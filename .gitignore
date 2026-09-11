@@ -1,0 +1,32 @@
+.dart_tool/
+.packages
+.pub/
+build/
+.idea/
+.vscode/
+*.iml
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+coverage/
+android/.gradle/
+ios/Pods/
+ios/.symlinks/
+
+# Read-only backend contract reference; never part of the mobile repository.
+/RikiPath.Backend/
+
+# Local audit output that is not maintained project documentation.
+/FILE_INVENTORY.txt
+
+# OS and archive artifacts.
+.DS_Store
+Thumbs.db
+*.zip
+*.7z
+*.rar
+
+# Local environment configuration. Keep the public template committed.
+.env
+.env.*
+!.env.example
