@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><title>RikiPath</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+JP:wght@400;500;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-tertiary-container": "#fffbff", "surface": "#f8f9ff", "on-surface-variant": "#5b403d", "surface-variant": "#d9e3f6", "inverse-surface": "#27313f", "primary": "#b7131a", "secondary-fixed": "#ffdad6", "tertiary-fixed-dim": "#ffb77d", "surface-container-lowest": "#ffffff", "on-secondary": "#ffffff", "tertiary": "#8d4b00", "surface-container-highest": "#d9e3f6", "on-error": "#ffffff", "on-primary-container": "#fffbff", "on-tertiary": "#ffffff", "inverse-primary": "#ffb4ac", "on-surface": "#121c2a", "on-primary-fixed": "#410002", "error-container": "#ffdad6", "inverse-on-surface": "#eaf1ff", "on-primary-fixed-variant": "#93000d", "surface-container-high": "#dee9fc", "tertiary-fixed": "#ffdcc3", "surface-dim": "#d0dbed", "on-primary": "#ffffff", "on-background": "#121c2a", "on-tertiary-fixed-variant": "#6e3900", "secondary-fixed-dim": "#ffb4ac", "outline": "#906f6c", "secondary-container": "#db3230", "surface-bright": "#f8f9ff", "on-secondary-container": "#fffbff", "surface-tint": "#bb171c", "primary-fixed-dim": "#ffb4ac", "background": "#f8f9ff", "primary-fixed": "#ffdad6", "secondary": "#b7131a", "surface-container": "#e6eeff", "outline-variant": "#e4beb9", "on-secondary-fixed": "#410002", "on-secondary-fixed-variant": "#93000d", "error": "#ba1a1a", "surface-container-low": "#eff4ff", "on-error-container": "#93000a", "on-tertiary-fixed": "#2f1500", "primary-container": "#db322f", "tertiary-container": "#b15f00" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xxs": "0.25rem", "space-lg": "1.25rem", "space-sm": "0.75rem", "space-md": "1rem", "space-xs": "0.5rem", "card-inner-padding": "1rem", "space-xl": "1.5rem", "touch-target-min": "2.75rem", "space-2xl": "2rem", "screen-edge-padding": "1rem" }, "fontFamily": { "title-md": ["\"Inter, 'Noto Sans JP', sans-serif\""], "headline-md": ["\"Inter, 'Noto Sans JP', sans-serif\""], "label-sm": ["\"Inter, sans-serif\""], "body-md": ["\"Inter, 'Noto Sans JP', sans-serif\""], "furigana-mobile": ["\"'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif\""], "body-sm": ["\"Inter, 'Noto Sans JP', sans-serif\""], "title-sm": ["\"Inter, 'Noto Sans JP', sans-serif\""], "body-lg": ["\"Inter, 'Noto Sans JP', sans-serif\""], "headline-lg": ["\"Inter, 'Noto Sans JP', sans-serif\""], "headline-sm": ["\"Inter, 'Noto Sans JP', sans-serif\""], "label-md": ["\"Inter, sans-serif\""], "display-kanji-mobile": ["\"Inter, 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif\""] }, "fontSize": { "title-md": ["18px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "600" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }], "furigana-mobile": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }], "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }], "title-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }], "display-kanji-mobile": ["48px", { "lineHeight": "56px", "letterSpacing": "0px", "fontWeight": "700" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;min-height:100%;}body{overscroll-behavior-y:none;background-color:#f8f9ff;font-family:"Inter, 'Noto Sans JP', sans-serif";}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface flex flex-col antialiased selection:bg-primary/20"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-screen-edge-padding flex items-center justify-between"><div class="flex items-center gap-space-xs min-w-0"><button aria-label="Quay lại" class="w-touch-target-min h-touch-target-min rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors shrink-0" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><h1 class="font-title-md text-title-md text-on-surface truncate">Chi Tiết Bài Học Ai</h1></div><div class="flex items-center gap-space-xs"><button aria-label="Thông báo" class="w-touch-target-min h-touch-target-min rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[24px]">notifications</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-safe bg-surface min-h-screen"><div class="flex flex-col w-full pb-10">
+<!-- Top Navigation context banner -->
+<div class="w-full px-screen-edge-padding py-space-sm bg-surface-container-low flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">
+        AI DIAGNOSTIC
+      </span>
+<span class="text-on-surface-variant font-body-sm text-body-sm truncate">
+        Mã phân tích #RK-N4-884
+      </span>
+</div>
+<div class="flex items-center gap-space-xs shrink-0">
+<span class="inline-flex items-center gap-1 text-primary font-label-sm text-label-sm font-semibold">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        Dữ liệu thực
+      </span>
+</div>
+</div>
+<!-- Main Content Layout -->
+<div class="px-screen-edge-padding pt-space-md flex flex-col gap-space-lg max-w-[428px] mx-auto w-full">
+<!-- Header Diagnostic Intro -->
+<section class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold tracking-wider">
+          JLPT N4
+        </span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">
+          Đọc hiểu (読解)
+        </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface leading-snug">
+        Vì sao RikiPath đề xuất nội dung này?
+      </h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        Phân tích minh bạch dựa trên dữ liệu học tập thực tế của bạn cho kỹ năng Đọc hiểu N4.
+      </p>
+</section>
+<!-- Visual Metric Radar/Summary Card -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center gap-space-md">
+<div class="relative w-16 h-16 shrink-0 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3.5"></path>
+<path class="text-primary stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="70, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute font-headline-sm text-headline-sm text-primary font-bold">70%</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Kỹ năng mục tiêu</span>
+<span class="font-title-sm text-title-sm text-on-surface font-bold truncate">Đọc hiểu Trường văn N4</span>
+<span class="font-body-sm text-body-sm text-error flex items-center gap-1 font-medium mt-0.5">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+          Cần củng cố phản xạ &amp; từ vựng
+        </span>
+</div>
+</div>
+<!-- Section 1: Clear Evidence Breakdown -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]">dataset</span>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-bold">
+            Căn cứ thực tế từ hệ thống
+          </h3>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Cập nhật 2 giờ trước</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-md">
+<!-- Item 1: Mock JLPT -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[15px]">assignment</span>
+</span>
+<span class="font-title-sm text-title-sm text-on-surface">Mock JLPT gần nhất (Đề #01)</span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-variant text-on-surface font-semibold">
+              42 / 60 điểm
+            </span>
+</div>
+<!-- Micro metrics grid -->
+<div class="grid grid-cols-2 gap-2 mt-1">
+<div class="bg-error-container/40 p-2.5 rounded-lg flex flex-col justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Độ chính xác bài dài:</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-sm text-headline-sm text-error font-bold">45%</span>
+<span class="font-label-sm text-label-sm text-error">(Cảnh báo)</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-2.5 rounded-lg flex flex-col justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Thời gian thực tế:</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">+8 phút</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">so với chuẩn</span>
+</div>
+</div>
+</div>
+</div>
+<div class="h-[1px] bg-surface-variant w-full"></div>
+<!-- Item 2: Theory Progress -->
+<div class="flex items-start gap-3">
+<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-tertiary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[15px]">menu_book</span>
+</div>
+<div class="flex flex-col flex-1">
+<div class="flex items-center justify-between">
+<span class="font-title-sm text-title-sm text-on-surface">Tiến độ bài học lý thuyết</span>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Chưa hoàn tất</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+              Còn <span class="font-semibold text-on-surface">2 bài đọc hiểu trung văn</span> chưa hoàn thành trong giáo trình Unit 5.
+            </p>
+</div>
+</div>
+<div class="h-[1px] bg-surface-variant w-full"></div>
+<!-- Item 3: Vocabulary Context -->
+<div class="flex items-start gap-3">
+<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[15px]">translate</span>
+</div>
+<div class="flex flex-col flex-1">
+<div class="flex items-center justify-between">
+<span class="font-title-sm text-title-sm text-on-surface">Ngữ cảnh từ vựng rào cản</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Sổ từ cá nhân</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+              Phát hiện <span class="text-primary font-bold">17 từ vựng N4</span> then chốt có mặt trong văn bản nhưng độ nhớ của bạn dưới 50%.
+            </p>
+<div class="flex flex-wrap gap-1.5 mt-2">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface font-furigana-mobile text-furigana-mobile">案内・あんない</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface font-furigana-mobile text-furigana-mobile">連絡・れんらく</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface font-furigana-mobile text-furigana-mobile">遠慮・えんりょ</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">+14 từ nữa</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Mục tiêu cải thiện -->
+<section class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]">track_changes</span>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-bold">
+          Mục tiêu cải thiện dự kiến
+        </h3>
+</div>
+<div class="bg-gradient-to-br from-surface-container-low to-surface-container-high rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">Mục tiêu ngắn hạn</span>
+<span class="px-2.5 py-0.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-bold">
+            +20% TỐI ƯU
+          </span>
+</div>
+<div class="flex items-center gap-3 py-1">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Hiện tại</span>
+<span class="font-headline-sm text-headline-sm text-error font-bold">45%</span>
+</div>
+<div class="flex-1 flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">trending_flat</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mục tiêu</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">65%</span>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-lowest/80 p-2.5 rounded-lg">
+<span class="material-symbols-outlined text-tertiary text-[20px] shrink-0">timelapse</span>
+<p class="font-body-sm text-body-sm text-on-surface leading-tight">
+            Thời gian dự kiến đạt được: <strong class="text-on-surface font-semibold">7 ngày</strong> với lộ trình duy trì <strong class="text-primary font-semibold">15 phút/ngày</strong>.
+          </p>
+</div>
+</div>
+</section>
+<!-- Section 3: Recommended Plan -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]">calendar_month</span>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-bold">
+            Đề xuất hành động theo kế hoạch
+          </h3>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold">Tổng: 30 phút</span>
+</div>
+<div class="flex flex-col gap-2.5">
+<!-- Step 1 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary font-bold font-title-sm text-title-sm flex items-center justify-center shrink-0">
+            1
+          </div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-title-sm text-title-sm text-on-surface truncate font-semibold">Reading Unit 5</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-variant text-on-surface shrink-0 font-medium">15 phút</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+              Bài đọc trung bình • Nắm cấu trúc đoạn văn
+            </p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-primary font-bold font-title-sm text-title-sm flex items-center justify-center shrink-0">
+            2
+          </div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-title-sm text-title-sm text-on-surface truncate font-semibold">Ôn 17 từ vựng liên quan</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-variant text-on-surface shrink-0 font-medium">10 phút</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+              Flashcard nhanh • Tập trung mặt chữ Hán
+            </p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-primary font-bold font-title-sm text-title-sm flex items-center justify-center shrink-0">
+            3
+          </div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-title-sm text-title-sm text-on-surface truncate font-semibold">Làm bài đọc ngắn phản xạ</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-variant text-on-surface shrink-0 font-medium">5 phút</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+              1 bài test tốc độ bấm giờ thực tế
+            </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Action Space -->
+<div class="pt-space-sm flex flex-col gap-3">
+<button class="w-full h-12 rounded-xl bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 active:bg-secondary-container transition-colors shadow-md" type="button">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+        Bắt đầu theo kế hoạch
+      </button>
+<button class="w-full h-12 rounded-xl bg-surface-container-low text-primary font-label-md text-label-md flex items-center justify-center gap-2 active:bg-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+        Xem bài học Unit 5
+      </button>
+<div class="flex items-center justify-center gap-1 text-center px-4 py-1">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">info</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Bạn có thể điều chỉnh thời lượng học trong phần Cài đặt mục tiêu.
+        </p>
+</div>
+</div>
+</div>
+</div></main></body></html>

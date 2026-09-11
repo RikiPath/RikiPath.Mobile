@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>JLPT N4 - Đọc hiểu</title>
+<!-- Tailwind CSS v3 with forms and container-queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter & Noto Sans JP -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+JP:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#B91C1C',
+              'red-dark': '#991B1B',
+              'red-light': '#FEF2F2',
+              blue: '#EFF6FF',
+              'blue-icon': '#3B82F6',
+              border: '#E2E8F0',
+              bg: '#F8FAFC'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans JP', 'sans-serif'],
+            jp: ['Noto Sans JP', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="base-typography">
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between antialiased selection:bg-red-100">
+<!-- BEGIN: TopStickyHeader -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-slate-100">
+<div class="px-4 py-3 flex items-center justify-between">
+<!-- Close Exam Button -->
+<button aria-label="Đóng phòng thi" class="w-9 h-9 flex items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 active:scale-95 transition-transform" type="button">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Exam Name -->
+<div class="text-base font-bold tracking-tight text-slate-800">
+        Jlpt N4 • Đề #01
+      </div>
+<!-- Timer Pill -->
+<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100/60 text-blue-900 font-semibold text-xs tracking-wide">
+<svg class="w-4 h-4 text-amber-600 animate-pulse" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<polyline points="12 7 12 12 15 15"></polyline>
+</svg>
+<span>00:52:18</span>
+</div>
+</div>
+</header>
+<!-- END: TopStickyHeader -->
+<!-- BEGIN: ExamInfoSection -->
+<section class="px-4 pt-3.5 pb-2">
+<!-- Category Tag & Auto-save Status -->
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center justify-center px-2 py-0.5 rounded text-[11px] font-bold bg-slate-200/80 text-slate-700">
+          JLPT N4
+        </span>
+<span class="text-sm font-bold text-slate-800 tracking-tight">
+          Phần 2: Đọc hiểu
+        </span>
+</div>
+<!-- Auto-save Pill -->
+<div class="flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200/50">
+<svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Đã tự lưu</span>
+</div>
+</div>
+<!-- Question Number and Bookmark Button -->
+<div class="flex items-center justify-between mb-3">
+<div class="text-base font-medium text-slate-500">
+<span class="text-xl font-black text-brand-red font-serif">Câu 06</span>
+<span class="text-sm font-semibold text-slate-400">/ 30</span>
+</div>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-700 shadow-sm active:bg-slate-50 active:scale-95 transition-all" type="button">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Đánh dấu câu này</span>
+</button>
+</div>
+<!-- Exam Progress Bar (filled for progress) -->
+<div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
+<!-- 20% progress -->
+<div class="bg-brand-red h-full rounded-full transition-all duration-300" style="width: 20%;"></div>
+</div>
+</section>
+<!-- END: ExamInfoSection -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 px-4 py-2 space-y-4 max-w-lg mx-auto w-full pb-24">
+<!-- Reading Passage Card -->
+<article class="relative bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-sm border-l-4 border-l-brand-red space-y-3">
+<!-- Header meta in passage card -->
+<div class="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+<svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Đọc đoạn văn sau và trả lời câu hỏi:</span>
+</div>
+<!-- Japanese Passage Text -->
+<div class="text-[15px] font-jp leading-relaxed text-slate-800 space-y-2 bg-slate-50/70 p-3.5 rounded-xl border border-slate-100/80 tracking-wide">
+<p>田中さんは毎朝六時に起きます。</p>
+<p>朝ご飯を食べてから、七時に家を出ます。</p>
+<p>会社までは電車で四十分ぐらいかかります。</p>
+<p>最近、健康のために駅から会社まで歩くことにしています。</p>
+</div>
+<!-- Question Box -->
+<div class="pt-2 border-t border-slate-100">
+<h2 class="text-base font-bold font-jp text-slate-900 leading-snug">
+          Q. 田中さんは最近、駅から会社までどうしていますか。
+        </h2>
+</div>
+<!-- Question Badge / Points -->
+<div class="flex items-center justify-between pt-1">
+<span class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700">
+<svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Đọc hiểu đoản văn
+        </span>
+<span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+          2.0 điểm
+        </span>
+</div>
+</article>
+<!-- Options Instruction Label -->
+<div class="flex items-center justify-between px-1 pt-1">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-500">Lựa chọn trả lời</span>
+<span class="inline-flex items-center gap-1 text-xs text-amber-600 font-medium">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+        Chạm để chọn
+      </span>
+</div>
+<!-- Answer Options List -->
+<div aria-label="Danh sách câu trả lời" class="space-y-3" role="radiogroup">
+<!-- Option 1: Unselected -->
+<label class="flex items-center justify-between p-3.5 bg-white rounded-2xl border border-slate-200/80 shadow-sm cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3">
+<span class="w-9 h-9 rounded-full bg-blue-50 text-blue-800 text-sm font-bold flex items-center justify-center flex-shrink-0">
+            1
+          </span>
+<span class="font-jp text-[15px] font-medium text-slate-800">
+            バスに乗っています。
+          </span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-slate-200 bg-slate-100 flex-shrink-0"></div>
+<input class="sr-only" name="answer" type="radio" value="1"/>
+</label>
+<!-- Option 2: Selected (RikiPath Red Active State) -->
+<label class="flex items-center justify-between p-3.5 bg-white rounded-2xl border-2 border-brand-red shadow-sm cursor-pointer active:scale-[0.99] transition-transform ring-2 ring-brand-red/10">
+<div class="flex items-center gap-3">
+<span class="w-9 h-9 rounded-full bg-brand-red text-white text-sm font-bold flex items-center justify-center flex-shrink-0 shadow-sm shadow-red-200">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</span>
+<span class="font-jp text-[15px] font-bold text-brand-red">
+            歩いています。
+          </span>
+</div>
+<div class="w-3.5 h-3.5 rounded-full bg-brand-red flex-shrink-0 mr-1"></div>
+<input checked="" class="sr-only" name="answer" type="radio" value="2"/>
+</label>
+<!-- Option 3: Unselected -->
+<label class="flex items-center justify-between p-3.5 bg-white rounded-2xl border border-slate-200/80 shadow-sm cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3">
+<span class="w-9 h-9 rounded-full bg-blue-50 text-blue-800 text-sm font-bold flex items-center justify-center flex-shrink-0">
+            3
+          </span>
+<span class="font-jp text-[15px] font-medium text-slate-800">
+            自転車で行っています。
+          </span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-slate-200 bg-slate-100 flex-shrink-0"></div>
+<input class="sr-only" name="answer" type="radio" value="3"/>
+</label>
+<!-- Option 4: Unselected -->
+<label class="flex items-center justify-between p-3.5 bg-white rounded-2xl border border-slate-200/80 shadow-sm cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3">
+<span class="w-9 h-9 rounded-full bg-blue-50 text-blue-800 text-sm font-bold flex items-center justify-center flex-shrink-0">
+            4
+          </span>
+<span class="font-jp text-[15px] font-medium text-slate-800">
+            タクシーを使っています。
+          </span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-slate-200 bg-slate-100 flex-shrink-0"></div>
+<input class="sr-only" name="answer" type="radio" value="4"/>
+</label>
+</div>
+</main>
+<!-- END: MainContentArea -->
+<!-- BEGIN: StickyBottomNavigation -->
+<footer class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200/80 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+<div class="max-w-lg mx-auto grid grid-cols-3 gap-2.5">
+<!-- Previous Question Button -->
+<button class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-blue-50/80 border border-blue-100 text-slate-700 font-semibold text-xs active:bg-blue-100 active:scale-[0.98] transition-all" type="button">
+<svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Câu trước</span>
+</button>
+<!-- Question Grid/List Button -->
+<button class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-blue-50/80 border border-blue-100 text-slate-700 font-semibold text-xs active:bg-blue-100 active:scale-[0.98] transition-all" type="button">
+<svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+</svg>
+<span class="truncate">Danh sách (6/30)</span>
+</button>
+<!-- Next Question Button (Primary Action) -->
+<button class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-brand-red text-white font-semibold text-xs shadow-md shadow-red-200 active:bg-brand-red-dark active:scale-[0.98] transition-all" type="button">
+<span>Câu tiếp</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</footer>
+<!-- END: StickyBottomNavigation -->
+</body></html>

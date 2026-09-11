@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><title>RikiPath</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+JP:wght@400;500;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;min-height:100vh;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"error":"#ba1a1a","on-error-container":"#93000a","error-container":"#ffdad6","surface-bright":"#f8f9ff","on-tertiary":"#ffffff","inverse-primary":"#ffb4ac","secondary-fixed":"#ffdad6","on-primary-fixed":"#410002","secondary-fixed-dim":"#ffb4ac","surface-variant":"#d9e3f6","surface-tint":"#bb171c","on-surface-variant":"#5b403d","on-primary":"#ffffff","on-secondary-container":"#fffbff","inverse-on-surface":"#eaf1ff","primary-fixed-dim":"#ffb4ac","on-secondary":"#ffffff","secondary":"#b7131a","primary-fixed":"#ffdad6","tertiary":"#8d4b00","tertiary-fixed":"#ffdcc3","on-tertiary-fixed":"#2f1500","on-tertiary-container":"#fffbff","background":"#f8f9ff","outline":"#906f6c","on-secondary-fixed-variant":"#93000d","on-primary-container":"#fffbff","surface-container-high":"#dee9fc","tertiary-fixed-dim":"#ffb77d","surface-container-highest":"#d9e3f6","surface-container-lowest":"#ffffff","primary-container":"#db322f","on-primary-fixed-variant":"#93000d","on-surface":"#121c2a","surface-container-low":"#eff4ff","outline-variant":"#e4beb9","surface":"#f8f9ff","on-error":"#ffffff","on-secondary-fixed":"#410002","on-background":"#121c2a","surface-dim":"#d0dbed","surface-container":"#e6eeff","tertiary-container":"#b15f00","inverse-surface":"#27313f","primary":"#b7131a","secondary-container":"#db3230","on-tertiary-fixed-variant":"#6e3900"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"card-inner-padding":"1rem","space-2xl":"2rem","touch-target-min":"2.75rem","screen-edge-padding":"1rem","space-xl":"1.5rem","space-md":"1rem","space-xs":"0.5rem","space-xxs":"0.25rem","space-sm":"0.75rem","space-lg":"1.25rem"},"fontFamily":{"label-md":["\"Inter, sans-serif\""],"headline-sm":["\"Inter, 'Noto Sans JP', sans-serif\""],"headline-lg":["\"Inter, 'Noto Sans JP', sans-serif\""],"body-lg":["\"Inter, 'Noto Sans JP', sans-serif\""],"title-md":["\"Inter, 'Noto Sans JP', sans-serif\""],"display-kanji-mobile":["\"Inter, 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif\""],"body-md":["\"Inter, 'Noto Sans JP', sans-serif\""],"label-sm":["\"Inter, sans-serif\""],"title-sm":["\"Inter, 'Noto Sans JP', sans-serif\""],"headline-md":["\"Inter, 'Noto Sans JP', sans-serif\""],"body-sm":["\"Inter, 'Noto Sans JP', sans-serif\""],"furigana-mobile":["\"'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif\""]},"fontSize":{"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.02em","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"0em","fontWeight":"600"}],"headline-lg":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"400"}],"title-md":["18px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"600"}],"display-kanji-mobile":["48px",{"lineHeight":"56px","letterSpacing":"0px","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"22px","letterSpacing":"0em","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"700"}],"title-sm":["16px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"700"}],"body-sm":["12px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"400"}],"furigana-mobile":["11px",{"lineHeight":"14px","letterSpacing":"0.02em","fontWeight":"500"}]}}}};</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-screen-edge-padding flex items-center justify-between"><div class="flex items-center gap-space-xs"><button aria-label="Quay lại" class="w-touch-target-min h-touch-target-min flex items-center justify-center text-on-surface hover:text-primary transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back_ios_new</span></button><h1 class="font-title-md text-title-md text-on-surface line-clamp-1">Written Consultation Form</h1></div><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-safe bg-surface px-screen-edge-padding"><div class="flex flex-col w-full pb-28">
+<!-- Micro Progress Step Header -->
+<div class="flex flex-col gap-space-xs mb-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xxs">
+<span class="font-label-sm text-label-sm text-primary uppercase">Bước 2 / 3</span>
+<span class="text-outline-variant font-label-sm">•</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Dữ liệu hỗ trợ phân tích</span>
+</div>
+<button aria-label="Hướng dẫn chọn dữ liệu" class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors active:bg-surface-variant" type="button">
+<span class="material-symbols-outlined text-[18px]">help_outline</span>
+</button>
+</div>
+<!-- Segmented Stepper Bar -->
+<div class="grid grid-cols-3 gap-space-xxs w-full">
+<div class="h-1.5 rounded-full bg-primary"></div>
+<div class="h-1.5 rounded-full bg-primary"></div>
+<div class="h-1.5 rounded-full bg-surface-container-highest"></div>
+</div>
+</div>
+<!-- Intro Explanation Card & Sensei Trust Note -->
+<div class="flex flex-col gap-space-sm bg-surface-container-lowest rounded-xl p-card-inner-padding shadow-sm mb-space-md">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings: 'FILL' 1;">folder_shared</span>
+</div>
+<div class="flex flex-col">
+<h2 class="font-title-sm text-title-sm text-on-surface">Dữ liệu học tập đính kèm</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+          Chọn những kết quả bạn muốn chuyên gia sử dụng để hiểu rõ hơn về tình hình học tập của bạn. Quyền xem xét chỉ cấp tạm thời cho Sensei được phân công.
+        </p>
+</div>
+</div>
+<!-- Sensei Context Persona Banner -->
+<div class="flex items-center gap-space-sm bg-surface-container-low p-space-sm rounded-lg">
+<img class="w-10 h-10 rounded-full object-cover shrink-0 shadow-sm" data-alt="Chân dung trực diện thầy giáo người Nhật mặc áo vest giản dị, nụ cười sư phạm ấm áp, hậu cảnh phòng học Riki trang nhã với ánh sáng tự nhiên dịu dàng" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKZxaQ8usFR2Rq8BGq3DxyXdvE_Ch5bEUFutRg3yZay1wUgN3afIusEJyATkDhmrSkdHzH-yE424vTk_IWnpADeusXJYF3NX_-9pwNeruNCDZGZzSONbuARjDQPlbim9gl-qYwC9NtEYaR7HYG6sCXVZ5mMmtGc_Hb77F72oJBIlC31y4vr8PsFOXlv8bcH79Ar-wvAEtPgrjs7SGpOQSdvb7VKNVYTjnvHf79kHuCkHXE6foCGm7c"/>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-space-xxs">
+<span class="font-label-sm text-label-sm text-primary">Cố vấn phân bổ:</span>
+<span class="font-label-md text-label-md text-on-surface truncate">Yamamoto Sensei &amp; AI Coach</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Báo cáo sẽ được đối chiếu đa chiều từ các bài tập đã nộp</p>
+</div>
+</div>
+<!-- Security Micro-banner -->
+<div class="flex items-center gap-space-xs bg-primary-fixed/40 px-space-sm py-space-xs rounded-lg">
+<span class="material-symbols-outlined text-primary text-[16px] shrink-0">lock</span>
+<span class="font-body-sm text-body-sm text-on-primary-fixed-variant">Chuyên gia chỉ đọc được dữ liệu mà bạn tích chọn bên dưới.</span>
+</div>
+</div>
+<!-- Selection Counter & Batch Action -->
+<div class="flex items-center justify-between mb-space-sm px-space-xxs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span class="font-label-md text-label-md text-on-surface" id="selected-counter">Đã chọn: 4 nguồn dữ liệu học tập</span>
+</div>
+<button class="font-label-sm text-label-sm text-primary active:opacity-75" id="toggle-all-btn" type="button">
+      Bỏ chọn tất cả
+    </button>
+</div>
+<!-- Interactive Selectable Context Items List -->
+<div class="flex flex-col gap-space-sm mb-space-xl" id="context-list">
+<!-- Item 1: Thi thử JLPT N4 -->
+<div class="context-card bg-surface-container-lowest rounded-xl p-card-inner-padding shadow-sm flex flex-col gap-space-xs cursor-pointer transition-all active:scale-[0.99]" data-selected="true">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs flex-1 min-w-0">
+<div class="custom-checkbox w-6 h-6 rounded-md bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[18px] font-bold">check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-title-sm text-title-sm text-on-surface truncate">Đề thi thử JLPT N4 #01</span>
+<span class="bg-surface-container-high text-primary font-label-sm text-label-sm px-2 py-0.5 rounded-full">JLPT N4</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ngày thi: 08/09/2026</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="font-headline-sm text-headline-sm text-primary leading-tight">132 <span class="font-body-sm text-body-sm text-on-surface-variant">/ 180đ</span></span>
+<span class="font-label-sm text-label-sm text-error bg-error-container/60 px-1.5 py-0.5 rounded">Điểm nghẽn Dokkai</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-space-xs mt-space-xxs flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[16px] mt-0.5 shrink-0">info</span>
+<div class="font-body-sm text-body-sm text-on-surface-variant leading-tight">
+          Đọc hiểu: 42/60đ. Đã hoàn thành 3 phần, thời gian đọc hiểu vượt 8 phút so với chuẩn.
+        </div>
+</div>
+</div>
+<!-- Item 2: Bài viết N4 -->
+<div class="context-card bg-surface-container-lowest rounded-xl p-card-inner-padding shadow-sm flex flex-col gap-space-xs cursor-pointer transition-all active:scale-[0.99]" data-selected="true">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs flex-1 min-w-0">
+<div class="custom-checkbox w-6 h-6 rounded-md bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[18px] font-bold">check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-title-sm text-title-sm text-on-surface truncate">Bài viết tiếng Nhật N4</span>
+<span class="bg-surface-container-high text-primary font-label-sm text-label-sm px-2 py-0.5 rounded-full">Sakubun</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ngày nộp: 04/09/2026</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="font-headline-sm text-headline-sm text-primary leading-tight">82 <span class="font-body-sm text-body-sm text-on-surface-variant">/ 100đ</span></span>
+<span class="font-label-sm text-label-sm text-tertiary bg-tertiary-fixed/60 px-1.5 py-0.5 rounded">Cần cải thiện ngữ pháp</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-space-xs mt-space-xxs flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[16px] mt-0.5 shrink-0">auto_awesome</span>
+<div class="font-body-sm text-body-sm text-on-surface-variant leading-tight">
+          Chủ đề: Một ngày tại thư viện • AI phát hiện 3 lỗi trợ từ を và に trong câu phức.
+        </div>
+</div>
+</div>
+<!-- Item 3: Bài chấm Kanji gần nhất -->
+<div class="context-card bg-surface-container-lowest rounded-xl p-card-inner-padding shadow-sm flex flex-col gap-space-xs cursor-pointer transition-all active:scale-[0.99]" data-selected="true">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs flex-1 min-w-0">
+<div class="custom-checkbox w-6 h-6 rounded-md bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[18px] font-bold">check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-title-sm text-title-sm text-on-surface truncate">Bài viết Kanji AI đã chấm</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm px-2 py-0.5 rounded-full">Chữ Hán</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mục tiêu: 改善 (CẢI THIỆN)</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="font-headline-sm text-headline-sm text-primary leading-tight">90 <span class="font-body-sm text-body-sm text-on-surface-variant">/ 100đ</span></span>
+<span class="font-label-sm text-label-sm text-primary bg-primary-fixed/60 px-1.5 py-0.5 rounded">Đạt độ cân đối</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-space-xs mt-space-xxs flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[16px] mt-0.5 shrink-0">edit_note</span>
+<div class="font-body-sm text-body-sm text-on-surface-variant leading-tight">
+          Cần tối ưu khoảng cách các nét ngang bộ Dương (羊) và độ nghiêng của nét phẩy.
+        </div>
+</div>
+</div>
+<!-- Item 4: Sổ từ vựng cá nhân (SRS) -->
+<div class="context-card bg-surface-container-lowest rounded-xl p-card-inner-padding shadow-sm flex flex-col gap-space-xs cursor-pointer transition-all active:scale-[0.99]" data-selected="true">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs flex-1 min-w-0">
+<div class="custom-checkbox w-6 h-6 rounded-md bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[18px] font-bold">check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-title-sm text-title-sm text-on-surface truncate">Sổ từ cá nhân (SRS)</span>
+<span class="bg-surface-container-high text-primary font-label-sm text-label-sm px-2 py-0.5 rounded-full">Spaced Repetition</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Chu kỳ ghi nhớ chủ động</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="font-headline-sm text-headline-sm text-on-surface leading-tight">420 <span class="font-body-sm text-body-sm text-on-surface-variant">từ</span></span>
+<span class="font-label-sm text-label-sm text-error bg-error-container/60 px-1.5 py-0.5 rounded">17 từ hay nhầm</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-space-xs mt-space-xxs flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[16px] mt-0.5 shrink-0">repeat</span>
+<div class="font-body-sm text-body-sm text-on-surface-variant leading-tight">
+          Bao gồm 17 từ vựng N4 hay nhầm lẫn trong chu kỳ ngắt quãng, Sensei sẽ phân bổ mẹo nhớ hán tự.
+        </div>
+</div>
+</div>
+<!-- Item 5: Tiến độ xem video bài học (Unchecked by default) -->
+<div class="context-card bg-surface-container-lowest rounded-xl p-card-inner-padding shadow-sm flex flex-col gap-space-xs cursor-pointer transition-all active:scale-[0.99]" data-selected="false">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs flex-1 min-w-0">
+<div class="custom-checkbox w-6 h-6 rounded-md bg-surface-container-highest text-surface-container-highest flex items-center justify-center shrink-0 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[18px] font-bold opacity-0">check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-title-sm text-title-sm text-on-surface truncate">Nhật ký xem video Unit 1 - 5</span>
+<span class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-0.5 rounded-full">Tùy chọn thêm</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">12 bài học đã hoàn thành</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="font-headline-sm text-headline-sm text-on-surface-variant leading-tight">78% <span class="font-body-sm text-body-sm text-on-surface-variant">thời lượng</span></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-1.5 py-0.5 rounded">Tự học</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-space-xs mt-space-xxs flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[16px] mt-0.5 shrink-0">slow_motion_video</span>
+<div class="font-body-sm text-body-sm text-on-surface-variant leading-tight">
+          Lịch sử dừng, tua lại và ghi chú các cấu trúc ngữ pháp có thể giúp đánh giá điểm chưa hiểu bài.
+        </div>
+</div>
+</div>
+</div>
+<!-- Study Context Visual Anchor Placeholder -->
+<div class="flex items-center gap-space-md bg-surface-container-low p-card-inner-padding rounded-xl mb-space-lg shadow-sm">
+<img class="w-16 h-16 rounded-lg object-cover shrink-0 shadow-sm" data-alt="Bàn học phong cách Nhật Bản tối giản với sổ tay tiếng Nhật mở sẵn, bút mực, đồng hồ Pomodoro, điện thoại đang hiển thị app RikiPath, ánh sáng vàng ấm áp thư giãn" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZqiU75ZejROQEDfsRAGivXW7EWwgU-p_AGNpYv_y8pwVdPLFlbuO-ZjX6fll690zw4lkaYJj5ClPDaXgmLQBTqam4vrcERwGwZsF98KatPDWfOErZyXTKiqM3oj74PpOy1xRpk2hneDM4-3LZBy0T4Y_bk61Zpx5GgctksJ1L80KvbVHYMlK7YNzBKCdYnXX4UEvqTRCswTy7NGgEVZ8ZbNbXsJ6deTHQnC0ZRW4JzD606cIIZJAp"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Bạn muốn bổ sung bài viết tay khác?</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Sensei sẵn sàng nhận thêm hình ảnh vở nháp thực tế ở bước kết quả.</span>
+</div>
+</div>
+<!-- STICKY ACTION BOTTOM DOCK -->
+<div class="fixed bottom-0 inset-x-0 z-40 bg-surface/95 backdrop-blur-xl shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-screen-edge-padding pt-space-xs pb-safe">
+<!-- Action buttons -->
+<div class="flex items-center gap-space-sm mb-space-xs">
+<button class="w-1/3 h-[48px] rounded-xl bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center justify-center transition-colors active:bg-surface-variant" type="button">
+        Bỏ qua
+      </button>
+<button class="flex-1 h-[48px] rounded-xl bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-space-xxs shadow-md transition-all active:bg-secondary" type="button">
+<span>Tiếp tục</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+<!-- Persistent Global Bottom Navigation Bar -->
+<nav class="flex items-center justify-around h-12 w-full pt-1">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors flex-1 py-1" type="button">
+<span class="material-symbols-outlined text-[20px]">home</span>
+<span class="font-label-sm text-[10px] leading-tight mt-0.5">Trang chủ</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary transition-colors flex-1 py-1" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-label-sm text-[10px] leading-tight mt-0.5 font-bold">Học tập</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors flex-1 py-1" type="button">
+<span class="material-symbols-outlined text-[20px]">fitness_center</span>
+<span class="font-label-sm text-[10px] leading-tight mt-0.5">Luyện tập</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors flex-1 py-1" type="button">
+<span class="material-symbols-outlined text-[20px]">style</span>
+<span class="font-label-sm text-[10px] leading-tight mt-0.5">Sổ từ</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors flex-1 py-1" type="button">
+<span class="material-symbols-outlined text-[20px]">person</span>
+<span class="font-label-sm text-[10px] leading-tight mt-0.5">Cá nhân</span>
+</button>
+</nav>
+</div>
+</div>
+<script>
+  (function initContextSelector() {
+    const cards = document.querySelectorAll('.context-card');
+    const counterEl = document.getElementById('selected-counter');
+    const toggleAllBtn = document.getElementById('toggle-all-btn');
+
+    function updateCount() {
+      const selectedCards = document.querySelectorAll('.context-card[data-selected="true"]');
+      const count = selectedCards.length;
+      if (counterEl) {
+        counterEl.textContent = `Đã chọn: ${count} nguồn dữ liệu học tập`;
+      }
+      if (toggleAllBtn) {
+        toggleAllBtn.textContent = count === cards.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả';
+      }
+    }
+
+    function setCardState(card, isSelected) {
+      card.setAttribute('data-selected', isSelected ? 'true' : 'false');
+      const box = card.querySelector('.custom-checkbox');
+      const icon = box ? box.querySelector('.material-symbols-outlined') : null;
+
+      if (isSelected) {
+        box.classList.remove('bg-surface-container-highest', 'text-surface-container-highest');
+        box.classList.add('bg-primary', 'text-on-primary');
+        if (icon) icon.classList.remove('opacity-0');
+      } else {
+        box.classList.remove('bg-primary', 'text-on-primary');
+        box.classList.add('bg-surface-container-highest', 'text-surface-container-highest');
+        if (icon) icon.classList.add('opacity-0');
+      }
+    }
+
+    cards.forEach((card) => {
+      card.addEventListener('click', () => {
+        const current = card.getAttribute('data-selected') === 'true';
+        setCardState(card, !current);
+        updateCount();
+      });
+    });
+
+    if (toggleAllBtn) {
+      toggleAllBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const anyUnselected = Array.from(cards).some(c => c.getAttribute('data-selected') !== 'true');
+        cards.forEach(card => setCardState(card, anyUnselected));
+        updateCount();
+      });
+    }
+
+    updateCount();
+  })();
+</script></main></body></html>

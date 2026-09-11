@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Lỗi tải video / Ngoại tuyến - RikiPath</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Be Vietnam Pro -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&amp;display=swap" rel="stylesheet"/>
+<!-- Phosphor Icons for Crisp Mobile UI -->
+<link href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" rel="stylesheet"/>
+<link href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" rel="stylesheet"/>
+<link href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" rel="stylesheet"/>
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fdf2f2',
+              100: '#fde8e8',
+              500: '#d32029',
+              600: '#b7131a',
+              700: '#9b1016',
+              800: '#7f0d12'
+            },
+            amber: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              500: '#f59e0b',
+              800: '#92400e'
+            }
+          },
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="typography">
+    body {
+      font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .japanese-text {
+      font-family: 'Hiragino Sans', 'Meiryo', 'Be Vietnam Pro', sans-serif;
+    }
+  </style>
+<style data-purpose="custom-scrollbars">
+    /* Ẩn scrollbar xấu xí trên giao diện di động */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 antialiased min-h-screen flex flex-col pb-24">
+<!-- BEGIN: TopAppBar -->
+<!-- Header cố định chuẩn native app iOS/Android -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 h-14 flex items-center justify-between shadow-xs">
+<div class="flex items-center space-x-3 overflow-hidden">
+<button aria-label="Quay lại" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 active:bg-slate-200 text-slate-700 transition" type="button">
+<i class="ph ph-arrow-left text-lg font-bold"></i>
+</button>
+<div class="truncate">
+<span class="block text-[10px] font-semibold tracking-wider text-brand-600 uppercase leading-none">NGỮ PHÁP MINNA</span>
+<h1 class="text-sm font-bold text-slate-900 truncate mt-0.5 leading-snug">Bài 19: ～たり～たりする</h1>
+</div>
+</div>
+<div class="flex items-center space-x-1 flex-shrink-0">
+<button aria-label="Lưu bài học" class="w-9 h-9 flex items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 active:bg-slate-200" type="button">
+<i class="ph ph-bookmark-simple text-xl"></i>
+</button>
+<button aria-label="Tùy chọn khác" class="w-9 h-9 flex items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 active:bg-slate-200" type="button">
+<i class="ph ph-dots-three-vertical text-xl"></i>
+</button>
+</div>
+</header>
+<!-- END: TopAppBar -->
+<!-- BEGIN: VideoPlayerArea -->
+<!-- Khu vực hiển thị khung video 16:9 nhưng trong trạng thái lỗi tải mạng dịu nhẹ, không vỡ layout -->
+<section class="w-full bg-slate-950 relative" data-purpose="video-error-container">
+<div class="w-full aspect-video bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 flex flex-col justify-center items-center px-6 py-4 text-center relative overflow-hidden">
+<!-- Lớp hoa văn nhẹ mô phỏng màn hình phát tín hiệu gián đoạn -->
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+<!-- Icon trạng thái mạng gián đoạn -->
+<div class="relative z-10 w-12 h-12 rounded-full bg-slate-800/90 border border-slate-700/70 flex items-center justify-center mb-2.5 shadow-md">
+<i class="ph-bold ph-wifi-slash text-2xl text-slate-300"></i>
+</div>
+<!-- Thông điệp thông báo thân thiện -->
+<h2 class="relative z-10 text-white font-semibold text-sm leading-snug">
+        Không thể tải video bài giảng
+      </h2>
+<p class="relative z-10 text-slate-300 text-[11px] leading-relaxed mt-1 max-w-xs line-clamp-2">
+        Kết nối mạng chập chờn hoặc ngoại tuyến. Bạn vẫn có thể học tiếp bằng phần tóm tắt &amp; từ vựng bên dưới.
+      </p>
+<!-- Các thao tác xử lý lỗi ngay trên player -->
+<div class="relative z-10 flex items-center gap-2.5 mt-3">
+<button class="inline-flex items-center gap-1.5 bg-white active:bg-slate-100 text-slate-900 px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-sm transition" type="button">
+<i class="ph-bold ph-arrows-clockwise text-xs"></i>
+<span>Thử lại</span>
+</button>
+<a class="inline-flex items-center gap-1 bg-white/10 hover:bg-white/15 active:bg-white/20 text-slate-200 border border-white/15 px-3 py-1.5 rounded-full text-xs font-medium transition" href="#content-section">
+<span>Xem bản chữ</span>
+<i class="ph-bold ph-arrow-down text-xs"></i>
+</a>
+</div>
+<!-- Tag thanh trạng thái dưới cùng video giả lập thời lượng gốc -->
+<div class="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+<span class="inline-flex items-center gap-1 text-amber-400 bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Chế độ Offline
+        </span>
+<span class="bg-black/40 px-1.5 py-0.5 rounded">28:00</span>
+</div>
+</div>
+</section>
+<!-- END: VideoPlayerArea -->
+<!-- BEGIN: MainContent -->
+<main class="px-4 pt-3.5 space-y-4 flex-1">
+<!-- Thông tin bài học & Tiến độ -->
+<section class="bg-white rounded-2xl p-4 border border-slate-150/70 shadow-xs" data-purpose="lesson-meta-card">
+<div class="flex items-center justify-between gap-2 flex-wrap mb-1.5">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60">
+            JLPT N4
+          </span>
+<span class="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700">
+            Ngữ pháp
+          </span>
+<span class="px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60 inline-flex items-center gap-1">
+<i class="ph-bold ph-check-circle text-xs"></i> Đã tải văn bản
+          </span>
+</div>
+<span class="text-xs font-semibold text-slate-500">40% hoàn thành</span>
+</div>
+<h1 class="text-lg font-bold text-slate-900 mt-1 leading-snug">
+        Thể quá khứ &amp; Liệt kê hành động <span class="text-brand-600 japanese-text">(～たり～たりする)</span>
+</h1>
+<!-- Progress bar -->
+<div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-3">
+<div class="bg-brand-600 h-full rounded-full transition-all duration-300" style="width: 40%"></div>
+</div>
+</section>
+<!-- BEGIN: SegmentedTabs -->
+<!-- Tab chuyển đổi cho phép học từ vựng và ghi chú không ngắt quãng -->
+<div class="bg-slate-200/80 p-1 rounded-xl flex items-center text-xs font-semibold text-slate-600 shadow-inner" data-purpose="segmented-tabs">
+<button class="flex-1 py-2 text-center rounded-lg bg-white text-slate-900 shadow-xs font-bold transition" type="button">
+        Nội dung
+      </button>
+<button class="flex-1 py-2 text-center rounded-lg hover:text-slate-900 transition flex items-center justify-center gap-1" type="button">
+<span>Ghi chú</span>
+<span class="text-[10px] px-1.5 py-0.2 bg-slate-300/80 rounded-full font-medium">3</span>
+</button>
+<button class="flex-1 py-2 text-center rounded-lg hover:text-slate-900 transition flex items-center justify-center gap-1" type="button">
+<span>Từ vựng</span>
+<span class="text-[10px] px-1.5 py-0.2 bg-slate-300/80 rounded-full font-medium">12</span>
+</button>
+</div>
+<!-- END: SegmentedTabs -->
+<!-- BEGIN: OfflineNoticeBanner -->
+<!-- Thông báo an tâm: Dữ liệu bài đọc vẫn nguyên vẹn cục bộ -->
+<div class="bg-amber-50/90 border border-amber-200/80 rounded-xl p-3 flex items-start gap-2.5 text-amber-900 text-xs">
+<i class="ph-fill ph-lightbulb text-amber-600 text-base flex-shrink-0 mt-0.5"></i>
+<div class="leading-relaxed">
+<span class="font-bold">Học không gián đoạn:</span> Toàn bộ lý thuyết, mẫu câu ví dụ và phiên âm Hiragana bên dưới đã được lưu trên thiết bị của bạn.
+      </div>
+</div>
+<!-- END: OfflineNoticeBanner -->
+<!-- BEGIN: TabContent_GrammarNotes -->
+<div class="space-y-3.5" id="content-section">
+<!-- Thẻ Mục tiêu bài học -->
+<section class="bg-white rounded-2xl p-4 border border-slate-150 shadow-xs">
+<div class="flex items-center gap-2 mb-2 text-brand-600 font-bold text-xs uppercase tracking-wide">
+<i class="ph-bold ph-flag-banner text-sm"></i>
+<span>Mục tiêu bài học</span>
+</div>
+<p class="text-xs text-slate-700 leading-relaxed">
+          Liệt kê các hành động tiêu biểu, mang tính đại diện trong số nhiều việc được thực hiện. Các hành động không nhất thiết phải diễn ra theo thứ tự thời gian.
+        </p>
+</section>
+<!-- Thẻ Cấu trúc cốt lõi -->
+<section class="bg-white rounded-2xl p-4 border border-slate-150 shadow-xs">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-bold text-brand-600 uppercase tracking-wide">Cấu trúc cốt lõi</span>
+<span class="text-[11px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Động từ nhóm 1, 2, 3</span>
+</div>
+<div class="bg-blue-50/60 border border-blue-100 rounded-xl p-3.5 text-center my-2">
+<div class="japanese-text text-base font-bold text-slate-900 tracking-wide flex items-center justify-center gap-2">
+<span>V₁<span class="text-brand-600">た + り</span></span>
+<span class="text-slate-400 font-normal">、</span>
+<span>V₂<span class="text-brand-600">た + りします</span></span>
+</div>
+</div>
+<div class="flex items-start gap-2 mt-3 text-xs text-slate-600">
+<i class="ph-bold ph-sparkle text-amber-500 text-sm mt-0.5 flex-shrink-0"></i>
+<p class="leading-relaxed">
+<strong class="text-slate-800">Cách lập thể:</strong> Chia động từ về <span class="text-brand-600 font-semibold">thể Quá khứ ngắn (Thể Ta - た)</span> rồi gắn thêm trợ từ <span class="text-brand-600 font-bold">り</span>.
+          </p>
+</div>
+</section>
+<!-- Thẻ Câu ví dụ thực tế -->
+<section class="bg-white rounded-2xl p-4 border-l-4 border-l-brand-600 border border-slate-150 shadow-xs">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-brand-600 uppercase tracking-wide">Ví dụ minh họa</span>
+<button aria-label="Phát âm thanh ví dụ" class="w-8 h-8 rounded-full bg-brand-50 active:bg-brand-100 text-brand-600 flex items-center justify-center transition" type="button">
+<i class="ph-fill ph-speaker-high text-base"></i>
+</button>
+</div>
+<div class="space-y-1.5">
+<!-- Câu tiếng Nhật có Furigana -->
+<p class="japanese-text text-base font-bold text-slate-900 leading-relaxed">
+<ruby>週末<rt class="text-[10px] text-slate-500 font-normal">しゅうまつ</rt></ruby>は
+            <ruby>映画<rt class="text-[10px] text-slate-500 font-normal">えいが</rt></ruby>を
+            <span class="text-brand-600 underline underline-offset-4 decoration-brand-500 font-bold">見たり</span>、
+            <ruby>本<rt class="text-[10px] text-slate-500 font-normal">ほん</rt></ruby>を
+            <span class="text-brand-600 underline underline-offset-4 decoration-brand-500 font-bold">読んだりします</span>。
+          </p>
+<p class="text-slate-500 text-xs italic font-sans">
+            Shuumatsu wa eiga o mitari, hon o yondari shimasu.
+          </p>
+</div>
+<div class="mt-3 bg-slate-50 rounded-xl p-2.5 text-xs text-slate-700 flex items-start gap-2 border border-slate-100">
+<span class="text-sm leading-none">👉</span>
+<p class="leading-relaxed">
+            Cuối tuần tôi thường xem phim, đọc sách (và còn làm một số hoạt động khác nữa).
+          </p>
+</div>
+</section>
+<!-- Thẻ Lưu ý ngữ pháp quan trọng -->
+<section class="bg-white rounded-2xl p-4 border border-slate-150 shadow-xs">
+<div class="flex items-center gap-1.5 text-amber-700 font-bold text-xs uppercase tracking-wide mb-3">
+<i class="ph-bold ph-warning-circle text-base"></i>
+<span>Lưu ý quan trọng</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-2.5 text-xs">
+<span class="w-5 h-5 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
+<p class="text-slate-700 leading-relaxed">
+<strong class="text-slate-900">Thì của toàn bộ câu</strong> do trợ động từ <span class="font-bold text-brand-600">する</span> ở cuối câu quyết định (Quá khứ: <em>～たり～たりしました</em>).
+            </p>
+</div>
+<div class="flex items-start gap-2.5 text-xs">
+<span class="w-5 h-5 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
+<div class="space-y-1.5 flex-1">
+<p class="text-slate-700 leading-relaxed">
+<strong class="text-slate-900">Phân biệt với ～て、～て:</strong> Thể <em>～て</em> bắt buộc liệt kê theo đúng trình tự thời gian xảy ra trước sau.
+              </p>
+<!-- So sánh bảng nhỏ -->
+<div class="grid grid-cols-2 gap-2 pt-1">
+<div class="bg-slate-50 border border-slate-200/80 rounded-lg p-2 text-center">
+<div class="text-[11px] font-bold text-brand-600">～たり～たり</div>
+<div class="text-[10px] text-slate-500 mt-0.5">Không theo thứ tự, đại diện</div>
+</div>
+<div class="bg-slate-50 border border-slate-200/80 rounded-lg p-2 text-center">
+<div class="text-[11px] font-bold text-slate-700">～て、～て</div>
+<div class="text-[10px] text-slate-500 mt-0.5">Tuần tự theo thời gian thực</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- END: TabContent_GrammarNotes -->
+<!-- BEGIN: NavigationActions -->
+<!-- Điều hướng trước / sau & Nút đọc tài liệu hoàn tất -->
+<section class="space-y-2.5 pt-2 pb-2" data-purpose="bottom-actions">
+<!-- Nút chuyển bài trước - sau -->
+<div class="grid grid-cols-2 gap-2.5">
+<button class="h-11 px-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 active:bg-slate-50 transition shadow-xs" type="button">
+<i class="ph-bold ph-caret-left text-xs"></i>
+<span class="truncate">Bài 18: Thể từ điển</span>
+</button>
+<button class="h-11 px-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 active:bg-slate-50 transition shadow-xs" type="button">
+<span class="truncate">Bài 20: Thể thông thường</span>
+<i class="ph-bold ph-caret-right text-xs"></i>
+</button>
+</div>
+<!-- Nút hành động chính (Primary Action) -->
+<button class="w-full h-12 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-brand-600/20 transition" type="button">
+<span>Đọc bản ghi chép chi tiết</span>
+<i class="ph-bold ph-arrow-right text-sm"></i>
+</button>
+</section>
+<!-- END: NavigationActions -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomNavigationBar -->
+<!-- 5 tabs cố định chuẩn ứng dụng di động RikiPath -->
+<nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-2 py-1.5 flex items-center justify-around text-center shadow-lg" data-purpose="mobile-bottom-nav">
+<!-- Tab 1: Trang chủ -->
+<a class="flex flex-col items-center justify-center py-1 px-2 text-slate-500 active:text-brand-600 transition" href="#">
+<i class="ph ph-house text-xl"></i>
+<span class="text-[10px] font-medium mt-0.5">Trang chủ</span>
+</a>
+<!-- Tab 2: Học tập (Active) -->
+<a class="flex flex-col items-center justify-center py-1 px-2 text-brand-600 font-bold transition" href="#">
+<i class="ph-fill ph-book-open text-xl"></i>
+<span class="text-[10px] mt-0.5">Học tập</span>
+</a>
+<!-- Tab 3: Luyện tập -->
+<a class="flex flex-col items-center justify-center py-1 px-2 text-slate-500 active:text-brand-600 transition" href="#">
+<i class="ph ph-pencil-simple-line text-xl"></i>
+<span class="text-[10px] font-medium mt-0.5">Luyện tập</span>
+</a>
+<!-- Tab 4: Sổ từ -->
+<a class="flex flex-col items-center justify-center py-1 px-2 text-slate-500 active:text-brand-600 transition" href="#">
+<i class="ph ph-cards text-xl"></i>
+<span class="text-[10px] font-medium mt-0.5">Sổ từ</span>
+</a>
+<!-- Tab 5: Cá nhân -->
+<a class="flex flex-col items-center justify-center py-1 px-2 text-slate-500 active:text-brand-600 transition" href="#">
+<i class="ph ph-user text-xl"></i>
+<span class="text-[10px] font-medium mt-0.5">Cá nhân</span>
+</a>
+</nav>
+<!-- END: BottomNavigationBar -->
+<!-- BEGIN: InteractiveHandlers -->
+<script data-purpose="retry-handler">
+    // Xử lý mô phỏng khi người dùng bấm "Thử lại" kết nối video
+    document.addEventListener('DOMContentLoaded', () => {
+      const retryBtn = document.querySelector('[data-purpose="video-error-container"] button');
+      if (retryBtn) {
+        retryBtn.addEventListener('click', () => {
+          const originalText = retryBtn.innerHTML;
+          retryBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xs"></i> <span>Đang kết nối...</span>';
+          retryBtn.disabled = true;
+          
+          setTimeout(() => {
+            retryBtn.innerHTML = originalText;
+            retryBtn.disabled = false;
+            alert('Vẫn chưa có tín hiệu video. Bạn có thể tiếp tục học qua bản tóm tắt văn bản!');
+          }, 1400);
+        });
+      }
+    });
+  </script>
+<!-- END: InteractiveHandlers -->
+</body></html>

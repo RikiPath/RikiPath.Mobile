@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter,+'Noto+Sans+JP',+'Hiragino+Kaku+Gothic+Pro',+sans-serif:wght@100..900&family=Inter,+'Noto+Sans+JP',+sans-serif:wght@100..900&family=Inter,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "secondary-fixed": "#ffdad6", "primary-fixed": "#ffdad6", "tertiary": "#8d4b00", "surface-tint": "#bb171c", "primary": "#b7131a", "on-surface": "#121c2a", "on-tertiary-fixed": "#2f1500", "on-primary-container": "#fffbff", "surface-container-high": "#dee9fc", "tertiary-fixed-dim": "#ffb77d", "outline": "#906f6c", "surface-container-highest": "#d9e3f6", "surface-dim": "#d0dbed", "on-secondary-fixed-variant": "#93000d", "on-secondary-fixed": "#410002", "secondary-container": "#db3230", "secondary-fixed-dim": "#ffb4ac", "tertiary-fixed": "#ffdcc3", "primary-fixed-dim": "#ffb4ac", "on-tertiary-container": "#fffbff", "on-tertiary-fixed-variant": "#6e3900", "on-tertiary": "#ffffff", "on-error": "#ffffff", "background": "#f8f9ff", "on-surface-variant": "#5b403d", "inverse-primary": "#ffb4ac", "on-background": "#121c2a", "tertiary-container": "#b15f00", "surface": "#f8f9ff", "surface-container-lowest": "#ffffff", "on-primary-fixed-variant": "#93000d", "surface-container": "#e6eeff", "on-error-container": "#93000a", "on-primary": "#ffffff", "on-primary-fixed": "#410002", "surface-bright": "#f8f9ff", "inverse-surface": "#27313f", "on-secondary-container": "#fffbff", "surface-container-low": "#eff4ff", "primary-container": "#db322f", "outline-variant": "#e4beb9", "surface-variant": "#d9e3f6", "error": "#ba1a1a", "inverse-on-surface": "#eaf1ff", "on-secondary": "#ffffff", "error-container": "#ffdad6", "secondary": "#b7131a" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "screen-edge-padding": "1rem", "card-inner-padding": "1rem", "space-md": "1rem", "space-lg": "1.25rem", "space-sm": "0.75rem", "space-xs": "0.5rem", "space-2xl": "2rem", "touch-target-min": "2.75rem", "space-xxs": "0.25rem", "space-xl": "1.5rem" }, fontFamily: { "headline-md": ["\"Inter, 'Noto Sans JP', sans-serif\""], "label-sm": ["\"Inter, sans-serif\""], "furigana-mobile": ["\"'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif\""], "body-lg": ["\"Inter, 'Noto Sans JP', sans-serif\""], "label-md": ["\"Inter, sans-serif\""], "headline-lg": ["\"Inter, 'Noto Sans JP', sans-serif\""], "body-sm": ["\"Inter, 'Noto Sans JP', sans-serif\""], "title-md": ["\"Inter, 'Noto Sans JP', sans-serif\""], "display-kanji-mobile": ["\"Inter, 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif\""], "body-md": ["\"Inter, 'Noto Sans JP', sans-serif\""], "headline-sm": ["\"Inter, 'Noto Sans JP', sans-serif\""], "title-sm": ["\"Inter, 'Noto Sans JP', sans-serif\""] }, fontSize: { "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "furigana-mobile": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "400" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }], "title-md": ["18px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "600" }], "display-kanji-mobile": ["48px", { "lineHeight": "56px", "letterSpacing": "0px", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600" }], "title-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-screen-edge-padding flex items-center justify-between gap-space-xs"><div class="flex items-center gap-space-xs"><div class="flex items-center gap-1.5"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[20px]">translate</span></div><span class="font-headline-sm text-headline-sm text-primary tracking-tight">RikiPath</span></div><span class="bg-surface-container-high text-[#0284C7] font-label-sm text-label-sm px-2 py-0.5 rounded-full uppercase tracking-wide">N4</span></div><div class="flex items-center gap-space-xs"><div class="flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-full text-tertiary-container"><span class="material-symbols-outlined text-[18px] text-tertiary">local_fire_department</span><span class="font-label-md text-label-md text-on-surface">14</span></div><button aria-label="Thông báo" class="w-touch-target-min h-touch-target-min flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[24px]">notifications</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface"><div class="flex flex-col w-full px-screen-edge-padding space-y-space-md">
+<!-- Top Navigation & Action Header -->
+<div class="flex items-center justify-between py-space-xs">
+<button aria-label="Quay lại chi tiết chữ Nghiệm" class="w-touch-target-min h-touch-target-min flex items-center justify-center rounded-full bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<div class="flex flex-col items-center">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm text-on-surface">Thứ tự nét viết</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">験</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">NGHIỆM • JLPT N4</span>
+</div>
+<button aria-label="Xem quy tắc nét bút" class="w-touch-target-min h-touch-target-min flex items-center justify-center rounded-full bg-surface-container-low text-on-surface hover:text-primary transition-colors active:scale-95" id="rule-info-btn" type="button">
+<span class="material-symbols-outlined text-[22px]">help</span>
+</button>
+</div>
+<!-- Stroke Visualizer Canvas Card -->
+<div class="flex flex-col items-center bg-surface-container-lowest rounded-2xl shadow-sm p-space-md relative overflow-hidden">
+<!-- Grid Canvas -->
+<div class="relative w-[260px] h-[260px] rounded-2xl bg-[#FCFDFE] flex items-center justify-center overflow-hidden shadow-inner">
+<!-- Auxiliary Guidelines: Cross & Diagonals (dashed) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none stroke-[#CBD5E1]/60 stroke-1" stroke-dasharray="4 4" viewbox="0 0 260 260">
+<line x1="0" x2="260" y1="130" y2="130"></line>
+<line x1="130" x2="130" y1="0" y2="260"></line>
+<line class="stroke-[#CBD5E1]/30" x1="0" x2="260" y1="0" y2="260"></line>
+<line class="stroke-[#CBD5E1]/30" x1="260" x2="0" y1="0" y2="260"></line>
+</svg>
+<!-- Kanji 験 Layered Stroke Articulation (Stroke 5 Highlighted) -->
+<svg class="w-[210px] h-[210px] z-10 drop-shadow-sm" viewbox="0 0 100 100">
+<!-- Ghost Strokes (Future strokes 6 to 18) -->
+<g fill="none" opacity="0.65" stroke="#D1D5DB" stroke-dasharray="1 3" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5">
+<!-- Remaining of 馬 (strokes 6-10) -->
+<path d="M 23 48 L 41 48"></path>
+<path d="M 17 60 Q 16 68 15 72"></path>
+<path d="M 24 59 Q 24 67 24 72"></path>
+<path d="M 31 59 Q 32 67 33 72"></path>
+<path d="M 39 59 Q 42 67 44 72"></path>
+<!-- 僉 component (strokes 11-18) -->
+<path d="M 72 17 L 54 33"></path>
+<path d="M 72 17 L 90 33"></path>
+<path d="M 64 36 L 81 36"></path>
+<path d="M 59 47 L 85 47"></path>
+<path d="M 59 47 L 59 62"></path>
+<path d="M 85 47 L 85 62"></path>
+<path d="M 59 62 L 85 62"></path>
+<path d="M 65 72 L 72 88"></path>
+<path d="M 79 72 L 75 88"></path>
+<path d="M 52 91 L 91 91"></path>
+</g>
+<!-- Completed Strokes (Strokes 1 - 4: Left component 馬 top block) -->
+<g fill="none" stroke="#1E293B" stroke-linecap="round" stroke-linejoin="round" stroke-width="5.5">
+<!-- Stroke 1: Sổ đứng bên trái -->
+<path d="M 19 23 L 19 50"></path>
+<!-- Stroke 2: Ngang gập -->
+<path d="M 20 25 L 42 25 Q 44 25 43 49 L 43 51"></path>
+<!-- Stroke 3: Ngang giữa 1 -->
+<path d="M 20 33 L 42 33"></path>
+<!-- Stroke 4: Ngang giữa 2 -->
+<path d="M 20 41 L 42 41"></path>
+</g>
+<!-- Current Active Stroke (Stroke 5: Sổ dài thân giữa của bộ Mã) -->
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<!-- Halo effect -->
+<path d="M 30 20 L 30 54" opacity="0.8" stroke="#FFDAD6" stroke-width="9"></path>
+<!-- Main crimson stroke -->
+<path d="M 30 20 L 30 54" stroke="#B7131A" stroke-width="5.5"></path>
+</g>
+<!-- Direction indicator arrow on stroke 5 -->
+<g class="animate-bounce" transform="translate(30, 36)">
+<circle cx="0" cy="0" fill="#B7131A" r="5"></circle>
+<path d="M -2 -2 L 0 1 L 2 -2" fill="none" stroke="#FFFFFF" stroke-width="1.2"></path>
+</g>
+</svg>
+<!-- Watermark stamp corner indicator -->
+<span class="absolute top-3 right-3 font-label-sm text-label-sm text-on-surface-variant/70 bg-surface-container-low px-2 py-0.5 rounded-md">
+        Nét 5/18
+      </span>
+</div>
+<!-- Active Stroke Description Pill -->
+<div class="mt-space-sm w-full bg-surface-container-low rounded-xl px-space-md py-space-xs flex items-center justify-between">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm text-label-sm shrink-0">
+          5
+        </div>
+<p class="font-title-sm text-title-sm text-on-surface truncate">
+          Nét sổ đứng <span class="font-body-sm text-body-sm text-on-surface-variant font-normal">(Thân giữa bộ Mã)</span>
+</p>
+</div>
+<div class="flex items-center gap-1 text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">arrow_downward</span>
+<span class="font-label-sm text-label-sm uppercase font-bold">Từ trên xuống</span>
+</div>
+</div>
+</div>
+<!-- Stroke Order Media Controls -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm space-y-space-md">
+<!-- Stepper 18-segments bar -->
+<div class="flex flex-col space-y-1.5">
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="font-label-sm text-label-sm">Tiến độ nét: <strong class="text-primary font-title-sm">5</strong> / 18</span>
+<span class="font-label-sm text-label-sm">Bộ thủ: <strong class="text-on-surface">馬 (Mã)</strong></span>
+</div>
+<div class="grid grid-cols-18 gap-1 w-full h-2 rounded-full overflow-hidden bg-surface-container" style="display: grid; grid-template-columns: repeat(18, minmax(0, 1fr));">
+<div class="h-full bg-primary rounded-full cursor-pointer"></div>
+<div class="h-full bg-primary rounded-full cursor-pointer"></div>
+<div class="h-full bg-primary rounded-full cursor-pointer"></div>
+<div class="h-full bg-primary rounded-full cursor-pointer"></div>
+<div class="h-full bg-primary-container rounded-full ring-1 ring-primary/40 cursor-pointer animate-pulse"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+<div class="h-full bg-surface-container-high rounded-full cursor-pointer"></div>
+</div>
+</div>
+<!-- Main Control Buttons -->
+<div class="flex items-center justify-between px-space-sm pt-space-xs">
+<!-- Replay to start -->
+<button aria-label="Phát lại từ đầu" class="w-touch-target-min h-touch-target-min flex flex-col items-center justify-center rounded-full bg-surface-container-low text-on-surface hover:bg-surface-container active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[22px]">replay</span>
+</button>
+<!-- Previous Step -->
+<button aria-label="Lùi 1 nét" class="w-touch-target-min h-touch-target-min flex items-center justify-center rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[26px]">skip_previous</span>
+</button>
+<!-- Primary Play / Pause Action Button -->
+<button aria-label="Phát tự động thứ tự nét" class="w-14 h-14 rounded-full bg-primary text-on-primary shadow-md flex items-center justify-center hover:bg-primary-container active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[32px]">play_arrow</span>
+</button>
+<!-- Next Step -->
+<button aria-label="Tiến 1 nét" class="w-touch-target-min h-touch-target-min flex items-center justify-center rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[26px]">skip_next</span>
+</button>
+<!-- Speed Control Selector -->
+<div class="flex bg-surface-container-low p-1 rounded-full items-center">
+<button class="px-2 py-1 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface" type="button">0.5x</button>
+<button class="px-2.5 py-1 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-bold shadow-sm" type="button">1.0x</button>
+<button class="px-2 py-1 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface" type="button">1.5x</button>
+</div>
+</div>
+</div>
+<!-- 18-Stroke Breakdown Strip (Toàn cảnh 18 bước tích lũy) -->
+<div class="flex flex-col space-y-space-xs">
+<div class="flex items-center justify-between">
+<h3 class="font-title-sm text-title-sm text-on-surface">Tiến trình 18 nét tích lũy</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Vuốt ngang để xem</span>
+</div>
+<div class="flex gap-space-xs overflow-x-auto pb-space-xs pt-1 -mx-screen-edge-padding px-screen-edge-padding no-scrollbar scroll-smooth">
+<!-- Step 1 Card -->
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-lowest shrink-0 w-[64px] shadow-sm hover:shadow transition-all cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nét 1</span>
+<div class="w-10 h-10 flex items-center justify-center text-title-md font-bold text-on-surface">丨</div>
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-1"></span>
+</div>
+<!-- Step 2 Card -->
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-lowest shrink-0 w-[64px] shadow-sm hover:shadow transition-all cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nét 2</span>
+<div class="w-10 h-10 flex items-center justify-center text-title-md font-bold text-on-surface">冂</div>
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-1"></span>
+</div>
+<!-- Step 3 Card -->
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-lowest shrink-0 w-[64px] shadow-sm hover:shadow transition-all cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nét 3</span>
+<div class="w-10 h-10 flex items-center justify-center text-title-md font-bold text-on-surface">日</div>
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-1"></span>
+</div>
+<!-- Step 4 Card -->
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-lowest shrink-0 w-[64px] shadow-sm hover:shadow transition-all cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nét 4</span>
+<div class="w-10 h-10 flex items-center justify-center text-title-md font-bold text-on-surface">目</div>
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-1"></span>
+</div>
+<!-- Step 5 Active Card -->
+<div class="flex flex-col items-center p-2 rounded-xl bg-primary text-on-primary shrink-0 w-[68px] shadow-md ring-2 ring-primary/20 scale-105 transition-all">
+<span class="font-label-sm text-label-sm text-on-primary">Nét 5</span>
+<div class="w-10 h-10 flex items-center justify-center text-title-md font-bold text-on-primary">目|</div>
+<div class="flex items-center gap-0.5 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-on-primary"></span>
+<span class="font-label-sm text-label-sm">Đang xem</span>
+</div>
+</div>
+<!-- Step 6 Card -->
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-lowest shrink-0 w-[64px] shadow-sm hover:shadow transition-all opacity-85 cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nét 6</span>
+<div class="w-10 h-10 flex items-center justify-center text-title-md font-bold text-on-surface-variant">一</div>
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-highest mt-1"></span>
+</div>
+<!-- Step 7 Card -->
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-lowest shrink-0 w-[64px] shadow-sm hover:shadow transition-all opacity-85 cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nét 7</span>
+<div class="w-10 h-10 flex items-center justify-center text-title-md font-bold text-on-surface-variant">丶</div>
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-highest mt-1"></span>
+</div>
+<!-- Step 8 to 10 (Mã complete) -->
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-lowest shrink-0 w-[64px] shadow-sm hover:shadow transition-all opacity-85 cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nét 10</span>
+<div class="w-10 h-10 flex items-center justify-center text-title-md font-bold text-on-surface-variant">馬</div>
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-highest mt-1"></span>
+</div>
+<!-- Step 18 (Full Kanji 験) -->
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-lowest shrink-0 w-[64px] shadow-sm hover:shadow transition-all opacity-85 cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nét 18</span>
+<div class="w-10 h-10 flex items-center justify-center text-title-md font-bold text-on-surface-variant">験</div>
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-highest mt-1"></span>
+</div>
+</div>
+</div>
+<!-- Stroke Rules & Calligraphy Guide Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm space-y-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-on-surface">Quy tắc bút thuận áp dụng cho chữ 験</h3>
+</div>
+<div class="grid grid-cols-1 gap-2 pt-1">
+<div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-surface-container-low">
+<span class="w-5 h-5 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-label-sm text-label-sm shrink-0 mt-0.5">1</span>
+<p class="font-body-md text-body-md text-on-surface">
+<strong>Từ trên xuống dưới, từ trái qua phải:</strong> Viết hoàn chỉnh kết cấu bên trái trước khi sang bên phải.
+        </p>
+</div>
+<div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-surface-container-low">
+<span class="w-5 h-5 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-label-sm text-label-sm shrink-0 mt-0.5">2</span>
+<p class="font-body-md text-body-md text-on-surface">
+<strong>Bộ Mã (馬) viết trước:</strong> Chiếm 10 nét đầu tiên tạo khung trụ vững chãi cho nửa trái chữ.
+        </p>
+</div>
+<div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-surface-container-low">
+<span class="w-5 h-5 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-label-sm text-label-sm shrink-0 mt-0.5">3</span>
+<p class="font-body-md text-body-md text-on-surface">
+<strong>Bộ Thiêm (僉) viết sau:</strong> Gồm 8 nét từ nét thứ 11 đến 18, hoàn thiện nửa bên phải.
+        </p>
+</div>
+<div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-surface-container-low">
+<span class="w-5 h-5 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-label-sm text-label-sm shrink-0 mt-0.5">4</span>
+<p class="font-body-md text-body-md text-on-surface">
+<strong>Ngang trước, sổ sau:</strong> Các nét chắn ngang trong thân ngựa viết trước nét sổ dọc xuyên qua.
+        </p>
+</div>
+</div>
+</div>
+<!-- Primary Action Footers -->
+<div class="flex flex-col gap-space-xs pt-space-xs pb-space-sm">
+<button class="w-full h-touch-target-min rounded-xl bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 shadow-md hover:bg-primary-container active:scale-[0.98] transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+<span>Quay lại chi tiết chữ 験</span>
+</button>
+<button class="w-full h-touch-target-min rounded-xl bg-surface-container-lowest text-on-surface font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px] text-primary">edit_note</span>
+<span>Mở bảng từ vựng có chứa chữ 験 (12 từ)</span>
+</button>
+</div>
+</div>
+<script>
+  // Simple interactive feedback micro-interaction
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (this.classList.contains('active:scale-95') || this.classList.contains('active:scale-90')) return;
+      this.classList.add('opacity-80');
+      setTimeout(() => this.classList.remove('opacity-80'), 150);
+    });
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_10px_rgba(0,0,0,0.05)]" data-active-classes="text-primary font-bold [&>div]:bg-primary-fixed"><div class="flex justify-around items-center h-16 px-space-xs"><a aria-current="page" class="flex flex-col items-center justify-center w-touch-target-min h-touch-target-min gap-0.5 transition-colors group text-primary font-bold [&>div]:bg-primary-fixed" data-path="trang-chu" href="#"><div class="w-10 h-6 flex items-center justify-center rounded-full transition-colors"><span class="material-symbols-outlined text-[22px]">home</span></div><span class="font-label-sm text-label-sm">Trang chủ</span></a><a class="flex flex-col items-center justify-center w-touch-target-min h-touch-target-min gap-0.5 text-on-surface-variant transition-colors group" data-path="hoc-tap" href="#"><div class="w-10 h-6 flex items-center justify-center rounded-full transition-colors"><span class="material-symbols-outlined text-[22px]">menu_book</span></div><span class="font-label-sm text-label-sm">Học tập</span></a><a class="flex flex-col items-center justify-center w-touch-target-min h-touch-target-min gap-0.5 text-on-surface-variant transition-colors group" data-path="luyen-tap" href="#"><div class="w-10 h-6 flex items-center justify-center rounded-full transition-colors"><span class="material-symbols-outlined text-[22px]">quiz</span></div><span class="font-label-sm text-label-sm">Luyện tập</span></a><a class="flex flex-col items-center justify-center w-touch-target-min h-touch-target-min gap-0.5 text-on-surface-variant transition-colors group" data-path="so-tu" href="#"><div class="w-10 h-6 flex items-center justify-center rounded-full transition-colors"><span class="material-symbols-outlined text-[22px]">style</span></div><span class="font-label-sm text-label-sm">Sổ từ</span></a><a class="flex flex-col items-center justify-center w-touch-target-min h-touch-target-min gap-0.5 text-on-surface-variant transition-colors group" data-path="ca-nhan" href="#"><div class="w-10 h-6 flex items-center justify-center rounded-full transition-colors"><span class="material-symbols-outlined text-[22px]">person</span></div><span class="font-label-sm text-label-sm">Cá nhân</span></a></div></nav></body></html>

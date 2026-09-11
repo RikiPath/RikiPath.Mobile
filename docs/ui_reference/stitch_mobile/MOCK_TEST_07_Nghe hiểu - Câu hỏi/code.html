@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>JLPT N4 - Nghe hiểu - Phòng thi</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter & Noto Sans JP -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Serif:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-serif-custom {
+      font-family: 'Noto Serif', serif;
+    }
+  </style>
+</head>
+<body class="bg-[#F4F7FB] text-[#1E293B] antialiased min-h-screen flex flex-col justify-between max-w-[430px] mx-auto select-none">
+<!-- BEGIN: MainContentWrapper -->
+<div class="flex-1 flex flex-col pb-24">
+<!-- BEGIN: TopExamHeader -->
+<!-- Sticky exam status header with close button, title, timer pill, and avatar -->
+<header class="bg-white px-4 py-3 border-b border-[#E2E8F0] flex items-center justify-between sticky top-0 z-30 shadow-xs">
+<!-- Close / Exit Exam Button -->
+<button aria-label="Đóng bài thi" class="p-1.5 text-slate-700 hover:text-slate-900 transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+</svg>
+</button>
+<!-- Exam Name -->
+<h1 class="text-[17px] font-bold text-slate-900 tracking-tight">
+        JLPT N4 • Đề #01
+      </h1>
+<!-- Right Header Group: Timer and User Icon -->
+<div class="flex items-center gap-2">
+<!-- Timer Badge -->
+<div class="bg-[#EBF3FF] text-[#1E40AF] px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-[#2563EB]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9" stroke-width="2"></circle>
+<path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="tracking-wide font-mono">00:24:31</span>
+</div>
+<!-- Profile Avatar Placeholder -->
+<div class="w-8 h-8 rounded-full bg-[#B91C1C] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"></path>
+</svg>
+</div>
+</div>
+</header>
+<!-- END: TopExamHeader -->
+<!-- BEGIN: SubHeaderSection -->
+<section class="px-4 pt-3.5 pb-2">
+<!-- Section metadata line -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="bg-[#E2E8F0] text-slate-700 text-[11px] font-bold px-2 py-0.5 rounded">N4</span>
+<span class="font-bold text-slate-900 text-base">Phần 3: Nghe hiểu</span>
+</div>
+<!-- Auto-save Status indicator -->
+<div class="flex items-center gap-1 text-[11px] font-medium text-[#15803D] bg-[#DCFCE7] px-2.5 py-0.5 rounded-full">
+<svg class="w-3 h-3 text-[#16A34A]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Đã tự lưu</span>
+</div>
+</div>
+<!-- Question Number & Bookmark Action -->
+<div class="mt-3 flex items-baseline justify-between">
+<div>
+<span class="text-xl font-extrabold text-[#B91C1C] font-serif-custom">Câu 07</span>
+<span class="text-slate-400 font-medium text-sm ml-1">/ 30</span>
+</div>
+<!-- Bookmark Button -->
+<button class="flex items-center gap-1.5 bg-white border border-[#E2E8F0] hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-full text-xs font-semibold shadow-2xs transition active:scale-95" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Đánh dấu câu này</span>
+</button>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-[#E2E8F0] h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-[#B91C1C] h-full rounded-full transition-all duration-300" style="width: 23.33%;"></div>
+</div>
+</section>
+<!-- END: SubHeaderSection -->
+<!-- BEGIN: MainQuestionArea -->
+<main class="px-4 mt-2 space-y-4 flex-1">
+<!-- BEGIN: EducationalAudioPlayer -->
+<!-- Audio player customized for JLPT exam listening test -->
+<section class="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-xs" data-purpose="exam-audio-card">
+<!-- Audio Header: Track title and attempt counter -->
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-red-50 text-[#B91C1C] flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<p class="text-xs font-bold text-slate-800">Mondai 1 • Nghe hiểu nội dung</p>
+</div>
+</div>
+<span class="text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
+            Lượt nghe: 1 / 2
+          </span>
+</div>
+<!-- Waveform and status indicators -->
+<div class="mt-3.5 flex items-center justify-between text-xs text-slate-500 font-medium">
+<span class="flex items-center gap-1.5 text-emerald-600 font-semibold">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Sẵn sàng nghe
+          </span>
+<span class="font-mono text-[11px] text-slate-400">00:00 / 00:42</span>
+</div>
+<!-- Visual Neutral Waveform Bars -->
+<div class="mt-2.5 flex items-center justify-between gap-1 h-8 px-1 bg-slate-50 rounded-lg border border-slate-100/70">
+<span class="w-1 bg-slate-300 rounded-full h-3"></span>
+<span class="w-1 bg-slate-300 rounded-full h-5"></span>
+<span class="w-1 bg-slate-300 rounded-full h-4"></span>
+<span class="w-1 bg-slate-300 rounded-full h-6"></span>
+<span class="w-1 bg-slate-300 rounded-full h-2"></span>
+<span class="w-1 bg-slate-300 rounded-full h-7"></span>
+<span class="w-1 bg-slate-300 rounded-full h-5"></span>
+<span class="w-1 bg-slate-300 rounded-full h-4"></span>
+<span class="w-1 bg-slate-300 rounded-full h-6"></span>
+<span class="w-1 bg-slate-300 rounded-full h-7"></span>
+<span class="w-1 bg-slate-300 rounded-full h-3"></span>
+<span class="w-1 bg-slate-300 rounded-full h-6"></span>
+<span class="w-1 bg-slate-300 rounded-full h-4"></span>
+<span class="w-1 bg-slate-300 rounded-full h-2"></span>
+<span class="w-1 bg-slate-300 rounded-full h-5"></span>
+<span class="w-1 bg-slate-300 rounded-full h-7"></span>
+<span class="w-1 bg-slate-300 rounded-full h-4"></span>
+<span class="w-1 bg-slate-300 rounded-full h-6"></span>
+<span class="w-1 bg-slate-300 rounded-full h-3"></span>
+<span class="w-1 bg-slate-300 rounded-full h-5"></span>
+<span class="w-1 bg-slate-300 rounded-full h-4"></span>
+<span class="w-1 bg-slate-300 rounded-full h-2"></span>
+</div>
+<!-- Primary Action Button: Play Audio -->
+<button class="mt-3.5 w-full bg-[#B91C1C] hover:bg-[#991B1B] active:bg-[#7F1D1D] text-white py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition-all duration-150" type="button">
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M8 5v14l11-7z"></path>
+</svg>
+<span>Phát audio</span>
+</button>
+</section>
+<!-- END: EducationalAudioPlayer -->
+<!-- BEGIN: QuestionContentCard -->
+<!-- Red border accent prompt card matching Screenshot reference layout -->
+<article class="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-xs relative overflow-hidden" data-purpose="question-card">
+<!-- Left vertical accent strip -->
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#B91C1C]"></div>
+<div class="pl-2">
+<!-- Question instructions -->
+<div class="flex items-center gap-2 text-xs font-semibold text-slate-600 mb-2">
+<svg class="w-4 h-4 text-[#B91C1C]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Nghe đoạn hội thoại và trả lời câu hỏi:</span>
+</div>
+<!-- Japanese Prompt text -->
+<div class="py-2.5">
+<h2 class="text-[19px] font-bold text-slate-900 leading-relaxed tracking-wide">
+              Q. 女の人はこのあと何をしますか。
+            </h2>
+</div>
+<!-- Question Footer / Meta -->
+<div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+<div class="flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewbox="0 0 20 20">
+<path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14H8a4 4 0 01-.8-7.92 4.002 4.002 0 017.6 0A4 4 0 0112 14z"></path>
+</svg>
+<span>Dạng bài: Hành động tiếp theo</span>
+</div>
+<span class="bg-slate-100 text-slate-700 font-medium px-2 py-0.5 rounded text-[11px]">
+              1.5 điểm
+            </span>
+</div>
+</div>
+</article>
+<!-- END: QuestionContentCard -->
+<!-- BEGIN: AnswerOptionsSection -->
+<section class="space-y-2.5" data-purpose="answer-choices">
+<div class="flex items-center justify-between px-1 text-xs">
+<span class="font-bold tracking-wider text-slate-600 uppercase text-[11px]">LỰA CHỌN TRẢ LỜI (CHƯA CHỌN)</span>
+<span class="text-slate-500 flex items-center gap-1 text-[11px]">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+            Chạm để chọn
+          </span>
+</div>
+<!-- Option 1 -->
+<label class="bg-white p-3.5 rounded-2xl border border-[#E2E8F0] shadow-xs flex items-center justify-between cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3.5">
+<span class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-sm flex items-center justify-center shrink-0">
+              1
+            </span>
+<span class="text-base font-semibold text-slate-900 tracking-wide">
+              会社へ行きます。
+            </span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0"></div>
+</label>
+<!-- Option 2 -->
+<label class="bg-white p-3.5 rounded-2xl border border-[#E2E8F0] shadow-xs flex items-center justify-between cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3.5">
+<span class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-sm flex items-center justify-center shrink-0">
+              2
+            </span>
+<span class="text-base font-semibold text-slate-900 tracking-wide">
+              銀行へ行きます。
+            </span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0"></div>
+</label>
+<!-- Option 3 -->
+<label class="bg-white p-3.5 rounded-2xl border border-[#E2E8F0] shadow-xs flex items-center justify-between cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3.5">
+<span class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-sm flex items-center justify-center shrink-0">
+              3
+            </span>
+<span class="text-base font-semibold text-slate-900 tracking-wide">
+              駅で友達を待ちます。
+            </span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0"></div>
+</label>
+<!-- Option 4 -->
+<label class="bg-white p-3.5 rounded-2xl border border-[#E2E8F0] shadow-xs flex items-center justify-between cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3.5">
+<span class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-sm flex items-center justify-center shrink-0">
+              4
+            </span>
+<span class="text-base font-semibold text-slate-900 tracking-wide">
+              家に帰ります。
+            </span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0"></div>
+</label>
+</section>
+<!-- END: AnswerOptionsSection -->
+</main>
+<!-- END: MainQuestionArea -->
+</div>
+<!-- END: MainContentWrapper -->
+<!-- BEGIN: StickyBottomExamNavigation -->
+<!-- Strict exam mode footer navigation bar (no general app tabs) -->
+<footer class="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white/95 backdrop-blur-md border-t border-[#E2E8F0] px-3 py-2.5 z-40">
+<div class="flex items-center justify-between gap-2">
+<!-- Previous Question Button -->
+<button class="flex-1 bg-[#EBF3FF] hover:bg-[#DBEAFE] text-[#1D4ED8] py-2.5 px-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 transition active:scale-95" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<span>Câu trước</span>
+</button>
+<!-- Question List / Overview Modal Trigger Button -->
+<button class="flex-[1.2] bg-[#F8FAFC] hover:bg-slate-100 text-slate-700 border border-[#E2E8F0] py-2.5 px-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition active:scale-95" type="button">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="truncate">Danh sách (7/30)</span>
+</button>
+<!-- Next Question Button -->
+<button class="flex-1 bg-[#B91C1C] hover:bg-[#991B1B] text-white py-2.5 px-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 shadow-sm transition active:scale-95" type="button">
+<span>Câu tiếp</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</button>
+</div>
+</footer>
+<!-- END: StickyBottomExamNavigation -->
+</body></html>

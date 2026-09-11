@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Danh sách Bài học - RikiPath JLPT N4</title>
+<!-- Tailwind CSS v3 with forms & container queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fef2f2',
+              100: '#fee2e2',
+              200: '#fecaca',
+              600: '#b7131a',
+              700: '#991016',
+              800: '#7f0d12'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="custom-scrollbars">
+    /* Hide scrollbar for horizontal chip navigation while retaining functionality */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased selection:bg-brand-100 selection:text-brand-700 min-h-screen pb-24">
+<!-- BEGIN: TopHeader -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm" data-purpose="main-header">
+<div class="px-4 py-3 flex items-center justify-between">
+<!-- Back button and title context -->
+<div class="flex items-center gap-3">
+<button aria-label="Quay lại" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-700 active:scale-95 transition-transform hover:bg-slate-200" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<div>
+<h1 class="text-lg font-bold text-slate-900 leading-tight">Bài học</h1>
+<p class="text-xs text-slate-500 font-medium">JLPT N4 • 30 bài học</p>
+</div>
+</div>
+<!-- Action buttons: Search and Filter trigger -->
+<div class="flex items-center gap-2">
+<button aria-label="Tìm kiếm bài học" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:text-slate-900 active:scale-95 transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button aria-label="Bộ lọc" class="relative w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:text-slate-900 active:scale-95 transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-brand-600 ring-2 ring-white"></span>
+</button>
+</div>
+</div>
+<!-- BEGIN: FilterRow -->
+<!-- Horizontal filter chips with comfortable touch targets -->
+<div class="px-4 pb-3 overflow-x-auto no-scrollbar flex items-center gap-2 pt-1" data-purpose="skill-filter-chips">
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-brand-600 text-white text-xs font-semibold shadow-sm shadow-brand-600/20 active:scale-95 transition-transform" type="button">
+        Tất cả
+      </button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all" type="button">
+        Từ vựng
+      </button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all" type="button">
+        Kanji
+      </button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all" type="button">
+        Ngữ pháp
+      </button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all" type="button">
+        Đọc hiểu
+      </button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 active:scale-95 transition-all" type="button">
+        Nghe hiểu
+      </button>
+</div>
+<!-- END: FilterRow -->
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: MainContent -->
+<main class="px-4 pt-3.5 space-y-3" data-purpose="lesson-card-feed">
+<!-- Sub-header: Count and Sort Dropdown -->
+<div class="flex items-center justify-between text-xs text-slate-500 font-medium px-1">
+<span>Danh sách 30 bài học</span>
+<button class="inline-flex items-center gap-1 text-slate-700 font-semibold hover:text-brand-600 transition-colors" type="button">
+<span>Theo thứ tự lộ trình</span>
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<!-- BEGIN: LessonCards -->
+<!-- Card 1: Bài 18 - Hoàn thành -->
+<article class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm relative overflow-hidden transition-all hover:border-slate-300" data-purpose="lesson-card-completed">
+<!-- Header row -->
+<div class="flex items-center justify-between gap-2 mb-2">
+<div class="flex items-center gap-2">
+<span class="text-xs font-extrabold tracking-wider text-slate-900 uppercase">Bài 18</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">Ngữ pháp</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-600 border border-blue-100">N4</span>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24">
+<path d="M4.5 12.75l6 6 9-13.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Hoàn thành
+        </span>
+</div>
+<!-- Title & Structure details -->
+<h2 class="text-base font-bold text-slate-900 leading-snug">
+        Ngữ pháp thể て diễn đạt sự tiếp diễn
+      </h2>
+<p class="text-xs text-slate-500 mt-1 font-normal flex items-center gap-1.5">
+<span class="font-medium text-slate-600 font-mono">〜ている</span>
+<span>•</span>
+<span>Biểu thị trạng thái &amp; thói quen</span>
+</p>
+<!-- Metadata & Progress bar -->
+<div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+<div class="flex items-center gap-1 font-medium text-slate-600">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>22 phút</span>
+</div>
+<span class="text-emerald-700 font-semibold">100%</span>
+</div>
+<!-- 100% Green Progress Bar -->
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
+<div class="bg-emerald-500 h-1.5 rounded-full w-full"></div>
+</div>
+</article>
+<!-- Card 2: Bài 19 - Đang học (Current Active Lesson) -->
+<article class="bg-white rounded-2xl p-4 border-2 border-brand-200 shadow-md shadow-brand-50 relative overflow-hidden" data-purpose="lesson-card-in-progress">
+<!-- Active indicator accent ribbon on left -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-600"></div>
+<!-- Header row -->
+<div class="flex items-center justify-between gap-2 mb-2">
+<div class="flex items-center gap-2">
+<span class="text-xs font-extrabold tracking-wider text-brand-700 uppercase">Bài 19</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">Ngữ pháp</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-600 border border-blue-100">N4</span>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+<span class="w-1.5 h-1.5 rounded-full bg-brand-600 animate-pulse"></span>
+          Đang học (40%)
+        </span>
+</div>
+<!-- Title -->
+<h2 class="text-base font-bold text-slate-900 leading-snug">
+        Thể quá khứ &amp; Liệt kê hành động
+      </h2>
+<p class="text-xs text-slate-500 mt-1 font-normal flex items-center gap-1.5">
+<span class="font-medium text-slate-600 font-mono">〜たり〜たりする</span>
+<span>•</span>
+<span>Chương 2 • Bài 19</span>
+</p>
+<!-- Progress bar -->
+<div class="w-full bg-slate-100 rounded-full h-2 mt-3.5 overflow-hidden">
+<div class="bg-brand-600 h-2 rounded-full transition-all duration-300" style="width: 40%;"></div>
+</div>
+<!-- Footer action & metadata -->
+<div class="mt-3 pt-2.5 flex items-center justify-between">
+<div class="flex items-center gap-1 text-xs text-slate-500 font-medium">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>28 phút</span>
+</div>
+<button class="inline-flex items-center gap-1.5 bg-brand-600 text-white hover:bg-brand-700 active:scale-95 text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-sm shadow-brand-600/25 transition-all" type="button">
+<span>Học tiếp</span>
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</article>
+<!-- Card 3: Bài 20 - Chưa học -->
+<article class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm relative transition-all hover:border-slate-300" data-purpose="lesson-card-not-started">
+<!-- Header row -->
+<div class="flex items-center justify-between gap-2 mb-2">
+<div class="flex items-center gap-2">
+<span class="text-xs font-extrabold tracking-wider text-slate-900 uppercase">Bài 20</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200/60">Nghe hiểu</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-600 border border-blue-100">N4</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200/60">
+          Chưa học
+        </span>
+</div>
+<!-- Title & detail -->
+<h2 class="text-base font-bold text-slate-900 leading-snug">
+        Văn phong giao tiếp thân mật
+      </h2>
+<p class="text-xs text-slate-500 mt-1 font-normal">
+        Thể thông thường Futsuukei (普通形) trong hội thoại
+      </p>
+<!-- Metadata & Action -->
+<div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+<div class="flex items-center gap-1 font-medium text-slate-600">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>35 phút</span>
+</div>
+<button aria-label="Bắt đầu Bài 20" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 ml-0.5 text-slate-700" fill="currentColor" viewbox="0 0 24 24">
+<path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"></path>
+</svg>
+</button>
+</div>
+</article>
+<!-- Card 4: Bài 21 - Chưa học -->
+<article class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm relative transition-all hover:border-slate-300" data-purpose="lesson-card-not-started">
+<!-- Header row -->
+<div class="flex items-center justify-between gap-2 mb-2">
+<div class="flex items-center gap-2">
+<span class="text-xs font-extrabold tracking-wider text-slate-900 uppercase">Bài 21</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200/60">Từ vựng</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-600 border border-blue-100">N4</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200/60">
+          Chưa học
+        </span>
+</div>
+<!-- Title -->
+<h2 class="text-base font-bold text-slate-900 leading-snug">
+        Từ vựng chuyên đề: Môi trường &amp; Đời sống
+      </h2>
+<p class="text-xs text-slate-500 mt-1 font-normal">
+        35 từ vựng mới kèm ví dụ ứng dụng thực tế
+      </p>
+<!-- Metadata & Action -->
+<div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+<div class="flex items-center gap-1 font-medium text-slate-600">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>20 phút</span>
+</div>
+<button aria-label="Bắt đầu Bài 21" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 ml-0.5 text-slate-700" fill="currentColor" viewbox="0 0 24 24">
+<path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"></path>
+</svg>
+</button>
+</div>
+</article>
+<!-- Card 5: Bài 22 - Khóa (Locked State) -->
+<article class="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/70 shadow-none relative opacity-75 select-none" data-purpose="lesson-card-locked">
+<!-- Header row -->
+<div class="flex items-center justify-between gap-2 mb-2">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold tracking-wider text-slate-500 uppercase">Bài 22</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-800/70 border border-emerald-200/50">Đọc hiểu</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-200/70 text-slate-600">N4</span>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-200/70 text-slate-600">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Khóa
+        </span>
+</div>
+<!-- Title -->
+<h2 class="text-base font-semibold text-slate-700 leading-snug">
+        Đoản văn Dokkai: Hướng dẫn ga tàu điện
+      </h2>
+<p class="text-xs text-slate-500 mt-1 font-normal">
+        Luyện kỹ năng tìm thông tin nhanh dạng thông báo đời sống
+      </p>
+<!-- Metadata & Locked note -->
+<div class="mt-3.5 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
+<div class="flex items-center gap-1">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>25 phút</span>
+</div>
+<span class="text-[11px] italic text-slate-500">Mở sau khi hoàn thành Bài 21</span>
+</div>
+</article>
+<!-- END: LessonCards -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomNavigation -->
+<!-- 5 tabs mobile navigation bar matching SCREEN_8 system design -->
+<nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg px-2 py-1.5" data-purpose="mobile-bottom-navigation">
+<div class="flex items-center justify-around">
+<!-- Tab 1: Trang chủ -->
+<a class="flex flex-col items-center justify-center py-1 px-3 text-slate-500 hover:text-slate-900 group transition-colors" href="#">
+<svg class="w-5 h-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium mt-0.5">Trang chủ</span>
+</a>
+<!-- Tab 2: Học tập (Active Red) -->
+<a class="flex flex-col items-center justify-center py-1 px-3 text-brand-600 transition-colors" href="#">
+<svg class="w-5 h-5 stroke-[2.2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-bold mt-0.5">Học tập</span>
+</a>
+<!-- Tab 3: Luyện tập -->
+<a class="flex flex-col items-center justify-center py-1 px-3 text-slate-500 hover:text-slate-900 group transition-colors" href="#">
+<svg class="w-5 h-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium mt-0.5">Luyện tập</span>
+</a>
+<!-- Tab 4: Sổ từ -->
+<a class="relative flex flex-col items-center justify-center py-1 px-3 text-slate-500 hover:text-slate-900 group transition-colors" href="#">
+<!-- Notification badge -->
+<span class="absolute top-1 right-3.5 w-2 h-2 rounded-full bg-brand-600 ring-2 ring-white"></span>
+<svg class="w-5 h-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium mt-0.5">Sổ từ</span>
+</a>
+<!-- Tab 5: Cá nhân -->
+<a class="flex flex-col items-center justify-center py-1 px-3 text-slate-500 hover:text-slate-900 group transition-colors" href="#">
+<svg class="w-5 h-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium mt-0.5">Cá nhân</span>
+</a>
+</div>
+</nav>
+<!-- END: BottomNavigation -->
+</body></html>

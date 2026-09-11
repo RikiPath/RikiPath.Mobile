@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Trạng thái tải bài học - RikiPath</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#B91C1C',
+              darkRed: '#991B1B',
+              softRed: '#FEF2F2',
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-layout">
+    /* iOS Safe Area Support & Mobile Optimization */
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .safe-top {
+      padding-top: env(safe-area-inset-top, 12px);
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+    /* Subtle custom shimmer effect */
+    @keyframes shimmer {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+    .shimmer-box {
+      animation: shimmer 1.6s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+<!-- BEGIN: TopBrandHeader -->
+<!-- Top App Brand & Profile Header Skeleton -->
+<header class="bg-white border-b border-slate-100 px-4 pt-3 pb-3 safe-top sticky top-0 z-30 flex items-center justify-between">
+<!-- Brand Logo Area -->
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-red-100 text-brand-red flex items-center justify-center font-bold text-sm">
+        文
+      </div>
+<span class="font-black text-lg tracking-tight text-slate-800">RikiPath</span>
+<div class="h-5 w-8 rounded-full bg-slate-200 animate-pulse ml-0.5"></div>
+</div>
+<!-- Right utility controls -->
+<div class="flex items-center gap-2.5">
+<!-- Streak skeleton -->
+<div class="h-7 w-12 rounded-full bg-slate-200 animate-pulse"></div>
+<!-- Notification bell skeleton -->
+<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+<i class="fa-regular fa-bell text-sm"></i>
+</div>
+<!-- Profile avatar skeleton -->
+<div class="w-8 h-8 rounded-full bg-slate-200 animate-pulse"></div>
+</div>
+</header>
+<!-- END: TopBrandHeader -->
+<!-- BEGIN: LessonSubHeader -->
+<!-- Lesson Navigation Action Bar Skeleton -->
+<section class="bg-white px-4 py-3 border-b border-slate-100 flex items-center justify-between" data-purpose="sub-appbar-skeleton">
+<div class="flex items-center gap-3">
+<!-- Circular Back Button -->
+<div class="w-10 h-10 rounded-full bg-slate-200 animate-pulse flex items-center justify-center text-slate-400">
+<i class="fa-solid fa-arrow-left text-sm opacity-30"></i>
+</div>
+<!-- Title & Subtitle skeleton lines -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<div class="h-5 w-24 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-4 w-16 rounded-full bg-slate-100 animate-pulse"></div>
+</div>
+<div class="h-3 w-32 rounded bg-slate-200 animate-pulse"></div>
+</div>
+</div>
+<!-- Bookmark & Share Action Buttons Skeleton -->
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-full bg-slate-200 animate-pulse"></div>
+<div class="w-9 h-9 rounded-full bg-slate-200 animate-pulse"></div>
+</div>
+</section>
+<!-- END: LessonSubHeader -->
+<!-- BEGIN: MainContent -->
+<!-- Scrollable Skeleton Container matching SCREEN_10 layout -->
+<main class="flex-1 px-4 py-4 space-y-4 pb-28">
+<!-- BEGIN: LessonHeroCard -->
+<!-- 2. Thẻ định danh bài học Skeleton (Lesson Hero Card) -->
+<section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 relative overflow-hidden" data-purpose="lesson-hero-skeleton">
+<!-- Top Badges skeleton (JLPT, Tag, Time) -->
+<div class="flex items-center gap-2 mb-3.5">
+<div class="h-6 w-16 rounded-full bg-slate-200 animate-pulse"></div>
+<div class="h-6 w-20 rounded-full bg-slate-200 animate-pulse"></div>
+<div class="h-6 w-20 rounded-full bg-slate-200 animate-pulse"></div>
+</div>
+<!-- Main Lesson Title Skeleton (2 lines) -->
+<div class="space-y-2 mb-4">
+<div class="h-6 w-4/5 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-6 w-1/2 rounded bg-slate-200 animate-pulse"></div>
+</div>
+<!-- Key Grammar Focus Highlight Box Skeleton -->
+<div class="flex items-center gap-2 mb-5">
+<div class="h-4 w-16 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-9 w-44 rounded-xl bg-slate-200 animate-pulse"></div>
+</div>
+<!-- Progress Section Skeleton -->
+<div class="pt-2 border-t border-slate-100">
+<div class="flex justify-between items-center mb-2">
+<div class="h-3.5 w-36 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3.5 w-14 rounded bg-slate-200 animate-pulse"></div>
+</div>
+<!-- Progress Bar Track Skeleton -->
+<div class="h-2 w-full rounded-full bg-slate-200 overflow-hidden relative">
+<div class="h-full w-2/5 rounded-full bg-slate-300 animate-pulse"></div>
+</div>
+</div>
+</section>
+<!-- END: LessonHeroCard -->
+<!-- BEGIN: LessonGoalCard -->
+<!-- 3. Khối mục tiêu bài học Skeleton -->
+<section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex gap-3.5 items-start" data-purpose="lesson-goal-skeleton">
+<!-- Red circular icon placeholder -->
+<div class="w-10 h-10 rounded-xl bg-slate-200 animate-pulse shrink-0"></div>
+<!-- Text lines placeholder -->
+<div class="flex-1 space-y-2">
+<div class="h-4 w-32 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3.5 w-full rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3.5 w-11/12 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3.5 w-3/4 rounded bg-slate-200 animate-pulse"></div>
+</div>
+</section>
+<!-- END: LessonGoalCard -->
+<!-- BEGIN: StreakBannerSkeleton -->
+<!-- Mini Streak Reward Banner Placeholder -->
+<div class="bg-white rounded-2xl p-3.5 border border-slate-100 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-slate-200 animate-pulse"></div>
+<div class="space-y-1.5">
+<div class="h-3.5 w-28 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3 w-40 rounded bg-slate-200 animate-pulse"></div>
+</div>
+</div>
+<div class="h-6 w-16 rounded-full bg-slate-200 animate-pulse"></div>
+</div>
+<!-- END: StreakBannerSkeleton -->
+<!-- BEGIN: LessonModulesList -->
+<!-- 4. Danh sách các phần nội dung bài học Skeleton (4 items) -->
+<section class="space-y-3" data-purpose="modules-list-skeleton">
+<div class="flex justify-between items-center px-1">
+<div class="h-4 w-36 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3.5 w-24 rounded bg-slate-200 animate-pulse"></div>
+</div>
+<!-- Item 1 Skeleton -->
+<div class="bg-white rounded-2xl p-3.5 border border-slate-100 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-slate-200 animate-pulse shrink-0"></div>
+<div class="space-y-1.5">
+<div class="h-3.5 w-36 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3 w-28 rounded bg-slate-200 animate-pulse"></div>
+</div>
+</div>
+<div class="h-6 w-14 rounded-full bg-slate-200 animate-pulse"></div>
+</div>
+<!-- Item 2 Skeleton (Active Module placeholder) -->
+<div class="bg-white rounded-2xl p-3.5 border border-slate-200 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-slate-200 animate-pulse shrink-0"></div>
+<div class="space-y-1.5">
+<div class="h-3.5 w-44 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3 w-32 rounded bg-slate-200 animate-pulse"></div>
+</div>
+</div>
+<div class="h-6 w-16 rounded-full bg-slate-200 animate-pulse"></div>
+</div>
+<!-- Item 3 Skeleton -->
+<div class="bg-white rounded-2xl p-3.5 border border-slate-100 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-slate-200 animate-pulse shrink-0"></div>
+<div class="space-y-1.5">
+<div class="h-3.5 w-48 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3 w-36 rounded bg-slate-200 animate-pulse"></div>
+</div>
+</div>
+<div class="w-5 h-5 rounded bg-slate-200 animate-pulse"></div>
+</div>
+<!-- Item 4 Skeleton -->
+<div class="bg-white rounded-2xl p-3.5 border border-slate-100 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-slate-200 animate-pulse shrink-0"></div>
+<div class="space-y-1.5">
+<div class="h-3.5 w-40 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3 w-32 rounded bg-slate-200 animate-pulse"></div>
+</div>
+</div>
+<div class="w-5 h-5 rounded bg-slate-200 animate-pulse"></div>
+</div>
+</section>
+<!-- END: LessonModulesList -->
+<!-- BEGIN: FocusVocabularySection -->
+<!-- 5. Khu vực từ vựng trọng tâm Skeleton -->
+<section class="space-y-3 pt-2" data-purpose="vocabulary-list-skeleton">
+<div class="flex justify-between items-center px-1">
+<div class="h-4 w-40 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3.5 w-16 rounded bg-slate-200 animate-pulse"></div>
+</div>
+<!-- Vocab Item 1 Skeleton -->
+<div class="bg-white rounded-2xl p-3.5 border border-slate-100 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-200 animate-pulse shrink-0"></div>
+<div class="space-y-1.5">
+<div class="h-4 w-28 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3 w-20 rounded bg-slate-200 animate-pulse"></div>
+</div>
+</div>
+<div class="h-8 w-16 rounded-xl bg-slate-200 animate-pulse"></div>
+</div>
+<!-- Vocab Item 2 Skeleton -->
+<div class="bg-white rounded-2xl p-3.5 border border-slate-100 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-200 animate-pulse shrink-0"></div>
+<div class="space-y-1.5">
+<div class="h-4 w-28 rounded bg-slate-200 animate-pulse"></div>
+<div class="h-3 w-20 rounded bg-slate-200 animate-pulse"></div>
+</div>
+</div>
+<div class="h-8 w-16 rounded-xl bg-slate-200 animate-pulse"></div>
+</div>
+<!-- View All Vocab Button Skeleton -->
+<div class="h-10 w-full rounded-xl bg-slate-200 animate-pulse"></div>
+</section>
+<!-- END: FocusVocabularySection -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: StickyBottomCTA -->
+<!-- 6. Khối CTA chính Skeleton (Sticky at bottom above Navigation) -->
+<aside class="fixed bottom-16 left-0 right-0 p-4 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent z-20">
+<div class="h-12 w-full rounded-2xl bg-slate-200 animate-pulse shadow-md"></div>
+</aside>
+<!-- END: StickyBottomCTA -->
+<!-- BEGIN: BottomNavigationBar -->
+<!-- 7. Bottom Navigation Bar 5 tab chuẩn RikiPath (Trạng thái chờ tải dữ liệu) -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-3 py-2 flex items-center justify-around z-30 safe-bottom">
+<!-- Tab 1: Trang chủ -->
+<div class="flex flex-col items-center justify-center gap-1 w-14 text-slate-400">
+<i class="fa-solid fa-house text-lg opacity-40"></i>
+<span class="text-[10px] font-medium text-slate-400">Trang chủ</span>
+</div>
+<!-- Tab 2: Học tập (Active Module) -->
+<div class="flex flex-col items-center justify-center gap-1 w-14 text-brand-red">
+<div class="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center">
+<i class="fa-solid fa-book-open text-base text-brand-red"></i>
+</div>
+<span class="text-[10px] font-bold text-brand-red">Học tập</span>
+</div>
+<!-- Tab 3: Luyện tập -->
+<div class="flex flex-col items-center justify-center gap-1 w-14 text-slate-400">
+<i class="fa-solid fa-circle-question text-lg opacity-40"></i>
+<span class="text-[10px] font-medium text-slate-400">Luyện tập</span>
+</div>
+<!-- Tab 4: Sổ từ -->
+<div class="flex flex-col items-center justify-center gap-1 w-14 text-slate-400">
+<i class="fa-solid fa-book-bookmark text-lg opacity-40"></i>
+<span class="text-[10px] font-medium text-slate-400">Sổ từ</span>
+</div>
+<!-- Tab 5: Cá nhân -->
+<div class="flex flex-col items-center justify-center gap-1 w-14 text-slate-400">
+<i class="fa-regular fa-user text-lg opacity-40"></i>
+<span class="text-[10px] font-medium text-slate-400">Cá nhân</span>
+</div>
+</nav>
+<!-- END: BottomNavigationBar -->
+</body></html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+JP:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-primary-fixed": "#410002", "secondary-fixed": "#ffdad6", "on-surface-variant": "#5b403d", "on-secondary-fixed-variant": "#93000d", "surface-bright": "#f8f9ff", "surface-container-high": "#dee9fc", "surface-container-low": "#eff4ff", "secondary": "#b7131a", "on-primary": "#ffffff", "on-surface": "#121c2a", "tertiary-fixed": "#ffdcc3", "on-error": "#ffffff", "surface-container-highest": "#d9e3f6", "primary-fixed-dim": "#ffb4ac", "background": "#f8f9ff", "on-primary-container": "#fffbff", "surface": "#f8f9ff", "tertiary-container": "#b15f00", "primary": "#b7131a", "surface-tint": "#bb171c", "primary-fixed": "#ffdad6", "surface-container-lowest": "#ffffff", "inverse-surface": "#27313f", "surface-variant": "#d9e3f6", "on-primary-fixed-variant": "#93000d", "on-secondary-container": "#fffbff", "tertiary-fixed-dim": "#ffb77d", "on-tertiary-fixed": "#2f1500", "on-tertiary-container": "#fffbff", "on-secondary": "#ffffff", "on-secondary-fixed": "#410002", "tertiary": "#8d4b00", "on-tertiary-fixed-variant": "#6e3900", "inverse-on-surface": "#eaf1ff", "on-tertiary": "#ffffff", "secondary-fixed-dim": "#ffb4ac", "inverse-primary": "#ffb4ac", "on-error-container": "#93000a", "outline-variant": "#e4beb9", "error-container": "#ffdad6", "primary-container": "#db322f", "secondary-container": "#db3230", "on-background": "#121c2a", "surface-dim": "#d0dbed", "outline": "#906f6c", "error": "#ba1a1a", "surface-container": "#e6eeff" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-xl": "1.5rem", "space-2xl": "2rem", "space-lg": "1.25rem", "screen-edge-padding": "1rem", "space-md": "1rem", "touch-target-min": "2.75rem", "space-xxs": "0.25rem", "card-inner-padding": "1rem", "space-sm": "0.75rem", "space-xs": "0.5rem" }, fontFamily: { "headline-md": ["Inter, 'Noto Sans JP', sans-serif"], "furigana-mobile": ["'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif"], "display-kanji-mobile": ["Inter, 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif"], "headline-sm": ["Inter, 'Noto Sans JP', sans-serif"], "title-md": ["Inter, 'Noto Sans JP', sans-serif"], "body-sm": ["Inter, 'Noto Sans JP', sans-serif"], "body-lg": ["Inter, 'Noto Sans JP', sans-serif"], "label-sm": ["Inter, sans-serif"], "title-sm": ["Inter, 'Noto Sans JP', sans-serif"], "body-md": ["Inter, 'Noto Sans JP', sans-serif"], "headline-lg": ["Inter, 'Noto Sans JP', sans-serif"], "label-md": ["Inter, sans-serif"] }, fontSize: { "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }], "furigana-mobile": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "500" }], "display-kanji-mobile": ["48px", { lineHeight: "56px", letterSpacing: "0px", fontWeight: "700" }], "headline-sm": ["20px", { lineHeight: "28px", letterSpacing: "0em", fontWeight: "600" }], "title-md": ["18px", { lineHeight: "26px", letterSpacing: "0em", fontWeight: "600" }], "body-sm": ["12px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" }], "body-lg": ["16px", { lineHeight: "26px", letterSpacing: "0em", fontWeight: "400" }], "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "700" }], "title-sm": ["16px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "600" }], "body-md": ["14px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" }], "headline-lg": ["30px", { lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "700" }], "label-md": ["13px", { lineHeight: "18px", letterSpacing: "0.02em", fontWeight: "600" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-screen-edge-padding flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-headline-sm text-headline-sm font-bold">力</div><div><span class="font-title-md text-title-md text-on-surface block leading-tight">Cá Nhân</span><span class="font-furigana-mobile text-furigana-mobile text-on-surface-variant">RikiPath JLPT</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Thông báo" class="w-touch-target-min h-touch-target-min flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[22px]">notifications</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-24 bg-surface min-h-screen"><div class="flex flex-col w-full px-screen-edge-padding pb-space-2xl">
+<!-- Sub-Header / Step Bar -->
+<div class="flex items-center justify-between py-space-sm">
+<button aria-label="Quay lại" class="w-touch-target-min h-touch-target-min flex items-center justify-start text-on-surface hover:text-primary transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back_ios_new</span>
+</button>
+<div class="text-center">
+<h1 class="font-title-md text-title-md text-on-surface">Chọn hình thức tư vấn</h1>
+<span class="font-label-sm text-label-sm text-primary">Bước 1 / 3</span>
+</div>
+<div class="w-touch-target-min flex items-center justify-end">
+<span aria-label="Trợ giúp" class="material-symbols-outlined text-outline text-[22px]">help_outline</span>
+</div>
+</div>
+<!-- Step Progress Indicator -->
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden mb-space-md">
+<div class="bg-primary h-full rounded-full transition-all duration-300 w-1/3"></div>
+</div>
+<!-- Selected Package Summary Chip -->
+<div class="flex items-center gap-space-xs bg-surface-container-lowest p-space-sm rounded-xl shadow-sm mb-space-md">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+</div>
+<div class="min-w-0 flex-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant block uppercase tracking-wider">Gói đã chọn</span>
+<p class="font-title-sm text-title-sm text-on-surface font-bold truncate">
+        Tư vấn chuyên sâu <span class="font-normal text-on-surface-variant">• 60 phút •</span> <span class="text-primary">349.000đ</span>
+</p>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] shrink-0">edit_note</span>
+</div>
+<!-- Instruction Text -->
+<div class="mb-space-md">
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+      Vui lòng chọn cách bạn muốn trao đổi cùng Chuyên gia. Bạn sẽ chọn lịch hoặc gửi câu hỏi ở bước kế tiếp.
+    </p>
+</div>
+<!-- Selectable Options Container -->
+<div aria-label="Hình thức tư vấn" class="flex flex-col gap-space-md" id="consultation-options" role="radiogroup">
+<!-- Option 1: Video Call (Default Selected) -->
+<div aria-checked="true" class="group relative bg-surface-container-lowest rounded-xl p-space-md transition-all duration-200 cursor-pointer shadow-md bg-gradient-to-br from-surface-container-lowest via-primary/5 to-surface-container-lowest" data-option="video" id="option-video" role="radio" tabindex="0">
+<!-- Popularity Badge -->
+<div class="flex justify-between items-start mb-space-xs">
+<span class="inline-flex items-center gap-1 bg-primary/10 text-primary font-label-sm text-label-sm px-2.5 py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+          Được nhiều học viên chọn nhất
+        </span>
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center transition-transform group-active:scale-95 shadow-sm" id="check-video">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+</div>
+<!-- Main Title with Icon -->
+<div class="flex items-center gap-space-sm mb-space-xs">
+<div class="w-11 h-11 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">videocam</span>
+</div>
+<div class="min-w-0">
+<h2 class="font-title-md text-title-md text-on-surface font-bold">TƯ VẤN VIDEO 1-1</h2>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Tương tác trực tiếp qua camera</span>
+</div>
+</div>
+<!-- Description -->
+<p class="font-body-md text-body-md text-on-surface mb-space-sm font-medium">
+        Trao đổi trực tiếp qua video call bảo mật cùng Chuyên gia RikiPath.
+      </p>
+<!-- Sub-details list -->
+<div class="bg-surface-container-low/70 rounded-lg p-space-sm space-y-space-xxs">
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">timer</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Thời lượng: 60 phút tương tác trực tiếp</span>
+</div>
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">screen_share</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Chia sẻ màn hình xem lại bài thi &amp; bài viết Kanji</span>
+</div>
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">calendar_month</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Yêu cầu: Chọn ngày và khung giờ rảnh của bạn ở bước sau</span>
+</div>
+</div>
+<!-- Active indicator bar -->
+<div class="absolute left-0 top-3 bottom-3 w-1.5 bg-primary rounded-r-full" id="bar-video"></div>
+</div>
+<!-- Option 2: Written Consultation (Unselected) -->
+<div aria-checked="false" class="group relative bg-surface-container-lowest rounded-xl p-space-md transition-all duration-200 cursor-pointer shadow-sm" data-option="text" id="option-text" role="radio" tabindex="0">
+<!-- Badge & Radio -->
+<div class="flex justify-between items-start mb-space-xs">
+<span class="inline-flex items-center gap-1 bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm px-2.5 py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+          Linh hoạt thời gian
+        </span>
+<div class="w-6 h-6 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center transition-transform group-active:scale-95" id="check-text">
+<span class="material-symbols-outlined text-[16px] opacity-0">check</span>
+</div>
+</div>
+<!-- Main Title with Icon -->
+<div class="flex items-center gap-space-sm mb-space-xs">
+<div class="w-11 h-11 rounded-xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">edit_note</span>
+</div>
+<div class="min-w-0">
+<h2 class="font-title-md text-title-md text-on-surface font-bold">TƯ VẤN BẰNG VĂN BẢN</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-normal">Gửi tài liệu &amp; nhận giải đáp</span>
+</div>
+</div>
+<!-- Description -->
+<p class="font-body-md text-body-md text-on-surface mb-space-sm font-medium">
+        Gửi thắc mắc, bài tập và nhận bản phân tích chi tiết từ Chuyên gia.
+      </p>
+<!-- Sub-details list -->
+<div class="bg-surface-container-low/70 rounded-lg p-space-sm space-y-space-xxs">
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px] shrink-0 mt-0.5">event_available</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Không cần sắp xếp thời gian gặp trực tiếp</span>
+</div>
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px] shrink-0 mt-0.5">mark_chat_read</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Nhận phản hồi văn bản chi tiết trong vòng 24 giờ</span>
+</div>
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px] shrink-0 mt-0.5">assignment_turned_in</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Bao gồm kế hoạch ôn tập điều chỉnh cho 2 tuần kế tiếp</span>
+</div>
+</div>
+<!-- Active indicator bar -->
+<div class="absolute left-0 top-3 bottom-3 w-1.5 bg-primary rounded-r-full hidden" id="bar-text"></div>
+</div>
+</div>
+<!-- Informative Notice Card -->
+<div class="mt-space-md p-space-sm rounded-xl bg-surface-container flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+<strong class="text-on-surface font-semibold">Lưu ý:</strong> Sau khi bấm <span class="text-primary font-bold">Tiếp tục</span>, hệ thống sẽ chuyển sang màn hình thiết lập riêng cho hình thức bạn đã chọn (Đặt lịch hẹn hoặc Soạn câu hỏi), không trộn lẫn quy trình.
+    </p>
+</div>
+<!-- Expert Guarantee Micro-badge -->
+<div class="mt-space-md flex items-center justify-center gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary">security</span>
+<span class="font-label-sm text-label-sm">Được đảm bảo bởi đội ngũ Giảng viên JLPT N1 RikiPath</span>
+</div>
+<!-- Action CTA Area -->
+<div class="mt-space-lg flex flex-col gap-space-sm pt-space-xs">
+<button class="w-full h-12 bg-primary text-on-primary rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 shadow-md active:bg-on-primary-fixed-variant transition-all" id="btn-continue" type="button">
+<span>Tiếp tục</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<button class="w-full py-space-xs text-center font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" type="button">
+      Hủy chọn
+    </button>
+</div>
+</div>
+<script>
+  (function() {
+    const cardVideo = document.getElementById('option-video');
+    const cardText = document.getElementById('option-text');
+    const checkVideo = document.getElementById('check-video');
+    const checkText = document.getElementById('check-text');
+    const barVideo = document.getElementById('bar-video');
+    const barText = document.getElementById('bar-text');
+
+    function selectOption(type) {
+      if (type === 'video') {
+        // Video active
+        cardVideo.setAttribute('aria-checked', 'true');
+        cardVideo.classList.add('shadow-md', 'bg-gradient-to-br', 'from-surface-container-lowest', 'via-primary/5', 'to-surface-container-lowest');
+        cardVideo.classList.remove('shadow-sm');
+        checkVideo.className = 'w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center transition-transform group-active:scale-95 shadow-sm';
+        checkVideo.firstElementChild.classList.remove('opacity-0');
+        barVideo.classList.remove('hidden');
+
+        // Text inactive
+        cardText.setAttribute('aria-checked', 'false');
+        cardText.classList.remove('shadow-md', 'bg-gradient-to-br', 'from-surface-container-lowest', 'via-primary/5', 'to-surface-container-lowest');
+        cardText.classList.add('shadow-sm');
+        checkText.className = 'w-6 h-6 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center transition-transform group-active:scale-95';
+        checkText.firstElementChild.classList.add('opacity-0');
+        barText.classList.add('hidden');
+      } else {
+        // Text active
+        cardText.setAttribute('aria-checked', 'true');
+        cardText.classList.add('shadow-md', 'bg-gradient-to-br', 'from-surface-container-lowest', 'via-primary/5', 'to-surface-container-lowest');
+        cardText.classList.remove('shadow-sm');
+        checkText.className = 'w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center transition-transform group-active:scale-95 shadow-sm';
+        checkText.firstElementChild.classList.remove('opacity-0');
+        barText.classList.remove('hidden');
+
+        // Video inactive
+        cardVideo.setAttribute('aria-checked', 'false');
+        cardVideo.classList.remove('shadow-md', 'bg-gradient-to-br', 'from-surface-container-lowest', 'via-primary/5', 'to-surface-container-lowest');
+        cardVideo.classList.add('shadow-sm');
+        checkVideo.className = 'w-6 h-6 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center transition-transform group-active:scale-95';
+        checkVideo.firstElementChild.classList.add('opacity-0');
+        barVideo.classList.add('hidden');
+      }
+    }
+
+    if (cardVideo && cardText) {
+      cardVideo.addEventListener('click', () => selectOption('video'));
+      cardText.addEventListener('click', () => selectOption('text'));
+      cardVideo.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') selectOption('video'); });
+      cardText.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') selectOption('text'); });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(18,28,42,0.06)]" data-active-classes="text-primary font-bold"><div class="flex justify-around items-center h-16 px-space-xxs"><a class="flex flex-col items-center justify-center w-touch-target-min h-touch-target-min text-on-surface-variant hover:text-primary transition-colors group" data-path="trang-chu" href="#"><span class="material-symbols-outlined text-[24px] mb-0.5">home</span><span class="font-label-sm text-label-sm tracking-tight">Trang chủ</span></a><a class="flex flex-col items-center justify-center w-touch-target-min h-touch-target-min text-on-surface-variant hover:text-primary transition-colors group" data-path="hoc-tap" href="#"><span class="material-symbols-outlined text-[24px] mb-0.5">menu_book</span><span class="font-label-sm text-label-sm tracking-tight">Học tập</span></a><a class="flex flex-col items-center justify-center w-touch-target-min h-touch-target-min text-on-surface-variant hover:text-primary transition-colors group" data-path="luyen-tap" href="#"><span class="material-symbols-outlined text-[24px] mb-0.5">quiz</span><span class="font-label-sm text-label-sm tracking-tight">Luyện tập</span></a><a class="flex flex-col items-center justify-center w-touch-target-min h-touch-target-min text-on-surface-variant hover:text-primary transition-colors group" data-path="so-tu" href="#"><span class="material-symbols-outlined text-[24px] mb-0.5">bookmark</span><span class="font-label-sm text-label-sm tracking-tight">Sổ từ</span></a><a class="flex flex-col items-center justify-center w-touch-target-min h-touch-target-min text-on-surface-variant hover:text-primary transition-colors group" data-path="ca-nhan" href="#"><span class="material-symbols-outlined text-[24px] mb-0.5">account_circle</span><span class="font-label-sm text-label-sm tracking-tight">Cá nhân</span></a></div></nav></body></html>
