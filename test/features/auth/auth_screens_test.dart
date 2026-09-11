@@ -58,13 +58,17 @@ void main() {
       await _pumpAuthRoute(tester, AppRoutes.login, _FakeAuthRepository());
 
       expect(
-        tester.widget<TextField>(_textField('login_password_field')).obscureText,
+        tester
+            .widget<TextField>(_textField('login_password_field'))
+            .obscureText,
         isTrue,
       );
       await tester.tap(find.byTooltip('Hiện mật khẩu'));
       await tester.pump();
       expect(
-        tester.widget<TextField>(_textField('login_password_field')).obscureText,
+        tester
+            .widget<TextField>(_textField('login_password_field'))
+            .obscureText,
         isFalse,
       );
     });
@@ -135,7 +139,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Không thể đăng nhập'), findsOneWidget);
-      expect(find.textContaining('Email hoặc mật khẩu không đúng'), findsOneWidget);
+      expect(
+        find.textContaining('Email hoặc mật khẩu không đúng'),
+        findsOneWidget,
+      );
     });
   });
 
@@ -201,9 +208,11 @@ void main() {
 
       expect(find.text('Đang tạo tài khoản...'), findsOneWidget);
       expect(
-        tester.widget<RikiPrimaryButton>(
-          find.byKey(const Key('register_submit_button')),
-        ).isLoading,
+        tester
+            .widget<RikiPrimaryButton>(
+              find.byKey(const Key('register_submit_button')),
+            )
+            .isLoading,
         isTrue,
       );
       expect(repository.registerCalls, 1);
@@ -307,7 +316,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Chưa thể gửi yêu cầu'), findsOneWidget);
-      expect(find.textContaining('chưa được kết nối với máy chủ'), findsOneWidget);
+      expect(
+        find.textContaining('chưa được kết nối với máy chủ'),
+        findsOneWidget,
+      );
     });
   });
 }
@@ -330,14 +342,12 @@ class _FakeAuthRepository implements AuthRepository {
     this.loginCompleter,
     this.registerCompleter,
     this.loginError,
-    this.registerError,
     this.passwordResetError,
   });
 
   final Completer<LoginResponseDto>? loginCompleter;
   final Completer<RegisterResponseDto>? registerCompleter;
   final Object? loginError;
-  final Object? registerError;
   final Object? passwordResetError;
 
   int loginCalls = 0;
@@ -357,7 +367,6 @@ class _FakeAuthRepository implements AuthRepository {
   @override
   Future<RegisterResponseDto> register(RegisterRequestDto request) {
     registerCalls += 1;
-    if (registerError != null) return Future.error(registerError!);
     return registerCompleter?.future ?? Future.value(_registerResponse);
   }
 
@@ -391,10 +400,7 @@ Future<GoRouter> _pumpAuthRoute(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [authRepositoryProvider.overrideWithValue(repository)],
-      child: MaterialApp.router(
-        theme: AppTheme.light,
-        routerConfig: router,
-      ),
+      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pump();

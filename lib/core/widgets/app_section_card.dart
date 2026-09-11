@@ -37,11 +37,11 @@ class AppSectionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (trailing != null) trailing!,
+              ?trailing,
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          child,
+          Material(type: MaterialType.transparency, child: child),
         ],
       ),
     );

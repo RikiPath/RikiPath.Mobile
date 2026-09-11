@@ -47,21 +47,33 @@ void main() {
 
     expect(error, isA<ValidationError>());
     expect(error.message, 'Validation failed.');
+    expect(error.statusCode, 400);
     expect(error.details, const ['Email is required.']);
+  });
+
+  test('response transform timeout maps to a processing error', () {
+    const mapper = ApiErrorMapper();
+    final request = RequestOptions(path: '/api/large-response');
+    final exception = DioException(
+      requestOptions: request,
+      type: DioExceptionType.transformTimeout,
+    );
+
+    final error = mapper.fromDioException(exception);
+
+    expect(error, isA<UnknownError>());
+    expect(error.message, 'The response took too long to process.');
   });
 
   test('failed 200 envelope uses its backend status code', () {
     const mapper = ApiErrorMapper();
 
-    final error = mapper.fromEnvelopeFailure(
-      const <String, Object?>{
-        'statusCode': 401,
-        'isSuccess': false,
-        'errorMessage': 'Unauthorized.',
-        'errors': <String>[],
-      },
-      httpStatusCode: 200,
-    );
+    final error = mapper.fromEnvelopeFailure(const <String, Object?>{
+      'statusCode': 401,
+      'isSuccess': false,
+      'errorMessage': 'Unauthorized.',
+      'errors': <String>[],
+    }, httpStatusCode: 200);
 
     expect(error, isA<UnauthorizedError>());
     expect(error?.message, 'Unauthorized.');

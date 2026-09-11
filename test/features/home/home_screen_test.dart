@@ -52,10 +52,7 @@ void main() {
     expect(find.text('Ngày 1'), findsOneWidget);
     expect(find.text('Tổng quan JLPT N4 & Phương pháp học'), findsOneWidget);
     expect(find.text('Lộ trình học tập cá nhân hóa'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Thiết lập ban đầu'),
-      300,
-    );
+    await tester.scrollUntilVisible(find.text('Thiết lập ban đầu'), 300);
     expect(find.text('Thiết lập ban đầu'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Làm quen với công cụ học tập'),
@@ -107,9 +104,7 @@ void main() {
     expect(navigation.selectedIndex, 1);
   });
 
-  testWidgets('mock-test shortcut selects the Practice branch', (
-    tester,
-  ) async {
+  testWidgets('mock-test shortcut selects the Practice branch', (tester) async {
     await _pumpHome(tester);
     await tester.pumpAndSettle();
 
@@ -117,6 +112,11 @@ void main() {
       const ValueKey<String>('home_practice_shortcut'),
     );
     await tester.scrollUntilVisible(shortcut, 300);
+    await tester.drag(
+      find.byKey(const ValueKey<String>('home_success_view')),
+      const Offset(0, -160),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(shortcut);
     await tester.pumpAndSettle();
 
@@ -168,13 +168,8 @@ Future<GoRouter> _pumpHome(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [
-        homeRepositoryProvider.overrideWithValue(repository),
-      ],
-      child: MaterialApp.router(
-        theme: AppTheme.light,
-        routerConfig: router,
-      ),
+      overrides: [homeRepositoryProvider.overrideWithValue(repository)],
+      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );
   return router;

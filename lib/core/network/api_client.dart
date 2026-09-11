@@ -52,11 +52,7 @@ final _dioProvider = Provider<Dio>((ref) {
 });
 
 class ApiClient {
-  ApiClient({
-    required Dio dio,
-    required ApiErrorMapper errorMapper,
-  })  : _dio = dio,
-        _errorMapper = errorMapper;
+  ApiClient({required this._dio, required this._errorMapper});
 
   final Dio _dio;
   final ApiErrorMapper _errorMapper;

@@ -97,8 +97,8 @@ class RikiTextField extends StatelessWidget {
               fillColor: isProcessing
                   ? AppColors.inputProcessing
                   : hasError
-                      ? AppColors.errorBackground
-                      : AppColors.input,
+                  ? AppColors.errorBackground
+                  : AppColors.input,
               error: hasError ? _ValidationMessage(errorText!) : null,
             ),
           ),
@@ -114,13 +114,9 @@ class RikiTextField extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const ExcludeSemantics(
-          child: Icon(
-            Icons.error,
-            size: 18,
-            color: AppColors.error,
-          ),
+          child: Icon(Icons.error, size: 18, color: AppColors.error),
         ),
-        if (suffixIcon != null) suffixIcon!,
+        ?suffixIcon,
       ],
     );
   }
@@ -206,9 +202,7 @@ class _RikiPasswordFieldState extends State<RikiPasswordField> {
             : null,
         tooltip: _obscured ? 'Hiện mật khẩu' : 'Ẩn mật khẩu',
         icon: Icon(
-          _obscured
-              ? Icons.visibility_outlined
-              : Icons.visibility_off_outlined,
+          _obscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
           size: 20,
         ),
       ),
@@ -239,9 +233,7 @@ class _ValidationMessage extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.space1),
-            Expanded(
-              child: Text(message, style: AppTypography.validationText),
-            ),
+            Expanded(child: Text(message, style: AppTypography.validationText)),
           ],
         ),
       ),
