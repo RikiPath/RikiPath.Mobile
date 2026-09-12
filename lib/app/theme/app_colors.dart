@@ -60,6 +60,11 @@ abstract final class AppColors {
   static const Color learnerTertiary = Color(0xFF8D4B00);
   static const Color learnerTertiaryBackground = Color(0xFFFFDCC3);
 
+  // Skill accents established by the approved JLPT progress reference.
+  static const Color skillGrammar = Color(0xFFD97706);
+  static const Color skillListening = Color(0xFF9333EA);
+  static const Color skillListeningBackground = Color(0xFFFAF5FF);
+
   /// Compatibility alias for pre-design-system frontend code.
   static const Color danger = errorText;
 }

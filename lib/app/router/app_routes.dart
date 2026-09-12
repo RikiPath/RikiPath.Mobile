@@ -8,6 +8,10 @@ abstract final class AppRoutes {
 
   static const String home = '/home';
   static const String learn = '/learn';
+  static const String learnRoadmapSegment = 'roadmap';
+  static const String learnProgressSegment = 'progress';
+  static const String learnRoadmap = '$learn/$learnRoadmapSegment';
+  static const String learnProgress = '$learn/$learnProgressSegment';
   static const String practice = '/practice';
   static const String notebook = '/notebook';
   static const String profile = '/profile';

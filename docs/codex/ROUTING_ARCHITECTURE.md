@@ -1,6 +1,6 @@
 # RikiPath Routing Architecture
 
-Reviewed on: 2026-09-11 (Asia/Bangkok)
+Reviewed on: 2026-09-12 (Asia/Bangkok)
 
 ## Router setup
 
@@ -19,6 +19,8 @@ The router does not currently implement authentication redirects or an onboardin
 | `/onboarding` | `OnboardingScreen` | None |
 | `/home` | `HomeScreen` | Learner shell, branch 0 |
 | `/learn` | `LearnScreen` | Learner shell, branch 1 |
+| `/learn/roadmap` | `LearningRoadmapScreen` | Learner shell, branch 1 |
+| `/learn/progress` | `JlptProgressScreen` | Learner shell, branch 1 |
 | `/practice` | `PracticeScreen` | Learner shell, branch 2 |
 | `/notebook` | `NotebookScreen` | Learner shell, branch 3 |
 | `/profile` | `ProfileScreen` | Learner shell, branch 4 |
@@ -37,6 +39,8 @@ The five learner destinations are branches of `StatefulShellRoute.indexedStack`.
 
 `StatefulNavigationShell.goBranch()` switches tabs and retains each branch widget tree. Selecting the active destination returns that branch to its initial location.
 
+The C9 learning routes are children of `/learn` in branch 1. Navigation from Learning Home to the roadmap and progress screens therefore preserves both the learner shell and the selected **Học tập** destination. Back navigation returns through the Learning stack; a directly opened nested route falls back to the appropriate Learning parent.
+
 `RikiBottomNavigationBar` is presentation-only: it receives the shell's current index and reports a destination index. It does not know route strings, instantiate feature screens, or own navigation state.
 
 Splash, authentication, and onboarding routes sit outside the stateful shell and therefore do not show bottom navigation.
@@ -50,6 +54,8 @@ Splash, authentication, and onboarding routes sit outside the stateful shell and
 - The first onboarding step leaves for login when there is no previous route; later onboarding back actions move to the preceding internal step and preserve controller state.
 - The onboarding completion action goes to `/home`.
 - Home's learning CTAs select `/learn`, its notebook shortcut selects `/notebook`, its practice shortcut selects `/practice`, and its avatar selects `/profile`; these are existing shell branches, not new deep routes.
+- Learning Home opens `/learn/roadmap`; the roadmap result action opens `/learn/progress`; the progress screen links back to `/learn/roadmap`.
+- C9 does not register Lesson Detail or video routes. Lesson CTAs remain deferred until C10 can use a confirmed lesson identifier and contract.
 
 The `/home` transition means only that the local onboarding flow is finished. It does not prove that a server-side completion flag or profile update has been stored.
 

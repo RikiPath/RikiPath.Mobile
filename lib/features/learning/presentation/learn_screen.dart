@@ -1,144 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
-import 'package:rikipath_mobile/core/widgets/app_section_card.dart';
-import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_header.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_home_view.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_state_views.dart';
 
-class LearnScreen extends StatelessWidget {
+class LearnScreen extends ConsumerWidget {
   const LearnScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final learningState = ref.watch(learningControllerProvider);
+    final snapshot = learningState.asData?.value;
+
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(title: const Text('Học tập')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
-          AppSectionCard(
-            title: 'Lộ trình JLPT',
-            subtitle: 'N5 → N4 → N3',
-            child: Column(
-              children: [
-                _RoadmapTile(
-                  level: JlptLevel.n3,
-                  progress: 0.68,
-                  status: 'Đang học',
-                  onTap: () {},
-                ),
-                const SizedBox(height: 10),
-                _RoadmapTile(
-                  level: JlptLevel.n4,
-                  progress: 1,
-                  status: 'Hoàn thành',
-                  onTap: () {},
-                ),
-                const SizedBox(height: 10),
-                _RoadmapTile(
-                  level: JlptLevel.n5,
-                  progress: 1,
-                  status: 'Hoàn thành',
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          AppSectionCard(
-            title: 'Thư viện kiến thức',
-            child: Column(
-              children: [
-                _LibraryTile(
-                  icon: Icons.translate,
-                  title: 'Từ vựng',
-                  subtitle: 'Tìm kiếm, ví dụ, audio và lưu vào notebook',
-                  onTap: () {},
-                ),
-                _LibraryTile(
-                  icon: Icons.gesture,
-                  title: 'Kanji',
-                  subtitle: 'Onyomi, Kunyomi, stroke order, từ ghép',
-                  onTap: () {},
-                ),
-                _LibraryTile(
-                  icon: Icons.schema_outlined,
-                  title: 'Ngữ pháp',
-                  subtitle: 'Cấu trúc, cách dùng và ví dụ',
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
-        ],
+      appBar: LearningHeader.root(
+        level: snapshot?.jlptTarget,
+        streakDays: snapshot?.streakDays,
+        hasUnreadNotifications: snapshot?.hasUnreadNotifications ?? false,
+        initials: snapshot?.initials,
+        onProfilePressed: () => context.go(AppRoutes.profile),
       ),
-    );
-  }
-}
-
-class _RoadmapTile extends StatelessWidget {
-  const _RoadmapTile({
-    required this.level,
-    required this.progress,
-    required this.status,
-    required this.onTap,
-  });
-
-  final JlptLevel level;
-  final double progress;
-  final String status;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            JlptBadge(level),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(status, style: const TextStyle(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 6),
-                  LinearProgressIndicator(value: progress),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right),
-          ],
+      body: SafeArea(
+        top: false,
+        child: learningState.when(
+          loading: () => const LearningLoadingView(),
+          error: (_, _) => LearningErrorView(
+            onRetry: ref.read(learningControllerProvider.notifier).retry,
+          ),
+          data: (data) => LearningHomeView(
+            snapshot: data,
+            onOpenRoadmap: () => context.push(AppRoutes.learnRoadmap),
+          ),
         ),
       ),
-    );
-  }
-}
-
-class _LibraryTile extends StatelessWidget {
-  const _LibraryTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-      subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
     );
   }
 }

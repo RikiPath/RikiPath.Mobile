@@ -8,7 +8,9 @@ import 'package:rikipath_mobile/features/auth/presentation/login_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/register_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/splash_screen.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
+import 'package:rikipath_mobile/features/learning/presentation/jlpt_progress_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
+import 'package:rikipath_mobile/features/learning/presentation/learning_roadmap_screen.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
@@ -62,6 +64,16 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.splash}) {
               GoRoute(
                 path: AppRoutes.learn,
                 builder: (context, state) => const LearnScreen(),
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.learnRoadmapSegment,
+                    builder: (context, state) => const LearningRoadmapScreen(),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.learnProgressSegment,
+                    builder: (context, state) => const JlptProgressScreen(),
+                  ),
+                ],
               ),
             ],
           ),
