@@ -6,6 +6,7 @@ import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/forgot_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/login_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/register_screen.dart';
@@ -16,6 +17,8 @@ import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dart';
+
+import '../../support/test_auth_session.dart';
 
 void main() {
   test('route constants expose the supported navigation paths', () {
@@ -31,27 +34,36 @@ void main() {
     expect(AppRoutes.profile, '/profile');
   });
 
-  testWidgets('splash is outside the tab shell and continues to login', (
+  testWidgets('unknown session stays on splash until restoration completes', (
     tester,
   ) async {
-    await _pumpRouter(tester, initialLocation: AppRoutes.splash);
+    final session = createTestAuthSession(
+      initialState: AuthSessionState.unknown,
+    );
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.splash,
+      authSession: session,
+    );
 
     expect(find.byType(SplashScreen), findsOneWidget);
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
 
-    await tester.pump(const Duration(milliseconds: 700));
+    await session.restore();
     await tester.pumpAndSettle();
 
     expect(find.byType(LoginScreen), findsOneWidget);
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
   });
 
-  testWidgets('auth and onboarding routes never show bottom navigation', (
-    tester,
-  ) async {
+  testWidgets('auth routes remain reachable while logged out', (tester) async {
+    final session = createTestAuthSession(
+      initialState: AuthSessionState.unauthenticated,
+    );
     final router = await _pumpRouter(
       tester,
       initialLocation: AppRoutes.login,
+      authSession: session,
     );
 
     expect(find.byType(LoginScreen), findsOneWidget);
@@ -67,6 +79,38 @@ void main() {
     expect(find.byType(ForgotPasswordScreen), findsOneWidget);
     expect(find.text('Quên mật khẩu?'), findsOneWidget);
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
+  });
+
+  testWidgets('unauthenticated learner route redirects to login', (
+    tester,
+  ) async {
+    final session = createTestAuthSession(
+      initialState: AuthSessionState.unauthenticated,
+    );
+
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.home,
+      authSession: session,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.byType(RikiBottomNavigationBar), findsNothing);
+  });
+
+  testWidgets('authenticated users can access learner and onboarding routes', (
+    tester,
+  ) async {
+    final session = createTestAuthSession();
+    final router = await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.home,
+      authSession: session,
+    );
+
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(RikiBottomNavigationBar), findsOneWidget);
 
     router.go(AppRoutes.onboarding);
     await tester.pumpAndSettle();
@@ -74,13 +118,45 @@ void main() {
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
   });
 
+  testWidgets('authenticated auth route redirects once to learner home', (
+    tester,
+  ) async {
+    await _pumpRouter(tester, initialLocation: AppRoutes.login);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(RikiBottomNavigationBar), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  test('stable auth destinations do not redirect and cannot loop', () {
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.unknown,
+        matchedLocation: AppRoutes.splash,
+      ),
+      isNull,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.unauthenticated,
+        matchedLocation: AppRoutes.login,
+      ),
+      isNull,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        matchedLocation: AppRoutes.home,
+      ),
+      isNull,
+    );
+  });
+
   testWidgets('each main destination renders inside the indexed tab shell', (
     tester,
   ) async {
-    final router = await _pumpRouter(
-      tester,
-      initialLocation: AppRoutes.home,
-    );
+    final router = await _pumpRouter(tester, initialLocation: AppRoutes.home);
     const destinations = <({String path, Type screen, int index})>[
       (path: AppRoutes.home, screen: HomeScreen, index: 0),
       (path: AppRoutes.learn, screen: LearnScreen, index: 1),
@@ -133,16 +209,20 @@ void main() {
 Future<GoRouter> _pumpRouter(
   WidgetTester tester, {
   required String initialLocation,
+  AuthSessionController? authSession,
 }) async {
-  final router = createAppRouter(initialLocation: initialLocation);
+  final session = authSession ?? createTestAuthSession();
+  final router = createAppRouter(
+    authSession: session,
+    initialLocation: initialLocation,
+  );
+  addTearDown(session.dispose);
   addTearDown(router.dispose);
 
   await tester.pumpWidget(
     ProviderScope(
-      child: MaterialApp.router(
-        theme: AppTheme.light,
-        routerConfig: router,
-      ),
+      overrides: [authSessionControllerProvider.overrideWithValue(session)],
+      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pump();

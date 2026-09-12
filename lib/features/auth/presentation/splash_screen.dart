@@ -1,24 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:rikipath_mobile/app/router/app_routes.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Timer(const Duration(milliseconds: 700), () {
-      if (mounted) context.go(AppRoutes.login);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,12 +18,14 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 12),
             Text(
               'RikiPath',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             const Text('Học tiếng Nhật • Luyện thi JLPT'),
+            const SizedBox(height: 20),
+            const CircularProgressIndicator(),
           ],
         ),
       ),

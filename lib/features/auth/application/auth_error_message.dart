@@ -8,6 +8,9 @@ String authErrorMessage(Object error, AuthOperation operation) {
     return 'Tính năng lấy lại mật khẩu chưa được kết nối với máy chủ. '
         'Vui lòng liên hệ trung tâm trợ giúp.';
   }
+  if (error is UnsupportedUserRoleException) {
+    return 'Ứng dụng di động hiện chỉ hỗ trợ tài khoản học viên.';
+  }
   if (error is NetworkError) {
     return 'Không thể kết nối tới RikiPath. Vui lòng kiểm tra mạng và thử lại.';
   }

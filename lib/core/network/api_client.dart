@@ -10,10 +10,7 @@ final _apiErrorMapperProvider = Provider<ApiErrorMapper>((ref) {
 });
 
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(
-    dio: ref.watch(_dioProvider),
-    errorMapper: ref.watch(_apiErrorMapperProvider),
-  );
+  return ApiClient(ref.watch(_dioProvider), ref.watch(_apiErrorMapperProvider));
 });
 
 final _dioProvider = Provider<Dio>((ref) {
@@ -52,7 +49,7 @@ final _dioProvider = Provider<Dio>((ref) {
 });
 
 class ApiClient {
-  ApiClient({required this._dio, required this._errorMapper});
+  ApiClient(this._dio, this._errorMapper);
 
   final Dio _dio;
   final ApiErrorMapper _errorMapper;

@@ -6,11 +6,13 @@ class LearningRoadmapView extends StatelessWidget {
   const LearningRoadmapView({
     required this.snapshot,
     required this.onOpenProgress,
+    required this.onContinueLesson,
     super.key,
   });
 
   final LearningSnapshot snapshot;
   final VoidCallback onOpenProgress;
+  final VoidCallback onContinueLesson;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,7 @@ class LearningRoadmapView extends StatelessWidget {
                   _RoadmapChapterCard(
                     chapter: snapshot.chapters[index],
                     onOpenProgress: onOpenProgress,
+                    onContinueLesson: onContinueLesson,
                   ),
                   if (index != snapshot.chapters.length - 1)
                     const SizedBox(height: AppSpacing.space4),
@@ -171,10 +174,12 @@ class _RoadmapChapterCard extends StatelessWidget {
   const _RoadmapChapterCard({
     required this.chapter,
     required this.onOpenProgress,
+    required this.onContinueLesson,
   });
 
   final RoadmapChapter chapter;
   final VoidCallback onOpenProgress;
+  final VoidCallback onContinueLesson;
 
   @override
   Widget build(BuildContext context) {
@@ -222,18 +227,14 @@ class _RoadmapChapterCard extends StatelessWidget {
           ],
           if (chapter.status == RoadmapChapterStatus.current) ...[
             const SizedBox(height: AppSpacing.space3),
-            Semantics(
-              enabled: false,
-              hint: 'Chi tiết bài học được triển khai trong C10',
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  key: const ValueKey<String>('roadmap_continue_lesson_button'),
-                  onPressed: null,
-                  label: const Text('Học tiếp: Bài 19 – 〜たり〜たりする'),
-                  iconAlignment: IconAlignment.end,
-                  icon: const Icon(Icons.arrow_forward, size: 18),
-                ),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                key: const ValueKey<String>('roadmap_continue_lesson_button'),
+                onPressed: onContinueLesson,
+                label: const Text('Học tiếp: Bài 19 – 〜たり〜たりする'),
+                iconAlignment: IconAlignment.end,
+                icon: const Icon(Icons.arrow_forward, size: 18),
               ),
             ),
           ],

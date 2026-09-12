@@ -1,6 +1,6 @@
 # RikiPath Frontend API Contract Reference
 
-Verified on: 2026-09-11 (Asia/Bangkok)
+Verified on: 2026-09-12 (Asia/Bangkok)
 
 ## Contract status and provenance
 
@@ -9,6 +9,7 @@ Verified on: 2026-09-11 (Asia/Bangkok)
 - **OpenAPI document:** `http://140.245.43.97/swagger/v1/swagger.json`
 - **OpenAPI identity:** OpenAPI 3.0.1, title `RikiPath API`, version `v1`.
 - **Live inventory:** 66 paths, 69 operations, 33 component schemas.
+- **Fetched snapshot:** 2026-09-12T10:21:35+07:00; SHA-256 `a2079ec3f6b5ace0d6bb1b82a3ec697cfc25b6d762c46c2afd42c4a088c53de4`.
 - **Backend source used for verification:** read-only `RikiPath.Backend/` revision `959cad6567ba0101e7fed00c3384948f51c0f47d`.
 - **Swagger JSON endpoint derivation:** `RikiPath.WebApi/Program.cs` registers document `v1` and configures Swagger UI with `/swagger/v1/swagger.json`.
 
@@ -177,7 +178,7 @@ Lists and entries are not paginated in the current contract.
 | `GET /api/Review/daily-queue` | Bearer — Learner | None | `ApiResponse<DailyReviewQueueResponse>` |
 | `POST /api/Review/submit-result` | Bearer — Learner | `SubmitReviewRequest` | `ApiResponse<SubmitReviewResultResponse>` |
 
-`quality` is an integer with the only published constraint `1..5`. The endpoint does not accept the domain `ReviewRating` enum (`Again`, `Hard`, `Good`, `Easy`), and no numeric-to-label mapping is published.
+Live Swagger publishes `quality` as an integer constrained to `1..5`; it does not publish labels for those values. The supplied backend source maps the values as `1` or `2` → `Again`, `3` → `Hard`, `4` → `Good`, and `5` → `Easy`. This label mapping is source-backed behavior, not a live OpenAPI guarantee. The request still accepts the numeric `quality`, not the domain `ReviewRating` enum itself.
 
 **NOT YET AVAILABLE:** batch review submission, client event/idempotency key, offline reconciliation, or review-history endpoint.
 

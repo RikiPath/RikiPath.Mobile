@@ -17,6 +17,8 @@ import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
 
+import '../../support/test_auth_session.dart';
+
 void main() {
   testWidgets('home route renders HomeScreen in the learner shell', (
     tester,
@@ -163,7 +165,12 @@ Future<GoRouter> _pumpHome(
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  final router = createAppRouter(initialLocation: AppRoutes.home);
+  final session = createTestAuthSession();
+  final router = createAppRouter(
+    authSession: session,
+    initialLocation: AppRoutes.home,
+  );
+  addTearDown(session.dispose);
   addTearDown(router.dispose);
 
   await tester.pumpWidget(

@@ -1,10 +1,10 @@
 # RikiPath Frontend API Gaps
 
-Reviewed on: 2026-09-11 (Asia/Bangkok)
+Reviewed on: 2026-09-12 (Asia/Bangkok)
 
 This gap register compares the live OpenAPI document at `http://140.245.43.97/swagger/v1/swagger.json` with the supplied read-only backend source at revision `959cad6567ba0101e7fed00c3384948f51c0f47d` and the learner-mobile product scope.
 
-Live Swagger was accessible during this phase. Routes and request schemas were verified against it. The deployed document contains 69 operations but publishes zero typed JSON response schemas, so source-backed response mappings remain unverified at the live schema level.
+Live Swagger was accessible during this phase. Routes and request schemas were verified against it. The deployed document contains 69 operations but publishes zero typed JSON response schemas, so source-backed response mappings remain unverified at the live schema level. The snapshot fetched at 2026-09-12T10:21:35+07:00 has SHA-256 `a2079ec3f6b5ace0d6bb1b82a3ec697cfc25b6d762c46c2afd42c4a088c53de4`.
 
 ## Highest-priority blockers
 
@@ -16,6 +16,16 @@ Live Swagger was accessible during this phase. Routes and request schemas were v
 6. **Offline notebook/SRS sync cannot be connected.** No version, tombstone, idempotency, client event, batch review, or reconciliation contract exists.
 7. **Exam autosave/resume cannot be connected.** Only start and final whole-attempt submission exist.
 8. **Consultation discovery is missing.** Booking/payment requests require package and availability IDs that no learner endpoint exposes.
+
+C10.5 frontend guardrails do not change these backend facts:
+
+- `PUT /api/Auth/update-email/{userId}` and
+  `POST /api/Auth/change-password/{userId}` remain intentionally unimplemented
+  and unexposed in the mobile app until backend authorization is enforced.
+- No response DTO was generated from the untyped live Swagger responses.
+  Existing Auth response parsing remains explicitly source-backed.
+- Local sign-out only clears secure client state. It does not claim token
+  revocation because no logout/revocation endpoint exists.
 
 ## Missing endpoints by product area
 
@@ -55,6 +65,26 @@ Live Swagger was accessible during this phase. Routes and request schemas were v
 - Non-video completion/progress mutation — **NOT YET AVAILABLE**.
 - Learning history/continue-learning aggregation — **NOT YET AVAILABLE**.
 
+#### C10 lesson integration gaps
+
+The following items were confirmed against `LessonProgressController`,
+`LessonProgressService`, `ILessonProgressService`, `LessonDetailResponse`,
+`UpdatePlaybackPositionRequest`, `Lesson`, and `LessonProgress` in the supplied
+read-only backend source.
+
+| Feature | Current backend capability | Frontend requirement | Confirmed missing or ambiguous contract | Priority | Blocks integration |
+|---|---|---|---|---|---|
+| Lesson discovery | Detail is readable only by a known numeric `lessonId` | Resolve a roadmap/course lesson to its numeric ID | No catalog, course lessons, roadmap nodes, or lesson-list route | P0 | Yes |
+| Lesson detail composition | Detail returns title, description-backed `content`, media URLs, order, and progress | JLPT/category/chapter metadata, objective, structured parts, examples, vocabulary preview, related grammar, notes, and mastery content | Required Stitch composition fields are absent; `attachmentUrl` is always null in the inspected service mapping | P0 | Yes |
+| Resume and duration | Playback update accepts `positionSeconds` and `durationSeconds`; detail returns resume position and percent | A trusted duration and consistent validation before progress sync | Detail does not return duration; controller comment says duration is optional, source service rejects `durationSeconds <= 0`, and Swagger publishes no validation | P0 | Yes |
+| Lesson completion | Source service marks playback complete when calculated progress is at least 95% | Explicit completion semantics for video and non-video lesson content | No separate completion endpoint and no non-video completion mutation | P1 | Yes |
+| Locked prerequisite and next lesson | No matching fields in lesson detail | Prerequisite status, unlock reason, previous/next lesson identity | No prerequisite, lock, or lesson-link contract | P1 | Yes |
+| Media delivery | Detail can return nullable `videoUrl` | Safe playback plus recovery for expired URLs | URL lifetime, signing, expiry, refresh, and offline policy are undocumented | P1 | Yes |
+
+C10 therefore uses local route keys, typed fixtures, and a media-driver
+abstraction. It makes no lesson API call and does not present fixture keys as
+backend IDs.
+
 ### Vocabulary, Kanji, and Grammar
 
 - Search and detail exist for all three banks.
@@ -74,7 +104,7 @@ Live Swagger was accessible during this phase. Routes and request schemas were v
 - Batch result upload — **NOT YET AVAILABLE**.
 - Offline event ID/idempotency key — **NOT YET AVAILABLE**.
 - Review history — **NOT YET AVAILABLE**.
-- A label mapping for integer `quality` values 1 through 5 — **NOT YET AVAILABLE**.
+- A live OpenAPI label contract for integer `quality` values 1 through 5 — **NOT YET AVAILABLE**. The supplied source maps `1..2` to `Again`, `3` to `Hard`, `4` to `Good`, and `5` to `Easy`; treat this as source-backed behavior until Swagger publishes it.
 
 ### Mock Tests, sessions, answers, and results
 
@@ -133,7 +163,7 @@ Source contains `SubmitEssayRequest`/`SubmitEssayResponse` types, but no live or
 | Request-body requirement | Every request body is optional | Controller actions expect non-null DTO parameters; some DTO fields carry `[Required]` | A generated client may allow body omission that runtime rejects or mishandles |
 | Email send request | `toEmail` and `htmlContent` are optional/nullable | Controller XML comment calls both required, but record has no validation annotations | Validation behavior is ambiguous |
 | File delete query | `storedFileName` is optional in live Swagger | Controller XML comment calls it required; no annotation/check is present | Client cannot rely on published validation |
-| Review rating | Request uses integer `quality` constrained to 1..5 | Domain also defines `ReviewRating` as `Again`, `Hard`, `Good`, `Easy` | UI label-to-value mapping is unknown; do not reuse the 0..3 draft mapping |
+| Review rating | Request uses integer `quality` constrained to 1..5 but publishes no labels | Service maps 1..2=`Again`, 3=`Hard`, 4=`Good`, 5=`Easy` before storing the domain enum | Do not reuse the frontend Drift draft's 0..3 values; keep the source-only mapping isolated until live OpenAPI publishes it |
 
 ## Ambiguous DTO fields and behavior
 
@@ -182,7 +212,7 @@ Source contains `SubmitEssayRequest`/`SubmitEssayResponse` types, but no live or
 - Learner profile, avatar, JLPT-goal update, notification preferences, and analytics.
 - Vocabulary, Kanji, and Grammar search/detail when integer JLPT IDs are already known.
 - Notebook list management, bookmarking, manual add, entry/list delete, and per-list entry reads.
-- Daily SRS queue and single review submission, once the 1..5 UI mapping is confirmed.
+- Daily SRS queue and single review submission using the source-backed 1..5 mapping, with the caveat that live Swagger does not publish the labels or response schema.
 - Mock-test list by known JLPT ID, start, final answer submission, and result reads.
 - AI advisory generation.
 - Writing/Kanji practice submission, history, nested grading read, and regrade.

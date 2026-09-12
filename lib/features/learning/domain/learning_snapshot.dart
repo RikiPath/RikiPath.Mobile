@@ -56,6 +56,7 @@ class LearningMetric {
 @immutable
 class CurrentLessonSummary {
   const CurrentLessonSummary({
+    required this.routeId,
     required this.chapterNumber,
     required this.lessonNumber,
     required this.title,
@@ -65,6 +66,8 @@ class CurrentLessonSummary {
     required this.progress,
   });
 
+  /// Frontend route key; it is not assumed to be the backend numeric lesson ID.
+  final String routeId;
   final int chapterNumber;
   final int lessonNumber;
   final String title;

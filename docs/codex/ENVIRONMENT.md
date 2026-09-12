@@ -79,10 +79,10 @@ and rejects enabled API logging.
 
 The verified development API currently uses plain HTTP. Android and iOS may
 block cleartext traffic depending on platform version and application network
-policy. This checkout does not yet contain generated Android or iOS host
-projects, so no platform exception can be configured here.
+policy. Standard Android and iOS hosts now exist, but C10.5 does not add a
+global or production transport exception.
 
-Prefer an HTTPS development endpoint. If HTTP remains necessary after platform
-projects are generated, add a narrowly scoped development/debug-only exception
-for the development host. Do not enable global cleartext traffic or weaken App
-Transport Security in production/release configuration.
+Prefer an HTTPS development endpoint. If HTTP remains necessary, add a narrowly
+scoped development/debug-only exception for `140.245.43.97` in an explicitly
+approved networking phase. Do not enable global cleartext traffic or weaken
+App Transport Security in production/release configuration.

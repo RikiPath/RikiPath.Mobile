@@ -40,6 +40,8 @@ class LearningRoadmapScreen extends ConsumerWidget {
           data: (data) => LearningRoadmapView(
             snapshot: data,
             onOpenProgress: () => context.push(AppRoutes.learnProgress),
+            onContinueLesson: () =>
+                context.push(AppRoutes.lesson(data.currentLesson.routeId)),
           ),
         ),
       ),

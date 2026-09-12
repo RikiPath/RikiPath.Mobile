@@ -18,6 +18,8 @@ import 'package:rikipath_mobile/features/learning/presentation/jlpt_progress_scr
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learning_roadmap_screen.dart';
 
+import '../../support/test_auth_session.dart';
+
 void main() {
   testWidgets('/learn renders the approved Learning Home hierarchy', (
     tester,
@@ -226,7 +228,12 @@ Future<GoRouter> _pumpLearning(
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  final router = createAppRouter(initialLocation: initialLocation);
+  final session = createTestAuthSession();
+  final router = createAppRouter(
+    authSession: session,
+    initialLocation: initialLocation,
+  );
+  addTearDown(session.dispose);
   addTearDown(router.dispose);
 
   await tester.pumpWidget(

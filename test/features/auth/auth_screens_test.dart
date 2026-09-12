@@ -9,12 +9,15 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/widgets/riki_buttons.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
 import 'package:rikipath_mobile/features/auth/presentation/forgot_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/login_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/register_screen.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
+
+import '../../support/test_auth_session.dart';
 
 void main() {
   group('LoginScreen', () {
@@ -395,11 +398,21 @@ Future<GoRouter> _pumpAuthRoute(
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  final router = createAppRouter(initialLocation: initialLocation);
+  final session = createTestAuthSession(
+    initialState: AuthSessionState.unauthenticated,
+  );
+  final router = createAppRouter(
+    authSession: session,
+    initialLocation: initialLocation,
+  );
+  addTearDown(session.dispose);
   addTearDown(router.dispose);
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [authRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repository),
+        authSessionControllerProvider.overrideWithValue(session),
+      ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );

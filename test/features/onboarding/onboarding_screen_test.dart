@@ -11,6 +11,8 @@ import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/application/onboarding_controller.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
 
+import '../../support/test_auth_session.dart';
+
 void main() {
   test('learner JLPT choices are typed and limited to N5, N4, and N3', () {
     expect(JlptLevel.values, <JlptLevel>[
@@ -26,10 +28,12 @@ void main() {
   });
 
   test('daily study choices are exactly 15, 30, 45, and 60 minutes', () {
-    expect(
-      DailyStudyTime.values.map((choice) => choice.minutes),
-      <int>[15, 30, 45, 60],
-    );
+    expect(DailyStudyTime.values.map((choice) => choice.minutes), <int>[
+      15,
+      30,
+      45,
+      60,
+    ]);
   });
 
   testWidgets('target step shows only N5, N4, and N3 choices', (tester) async {
@@ -102,9 +106,7 @@ void main() {
   testWidgets('back from study time preserves both selections', (tester) async {
     final harness = await _pumpOnboarding(tester);
     await _reachStudyTime(tester, JlptLevel.n4);
-    await tester.tap(
-      find.byKey(const ValueKey<String>('study_time_45')),
-    );
+    await tester.tap(find.byKey(const ValueKey<String>('study_time_45')));
     await tester.pump();
 
     await tester.tap(find.byTooltip('Quay lại bước chọn mục tiêu'));
@@ -208,17 +210,19 @@ Future<_OnboardingHarness> _pumpOnboarding(WidgetTester tester) async {
   addTearDown(tester.view.resetDevicePixelRatio);
 
   final container = ProviderContainer();
-  final router = createAppRouter(initialLocation: AppRoutes.onboarding);
+  final session = createTestAuthSession();
+  final router = createAppRouter(
+    authSession: session,
+    initialLocation: AppRoutes.onboarding,
+  );
   addTearDown(container.dispose);
+  addTearDown(session.dispose);
   addTearDown(router.dispose);
 
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: MaterialApp.router(
-        theme: AppTheme.light,
-        routerConfig: router,
-      ),
+      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pumpAndSettle();
@@ -226,13 +230,8 @@ Future<_OnboardingHarness> _pumpOnboarding(WidgetTester tester) async {
   return _OnboardingHarness(container: container);
 }
 
-Future<void> _reachStudyTime(
-  WidgetTester tester,
-  JlptLevel level,
-) async {
-  await tester.tap(
-    find.byKey(ValueKey<String>('jlpt_${level.name}')),
-  );
+Future<void> _reachStudyTime(WidgetTester tester, JlptLevel level) async {
+  await tester.tap(find.byKey(ValueKey<String>('jlpt_${level.name}')));
   await tester.pump();
   await tester.ensureVisible(
     find.byKey(const ValueKey<String>('onboarding_continue_button')),

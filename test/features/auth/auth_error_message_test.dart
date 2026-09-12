@@ -15,10 +15,7 @@ void main() {
   });
 
   test('network failure is mapped to learner-friendly Vietnamese', () {
-    final message = authErrorMessage(
-      const NetworkError(),
-      AuthOperation.login,
-    );
+    final message = authErrorMessage(const NetworkError(), AuthOperation.login);
 
     expect(message, contains('kiểm tra mạng'));
   });
@@ -51,6 +48,16 @@ void main() {
     );
 
     expect(message, contains('chưa được kết nối với máy chủ'));
+  });
+
+  test('unsupported backend roles get a learner-app message', () {
+    final message = authErrorMessage(
+      const UnsupportedUserRoleException('Admin'),
+      AuthOperation.login,
+    );
+
+    expect(message, 'Ứng dụng di động hiện chỉ hỗ trợ tài khoản học viên.');
+    expect(message, isNot(contains('Admin')));
   });
 
   test('unknown failures do not expose exception details', () {

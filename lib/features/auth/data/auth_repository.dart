@@ -42,6 +42,9 @@ class ApiAuthRepository implements AuthRepository {
 
     try {
       final login = LoginResponseDto.fromJson(result);
+      if (login.role != 'Learner') {
+        throw UnsupportedUserRoleException(login.role);
+      }
       await _tokenStorage.saveAccessToken(
         login.accessToken,
         persist: persistSession,
@@ -81,6 +84,12 @@ class ApiAuthRepository implements AuthRepository {
 
 class PasswordRecoveryUnavailableException implements Exception {
   const PasswordRecoveryUnavailableException();
+}
+
+class UnsupportedUserRoleException implements Exception {
+  const UnsupportedUserRoleException(this.role);
+
+  final String role;
 }
 
 Map<String, Object?> _readResult(Object? body) {

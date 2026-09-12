@@ -1,4 +1,5 @@
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
 
@@ -31,6 +32,7 @@ class FixtureLearningRepository implements LearningRepository {
       LearningMetric(label: 'NGỮ PHÁP', current: 18, total: 30),
     ],
     currentLesson: CurrentLessonSummary(
+      routeId: FixtureLessonRepository.lesson19RouteId,
       chapterNumber: 2,
       lessonNumber: 19,
       title: 'Thể quá khứ & Liệt kê hành động',

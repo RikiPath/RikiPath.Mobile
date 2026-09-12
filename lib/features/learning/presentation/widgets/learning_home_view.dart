@@ -7,11 +7,13 @@ class LearningHomeView extends StatelessWidget {
   const LearningHomeView({
     required this.snapshot,
     required this.onOpenRoadmap,
+    required this.onOpenLesson,
     super.key,
   });
 
   final LearningSnapshot snapshot;
   final VoidCallback onOpenRoadmap;
+  final VoidCallback onOpenLesson;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,10 @@ class LearningHomeView extends StatelessWidget {
         const SizedBox(height: AppSpacing.space4),
         _ProgressSummaryCard(snapshot: snapshot, onOpenRoadmap: onOpenRoadmap),
         const SizedBox(height: AppSpacing.space4),
-        _CurrentLessonCard(lesson: snapshot.currentLesson),
+        _CurrentLessonCard(
+          lesson: snapshot.currentLesson,
+          onOpenLesson: onOpenLesson,
+        ),
         const SizedBox(height: AppSpacing.space5),
         Row(
           children: [
@@ -338,9 +343,10 @@ class _MetricItem extends StatelessWidget {
 }
 
 class _CurrentLessonCard extends StatelessWidget {
-  const _CurrentLessonCard({required this.lesson});
+  const _CurrentLessonCard({required this.lesson, required this.onOpenLesson});
 
   final CurrentLessonSummary lesson;
+  final VoidCallback onOpenLesson;
 
   @override
   Widget build(BuildContext context) {
@@ -448,13 +454,10 @@ class _CurrentLessonCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.space3),
-              Semantics(
-                enabled: false,
-                hint: 'Chi tiết bài học được triển khai trong C10',
-                child: TextButton(
-                  onPressed: null,
-                  child: const Text('Học tiếp'),
-                ),
+              TextButton(
+                key: const ValueKey<String>('learning_continue_lesson_button'),
+                onPressed: onOpenLesson,
+                child: const Text('Học tiếp'),
               ),
             ],
           ),
