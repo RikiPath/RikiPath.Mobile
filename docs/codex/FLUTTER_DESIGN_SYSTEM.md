@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-C4B implemented the reusable Flutter design foundation derived from `STITCH_DESIGN_SPEC.md`. C8 extends that foundation with the approved learner-shell surface palette, shell shadows, and five-destination bottom navigation. Feature-specific Home composition remains in the Home feature rather than expanding the global widget layer.
+C4B implemented the reusable Flutter design foundation derived from `STITCH_DESIGN_SPEC.md`. C13.5 refreshes that foundation to the approved Neo-Japoniste Sakura system and applies one shared brand lockup across existing Auth and learner headers. Feature-specific composition remains inside its owning feature.
 
 The implementation uses normal Material 3 Flutter Widgets with RikiPath-specific tokens and state styling. It does not copy the Stitch HTML, embed a WebView, or use screenshot-sized canvases.
 
@@ -22,13 +22,14 @@ The implementation uses normal Material 3 Flutter Widgets with RikiPath-specific
 
 ### Key decisions
 
-- `AppColors.brandPrimary` is `#B7131A`.
-- `AppColors.brandPrimaryPressed` is `#9B1016`, the most repeated dark-red reference value documented by C4A.
-- No red disabled-button value was approved. Disabled primary buttons therefore use the documented neutral disabled palette (`#E2E8F0` with `#94A3B8` content) rather than an invented red.
-- General success components use the more frequently evidenced emerald surface/border pair. The custom soft-mint pair remains available for the registration-success card treatment.
-- `#2563EB` is retained as the semantic information/JLPT-badge color, not as the RikiPath brand primary.
+- `AppColors.brandPrimary` is Sakura `#E05A7A`; its pressed state is `#C24362`.
+- `AppColors.brandSecondary` is `#F8BBD0`, with `#FFF0F3`, `#FCE7EB`, and `#F8DBE2` providing the approved tonal surfaces.
+- Primary reading text uses ink neutral `#2D282A`; supporting text uses `#695F63`.
+- Verified completion and mastery use `#079D47`. Destructive/error actions use `#D32F2F`, never the Sakura brand color.
+- Disabled primary buttons use neutral `#EAE0E2` with `#9E9397` content.
+- JLPT badges have the approved N5/N4/N3 Sakura tonal treatments. The typed learner scope remains limited to those three levels.
 - Typography does not force Inter or add a font package. It uses the platform font plus the existing Japanese-capable fallback family names.
-- Learner pages use their approved blue-white tonal surface family without changing the Auth/Onboarding canvas.
+- Auth, onboarding, and learner pages now share the same warm Sakura canvas/surface family.
 
 ## Shared components
 
@@ -55,7 +56,7 @@ RikiPrimaryButton(
 )
 ```
 
-While loading, the underlying action is disabled to prevent repeated submission, but the button retains the red Stitch processing treatment and displays an inline spinner.
+While loading, the underlying action is disabled to prevent repeated submission, but the button retains the Sakura processing treatment and displays an inline spinner.
 
 ### Inputs
 
@@ -79,10 +80,11 @@ Validation is supplied by feature UI state. The component does not own API calls
 ### Header and badges
 
 - `RikiAuthHeader`
+- `RikiBrandLockup`
 - `JlptBadge`
 - `LanguageBadge`
 
-`RikiAuthHeader` supports the standard auth header, centered back-navigation header, and success-status header without reproducing a fake system status bar. The `文` mark is rendered from the visual reference until an approved logo asset is supplied.
+`RikiBrandLockup` is the canonical gradient `文` mark, Sakura wordmark, and optional JLPT badge used by Auth, Home, Learning, and Splash presentation. `RikiAuthHeader` supports the standard auth header, centered back-navigation header, and success-status header without reproducing a fake system status bar. The `文` mark remains text-rendered until an approved logo asset is supplied.
 
 `JlptBadge` accepts the typed `JlptLevel` enum. Its complete learner-facing domain is deliberately limited to `n5`, `n4`, and `n3`.
 
@@ -124,7 +126,7 @@ Do not pass a mock percentage to `RikiProgressIndicator` merely to resemble a sc
 
 - `RikiBottomNavigationBar`
 
-The component implements the five approved labels, outlined/filled icon states, pale-red selected pill, 64-pixel content height, platform safe-area inset, and full-width touch targets. It accepts a selected index and reports taps; `MainShell` retains all routing responsibility through `StatefulNavigationShell.goBranch()`.
+The component implements exactly five approved labels, outlined/filled icon states, Sakura selected pill, 64-pixel content height, platform safe-area inset, equal-width destinations, and single-line labels. It accepts a selected index and reports taps; `MainShell` retains all routing responsibility through `StatefulNavigationShell.goBranch()`.
 
 Home-only pieces such as `HomeHeader`, first-lesson/setup cards, tool shortcuts, and Home loading/error compositions stay under `features/home/presentation/widgets/`. They reuse global tokens and primitives but are not presented as universal components before another feature proves reuse.
 
@@ -159,8 +161,10 @@ Home-only pieces such as `HomeHeader`, first-lesson/setup cards, tool shortcuts,
 - Selection-card selected state and action.
 - Mixed Japanese/Vietnamese text preservation.
 - Compact `VI` language badge.
+- Exact Sakura, mastery, ink, and destructive token separation.
+- Shared normal/compact brand lockup presentation.
 
-`test/core/widgets/riki_bottom_navigation_bar_test.dart` separately covers all five labels, selected semantics/icon state, and tap-index reporting.
+`test/core/widgets/riki_bottom_navigation_bar_test.dart` separately covers all five labels, selected semantics/icon state, Sakura indicator, equal widths, single-line labels, and tap-index reporting.
 
 A development-only showcase route was not added. The repository has no existing showcase infrastructure, and adding one would complicate production routing; focused widget tests provide the requested isolated component coverage instead.
 

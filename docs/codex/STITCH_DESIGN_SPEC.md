@@ -2,7 +2,7 @@
 
 ## Purpose and authority
 
-This document records the reusable mobile design evidence currently available under `docs/ui_reference/stitch_mobile/`. It began as the C4A Auth/Onboarding audit and is updated as approved references are implemented. C8 adds the learner shell and Home evidence without authorizing unrelated feature screens.
+This document records the reusable mobile design evidence currently available under `docs/ui_reference/stitch_mobile/`. It began as the C4A Auth/Onboarding audit and is updated as approved references are implemented. The C13.5 Neo-Japoniste Sakura set is the current visual authority; earlier red/blue phase notes are historical only.
 
 Source priority is permanent for these references:
 
@@ -16,10 +16,10 @@ The generated HTML is not production code. It must not be embedded in a WebView 
 
 The current recursive inventory contains:
 
-- 113 screen folders
-- 113 `screen.png` files
-- 113 `code.html` files
-- 0 screen folders missing either required file
+- 67 screen folders
+- 67 `screen.png` files
+- 67 `code.html` files
+- one design-system folder containing `neo_japoniste_sakura/DESIGN.md`
 
 The original C4A subset formed four route-level experiences and eight additional visual states or steps:
 
@@ -32,7 +32,7 @@ Exact screen ownership and route/state classification are in `docs/codex/UI_SCRE
 
 C8 specifically adds deep analysis of four `HOME_*` references and five `SHELL_*` references. Other folders are inventory evidence only until their feature phase reviews them against API and routing contracts.
 
-### C8 post-auth reference map
+### Historical C8 post-auth reference map
 
 Every folder below contains both a primary `screen.png` and secondary `code.html`.
 
@@ -48,96 +48,67 @@ Every folder below contains both a primary `screen.png` and secondary `code.html
 | `SHELL_04_Sổ từ - Mobile Shell/` | `/notebook`, branch 3 | Notebook/SRS root hierarchy and selected Notebook tab; deep content deferred. |
 | `SHELL_05_Cá nhân - Mobile Shell/` | `/profile`, branch 4 | Profile root hierarchy and selected Profile tab; deep content deferred. |
 
-The reusable cross-route result is `RikiBottomNavigationBar`; Home cards and header remain feature-local until another implemented feature proves broader reuse.
+This table preserves phase provenance. Its old folder names and blue/red descriptions do not override the current `*_sakura` exports. The reusable cross-route result remains `RikiBottomNavigationBar`; C13.5 also establishes `RikiBrandLockup` as the shared brand unit.
 
 ## Visual language
 
 RikiPath uses a clean, friendly portrait-mobile language:
 
-- White or near-white pages with dark slate text.
-- A deep red brand color for identity, selection, links, and primary actions.
+- Warm Sakura-tinted near-white pages with ink-neutral text.
+- Sakura `#E05A7A` for identity, selection, links, progress, and primary actions.
 - Rounded controls and cards, normally with a thin border and very low elevation.
 - Small pastel badges and banners for AI hints, JLPT context, success, warning, and progress.
 - Strong title hierarchy, compact form labels, generous vertical separation, and full-width primary CTAs.
 - Friendly emoji and simple line icons as accents, while core controls remain conventional and readable.
 - Success views use centered mint/emerald illustrations and keep the main action near the bottom.
 - Onboarding uses large selectable cards, explicit selected treatment, and visible step progress.
-- Learner pages use a pale blue-white canvas, compact white top and bottom surfaces, red active navigation, and border-led white cards.
+- Learner pages use a warm `#FFF9FA` canvas, compact white top and bottom surfaces, Sakura active navigation, and border-led white cards.
 - Home uses a responsive single-column information hierarchy with greeting, next action, roadmap/setup summaries, and compact tool shortcuts.
 
 The screenshots contain simulated iOS status bars and, in some HTML files, browser-only device frames. Flutter must use the platform status area through `SafeArea`; it must not recreate those status bars or device frames.
 
 ## Color tokens
 
-The table separates stable values repeated across references from values that still need normalization. Hex values come from the HTML and were checked against the PNGs.
+The Neo-Japoniste Sakura `DESIGN.md`, current `*_sakura/screen.png` files, and their HTML overrides establish the following current roles. The earlier burgundy and blue learner palette is deprecated.
 
-| Proposed Flutter role | Value | Evidence and rule |
+| Flutter role | Value | Rule |
 |---|---:|---|
-| `brandPrimary` | `#B7131A` | Repeated across nearly every export and visually matches the primary red. Use for primary CTAs, active selection, prominent brand marks, and brand links. |
-| `brandPressed` | `#9B1016` | Most repeated dark-red variant. Other exports declare `#9A1016`, `#9E1016`, or `#920E14`; see known unknowns before treating this as final. |
-| `brandTint` | `#FEF2F2` | Common light-red badge, error tint, and brand-tinted surface. |
-| `brandBorder` | `#FEE2E2` | Common subtle red border. |
-| `brandSelectedTint` | `#FFF1F2` | Selected JLPT card surface. |
-| `brandSelectedBorder` | `#FDA4AF` | Declared selected-state border companion; the selected card itself uses `brandPrimary` as its 2 px outline. |
-| `page` | `#FFFFFF` | Dominant inner page/canvas color in the PNGs. |
-| `pageSubtle` | `#F8FAFC` | Slate-50 outer background and subtle/disabled surface. A few exports use `#FAFBFC` or `#FDFBFB`; those are not established as separate global tokens. |
-| `surface` | `#FFFFFF` | Inputs, cards, secondary buttons, and most headers. |
-| `textPrimary` | `#0F172A` | Slate-900 headings and strongest text. |
-| `textBody` | `#1E293B` | Slate-800 general body text where a distinct body role is needed. |
-| `textSecondary` | `#64748B` | Slate-500 explanatory and metadata text. |
-| `textDisabled` | `#94A3B8` | Slate-400 placeholders and softened processing/disabled content. |
-| `border` | `#E2E8F0` | Slate-200 default control and card border. |
-| `borderStrong` | `#CBD5E1` | Slate-300 radio circles and stronger neutral boundaries. |
-| `input` | `#FFFFFF` | Normal input fill. |
-| `inputProcessing` | `#F8FAFC` | Loading/locked input fill; screenshots soften the full form while processing. |
-| `error` | `#EF4444` | Red-500 validation outline and error icon. |
-| `errorText` | `#DC2626` | Red-600 validation message. |
-| `errorSurface` | `#FEF2F2` | Red-50 validation fill, often rendered with reduced opacity. |
-| `success` | `#059669` | Emerald-600 strong success text/icon. |
-| `successAccent` | `#10B981` | Emerald-500 success illustration fill. |
-| `successSurface` | `#F0FDF4` / `#ECFDF5` | Custom mint-50 and Tailwind emerald-50 are both present; they are visually close but not proven to be one canonical value. |
-| `successBorder` | `#BBF7D0` / `#A7F3D0` | Custom mint border and Tailwind emerald-200 both occur. Normalize only when the final theme is implemented. |
-| `warning` | `#F59E0B` | Amber-500 icon/accent. |
-| `warningSurface` | `#FFFBEB` | Amber-50 tip and instruction surfaces, sometimes with opacity. |
-| `warningBorder` | `#FDE68A` | Amber-200 banner border, usually softened with opacity. |
-| `warningText` | `#78350F` | Amber-900 explanatory text. Some small labels use amber-800 (`#92400E`) or amber-950 (`#451A03`). |
-| `information` | `#2563EB` | Blue-600 information/JLPT-badge foreground. This blue is not the RikiPath primary brand. |
-| `informationSurface` | `#EFF6FF` | Blue-50 information/JLPT-badge background. |
-| `informationBorder` | `#DBEAFE` | Blue-100 information/JLPT-badge border. |
+| `brandPrimary` | `#E05A7A` | Primary CTA, active navigation, brand mark/wordmark, focused input, and in-progress fill. |
+| `brandPrimaryPressed` | `#C24362` | Pressed primary action and N4 foreground. |
+| `brandSecondary` | `#F8BBD0` | Supporting Sakura surface, chip/level selection, and progress-track family. |
+| `brandTint` / `brandSelectedTint` | `#FFF0F3` | Selected study card and quiet highlighted state. |
+| `surfaceContainer` | `#FCE7EB` | Active navigation pill, interactive chip, secondary action, and progress track. |
+| `surfaceContainerHigh` | `#F8DBE2` | Pressed/nested tonal container. |
+| `background` | `#FFF9FA` | Warm portrait learner canvas. |
+| `surface` / `input` | `#FFFFFF` | Elevated cards, headers, sheets, and normal fields. |
+| `inputProcessing` | `#F6EBEE` | Disabled/read-only field surface. |
+| `textPrimary` / `textBody` | `#2D282A` | Ink neutral for headings, body, meanings, and Japanese glyphs. |
+| `textSecondary` | `#695F63` | Metadata, reading annotations, and inactive navigation. |
+| `textMuted` / `textDisabled` | `#9E9397` | Placeholder and disabled content. |
+| `border` | `#E8DDE0` | Default card, field, divider, and bottom-bar outline. |
+| `borderStrong` | `#DDBFC3` | Stronger neutral/level boundary. |
+| `success` | `#079D47` | Verified mastery, correct answer, and completed progress only. |
+| `successBackground` | `#E8F5E9` | Verified success surface. |
+| `successBorder` | `#C8E6C9` | Verified success outline. |
+| `error` / `errorText` | `#D32F2F` | Validation, incorrect answer, destructive/reset action. Never substitute brand Sakura. |
+| `errorBackground` | `#FDEDED` | Error/validation container. |
+| `warning` | `#F59E0B` | Countdown, review, and caution accent. |
+| `warningBackground` | `#FFFBEB` | Warning/tip container. |
+| `information` | `#1976D2` | Linguistic note or informational state, not brand identity. |
 
-### Learner-shell surface tokens
-
-The C8 `HOME_*` and `SHELL_*` HTML establishes a separate post-auth surface family. These roles are centralized in Flutter and do not replace the white/slate Auth/Onboarding palette.
-
-| Flutter role | Value | Use |
-|---|---:|---|
-| `learnerBackground` | `#F8F9FF` | Main learner-page canvas. |
-| `learnerSurfaceLow` | `#EFF4FF` | Low-emphasis sections and skeleton context. |
-| `learnerSurface` | `#E6EEFF` | Tonal learner surfaces. |
-| `learnerSurfaceHigh` | `#DEE9FC` | Loading skeleton blocks and stronger tonal fills. |
-| `learnerSurfaceHighest` | `#D9E3F6` | Highest tonal surface where the reference calls for it. |
-| `learnerTextPrimary` | `#121C2A` | Learner-page headings and strongest content. |
-| `learnerTextSecondary` | `#5B403D` | Learner metadata and inactive navigation. |
-| `learnerOutline` | `#E4BEB9` | Warm subtle learner-card boundaries. |
-| `learnerPrimaryFixed` | `#FFDAD6` | Selected navigation icon pill. |
-| `learnerTertiary` | `#8D4B00` | Streak emphasis. |
-| `learnerTertiaryBackground` | `#FFDCC3` | Streak pill background. |
+Existing `learner*` Flutter names are compatibility aliases and resolve to the same Sakura surface/text roles; they no longer define a separate blue post-auth theme.
 
 ### JLPT and selection colors
 
-- The compact header JLPT badge uses the information set: `#2563EB` on `#EFF6FF`, with a `#DBEAFE` border.
-- Unselected N5/N4 onboarding cards use neutral slate styling: white surface, `#E2E8F0` border, slate-100 level tile, and slate-700 label.
-- The selected N3 example uses `brandPrimary`, `brandSelectedTint`, white level text, and a 2 px red outline.
-- The references do not establish permanent, distinct colors for N5, N4, and N3. Do not invent a level-specific palette.
-- N4 in the auth header is sample content, not a global constant. RikiPath learner levels remain N5, N4, and N3 only unless backend evidence expands them.
-
-### Local onboarding accents
-
-The study-duration cards use local illustrative accents rather than global semantic colors: orange for 15 minutes, red for 30, blue for 45, and purple for 60. These should remain component-local until more references establish a wider product palette.
+- N5 uses `#E05A7A` on `#FCE7EB`.
+- N4 uses `#C24362` on `#F8BBD0`.
+- N3 uses `#942B46` on `#E8DDE0`.
+- The learner product enum remains N5/N4/N3 only. N4 shown in a reference is sample state, not a global learner constant.
+- Selected cards use `#FFF0F3` with an emphasized `#E05A7A` outline. Selected chips use a light Sakura container with Sakura foreground/border; they do not become solid destructive-looking red.
 
 ### Current Flutter theme alignment
 
-The Flutter theme now uses `#B7131A` as `brandPrimary`; blue remains the semantic information color. C8 adds the learner-shell surface roles above to `AppColors` and adds only the two evidenced shell shadows to `AppShadows`. Feature Widgets consume these centralized roles rather than repeating raw color values.
+`AppColors`, `AppTheme`, and `AppShadows` now own these roles. Feature Widgets consume the tokens rather than repeating raw Sakura hex values. Success, warning, information, and destructive/error treatments remain semantic and visually separate from primary brand actions.
 
 ## Typography
 
@@ -157,7 +128,7 @@ Sizes and line heights are logical Flutter pixels, derived from the HTML classes
 
 | Role | Observed size | Weight | Approx. line height | Color | Normalized use |
 |---|---:|---:|---:|---|---|
-| Brand wordmark | 18–24 | 700–900 | 22–29 | Brand red or slate-900 | Prefer 20/24, bold; exports disagree on color and oversized loading-state treatment. |
+| Brand wordmark | 18–24 | 700–900 | 22–29 | Sakura `brandPrimary` | Prefer 20/24 and bold through the shared `RikiBrandLockup`. |
 | Hero title | 26 | 700 | 34–36 | `textPrimary` | Completion/success emphasis only. |
 | Page title | 24 | 700–800; one export 900 | 30–32 | `textPrimary` | Default screen/form title. Loading must not change weight arbitrarily. |
 | Compact onboarding title | 22 | 700 | 27–28 | `textPrimary` | Use when dense selection content must fit naturally. |
@@ -222,7 +193,7 @@ Layout rules:
 
 - Default input/card border: 1 px `border` (`#E2E8F0`).
 - Strong neutral choice indicator: 2 px `borderStrong` (`#CBD5E1`).
-- Selected choice card: 2 px `brandPrimary` with a pale-red surface and subtle red shadow.
+- Selected choice card: emphasized `brandPrimary` outline with a light Sakura surface and subtle Sakura shadow.
 - Validation input: 1 px `error`, pale error surface, trailing error icon, and message below.
 - HTML focus classes generally use a 2 px translucent red focus ring. No PNG captures a focused keyboard state, so this is secondary evidence only.
 - Standard cards are border-led with zero or very low elevation. Common HTML `shadow-sm` should render as a restrained native shadow, not a raised Material card.
@@ -267,7 +238,7 @@ The standard header should accept the JLPT level as data and support N5/N4/N3. T
 
 ### Text button/link
 
-- Brand red and semibold for important navigation such as register/login, or slate for lower-emphasis “later” actions.
+- Sakura and semibold for important navigation such as register/login, or ink-neutral metadata for lower-emphasis “later” actions.
 - Must retain an accessible touch target even when its visible text is compact.
 - Legal links are underlined in the registration reference.
 
@@ -293,7 +264,7 @@ The standard header should accept the JLPT level as data and support N5/N4/N3. T
 
 ### Checkbox/agreement row
 
-- Small 16 px visual checkbox using brand red when checked, with a larger semantic/touch target.
+- Small 16 px visual checkbox using brand Sakura when checked, with a larger semantic/touch target.
 - Supporting copy is 12 px and may wrap across lines.
 - Login uses remember-session copy; registration uses agreement plus underlined legal links.
 
@@ -321,7 +292,7 @@ The standard header should accept the JLPT level as data and support N5/N4/N3. T
 
 - White, 1 px slate border, 16 radius, about 14–16 padding.
 - Leading 44 square level/icon tile, flexible title/description column, trailing radio/check state.
-- Selected state uses 2 px red border, pale-red surface, red/white leading tile, check, and subtle red shadow.
+- Selected state uses an emphasized Sakura border, light Sakura surface, Sakura/white leading tile, check, and subtle Sakura shadow.
 - Use radio-group semantics and make the entire card tappable.
 - Badges such as “Phổ biến nhất” must participate in layout. The duration PNG shows a collision around the selected card; do not reproduce it with absolute positioning.
 
@@ -415,7 +386,7 @@ Later Flutter implementation should:
 ## Known unknowns and inconsistencies
 
 - Canonical font family is unresolved: system sans dominates, while one completion export uses Inter. No fonts are bundled.
-- Dark/pressed brand red differs between exports (`#9A1016`, `#9B1016`, `#9E1016`, `#920E14`).
+- Historical exports used inconsistent burgundy pressed colors. The current normalized pressed token is Sakura `#C24362`.
 - Success surface/border uses both custom mint values and Tailwind emerald values.
 - Wordmark color, size, and weight vary between normal, validation, loading, and success exports.
 - Registration loading changes the normal screen title and promotional copy. This looks like export drift, not proven state behavior.

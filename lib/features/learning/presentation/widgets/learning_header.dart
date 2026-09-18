@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
 
 class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
   const LearningHeader.root({
@@ -77,45 +78,7 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildBrandTitle() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.brandPrimary,
-            borderRadius: BorderRadius.circular(AppRadius.compact),
-          ),
-          child: const Text(
-            '文',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              height: 1,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Flexible(
-          child: Text(
-            'RikiPath',
-            maxLines: 1,
-            overflow: TextOverflow.fade,
-            softWrap: false,
-            style: AppTypography.brandWordmark.copyWith(
-              color: AppColors.learnerTextPrimary,
-            ),
-          ),
-        ),
-        if (level != null) ...[
-          const SizedBox(width: AppSpacing.space2),
-          JlptBadge(level!),
-        ],
-      ],
-    );
+    return RikiBrandLockup(level: level, compact: true);
   }
 
   Widget _buildDetailTitle() {

@@ -2,14 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
-import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 
 class AuthPage extends StatelessWidget {
-  const AuthPage({
-    required this.child,
-    this.compact = false,
-    super.key,
-  });
+  const AuthPage({required this.child, this.compact = false, super.key});
 
   final Widget child;
   final bool compact;
@@ -73,11 +68,19 @@ class AuthNavigationPrompt extends StatelessWidget {
       alignment: WrapAlignment.center,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(
-          message,
-          style: AppTypography.bodySmall,
+        Text(message, style: AppTypography.bodySmall),
+        TextButton(
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            minimumSize: const Size(44, 44),
+            maximumSize: const Size(100, 44),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space1),
+            textStyle: AppTypography.bodySmall.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          child: Text(actionLabel, maxLines: 1),
         ),
-        RikiTextButton(label: actionLabel, onPressed: onPressed),
       ],
     );
   }
@@ -91,19 +94,13 @@ class AuthSecurityFooter extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(
-          Icons.shield_outlined,
-          size: 17,
-          color: AppColors.textMuted,
-        ),
+        const Icon(Icons.shield_outlined, size: 17, color: AppColors.textMuted),
         const SizedBox(width: AppSpacing.space2),
         Flexible(
           child: Text(
             'Bảo mật chuẩn mã hóa Riki Learning',
             textAlign: TextAlign.center,
-            style: AppTypography.metadata.copyWith(
-              color: AppColors.textMuted,
-            ),
+            style: AppTypography.metadata.copyWith(color: AppColors.textMuted),
           ),
         ),
       ],

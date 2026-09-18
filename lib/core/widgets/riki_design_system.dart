@@ -3,6 +3,7 @@ export 'jlpt_badge.dart';
 export 'language_badge.dart';
 export 'riki_auth_header.dart';
 export 'riki_banner.dart';
+export 'riki_brand_lockup.dart';
 export 'riki_bottom_navigation_bar.dart';
 export 'riki_buttons.dart';
 export 'riki_card.dart';

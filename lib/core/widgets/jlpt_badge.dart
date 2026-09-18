@@ -18,6 +18,8 @@ class JlptBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = _colorsFor(level);
+
     return Semantics(
       label: 'Trình độ JLPT ${level.label}',
       child: Container(
@@ -26,15 +28,47 @@ class JlptBadge extends StatelessWidget {
           vertical: 2,
         ),
         decoration: BoxDecoration(
-          color: AppColors.infoBackground,
-          border: Border.all(color: AppColors.infoBorder),
+          color: colors.background,
+          border: Border.all(color: colors.border),
           borderRadius: BorderRadius.circular(AppRadius.pill),
         ),
         child: Text(
           level.label,
-          style: AppTypography.badgeText.copyWith(color: AppColors.info),
+          style: AppTypography.badgeText.copyWith(color: colors.foreground),
         ),
       ),
     );
   }
+
+  _JlptBadgeColors _colorsFor(JlptLevel level) {
+    return switch (level) {
+      JlptLevel.n5 => const _JlptBadgeColors(
+        foreground: AppColors.jlptN5Foreground,
+        background: AppColors.jlptN5Background,
+        border: AppColors.brandBorder,
+      ),
+      JlptLevel.n4 => const _JlptBadgeColors(
+        foreground: AppColors.jlptN4Foreground,
+        background: AppColors.jlptN4Background,
+        border: AppColors.brandPrimary,
+      ),
+      JlptLevel.n3 => const _JlptBadgeColors(
+        foreground: AppColors.jlptN3Foreground,
+        background: AppColors.jlptN3Background,
+        border: AppColors.borderStrong,
+      ),
+    };
+  }
+}
+
+class _JlptBadgeColors {
+  const _JlptBadgeColors({
+    required this.foreground,
+    required this.background,
+    required this.border,
+  });
+
+  final Color foreground;
+  final Color background;
+  final Color border;
 }

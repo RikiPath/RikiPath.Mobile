@@ -8,11 +8,58 @@ void main() {
     final theme = AppTheme.light;
     final focusedBorder = theme.inputDecorationTheme.focusedBorder;
 
+    expect(AppColors.brandPrimary, const Color(0xFFE05A7A));
+    expect(AppColors.brandSecondary, const Color(0xFFF8BBD0));
+    expect(AppColors.success, const Color(0xFF079D47));
+    expect(AppColors.textPrimary, const Color(0xFF2D282A));
+    expect(AppColors.error, const Color(0xFFD32F2F));
+    expect(AppColors.error, isNot(AppColors.brandPrimary));
     expect(theme.colorScheme.primary, AppColors.brandPrimary);
+    expect(theme.colorScheme.secondary, AppColors.brandSecondary);
+    expect(
+      theme.progressIndicatorTheme.linearTrackColor,
+      AppColors.progressTrack,
+    );
     expect(focusedBorder, isA<OutlineInputBorder>());
     expect(
       (focusedBorder! as OutlineInputBorder).borderSide,
       AppBorders.focused,
+    );
+  });
+
+  testWidgets('brand lockup is shared across normal and compact headers', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _testHost(
+        const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RikiBrandLockup(level: JlptLevel.n4),
+            SizedBox(height: AppSpacing.space4),
+            RikiAuthHeader(onBack: _noop),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('RikiPath'), findsNWidgets(2));
+    expect(find.text('文'), findsNWidgets(2));
+    expect(
+      find.byKey(const ValueKey<String>('riki_brand_mark')),
+      findsNWidgets(2),
+    );
+
+    final marks = tester.widgetList<Container>(
+      find.byKey(const ValueKey<String>('riki_brand_mark')),
+    );
+    expect(
+      marks.map((mark) => mark.decoration),
+      everyElement(isA<BoxDecoration>()),
+    );
+    expect(
+      marks.map((mark) => (mark.decoration! as BoxDecoration).gradient),
+      everyElement(isA<LinearGradient>()),
     );
   });
 
@@ -23,10 +70,7 @@ void main() {
 
     await tester.pumpWidget(
       _testHost(
-        RikiPrimaryButton(
-          label: 'Đăng nhập',
-          onPressed: () => presses += 1,
-        ),
+        RikiPrimaryButton(label: 'Đăng nhập', onPressed: () => presses += 1),
       ),
     );
 
@@ -89,7 +133,10 @@ void main() {
       _testHost(const RikiPasswordField(label: 'Mật khẩu')),
     );
 
-    expect(tester.widget<TextField>(find.byType(TextField)).obscureText, isTrue);
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).obscureText,
+      isTrue,
+    );
 
     await tester.tap(find.byTooltip('Hiện mật khẩu'));
     await tester.pump();
@@ -122,9 +169,7 @@ void main() {
     expect(find.text('N3'), findsOneWidget);
   });
 
-  testWidgets('semantic banners render their expected content', (
-    tester,
-  ) async {
+  testWidgets('semantic banners render their expected content', (tester) async {
     await tester.pumpWidget(
       _testHost(
         const Column(
@@ -145,19 +190,20 @@ void main() {
     expect(find.text('Tài khoản đã sẵn sàng'), findsOneWidget);
   });
 
-  testWidgets('system typography preserves mixed Japanese and Vietnamese text', (
-    tester,
-  ) async {
-    const sample = '日本語・漢字・ひらがな・カタカナ — Tiếng Việt';
+  testWidgets(
+    'system typography preserves mixed Japanese and Vietnamese text',
+    (tester) async {
+      const sample = '日本語・漢字・ひらがな・カタカナ — Tiếng Việt';
 
-    await tester.pumpWidget(
-      _testHost(
-        const RikiCard(child: Text(sample, style: AppTypography.body)),
-      ),
-    );
+      await tester.pumpWidget(
+        _testHost(
+          const RikiCard(child: Text(sample, style: AppTypography.body)),
+        ),
+      );
 
-    expect(find.text(sample), findsOneWidget);
-  });
+      expect(find.text(sample), findsOneWidget);
+    },
+  );
 
   testWidgets('language badge exposes the approved compact VI state', (
     tester,
@@ -208,3 +254,5 @@ Widget _testHost(Widget child) {
     ),
   );
 }
+
+void _noop() {}

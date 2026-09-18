@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 
 class LanguageBadge extends StatelessWidget {
-  const LanguageBadge({
-    this.languageCode = 'VI',
-    this.onPressed,
-    super.key,
-  });
+  const LanguageBadge({this.languageCode = 'VI', this.onPressed, super.key});
 
   final String languageCode;
   final VoidCallback? onPressed;

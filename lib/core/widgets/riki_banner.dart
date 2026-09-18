@@ -97,7 +97,7 @@ class RikiErrorBanner extends StatelessWidget {
       icon: icon,
       foregroundColor: AppColors.errorText,
       backgroundColor: AppColors.errorBackground,
-      borderColor: AppColors.brandBorder,
+      borderColor: AppColors.errorBorder,
     );
   }
 }
@@ -139,9 +139,7 @@ class _RikiBanner extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ExcludeSemantics(
-              child: Icon(icon, size: 20, color: iconColor),
-            ),
+            ExcludeSemantics(child: Icon(icon, size: 20, color: iconColor)),
             const SizedBox(width: AppSpacing.space3),
             Expanded(
               child: Column(

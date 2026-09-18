@@ -13,38 +13,39 @@ class RikiBottomNavigationBar extends StatelessWidget {
 
   static const List<RikiNavigationDestination> destinations =
       <RikiNavigationDestination>[
-    RikiNavigationDestination(
-      label: 'Trang chủ',
-      icon: Icons.home_outlined,
-      selectedIcon: Icons.home,
-    ),
-    RikiNavigationDestination(
-      label: 'Học tập',
-      icon: Icons.menu_book_outlined,
-      selectedIcon: Icons.menu_book,
-    ),
-    RikiNavigationDestination(
-      label: 'Luyện tập',
-      icon: Icons.quiz_outlined,
-      selectedIcon: Icons.quiz,
-    ),
-    RikiNavigationDestination(
-      label: 'Sổ từ',
-      icon: Icons.style_outlined,
-      selectedIcon: Icons.style,
-    ),
-    RikiNavigationDestination(
-      label: 'Cá nhân',
-      icon: Icons.person_outline,
-      selectedIcon: Icons.person,
-    ),
-  ];
+        RikiNavigationDestination(
+          label: 'Trang chủ',
+          icon: Icons.home_outlined,
+          selectedIcon: Icons.home,
+        ),
+        RikiNavigationDestination(
+          label: 'Học tập',
+          icon: Icons.menu_book_outlined,
+          selectedIcon: Icons.menu_book,
+        ),
+        RikiNavigationDestination(
+          label: 'Luyện tập',
+          icon: Icons.quiz_outlined,
+          selectedIcon: Icons.quiz,
+        ),
+        RikiNavigationDestination(
+          label: 'Sổ từ',
+          icon: Icons.style_outlined,
+          selectedIcon: Icons.style,
+        ),
+        RikiNavigationDestination(
+          label: 'Cá nhân',
+          icon: Icons.person_outline,
+          selectedIcon: Icons.person,
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: const BoxDecoration(
         color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.border)),
         boxShadow: AppShadows.learnerBottomNavigation,
       ),
       child: Material(
@@ -99,7 +100,7 @@ class _NavigationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final foreground = selected
         ? AppColors.brandPrimary
-        : AppColors.learnerTextSecondary;
+        : AppColors.textSecondary;
 
     return Semantics(
       key: ValueKey<String>('bottom_navigation_item_${destination.label}'),
@@ -115,8 +116,8 @@ class _NavigationItem extends StatelessWidget {
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 160),
-                width: 40,
-                height: 24,
+                width: 48,
+                height: 28,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: selected

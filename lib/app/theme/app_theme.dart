@@ -18,10 +18,10 @@ abstract final class AppTheme {
     onPrimary: Colors.white,
     primaryContainer: AppColors.brandTint,
     onPrimaryContainer: AppColors.brandPrimaryPressed,
-    secondary: AppColors.info,
-    onSecondary: Colors.white,
-    secondaryContainer: AppColors.infoBackground,
-    onSecondaryContainer: AppColors.info,
+    secondary: AppColors.brandSecondary,
+    onSecondary: AppColors.textPrimary,
+    secondaryContainer: AppColors.surfaceContainer,
+    onSecondaryContainer: AppColors.brandPrimary,
     error: AppColors.errorText,
     onError: Colors.white,
     errorContainer: AppColors.errorBackground,
@@ -41,11 +41,7 @@ abstract final class AppTheme {
       canvasColor: AppColors.background,
       disabledColor: AppColors.textDisabled,
       focusColor: AppColors.brandTint,
-      fontFamilyFallback: const <String>[
-        'Noto Sans',
-        'Noto Sans JP',
-        'Roboto',
-      ],
+      fontFamilyFallback: const <String>['Noto Sans', 'Noto Sans JP', 'Roboto'],
       textTheme: AppTypography.textTheme,
       iconTheme: const IconThemeData(color: AppColors.textSecondary),
       appBarTheme: const AppBarThemeData(
@@ -114,9 +110,7 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: ButtonStyle(
-          minimumSize: const WidgetStatePropertyAll<Size>(
-            Size.fromHeight(48),
-          ),
+          minimumSize: const WidgetStatePropertyAll<Size>(Size.fromHeight(48)),
           padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
             EdgeInsets.symmetric(
               horizontal: AppSpacing.space5,
@@ -138,22 +132,18 @@ abstract final class AppTheme {
             }
             return Colors.white;
           }),
-          overlayColor: const WidgetStatePropertyAll<Color>(
-            Colors.transparent,
-          ),
+          overlayColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
           elevation: WidgetStateProperty.resolveWith<double>((states) {
             if (states.contains(WidgetState.disabled)) return 0;
             if (states.contains(WidgetState.pressed)) return 1;
             return 3;
           }),
           shadowColor: const WidgetStatePropertyAll<Color>(
-            Color(0x40B7131A),
+            AppColors.brandShadow,
           ),
           shape: const WidgetStatePropertyAll<OutlinedBorder>(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(AppRadius.button),
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.button)),
             ),
           ),
           textStyle: const WidgetStatePropertyAll<TextStyle>(
@@ -163,9 +153,7 @@ abstract final class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
-          minimumSize: const WidgetStatePropertyAll<Size>(
-            Size.fromHeight(48),
-          ),
+          minimumSize: const WidgetStatePropertyAll<Size>(Size.fromHeight(48)),
           padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
             EdgeInsets.symmetric(
               horizontal: AppSpacing.space5,
@@ -189,9 +177,7 @@ abstract final class AppTheme {
           }),
           shape: const WidgetStatePropertyAll<OutlinedBorder>(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(AppRadius.button),
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.button)),
             ),
           ),
           textStyle: const WidgetStatePropertyAll<TextStyle>(
@@ -238,15 +224,32 @@ abstract final class AppTheme {
         thickness: AppBorders.thin,
         space: AppSpacing.space4,
       ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surface,
+        selectedColor: AppColors.brandTint,
+        disabledColor: AppColors.inputProcessing,
+        checkmarkColor: AppColors.brandPrimary,
+        side: const BorderSide(color: AppColors.border),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+        ),
+        labelStyle: AppTypography.badgeText.copyWith(
+          color: AppColors.textSecondary,
+        ),
+        secondaryLabelStyle: AppTypography.badgeText.copyWith(
+          color: AppColors.brandPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: AppColors.brandPrimary,
-        linearTrackColor: AppColors.border,
+        linearTrackColor: AppColors.progressTrack,
         linearMinHeight: AppSpacing.space1,
-        circularTrackColor: AppColors.brandBorder,
+        circularTrackColor: AppColors.progressTrack,
       ),
       navigationBarTheme: const NavigationBarThemeData(
         backgroundColor: AppColors.surface,
-        indicatorColor: AppColors.infoBackground,
+        indicatorColor: AppColors.surfaceContainer,
         height: 68,
       ),
     );

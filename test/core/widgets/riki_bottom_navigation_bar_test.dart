@@ -24,13 +24,47 @@ void main() {
     await _pumpNavigation(tester, selectedIndex: 2);
 
     final semantics = tester.widget<Semantics>(
-      find.byKey(
-        const ValueKey<String>('bottom_navigation_item_Luyện tập'),
-      ),
+      find.byKey(const ValueKey<String>('bottom_navigation_item_Luyện tập')),
     );
     expect(semantics.properties.selected, isTrue);
     expect(find.byIcon(Icons.quiz), findsOneWidget);
     expect(find.byIcon(Icons.quiz_outlined), findsNothing);
+
+    final indicator = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byKey(
+          const ValueKey<String>('bottom_navigation_item_Luyện tập'),
+        ),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+    expect(
+      (indicator.decoration! as BoxDecoration).color,
+      AppColors.surfaceContainer,
+    );
+  });
+
+  testWidgets('destinations keep equal width and single-line labels', (
+    tester,
+  ) async {
+    await _pumpNavigation(tester, selectedIndex: 0);
+
+    expect(RikiBottomNavigationBar.destinations, hasLength(5));
+    for (final destination in RikiBottomNavigationBar.destinations) {
+      final label = tester.widget<Text>(find.text(destination.label));
+      expect(label.maxLines, 1);
+    }
+
+    final itemWidths = RikiBottomNavigationBar.destinations.map((destination) {
+      return tester
+          .getSize(
+            find.byKey(
+              ValueKey<String>('bottom_navigation_item_${destination.label}'),
+            ),
+          )
+          .width;
+    }).toSet();
+    expect(itemWidths, hasLength(1));
   });
 
   testWidgets('destination tap reports its index', (tester) async {

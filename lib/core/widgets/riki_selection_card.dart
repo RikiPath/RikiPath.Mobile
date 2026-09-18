@@ -37,8 +37,7 @@ class RikiSelectionCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadius.card),
-          boxShadow:
-              selected ? AppShadows.selectedCard : AppShadows.cardSoft,
+          boxShadow: selected ? AppShadows.selectedCard : AppShadows.cardSoft,
         ),
         child: Material(
           color: selected ? AppColors.brandSelectedTint : AppColors.surface,

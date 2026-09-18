@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -6,24 +8,17 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.route,
-              size: 64,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'RikiPath',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-            ),
+            const RikiBrandLockup(),
             const SizedBox(height: 8),
-            const Text('Học tiếng Nhật • Luyện thi JLPT'),
+            Text(
+              'Học tiếng Nhật • Luyện thi JLPT',
+              style: AppTypography.bodySmall,
+            ),
             const SizedBox(height: 20),
             const CircularProgressIndicator(),
           ],

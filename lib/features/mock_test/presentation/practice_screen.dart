@@ -15,7 +15,7 @@ class PracticeScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           AppSectionCard(
-            title: 'Đề thi thử JLPT',
+            title: 'Thi thử JLPT',
             subtitle: 'Mô phỏng cấu trúc từ vựng/ngữ pháp, đọc và nghe',
             child: Column(
               children: [
@@ -46,7 +46,7 @@ class PracticeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           AppSectionCard(
-            title: 'AI chấm bài',
+            title: 'Chấm bài AI',
             subtitle: 'Writing & Kanji practice',
             child: Row(
               children: [

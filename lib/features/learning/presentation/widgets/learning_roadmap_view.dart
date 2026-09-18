@@ -495,10 +495,7 @@ class _CurrentSkillTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = switch (skill.status) {
       ChapterSkillStatus.completed => AppColors.success,
-      ChapterSkillStatus.inProgress =>
-        skill.category == LearningSkillCategory.reading
-            ? AppColors.skillGrammar
-            : AppColors.brandPrimary,
+      ChapterSkillStatus.inProgress => AppColors.brandPrimary,
       ChapterSkillStatus.notStarted ||
       ChapterSkillStatus.locked => AppColors.textMuted,
     };
@@ -547,7 +544,7 @@ class _CurrentSkillTile extends StatelessWidget {
                 value: skill.progress,
                 minHeight: 6,
                 color: color,
-                backgroundColor: AppColors.learnerSurfaceLow,
+                backgroundColor: AppColors.progressTrack,
                 semanticsLabel:
                     'Tiến độ ${skill.category.label} ${skill.detail}',
               ),

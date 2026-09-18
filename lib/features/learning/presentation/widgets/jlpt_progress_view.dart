@@ -317,8 +317,10 @@ class _SkillProgressRow extends StatelessWidget {
           child: LinearProgressIndicator(
             value: skill.progress,
             minHeight: 8,
-            color: skill.category.foregroundColor,
-            backgroundColor: AppColors.learnerSurfaceLow,
+            color: skill.progress >= 1
+                ? AppColors.success
+                : AppColors.brandPrimary,
+            backgroundColor: AppColors.progressTrack,
             semanticsLabel:
                 'Tiến độ ${skill.category.label} '
                 '${skill.progressPercent} phần trăm',

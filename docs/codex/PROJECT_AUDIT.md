@@ -140,9 +140,9 @@ There is no authentication redirect/guard, route refresh notifier, named-route a
 
 The existing UI language is light, card-based, moderately rounded, and built around a five-tab portrait mobile shell. `AppSectionCard` and `JlptBadge` are the two reusable shared visual components.
 
-The source and README explicitly label the Flutter theme values as temporary because RikiPath/Stitch design tokens were not available when the starter was created. The currently available `docs/ui_reference/stitch_mobile/` set contains five portrait auth-state exports: login, login validation, login loading, forgot password, and forgot-password success. The exports consistently show a red RikiPath identity centered on `#B7131A`, white or pale-slate surfaces, dark-slate text, rounded inputs/buttons/cards, compact pills, and phone canvases capped between 390 and 430 CSS pixels. The exports use system sans-serif stacks and do not supply a bundled font asset.
+At the initial audit, the source and README labeled the Flutter theme values as temporary because only an early Auth subset was available. That historical subset used legacy `#B7131A`; it was superseded by the approved Neo-Japoniste Sakura reference set and is not a current brand token. The references use system sans-serif stacks and do not supply a bundled font asset.
 
-The current Flutter primary token is blue `#2563EB`, so it has not been reconciled with the red auth references. The HTML files also contain simulated iOS status bars and Tailwind/browser implementation details; those are reference presentation artifacts, not Flutter components to copy.
+The starter Flutter primary token was blue `#2563EB`; the current implementation has since been reconciled to the approved Sakura tokens documented in `FLUTTER_DESIGN_SYSTEM.md`. The HTML files also contain simulated iOS status bars and Tailwind/browser implementation details; those are reference presentation artifacts, not Flutter components to copy.
 
 No font files are bundled or declared in `pubspec.yaml`, so listing `Noto Sans JP` as a fallback does not guarantee that font is present on every device. The reference screenshots include the kanji `文` in the logo treatment but do not demonstrate general Japanese learning-content rendering.
 
