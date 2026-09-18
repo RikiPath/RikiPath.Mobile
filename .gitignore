@@ -9,6 +9,7 @@ build/
 .flutter-plugins-dependencies
 coverage/
 android/.gradle/
+android/.kotlin/
 ios/Pods/
 ios/.symlinks/
 
