@@ -1,6 +1,6 @@
 # RikiPath Frontend API Gaps
 
-Reviewed on: 2026-09-12 (Asia/Bangkok)
+Reviewed on: 2026-09-18 (Asia/Bangkok)
 
 This gap register compares the live OpenAPI document at `http://140.245.43.97/swagger/v1/swagger.json` with the supplied read-only backend source at revision `959cad6567ba0101e7fed00c3384948f51c0f47d` and the learner-mobile product scope.
 
@@ -17,11 +17,14 @@ Live Swagger was accessible during this phase. Routes and request schemas were v
 7. **Exam autosave/resume cannot be connected.** Only start and final whole-attempt submission exist.
 8. **Consultation discovery is missing.** Booking/payment requests require package and availability IDs that no learner endpoint exposes.
 
-C10.5 frontend guardrails do not change these backend facts:
+C10.5/A3 frontend guardrails do not change these backend facts:
 
-- `PUT /api/Auth/update-email/{userId}` and
-  `POST /api/Auth/change-password/{userId}` remain intentionally unimplemented
-  and unexposed in the mobile app until backend authorization is enforced.
+- A3 integrates `PUT /api/Auth/update-email/{userId}` and
+  `POST /api/Auth/change-password/{userId}` only behind authenticated frontend
+  routes, with the path ID taken from the current stored session and the normal
+  bearer interceptor. This client restriction does not provide server-side
+  authorization; both routes remain backend security blockers until ownership
+  and role enforcement are added.
 - No response DTO was generated from the untyped live Swagger responses.
   Existing Auth response parsing remains explicitly source-backed.
 - Local sign-out only clears secure client state. It does not claim token
@@ -41,6 +44,15 @@ C10.5 frontend guardrails do not change these backend facts:
   returns only `fullName` and `email`, while `VerifyEmailRequest` requires both
   `userId` and `verificationCode`. The newly created user's ID is not available
   to the mobile client through the registration response.
+
+Priority A1 reverified the unchanged live OpenAPI snapshot on 2026-09-18. An
+invalid Login reached the deployed endpoint and returned the source-shaped HTTP
+400 envelope with `statusCode`, `isSuccess`, and `errorMessage`. A malformed,
+non-mutating Register probe returned the ASP.NET validation-problem shape rather
+than `ApiResponse<T>`. No successful Login/Register response was observed
+because no safe test credentials or test inbox were provided; the source-backed
+success DTOs and missing registration `userId` therefore remain unverified at
+the live response-schema/runtime-success level.
 
 `POST /api/Email/send-validation` is not an acceptable mobile replacement: it accepts destination email plus arbitrary HTML and is described as backend/admin-oriented.
 
@@ -91,6 +103,85 @@ backend IDs.
 - They cannot offer a contract-derived JLPT selector until the level catalog exists.
 - Pagination limits and maximum `pageSize` are not published.
 
+#### C11 vocabulary integration gaps
+
+The following vocabulary findings were confirmed against live Swagger, live
+runtime requests, `SharedBankController`, `SharedBankSearchService`, the bank
+response and filter types, vocabulary/JLPT entities, and the Notebook source.
+
+| Feature | Current backend capability | Frontend requirement | Confirmed missing or ambiguous contract | Priority | Blocks integration |
+|---|---|---|---|---|---|
+| Vocabulary data | `POST /api/SharedBank/vocabulary/search` returned a valid empty page during C11 verification | A usable N5/N4/N3 vocabulary library | The deployed vocabulary bank contained zero returned entries at verification time | P0 | Yes, for real content; C11 uses clearly labeled fixtures when page 1 is empty |
+| JLPT filtering | Search accepts nullable integer `jlptLevelId` | N5/N4/N3 filter chips | No endpoint or published mapping relates N5/N4/N3 names to numeric IDs | P0 | Yes, for remote filtering |
+| Detail composition | Detail returns `VocabularyCardResponse`, the same fields used by search cards | Stitch detail sections such as Hán-Việt, expanded definition, translations, collocations, nuance, Kanji analysis, frequency, and related lessons | None of those enrichment fields are in the response contract | P1 | Yes, for full detail fidelity |
+| Part of speech | Response type declares `partOfSpeech` | Render a reliable part-of-speech label | The inspected `MapVocabulary` source does not assign `PartOfSpeech`, so source behavior produces an empty value; live behavior could not be observed because the list was empty | P1 | Yes, for this label |
+| Example sentence | Response type declares non-null `exampleSentence` | Render an example and translation safely | The entity field is nullable, the mapper passes it through, null JSON is omitted globally, and no translation field exists | P1 | Yes, for guaranteed examples/translations |
+| Search coverage | Source searches `word`, `reading`, and `meaning` | Stitch search hint also suggests Romaji and Hán-Việt | No Romaji or Hán-Việt search field/behavior exists | P1 | Yes, for those search modes |
+| Saved status | Notebook can bookmark a known bank entry into a known list | Show per-entry saved status and reconcile it after reload | Bank responses have no saved flag; Notebook responses do not expose the originating `vocabularyEntryId`; removal requires `noteEntryId` | P0 | Yes, for reliable saved-state synchronization and removal after reload |
+| Duplicate bookmark behavior | Bookmark creates a note entry and SRS item | Idempotent save UX | No idempotency key or duplicate-bookmark contract/check was found | P1 | Yes, for safe retry/idempotency |
+| Audio | Bank response has nullable `audioUrl` | Word and sentence playback | No guaranteed audio, sentence-audio/TTS contract, or URL lifetime/refresh policy exists | P1 | Yes, when `audioUrl` is absent or expires |
+| Published-content safety | Search/detail read shared-bank records | Learner screens should expose only published content | Search passes no content-status filter and detail has no confirmed published-status check in the inspected source; live behavior is unverified because the bank was empty | P0 | Yes, pending backend confirmation or enforcement |
+| Pagination validation | Source normalizes page below 1 to 1, page size below 1 to 20, and caps page size at 100 | Stable client-side paging rules | Swagger publishes no defaults, ranges, or maximum | P1 | No for conservative paging; yes for generated validation |
+
+C11 therefore keeps fixture route keys separate from numeric backend IDs,
+labels fixture content, never sends a guessed JLPT ID, accepts nullable audio
+and example fields, and only calls Notebook bookmarking for remote entries with
+a real backend ID.
+
+#### C12 Kanji integration gaps
+
+The following findings were confirmed on 2026-09-12 against live Swagger,
+runtime requests, `SharedBankController`, `SharedBankSearchService`, the Kanji
+entity/configuration/repository, bank response and filter types, and Notebook
+controller/service/request types in the supplied read-only backend source.
+
+| Feature | Current backend capability | Frontend requirement | Confirmed missing or mismatched contract | Priority | Blocks integration |
+|---|---|---|---|---|---|
+| Kanji data | `POST /api/SharedBank/kanji/search` returned a valid empty paged result | A usable N5/N4/N3 Kanji library | The deployed Kanji bank returned zero entries at verification time | P0 | Yes, for real content; C12 uses clearly labeled fixtures when page 1 is empty |
+| JLPT filtering | Search accepts nullable integer `jlptLevelId` | N5/N4/N3 filter chips | No endpoint or published mapping relates N5/N4/N3 names to numeric IDs | P0 | Yes, for remote filtering |
+| Detail composition | Detail returns the same `KanjiCardResponse` shape used by search | Radical, mnemonic, compound words, translated examples, and related lesson content shown by Stitch | These enrichment fields are absent; the controller comment mentions examples but the executable response type does not contain them | P1 | Yes, for full Stitch detail fidelity |
+| On reading nullability | `KanjiCardResponse.onYomi` is declared non-nullable | Safe rendering of optional readings | `KanjiEntry.OnYomi` is nullable, the mapper passes it through, and global JSON options omit null values | P1 | No when parsed as nullable; yes for generated non-null clients |
+| Keyword search | Source repository searches `character` and `meaning` | Predictable search hint and behavior | On-yomi, kun-yomi, and Hán-Việt fields are not included in source search despite the broader Stitch search hint | P1 | Yes, for reading/Hán-Việt search |
+| Stroke order | Response can contain one nullable `strokeOrderUrl` image | The approved stroke screen shows an 18-step sequence, active stroke, animation controls, directions, and writing rules | No stroke-sequence, vector, direction, animation, speed, or rules contract exists | P1 | Yes, for production stroke animation; a typed, labeled Stitch fixture is isolated in C12 |
+| Saved status | Notebook can bookmark a known Kanji entry into a known list | Show and reconcile saved state after reload | Bank responses have no saved flag; Notebook responses do not return the originating `kanjiEntryId`; removal requires `noteEntryId` | P0 | Yes, for reliable saved-state synchronization and removal after reload |
+| Duplicate bookmark behavior | Bookmark creates a note entry and SRS item | Idempotent save and retry UX | No idempotency key or duplicate-bookmark check/contract was found | P1 | Yes, for safe retries |
+| Bookmark documentation | Executable request and live Swagger use `vocabularyListId` plus `kanjiEntryId` | Stable generated/manual client documentation | Controller XML text says `KanjiId or Character` although neither name matches the request DTO | P2 | No; C12 follows the executable DTO and live request schema |
+| Audio | Bank response has nullable `audioUrl` | Reading playback | No guaranteed audio or URL lifetime/signing/refresh policy exists | P1 | Yes when audio is absent or expires |
+| Published-content safety | Search/detail read shared-bank Kanji records | Learner screens should expose only published content | Search passes no content-status filter and detail has no confirmed published-status check | P0 | Yes, pending backend enforcement or confirmation |
+| Pagination validation | Source normalizes page below 1 to 1, page size below 1 to 20, and caps page size at 100 | Stable client paging rules | Swagger publishes no defaults, ranges, or maximum; stroke min/max also have no range/cross-field rule | P1 | No for conservative paging; yes for generated validation |
+
+C12 therefore keeps `fixture-*` route keys separate from numeric `remote-*`
+IDs, labels visual-only enrichment, never sends a guessed JLPT ID, treats
+`onYomi` and media URLs as nullable, and calls Kanji bookmarking only for a
+remote entry with a real backend ID.
+
+#### C13 Grammar integration gaps
+
+The following findings were confirmed on 2026-09-13 against live Swagger,
+read-only runtime requests, `SharedBankController`,
+`SharedBankSearchService`, the Grammar entity/configuration/repository, bank
+response/filter types, and the Notebook controller/service in the supplied
+read-only backend source.
+
+| Feature | Current backend capability | Frontend requirement | Confirmed missing or mismatched contract | Priority | Blocks integration |
+|---|---|---|---|---|---|
+| Grammar data | `POST /api/SharedBank/grammar/search` returned HTTP 200 with a valid empty paged result; `GET /api/SharedBank/grammar/1` returned the source-shaped HTTP 404 envelope | A usable N5/N4/N3 Grammar library | The deployed Grammar bank returned zero entries at verification time | P0 | Yes, for real content; C13 uses clearly labeled fixtures only when page 1 is empty |
+| JLPT filtering | Search accepts nullable integer `jlptLevelId` | N5/N4/N3 filter chips | No endpoint or published mapping relates N5/N4/N3 labels to numeric IDs | P0 | Yes, for remote filtering |
+| Published-content safety | Search/detail read shared-bank Grammar records | Learners must receive only published Grammar | Search passes `status: null`, and detail has no published-status check in the inspected source | P0 | Yes, pending backend enforcement |
+| Detail composition | Detail returns the same `GrammarCardResponse` shape as search | Stitch sections for distinct meaning, usage rules, cautions, multiple translated examples, related Grammar, lesson links, audio, and practice | None of those richer fields/relationships are exposed by the executable response type | P1 | Yes, for full Stitch detail fidelity |
+| Explanation/example nullability | Response properties are declared non-nullable strings | Safe optional rendering | Mapper assigns nullable `UsageNotes` and `ExampleSentence` directly; global JSON options omit null values, so either field can be absent at runtime | P1 | No when parsed as optional; yes for generated non-null clients |
+| Example translation | Entity contains nullable `ExampleSentenceMeaning` | Vietnamese example translation | `GrammarCardResponse` and `MapGrammar` do not expose the entity field | P1 | Yes |
+| Keyword behavior | Source searches `title`, `structure`, and nullable `usageNotes` | Predictable multilingual search | Example sentence and translation are not searched; collation/case behavior is database-dependent and not published | P1 | Yes, for broader Stitch search expectations |
+| Related Grammar | No related-Grammar field or endpoint was found | “Ngữ pháp liên quan & phân biệt” section | Relationship IDs, summaries, ordering, and comparison guidance are absent | P1 | Yes; C13 keeps this as labeled fixture enrichment only |
+| Saved status/removal | `POST /api/Notebook/bookmark/grammar/{grammarPointId}` creates a review item for a Learner | Reliable save/un-save and saved-state restoration | Bank responses have no saved flag, the bookmark service has no duplicate check/idempotency contract, and no Grammar-specific unbookmark/read-state contract was found | P0 | Yes; C13 does not expose Notebook actions |
+| Authentication publication | SharedBank source is public; Notebook source requires Learner | Accurate per-operation auth | Live Swagger applies Bearer globally and cannot express the public SharedBank exception; responses remain untyped | P1 | No for search/detail after source/runtime verification; yes for generated auth metadata |
+| Pagination validation | Source normalizes page below 1 to 1, page size below 1 to 20, and caps page size at 100 | Stable client paging rules | Swagger publishes no defaults, ranges, or maximum | P1 | No for conservative paging; yes for generated validation |
+
+C13 therefore keeps `fixture-*` keys separate from numeric `remote-*` IDs,
+labels fixture-only enrichment, treats nullable entity-backed strings as
+optional, never sends a guessed JLPT ID, and leaves Notebook, audio, lessons,
+practice, and related-Grammar production integration deferred.
+
 ### Personal Vocabulary
 
 - Update a manual/saved entry — **NOT YET AVAILABLE**.
@@ -98,6 +189,31 @@ backend IDs.
 - List/search all notebook entries independent of a list — **NOT YET AVAILABLE**.
 - Entry/list pagination — **NOT YET AVAILABLE**.
 - Offline sync push/pull, versioning, tombstones, idempotency, and conflict resolution — **NOT YET AVAILABLE**.
+
+#### C14 Notebook integration gaps
+
+The following findings were confirmed on 2026-09-13 against live Swagger,
+an unauthenticated runtime request, and the read-only Notebook controller,
+service, requests, responses, repositories, entities, and EF configurations.
+
+| Feature | Current backend capability | Frontend requirement | Missing/ambiguous contract | Swagger/backend mismatch | Priority | Blocks real integration |
+|---|---|---|---|---|---|---|
+| Saved-state lookup | A learner can bookmark a known bank vocabulary ID into a known list | Restore whether a bank entry is saved and offer reliable save/unsave | No saved-state endpoint or flag exists; NotebookEntryResponse omits the originating vocabularyEntryId | Live responses have no schemas, so the omission is only verifiable from source/runtime-shaped fixtures | P0 | Yes |
+| Duplicate save | Each bookmark call creates a new note entry and linked ReviewItem | Safe retries and one logical bookmark per list/word | No uniqueness rule, duplicate check, idempotency key, or conflict response exists | Swagger declares only an untyped 200, while source creates a new result with Created semantics | P0 | Yes |
+| Cross-list reconciliation | Lists and their entries can be read one list at a time | Show all locations containing one vocabulary item and remove the correct bookmark | There is no all-entry lookup and an entry cannot be related back to its source bank ID | Swagger publishes the per-list path but no response schema or relationship fields | P0 | Yes |
+| Remote detail navigation | Per-list reads return term, reading, meaning, note, and note/review IDs | Open the source Vocabulary Detail from Notebook | vocabularyEntryId is not returned, so the frontend cannot derive a real detail route | Live response schema is absent; source response confirms the missing ID | P1 | Yes |
+| Notebook search/filter | GET /api/Notebook/lists/{listId}/entries returns a complete list ordered newest-first in source | Server-backed search, JLPT filters, and SRS-status filters shown by Stitch | No query parameters or all-list search endpoint exists; entries expose neither JLPT nor review status | Swagger shows no parameters or response schema; source confirms no filters/pagination | P1 | Yes, for server-backed/global filtering; no for local search of a loaded list |
+| Pagination | Lists and per-list entries return arrays | Scale large personal notebooks | No page fields, limits, continuation token, or stable paging contract exists | Swagger has no pagination parameters and untyped responses | P1 | Yes, for large-data incremental loading |
+| Manual-entry fidelity | POST /api/Notebook/entries accepts list ID, word, optional reading, meaning, and optional note | Stitch also shows JLPT, part of speech, and example fields | JLPT, part of speech, examples, and example translations cannot be stored | Live request schema matches source but marks every property optional; source validates word and meaning at service level | P1 | Yes, for full Stitch form fidelity |
+| Entry edit/move | An entry can be added and deleted | Edit notes/content or move/copy between lists | No update-entry or move-entry endpoint exists | No such operation appears in live Swagger or source | P1 | Yes |
+| Delete contract | Source ownership-checks the list and removes the note plus its linked ReviewItem | Confirm deletion and update UI safely | No typed success body/status contract or concurrency/not-found recovery contract is published | Swagger declares only untyped 200; source can return success/403/404/500-style envelopes | P1 | No for basic online delete; yes for generated/optimistic conflict handling |
+| Create-list validation | POST /api/Notebook/lists creates a list; source rejects blank names and EF limits names to 200 characters | Accurate client validation and generated DTO requiredness | No description limit or duplicate-name rule is defined | Live body/fields are optional and publish neither the source-required name nor its 200-character limit | P1 | No for source-backed required-name/length validation |
+| Content type | Source currently maps vocabulary, kanji, or manual | Stable typed display and future compatibility | contentType is a plain string, not an enum or exhaustive contract | Live response schema is absent | P2 | No; C14 preserves unknown values as an explicit fallback |
+| Offline synchronization | No Notebook sync/version endpoint exists | Durable offline Notebook edits, retries, and conflict resolution | Versions, tombstones, retry tokens, idempotency, and reconciliation are absent | No live or source operations exist | P0 | Yes; deferred to C15/backend work |
+
+C14 therefore uses real per-list reads and mutations, performs search only over
+the currently loaded list, never derives a vocabulary route from a note ID, and
+does not expose JLPT/SRS filters that the response cannot support.
 
 ### Review/SRS
 
@@ -182,9 +298,10 @@ Source contains `SubmitEssayRequest`/`SubmitEssayResponse` types, but no live or
 - `LoginResponse.role` and `UserProfileResponse.role` are strings; known source role values are documented, but live responses remain untyped.
 - The approved registration UI presents one Vietnamese full-name field, while
   `RegisterRequest` exposes separate nullable `firstName` and `lastName` fields
-  and publishes no locale-aware name-order or splitting rule. The frontend must
-  collect these values separately until product/backend naming behavior is
-  clarified.
+  and publishes no locale-aware name-order or splitting rule. A3 preserves the
+  approved single field and uses a deterministic adapter (first token to
+  `lastName`, remainder to `firstName`), but compound-family-name fidelity
+  remains ambiguous until backend/product naming behavior is defined.
 - The JWT expires after one day in the supplied source, but login does not return `expiresAt`; deployed parity is not expressible through Swagger.
 - Date/time fields do not publish an offset/timezone policy.
 - Media URL lifetime, signing, and refresh behavior are not documented for avatar, video, attachment, audio, image, or stroke-order URLs.
@@ -208,7 +325,9 @@ Source contains `SubmitEssayRequest`/`SubmitEssayResponse` types, but no live or
 
 ## APIs currently connectable with stated limitations
 
-- Register, verify email, and login with an access token only.
+- Register and login with an access token only. Verify Email is wired for a
+  trusted known `userId`, but Register cannot hand it off because its response
+  omits that ID.
 - Learner profile, avatar, JLPT-goal update, notification preferences, and analytics.
 - Vocabulary, Kanji, and Grammar search/detail when integer JLPT IDs are already known.
 - Notebook list management, bookmarking, manual add, entry/list delete, and per-list entry reads.

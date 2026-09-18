@@ -16,8 +16,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -25,8 +24,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -35,9 +33,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
-    await ref.read(registerControllerProvider.notifier).submit(
-          firstName: _firstNameController.text,
-          lastName: _lastNameController.text,
+    await ref
+        .read(registerControllerProvider.notifier)
+        .submit(
+          fullName: _fullNameController.text,
           email: _emailController.text,
           password: _passwordController.text,
           confirmPassword: _confirmPasswordController.text,
@@ -92,44 +91,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.space6),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: RikiTextField(
-                      key: const Key('register_last_name_field'),
-                      label: 'Họ',
-                      hintText: 'Nguyễn',
-                      controller: _lastNameController,
-                      prefixIcon: Icons.person_outline,
-                      enabled: !state.isLoading,
-                      textInputAction: TextInputAction.next,
-                      textCapitalization: TextCapitalization.words,
-                      autofillHints: const [AutofillHints.familyName],
-                      onChanged: (_) => _clearFeedback(),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.space3),
-                  Expanded(
-                    child: RikiTextField(
-                      key: const Key('register_first_name_field'),
-                      label: 'Tên',
-                      hintText: 'Minh Anh',
-                      controller: _firstNameController,
-                      enabled: !state.isLoading,
-                      textInputAction: TextInputAction.next,
-                      textCapitalization: TextCapitalization.words,
-                      autofillHints: const [AutofillHints.givenName],
-                      onChanged: (_) => _clearFeedback(),
-                    ),
-                  ),
-                ],
+              RikiTextField(
+                key: const Key('register_full_name_field'),
+                label: 'Họ và tên',
+                hintText: 'Nguyễn Minh Anh',
+                controller: _fullNameController,
+                prefixIcon: Icons.person_outline,
+                enabled: !state.isLoading,
+                textInputAction: TextInputAction.next,
+                textCapitalization: TextCapitalization.words,
+                autofillHints: const [AutofillHints.name],
+                onChanged: (_) => _clearFeedback(),
               ),
               const SizedBox(height: AppSpacing.fieldGap),
               RikiTextField(
                 key: const Key('register_email_field'),
                 label: 'Email học viên',
-                hintText: 'nhap.email@example.com',
+                hintText: 'hocvien@example.com',
                 controller: _emailController,
                 prefixIcon: Icons.mail_outline,
                 suffixIcon: state.isLoading
@@ -147,6 +125,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               RikiPasswordField(
                 key: const Key('register_password_field'),
                 label: 'Mật khẩu',
+                hintText: 'Nhập mật khẩu',
                 controller: _passwordController,
                 errorText: state.passwordError,
                 enabled: !state.isLoading,
@@ -177,6 +156,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               RikiPasswordField(
                 key: const Key('register_confirm_password_field'),
                 label: 'Xác nhận mật khẩu',
+                hintText: 'Nhập lại mật khẩu',
                 controller: _confirmPasswordController,
                 errorText: state.confirmPasswordError,
                 enabled: !state.isLoading,
@@ -189,6 +169,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: AppSpacing.space3),
               RikiCheckboxRow(
                 value: _acceptedTerms,
+                compact: true,
                 onChanged: state.isLoading
                     ? null
                     : (value) {
@@ -249,7 +230,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: AppSpacing.space4),
                 const RikiWarningBanner(
                   icon: Icons.hourglass_bottom,
-                  message: 'Đang tạo tài khoản học viên và gửi email xác thực...',
+                  message:
+                      'Đang tạo tài khoản học viên và gửi email xác thực...',
                 ),
                 const SizedBox(height: AppSpacing.space3),
                 const RikiProgressIndicator(
@@ -280,10 +262,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 }
 
 class _RegisterSuccess extends StatelessWidget {
-  const _RegisterSuccess({
-    required this.email,
-    required this.onReturnToLogin,
-  });
+  const _RegisterSuccess({required this.email, required this.onReturnToLogin});
 
   final String email;
   final VoidCallback onReturnToLogin;
@@ -324,7 +303,9 @@ class _RegisterSuccess extends StatelessWidget {
               const SizedBox(height: AppSpacing.space4),
               const RikiWarningBanner(
                 icon: Icons.mark_email_unread_outlined,
-                message: 'Bạn cần xác thực email trước khi đăng nhập.',
+                message:
+                    'Bạn cần xác thực email trước khi đăng nhập. Phản hồi đăng ký '
+                    'hiện chưa trả về mã tài khoản để ứng dụng mở bước nhập mã tự động.',
               ),
             ],
           ),

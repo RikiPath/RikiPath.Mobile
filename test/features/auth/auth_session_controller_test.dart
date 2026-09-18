@@ -11,6 +11,7 @@ void main() {
     () async {
       final secureStore = TestSecureKeyValueStore(
         accessToken: 'persisted-token',
+        userId: 42,
       );
       final container = ProviderContainer(
         overrides: [
@@ -25,6 +26,7 @@ void main() {
       await pumpEventQueue();
 
       expect(controller.value, AuthSessionState.authenticated);
+      expect(controller.currentUserId, 42);
     },
   );
 
@@ -37,6 +39,7 @@ void main() {
     await controller.restore();
 
     expect(controller.value, AuthSessionState.unauthenticated);
+    expect(controller.currentUserId, isNull);
   });
 
   test('sign out removes the token and ends the local session', () async {
@@ -51,6 +54,7 @@ void main() {
     await controller.signOut();
 
     expect(controller.value, AuthSessionState.unauthenticated);
+    expect(controller.currentUserId, isNull);
     expect(await tokenStorage.readAccessToken(), isNull);
     expect(secureStore.values, isEmpty);
   });

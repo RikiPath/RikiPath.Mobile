@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 
 class AuthSuccessIllustration extends StatelessWidget {
-  const AuthSuccessIllustration({
-    required this.icon,
-    super.key,
-  });
+  const AuthSuccessIllustration({required this.icon, super.key});
 
   final IconData icon;
 

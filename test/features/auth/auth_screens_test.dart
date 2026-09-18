@@ -31,6 +31,45 @@ void main() {
       expect(find.text('Email học viên'), findsOneWidget);
       expect(find.text('Mẹo đăng nhập'), findsOneWidget);
       expect(find.text('Bảo mật chuẩn mã hóa Riki Learning'), findsOneWidget);
+      expect(
+        tester
+            .widget<TextField>(_textField('login_password_field'))
+            .decoration
+            ?.hintText,
+        'Nhập mật khẩu',
+      );
+
+      final promptCenter = tester.getCenter(find.text('Chưa có tài khoản?')).dy;
+      final actionCenter = tester.getCenter(find.text('Đăng ký')).dy;
+      expect(
+        (promptCenter - actionCenter).abs(),
+        lessThanOrEqualTo(0.5),
+        reason:
+            'Prompt ${tester.getSize(find.text('Chưa có tài khoản?'))} and '
+            'action ${tester.getSize(find.text('Đăng ký'))} should share a row.',
+      );
+
+      final forgotPasswordText = tester.getRect(find.text('Quên mật khẩu?'));
+      final rememberText = tester.getRect(
+        find.text('Ghi nhớ phiên đăng nhập trên thiết bị này'),
+      );
+      final checkbox = tester.getRect(find.byType(Checkbox));
+      final submitButton = tester.getRect(
+        find.byKey(const Key('login_submit_button')),
+      );
+      expect(
+        rememberText.top - forgotPasswordText.bottom,
+        lessThanOrEqualTo(AppSpacing.space6),
+      );
+      expect(
+        submitButton.top - rememberText.bottom,
+        lessThanOrEqualTo(AppSpacing.space6),
+      );
+      expect(
+        rememberText.left - checkbox.right,
+        lessThanOrEqualTo(AppSpacing.space1),
+      );
+      expect(rememberText.center.dy - checkbox.center.dy, 0);
     });
 
     testWidgets('empty form prevents repository submission', (tester) async {
@@ -110,6 +149,14 @@ void main() {
     ) async {
       await _pumpAuthRoute(tester, AppRoutes.login, _FakeAuthRepository());
 
+      final passwordBottom = tester
+          .getBottomLeft(find.byKey(const Key('login_password_field')))
+          .dy;
+      final forgotPasswordTop = tester
+          .getTopLeft(find.byKey(const Key('forgot_password_button')))
+          .dy;
+      expect(forgotPasswordTop, greaterThanOrEqualTo(passwordBottom));
+
       await tester.tap(find.text('Quên mật khẩu?'));
       await tester.pumpAndSettle();
 
@@ -156,6 +203,28 @@ void main() {
       final repository = _FakeAuthRepository();
       await _pumpAuthRoute(tester, AppRoutes.register, repository);
 
+      expect(
+        tester
+            .widget<TextField>(_textField('register_full_name_field'))
+            .decoration
+            ?.hintText,
+        'Nguyễn Minh Anh',
+      );
+      expect(
+        tester
+            .widget<TextField>(_textField('register_password_field'))
+            .decoration
+            ?.hintText,
+        'Nhập mật khẩu',
+      );
+      expect(
+        tester
+            .widget<TextField>(_textField('register_confirm_password_field'))
+            .decoration
+            ?.hintText,
+        'Nhập lại mật khẩu',
+      );
+
       await _tapVisible(
         tester,
         find.byKey(const Key('register_submit_button')),
@@ -194,6 +263,10 @@ void main() {
       final repository = _FakeAuthRepository(registerCompleter: completer);
       await _pumpAuthRoute(tester, AppRoutes.register, repository);
       await tester.enterText(
+        _textField('register_full_name_field'),
+        '  Nguyễn   Minh Anh  ',
+      );
+      await tester.enterText(
         _textField('register_email_field'),
         'learner@example.com',
       );
@@ -219,10 +292,41 @@ void main() {
         isTrue,
       );
       expect(repository.registerCalls, 1);
+      expect(repository.lastRegisterRequest?.lastName, 'Nguyễn');
+      expect(repository.lastRegisterRequest?.firstName, 'Minh Anh');
 
       completer.complete(_registerResponse);
       await tester.pumpAndSettle();
       expect(find.text('Tạo tài khoản thành công'), findsOneWidget);
+    });
+
+    testWidgets('duplicate email renders controlled backend feedback', (
+      tester,
+    ) async {
+      final repository = _FakeAuthRepository(
+        registerError: const ValidationError(
+          message: 'Email này đã được đăng ký.',
+        ),
+      );
+      await _pumpAuthRoute(tester, AppRoutes.register, repository);
+      await tester.enterText(
+        _textField('register_email_field'),
+        'learner@example.com',
+      );
+      await tester.enterText(_textField('register_password_field'), 'secret');
+      await tester.enterText(
+        _textField('register_confirm_password_field'),
+        'secret',
+      );
+
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('register_submit_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Không thể tạo tài khoản'), findsOneWidget);
+      expect(find.textContaining('email đã được sử dụng'), findsOneWidget);
     });
 
     testWidgets('login action returns to login', (tester) async {
@@ -345,17 +449,20 @@ class _FakeAuthRepository implements AuthRepository {
     this.loginCompleter,
     this.registerCompleter,
     this.loginError,
+    this.registerError,
     this.passwordResetError,
   });
 
   final Completer<LoginResponseDto>? loginCompleter;
   final Completer<RegisterResponseDto>? registerCompleter;
   final Object? loginError;
+  final Object? registerError;
   final Object? passwordResetError;
 
   int loginCalls = 0;
   int registerCalls = 0;
   int passwordResetCalls = 0;
+  RegisterRequestDto? lastRegisterRequest;
 
   @override
   Future<LoginResponseDto> login(
@@ -370,8 +477,22 @@ class _FakeAuthRepository implements AuthRepository {
   @override
   Future<RegisterResponseDto> register(RegisterRequestDto request) {
     registerCalls += 1;
+    lastRegisterRequest = request;
+    if (registerError != null) return Future.error(registerError!);
     return registerCompleter?.future ?? Future.value(_registerResponse);
   }
+
+  @override
+  Future<void> verifyEmail(VerifyEmailRequestDto request) async {}
+
+  @override
+  Future<void> updateEmail(int userId, UpdateEmailRequestDto request) async {}
+
+  @override
+  Future<void> changePassword(
+    int userId,
+    ChangePasswordRequestDto request,
+  ) async {}
 
   @override
   Future<void> requestPasswordReset(String email) {

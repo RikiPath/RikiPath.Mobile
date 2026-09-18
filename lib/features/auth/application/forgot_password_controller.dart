@@ -5,8 +5,8 @@ import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
 
 final forgotPasswordControllerProvider =
     NotifierProvider<ForgotPasswordController, ForgotPasswordState>(
-  ForgotPasswordController.new,
-);
+      ForgotPasswordController.new,
+    );
 
 enum ForgotPasswordStage { form, submitting, success }
 
@@ -49,9 +49,7 @@ class ForgotPasswordController extends Notifier<ForgotPasswordState> {
     }
 
     final normalizedEmail = email.trim();
-    state = const ForgotPasswordState(
-      stage: ForgotPasswordStage.submitting,
-    );
+    state = const ForgotPasswordState(stage: ForgotPasswordStage.submitting);
     try {
       await ref
           .read(authRepositoryProvider)
@@ -63,10 +61,7 @@ class ForgotPasswordController extends Notifier<ForgotPasswordState> {
       return true;
     } catch (error) {
       state = ForgotPasswordState(
-        serverError: authErrorMessage(
-          error,
-          AuthOperation.passwordRecovery,
-        ),
+        serverError: authErrorMessage(error, AuthOperation.passwordRecovery),
       );
       return false;
     }

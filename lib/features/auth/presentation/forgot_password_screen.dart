@@ -92,7 +92,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               RikiTextField(
                 key: const Key('forgot_email_field'),
                 label: 'EMAIL ĐÃ ĐĂNG KÝ',
-                hintText: 'nhap.email@example.com',
+                hintText: 'hocvien@example.com',
                 controller: _emailController,
                 prefixIcon: Icons.mail_outline,
                 errorText: state.emailError,
@@ -184,12 +184,14 @@ class _ForgotPasswordSuccess extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space6),
               const RikiSuccessBanner(
-                message: 'Vui lòng kiểm tra email để tiếp tục đặt lại mật khẩu.',
+                message:
+                    'Vui lòng kiểm tra email để tiếp tục đặt lại mật khẩu.',
               ),
               const SizedBox(height: AppSpacing.space4),
               const RikiWarningBanner(
                 icon: Icons.info_outline,
-                message: 'Nếu không thấy email trong Hộp thư đến, vui lòng '
+                message:
+                    'Nếu không thấy email trong Hộp thư đến, vui lòng '
                     'kiểm tra Thư rác hoặc Spam.',
               ),
               const SizedBox(height: AppSpacing.space6),

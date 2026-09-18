@@ -7,10 +7,14 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/auth/presentation/account_settings_screen.dart';
+import 'package:rikipath_mobile/features/auth/presentation/change_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/forgot_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/login_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/register_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/splash_screen.dart';
+import 'package:rikipath_mobile/features/auth/presentation/update_email_screen.dart';
+import 'package:rikipath_mobile/features/auth/presentation/verify_email_screen.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
@@ -26,12 +30,16 @@ void main() {
     expect(AppRoutes.login, '/auth/login');
     expect(AppRoutes.register, '/auth/register');
     expect(AppRoutes.forgotPassword, '/auth/forgot-password');
+    expect(AppRoutes.verifyEmail, '/auth/verify-email');
     expect(AppRoutes.onboarding, '/onboarding');
     expect(AppRoutes.home, '/home');
     expect(AppRoutes.learn, '/learn');
     expect(AppRoutes.practice, '/practice');
     expect(AppRoutes.notebook, '/notebook');
     expect(AppRoutes.profile, '/profile');
+    expect(AppRoutes.profileAccount, '/profile/account');
+    expect(AppRoutes.profileChangeEmail, '/profile/change-email');
+    expect(AppRoutes.profileChangePassword, '/profile/change-password');
   });
 
   testWidgets('unknown session stays on splash until restoration completes', (
@@ -79,6 +87,12 @@ void main() {
     expect(find.byType(ForgotPasswordScreen), findsOneWidget);
     expect(find.text('Quên mật khẩu?'), findsOneWidget);
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
+
+    router.go(AppRoutes.verifyEmail);
+    await tester.pumpAndSettle();
+    expect(find.byType(VerifyEmailScreen), findsOneWidget);
+    expect(find.text('Chưa thể tiếp tục từ đăng ký'), findsOneWidget);
+    expect(find.byType(RikiBottomNavigationBar), findsNothing);
   });
 
   testWidgets('unauthenticated learner route redirects to login', (
@@ -99,6 +113,24 @@ void main() {
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
   });
 
+  testWidgets('unauthenticated account mutation route redirects to login', (
+    tester,
+  ) async {
+    final session = createTestAuthSession(
+      initialState: AuthSessionState.unauthenticated,
+    );
+
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.profileChangeEmail,
+      authSession: session,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.byType(UpdateEmailScreen), findsNothing);
+  });
+
   testWidgets('authenticated users can access learner and onboarding routes', (
     tester,
   ) async {
@@ -116,6 +148,45 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(OnboardingScreen), findsOneWidget);
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
+  });
+
+  testWidgets('authenticated account routes are reachable from Profile', (
+    tester,
+  ) async {
+    final router = await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.profile,
+    );
+
+    await tester.tap(find.text('Cài đặt'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AccountSettingsScreen), findsOneWidget);
+
+    router.go(AppRoutes.profileChangeEmail);
+    await tester.pumpAndSettle();
+    expect(find.byType(UpdateEmailScreen), findsOneWidget);
+
+    router.go(AppRoutes.profileChangePassword);
+    await tester.pumpAndSettle();
+    expect(find.byType(ChangePasswordScreen), findsOneWidget);
+  });
+
+  testWidgets('account logout clears the session and returns to Login', (
+    tester,
+  ) async {
+    final session = createTestAuthSession(userId: 42);
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.profileAccount,
+      authSession: session,
+    );
+
+    await tester.tap(find.byKey(const Key('account_logout_button')));
+    await tester.pumpAndSettle();
+
+    expect(session.value, AuthSessionState.unauthenticated);
+    expect(session.currentUserId, isNull);
+    expect(find.byType(LoginScreen), findsOneWidget);
   });
 
   testWidgets('authenticated auth route redirects once to learner home', (
@@ -148,6 +219,20 @@ void main() {
       authRouteRedirect(
         authState: AuthSessionState.authenticated,
         matchedLocation: AppRoutes.home,
+      ),
+      isNull,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.unauthenticated,
+        matchedLocation: AppRoutes.verifyEmail,
+      ),
+      isNull,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        matchedLocation: AppRoutes.verifyEmail,
       ),
       isNull,
     );

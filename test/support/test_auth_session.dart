@@ -4,17 +4,23 @@ import 'package:rikipath_mobile/features/auth/application/auth_session_controlle
 AuthSessionController createTestAuthSession({
   AuthSessionState initialState = AuthSessionState.authenticated,
   TestSecureKeyValueStore? secureStore,
+  int? userId,
 }) {
   return AuthSessionController(
     TokenStorage(secureStore ?? TestSecureKeyValueStore()),
     initialState: initialState,
+    initialUserId:
+        userId ?? (initialState == AuthSessionState.authenticated ? 42 : null),
   );
 }
 
 class TestSecureKeyValueStore implements SecureKeyValueStore {
-  TestSecureKeyValueStore({String? accessToken}) {
+  TestSecureKeyValueStore({String? accessToken, int? userId}) {
     if (accessToken != null) {
       values['access_token'] = accessToken;
+    }
+    if (userId != null) {
+      values['authenticated_user_id'] = userId.toString();
     }
   }
 

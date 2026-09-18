@@ -109,8 +109,8 @@ class _BackendErrorPayload {
       return null;
     }
 
-    final rawStatusCode = data['statusCode'];
-    final rawErrorMessage = data['errorMessage'];
+    final rawStatusCode = data['statusCode'] ?? data['status'];
+    final rawErrorMessage = data['errorMessage'] ?? data['title'];
     final rawErrors = data['errors'];
 
     return _BackendErrorPayload(
@@ -120,13 +120,7 @@ class _BackendErrorPayload {
           rawErrorMessage is String && rawErrorMessage.trim().isNotEmpty
           ? rawErrorMessage.trim()
           : null,
-      errors: rawErrors is List<Object?>
-          ? rawErrors
-                .whereType<String>()
-                .map((error) => error.trim())
-                .where((error) => error.isNotEmpty)
-                .toList(growable: false)
-          : const [],
+      errors: _readErrors(rawErrors),
     );
   }
 
@@ -134,4 +128,23 @@ class _BackendErrorPayload {
   final int? statusCode;
   final String? errorMessage;
   final List<String> errors;
+}
+
+List<String> _readErrors(Object? rawErrors) {
+  if (rawErrors is List<Object?>) {
+    return rawErrors
+        .whereType<String>()
+        .map((error) => error.trim())
+        .where((error) => error.isNotEmpty)
+        .toList(growable: false);
+  }
+  if (rawErrors is Map<Object?, Object?>) {
+    return rawErrors.values
+        .whereType<List<Object?>>()
+        .expand((errors) => errors.whereType<String>())
+        .map((error) => error.trim())
+        .where((error) => error.isNotEmpty)
+        .toList(growable: false);
+  }
+  return const [];
 }

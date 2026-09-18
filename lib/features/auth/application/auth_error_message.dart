@@ -1,7 +1,14 @@
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
 
-enum AuthOperation { login, register, passwordRecovery }
+enum AuthOperation {
+  login,
+  register,
+  verifyEmail,
+  updateEmail,
+  changePassword,
+  passwordRecovery,
+}
 
 String authErrorMessage(Object error, AuthOperation operation) {
   if (error is PasswordRecoveryUnavailableException) {
@@ -15,7 +22,15 @@ String authErrorMessage(Object error, AuthOperation operation) {
     return 'Không thể kết nối tới RikiPath. Vui lòng kiểm tra mạng và thử lại.';
   }
   if (error is UnauthorizedError) {
-    return 'Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.';
+    return operation == AuthOperation.login
+        ? 'Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.'
+        : 'Phiên đăng nhập không còn hợp lệ. Vui lòng đăng nhập lại.';
+  }
+  if (error is ForbiddenError) {
+    return 'Bạn không có quyền thực hiện thay đổi này.';
+  }
+  if (error is NotFoundError) {
+    return 'Không tìm thấy tài khoản cần cập nhật.';
   }
   if (error is ValidationError) {
     if (operation == AuthOperation.login) {
@@ -32,6 +47,12 @@ String authErrorMessage(Object error, AuthOperation operation) {
         'Thông tin đăng nhập chưa hợp lệ. Vui lòng kiểm tra lại.',
       AuthOperation.register =>
         'Thông tin đăng ký chưa hợp lệ hoặc email đã được sử dụng.',
+      AuthOperation.verifyEmail =>
+        'Mã xác thực không hợp lệ, đã hết hạn hoặc đã được sử dụng.',
+      AuthOperation.updateEmail =>
+        'Email mới chưa hợp lệ hoặc đã được sử dụng.',
+      AuthOperation.changePassword =>
+        'Mật khẩu hiện tại không đúng hoặc mật khẩu mới chưa hợp lệ.',
       AuthOperation.passwordRecovery =>
         'Email chưa hợp lệ. Vui lòng kiểm tra lại.',
     };

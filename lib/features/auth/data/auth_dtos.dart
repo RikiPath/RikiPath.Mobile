@@ -1,16 +1,13 @@
 class LoginRequestDto {
-  const LoginRequestDto({
-    required this.email,
-    required this.password,
-  });
+  const LoginRequestDto({required this.email, required this.password});
 
   final String email;
   final String password;
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'email': email,
-        'password': password,
-      };
+    'email': email,
+    'password': password,
+  };
 }
 
 class RegisterRequestDto {
@@ -29,12 +26,12 @@ class RegisterRequestDto {
   final String? lastName;
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'email': email,
-        'password': password,
-        'confirmPassword': confirmPassword,
-        'firstName': firstName,
-        'lastName': lastName,
-      };
+    'email': email,
+    'password': password,
+    'confirmPassword': confirmPassword,
+    'firstName': firstName,
+    'lastName': lastName,
+  };
 }
 
 class LoginResponseDto {
@@ -64,10 +61,7 @@ class LoginResponseDto {
 }
 
 class RegisterResponseDto {
-  const RegisterResponseDto({
-    required this.fullName,
-    required this.email,
-  });
+  const RegisterResponseDto({required this.fullName, required this.email});
 
   factory RegisterResponseDto.fromJson(Map<String, Object?> json) {
     return RegisterResponseDto(
@@ -78,6 +72,47 @@ class RegisterResponseDto {
 
   final String fullName;
   final String email;
+}
+
+class VerifyEmailRequestDto {
+  const VerifyEmailRequestDto({
+    required this.userId,
+    required this.verificationCode,
+  });
+
+  final int userId;
+  final String verificationCode;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'userId': userId,
+    'verificationCode': verificationCode,
+  };
+}
+
+class UpdateEmailRequestDto {
+  const UpdateEmailRequestDto({required this.newEmail});
+
+  final String newEmail;
+
+  Map<String, Object?> toJson() => <String, Object?>{'newEmail': newEmail};
+}
+
+class ChangePasswordRequestDto {
+  const ChangePasswordRequestDto({
+    required this.currentPassword,
+    required this.newPassword,
+    required this.confirmPassword,
+  });
+
+  final String currentPassword;
+  final String newPassword;
+  final String confirmPassword;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'currentPassword': currentPassword,
+    'newPassword': newPassword,
+    'confirmPassword': confirmPassword,
+  };
 }
 
 String _requiredString(Map<String, Object?> json, String field) {

@@ -1,0 +1,79 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/features/kanji/application/kanji_controller.dart';
+import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
+import 'package:rikipath_mobile/features/kanji/presentation/widgets/kanji_library_view.dart';
+import 'package:rikipath_mobile/features/kanji/presentation/widgets/kanji_state_views.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_header.dart';
+
+class KanjiLibraryScreen extends ConsumerStatefulWidget {
+  const KanjiLibraryScreen({super.key});
+
+  @override
+  ConsumerState<KanjiLibraryScreen> createState() => _KanjiLibraryScreenState();
+}
+
+class _KanjiLibraryScreenState extends ConsumerState<KanjiLibraryScreen> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(kanjiLibraryControllerProvider);
+    final controller = ref.read(kanjiLibraryControllerProvider.notifier);
+
+    return Scaffold(
+      backgroundColor: AppColors.learnerBackground,
+      appBar: LearningHeader.detail(
+        title: 'Kanji',
+        subtitle: 'THƯ VIỆN',
+        level: state.value?.query.level,
+        initials: null,
+        onBack: context.pop,
+        onProfilePressed: () => context.go(AppRoutes.profile),
+      ),
+      body: SafeArea(
+        top: false,
+        child: state.when(
+          loading: KanjiLoadingView.new,
+          error: (_, _) => KanjiErrorView(onRetry: controller.retry),
+          data: (data) => KanjiLibraryView(
+            state: data,
+            searchController: _searchController,
+            onSearch: controller.search,
+            onFilter: controller.filterByLevel,
+            onClear: () {
+              _searchController.clear();
+              controller.clear();
+            },
+            onOpenDetail: (entry) =>
+                context.push(AppRoutes.kanjiDetail(entry.routeKey)),
+            onPlayAudio: (entry) => _playAudio(context, entry),
+            onLoadMore: controller.loadNextPage,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _playAudio(BuildContext context, KanjiEntry entry) async {
+    final source = entry.audioUrl;
+    if (source == null) return;
+    try {
+      await ref.read(kanjiAudioPlayerProvider).play(source);
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không thể phát âm thanh Kanji.')),
+      );
+    }
+  }
+}

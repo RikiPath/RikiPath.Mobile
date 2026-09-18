@@ -78,4 +78,37 @@ void main() {
     expect(error, isA<UnauthorizedError>());
     expect(error?.message, 'Unauthorized.');
   });
+
+  test('ASP.NET validation problem maps field errors without traceId', () {
+    const mapper = ApiErrorMapper();
+    final request = RequestOptions(path: '/api/Auth/register');
+    final exception = DioException(
+      requestOptions: request,
+      response: Response<dynamic>(
+        requestOptions: request,
+        statusCode: 400,
+        data: const <String, Object?>{
+          'type': 'https://tools.ietf.org/html/rfc9110',
+          'title': 'One or more validation errors occurred.',
+          'status': 400,
+          'errors': <String, Object?>{
+            'Email': <String>['The Email field is required.'],
+            'Password': <String>['The Password field is required.'],
+          },
+          'traceId': '00-secret-diagnostic-id',
+        },
+      ),
+      type: DioExceptionType.badResponse,
+    );
+
+    final error = mapper.fromDioException(exception);
+
+    expect(error, isA<ValidationError>());
+    expect(error.details, const [
+      'The Email field is required.',
+      'The Password field is required.',
+    ]);
+    expect(error.toString(), isNot(contains('traceId')));
+    expect(error.toString(), isNot(contains('secret-diagnostic-id')));
+  });
 }

@@ -5,9 +5,7 @@ import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
 
 final registerControllerProvider =
-    NotifierProvider<RegisterController, RegisterState>(
-  RegisterController.new,
-);
+    NotifierProvider<RegisterController, RegisterState>(RegisterController.new);
 
 class RegisterState {
   const RegisterState({
@@ -42,8 +40,7 @@ class RegisterController extends Notifier<RegisterState> {
   void reset() => state = const RegisterState();
 
   Future<bool> submit({
-    required String firstName,
-    required String lastName,
+    required String fullName,
     required String email,
     required String password,
     required String confirmPassword,
@@ -76,13 +73,16 @@ class RegisterController extends Notifier<RegisterState> {
 
     state = const RegisterState(isLoading: true);
     try {
-      final account = await ref.read(authRepositoryProvider).register(
+      final name = _splitVietnameseFullName(fullName);
+      final account = await ref
+          .read(authRepositoryProvider)
+          .register(
             RegisterRequestDto(
               email: email.trim(),
               password: password,
               confirmPassword: confirmPassword,
-              firstName: _nullableTrim(firstName),
-              lastName: _nullableTrim(lastName),
+              firstName: name.firstName,
+              lastName: name.lastName,
             ),
           );
       state = RegisterState(registeredAccount: account);
@@ -96,7 +96,13 @@ class RegisterController extends Notifier<RegisterState> {
   }
 }
 
-String? _nullableTrim(String value) {
-  final trimmed = value.trim();
-  return trimmed.isEmpty ? null : trimmed;
+({String? firstName, String? lastName}) _splitVietnameseFullName(String value) {
+  final parts = value.trim().split(RegExp(r'\s+'));
+  if (parts.length == 1 && parts.single.isEmpty) {
+    return (firstName: null, lastName: null);
+  }
+  if (parts.length == 1) {
+    return (firstName: parts.single, lastName: null);
+  }
+  return (firstName: parts.skip(1).join(' '), lastName: parts.first);
 }

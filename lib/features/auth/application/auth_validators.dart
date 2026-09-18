@@ -1,7 +1,5 @@
 abstract final class AuthValidators {
-  static final RegExp _emailPattern = RegExp(
-    r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-  );
+  static final RegExp _emailPattern = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
 
   static String? email(String value) {
     final normalized = value.trim();
@@ -26,6 +24,11 @@ abstract final class AuthValidators {
   static String? passwordConfirmation(String value, String password) {
     if (value.isEmpty) return 'Vui lòng xác nhận mật khẩu.';
     if (value != password) return 'Mật khẩu xác nhận không khớp.';
+    return null;
+  }
+
+  static String? verificationCode(String value) {
+    if (value.trim().isEmpty) return 'Vui lòng nhập mã xác thực.';
     return null;
   }
 }

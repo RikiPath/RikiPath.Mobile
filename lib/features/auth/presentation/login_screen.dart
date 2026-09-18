@@ -28,7 +28,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
-    final succeeded = await ref.read(loginControllerProvider.notifier).submit(
+    final succeeded = await ref
+        .read(loginControllerProvider.notifier)
+        .submit(
           email: _emailController.text,
           password: _passwordController.text,
           rememberSession: _rememberSession,
@@ -40,7 +42,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(loginControllerProvider);
-    final hasFeedback = state.emailError != null ||
+    final hasFeedback =
+        state.emailError != null ||
         state.passwordError != null ||
         state.serverError != null;
 
@@ -61,7 +64,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.space5),
-              const Text('Chào mừng trở lại! 👋', style: AppTypography.pageTitle),
+              const Text(
+                'Chào mừng trở lại! 👋',
+                style: AppTypography.pageTitle,
+              ),
               const SizedBox(height: AppSpacing.space2),
               Text(
                 'Tiếp tục hành trình chinh phục JLPT cùng RikiPath.',
@@ -73,7 +79,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               RikiTextField(
                 key: const Key('login_email_field'),
                 label: 'Email học viên',
-                hintText: 'nhap.email@example.com',
+                hintText: 'hocvien@example.com',
                 controller: _emailController,
                 prefixIcon: Icons.mail_outline,
                 suffixIcon: state.isLoading
@@ -85,42 +91,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.email],
                 autocorrect: false,
-                onChanged: (_) => ref
-                    .read(loginControllerProvider.notifier)
-                    .clearFeedback(),
+                onChanged: (_) =>
+                    ref.read(loginControllerProvider.notifier).clearFeedback(),
               ),
               const SizedBox(height: AppSpacing.fieldGap),
               RikiPasswordField(
                 key: const Key('login_password_field'),
                 label: 'Mật khẩu',
+                hintText: 'Nhập mật khẩu',
                 controller: _passwordController,
                 errorText: state.passwordError,
                 enabled: !state.isLoading,
                 textInputAction: TextInputAction.done,
-                labelTrailing: RikiTextButton(
+                onChanged: (_) =>
+                    ref.read(loginControllerProvider.notifier).clearFeedback(),
+                onSubmitted: (_) {
+                  if (!state.isLoading) _submit();
+                },
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: RikiTextButton(
+                  key: const Key('forgot_password_button'),
                   label: 'Quên mật khẩu?',
                   onPressed: state.isLoading
                       ? null
                       : () => context.go(AppRoutes.forgotPassword),
                 ),
-                onChanged: (_) => ref
-                    .read(loginControllerProvider.notifier)
-                    .clearFeedback(),
-                onSubmitted: (_) {
-                  if (!state.isLoading) _submit();
-                },
               ),
-              const SizedBox(height: AppSpacing.space3),
               RikiCheckboxRow(
                 value: _rememberSession,
+                compact: true,
+                centerChild: true,
                 onChanged: state.isLoading
                     ? null
                     : (value) {
                         setState(() => _rememberSession = value ?? false);
                       },
-                child: const Text(
-                  'Ghi nhớ phiên đăng nhập trên thiết bị này',
-                ),
+                child: const Text('Ghi nhớ phiên đăng nhập trên thiết bị này'),
               ),
               if (state.serverError != null) ...[
                 const SizedBox(height: AppSpacing.space3),
@@ -129,7 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   message: state.serverError!,
                 ),
               ],
-              const SizedBox(height: AppSpacing.space4),
+              const SizedBox(height: AppSpacing.space2),
               RikiPrimaryButton(
                 key: const Key('login_submit_button'),
                 label: 'Đăng nhập',
@@ -145,14 +153,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   message: 'Đang kết nối an toàn với tài khoản của bạn...',
                 ),
                 const SizedBox(height: AppSpacing.space3),
-                const RikiProgressIndicator(
-                  semanticsLabel: 'Đang đăng nhập',
-                ),
+                const RikiProgressIndicator(semanticsLabel: 'Đang đăng nhập'),
               ] else if (!hasFeedback) ...[
                 const SizedBox(height: AppSpacing.space5),
                 const RikiWarningBanner(
                   title: 'Mẹo đăng nhập',
-                  message: 'Sử dụng tài khoản đã đăng ký khóa học để đồng bộ '
+                  message:
+                      'Sử dụng tài khoản đã đăng ký khóa học để đồng bộ '
                       'chuỗi streak và lộ trình AI.',
                 ),
               ],

@@ -20,6 +20,12 @@ abstract interface class AuthRepository {
 
   Future<RegisterResponseDto> register(RegisterRequestDto request);
 
+  Future<void> verifyEmail(VerifyEmailRequestDto request);
+
+  Future<void> updateEmail(int userId, UpdateEmailRequestDto request);
+
+  Future<void> changePassword(int userId, ChangePasswordRequestDto request);
+
   Future<void> requestPasswordReset(String email);
 }
 
@@ -45,8 +51,9 @@ class ApiAuthRepository implements AuthRepository {
       if (login.role != 'Learner') {
         throw UnsupportedUserRoleException(login.role);
       }
-      await _tokenStorage.saveAccessToken(
-        login.accessToken,
+      await _tokenStorage.saveAuthenticatedSession(
+        accessToken: login.accessToken,
+        userId: login.userId,
         persist: persistSession,
       );
       return login;
@@ -55,6 +62,36 @@ class ApiAuthRepository implements AuthRepository {
         message: 'The login response did not match the API contract.',
       );
     }
+  }
+
+  @override
+  Future<void> verifyEmail(VerifyEmailRequestDto request) async {
+    final response = await _apiClient.post<Object?>(
+      AuthApiPaths.verifyEmail,
+      data: request.toJson(),
+    );
+    _ensureSuccessEnvelope(response.data);
+  }
+
+  @override
+  Future<void> updateEmail(int userId, UpdateEmailRequestDto request) async {
+    final response = await _apiClient.put<Object?>(
+      AuthApiPaths.updateEmail(userId),
+      data: request.toJson(),
+    );
+    _ensureSuccessEnvelope(response.data);
+  }
+
+  @override
+  Future<void> changePassword(
+    int userId,
+    ChangePasswordRequestDto request,
+  ) async {
+    final response = await _apiClient.post<Object?>(
+      AuthApiPaths.changePassword(userId),
+      data: request.toJson(),
+    );
+    _ensureSuccessEnvelope(response.data);
   }
 
   @override
@@ -100,6 +137,15 @@ Map<String, Object?> _readResult(Object? body) {
     );
   }
   return _stringKeyedMap(envelope['result']);
+}
+
+void _ensureSuccessEnvelope(Object? body) {
+  final envelope = _stringKeyedMap(body);
+  if (envelope['isSuccess'] != true) {
+    throw const UnknownError(
+      message: 'The API returned an invalid success envelope.',
+    );
+  }
 }
 
 Map<String, Object?> _stringKeyedMap(Object? value) {

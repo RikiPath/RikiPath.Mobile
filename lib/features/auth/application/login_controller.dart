@@ -49,13 +49,15 @@ class LoginController extends Notifier<LoginState> {
 
     state = const LoginState(isLoading: true);
     try {
-      await ref
+      final account = await ref
           .read(authRepositoryProvider)
           .login(
             LoginRequestDto(email: email.trim(), password: password),
             persistSession: rememberSession,
           );
-      ref.read(authSessionControllerProvider).markAuthenticated();
+      ref
+          .read(authSessionControllerProvider)
+          .markAuthenticated(userId: account.userId);
       state = const LoginState(succeeded: true);
       return true;
     } catch (error) {

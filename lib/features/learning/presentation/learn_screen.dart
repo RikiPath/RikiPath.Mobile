@@ -35,6 +35,7 @@ class LearnScreen extends ConsumerWidget {
           data: (data) => LearningHomeView(
             snapshot: data,
             onOpenRoadmap: () => context.push(AppRoutes.learnRoadmap),
+            onOpenVocabulary: () => context.push(AppRoutes.vocabulary),
             onOpenLesson: () =>
                 context.push(AppRoutes.lesson(data.currentLesson.routeId)),
           ),

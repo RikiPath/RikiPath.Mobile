@@ -7,12 +7,14 @@ class LearningHomeView extends StatelessWidget {
   const LearningHomeView({
     required this.snapshot,
     required this.onOpenRoadmap,
+    required this.onOpenVocabulary,
     required this.onOpenLesson,
     super.key,
   });
 
   final LearningSnapshot snapshot;
   final VoidCallback onOpenRoadmap;
+  final VoidCallback onOpenVocabulary;
   final VoidCallback onOpenLesson;
 
   @override
@@ -58,6 +60,7 @@ class LearningHomeView extends StatelessWidget {
         _LearningSections(
           sections: snapshot.sections,
           onOpenRoadmap: onOpenRoadmap,
+          onOpenVocabulary: onOpenVocabulary,
         ),
       ],
     );
@@ -471,10 +474,12 @@ class _LearningSections extends StatelessWidget {
   const _LearningSections({
     required this.sections,
     required this.onOpenRoadmap,
+    required this.onOpenVocabulary,
   });
 
   final List<LearningSectionSummary> sections;
   final VoidCallback onOpenRoadmap;
+  final VoidCallback onOpenVocabulary;
 
   @override
   Widget build(BuildContext context) {
@@ -484,9 +489,11 @@ class _LearningSections extends StatelessWidget {
           return _LearningSectionCard(
             key: ValueKey<String>('learning_section_${section.kind.name}'),
             section: section,
-            onPressed: section.kind == LearningSectionKind.roadmap
-                ? onOpenRoadmap
-                : null,
+            onPressed: switch (section.kind) {
+              LearningSectionKind.roadmap => onOpenRoadmap,
+              LearningSectionKind.library => onOpenVocabulary,
+              LearningSectionKind.lessons => null,
+            },
           );
         }).toList();
 

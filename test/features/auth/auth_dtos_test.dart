@@ -45,4 +45,48 @@ void main() {
     expect(response.userId, 42);
     expect(response.role, 'Learner');
   });
+
+  test('register response does not require a fabricated userId', () {
+    final response = RegisterResponseDto.fromJson(const <String, Object?>{
+      'fullName': 'Nguyễn Minh Anh',
+      'email': 'learner@example.com',
+    });
+
+    expect(response.fullName, 'Nguyễn Minh Anh');
+    expect(response.email, 'learner@example.com');
+  });
+
+  test('verify-email request uses exact backend JSON field names', () {
+    const request = VerifyEmailRequestDto(
+      userId: 42,
+      verificationCode: '123456',
+    );
+
+    expect(request.toJson(), const <String, Object?>{
+      'userId': 42,
+      'verificationCode': '123456',
+    });
+  });
+
+  test('update-email request uses only newEmail', () {
+    const request = UpdateEmailRequestDto(newEmail: 'new@example.com');
+
+    expect(request.toJson(), const <String, Object?>{
+      'newEmail': 'new@example.com',
+    });
+  });
+
+  test('change-password request uses exact password fields', () {
+    const request = ChangePasswordRequestDto(
+      currentPassword: 'current-secret',
+      newPassword: 'new-secret',
+      confirmPassword: 'new-secret',
+    );
+
+    expect(request.toJson(), const <String, Object?>{
+      'currentPassword': 'current-secret',
+      'newPassword': 'new-secret',
+      'confirmPassword': 'new-secret',
+    });
+  });
 }

@@ -33,6 +33,37 @@ void main() {
     expect(await tokenStorage.readAccessToken(), isNull);
     expect(secureStore.values, isEmpty);
   });
+
+  test(
+    'authenticated identity follows remembered session persistence',
+    () async {
+      final secureStore = _MemorySecureKeyValueStore();
+      final tokenStorage = TokenStorage(secureStore);
+
+      await tokenStorage.saveAuthenticatedSession(
+        accessToken: 'access-token',
+        userId: 42,
+      );
+
+      expect(await tokenStorage.readAuthenticatedUserId(), 42);
+      expect(secureStore.values['authenticated_user_id'], '42');
+    },
+  );
+
+  test('session-only identity is not written to secure storage', () async {
+    final secureStore = _MemorySecureKeyValueStore()
+      ..values['authenticated_user_id'] = '7';
+    final tokenStorage = TokenStorage(secureStore);
+
+    await tokenStorage.saveAuthenticatedSession(
+      accessToken: 'session-token',
+      userId: 42,
+      persist: false,
+    );
+
+    expect(await tokenStorage.readAuthenticatedUserId(), 42);
+    expect(secureStore.values.containsKey('authenticated_user_id'), isFalse);
+  });
 }
 
 class _MemorySecureKeyValueStore implements SecureKeyValueStore {

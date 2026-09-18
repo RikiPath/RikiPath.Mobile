@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/app_section_card.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
@@ -26,7 +28,13 @@ class ProfileScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Learner', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                    Text(
+                      'Learner',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     SizedBox(height: 4),
                     Text('Mục tiêu hiện tại'),
                   ],
@@ -67,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
                   leading: const Icon(Icons.settings_outlined),
                   title: const Text('Cài đặt'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
+                  onTap: () => context.push(AppRoutes.profileAccount),
                 ),
               ],
             ),
@@ -90,9 +98,9 @@ class _Metric extends StatelessWidget {
       children: [
         Text(
           value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
         ),
         Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
