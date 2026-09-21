@@ -1,34 +1,59 @@
+import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
+import 'package:rikipath_mobile/l10n/generated/app_localizations_vi.dart';
+
 abstract final class AuthValidators {
   static final RegExp _emailPattern = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
 
-  static String? email(String value) {
+  static String? email(String value, [AppLocalizations? localizations]) {
+    final l10n = localizations ?? AppLocalizationsVi();
     final normalized = value.trim();
-    if (normalized.isEmpty) return 'Vui lòng nhập email.';
+    if (normalized.isEmpty) return l10n.validationEmailRequired;
     if (!_emailPattern.hasMatch(normalized)) {
-      return 'Email không hợp lệ. Vui lòng kiểm tra lại định dạng.';
+      return l10n.validationEmailInvalid;
     }
     return null;
   }
 
-  static String? loginPassword(String value) {
-    if (value.isEmpty) return 'Vui lòng nhập mật khẩu.';
+  static String? loginPassword(
+    String value, [
+    AppLocalizations? localizations,
+  ]) {
+    final l10n = localizations ?? AppLocalizationsVi();
+    if (value.isEmpty) return l10n.validationPasswordRequired;
     return null;
   }
 
-  static String? registrationPassword(String value) {
-    if (value.isEmpty) return 'Vui lòng nhập mật khẩu.';
-    if (value.length < 6) return 'Mật khẩu phải có ít nhất 6 ký tự.';
+  static String? registrationPassword(
+    String value, [
+    AppLocalizations? localizations,
+  ]) {
+    final l10n = localizations ?? AppLocalizationsVi();
+    if (value.isEmpty) return l10n.validationPasswordRequired;
+    if (value.length < 6) return l10n.validationPasswordLength;
     return null;
   }
 
-  static String? passwordConfirmation(String value, String password) {
-    if (value.isEmpty) return 'Vui lòng xác nhận mật khẩu.';
-    if (value != password) return 'Mật khẩu xác nhận không khớp.';
+  static String? passwordConfirmation(
+    String value,
+    String password, [
+    AppLocalizations? localizations,
+  ]) {
+    final l10n = localizations ?? AppLocalizationsVi();
+    if (value.isEmpty) return l10n.validationConfirmPasswordRequired;
+    if (value != password) return l10n.validationPasswordMismatch;
     return null;
   }
 
-  static String? verificationCode(String value) {
-    if (value.trim().isEmpty) return 'Vui lòng nhập mã xác thực.';
+  static String? verificationCode(
+    String value, [
+    AppLocalizations? localizations,
+  ]) {
+    final l10n = localizations ?? AppLocalizationsVi();
+    final normalized = value.trim();
+    if (normalized.isEmpty) return l10n.validationVerificationCodeRequired;
+    if (!RegExp(r'^\d{6}$').hasMatch(normalized)) {
+      return l10n.validationVerificationCodeLength;
+    }
     return null;
   }
 }

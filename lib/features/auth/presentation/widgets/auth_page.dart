@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({required this.child, this.compact = false, super.key});
@@ -64,9 +65,11 @@ class AuthNavigationPrompt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      crossAxisAlignment: WrapCrossAlignment.center,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
       children: [
         Text(message, style: AppTypography.bodySmall),
         TextButton(
@@ -98,7 +101,7 @@ class AuthSecurityFooter extends StatelessWidget {
         const SizedBox(width: AppSpacing.space2),
         Flexible(
           child: Text(
-            'Bảo mật chuẩn mã hóa Riki Learning',
+            context.l10n.securityFooter,
             textAlign: TextAlign.center,
             style: AppTypography.metadata.copyWith(color: AppColors.textMuted),
           ),
@@ -109,25 +112,23 @@ class AuthSecurityFooter extends StatelessWidget {
 }
 
 class AuthHelpFooter extends StatelessWidget {
-  const AuthHelpFooter({
-    this.prefix = 'Cần trợ giúp trực tiếp?',
-    this.actionLabel = 'Liên hệ Sensei hỗ trợ',
-    super.key,
-  });
+  const AuthHelpFooter({this.prefix, this.actionLabel, super.key});
 
-  final String prefix;
-  final String actionLabel;
+  final String? prefix;
+  final String? actionLabel;
 
   @override
   Widget build(BuildContext context) {
+    final resolvedPrefix = prefix ?? context.l10n.helpDirectPrefix;
+    final resolvedActionLabel = actionLabel ?? context.l10n.helpSensei;
     return Semantics(
-      label: '$prefix $actionLabel',
+      label: '$resolvedPrefix $resolvedActionLabel',
       child: Text.rich(
         TextSpan(
           children: [
-            TextSpan(text: '$prefix '),
+            TextSpan(text: '$resolvedPrefix '),
             TextSpan(
-              text: actionLabel,
+              text: resolvedActionLabel,
               style: AppTypography.metadata.copyWith(
                 color: AppColors.brandPrimary,
                 fontWeight: FontWeight.w600,

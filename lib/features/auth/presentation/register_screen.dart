@@ -1,12 +1,17 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/register_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_page.dart';
-import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_success_illustration.dart';
+import 'package:rikipath_mobile/features/auth/presentation/widgets/register_success_celebration.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -50,10 +55,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final state = ref.watch(registerControllerProvider);
     if (state.succeeded) {
       return _RegisterSuccess(
         email: state.registeredAccount!.email,
+        userId: state.registeredAccount!.userId,
+        onVerifyEmail: state.registeredAccount!.userId == null
+            ? null
+            : () {
+                final userId = state.registeredAccount!.userId!;
+                ref.read(registerControllerProvider.notifier).reset();
+                context.go(AppRoutes.verifyEmail, extra: userId);
+              },
         onReturnToLogin: () {
           ref.read(registerControllerProvider.notifier).reset();
           context.go(AppRoutes.login);
@@ -70,22 +84,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const RikiAuthHeader(level: JlptLevel.n4),
+              const RikiAuthHeader(),
               const SizedBox(height: AppSpacing.space6),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
-                child: RikiPromotionalPill(
-                  message: 'Học tiếng Nhật cá nhân hoá cùng AI',
-                ),
+                child: RikiPromotionalPill(message: l10n.authPromotion),
               ),
               const SizedBox(height: AppSpacing.space4),
-              const Text(
-                'Tạo tài khoản RikiPath',
-                style: AppTypography.pageTitle,
-              ),
+              Text(l10n.registerTitle, style: AppTypography.pageTitle),
               const SizedBox(height: AppSpacing.space1),
               Text(
-                'Bắt đầu xây dựng lộ trình học JLPT của riêng bạn.',
+                l10n.registerSubtitle,
                 style: AppTypography.body.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -93,8 +102,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: AppSpacing.space6),
               RikiTextField(
                 key: const Key('register_full_name_field'),
-                label: 'Họ và tên',
-                hintText: 'Nguyễn Minh Anh',
+                label: l10n.fullName,
+                hintText: l10n.fullNameHint,
                 controller: _fullNameController,
                 prefixIcon: Icons.person_outline,
                 enabled: !state.isLoading,
@@ -106,8 +115,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: AppSpacing.fieldGap),
               RikiTextField(
                 key: const Key('register_email_field'),
-                label: 'Email học viên',
-                hintText: 'hocvien@example.com',
+                label: l10n.studentEmail,
+                hintText: l10n.emailHint,
                 controller: _emailController,
                 prefixIcon: Icons.mail_outline,
                 suffixIcon: state.isLoading
@@ -124,8 +133,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: AppSpacing.fieldGap),
               RikiPasswordField(
                 key: const Key('register_password_field'),
-                label: 'Mật khẩu',
-                hintText: 'Nhập mật khẩu',
+                label: l10n.password,
+                hintText: l10n.passwordHint,
                 controller: _passwordController,
                 errorText: state.passwordError,
                 enabled: !state.isLoading,
@@ -145,7 +154,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(width: AppSpacing.space1),
                     Expanded(
                       child: Text(
-                        'Tối thiểu 6 ký tự',
+                        l10n.minimumSixCharacters,
                         style: AppTypography.metadata,
                       ),
                     ),
@@ -155,8 +164,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: AppSpacing.fieldGap),
               RikiPasswordField(
                 key: const Key('register_confirm_password_field'),
-                label: 'Xác nhận mật khẩu',
-                hintText: 'Nhập lại mật khẩu',
+                label: l10n.confirmPassword,
+                hintText: l10n.confirmPasswordHint,
                 controller: _confirmPasswordController,
                 errorText: state.confirmPasswordError,
                 enabled: !state.isLoading,
@@ -179,25 +188,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 child: Text.rich(
                   TextSpan(
                     children: [
-                      const TextSpan(
-                        text: 'Bằng việc đăng ký, bạn đồng ý với ',
-                      ),
+                      TextSpan(text: l10n.termsPrefix),
                       TextSpan(
-                        text: 'Điều khoản dịch vụ',
+                        text: l10n.termsOfService,
                         style: AppTypography.metadata.copyWith(
                           color: AppColors.textPrimary,
                           decoration: TextDecoration.underline,
                         ),
                       ),
-                      const TextSpan(text: ' & '),
+                      TextSpan(text: l10n.termsJoiner),
                       TextSpan(
-                        text: 'Chính sách bảo mật',
+                        text: l10n.privacyPolicy,
                         style: AppTypography.metadata.copyWith(
                           color: AppColors.textPrimary,
                           decoration: TextDecoration.underline,
                         ),
                       ),
-                      const TextSpan(text: ' của RikiPath.'),
+                      TextSpan(text: l10n.termsSuffix),
                     ],
                   ),
                 ),
@@ -213,29 +220,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               if (state.serverError != null) ...[
                 const SizedBox(height: AppSpacing.space3),
                 RikiErrorBanner(
-                  title: 'Không thể tạo tài khoản',
+                  title: l10n.registerFailedTitle,
                   message: state.serverError!,
                 ),
               ],
               const SizedBox(height: AppSpacing.space4),
               RikiPrimaryButton(
                 key: const Key('register_submit_button'),
-                label: 'Đăng ký',
-                loadingLabel: 'Đang tạo tài khoản...',
+                label: l10n.register,
+                loadingLabel: l10n.creatingAccount,
                 trailingIcon: Icons.arrow_forward,
                 isLoading: state.isLoading,
                 onPressed: _submit,
               ),
               if (state.isLoading) ...[
                 const SizedBox(height: AppSpacing.space4),
-                const RikiWarningBanner(
+                RikiWarningBanner(
                   icon: Icons.hourglass_bottom,
-                  message:
-                      'Đang tạo tài khoản học viên và gửi email xác thực...',
+                  message: l10n.creatingAccountMessage,
                 ),
                 const SizedBox(height: AppSpacing.space3),
-                const RikiProgressIndicator(
-                  semanticsLabel: 'Đang tạo tài khoản',
+                RikiProgressIndicator(
+                  semanticsLabel: l10n.creatingAccountSemantics,
                 ),
               ],
             ],
@@ -245,8 +251,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               children: [
                 AuthNavigationPrompt(
-                  message: 'Đã có tài khoản?',
-                  actionLabel: 'Đăng nhập',
+                  message: l10n.alreadyHaveAccount,
+                  actionLabel: l10n.login,
                   onPressed: state.isLoading
                       ? null
                       : () => context.go(AppRoutes.login),
@@ -261,14 +267,77 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 }
 
-class _RegisterSuccess extends StatelessWidget {
-  const _RegisterSuccess({required this.email, required this.onReturnToLogin});
+class _RegisterSuccess extends StatefulWidget {
+  const _RegisterSuccess({
+    required this.email,
+    required this.userId,
+    required this.onVerifyEmail,
+    required this.onReturnToLogin,
+  });
 
   final String email;
+  final int? userId;
+  final VoidCallback? onVerifyEmail;
   final VoidCallback onReturnToLogin;
 
   @override
+  State<_RegisterSuccess> createState() => _RegisterSuccessState();
+}
+
+class _RegisterSuccessState extends State<_RegisterSuccess>
+    with SingleTickerProviderStateMixin {
+  static const _celebrationDuration = Duration(milliseconds: 1800);
+
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: _celebrationDuration,
+  );
+  bool _hasStarted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final mediaQuery = MediaQuery.of(context);
+    final reduceMotion =
+        mediaQuery.disableAnimations || mediaQuery.accessibleNavigation;
+
+    if (reduceMotion) {
+      _controller.stop();
+      _controller.value = 1;
+      _hasStarted = true;
+      return;
+    }
+    if (_hasStarted) return;
+
+    _hasStarted = true;
+    _controller.forward();
+    _triggerSuccessHaptic();
+  }
+
+  void _triggerSuccessHaptic() {
+    if (kIsWeb) return;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        unawaited(HapticFeedback.lightImpact());
+        return;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AuthPage(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -277,35 +346,61 @@ class _RegisterSuccess extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const RikiAuthHeader(statusLabel: 'Đã tạo tài khoản'),
+              RikiAuthHeader(statusLabel: l10n.accountCreatedStatus),
               const SizedBox(height: AppSpacing.space10),
-              const Center(
-                child: AuthSuccessIllustration(icon: Icons.person_outline),
-              ),
-              const SizedBox(height: AppSpacing.space6),
-              const Text(
-                'Tạo tài khoản thành công',
-                textAlign: TextAlign.center,
-                style: AppTypography.heroTitle,
-              ),
-              const SizedBox(height: AppSpacing.space2),
-              Text(
-                'RikiPath đã gửi mã xác thực tới $email.',
-                textAlign: TextAlign.center,
-                style: AppTypography.body.copyWith(
-                  color: AppColors.textSecondary,
+              Center(
+                child: RegisterSuccessCelebration(
+                  key: const Key('register_success_celebration'),
+                  animation: _controller,
+                  icon: Icons.person_outline,
                 ),
               ),
               const SizedBox(height: AppSpacing.space6),
-              const RikiSuccessBanner(
-                message: 'Vui lòng kiểm tra email để xác thực tài khoản.',
+              SuccessContentEntrance(
+                key: const Key('register_success_title_entrance'),
+                animation: _controller,
+                start: 0.16,
+                end: 0.36,
+                child: Text(
+                  l10n.accountCreatedTitle,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.heroTitle,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.space2),
+              SuccessContentEntrance(
+                key: const Key('register_success_support_entrance'),
+                animation: _controller,
+                start: 0.22,
+                end: 0.42,
+                child: Text(
+                  l10n.accountCreatedMessage(widget.email),
+                  textAlign: TextAlign.center,
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.space6),
+              SuccessContentEntrance(
+                key: const Key('register_success_status_entrance'),
+                animation: _controller,
+                start: 0.30,
+                end: 0.50,
+                child: RikiSuccessBanner(message: l10n.checkEmailVerification),
               ),
               const SizedBox(height: AppSpacing.space4),
-              const RikiWarningBanner(
-                icon: Icons.mark_email_unread_outlined,
-                message:
-                    'Bạn cần xác thực email trước khi đăng nhập. Phản hồi đăng ký '
-                    'hiện chưa trả về mã tài khoản để ứng dụng mở bước nhập mã tự động.',
+              SuccessContentEntrance(
+                key: const Key('register_success_warning_entrance'),
+                animation: _controller,
+                start: 0.38,
+                end: 0.58,
+                child: RikiWarningBanner(
+                  icon: Icons.mark_email_unread_outlined,
+                  message: widget.userId == null
+                      ? l10n.verificationBackendBlocker
+                      : l10n.verificationCodeValidity,
+                ),
               ),
             ],
           ),
@@ -314,10 +409,23 @@ class _RegisterSuccess extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                RikiPrimaryButton(
-                  label: 'Quay lại đăng nhập',
-                  onPressed: onReturnToLogin,
-                ),
+                if (widget.onVerifyEmail != null) ...[
+                  RikiPrimaryButton(
+                    key: const Key('register_open_verify_email_button'),
+                    label: l10n.enterVerificationCode,
+                    trailingIcon: Icons.arrow_forward,
+                    onPressed: widget.onVerifyEmail,
+                  ),
+                  const SizedBox(height: AppSpacing.space2),
+                  RikiTextButton(
+                    label: l10n.returnToLogin,
+                    onPressed: widget.onReturnToLogin,
+                  ),
+                ] else
+                  RikiPrimaryButton(
+                    label: l10n.returnToLogin,
+                    onPressed: widget.onReturnToLogin,
+                  ),
                 const SizedBox(height: AppSpacing.space4),
                 const AuthSecurityFooter(),
               ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
+import 'package:rikipath_mobile/core/widgets/riki_loading.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -9,20 +11,12 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const RikiBrandLockup(),
-            const SizedBox(height: 8),
-            Text(
-              'Học tiếng Nhật • Luyện thi JLPT',
-              style: AppTypography.bodySmall,
-            ),
-            const SizedBox(height: 20),
-            const CircularProgressIndicator(),
-          ],
-        ),
+      body: RikiFullScreenLoader(
+        key: const ValueKey<String>('splash_loading_view'),
+        title: context.l10n.preparingLearningContent,
+        subtitle: context.l10n.preparingLearningSubtext,
+        semanticsLabel: context.l10n.loading,
+        header: const RikiBrandLockup(),
       ),
     );
   }

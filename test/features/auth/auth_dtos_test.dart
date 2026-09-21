@@ -46,14 +46,25 @@ void main() {
     expect(response.role, 'Learner');
   });
 
-  test('register response does not require a fabricated userId', () {
+  test('register response reads the userId used by email verification', () {
+    final response = RegisterResponseDto.fromJson(const <String, Object?>{
+      'userId': 42,
+      'fullName': 'Nguyễn Minh Anh',
+      'email': 'learner@example.com',
+    });
+
+    expect(response.userId, 42);
+    expect(response.fullName, 'Nguyễn Minh Anh');
+    expect(response.email, 'learner@example.com');
+  });
+
+  test('register response remains safe when an older server omits userId', () {
     final response = RegisterResponseDto.fromJson(const <String, Object?>{
       'fullName': 'Nguyễn Minh Anh',
       'email': 'learner@example.com',
     });
 
-    expect(response.fullName, 'Nguyễn Minh Anh');
-    expect(response.email, 'learner@example.com');
+    expect(response.userId, isNull);
   });
 
   test('verify-email request uses exact backend JSON field names', () {

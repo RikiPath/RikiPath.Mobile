@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/router/main_shell.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/account_settings_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/change_password_screen.dart';
@@ -26,6 +27,9 @@ import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dart';
+import 'package:rikipath_mobile/features/profile/presentation/edit_profile_screen.dart';
+import 'package:rikipath_mobile/features/profile/presentation/jlpt_goal_screen.dart';
+import 'package:rikipath_mobile/features/profile/presentation/notification_settings_screen.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/vocabulary_detail_screen.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/vocabulary_library_screen.dart';
 
@@ -174,15 +178,45 @@ GoRouter createAppRouter({
                 routes: [
                   GoRoute(
                     path: AppRoutes.profileAccountSegment,
-                    builder: (context, state) => const AccountSettingsScreen(),
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: const AccountSettingsScreen(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.profileEditSegment,
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: const EditProfileScreen(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.profileJlptGoalSegment,
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: const JlptGoalScreen(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.profileNotificationsSegment,
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: const NotificationSettingsScreen(),
+                    ),
                   ),
                   GoRoute(
                     path: AppRoutes.profileChangeEmailSegment,
-                    builder: (context, state) => const UpdateEmailScreen(),
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: const UpdateEmailScreen(),
+                    ),
                   ),
                   GoRoute(
                     path: AppRoutes.profileChangePasswordSegment,
-                    builder: (context, state) => const ChangePasswordScreen(),
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: const ChangePasswordScreen(),
+                    ),
                   ),
                 ],
               ),
@@ -192,8 +226,42 @@ GoRouter createAppRouter({
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
-      body: Center(child: Text('Không tìm thấy trang: ${state.uri}')),
+      body: Center(child: Text(context.l10n.pageNotFound('${state.uri}'))),
     ),
+  );
+}
+
+CustomTransitionPage<void> _profileDetailPage({
+  required GoRouterState state,
+  required Widget child,
+}) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 260),
+    reverseTransitionDuration: const Duration(milliseconds: 220),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final mediaQuery = MediaQuery.maybeOf(context);
+      final reduceMotion =
+          (mediaQuery?.disableAnimations ?? false) ||
+          (mediaQuery?.accessibleNavigation ?? false);
+      if (reduceMotion) return child;
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0.035, 0),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
+      );
+    },
   );
 }
 

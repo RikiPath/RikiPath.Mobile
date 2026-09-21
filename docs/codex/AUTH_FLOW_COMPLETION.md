@@ -1,6 +1,6 @@
 # RikiPath Auth Flow Completion
 
-Reviewed on: 2026-09-18 (Asia/Bangkok)
+Reviewed on: 2026-09-19 (Asia/Bangkok)
 
 ## Contract evidence
 
@@ -9,13 +9,16 @@ Reviewed on: 2026-09-18 (Asia/Bangkok)
 - Read-only backend revision: `959cad6567ba0101e7fed00c3384948f51c0f47d`
 - Live Auth operations: exactly five (`register`, `verify-email`, `login`, `update-email/{userId}`, and `change-password/{userId}`)
 - Live OpenAPI still publishes no typed success response bodies. Response envelopes and result DTOs remain source-backed.
+- The backend team confirmed that the deployed Register success result now adds
+  `userId`. The live OpenAPI and supplied source snapshot have not yet caught up,
+  so the mobile parser accepts this field and retains a safe legacy fallback.
 
 ## Auth endpoint audit matrix
 
 | Endpoint | Repository | Controller | UI | Route | API wired | Tests | Status |
 |---|---|---|---|---|---|---|---|
 | `POST /api/Auth/register` | Existing | Existing | Existing Sakura Register | `/auth/register` | Yes | DTO, repository, validation, loading, payload, success, no session | COMPLETE_NOT_LIVE_MUTATION_TESTED |
-| `POST /api/Auth/verify-email` | Added | Added | Added code, loading, invalid-code, success, and blocked-handoff states | `/auth/verify-email` | Yes when `userId` is known | DTO, repository, validation, loading, failure, success, missing handoff | BLOCKED_BY_BACKEND |
+| `POST /api/Auth/verify-email` | Added | Added | Added code, loading, invalid-code, success, and legacy blocked-handoff states | `/auth/verify-email` | Yes when Register returns `userId` | DTO, repository, validation, loading, failure, success, Register handoff, legacy missing-ID fallback | COMPLETE_NOT_LIVE_MUTATION_TESTED |
 | `POST /api/Auth/login` | Existing | Existing | Existing Sakura Login | `/auth/login` | Yes | Request, failure, role gate, persistence, loading, routing | COMPLETE_NOT_LIVE_MUTATION_TESTED |
 | `PUT /api/Auth/update-email/{userId}` | Added | Added | Added authenticated account form | `/profile/change-email` | Yes, current session ID only | DTO, path/body, session ID, loading, error, success | COMPLETE_NOT_LIVE_MUTATION_TESTED |
 | `POST /api/Auth/change-password/{userId}` | Added | Added | Added authenticated account form | `/profile/change-password` | Yes, current session ID only | DTO, path/body, validation, loading, error, success, session preservation | COMPLETE_NOT_LIVE_MUTATION_TESTED |
@@ -25,7 +28,7 @@ Reviewed on: 2026-09-18 (Asia/Bangkok)
 | Feature | UI | API | Route | Tests | Live verified | Status |
 |---|---|---|---|---|---|---|
 | Register | Complete | Real register endpoint | `/auth/register` | Complete | Contract and non-mutating validation only | COMPLETE_NOT_LIVE_MUTATION_TESTED |
-| Verify Email | Complete as far as supplied ID permits | Real verify endpoint | `/auth/verify-email` | Complete | Contract only; no safe account/code | BLOCKED_BY_BACKEND |
+| Verify Email | Complete, including Register handoff | Real verify endpoint | `/auth/verify-email` | Complete | Contract only; no safe account/code | COMPLETE_NOT_LIVE_MUTATION_TESTED |
 | Login | Complete | Real login endpoint | `/auth/login` | Complete | Invalid login re-verified against the live API; successful login not verified | COMPLETE_NOT_LIVE_MUTATION_TESTED |
 | Update Email | Complete | Real update endpoint | `/profile/change-email` | Complete | Not mutated without safe credentials | COMPLETE_NOT_LIVE_MUTATION_TESTED |
 | Change Password | Complete | Real change endpoint | `/profile/change-password` | Complete | Not mutated without safe credentials | COMPLETE_NOT_LIVE_MUTATION_TESTED |
@@ -66,13 +69,23 @@ The Verify Email frontend stack is complete for the exact request:
 }
 ```
 
-Automatic Register → Verify Email handoff remains **BLOCKED_BY_BACKEND**. `RegisterResponse` still contains only `fullName` and `email`; it does not contain the `userId` required by `VerifyEmailRequest`. Flutter does not derive an ID from email, decode or guess one, or expose an arbitrary ID field. The route therefore renders an explicit blocked state when no trusted ID is supplied.
+The backend team reports that Register now returns the `userId` required by
+`VerifyEmailRequest`. Flutter parses that ID, shows an **Nhập mã xác thực**
+action on the registration-success screen, and passes the trusted ID through
+go_router to the six-digit code screen. No authenticated session is fabricated.
+
+Because the live OpenAPI operation still exposes only an untyped `200` response
+and the supplied backend source snapshot still has the older two-field DTO, the
+parser keeps `userId` nullable. If an older deployment omits it, the UI falls
+back to the explicit blocked state rather than deriving an ID from email or
+accepting arbitrary input.
 
 Registration continues to collect one Vietnamese full-name value. Its deterministic adapter maps the first whitespace-separated token to `lastName` and the remaining tokens to `firstName`; a single token maps to `firstName`, and an empty value maps both optional backend fields to null. The backend publishes no locale-aware name splitting rule, so semantic fidelity for compound family names remains an acknowledged ambiguity.
 
 ## Confirmed backend gaps and security blockers
 
-- Register omits the `userId` required by Verify Email.
+- Live Swagger/source artifacts do not yet describe the backend-team-confirmed
+  Register `userId`, even though the frontend now supports it defensively.
 - No forgot-password, reset-password, verification-resend, refresh-token, logout/revocation, or device-session endpoint exists.
 - `PUT /api/Auth/update-email/{userId}` and `POST /api/Auth/change-password/{userId}` have no `[Authorize]` enforcement in the supplied controller even though comments describe bearer/ownership requirements. Flutter requiring a session, bearer token, and current session ID does not fix server authorization.
 - Live Swagger applies a global bearer requirement even to source-public Auth operations and publishes only untyped `200` responses.
@@ -94,5 +107,5 @@ No valid learner credentials or safe disposable inbox were supplied. Successful 
 - The debug app built, installed, and launched successfully on the Android 17 emulator with the local `.env` configuration.
 - Login and Register were visually reviewed on the emulator. Their Sakura layout, Vietnamese text, full-name field, placeholders, password controls, checkbox rows, and route transition rendered correctly. Empty Register submission produced controlled local validation messages without making a successful mutation.
 - An intentionally invalid Login submission reached the live API and rendered the controlled Vietnamese invalid-credentials message without exposing a raw response or trace ID.
-- Verify Email, Account Settings, Update Email, and Change Password were rendered and interaction-tested through widget/router tests. A safe runtime path to the authenticated account screens was unavailable without learner credentials, while Register cannot hand off to Verify Email because its response omits `userId`.
+- Verify Email, Account Settings, Update Email, and Change Password were rendered and interaction-tested through widget/router tests. Register → Verify Email is covered with a trusted response `userId`; a successful live registration/verification mutation was not attempted without a safe disposable inbox.
 - No live account was registered, verified, updated, or password-mutated during this review.

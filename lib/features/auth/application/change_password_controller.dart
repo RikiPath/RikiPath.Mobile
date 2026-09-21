@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_error_message.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_validators.dart';
@@ -43,11 +45,19 @@ class ChangePasswordController extends Notifier<ChangePasswordState> {
   }) async {
     if (state.isLoading) return false;
 
-    final currentPasswordError = AuthValidators.loginPassword(currentPassword);
-    final newPasswordError = AuthValidators.registrationPassword(newPassword);
+    final l10n = ref.read(appLocalizationsProvider);
+    final currentPasswordError = AuthValidators.loginPassword(
+      currentPassword,
+      l10n,
+    );
+    final newPasswordError = AuthValidators.registrationPassword(
+      newPassword,
+      l10n,
+    );
     final confirmPasswordError = AuthValidators.passwordConfirmation(
       confirmPassword,
       newPassword,
+      l10n,
     );
     if (currentPasswordError != null ||
         newPasswordError != null ||
@@ -63,9 +73,8 @@ class ChangePasswordController extends Notifier<ChangePasswordState> {
     final session = ref.read(authSessionControllerProvider);
     final userId = session.currentUserId;
     if (session.value != AuthSessionState.authenticated || userId == null) {
-      state = const ChangePasswordState(
-        serverError:
-            'Không tìm thấy mã tài khoản trong phiên hiện tại. Vui lòng đăng nhập lại.',
+      state = ChangePasswordState(
+        serverError: l10n.authErrorSessionMissingUserId,
       );
       return false;
     }
@@ -83,10 +92,17 @@ class ChangePasswordController extends Notifier<ChangePasswordState> {
             ),
           );
       state = const ChangePasswordState(succeeded: true);
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .success(title: l10n.toastPasswordChangeSuccessTitle);
       return true;
     } catch (error) {
       state = ChangePasswordState(
-        serverError: authErrorMessage(error, AuthOperation.changePassword),
+        serverError: authErrorMessage(
+          error,
+          AuthOperation.changePassword,
+          l10n,
+        ),
       );
       return false;
     }

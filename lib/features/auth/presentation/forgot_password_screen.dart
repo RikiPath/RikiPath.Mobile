@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/forgot_password_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_page.dart';
@@ -34,6 +35,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final state = ref.watch(forgotPasswordControllerProvider);
     if (state.succeeded) {
       return _ForgotPasswordSuccess(
@@ -55,7 +57,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             children: [
               RikiAuthHeader(
                 onBack: () => context.go(AppRoutes.login),
-                backSemanticLabel: 'Quay lại đăng nhập',
+                backSemanticLabel: l10n.returnToLogin,
               ),
               const SizedBox(height: AppSpacing.space10),
               Center(
@@ -75,14 +77,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.space8),
-              const Text(
-                'Quên mật khẩu?',
+              Text(
+                l10n.forgotPasswordTitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.pageTitle,
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                'Nhập email đã đăng ký để nhận hướng dẫn đặt lại mật khẩu.',
+                l10n.forgotPasswordSubtitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.body.copyWith(
                   color: AppColors.textSecondary,
@@ -91,8 +93,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               const SizedBox(height: AppSpacing.space10),
               RikiTextField(
                 key: const Key('forgot_email_field'),
-                label: 'EMAIL ĐÃ ĐĂNG KÝ',
-                hintText: 'hocvien@example.com',
+                label: l10n.registeredEmail,
+                hintText: l10n.emailHint,
                 controller: _emailController,
                 prefixIcon: Icons.mail_outline,
                 errorText: state.emailError,
@@ -111,22 +113,22 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               if (state.serverError != null) ...[
                 const SizedBox(height: AppSpacing.space4),
                 RikiErrorBanner(
-                  title: 'Chưa thể gửi yêu cầu',
+                  title: l10n.passwordRecoveryUnavailableTitle,
                   message: state.serverError!,
                 ),
               ],
               const SizedBox(height: AppSpacing.space6),
               RikiPrimaryButton(
                 key: const Key('forgot_submit_button'),
-                label: 'Gửi yêu cầu',
-                loadingLabel: 'Đang gửi yêu cầu...',
+                label: l10n.sendRequest,
+                loadingLabel: l10n.sendingRequest,
                 trailingIcon: Icons.arrow_forward,
                 isLoading: state.isLoading,
                 onPressed: _submit,
               ),
               const SizedBox(height: AppSpacing.space3),
               RikiSecondaryButton(
-                label: 'Quay lại đăng nhập',
+                label: l10n.returnToLogin,
                 leadingIcon: Icons.arrow_back,
                 onPressed: state.isLoading
                     ? null
@@ -155,6 +157,7 @@ class _ForgotPasswordSuccess extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AuthPage(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -163,40 +166,35 @@ class _ForgotPasswordSuccess extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const RikiAuthHeader(statusLabel: 'Đã gửi email'),
+              RikiAuthHeader(statusLabel: l10n.requestSentStatus),
               const SizedBox(height: AppSpacing.space10),
               const Center(
                 child: AuthSuccessIllustration(icon: Icons.mail_outline),
               ),
               const SizedBox(height: AppSpacing.space6),
-              const Text(
-                'Yêu cầu đã được gửi',
+              Text(
+                l10n.requestSentTitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.heroTitle,
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                'Chúng tôi đã gửi hướng dẫn lấy lại mật khẩu tới $email.',
+                l10n.forgotPasswordSentBody(email),
                 textAlign: TextAlign.center,
                 style: AppTypography.body.copyWith(
                   color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppSpacing.space6),
-              const RikiSuccessBanner(
-                message:
-                    'Vui lòng kiểm tra email để tiếp tục đặt lại mật khẩu.',
-              ),
+              RikiSuccessBanner(message: l10n.forgotPasswordCheckEmail),
               const SizedBox(height: AppSpacing.space4),
-              const RikiWarningBanner(
+              RikiWarningBanner(
                 icon: Icons.info_outline,
-                message:
-                    'Nếu không thấy email trong Hộp thư đến, vui lòng '
-                    'kiểm tra Thư rác hoặc Spam.',
+                message: l10n.forgotPasswordSpamHint,
               ),
               const SizedBox(height: AppSpacing.space6),
               Text(
-                'Không nhận được thư? Gửi lại (58s)',
+                l10n.forgotPasswordResend,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySmall.copyWith(
                   fontWeight: FontWeight.w600,
@@ -210,13 +208,13 @@ class _ForgotPasswordSuccess extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 RikiPrimaryButton(
-                  label: 'Quay lại đăng nhập',
+                  label: l10n.returnToLogin,
                   onPressed: onReturnToLogin,
                 ),
                 const SizedBox(height: AppSpacing.space4),
-                const AuthHelpFooter(
-                  prefix: 'Cần hỗ trợ về tài khoản?',
-                  actionLabel: 'Trung tâm trợ giúp',
+                AuthHelpFooter(
+                  prefix: l10n.helpAccountPrefix,
+                  actionLabel: l10n.helpCenter,
                 ),
               ],
             ),

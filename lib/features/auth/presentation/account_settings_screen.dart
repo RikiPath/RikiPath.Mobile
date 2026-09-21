@@ -3,63 +3,140 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
+import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
 
 class AccountSettingsScreen extends ConsumerWidget {
   const AccountSettingsScreen({super.key});
 
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final confirmed = await showProfileConfirmationSheet(
+      context: context,
+      icon: Icons.logout_rounded,
+      title: l10n.logoutConfirmationTitle,
+      message: l10n.logoutConfirmationMessage,
+      confirmLabel: l10n.logout,
+      cancelLabel: l10n.cancel,
+      confirmKey: const ValueKey<String>('account_logout_confirm_button'),
+      destructive: true,
+    );
+    if (!confirmed) return;
+    await ref.read(authSessionControllerProvider).signOut();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final profileValue = ref.watch(userProfileControllerProvider);
     return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(title: const Text('Tài khoản')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.space4,
-          AppSpacing.space3,
-          AppSpacing.space4,
-          AppSpacing.space8,
+      backgroundColor: AppColors.profileBackground,
+      appBar: ProfileDetailHeader(title: l10n.account),
+      body: profileValue.when(
+        loading: () => const ProfileDetailSkeleton(
+          key: ValueKey<String>('account_settings_loading_view'),
+          groupCount: 3,
+          rowsPerGroup: 2,
         ),
-        children: [
-          const Text('Bảo mật tài khoản', style: AppTypography.pageTitle),
-          const SizedBox(height: AppSpacing.space2),
-          Text(
-            'Quản lý email đăng nhập, mật khẩu và phiên hiện tại.',
-            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppSpacing.space6),
-          Card(
+        error: (error, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.space5),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                ListTile(
-                  key: const Key('account_change_email_action'),
-                  leading: const Icon(Icons.alternate_email),
-                  title: const Text('Đổi email'),
-                  subtitle: const Text('Gửi mã xác thực tới email mới'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(AppRoutes.profileChangeEmail),
+                RikiErrorBanner(
+                  title: l10n.profileLoadFailedTitle,
+                  message: userProfileErrorMessage(error, l10n),
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  key: const Key('account_change_password_action'),
-                  leading: const Icon(Icons.lock_outline),
-                  title: const Text('Đổi mật khẩu'),
-                  subtitle: const Text('Yêu cầu mật khẩu hiện tại'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(AppRoutes.profileChangePassword),
+                const SizedBox(height: AppSpacing.space4),
+                RikiSecondaryButton(
+                  label: l10n.retry,
+                  onPressed: () =>
+                      ref.read(userProfileControllerProvider.notifier).retry(),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.space4),
-          RikiSecondaryButton(
-            key: const Key('account_logout_button'),
-            label: 'Đăng xuất',
-            leadingIcon: Icons.logout,
-            onPressed: () => ref.read(authSessionControllerProvider).signOut(),
+        ),
+        data: (state) => ProfileAnimatedEntrance(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.space4,
+              AppSpacing.space3,
+              AppSpacing.space4,
+              AppSpacing.space8,
+            ),
+            children: [
+              ProfileDetailIntro(
+                icon: Icons.shield_outlined,
+                title: l10n.accountSecurity,
+                description: l10n.accountSecuritySubtitle,
+              ),
+              const SizedBox(height: AppSpacing.space5),
+              ProfileSecurityCard(
+                email: state.profile.email,
+                verified: state.profile.isEmailVerified,
+                verifiedTitle: l10n.accountVerifiedTitle,
+                unverifiedTitle: l10n.accountUnverifiedTitle,
+              ),
+              const SizedBox(height: AppSpacing.space6),
+              ProfileSettingsGroup(
+                label: l10n.accountSecuritySection,
+                children: [
+                  ProfileSettingsTile(
+                    key: const ValueKey<String>('account_change_email_action'),
+                    icon: Icons.alternate_email_rounded,
+                    title: l10n.changeEmail,
+                    subtitle: l10n.changeEmailSubtitle,
+                    onTap: () => context.push(AppRoutes.profileChangeEmail),
+                  ),
+                  ProfileSettingsTile(
+                    key: const ValueKey<String>(
+                      'account_change_password_action',
+                    ),
+                    icon: Icons.lock_outline_rounded,
+                    title: l10n.changePassword,
+                    subtitle: l10n.changePasswordSubtitle,
+                    onTap: () => context.push(AppRoutes.profileChangePassword),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.space6),
+              ProfileSettingsGroup(
+                label: l10n.accountOptionsSection,
+                children: [
+                  ProfileSettingsTile(
+                    key: const ValueKey<String>(
+                      'account_notification_settings_action',
+                    ),
+                    icon: Icons.notifications_none_rounded,
+                    title: l10n.notificationSettingsTitle,
+                    subtitle: l10n.notificationSettingsSubtitle,
+                    onTap: () => context.push(AppRoutes.profileNotifications),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.space6),
+              ProfileSettingsGroup(
+                label: l10n.accountSessionSection,
+                children: [
+                  ProfileSettingsTile(
+                    key: const ValueKey<String>('account_logout_button'),
+                    icon: Icons.logout_rounded,
+                    title: l10n.logout,
+                    subtitle: l10n.logoutConfirmationMessage,
+                    destructive: true,
+                    onTap: () => _confirmLogout(context, ref),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

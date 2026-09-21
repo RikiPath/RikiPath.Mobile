@@ -21,6 +21,12 @@ import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dart';
+import 'package:rikipath_mobile/features/profile/presentation/edit_profile_screen.dart';
+import 'package:rikipath_mobile/features/profile/presentation/jlpt_goal_screen.dart';
+import 'package:rikipath_mobile/features/profile/presentation/notification_settings_screen.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 
 import '../../support/test_auth_session.dart';
 
@@ -38,6 +44,9 @@ void main() {
     expect(AppRoutes.notebook, '/notebook');
     expect(AppRoutes.profile, '/profile');
     expect(AppRoutes.profileAccount, '/profile/account');
+    expect(AppRoutes.profileEdit, '/profile/edit');
+    expect(AppRoutes.profileJlptGoal, '/profile/jlpt-goal');
+    expect(AppRoutes.profileNotifications, '/profile/notifications');
     expect(AppRoutes.profileChangeEmail, '/profile/change-email');
     expect(AppRoutes.profileChangePassword, '/profile/change-password');
   });
@@ -157,10 +166,32 @@ void main() {
       tester,
       initialLocation: AppRoutes.profile,
     );
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Cài đặt'));
+    final settingsAction = find.byKey(
+      const ValueKey<String>('profile_settings_action'),
+    );
+    await tester.scrollUntilVisible(
+      settingsAction,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(settingsAction);
     await tester.pumpAndSettle();
     expect(find.byType(AccountSettingsScreen), findsOneWidget);
+
+    router.go(AppRoutes.profileEdit);
+    await tester.pumpAndSettle();
+    expect(find.byType(EditProfileScreen), findsOneWidget);
+
+    router.go(AppRoutes.profileJlptGoal);
+    await tester.pumpAndSettle();
+    expect(find.byType(JlptGoalScreen), findsOneWidget);
+
+    router.go(AppRoutes.profileNotifications);
+    await tester.pumpAndSettle();
+    expect(find.byType(NotificationSettingsScreen), findsOneWidget);
 
     router.go(AppRoutes.profileChangeEmail);
     await tester.pumpAndSettle();
@@ -180,8 +211,19 @@ void main() {
       initialLocation: AppRoutes.profileAccount,
       authSession: session,
     );
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('account_logout_button')));
+    final logout = find.byKey(const Key('account_logout_button'));
+    await tester.scrollUntilVisible(
+      logout,
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(logout);
+    await tester.pumpAndSettle();
+
+    expect(session.value, AuthSessionState.authenticated);
+    await tester.tap(find.byKey(const Key('account_logout_confirm_button')));
     await tester.pumpAndSettle();
 
     expect(session.value, AuthSessionState.unauthenticated);
@@ -306,10 +348,59 @@ Future<GoRouter> _pumpRouter(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [authSessionControllerProvider.overrideWithValue(session)],
+      overrides: [
+        authSessionControllerProvider.overrideWithValue(session),
+        userProfileRepositoryProvider.overrideWithValue(
+          const _RouterProfileRepository(),
+        ),
+      ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pump();
   return router;
+}
+
+class _RouterProfileRepository implements UserProfileRepository {
+  const _RouterProfileRepository();
+
+  UserProfile get _profile => const UserProfile(
+    userId: 42,
+    email: 'learner@example.com',
+    firstName: 'Minh Anh',
+    lastName: 'Nguyễn',
+    avatarUrl: null,
+    role: 'Learner',
+    isEmailVerified: true,
+    targetJlptLevelId: null,
+    targetJlptLevelName: null,
+    dailyStudyMinutes: 30,
+    emailNotificationsEnabled: true,
+    systemNotificationsEnabled: true,
+  );
+
+  @override
+  Future<UserProfile> loadProfile() async => _profile;
+
+  @override
+  Future<UserProfile> updateProfile({
+    required String firstName,
+    required String lastName,
+  }) async => _profile;
+
+  @override
+  Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) async =>
+      _profile;
+
+  @override
+  Future<UserProfile> setJlptGoal({
+    required int targetJlptLevelId,
+    required int dailyStudyMinutes,
+  }) async => _profile;
+
+  @override
+  Future<UserProfile> updateNotificationSettings({
+    required bool emailNotificationsEnabled,
+    required bool systemNotificationsEnabled,
+  }) async => _profile;
 }

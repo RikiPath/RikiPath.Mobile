@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 
 class AuthSuccessIllustration extends StatelessWidget {
   const AuthSuccessIllustration({required this.icon, super.key});
@@ -10,7 +11,7 @@ class AuthSuccessIllustration extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       image: true,
-      label: 'Thành công',
+      label: context.l10n.successSemantics,
       child: SizedBox.square(
         dimension: 160,
         child: Stack(

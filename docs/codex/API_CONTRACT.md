@@ -319,7 +319,7 @@ Every request DTO referenced above is defined here using live Swagger field name
 |---|---|
 | `LoginRequest` | `email: string(email)` R; `password: string` R |
 | `RegisterRequest` | `email: string(email)` R; `password: string` R, minimum length 6; `confirmPassword: string` R and source `[Compare(password)]`; `firstName: string` O?; `lastName: string` O? |
-| `VerifyEmailRequest` | `userId: int32` R; `verificationCode: string` R; no published length/pattern |
+| `VerifyEmailRequest` | `userId: int32` R; `verificationCode: string` R; live Swagger publishes no length/pattern beyond non-empty. Backend source generates a six-digit numeric code with a 30-minute expiry. |
 | `UpdateEmailRequest` | `newEmail: string(email)` R |
 | `ChangePasswordRequest` | `currentPassword: string` R; `newPassword: string` R, minimum length 6; `confirmPassword: string` R and source `[Compare(newPassword)]` |
 | `SendValidationEmailRequest` | `toEmail: string` O?; `htmlContent: string` O? |
@@ -362,7 +362,7 @@ These response DTOs are absent from live OpenAPI schemas. Field names come from 
 
 | Response DTO | JSON fields |
 |---|---|
-| `RegisterResponse` | `fullName: string`, `email: string` |
+| `RegisterResponse` | `fullName: string`, `email: string`, `userId?: int32` in the backend-team-confirmed runtime response. The live OpenAPI operation still publishes only an untyped `200`, and the supplied read-only source snapshot still shows the older two-field DTO, so `userId` is handled defensively until those artifacts are refreshed. |
 | `LoginResponse` | `accessToken: string`, `userId: int32`, `email: string`, `fullName: string`, `role: string` |
 | `UserProfileResponse` | `userId: int32`, `email: string`, `firstName: string`, `lastName: string`, `avatarUrl?: string`, `role: string`, `isEmailVerified: boolean`, `targetJlptLevelId?: int32`, `targetJlptLevelName?: string`, `dailyStudyMinutes: int32`, `emailNotificationsEnabled: boolean`, `systemNotificationsEnabled: boolean` |
 | `StudyStreakResponse` | `currentStreakDays: int32`, `longestStreakDays: int32`, `lastActivityDate?: datetime`, `isActiveToday: boolean` |

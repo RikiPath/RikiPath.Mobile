@@ -61,17 +61,23 @@ class LoginResponseDto {
 }
 
 class RegisterResponseDto {
-  const RegisterResponseDto({required this.fullName, required this.email});
+  const RegisterResponseDto({
+    required this.fullName,
+    required this.email,
+    this.userId,
+  });
 
   factory RegisterResponseDto.fromJson(Map<String, Object?> json) {
     return RegisterResponseDto(
       fullName: _requiredString(json, 'fullName'),
       email: _requiredString(json, 'email'),
+      userId: _optionalInt(json, 'userId'),
     );
   }
 
   final String fullName;
   final String email;
+  final int? userId;
 }
 
 class VerifyEmailRequestDto {
@@ -123,6 +129,14 @@ String _requiredString(Map<String, Object?> json, String field) {
 
 int _requiredInt(Map<String, Object?> json, String field) {
   final value = json[field];
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  throw FormatException('Expected an integer field named $field.');
+}
+
+int? _optionalInt(Map<String, Object?> json, String field) {
+  final value = json[field];
+  if (value == null) return null;
   if (value is int) return value;
   if (value is num) return value.toInt();
   throw FormatException('Expected an integer field named $field.');

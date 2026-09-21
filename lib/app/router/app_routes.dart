@@ -38,9 +38,16 @@ abstract final class AppRoutes {
       '$notebook/vocabulary/${Uri.encodeComponent(entryKey)}';
   static const String profile = '/profile';
   static const String profileAccountSegment = 'account';
+  static const String profileEditSegment = 'edit';
+  static const String profileJlptGoalSegment = 'jlpt-goal';
+  static const String profileNotificationsSegment = 'notifications';
   static const String profileChangeEmailSegment = 'change-email';
   static const String profileChangePasswordSegment = 'change-password';
   static const String profileAccount = '$profile/$profileAccountSegment';
+  static const String profileEdit = '$profile/$profileEditSegment';
+  static const String profileJlptGoal = '$profile/$profileJlptGoalSegment';
+  static const String profileNotifications =
+      '$profile/$profileNotificationsSegment';
   static const String profileChangeEmail =
       '$profile/$profileChangeEmailSegment';
   static const String profileChangePassword =

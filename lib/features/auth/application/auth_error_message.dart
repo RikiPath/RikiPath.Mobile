@@ -1,5 +1,7 @@
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
+import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
+import 'package:rikipath_mobile/l10n/generated/app_localizations_vi.dart';
 
 enum AuthOperation {
   login,
@@ -10,55 +12,53 @@ enum AuthOperation {
   passwordRecovery,
 }
 
-String authErrorMessage(Object error, AuthOperation operation) {
+String authErrorMessage(
+  Object error,
+  AuthOperation operation, [
+  AppLocalizations? localizations,
+]) {
+  final l10n = localizations ?? AppLocalizationsVi();
   if (error is PasswordRecoveryUnavailableException) {
-    return 'Tính năng lấy lại mật khẩu chưa được kết nối với máy chủ. '
-        'Vui lòng liên hệ trung tâm trợ giúp.';
+    return l10n.authErrorPasswordRecoveryUnavailable;
   }
   if (error is UnsupportedUserRoleException) {
-    return 'Ứng dụng di động hiện chỉ hỗ trợ tài khoản học viên.';
+    return l10n.authErrorUnsupportedRole;
   }
   if (error is NetworkError) {
-    return 'Không thể kết nối tới RikiPath. Vui lòng kiểm tra mạng và thử lại.';
+    return l10n.authErrorNetwork;
   }
   if (error is UnauthorizedError) {
     return operation == AuthOperation.login
-        ? 'Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.'
-        : 'Phiên đăng nhập không còn hợp lệ. Vui lòng đăng nhập lại.';
+        ? l10n.authErrorInvalidCredentials
+        : l10n.authErrorSessionExpired;
   }
   if (error is ForbiddenError) {
-    return 'Bạn không có quyền thực hiện thay đổi này.';
+    return l10n.authErrorForbidden;
   }
   if (error is NotFoundError) {
-    return 'Không tìm thấy tài khoản cần cập nhật.';
+    return l10n.authErrorNotFound;
   }
   if (error is ValidationError) {
     if (operation == AuthOperation.login) {
       final normalizedMessage = error.message.toLowerCase();
       if (normalizedMessage.contains('email hoặc mật khẩu')) {
-        return 'Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.';
+        return l10n.authErrorInvalidCredentials;
       }
       if (normalizedMessage.contains('xác thực email')) {
-        return 'Vui lòng xác thực email trước khi đăng nhập.';
+        return l10n.authErrorEmailNotVerified;
       }
     }
     return switch (operation) {
-      AuthOperation.login =>
-        'Thông tin đăng nhập chưa hợp lệ. Vui lòng kiểm tra lại.',
-      AuthOperation.register =>
-        'Thông tin đăng ký chưa hợp lệ hoặc email đã được sử dụng.',
-      AuthOperation.verifyEmail =>
-        'Mã xác thực không hợp lệ, đã hết hạn hoặc đã được sử dụng.',
-      AuthOperation.updateEmail =>
-        'Email mới chưa hợp lệ hoặc đã được sử dụng.',
-      AuthOperation.changePassword =>
-        'Mật khẩu hiện tại không đúng hoặc mật khẩu mới chưa hợp lệ.',
-      AuthOperation.passwordRecovery =>
-        'Email chưa hợp lệ. Vui lòng kiểm tra lại.',
+      AuthOperation.login => l10n.authErrorLoginValidation,
+      AuthOperation.register => l10n.authErrorRegisterValidation,
+      AuthOperation.verifyEmail => l10n.authErrorVerifyValidation,
+      AuthOperation.updateEmail => l10n.authErrorUpdateEmailValidation,
+      AuthOperation.changePassword => l10n.authErrorChangePasswordValidation,
+      AuthOperation.passwordRecovery => l10n.authErrorRecoveryValidation,
     };
   }
   if (error is ServerError) {
-    return 'RikiPath đang gặp sự cố. Vui lòng thử lại sau ít phút.';
+    return l10n.authErrorServer;
   }
-  return 'Đã có lỗi ngoài dự kiến. Vui lòng thử lại.';
+  return l10n.authErrorUnknown;
 }

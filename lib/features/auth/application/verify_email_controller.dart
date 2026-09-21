@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_error_message.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_validators.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
@@ -40,15 +41,13 @@ class VerifyEmailController extends Notifier<VerifyEmailState> {
     required String verificationCode,
   }) async {
     if (state.isLoading) return false;
+    final l10n = ref.read(appLocalizationsProvider);
     if (userId == null) {
-      state = const VerifyEmailState(
-        serverError:
-            'Máy chủ chưa cung cấp mã tài khoản cần thiết để xác thực email.',
-      );
+      state = VerifyEmailState(serverError: l10n.authErrorVerifyMissingUserId);
       return false;
     }
 
-    final codeError = AuthValidators.verificationCode(verificationCode);
+    final codeError = AuthValidators.verificationCode(verificationCode, l10n);
     if (codeError != null) {
       state = VerifyEmailState(codeError: codeError);
       return false;
@@ -68,7 +67,7 @@ class VerifyEmailController extends Notifier<VerifyEmailState> {
       return true;
     } catch (error) {
       state = VerifyEmailState(
-        serverError: authErrorMessage(error, AuthOperation.verifyEmail),
+        serverError: authErrorMessage(error, AuthOperation.verifyEmail, l10n),
       );
       return false;
     }

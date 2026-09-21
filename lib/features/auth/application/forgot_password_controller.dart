@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_error_message.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_validators.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
@@ -42,7 +43,8 @@ class ForgotPasswordController extends Notifier<ForgotPasswordState> {
   Future<bool> submit(String email) async {
     if (state.isLoading) return false;
 
-    final emailError = AuthValidators.email(email);
+    final l10n = ref.read(appLocalizationsProvider);
+    final emailError = AuthValidators.email(email, l10n);
     if (emailError != null) {
       state = ForgotPasswordState(emailError: emailError);
       return false;
@@ -61,7 +63,11 @@ class ForgotPasswordController extends Notifier<ForgotPasswordState> {
       return true;
     } catch (error) {
       state = ForgotPasswordState(
-        serverError: authErrorMessage(error, AuthOperation.passwordRecovery),
+        serverError: authErrorMessage(
+          error,
+          AuthOperation.passwordRecovery,
+          l10n,
+        ),
       );
       return false;
     }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/login_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_page.dart';
@@ -41,6 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final state = ref.watch(loginControllerProvider);
     final hasFeedback =
         state.emailError != null ||
@@ -55,22 +57,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const RikiAuthHeader(level: JlptLevel.n4),
+              const RikiAuthHeader(),
               const SizedBox(height: AppSpacing.space8),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
-                child: RikiPromotionalPill(
-                  message: 'Học tiếng Nhật cá nhân hoá cùng AI',
-                ),
+                child: RikiPromotionalPill(message: l10n.authPromotion),
               ),
               const SizedBox(height: AppSpacing.space5),
-              const Text(
-                'Chào mừng trở lại! 👋',
-                style: AppTypography.pageTitle,
-              ),
+              Text(l10n.loginWelcome, style: AppTypography.pageTitle),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                'Tiếp tục hành trình chinh phục JLPT cùng RikiPath.',
+                l10n.loginSubtitle,
                 style: AppTypography.body.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -78,8 +75,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: AppSpacing.space8),
               RikiTextField(
                 key: const Key('login_email_field'),
-                label: 'Email học viên',
-                hintText: 'hocvien@example.com',
+                label: l10n.studentEmail,
+                hintText: l10n.emailHint,
                 controller: _emailController,
                 prefixIcon: Icons.mail_outline,
                 suffixIcon: state.isLoading
@@ -97,8 +94,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: AppSpacing.fieldGap),
               RikiPasswordField(
                 key: const Key('login_password_field'),
-                label: 'Mật khẩu',
-                hintText: 'Nhập mật khẩu',
+                label: l10n.password,
+                hintText: l10n.passwordHint,
                 controller: _passwordController,
                 errorText: state.passwordError,
                 enabled: !state.isLoading,
@@ -113,7 +110,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 alignment: Alignment.centerRight,
                 child: RikiTextButton(
                   key: const Key('forgot_password_button'),
-                  label: 'Quên mật khẩu?',
+                  label: l10n.forgotPassword,
                   onPressed: state.isLoading
                       ? null
                       : () => context.go(AppRoutes.forgotPassword),
@@ -128,39 +125,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     : (value) {
                         setState(() => _rememberSession = value ?? false);
                       },
-                child: const Text('Ghi nhớ phiên đăng nhập trên thiết bị này'),
+                child: Text(l10n.rememberSession),
               ),
-              if (state.serverError != null) ...[
-                const SizedBox(height: AppSpacing.space3),
-                RikiErrorBanner(
-                  title: 'Không thể đăng nhập',
-                  message: state.serverError!,
-                ),
-              ],
               const SizedBox(height: AppSpacing.space2),
               RikiPrimaryButton(
                 key: const Key('login_submit_button'),
-                label: 'Đăng nhập',
-                loadingLabel: 'Đang đăng nhập...',
+                label: l10n.login,
+                loadingLabel: l10n.loggingIn,
                 trailingIcon: Icons.arrow_forward,
                 isLoading: state.isLoading,
                 onPressed: _submit,
               ),
               if (state.isLoading) ...[
                 const SizedBox(height: AppSpacing.space4),
-                const RikiWarningBanner(
+                RikiWarningBanner(
                   icon: Icons.hourglass_bottom,
-                  message: 'Đang kết nối an toàn với tài khoản của bạn...',
+                  message: l10n.loginSecureConnection,
                 ),
                 const SizedBox(height: AppSpacing.space3),
-                const RikiProgressIndicator(semanticsLabel: 'Đang đăng nhập'),
+                RikiProgressIndicator(semanticsLabel: l10n.loggingInSemantics),
               ] else if (!hasFeedback) ...[
                 const SizedBox(height: AppSpacing.space5),
-                const RikiWarningBanner(
-                  title: 'Mẹo đăng nhập',
-                  message:
-                      'Sử dụng tài khoản đã đăng ký khóa học để đồng bộ '
-                      'chuỗi streak và lộ trình AI.',
+                RikiWarningBanner(
+                  title: l10n.loginTipTitle,
+                  message: l10n.loginTipMessage,
                 ),
               ],
             ],
@@ -170,8 +158,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               children: [
                 AuthNavigationPrompt(
-                  message: 'Chưa có tài khoản?',
-                  actionLabel: 'Đăng ký',
+                  message: l10n.noAccount,
+                  actionLabel: l10n.register,
                   onPressed: state.isLoading
                       ? null
                       : () => context.go(AppRoutes.register),

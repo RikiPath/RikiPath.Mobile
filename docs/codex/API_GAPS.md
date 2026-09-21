@@ -1,8 +1,8 @@
 # RikiPath Frontend API Gaps
 
-Reviewed on: 2026-09-18 (Asia/Bangkok)
+Reviewed on: 2026-09-20 (Asia/Bangkok)
 
-This gap register compares the live OpenAPI document at `http://140.245.43.97/swagger/v1/swagger.json` with the supplied read-only backend source at revision `959cad6567ba0101e7fed00c3384948f51c0f47d` and the learner-mobile product scope.
+This gap register compares the live OpenAPI document at `http://140.245.43.97/swagger/v1/swagger.json` with the supplied read-only backend source, currently at revision `006c45cf7d863c1d5fa38b93a0b680cd37b5689d`, and the learner-mobile product scope.
 
 Live Swagger was accessible during this phase. Routes and request schemas were verified against it. The deployed document contains 69 operations but publishes zero typed JSON response schemas, so source-backed response mappings remain unverified at the live schema level. The snapshot fetched at 2026-09-12T10:21:35+07:00 has SHA-256 `a2079ec3f6b5ace0d6bb1b82a3ec697cfc25b6d762c46c2afd42c4a088c53de4`.
 
@@ -40,10 +40,12 @@ C10.5/A3 frontend guardrails do not change these backend facts:
 - Reset-password confirmation — **NOT YET AVAILABLE**.
 - Purpose-built resend-verification — **NOT YET AVAILABLE**.
 - Current-session/device management — **NOT YET AVAILABLE**.
-- Registration cannot hand off to in-app email verification: `RegisterResponse`
-  returns only `fullName` and `email`, while `VerifyEmailRequest` requires both
-  `userId` and `verificationCode`. The newly created user's ID is not available
-  to the mobile client through the registration response.
+- The backend team reports that the deployed registration response now includes
+  `userId`, and Flutter now consumes it for the Register → Verify Email handoff.
+  However, the live OpenAPI operation still has an untyped `200` response and
+  the supplied read-only source snapshot still shows the older two-field
+  `RegisterResponse`. Flutter therefore keeps a safe fallback blocked state if
+  an older server omits `userId`; Swagger/source artifacts still need refreshing.
 
 Priority A1 reverified the unchanged live OpenAPI snapshot on 2026-09-18. An
 invalid Login reached the deployed endpoint and returned the source-shaped HTTP
@@ -51,8 +53,8 @@ invalid Login reached the deployed endpoint and returned the source-shaped HTTP
 non-mutating Register probe returned the ASP.NET validation-problem shape rather
 than `ApiResponse<T>`. No successful Login/Register response was observed
 because no safe test credentials or test inbox were provided; the source-backed
-success DTOs and missing registration `userId` therefore remain unverified at
-the live response-schema/runtime-success level.
+success DTOs, including the reported registration `userId`, therefore remain
+unverified at the live response-schema/runtime-success level.
 
 `POST /api/Email/send-validation` is not an acceptable mobile replacement: it accepts destination email plus arbitrary HTML and is described as backend/admin-oriented.
 
@@ -60,7 +62,15 @@ the live response-schema/runtime-success level.
 
 - No endpoint exposes a safe self-service email change without a path `userId`.
 - No API returns session expiry or token metadata.
-- Profile and analytics endpoints otherwise exist.
+- P1 connected the five `/api/UserProfile/me` operations with source-backed
+  response DTOs. Live Swagger still publishes only untyped `200` responses, so
+  authenticated runtime response parity has not been verified.
+- Swagger publishes avatar multipart key `avatarFile`, but its JPEG/PNG/WEBP
+  allow-list and 5MB maximum are only present in the supplied backend source.
+- UserProfile exposes no phone number, date of birth, gender, bio, or locale.
+- Notification settings expose only `emailNotificationsEnabled` and
+  `systemNotificationsEnabled`; more granular polished-UI settings cannot be
+  represented as backend-synced values.
 
 ### JLPT
 
@@ -157,7 +167,7 @@ remote entry with a real backend ID.
 
 #### C13 Grammar integration gaps
 
-The following findings were confirmed on 2026-09-13 against live Swagger,
+The following findings were re-confirmed on 2026-09-20 against live Swagger,
 read-only runtime requests, `SharedBankController`,
 `SharedBankSearchService`, the Grammar entity/configuration/repository, bank
 response/filter types, and the Notebook controller/service in the supplied
@@ -211,8 +221,9 @@ service, requests, responses, repositories, entities, and EF configurations.
 | Content type | Source currently maps vocabulary, kanji, or manual | Stable typed display and future compatibility | contentType is a plain string, not an enum or exhaustive contract | Live response schema is absent | P2 | No; C14 preserves unknown values as an explicit fallback |
 | Offline synchronization | No Notebook sync/version endpoint exists | Durable offline Notebook edits, retries, and conflict resolution | Versions, tombstones, retry tokens, idempotency, and reconciliation are absent | No live or source operations exist | P0 | Yes; deferred to C15/backend work |
 
-C14 therefore uses real per-list reads and mutations, performs search only over
-the currently loaded list, never derives a vocabulary route from a note ID, and
+C14 therefore uses real per-list reads and mutations, caches verified response
+fields in user-scoped Drift storage, performs search only over the selected
+cached list, never derives a vocabulary route from a note ID, and
 does not expose JLPT/SRS filters that the response cannot support.
 
 ### Review/SRS

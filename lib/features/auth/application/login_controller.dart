@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_error_message.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_validators.dart';
@@ -40,8 +42,9 @@ class LoginController extends Notifier<LoginState> {
   }) async {
     if (state.isLoading) return false;
 
-    final emailError = AuthValidators.email(email);
-    final passwordError = AuthValidators.loginPassword(password);
+    final l10n = ref.read(appLocalizationsProvider);
+    final emailError = AuthValidators.email(email, l10n);
+    final passwordError = AuthValidators.loginPassword(password, l10n);
     if (emailError != null || passwordError != null) {
       state = LoginState(emailError: emailError, passwordError: passwordError);
       return false;
@@ -56,14 +59,22 @@ class LoginController extends Notifier<LoginState> {
             persistSession: rememberSession,
           );
       ref
+          .read(rikiToastServiceProvider.notifier)
+          .success(
+            title: l10n.toastLoginSuccessTitle,
+            description: l10n.toastLoginSuccessDescription,
+          );
+      ref
           .read(authSessionControllerProvider)
           .markAuthenticated(userId: account.userId);
       state = const LoginState(succeeded: true);
       return true;
     } catch (error) {
-      state = LoginState(
-        serverError: authErrorMessage(error, AuthOperation.login),
-      );
+      final message = authErrorMessage(error, AuthOperation.login, l10n);
+      state = LoginState(serverError: message);
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .error(title: l10n.loginFailedTitle, description: message);
       return false;
     }
   }

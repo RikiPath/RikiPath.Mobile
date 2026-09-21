@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_error_message.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_validators.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
@@ -48,15 +50,15 @@ class RegisterController extends Notifier<RegisterState> {
   }) async {
     if (state.isLoading) return false;
 
-    final emailError = AuthValidators.email(email);
-    final passwordError = AuthValidators.registrationPassword(password);
+    final l10n = ref.read(appLocalizationsProvider);
+    final emailError = AuthValidators.email(email, l10n);
+    final passwordError = AuthValidators.registrationPassword(password, l10n);
     final confirmationError = AuthValidators.passwordConfirmation(
       confirmPassword,
       password,
+      l10n,
     );
-    final agreementError = acceptedTerms
-        ? null
-        : 'Vui lòng đồng ý với điều khoản trước khi đăng ký.';
+    final agreementError = acceptedTerms ? null : l10n.validationTermsRequired;
 
     if (emailError != null ||
         passwordError != null ||
@@ -86,10 +88,16 @@ class RegisterController extends Notifier<RegisterState> {
             ),
           );
       state = RegisterState(registeredAccount: account);
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .success(
+            title: l10n.toastRegisterSuccessTitle,
+            description: l10n.toastRegisterSuccessDescription,
+          );
       return true;
     } catch (error) {
       state = RegisterState(
-        serverError: authErrorMessage(error, AuthOperation.register),
+        serverError: authErrorMessage(error, AuthOperation.register, l10n),
       );
       return false;
     }

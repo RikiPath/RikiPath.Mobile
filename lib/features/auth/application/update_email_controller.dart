@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_error_message.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_validators.dart';
@@ -35,7 +37,8 @@ class UpdateEmailController extends Notifier<UpdateEmailState> {
   Future<bool> submit(String newEmail) async {
     if (state.isLoading) return false;
 
-    final emailError = AuthValidators.email(newEmail);
+    final l10n = ref.read(appLocalizationsProvider);
+    final emailError = AuthValidators.email(newEmail, l10n);
     if (emailError != null) {
       state = UpdateEmailState(emailError: emailError);
       return false;
@@ -44,10 +47,7 @@ class UpdateEmailController extends Notifier<UpdateEmailState> {
     final session = ref.read(authSessionControllerProvider);
     final userId = session.currentUserId;
     if (session.value != AuthSessionState.authenticated || userId == null) {
-      state = const UpdateEmailState(
-        serverError:
-            'Không tìm thấy mã tài khoản trong phiên hiện tại. Vui lòng đăng nhập lại.',
-      );
+      state = UpdateEmailState(serverError: l10n.authErrorSessionMissingUserId);
       return false;
     }
 
@@ -60,10 +60,13 @@ class UpdateEmailController extends Notifier<UpdateEmailState> {
             UpdateEmailRequestDto(newEmail: newEmail.trim()),
           );
       state = const UpdateEmailState(succeeded: true);
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .success(title: l10n.toastEmailUpdateSuccessTitle);
       return true;
     } catch (error) {
       state = UpdateEmailState(
-        serverError: authErrorMessage(error, AuthOperation.updateEmail),
+        serverError: authErrorMessage(error, AuthOperation.updateEmail, l10n),
       );
       return false;
     }

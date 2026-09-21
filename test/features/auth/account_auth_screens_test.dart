@@ -11,6 +11,9 @@ import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
 import 'package:rikipath_mobile/features/auth/presentation/change_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/update_email_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/verify_email_screen.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 
 import '../../support/test_auth_session.dart';
 
@@ -56,6 +59,26 @@ void main() {
       expect(repository.verifyEmailCalls, 0);
     });
 
+    testWidgets('incomplete code validates before repository submission', (
+      tester,
+    ) async {
+      final repository = _AccountAuthRepository();
+      await _pumpScreen(
+        tester,
+        screen: const VerifyEmailScreen(userId: 42),
+        repository: repository,
+      );
+      await tester.enterText(_textField('verify_email_code_field'), '12345');
+
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('verify_email_submit_button')),
+      );
+
+      expect(find.text('Mã xác thực phải gồm đúng 6 chữ số.'), findsOneWidget);
+      expect(repository.verifyEmailCalls, 0);
+    });
+
     testWidgets('exact request, loading, and success are represented', (
       tester,
     ) async {
@@ -81,6 +104,28 @@ void main() {
       completer.complete();
       await tester.pumpAndSettle();
       expect(find.text('Xác thực email thành công'), findsOneWidget);
+    });
+
+    testWidgets('code field keeps only the first six digits', (tester) async {
+      final repository = _AccountAuthRepository();
+      await _pumpScreen(
+        tester,
+        screen: const VerifyEmailScreen(userId: 42),
+        repository: repository,
+      );
+
+      await tester.enterText(
+        _textField('verify_email_code_field'),
+        '12a3 4567',
+      );
+
+      expect(
+        tester
+            .widget<TextField>(_textField('verify_email_code_field'))
+            .controller
+            ?.text,
+        '123456',
+      );
     });
 
     testWidgets('invalid backend code renders controlled feedback', (
@@ -377,11 +422,58 @@ Future<void> _pumpScreen(
       overrides: [
         authRepositoryProvider.overrideWithValue(repository),
         authSessionControllerProvider.overrideWithValue(authSession),
+        userProfileRepositoryProvider.overrideWithValue(
+          const _AccountProfileRepository(),
+        ),
       ],
       child: MaterialApp(theme: AppTheme.light, home: screen),
     ),
   );
   await tester.pump();
+}
+
+class _AccountProfileRepository implements UserProfileRepository {
+  const _AccountProfileRepository();
+
+  static const _profile = UserProfile(
+    userId: 42,
+    email: 'learner@example.com',
+    firstName: 'Minh Anh',
+    lastName: 'Nguyễn',
+    avatarUrl: null,
+    role: 'Learner',
+    isEmailVerified: true,
+    targetJlptLevelId: 73,
+    targetJlptLevelName: 'N3',
+    dailyStudyMinutes: 30,
+    emailNotificationsEnabled: true,
+    systemNotificationsEnabled: false,
+  );
+
+  @override
+  Future<UserProfile> loadProfile() async => _profile;
+
+  @override
+  Future<UserProfile> setJlptGoal({
+    required int targetJlptLevelId,
+    required int dailyStudyMinutes,
+  }) async => _profile;
+
+  @override
+  Future<UserProfile> updateNotificationSettings({
+    required bool emailNotificationsEnabled,
+    required bool systemNotificationsEnabled,
+  }) async => _profile;
+
+  @override
+  Future<UserProfile> updateProfile({
+    required String firstName,
+    required String lastName,
+  }) async => _profile;
+
+  @override
+  Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) async =>
+      _profile;
 }
 
 Finder _textField(String key) {
