@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 
 class VocabularyLoadingView extends StatelessWidget {
@@ -7,20 +8,11 @@ class VocabularyLoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return RikiSectionSkeleton(
       key: const ValueKey<String>('vocabulary_loading_view'),
-      padding: const EdgeInsets.all(AppSpacing.space4),
-      children: const [
-        _VocabularySkeleton(height: 48),
-        SizedBox(height: AppSpacing.space4),
-        _VocabularySkeleton(height: 34),
-        SizedBox(height: AppSpacing.space4),
-        _VocabularySkeleton(height: 180),
-        SizedBox(height: AppSpacing.space3),
-        _VocabularySkeleton(height: 180),
-        SizedBox(height: AppSpacing.space3),
-        _VocabularySkeleton(height: 180),
-      ],
+      semanticsLabel: context.l10n.loading,
+      itemCount: 3,
+      cardHeight: 116,
     );
   }
 }
@@ -47,18 +39,21 @@ class VocabularyEmptyView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.space4),
             Text(
-              'Không tìm thấy từ vựng',
+              context.l10n.vocabularyEmptyTitle,
               textAlign: TextAlign.center,
               style: AppTypography.sectionTitle,
             ),
             const SizedBox(height: AppSpacing.space2),
             Text(
-              'Thử từ khóa khác hoặc bỏ bộ lọc JLPT.',
+              context.l10n.vocabularyEmptyMessage,
               textAlign: TextAlign.center,
               style: AppTypography.bodySmall,
             ),
             const SizedBox(height: AppSpacing.space5),
-            RikiSecondaryButton(label: 'Xóa bộ lọc', onPressed: onClear),
+            RikiSecondaryButton(
+              label: context.l10n.clearFilters,
+              onPressed: onClear,
+            ),
           ],
         ),
       ),
@@ -92,20 +87,20 @@ class VocabularyErrorView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space4),
               Text(
-                'Chưa thể tải thư viện từ vựng',
+                context.l10n.vocabularyLoadFailed,
                 textAlign: TextAlign.center,
                 style: AppTypography.sectionTitle,
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                'Vui lòng kiểm tra kết nối và thử lại.',
+                context.l10n.checkConnectionRetry,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySmall,
               ),
               const SizedBox(height: AppSpacing.space5),
               RikiPrimaryButton(
                 key: const ValueKey<String>('vocabulary_retry_button'),
-                label: 'Thử lại',
+                label: context.l10n.retry,
                 leadingIcon: Icons.refresh,
                 onPressed: onRetry,
               ),
@@ -113,23 +108,6 @@ class VocabularyErrorView extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _VocabularySkeleton extends StatelessWidget {
-  const _VocabularySkeleton({required this.height});
-
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        color: AppColors.learnerSurfaceHigh,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
     );
   }
 }

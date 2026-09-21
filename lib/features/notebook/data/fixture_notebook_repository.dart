@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook_repository.dart';
 
@@ -71,6 +73,19 @@ class FixtureNotebookRepository implements NotebookRepository {
 
   final List<NotebookCollection> _collections;
   final Map<String, List<NotebookEntry>> _entries;
+  final StreamController<Set<String>> _savedKeysController =
+      StreamController<Set<String>>.broadcast();
+
+  @override
+  Stream<Set<String>> watchSavedVocabularyKeys() async* {
+    yield _savedVocabularyKeys();
+    yield* _savedKeysController.stream;
+  }
+
+  @override
+  Future<bool> isVocabularySaved(String vocabularyRouteKey) async {
+    return _savedVocabularyKeys().contains(vocabularyRouteKey);
+  }
 
   @override
   Future<List<NotebookCollection>> loadCollections() async =>
@@ -106,10 +121,40 @@ class FixtureNotebookRepository implements NotebookRepository {
 
   @override
   Future<NotebookBookmark> bookmarkVocabulary({
-    required int vocabularyEntryId,
+    required NotebookVocabularyDraft vocabulary,
     required NotebookCollection collection,
-  }) {
-    throw UnsupportedError('Fixture bookmark is not production API.');
+  }) async {
+    final existing = _entries[collection.routeKey] ?? <NotebookEntry>[];
+    NotebookEntry? duplicate;
+    for (final entry in existing) {
+      if (entry.vocabularyRouteKey == vocabulary.routeKey) {
+        duplicate = entry;
+        break;
+      }
+    }
+    if (duplicate == null) {
+      existing.insert(
+        0,
+        NotebookEntry(
+          routeKey: 'fixture-note-${vocabulary.routeKey}',
+          remoteNoteEntryId: null,
+          contentType: NotebookContentType.vocabulary,
+          term: vocabulary.term,
+          reading: vocabulary.reading,
+          meaning: vocabulary.meaning,
+          addedAt: DateTime.now().toUtc(),
+          source: NotebookDataSource.fixture,
+          vocabularyRouteKey: vocabulary.routeKey,
+        ),
+      );
+      _entries[collection.routeKey] = existing;
+      _savedKeysController.add(_savedVocabularyKeys());
+    }
+    return NotebookBookmark(
+      noteEntryId: duplicate?.remoteNoteEntryId,
+      collectionRouteKey: collection.routeKey,
+      collectionName: collection.name,
+    );
   }
 
   @override
@@ -117,5 +162,14 @@ class FixtureNotebookRepository implements NotebookRepository {
     for (final values in _entries.values) {
       values.removeWhere((item) => item.routeKey == entry.routeKey);
     }
+    _savedKeysController.add(_savedVocabularyKeys());
+  }
+
+  Set<String> _savedVocabularyKeys() {
+    return _entries.values
+        .expand((entries) => entries)
+        .map((entry) => entry.vocabularyRouteKey)
+        .whereType<String>()
+        .toSet();
   }
 }

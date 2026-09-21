@@ -1,12 +1,30 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/database/database_provider.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/core/storage/token_storage.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/notebook/data/api_notebook_repository.dart';
+import 'package:rikipath_mobile/features/notebook/data/notebook_local_store.dart';
+import 'package:rikipath_mobile/features/notebook/data/persistent_notebook_repository.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook_repository.dart';
 
 final notebookRepositoryProvider = Provider<NotebookRepository>((ref) {
-  return ApiNotebookRepository(ref.watch(apiClientProvider));
+  final session = ref.watch(authSessionControllerProvider);
+  final tokenStorage = ref.watch(tokenStorageProvider);
+  return PersistentNotebookRepository(
+    ApiNotebookRepository(ref.watch(apiClientProvider)),
+    NotebookLocalStore(ref.watch(appDatabaseProvider)),
+    () async => session.currentUserId ?? tokenStorage.readAuthenticatedUserId(),
+  );
+});
+
+final savedVocabularyKeysProvider = StreamProvider.autoDispose<Set<String>>((
+  ref,
+) {
+  return ref.watch(notebookRepositoryProvider).watchSavedVocabularyKeys();
 });
 
 final notebookControllerProvider =
@@ -79,7 +97,7 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
           isLoadingEntries: false,
           entriesError: _message(
             error,
-            'Không thể tải nội dung danh sách. Vui lòng thử lại.',
+            ref.read(appLocalizationsProvider).notebookEntriesLoadFailed,
           ),
         ),
       );
@@ -95,7 +113,11 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
     if (current == null || current.isCreatingCollection) return false;
     if (normalizedName.isEmpty) {
       state = AsyncData(
-        current.copyWith(mutationError: 'Tên danh sách không được để trống.'),
+        current.copyWith(
+          mutationError: ref
+              .read(appLocalizationsProvider)
+              .collectionNameRequired,
+        ),
       );
       return false;
     }
@@ -129,7 +151,7 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
           isCreatingCollection: false,
           mutationError: _message(
             error,
-            'Không thể tạo danh sách. Vui lòng thử lại.',
+            ref.read(appLocalizationsProvider).notebookCreateFailed,
           ),
         ),
       );
@@ -152,7 +174,9 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
     if (word.trim().isEmpty || meaning.trim().isEmpty) {
       state = AsyncData(
         current.copyWith(
-          mutationError: 'Từ tiếng Nhật và nghĩa tiếng Việt là bắt buộc.',
+          mutationError: ref
+              .read(appLocalizationsProvider)
+              .wordAndMeaningRequired,
         ),
       );
       return false;
@@ -188,7 +212,7 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
           isAddingEntry: false,
           mutationError: _message(
             error,
-            'Không thể thêm từ vào Sổ từ. Vui lòng thử lại.',
+            ref.read(appLocalizationsProvider).notebookAddFailed,
           ),
         ),
       );
@@ -236,7 +260,7 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
             ..remove(entry.routeKey),
           mutationError: _message(
             error,
-            'Không thể xóa mục khỏi Sổ từ. Vui lòng thử lại.',
+            ref.read(appLocalizationsProvider).notebookRemoveFailed,
           ),
         ),
       );

@@ -6,7 +6,7 @@ import 'package:rikipath_mobile/features/notebook/data/notebook_mapper.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook_repository.dart';
 
-class ApiNotebookRepository implements NotebookRepository {
+class ApiNotebookRepository implements NotebookRemoteDataSource {
   const ApiNotebookRepository(this._apiClient);
 
   final ApiClient _apiClient;

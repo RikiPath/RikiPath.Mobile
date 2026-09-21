@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
@@ -103,7 +104,9 @@ class VocabularyLibraryController
       state = AsyncData(
         current.copyWith(
           isLoadingMore: false,
-          pageError: 'Không thể tải thêm từ vựng. Vui lòng thử lại.',
+          pageError: ref
+              .read(appLocalizationsProvider)
+              .vocabularyLoadMoreFailed,
         ),
       );
     }
@@ -172,21 +175,6 @@ class VocabularyDetailController extends AsyncNotifier<VocabularyDetailState> {
 
   Future<List<NotebookCollection>> loadNotebookLists() async {
     final current = state.requireValue;
-    if (current.entry.source == VocabularyDataSource.fixture) {
-      const lists = <NotebookCollection>[
-        NotebookCollection(
-          routeKey: 'fixture-list-default',
-          remoteId: null,
-          name: 'Mặc định · dữ liệu mẫu',
-          entryCount: 48,
-          createdAt: null,
-          source: NotebookDataSource.fixture,
-        ),
-      ];
-      state = AsyncData(current.copyWith(notebookLists: lists));
-      return lists;
-    }
-
     state = AsyncData(
       current.copyWith(isLoadingNotebook: true, clearNotebookError: true),
     );
@@ -205,7 +193,9 @@ class VocabularyDetailController extends AsyncNotifier<VocabularyDetailState> {
       state = AsyncData(
         state.requireValue.copyWith(
           isLoadingNotebook: false,
-          notebookError: 'Không thể tải danh sách Sổ từ.',
+          notebookError: ref
+              .read(appLocalizationsProvider)
+              .notebookListsLoadFailed,
         ),
       );
       return const <NotebookCollection>[];
@@ -214,45 +204,37 @@ class VocabularyDetailController extends AsyncNotifier<VocabularyDetailState> {
 
   Future<bool> saveToNotebook(NotebookCollection list) async {
     final current = state.requireValue;
-    if (current.isSaving || current.isSaved) {
-      return current.isSaved;
-    }
+    if (current.isSaving) return false;
 
-    if (current.entry.source == VocabularyDataSource.fixture) {
-      state = AsyncData(
-        current.copyWith(
-          entry: current.entry.copyWith(isSaved: true),
-          bookmark: NotebookBookmark(
-            noteEntryId: null,
-            collectionRouteKey: list.routeKey,
-            collectionName: list.name,
-          ),
-        ),
-      );
-      return true;
-    }
-
-    final remoteId = current.entry.remoteId;
-    if (remoteId == null) {
-      return false;
-    }
+    final notebook = ref.read(notebookRepositoryProvider);
+    if (await notebook.isVocabularySaved(current.entry.routeKey)) return true;
 
     state = AsyncData(
       current.copyWith(isSaving: true, clearNotebookError: true),
     );
     try {
-      final bookmark = await ref
-          .read(notebookRepositoryProvider)
-          .bookmarkVocabulary(vocabularyEntryId: remoteId, collection: list);
-      state = AsyncData(
-        state.requireValue.copyWith(isSaving: false, bookmark: bookmark),
+      await notebook.bookmarkVocabulary(
+        vocabulary: NotebookVocabularyDraft(
+          routeKey: current.entry.routeKey,
+          remoteId: current.entry.remoteId,
+          term: current.entry.word,
+          reading: current.entry.reading,
+          meaning: current.entry.meaning,
+          jlptLevel: current.entry.level.label,
+          exampleSentence: current.entry.exampleSentence,
+        ),
+        collection: list,
       );
+      state = AsyncData(state.requireValue.copyWith(isSaving: false));
+      ref.invalidate(notebookControllerProvider);
       return true;
     } catch (_) {
       state = AsyncData(
         state.requireValue.copyWith(
           isSaving: false,
-          notebookError: 'Không thể lưu từ vựng vào Sổ từ.',
+          notebookError: ref
+              .read(appLocalizationsProvider)
+              .vocabularySaveFailed,
         ),
       );
       return false;
@@ -275,7 +257,7 @@ class VocabularyDetailController extends AsyncNotifier<VocabularyDetailState> {
       state = AsyncData(
         state.requireValue.copyWith(
           isPlayingAudio: false,
-          audioError: 'Không thể phát âm thanh từ vựng.',
+          audioError: ref.read(appLocalizationsProvider).vocabularyAudioFailed,
         ),
       );
       return false;
@@ -283,13 +265,10 @@ class VocabularyDetailController extends AsyncNotifier<VocabularyDetailState> {
   }
 }
 
-const Object _unsetVocabularyValue = Object();
-
 class VocabularyDetailState {
   const VocabularyDetailState({
     required this.entry,
     this.notebookLists = const <NotebookCollection>[],
-    this.bookmark,
     this.isLoadingNotebook = false,
     this.isSaving = false,
     this.isPlayingAudio = false,
@@ -299,20 +278,15 @@ class VocabularyDetailState {
 
   final VocabularyEntry entry;
   final List<NotebookCollection> notebookLists;
-  final NotebookBookmark? bookmark;
   final bool isLoadingNotebook;
   final bool isSaving;
   final bool isPlayingAudio;
   final String? notebookError;
   final String? audioError;
 
-  bool get isSaved => entry.isSaved == true || bookmark != null;
-  String? get savedListName => bookmark?.collectionName;
-
   VocabularyDetailState copyWith({
     VocabularyEntry? entry,
     List<NotebookCollection>? notebookLists,
-    Object? bookmark = _unsetVocabularyValue,
     bool? isLoadingNotebook,
     bool? isSaving,
     bool? isPlayingAudio,
@@ -323,9 +297,6 @@ class VocabularyDetailState {
     return VocabularyDetailState(
       entry: entry ?? this.entry,
       notebookLists: notebookLists ?? this.notebookLists,
-      bookmark: identical(bookmark, _unsetVocabularyValue)
-          ? this.bookmark
-          : bookmark as NotebookBookmark?,
       isLoadingNotebook: isLoadingNotebook ?? this.isLoadingNotebook,
       isSaving: isSaving ?? this.isSaving,
       isPlayingAudio: isPlayingAudio ?? this.isPlayingAudio,

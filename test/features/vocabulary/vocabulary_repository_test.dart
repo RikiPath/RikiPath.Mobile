@@ -62,7 +62,6 @@ void main() {
         expect(entry.exampleSentence, isNull);
         expect(entry.audioUrl, isNull);
         expect(entry.enrichment, isNull);
-        expect(entry.isSaved, isNull);
       },
     );
 

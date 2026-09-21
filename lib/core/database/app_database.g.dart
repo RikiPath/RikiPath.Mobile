@@ -18,6 +18,17 @@ class $VocabularyListsTable extends VocabularyLists
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -26,6 +37,65 @@ class $VocabularyListsTable extends VocabularyLists
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('local'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _entryCountMeta = const VerificationMeta(
+    'entryCount',
+  );
+  @override
+  late final GeneratedColumn<int> entryCount = GeneratedColumn<int>(
+    'entry_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _entriesCachedMeta = const VerificationMeta(
+    'entriesCached',
+  );
+  @override
+  late final GeneratedColumn<bool> entriesCached = GeneratedColumn<bool>(
+    'entries_cached',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("entries_cached" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
   );
   static const VerificationMeta _isDefaultMeta = const VerificationMeta(
     'isDefault',
@@ -67,7 +137,19 @@ class $VocabularyListsTable extends VocabularyLists
     defaultValue: const Constant(false),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, name, isDefault, updatedAt, dirty];
+  List<GeneratedColumn> get $columns => [
+    id,
+    remoteId,
+    name,
+    description,
+    source,
+    createdAt,
+    entryCount,
+    entriesCached,
+    isDefault,
+    updatedAt,
+    dirty,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -85,6 +167,12 @@ class $VocabularyListsTable extends VocabularyLists
     } else if (isInserting) {
       context.missing(_idMeta);
     }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
     if (data.containsKey('name')) {
       context.handle(
         _nameMeta,
@@ -92,6 +180,42 @@ class $VocabularyListsTable extends VocabularyLists
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('entry_count')) {
+      context.handle(
+        _entryCountMeta,
+        entryCount.isAcceptableOrUnknown(data['entry_count']!, _entryCountMeta),
+      );
+    }
+    if (data.containsKey('entries_cached')) {
+      context.handle(
+        _entriesCachedMeta,
+        entriesCached.isAcceptableOrUnknown(
+          data['entries_cached']!,
+          _entriesCachedMeta,
+        ),
+      );
     }
     if (data.containsKey('is_default')) {
       context.handle(
@@ -126,9 +250,33 @@ class $VocabularyListsTable extends VocabularyLists
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}remote_id'],
+      ),
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      ),
+      entryCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}entry_count'],
+      )!,
+      entriesCached: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}entries_cached'],
       )!,
       isDefault: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
@@ -153,13 +301,25 @@ class $VocabularyListsTable extends VocabularyLists
 
 class VocabularyList extends DataClass implements Insertable<VocabularyList> {
   final String id;
+  final int? remoteId;
   final String name;
+  final String? description;
+  final String source;
+  final DateTime? createdAt;
+  final int entryCount;
+  final bool entriesCached;
   final bool isDefault;
   final DateTime updatedAt;
   final bool dirty;
   const VocabularyList({
     required this.id,
+    this.remoteId,
     required this.name,
+    this.description,
+    required this.source,
+    this.createdAt,
+    required this.entryCount,
+    required this.entriesCached,
     required this.isDefault,
     required this.updatedAt,
     required this.dirty,
@@ -168,7 +328,19 @@ class VocabularyList extends DataClass implements Insertable<VocabularyList> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<int>(remoteId);
+    }
     map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['source'] = Variable<String>(source);
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    map['entry_count'] = Variable<int>(entryCount);
+    map['entries_cached'] = Variable<bool>(entriesCached);
     map['is_default'] = Variable<bool>(isDefault);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['dirty'] = Variable<bool>(dirty);
@@ -178,7 +350,19 @@ class VocabularyList extends DataClass implements Insertable<VocabularyList> {
   VocabularyListsCompanion toCompanion(bool nullToAbsent) {
     return VocabularyListsCompanion(
       id: Value(id),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
       name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      source: Value(source),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      entryCount: Value(entryCount),
+      entriesCached: Value(entriesCached),
       isDefault: Value(isDefault),
       updatedAt: Value(updatedAt),
       dirty: Value(dirty),
@@ -192,7 +376,13 @@ class VocabularyList extends DataClass implements Insertable<VocabularyList> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return VocabularyList(
       id: serializer.fromJson<String>(json['id']),
+      remoteId: serializer.fromJson<int?>(json['remoteId']),
       name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      source: serializer.fromJson<String>(json['source']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      entryCount: serializer.fromJson<int>(json['entryCount']),
+      entriesCached: serializer.fromJson<bool>(json['entriesCached']),
       isDefault: serializer.fromJson<bool>(json['isDefault']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       dirty: serializer.fromJson<bool>(json['dirty']),
@@ -203,7 +393,13 @@ class VocabularyList extends DataClass implements Insertable<VocabularyList> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'remoteId': serializer.toJson<int?>(remoteId),
       'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'source': serializer.toJson<String>(source),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'entryCount': serializer.toJson<int>(entryCount),
+      'entriesCached': serializer.toJson<bool>(entriesCached),
       'isDefault': serializer.toJson<bool>(isDefault),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'dirty': serializer.toJson<bool>(dirty),
@@ -212,13 +408,25 @@ class VocabularyList extends DataClass implements Insertable<VocabularyList> {
 
   VocabularyList copyWith({
     String? id,
+    Value<int?> remoteId = const Value.absent(),
     String? name,
+    Value<String?> description = const Value.absent(),
+    String? source,
+    Value<DateTime?> createdAt = const Value.absent(),
+    int? entryCount,
+    bool? entriesCached,
     bool? isDefault,
     DateTime? updatedAt,
     bool? dirty,
   }) => VocabularyList(
     id: id ?? this.id,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
     name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    source: source ?? this.source,
+    createdAt: createdAt.present ? createdAt.value : this.createdAt,
+    entryCount: entryCount ?? this.entryCount,
+    entriesCached: entriesCached ?? this.entriesCached,
     isDefault: isDefault ?? this.isDefault,
     updatedAt: updatedAt ?? this.updatedAt,
     dirty: dirty ?? this.dirty,
@@ -226,7 +434,19 @@ class VocabularyList extends DataClass implements Insertable<VocabularyList> {
   VocabularyList copyWithCompanion(VocabularyListsCompanion data) {
     return VocabularyList(
       id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       name: data.name.present ? data.name.value : this.name,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      source: data.source.present ? data.source.value : this.source,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      entryCount: data.entryCount.present
+          ? data.entryCount.value
+          : this.entryCount,
+      entriesCached: data.entriesCached.present
+          ? data.entriesCached.value
+          : this.entriesCached,
       isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
@@ -237,7 +457,13 @@ class VocabularyList extends DataClass implements Insertable<VocabularyList> {
   String toString() {
     return (StringBuffer('VocabularyList(')
           ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
           ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('source: $source, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('entryCount: $entryCount, ')
+          ..write('entriesCached: $entriesCached, ')
           ..write('isDefault: $isDefault, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('dirty: $dirty')
@@ -246,13 +472,31 @@ class VocabularyList extends DataClass implements Insertable<VocabularyList> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, isDefault, updatedAt, dirty);
+  int get hashCode => Object.hash(
+    id,
+    remoteId,
+    name,
+    description,
+    source,
+    createdAt,
+    entryCount,
+    entriesCached,
+    isDefault,
+    updatedAt,
+    dirty,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is VocabularyList &&
           other.id == this.id &&
+          other.remoteId == this.remoteId &&
           other.name == this.name &&
+          other.description == this.description &&
+          other.source == this.source &&
+          other.createdAt == this.createdAt &&
+          other.entryCount == this.entryCount &&
+          other.entriesCached == this.entriesCached &&
           other.isDefault == this.isDefault &&
           other.updatedAt == this.updatedAt &&
           other.dirty == this.dirty);
@@ -260,14 +504,26 @@ class VocabularyList extends DataClass implements Insertable<VocabularyList> {
 
 class VocabularyListsCompanion extends UpdateCompanion<VocabularyList> {
   final Value<String> id;
+  final Value<int?> remoteId;
   final Value<String> name;
+  final Value<String?> description;
+  final Value<String> source;
+  final Value<DateTime?> createdAt;
+  final Value<int> entryCount;
+  final Value<bool> entriesCached;
   final Value<bool> isDefault;
   final Value<DateTime> updatedAt;
   final Value<bool> dirty;
   final Value<int> rowid;
   const VocabularyListsCompanion({
     this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
     this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.source = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.entryCount = const Value.absent(),
+    this.entriesCached = const Value.absent(),
     this.isDefault = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.dirty = const Value.absent(),
@@ -275,7 +531,13 @@ class VocabularyListsCompanion extends UpdateCompanion<VocabularyList> {
   });
   VocabularyListsCompanion.insert({
     required String id,
+    this.remoteId = const Value.absent(),
     required String name,
+    this.description = const Value.absent(),
+    this.source = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.entryCount = const Value.absent(),
+    this.entriesCached = const Value.absent(),
     this.isDefault = const Value.absent(),
     required DateTime updatedAt,
     this.dirty = const Value.absent(),
@@ -285,7 +547,13 @@ class VocabularyListsCompanion extends UpdateCompanion<VocabularyList> {
        updatedAt = Value(updatedAt);
   static Insertable<VocabularyList> custom({
     Expression<String>? id,
+    Expression<int>? remoteId,
     Expression<String>? name,
+    Expression<String>? description,
+    Expression<String>? source,
+    Expression<DateTime>? createdAt,
+    Expression<int>? entryCount,
+    Expression<bool>? entriesCached,
     Expression<bool>? isDefault,
     Expression<DateTime>? updatedAt,
     Expression<bool>? dirty,
@@ -293,7 +561,13 @@ class VocabularyListsCompanion extends UpdateCompanion<VocabularyList> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
       if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (source != null) 'source': source,
+      if (createdAt != null) 'created_at': createdAt,
+      if (entryCount != null) 'entry_count': entryCount,
+      if (entriesCached != null) 'entries_cached': entriesCached,
       if (isDefault != null) 'is_default': isDefault,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (dirty != null) 'dirty': dirty,
@@ -303,7 +577,13 @@ class VocabularyListsCompanion extends UpdateCompanion<VocabularyList> {
 
   VocabularyListsCompanion copyWith({
     Value<String>? id,
+    Value<int?>? remoteId,
     Value<String>? name,
+    Value<String?>? description,
+    Value<String>? source,
+    Value<DateTime?>? createdAt,
+    Value<int>? entryCount,
+    Value<bool>? entriesCached,
     Value<bool>? isDefault,
     Value<DateTime>? updatedAt,
     Value<bool>? dirty,
@@ -311,7 +591,13 @@ class VocabularyListsCompanion extends UpdateCompanion<VocabularyList> {
   }) {
     return VocabularyListsCompanion(
       id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
       name: name ?? this.name,
+      description: description ?? this.description,
+      source: source ?? this.source,
+      createdAt: createdAt ?? this.createdAt,
+      entryCount: entryCount ?? this.entryCount,
+      entriesCached: entriesCached ?? this.entriesCached,
       isDefault: isDefault ?? this.isDefault,
       updatedAt: updatedAt ?? this.updatedAt,
       dirty: dirty ?? this.dirty,
@@ -325,8 +611,26 @@ class VocabularyListsCompanion extends UpdateCompanion<VocabularyList> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (entryCount.present) {
+      map['entry_count'] = Variable<int>(entryCount.value);
+    }
+    if (entriesCached.present) {
+      map['entries_cached'] = Variable<bool>(entriesCached.value);
     }
     if (isDefault.present) {
       map['is_default'] = Variable<bool>(isDefault.value);
@@ -347,7 +651,13 @@ class VocabularyListsCompanion extends UpdateCompanion<VocabularyList> {
   String toString() {
     return (StringBuffer('VocabularyListsCompanion(')
           ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
           ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('source: $source, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('entryCount: $entryCount, ')
+          ..write('entriesCached: $entriesCached, ')
           ..write('isDefault: $isDefault, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('dirty: $dirty, ')
@@ -372,6 +682,28 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _remoteNoteEntryIdMeta = const VerificationMeta(
+    'remoteNoteEntryId',
+  );
+  @override
+  late final GeneratedColumn<int> remoteNoteEntryId = GeneratedColumn<int>(
+    'remote_note_entry_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewItemIdMeta = const VerificationMeta(
+    'reviewItemId',
+  );
+  @override
+  late final GeneratedColumn<int> reviewItemId = GeneratedColumn<int>(
+    'review_item_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _sourceVocabularyIdMeta =
       const VerificationMeta('sourceVocabularyId');
   @override
@@ -394,6 +726,28 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES vocabulary_lists (id)',
     ),
+  );
+  static const VerificationMeta _contentTypeMeta = const VerificationMeta(
+    'contentType',
+  );
+  @override
+  late final GeneratedColumn<String> contentType = GeneratedColumn<String>(
+    'content_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('vocabulary'),
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('local'),
   );
   static const VerificationMeta _wordMeta = const VerificationMeta('word');
   @override
@@ -425,6 +779,15 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _jlptLevelMeta = const VerificationMeta(
     'jlptLevel',
@@ -495,6 +858,17 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAt = GeneratedColumn<DateTime>(
+    'added_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -522,17 +896,23 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    remoteNoteEntryId,
+    reviewItemId,
     sourceVocabularyId,
     listId,
+    contentType,
+    source,
     word,
     reading,
     meaning,
+    note,
     jlptLevel,
     exampleSentence,
     easeFactor,
     intervalDays,
     repetitions,
     nextReviewAt,
+    addedAt,
     updatedAt,
     dirty,
   ];
@@ -553,6 +933,24 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
     } else if (isInserting) {
       context.missing(_idMeta);
     }
+    if (data.containsKey('remote_note_entry_id')) {
+      context.handle(
+        _remoteNoteEntryIdMeta,
+        remoteNoteEntryId.isAcceptableOrUnknown(
+          data['remote_note_entry_id']!,
+          _remoteNoteEntryIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('review_item_id')) {
+      context.handle(
+        _reviewItemIdMeta,
+        reviewItemId.isAcceptableOrUnknown(
+          data['review_item_id']!,
+          _reviewItemIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('source_vocabulary_id')) {
       context.handle(
         _sourceVocabularyIdMeta,
@@ -566,6 +964,21 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
       context.handle(
         _listIdMeta,
         listId.isAcceptableOrUnknown(data['list_id']!, _listIdMeta),
+      );
+    }
+    if (data.containsKey('content_type')) {
+      context.handle(
+        _contentTypeMeta,
+        contentType.isAcceptableOrUnknown(
+          data['content_type']!,
+          _contentTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
       );
     }
     if (data.containsKey('word')) {
@@ -589,6 +1002,12 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
       );
     } else if (isInserting) {
       context.missing(_meaningMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
     }
     if (data.containsKey('jlpt_level')) {
       context.handle(
@@ -638,6 +1057,12 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
         ),
       );
     }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -668,6 +1093,14 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      remoteNoteEntryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}remote_note_entry_id'],
+      ),
+      reviewItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}review_item_id'],
+      ),
       sourceVocabularyId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}source_vocabulary_id'],
@@ -676,6 +1109,14 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
         DriftSqlType.string,
         data['${effectivePrefix}list_id'],
       ),
+      contentType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_type'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
       word: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}word'],
@@ -688,6 +1129,10 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
         DriftSqlType.string,
         data['${effectivePrefix}meaning'],
       )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
       jlptLevel: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}jlpt_level'],
@@ -712,6 +1157,10 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
         DriftSqlType.dateTime,
         data['${effectivePrefix}next_review_at'],
       ),
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at'],
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -732,32 +1181,44 @@ class $PersonalVocabularyEntriesTable extends PersonalVocabularyEntries
 class PersonalVocabularyEntry extends DataClass
     implements Insertable<PersonalVocabularyEntry> {
   final String id;
+  final int? remoteNoteEntryId;
+  final int? reviewItemId;
   final String? sourceVocabularyId;
   final String? listId;
+  final String contentType;
+  final String source;
   final String word;
   final String? reading;
   final String meaning;
+  final String? note;
   final String? jlptLevel;
   final String? exampleSentence;
   final double easeFactor;
   final int intervalDays;
   final int repetitions;
   final DateTime? nextReviewAt;
+  final DateTime? addedAt;
   final DateTime updatedAt;
   final bool dirty;
   const PersonalVocabularyEntry({
     required this.id,
+    this.remoteNoteEntryId,
+    this.reviewItemId,
     this.sourceVocabularyId,
     this.listId,
+    required this.contentType,
+    required this.source,
     required this.word,
     this.reading,
     required this.meaning,
+    this.note,
     this.jlptLevel,
     this.exampleSentence,
     required this.easeFactor,
     required this.intervalDays,
     required this.repetitions,
     this.nextReviewAt,
+    this.addedAt,
     required this.updatedAt,
     required this.dirty,
   });
@@ -765,17 +1226,28 @@ class PersonalVocabularyEntry extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || remoteNoteEntryId != null) {
+      map['remote_note_entry_id'] = Variable<int>(remoteNoteEntryId);
+    }
+    if (!nullToAbsent || reviewItemId != null) {
+      map['review_item_id'] = Variable<int>(reviewItemId);
+    }
     if (!nullToAbsent || sourceVocabularyId != null) {
       map['source_vocabulary_id'] = Variable<String>(sourceVocabularyId);
     }
     if (!nullToAbsent || listId != null) {
       map['list_id'] = Variable<String>(listId);
     }
+    map['content_type'] = Variable<String>(contentType);
+    map['source'] = Variable<String>(source);
     map['word'] = Variable<String>(word);
     if (!nullToAbsent || reading != null) {
       map['reading'] = Variable<String>(reading);
     }
     map['meaning'] = Variable<String>(meaning);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
     if (!nullToAbsent || jlptLevel != null) {
       map['jlpt_level'] = Variable<String>(jlptLevel);
     }
@@ -788,6 +1260,9 @@ class PersonalVocabularyEntry extends DataClass
     if (!nullToAbsent || nextReviewAt != null) {
       map['next_review_at'] = Variable<DateTime>(nextReviewAt);
     }
+    if (!nullToAbsent || addedAt != null) {
+      map['added_at'] = Variable<DateTime>(addedAt);
+    }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['dirty'] = Variable<bool>(dirty);
     return map;
@@ -796,17 +1271,26 @@ class PersonalVocabularyEntry extends DataClass
   PersonalVocabularyEntriesCompanion toCompanion(bool nullToAbsent) {
     return PersonalVocabularyEntriesCompanion(
       id: Value(id),
+      remoteNoteEntryId: remoteNoteEntryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteNoteEntryId),
+      reviewItemId: reviewItemId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewItemId),
       sourceVocabularyId: sourceVocabularyId == null && nullToAbsent
           ? const Value.absent()
           : Value(sourceVocabularyId),
       listId: listId == null && nullToAbsent
           ? const Value.absent()
           : Value(listId),
+      contentType: Value(contentType),
+      source: Value(source),
       word: Value(word),
       reading: reading == null && nullToAbsent
           ? const Value.absent()
           : Value(reading),
       meaning: Value(meaning),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       jlptLevel: jlptLevel == null && nullToAbsent
           ? const Value.absent()
           : Value(jlptLevel),
@@ -819,6 +1303,9 @@ class PersonalVocabularyEntry extends DataClass
       nextReviewAt: nextReviewAt == null && nullToAbsent
           ? const Value.absent()
           : Value(nextReviewAt),
+      addedAt: addedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(addedAt),
       updatedAt: Value(updatedAt),
       dirty: Value(dirty),
     );
@@ -831,19 +1318,25 @@ class PersonalVocabularyEntry extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PersonalVocabularyEntry(
       id: serializer.fromJson<String>(json['id']),
+      remoteNoteEntryId: serializer.fromJson<int?>(json['remoteNoteEntryId']),
+      reviewItemId: serializer.fromJson<int?>(json['reviewItemId']),
       sourceVocabularyId: serializer.fromJson<String?>(
         json['sourceVocabularyId'],
       ),
       listId: serializer.fromJson<String?>(json['listId']),
+      contentType: serializer.fromJson<String>(json['contentType']),
+      source: serializer.fromJson<String>(json['source']),
       word: serializer.fromJson<String>(json['word']),
       reading: serializer.fromJson<String?>(json['reading']),
       meaning: serializer.fromJson<String>(json['meaning']),
+      note: serializer.fromJson<String?>(json['note']),
       jlptLevel: serializer.fromJson<String?>(json['jlptLevel']),
       exampleSentence: serializer.fromJson<String?>(json['exampleSentence']),
       easeFactor: serializer.fromJson<double>(json['easeFactor']),
       intervalDays: serializer.fromJson<int>(json['intervalDays']),
       repetitions: serializer.fromJson<int>(json['repetitions']),
       nextReviewAt: serializer.fromJson<DateTime?>(json['nextReviewAt']),
+      addedAt: serializer.fromJson<DateTime?>(json['addedAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       dirty: serializer.fromJson<bool>(json['dirty']),
     );
@@ -853,17 +1346,23 @@ class PersonalVocabularyEntry extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'remoteNoteEntryId': serializer.toJson<int?>(remoteNoteEntryId),
+      'reviewItemId': serializer.toJson<int?>(reviewItemId),
       'sourceVocabularyId': serializer.toJson<String?>(sourceVocabularyId),
       'listId': serializer.toJson<String?>(listId),
+      'contentType': serializer.toJson<String>(contentType),
+      'source': serializer.toJson<String>(source),
       'word': serializer.toJson<String>(word),
       'reading': serializer.toJson<String?>(reading),
       'meaning': serializer.toJson<String>(meaning),
+      'note': serializer.toJson<String?>(note),
       'jlptLevel': serializer.toJson<String?>(jlptLevel),
       'exampleSentence': serializer.toJson<String?>(exampleSentence),
       'easeFactor': serializer.toJson<double>(easeFactor),
       'intervalDays': serializer.toJson<int>(intervalDays),
       'repetitions': serializer.toJson<int>(repetitions),
       'nextReviewAt': serializer.toJson<DateTime?>(nextReviewAt),
+      'addedAt': serializer.toJson<DateTime?>(addedAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'dirty': serializer.toJson<bool>(dirty),
     };
@@ -871,28 +1370,41 @@ class PersonalVocabularyEntry extends DataClass
 
   PersonalVocabularyEntry copyWith({
     String? id,
+    Value<int?> remoteNoteEntryId = const Value.absent(),
+    Value<int?> reviewItemId = const Value.absent(),
     Value<String?> sourceVocabularyId = const Value.absent(),
     Value<String?> listId = const Value.absent(),
+    String? contentType,
+    String? source,
     String? word,
     Value<String?> reading = const Value.absent(),
     String? meaning,
+    Value<String?> note = const Value.absent(),
     Value<String?> jlptLevel = const Value.absent(),
     Value<String?> exampleSentence = const Value.absent(),
     double? easeFactor,
     int? intervalDays,
     int? repetitions,
     Value<DateTime?> nextReviewAt = const Value.absent(),
+    Value<DateTime?> addedAt = const Value.absent(),
     DateTime? updatedAt,
     bool? dirty,
   }) => PersonalVocabularyEntry(
     id: id ?? this.id,
+    remoteNoteEntryId: remoteNoteEntryId.present
+        ? remoteNoteEntryId.value
+        : this.remoteNoteEntryId,
+    reviewItemId: reviewItemId.present ? reviewItemId.value : this.reviewItemId,
     sourceVocabularyId: sourceVocabularyId.present
         ? sourceVocabularyId.value
         : this.sourceVocabularyId,
     listId: listId.present ? listId.value : this.listId,
+    contentType: contentType ?? this.contentType,
+    source: source ?? this.source,
     word: word ?? this.word,
     reading: reading.present ? reading.value : this.reading,
     meaning: meaning ?? this.meaning,
+    note: note.present ? note.value : this.note,
     jlptLevel: jlptLevel.present ? jlptLevel.value : this.jlptLevel,
     exampleSentence: exampleSentence.present
         ? exampleSentence.value
@@ -901,6 +1413,7 @@ class PersonalVocabularyEntry extends DataClass
     intervalDays: intervalDays ?? this.intervalDays,
     repetitions: repetitions ?? this.repetitions,
     nextReviewAt: nextReviewAt.present ? nextReviewAt.value : this.nextReviewAt,
+    addedAt: addedAt.present ? addedAt.value : this.addedAt,
     updatedAt: updatedAt ?? this.updatedAt,
     dirty: dirty ?? this.dirty,
   );
@@ -909,13 +1422,24 @@ class PersonalVocabularyEntry extends DataClass
   ) {
     return PersonalVocabularyEntry(
       id: data.id.present ? data.id.value : this.id,
+      remoteNoteEntryId: data.remoteNoteEntryId.present
+          ? data.remoteNoteEntryId.value
+          : this.remoteNoteEntryId,
+      reviewItemId: data.reviewItemId.present
+          ? data.reviewItemId.value
+          : this.reviewItemId,
       sourceVocabularyId: data.sourceVocabularyId.present
           ? data.sourceVocabularyId.value
           : this.sourceVocabularyId,
       listId: data.listId.present ? data.listId.value : this.listId,
+      contentType: data.contentType.present
+          ? data.contentType.value
+          : this.contentType,
+      source: data.source.present ? data.source.value : this.source,
       word: data.word.present ? data.word.value : this.word,
       reading: data.reading.present ? data.reading.value : this.reading,
       meaning: data.meaning.present ? data.meaning.value : this.meaning,
+      note: data.note.present ? data.note.value : this.note,
       jlptLevel: data.jlptLevel.present ? data.jlptLevel.value : this.jlptLevel,
       exampleSentence: data.exampleSentence.present
           ? data.exampleSentence.value
@@ -932,6 +1456,7 @@ class PersonalVocabularyEntry extends DataClass
       nextReviewAt: data.nextReviewAt.present
           ? data.nextReviewAt.value
           : this.nextReviewAt,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
     );
@@ -941,17 +1466,23 @@ class PersonalVocabularyEntry extends DataClass
   String toString() {
     return (StringBuffer('PersonalVocabularyEntry(')
           ..write('id: $id, ')
+          ..write('remoteNoteEntryId: $remoteNoteEntryId, ')
+          ..write('reviewItemId: $reviewItemId, ')
           ..write('sourceVocabularyId: $sourceVocabularyId, ')
           ..write('listId: $listId, ')
+          ..write('contentType: $contentType, ')
+          ..write('source: $source, ')
           ..write('word: $word, ')
           ..write('reading: $reading, ')
           ..write('meaning: $meaning, ')
+          ..write('note: $note, ')
           ..write('jlptLevel: $jlptLevel, ')
           ..write('exampleSentence: $exampleSentence, ')
           ..write('easeFactor: $easeFactor, ')
           ..write('intervalDays: $intervalDays, ')
           ..write('repetitions: $repetitions, ')
           ..write('nextReviewAt: $nextReviewAt, ')
+          ..write('addedAt: $addedAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('dirty: $dirty')
           ..write(')'))
@@ -961,17 +1492,23 @@ class PersonalVocabularyEntry extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    remoteNoteEntryId,
+    reviewItemId,
     sourceVocabularyId,
     listId,
+    contentType,
+    source,
     word,
     reading,
     meaning,
+    note,
     jlptLevel,
     exampleSentence,
     easeFactor,
     intervalDays,
     repetitions,
     nextReviewAt,
+    addedAt,
     updatedAt,
     dirty,
   );
@@ -980,17 +1517,23 @@ class PersonalVocabularyEntry extends DataClass
       identical(this, other) ||
       (other is PersonalVocabularyEntry &&
           other.id == this.id &&
+          other.remoteNoteEntryId == this.remoteNoteEntryId &&
+          other.reviewItemId == this.reviewItemId &&
           other.sourceVocabularyId == this.sourceVocabularyId &&
           other.listId == this.listId &&
+          other.contentType == this.contentType &&
+          other.source == this.source &&
           other.word == this.word &&
           other.reading == this.reading &&
           other.meaning == this.meaning &&
+          other.note == this.note &&
           other.jlptLevel == this.jlptLevel &&
           other.exampleSentence == this.exampleSentence &&
           other.easeFactor == this.easeFactor &&
           other.intervalDays == this.intervalDays &&
           other.repetitions == this.repetitions &&
           other.nextReviewAt == this.nextReviewAt &&
+          other.addedAt == this.addedAt &&
           other.updatedAt == this.updatedAt &&
           other.dirty == this.dirty);
 }
@@ -998,50 +1541,68 @@ class PersonalVocabularyEntry extends DataClass
 class PersonalVocabularyEntriesCompanion
     extends UpdateCompanion<PersonalVocabularyEntry> {
   final Value<String> id;
+  final Value<int?> remoteNoteEntryId;
+  final Value<int?> reviewItemId;
   final Value<String?> sourceVocabularyId;
   final Value<String?> listId;
+  final Value<String> contentType;
+  final Value<String> source;
   final Value<String> word;
   final Value<String?> reading;
   final Value<String> meaning;
+  final Value<String?> note;
   final Value<String?> jlptLevel;
   final Value<String?> exampleSentence;
   final Value<double> easeFactor;
   final Value<int> intervalDays;
   final Value<int> repetitions;
   final Value<DateTime?> nextReviewAt;
+  final Value<DateTime?> addedAt;
   final Value<DateTime> updatedAt;
   final Value<bool> dirty;
   final Value<int> rowid;
   const PersonalVocabularyEntriesCompanion({
     this.id = const Value.absent(),
+    this.remoteNoteEntryId = const Value.absent(),
+    this.reviewItemId = const Value.absent(),
     this.sourceVocabularyId = const Value.absent(),
     this.listId = const Value.absent(),
+    this.contentType = const Value.absent(),
+    this.source = const Value.absent(),
     this.word = const Value.absent(),
     this.reading = const Value.absent(),
     this.meaning = const Value.absent(),
+    this.note = const Value.absent(),
     this.jlptLevel = const Value.absent(),
     this.exampleSentence = const Value.absent(),
     this.easeFactor = const Value.absent(),
     this.intervalDays = const Value.absent(),
     this.repetitions = const Value.absent(),
     this.nextReviewAt = const Value.absent(),
+    this.addedAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.dirty = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PersonalVocabularyEntriesCompanion.insert({
     required String id,
+    this.remoteNoteEntryId = const Value.absent(),
+    this.reviewItemId = const Value.absent(),
     this.sourceVocabularyId = const Value.absent(),
     this.listId = const Value.absent(),
+    this.contentType = const Value.absent(),
+    this.source = const Value.absent(),
     required String word,
     this.reading = const Value.absent(),
     required String meaning,
+    this.note = const Value.absent(),
     this.jlptLevel = const Value.absent(),
     this.exampleSentence = const Value.absent(),
     this.easeFactor = const Value.absent(),
     this.intervalDays = const Value.absent(),
     this.repetitions = const Value.absent(),
     this.nextReviewAt = const Value.absent(),
+    this.addedAt = const Value.absent(),
     required DateTime updatedAt,
     this.dirty = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1051,35 +1612,47 @@ class PersonalVocabularyEntriesCompanion
        updatedAt = Value(updatedAt);
   static Insertable<PersonalVocabularyEntry> custom({
     Expression<String>? id,
+    Expression<int>? remoteNoteEntryId,
+    Expression<int>? reviewItemId,
     Expression<String>? sourceVocabularyId,
     Expression<String>? listId,
+    Expression<String>? contentType,
+    Expression<String>? source,
     Expression<String>? word,
     Expression<String>? reading,
     Expression<String>? meaning,
+    Expression<String>? note,
     Expression<String>? jlptLevel,
     Expression<String>? exampleSentence,
     Expression<double>? easeFactor,
     Expression<int>? intervalDays,
     Expression<int>? repetitions,
     Expression<DateTime>? nextReviewAt,
+    Expression<DateTime>? addedAt,
     Expression<DateTime>? updatedAt,
     Expression<bool>? dirty,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (remoteNoteEntryId != null) 'remote_note_entry_id': remoteNoteEntryId,
+      if (reviewItemId != null) 'review_item_id': reviewItemId,
       if (sourceVocabularyId != null)
         'source_vocabulary_id': sourceVocabularyId,
       if (listId != null) 'list_id': listId,
+      if (contentType != null) 'content_type': contentType,
+      if (source != null) 'source': source,
       if (word != null) 'word': word,
       if (reading != null) 'reading': reading,
       if (meaning != null) 'meaning': meaning,
+      if (note != null) 'note': note,
       if (jlptLevel != null) 'jlpt_level': jlptLevel,
       if (exampleSentence != null) 'example_sentence': exampleSentence,
       if (easeFactor != null) 'ease_factor': easeFactor,
       if (intervalDays != null) 'interval_days': intervalDays,
       if (repetitions != null) 'repetitions': repetitions,
       if (nextReviewAt != null) 'next_review_at': nextReviewAt,
+      if (addedAt != null) 'added_at': addedAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (dirty != null) 'dirty': dirty,
       if (rowid != null) 'rowid': rowid,
@@ -1088,34 +1661,46 @@ class PersonalVocabularyEntriesCompanion
 
   PersonalVocabularyEntriesCompanion copyWith({
     Value<String>? id,
+    Value<int?>? remoteNoteEntryId,
+    Value<int?>? reviewItemId,
     Value<String?>? sourceVocabularyId,
     Value<String?>? listId,
+    Value<String>? contentType,
+    Value<String>? source,
     Value<String>? word,
     Value<String?>? reading,
     Value<String>? meaning,
+    Value<String?>? note,
     Value<String?>? jlptLevel,
     Value<String?>? exampleSentence,
     Value<double>? easeFactor,
     Value<int>? intervalDays,
     Value<int>? repetitions,
     Value<DateTime?>? nextReviewAt,
+    Value<DateTime?>? addedAt,
     Value<DateTime>? updatedAt,
     Value<bool>? dirty,
     Value<int>? rowid,
   }) {
     return PersonalVocabularyEntriesCompanion(
       id: id ?? this.id,
+      remoteNoteEntryId: remoteNoteEntryId ?? this.remoteNoteEntryId,
+      reviewItemId: reviewItemId ?? this.reviewItemId,
       sourceVocabularyId: sourceVocabularyId ?? this.sourceVocabularyId,
       listId: listId ?? this.listId,
+      contentType: contentType ?? this.contentType,
+      source: source ?? this.source,
       word: word ?? this.word,
       reading: reading ?? this.reading,
       meaning: meaning ?? this.meaning,
+      note: note ?? this.note,
       jlptLevel: jlptLevel ?? this.jlptLevel,
       exampleSentence: exampleSentence ?? this.exampleSentence,
       easeFactor: easeFactor ?? this.easeFactor,
       intervalDays: intervalDays ?? this.intervalDays,
       repetitions: repetitions ?? this.repetitions,
       nextReviewAt: nextReviewAt ?? this.nextReviewAt,
+      addedAt: addedAt ?? this.addedAt,
       updatedAt: updatedAt ?? this.updatedAt,
       dirty: dirty ?? this.dirty,
       rowid: rowid ?? this.rowid,
@@ -1128,11 +1713,23 @@ class PersonalVocabularyEntriesCompanion
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
+    if (remoteNoteEntryId.present) {
+      map['remote_note_entry_id'] = Variable<int>(remoteNoteEntryId.value);
+    }
+    if (reviewItemId.present) {
+      map['review_item_id'] = Variable<int>(reviewItemId.value);
+    }
     if (sourceVocabularyId.present) {
       map['source_vocabulary_id'] = Variable<String>(sourceVocabularyId.value);
     }
     if (listId.present) {
       map['list_id'] = Variable<String>(listId.value);
+    }
+    if (contentType.present) {
+      map['content_type'] = Variable<String>(contentType.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
     }
     if (word.present) {
       map['word'] = Variable<String>(word.value);
@@ -1142,6 +1739,9 @@ class PersonalVocabularyEntriesCompanion
     }
     if (meaning.present) {
       map['meaning'] = Variable<String>(meaning.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
     }
     if (jlptLevel.present) {
       map['jlpt_level'] = Variable<String>(jlptLevel.value);
@@ -1161,6 +1761,9 @@ class PersonalVocabularyEntriesCompanion
     if (nextReviewAt.present) {
       map['next_review_at'] = Variable<DateTime>(nextReviewAt.value);
     }
+    if (addedAt.present) {
+      map['added_at'] = Variable<DateTime>(addedAt.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -1177,17 +1780,23 @@ class PersonalVocabularyEntriesCompanion
   String toString() {
     return (StringBuffer('PersonalVocabularyEntriesCompanion(')
           ..write('id: $id, ')
+          ..write('remoteNoteEntryId: $remoteNoteEntryId, ')
+          ..write('reviewItemId: $reviewItemId, ')
           ..write('sourceVocabularyId: $sourceVocabularyId, ')
           ..write('listId: $listId, ')
+          ..write('contentType: $contentType, ')
+          ..write('source: $source, ')
           ..write('word: $word, ')
           ..write('reading: $reading, ')
           ..write('meaning: $meaning, ')
+          ..write('note: $note, ')
           ..write('jlptLevel: $jlptLevel, ')
           ..write('exampleSentence: $exampleSentence, ')
           ..write('easeFactor: $easeFactor, ')
           ..write('intervalDays: $intervalDays, ')
           ..write('repetitions: $repetitions, ')
           ..write('nextReviewAt: $nextReviewAt, ')
+          ..write('addedAt: $addedAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('dirty: $dirty, ')
           ..write('rowid: $rowid')
@@ -2434,7 +3043,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$VocabularyListsTableCreateCompanionBuilder =
     VocabularyListsCompanion Function({
       required String id,
+      Value<int?> remoteId,
       required String name,
+      Value<String?> description,
+      Value<String> source,
+      Value<DateTime?> createdAt,
+      Value<int> entryCount,
+      Value<bool> entriesCached,
       Value<bool> isDefault,
       required DateTime updatedAt,
       Value<bool> dirty,
@@ -2443,7 +3058,13 @@ typedef $$VocabularyListsTableCreateCompanionBuilder =
 typedef $$VocabularyListsTableUpdateCompanionBuilder =
     VocabularyListsCompanion Function({
       Value<String> id,
+      Value<int?> remoteId,
       Value<String> name,
+      Value<String?> description,
+      Value<String> source,
+      Value<DateTime?> createdAt,
+      Value<int> entryCount,
+      Value<bool> entriesCached,
       Value<bool> isDefault,
       Value<DateTime> updatedAt,
       Value<bool> dirty,
@@ -2499,8 +3120,38 @@ class $$VocabularyListsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get entryCount => $composableBuilder(
+    column: $table.entryCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get entriesCached => $composableBuilder(
+    column: $table.entriesCached,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2561,8 +3212,38 @@ class $$VocabularyListsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get entryCount => $composableBuilder(
+    column: $table.entryCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get entriesCached => $composableBuilder(
+    column: $table.entriesCached,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2594,8 +3275,32 @@ class $$VocabularyListsTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get entryCount => $composableBuilder(
+    column: $table.entryCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get entriesCached => $composableBuilder(
+    column: $table.entriesCached,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isDefault =>
       $composableBuilder(column: $table.isDefault, builder: (column) => column);
@@ -2665,14 +3370,26 @@ class $$VocabularyListsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<int?> remoteId = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<int> entryCount = const Value.absent(),
+                Value<bool> entriesCached = const Value.absent(),
                 Value<bool> isDefault = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<bool> dirty = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VocabularyListsCompanion(
                 id: id,
+                remoteId: remoteId,
                 name: name,
+                description: description,
+                source: source,
+                createdAt: createdAt,
+                entryCount: entryCount,
+                entriesCached: entriesCached,
                 isDefault: isDefault,
                 updatedAt: updatedAt,
                 dirty: dirty,
@@ -2681,14 +3398,26 @@ class $$VocabularyListsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<int?> remoteId = const Value.absent(),
                 required String name,
+                Value<String?> description = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<int> entryCount = const Value.absent(),
+                Value<bool> entriesCached = const Value.absent(),
                 Value<bool> isDefault = const Value.absent(),
                 required DateTime updatedAt,
                 Value<bool> dirty = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VocabularyListsCompanion.insert(
                 id: id,
+                remoteId: remoteId,
                 name: name,
+                description: description,
+                source: source,
+                createdAt: createdAt,
+                entryCount: entryCount,
+                entriesCached: entriesCached,
                 isDefault: isDefault,
                 updatedAt: updatedAt,
                 dirty: dirty,
@@ -2755,17 +3484,23 @@ typedef $$VocabularyListsTableProcessedTableManager =
 typedef $$PersonalVocabularyEntriesTableCreateCompanionBuilder =
     PersonalVocabularyEntriesCompanion Function({
       required String id,
+      Value<int?> remoteNoteEntryId,
+      Value<int?> reviewItemId,
       Value<String?> sourceVocabularyId,
       Value<String?> listId,
+      Value<String> contentType,
+      Value<String> source,
       required String word,
       Value<String?> reading,
       required String meaning,
+      Value<String?> note,
       Value<String?> jlptLevel,
       Value<String?> exampleSentence,
       Value<double> easeFactor,
       Value<int> intervalDays,
       Value<int> repetitions,
       Value<DateTime?> nextReviewAt,
+      Value<DateTime?> addedAt,
       required DateTime updatedAt,
       Value<bool> dirty,
       Value<int> rowid,
@@ -2773,17 +3508,23 @@ typedef $$PersonalVocabularyEntriesTableCreateCompanionBuilder =
 typedef $$PersonalVocabularyEntriesTableUpdateCompanionBuilder =
     PersonalVocabularyEntriesCompanion Function({
       Value<String> id,
+      Value<int?> remoteNoteEntryId,
+      Value<int?> reviewItemId,
       Value<String?> sourceVocabularyId,
       Value<String?> listId,
+      Value<String> contentType,
+      Value<String> source,
       Value<String> word,
       Value<String?> reading,
       Value<String> meaning,
+      Value<String?> note,
       Value<String?> jlptLevel,
       Value<String?> exampleSentence,
       Value<double> easeFactor,
       Value<int> intervalDays,
       Value<int> repetitions,
       Value<DateTime?> nextReviewAt,
+      Value<DateTime?> addedAt,
       Value<DateTime> updatedAt,
       Value<bool> dirty,
       Value<int> rowid,
@@ -2875,8 +3616,28 @@ class $$PersonalVocabularyEntriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get remoteNoteEntryId => $composableBuilder(
+    column: $table.remoteNoteEntryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reviewItemId => $composableBuilder(
+    column: $table.reviewItemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get sourceVocabularyId => $composableBuilder(
     column: $table.sourceVocabularyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contentType => $composableBuilder(
+    column: $table.contentType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2892,6 +3653,11 @@ class $$PersonalVocabularyEntriesTableFilterComposer
 
   ColumnFilters<String> get meaning => $composableBuilder(
     column: $table.meaning,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2922,6 +3688,11 @@ class $$PersonalVocabularyEntriesTableFilterComposer
 
   ColumnFilters<DateTime> get nextReviewAt => $composableBuilder(
     column: $table.nextReviewAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3023,8 +3794,28 @@ class $$PersonalVocabularyEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get remoteNoteEntryId => $composableBuilder(
+    column: $table.remoteNoteEntryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get reviewItemId => $composableBuilder(
+    column: $table.reviewItemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get sourceVocabularyId => $composableBuilder(
     column: $table.sourceVocabularyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contentType => $composableBuilder(
+    column: $table.contentType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3040,6 +3831,11 @@ class $$PersonalVocabularyEntriesTableOrderingComposer
 
   ColumnOrderings<String> get meaning => $composableBuilder(
     column: $table.meaning,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3070,6 +3866,11 @@ class $$PersonalVocabularyEntriesTableOrderingComposer
 
   ColumnOrderings<DateTime> get nextReviewAt => $composableBuilder(
     column: $table.nextReviewAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3119,10 +3920,28 @@ class $$PersonalVocabularyEntriesTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<int> get remoteNoteEntryId => $composableBuilder(
+    column: $table.remoteNoteEntryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reviewItemId => $composableBuilder(
+    column: $table.reviewItemId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get sourceVocabularyId => $composableBuilder(
     column: $table.sourceVocabularyId,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get contentType => $composableBuilder(
+    column: $table.contentType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
 
   GeneratedColumn<String> get word =>
       $composableBuilder(column: $table.word, builder: (column) => column);
@@ -3132,6 +3951,9 @@ class $$PersonalVocabularyEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get meaning =>
       $composableBuilder(column: $table.meaning, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
 
   GeneratedColumn<String> get jlptLevel =>
       $composableBuilder(column: $table.jlptLevel, builder: (column) => column);
@@ -3160,6 +3982,9 @@ class $$PersonalVocabularyEntriesTableAnnotationComposer
     column: $table.nextReviewAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
@@ -3285,33 +4110,45 @@ class $$PersonalVocabularyEntriesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<int?> remoteNoteEntryId = const Value.absent(),
+                Value<int?> reviewItemId = const Value.absent(),
                 Value<String?> sourceVocabularyId = const Value.absent(),
                 Value<String?> listId = const Value.absent(),
+                Value<String> contentType = const Value.absent(),
+                Value<String> source = const Value.absent(),
                 Value<String> word = const Value.absent(),
                 Value<String?> reading = const Value.absent(),
                 Value<String> meaning = const Value.absent(),
+                Value<String?> note = const Value.absent(),
                 Value<String?> jlptLevel = const Value.absent(),
                 Value<String?> exampleSentence = const Value.absent(),
                 Value<double> easeFactor = const Value.absent(),
                 Value<int> intervalDays = const Value.absent(),
                 Value<int> repetitions = const Value.absent(),
                 Value<DateTime?> nextReviewAt = const Value.absent(),
+                Value<DateTime?> addedAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<bool> dirty = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PersonalVocabularyEntriesCompanion(
                 id: id,
+                remoteNoteEntryId: remoteNoteEntryId,
+                reviewItemId: reviewItemId,
                 sourceVocabularyId: sourceVocabularyId,
                 listId: listId,
+                contentType: contentType,
+                source: source,
                 word: word,
                 reading: reading,
                 meaning: meaning,
+                note: note,
                 jlptLevel: jlptLevel,
                 exampleSentence: exampleSentence,
                 easeFactor: easeFactor,
                 intervalDays: intervalDays,
                 repetitions: repetitions,
                 nextReviewAt: nextReviewAt,
+                addedAt: addedAt,
                 updatedAt: updatedAt,
                 dirty: dirty,
                 rowid: rowid,
@@ -3319,33 +4156,45 @@ class $$PersonalVocabularyEntriesTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<int?> remoteNoteEntryId = const Value.absent(),
+                Value<int?> reviewItemId = const Value.absent(),
                 Value<String?> sourceVocabularyId = const Value.absent(),
                 Value<String?> listId = const Value.absent(),
+                Value<String> contentType = const Value.absent(),
+                Value<String> source = const Value.absent(),
                 required String word,
                 Value<String?> reading = const Value.absent(),
                 required String meaning,
+                Value<String?> note = const Value.absent(),
                 Value<String?> jlptLevel = const Value.absent(),
                 Value<String?> exampleSentence = const Value.absent(),
                 Value<double> easeFactor = const Value.absent(),
                 Value<int> intervalDays = const Value.absent(),
                 Value<int> repetitions = const Value.absent(),
                 Value<DateTime?> nextReviewAt = const Value.absent(),
+                Value<DateTime?> addedAt = const Value.absent(),
                 required DateTime updatedAt,
                 Value<bool> dirty = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PersonalVocabularyEntriesCompanion.insert(
                 id: id,
+                remoteNoteEntryId: remoteNoteEntryId,
+                reviewItemId: reviewItemId,
                 sourceVocabularyId: sourceVocabularyId,
                 listId: listId,
+                contentType: contentType,
+                source: source,
                 word: word,
                 reading: reading,
                 meaning: meaning,
+                note: note,
                 jlptLevel: jlptLevel,
                 exampleSentence: exampleSentence,
                 easeFactor: easeFactor,
                 intervalDays: intervalDays,
                 repetitions: repetitions,
                 nextReviewAt: nextReviewAt,
+                addedAt: addedAt,
                 updatedAt: updatedAt,
                 dirty: dirty,
                 rowid: rowid,

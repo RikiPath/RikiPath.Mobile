@@ -8,7 +8,10 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/widgets/riki_toast_host.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
+import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
+import 'package:rikipath_mobile/features/notebook/data/fixture_notebook_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/fixture_vocabulary_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
@@ -143,9 +146,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(
-      find.byKey(
-        const ValueKey<String>('vocabulary_notebook_fixture-list-default'),
-      ),
+      find.byKey(const ValueKey<String>('vocabulary_notebook_fixture-list-n3')),
     );
     await tester.pumpAndSettle();
 
@@ -153,7 +154,60 @@ void main() {
       find.byKey(const ValueKey<String>('vocabulary_saved_banner')),
       findsOneWidget,
     );
-    expect(find.textContaining('Mặc định'), findsWidgets);
+    expect(
+      find.textContaining(FixtureNotebookRepository.defaultCollection.name),
+      findsWidgets,
+    );
+  });
+
+  testWidgets('Vocabulary and Notebook observe the same saved source', (
+    tester,
+  ) async {
+    final router = await _pumpVocabulary(
+      tester,
+      initialLocation: AppRoutes.vocabularyDetail(
+        FixtureVocabularyRepository.keikenRouteKey,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final saveButton = find.byKey(
+      const ValueKey<String>('vocabulary_save_button'),
+    );
+    await _scrollWithin(tester, saveButton);
+    await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey<String>('vocabulary_notebook_fixture-list-n3')),
+    );
+    await tester.pumpAndSettle();
+
+    router.go(AppRoutes.notebook);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(
+        const ValueKey<String>('notebook_entry_fixture-note-fixture-keiken'),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('notebook_remove_fixture-note-fixture-keiken'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey<String>('notebook_confirm_remove_button')),
+    );
+    await tester.pumpAndSettle();
+
+    router.go(
+      AppRoutes.vocabularyDetail(FixtureVocabularyRepository.keikenRouteKey),
+    );
+    await tester.pumpAndSettle();
+    await _scrollWithin(tester, saveButton);
+    expect(saveButton, findsOneWidget);
   });
 
   testWidgets('pending repository renders the loading state', (tester) async {
@@ -305,8 +359,18 @@ Future<GoRouter> _pumpVocabulary(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [vocabularyRepositoryProvider.overrideWithValue(repository)],
-      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      overrides: [
+        vocabularyRepositoryProvider.overrideWithValue(repository),
+        notebookRepositoryProvider.overrideWithValue(
+          FixtureNotebookRepository(entries: const {}),
+        ),
+      ],
+      child: MaterialApp.router(
+        theme: AppTheme.light,
+        routerConfig: router,
+        builder: (context, child) =>
+            RikiToastHost(child: child ?? const SizedBox.shrink()),
+      ),
     ),
   );
   return router;

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-enum NotebookDataSource { remote, fixture }
+enum NotebookDataSource { remote, local, fixture }
 
 enum NotebookContentType { vocabulary, kanji, manual, unknown }
 
@@ -80,4 +80,27 @@ class NotebookBookmark {
   final int? noteEntryId;
   final String collectionRouteKey;
   final String collectionName;
+}
+
+@immutable
+class NotebookVocabularyDraft {
+  const NotebookVocabularyDraft({
+    required this.routeKey,
+    required this.remoteId,
+    required this.term,
+    required this.reading,
+    required this.meaning,
+    required this.jlptLevel,
+    this.exampleSentence,
+  });
+
+  /// Stable frontend identity established by the Vocabulary feature. This is
+  /// deliberately separate from the optional backend numeric ID.
+  final String routeKey;
+  final int? remoteId;
+  final String term;
+  final String? reading;
+  final String meaning;
+  final String? jlptLevel;
+  final String? exampleSentence;
 }

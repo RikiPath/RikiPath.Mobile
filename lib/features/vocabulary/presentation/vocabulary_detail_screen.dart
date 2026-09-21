@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
+import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_header.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/widgets/vocabulary_detail_view.dart';
@@ -20,12 +23,13 @@ class VocabularyDetailScreen extends ConsumerWidget {
     final state = ref.watch(provider);
     final controller = ref.read(provider.notifier);
     final entry = state.value?.entry;
+    final savedKeys = ref.watch(savedVocabularyKeysProvider).value;
 
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
-        title: 'Chi tiết từ vựng',
-        subtitle: entry?.reading ?? 'THƯ VIỆN',
+        title: context.l10n.vocabularyDetail,
+        subtitle: entry?.reading ?? context.l10n.library,
         level: entry?.level,
         initials: null,
         onBack: context.pop,
@@ -38,8 +42,9 @@ class VocabularyDetailScreen extends ConsumerWidget {
           error: (_, _) => VocabularyErrorView(onRetry: controller.retry),
           data: (data) => VocabularyDetailView(
             state: data,
+            isSaved: savedKeys?.contains(data.entry.routeKey) ?? false,
             onPlayAudio: controller.playAudio,
-            onSave: () => _chooseNotebookList(context, controller),
+            onSave: () => _chooseNotebookList(context, ref, controller),
             onOpenLesson: (lesson) =>
                 context.push(AppRoutes.lesson(lesson.routeId)),
           ),
@@ -50,6 +55,7 @@ class VocabularyDetailScreen extends ConsumerWidget {
 
   Future<void> _chooseNotebookList(
     BuildContext context,
+    WidgetRef ref,
     VocabularyDetailController controller,
   ) async {
     final lists = await controller.loadNotebookLists();
@@ -70,14 +76,17 @@ class VocabularyDetailScreen extends ConsumerWidget {
                 AppSpacing.space4,
                 AppSpacing.space2,
               ),
-              child: Text('Chọn Sổ từ', style: AppTypography.sectionTitle),
+              child: Text(
+                context.l10n.chooseNotebook,
+                style: AppTypography.sectionTitle,
+              ),
             ),
             for (final list in lists)
               ListTile(
                 key: ValueKey<String>('vocabulary_notebook_${list.routeKey}'),
                 leading: const Icon(Icons.book_outlined),
                 title: Text(list.name),
-                subtitle: Text('${list.entryCount} từ'),
+                subtitle: Text(context.l10n.wordCount(list.entryCount)),
                 onTap: () => Navigator.of(context).pop(list),
               ),
           ],
@@ -88,8 +97,8 @@ class VocabularyDetailScreen extends ConsumerWidget {
     if (selected == null) return;
     final saved = await controller.saveToNotebook(selected);
     if (!context.mounted || !saved) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Đã lưu vào ${selected.name}.')));
+    ref
+        .read(rikiToastServiceProvider.notifier)
+        .success(title: context.l10n.savedToCollection(selected.name));
   }
 }

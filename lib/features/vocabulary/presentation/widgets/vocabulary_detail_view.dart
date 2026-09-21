@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
@@ -7,6 +8,7 @@ import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
 class VocabularyDetailView extends StatelessWidget {
   const VocabularyDetailView({
     required this.state,
+    required this.isSaved,
     required this.onPlayAudio,
     required this.onSave,
     required this.onOpenLesson,
@@ -14,6 +16,7 @@ class VocabularyDetailView extends StatelessWidget {
   });
 
   final VocabularyDetailState state;
+  final bool isSaved;
   final Future<bool> Function() onPlayAudio;
   final VoidCallback onSave;
   final ValueChanged<VocabularyRelatedLesson> onOpenLesson;
@@ -55,7 +58,7 @@ class VocabularyDetailView extends StatelessWidget {
         if (entry.exampleSentence != null && examples.isEmpty) ...[
           const SizedBox(height: AppSpacing.space4),
           _SectionCard(
-            title: 'Ví dụ',
+            title: context.l10n.examples,
             icon: Icons.format_quote_outlined,
             child: SelectableText(
               entry.exampleSentence!,
@@ -77,7 +80,7 @@ class VocabularyDetailView extends StatelessWidget {
         if (enrichment?.nuance != null) ...[
           const SizedBox(height: AppSpacing.space4),
           _SectionCard(
-            title: 'Sắc thái sử dụng',
+            title: context.l10n.usageNuance,
             icon: Icons.lightbulb_outline,
             child: Text(enrichment!.nuance!, style: AppTypography.body),
           ),
@@ -94,7 +97,7 @@ class VocabularyDetailView extends StatelessWidget {
           ),
         ],
         const SizedBox(height: AppSpacing.space4),
-        _NotebookCard(state: state, onSave: onSave),
+        _NotebookCard(state: state, isSaved: isSaved, onSave: onSave),
       ],
     );
   }
@@ -123,7 +126,7 @@ class _FixtureNotice extends StatelessWidget {
           const SizedBox(width: AppSpacing.space2),
           Expanded(
             child: Text(
-              'Nội dung mở rộng bên dưới là dữ liệu minh họa cục bộ.',
+              context.l10n.localFixtureNotice,
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.warningText,
                 fontWeight: FontWeight.w600,
@@ -209,13 +212,15 @@ class _WordHero extends StatelessWidget {
                 ? null
                 : onPlayAudio,
             icon: isPlayingAudio
-                ? const SizedBox.square(
-                    dimension: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                ? RikiInlineLoader(
+                    size: 16,
+                    semanticsLabel: context.l10n.loading,
                   )
                 : const Icon(Icons.volume_up_outlined),
             label: Text(
-              entry.audioUrl == null ? 'Chưa có âm thanh' : 'Nghe phát âm',
+              entry.audioUrl == null
+                  ? context.l10n.audioUnavailable
+                  : context.l10n.listenPronunciation,
             ),
           ),
         ],
@@ -233,7 +238,7 @@ class _MeaningCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final definition = entry.enrichment?.definition;
     return _SectionCard(
-      title: 'Ý nghĩa',
+      title: context.l10n.meaning,
       icon: Icons.menu_book_outlined,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,7 +267,7 @@ class _ExamplesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SectionCard(
-      title: 'Ví dụ',
+      title: context.l10n.examples,
       icon: Icons.format_quote_outlined,
       child: Column(
         children: [
@@ -307,7 +312,7 @@ class _CollocationsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SectionCard(
-      title: 'Cụm từ thường gặp',
+      title: context.l10n.commonCollocations,
       icon: Icons.hub_outlined,
       child: Column(
         children: [
@@ -351,7 +356,7 @@ class _KanjiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SectionCard(
-      title: 'Phân tích Kanji',
+      title: context.l10n.kanjiAnalysis,
       icon: Icons.grid_view_outlined,
       child: Column(
         children: [
@@ -414,7 +419,7 @@ class _RelatedLessonsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SectionCard(
-      title: 'Bài học liên quan',
+      title: context.l10n.relatedLessons,
       icon: Icons.school_outlined,
       child: Column(
         children: [
@@ -441,14 +446,19 @@ class _RelatedLessonsCard extends StatelessWidget {
 }
 
 class _NotebookCard extends StatelessWidget {
-  const _NotebookCard({required this.state, required this.onSave});
+  const _NotebookCard({
+    required this.state,
+    required this.isSaved,
+    required this.onSave,
+  });
 
   final VocabularyDetailState state;
+  final bool isSaved;
   final VoidCallback onSave;
 
   @override
   Widget build(BuildContext context) {
-    if (state.isSaved) {
+    if (isSaved) {
       return Container(
         key: const ValueKey<String>('vocabulary_saved_banner'),
         padding: const EdgeInsets.all(AppSpacing.space4),
@@ -463,9 +473,7 @@ class _NotebookCard extends StatelessWidget {
             const SizedBox(width: AppSpacing.space3),
             Expanded(
               child: Text(
-                state.savedListName == null
-                    ? 'Từ này đã được lưu.'
-                    : 'Đã lưu vào ${state.savedListName}.',
+                context.l10n.wordAlreadySaved,
                 style: AppTypography.body.copyWith(
                   color: AppColors.success,
                   fontWeight: FontWeight.w700,
@@ -478,13 +486,13 @@ class _NotebookCard extends StatelessWidget {
     }
 
     return _SectionCard(
-      title: 'Sổ từ cá nhân',
+      title: context.l10n.personalNotebook,
       icon: Icons.bookmark_border,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Lưu từ này để ôn tập trong danh sách của bạn.',
+            context.l10n.saveWordDescription,
             style: AppTypography.bodySmall,
           ),
           if (state.notebookError != null) ...[
@@ -494,8 +502,8 @@ class _NotebookCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.space3),
           RikiPrimaryButton(
             key: const ValueKey<String>('vocabulary_save_button'),
-            label: 'Lưu vào Sổ từ',
-            loadingLabel: 'Đang xử lý...',
+            label: context.l10n.saveToNotebook,
+            loadingLabel: context.l10n.processing,
             isLoading: state.isLoadingNotebook || state.isSaving,
             leadingIcon: Icons.bookmark_add_outlined,
             onPressed: onSave,

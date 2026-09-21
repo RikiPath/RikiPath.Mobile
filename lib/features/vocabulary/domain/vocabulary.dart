@@ -16,7 +16,6 @@ class VocabularyEntry {
     this.partOfSpeech,
     this.exampleSentence,
     this.audioUrl,
-    this.isSaved,
     this.enrichment,
   });
 
@@ -31,27 +30,7 @@ class VocabularyEntry {
   final JlptLevel level;
   final VocabularyDataSource source;
 
-  /// `null` means that the backend did not publish a reliable saved-state
-  /// relationship for this bank entry.
-  final bool? isSaved;
   final VocabularyEnrichment? enrichment;
-
-  VocabularyEntry copyWith({bool? isSaved}) {
-    return VocabularyEntry(
-      routeKey: routeKey,
-      remoteId: remoteId,
-      word: word,
-      reading: reading,
-      meaning: meaning,
-      level: level,
-      source: source,
-      partOfSpeech: partOfSpeech,
-      exampleSentence: exampleSentence,
-      audioUrl: audioUrl,
-      isSaved: isSaved ?? this.isSaved,
-      enrichment: enrichment,
-    );
-  }
 }
 
 @immutable

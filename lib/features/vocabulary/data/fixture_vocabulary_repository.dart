@@ -68,7 +68,6 @@ class FixtureVocabularyRepository implements VocabularyRepository {
       exampleSentence: '日本で働いた経験があります。',
       level: JlptLevel.n3,
       source: VocabularyDataSource.fixture,
-      isSaved: false,
       enrichment: VocabularyEnrichment(
         sinoVietnamese: 'KINH NGHIỆM',
         definition:
@@ -129,7 +128,6 @@ class FixtureVocabularyRepository implements VocabularyRepository {
       partOfSpeech: 'Danh từ / する',
       level: JlptLevel.n3,
       source: VocabularyDataSource.fixture,
-      isSaved: false,
       enrichment: VocabularyEnrichment(sinoVietnamese: 'CẢI THIỆN'),
     ),
     VocabularyEntry(
@@ -141,7 +139,6 @@ class FixtureVocabularyRepository implements VocabularyRepository {
       partOfSpeech: 'Danh từ / する',
       level: JlptLevel.n4,
       source: VocabularyDataSource.fixture,
-      isSaved: true,
       enrichment: VocabularyEnrichment(sinoVietnamese: 'CHUẨN BỊ'),
     ),
     VocabularyEntry(
@@ -153,7 +150,6 @@ class FixtureVocabularyRepository implements VocabularyRepository {
       partOfSpeech: 'Danh từ / する',
       level: JlptLevel.n4,
       source: VocabularyDataSource.fixture,
-      isSaved: false,
       enrichment: VocabularyEnrichment(sinoVietnamese: 'ƯỚC THÚC'),
     ),
     VocabularyEntry(
@@ -165,7 +161,6 @@ class FixtureVocabularyRepository implements VocabularyRepository {
       partOfSpeech: 'Danh từ / する',
       level: JlptLevel.n4,
       source: VocabularyDataSource.fixture,
-      isSaved: false,
       enrichment: VocabularyEnrichment(sinoVietnamese: 'ÁN NỘI'),
     ),
     VocabularyEntry(
@@ -177,7 +172,6 @@ class FixtureVocabularyRepository implements VocabularyRepository {
       partOfSpeech: 'Danh từ',
       level: JlptLevel.n5,
       source: VocabularyDataSource.fixture,
-      isSaved: false,
       enrichment: VocabularyEnrichment(sinoVietnamese: 'HỌC SINH'),
     ),
   ];

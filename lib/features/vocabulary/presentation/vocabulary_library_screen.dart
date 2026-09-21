@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_header.dart';
+import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/widgets/vocabulary_library_view.dart';
@@ -16,12 +19,13 @@ class VocabularyLibraryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(vocabularyLibraryControllerProvider);
     final controller = ref.read(vocabularyLibraryControllerProvider.notifier);
+    final savedKeys = ref.watch(savedVocabularyKeysProvider).value;
 
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
-        title: 'Từ vựng',
-        subtitle: 'THƯ VIỆN',
+        title: context.l10n.vocabulary,
+        subtitle: context.l10n.library,
         level: state.value?.query.level,
         initials: null,
         onBack: context.pop,
@@ -34,6 +38,7 @@ class VocabularyLibraryScreen extends ConsumerWidget {
           error: (_, _) => VocabularyErrorView(onRetry: controller.retry),
           data: (data) => VocabularyLibraryView(
             state: data,
+            savedVocabularyKeys: savedKeys ?? const <String>{},
             onSearch: controller.search,
             onFilter: controller.filterByLevel,
             onClear: controller.clear,
@@ -58,9 +63,12 @@ class VocabularyLibraryScreen extends ConsumerWidget {
       await ref.read(vocabularyAudioPlayerProvider).play(source);
     } catch (_) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không thể phát âm thanh từ vựng.')),
-      );
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .error(
+            title: context.l10n.toastAudioFailedTitle,
+            description: context.l10n.vocabularyAudioFailed,
+          );
     }
   }
 }

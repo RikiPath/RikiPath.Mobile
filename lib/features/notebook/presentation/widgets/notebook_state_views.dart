@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/riki_loading.dart';
 
 class NotebookLoadingView extends StatelessWidget {
   const NotebookLoadingView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      key: ValueKey<String>('notebook_loading_view'),
-      child: CircularProgressIndicator(),
+    return RikiSectionSkeleton(
+      key: const ValueKey<String>('notebook_loading_view'),
+      semanticsLabel: context.l10n.loading,
+      itemCount: 3,
+      cardHeight: 92,
     );
   }
 }
@@ -34,13 +38,13 @@ class NotebookErrorView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.space3),
             Text(
-              'Không thể tải Sổ từ',
+              context.l10n.notebookLoadFailed,
               style: AppTypography.sectionTitle,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.space1),
             Text(
-              'Kiểm tra kết nối rồi thử lại.',
+              context.l10n.checkConnectionShort,
               style: AppTypography.bodySmall,
               textAlign: TextAlign.center,
             ),
@@ -48,7 +52,7 @@ class NotebookErrorView extends StatelessWidget {
             FilledButton(
               key: const ValueKey<String>('notebook_retry_button'),
               onPressed: onRetry,
-              child: const Text('Thử lại'),
+              child: Text(context.l10n.retry),
             ),
           ],
         ),

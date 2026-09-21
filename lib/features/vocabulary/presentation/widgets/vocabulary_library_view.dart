@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
@@ -8,6 +9,7 @@ import 'package:rikipath_mobile/features/vocabulary/presentation/widgets/vocabul
 class VocabularyLibraryView extends StatefulWidget {
   const VocabularyLibraryView({
     required this.state,
+    required this.savedVocabularyKeys,
     required this.onSearch,
     required this.onFilter,
     required this.onClear,
@@ -18,6 +20,7 @@ class VocabularyLibraryView extends StatefulWidget {
   });
 
   final VocabularyLibraryState state;
+  final Set<String> savedVocabularyKeys;
   final ValueChanged<String> onSearch;
   final ValueChanged<JlptLevel?> onFilter;
   final VoidCallback onClear;
@@ -71,12 +74,12 @@ class _VocabularyLibraryViewState extends State<VocabularyLibraryView> {
             onChanged: (_) => setState(() {}),
             onSubmitted: widget.onSearch,
             decoration: InputDecoration(
-              hintText: 'Tìm từ tiếng Nhật, cách đọc hoặc nghĩa...',
+              hintText: context.l10n.vocabularySearchHint,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isEmpty
                   ? null
                   : IconButton(
-                      tooltip: 'Xóa tìm kiếm',
+                      tooltip: context.l10n.clearSearch,
                       onPressed: () {
                         _searchController.clear();
                         setState(() {});
@@ -95,7 +98,7 @@ class _VocabularyLibraryViewState extends State<VocabularyLibraryView> {
             children: [
               _LevelFilterChip(
                 key: const ValueKey<String>('vocabulary_filter_all'),
-                label: 'Tất cả',
+                label: context.l10n.all,
                 selected: state.query.level == null,
                 onSelected: () => widget.onFilter(null),
               ),
@@ -133,7 +136,7 @@ class _VocabularyLibraryViewState extends State<VocabularyLibraryView> {
                       borderRadius: BorderRadius.circular(AppRadius.tag),
                     ),
                     child: Text(
-                      'Dữ liệu minh họa',
+                      context.l10n.illustrationData,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.badgeText.copyWith(
                         color: AppColors.warningText,
@@ -143,7 +146,7 @@ class _VocabularyLibraryViewState extends State<VocabularyLibraryView> {
                 ),
               const Spacer(),
               Text(
-                '${state.page.totalCount} từ',
+                context.l10n.wordCount(state.page.totalCount),
                 style: AppTypography.metadata,
               ),
             ],
@@ -178,6 +181,9 @@ class _VocabularyLibraryViewState extends State<VocabularyLibraryView> {
                     final entry = state.page.items[index];
                     return _VocabularyCard(
                       entry: entry,
+                      isSaved: widget.savedVocabularyKeys.contains(
+                        entry.routeKey,
+                      ),
                       onOpen: () => widget.onOpenDetail(entry),
                       onPlayAudio: () => widget.onPlayAudio(entry),
                     );
@@ -225,11 +231,13 @@ class _LevelFilterChip extends StatelessWidget {
 class _VocabularyCard extends StatelessWidget {
   const _VocabularyCard({
     required this.entry,
+    required this.isSaved,
     required this.onOpen,
     required this.onPlayAudio,
   });
 
   final VocabularyEntry entry;
+  final bool isSaved;
   final VoidCallback onOpen;
   final VoidCallback onPlayAudio;
 
@@ -300,9 +308,9 @@ class _VocabularyCard extends StatelessWidget {
                           JlptBadge(entry.level),
                           if (partOfSpeech != null && partOfSpeech.isNotEmpty)
                             _Tag(label: partOfSpeech),
-                          if (entry.isSaved == true)
-                            const _Tag(
-                              label: 'Đã lưu',
+                          if (isSaved)
+                            _Tag(
+                              label: context.l10n.saved,
                               icon: Icons.bookmark,
                               foregroundColor: AppColors.success,
                               backgroundColor: AppColors.successBackground,
@@ -316,8 +324,8 @@ class _VocabularyCard extends StatelessWidget {
                 IconButton(
                   key: ValueKey<String>('vocabulary_audio_${entry.routeKey}'),
                   tooltip: entry.audioUrl == null
-                      ? 'Chưa có âm thanh'
-                      : 'Nghe phát âm',
+                      ? context.l10n.audioUnavailable
+                      : context.l10n.listenPronunciation,
                   onPressed: entry.audioUrl == null ? null : onPlayAudio,
                   icon: Icon(
                     Icons.volume_up_outlined,
@@ -390,10 +398,10 @@ class _LoadMore extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(AppSpacing.space4),
-          child: CircularProgressIndicator(),
+          padding: const EdgeInsets.all(AppSpacing.space4),
+          child: RikiInlineLoader(semanticsLabel: context.l10n.loading),
         ),
       );
     }
@@ -407,7 +415,7 @@ class _LoadMore extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.space2),
         ],
-        RikiSecondaryButton(label: 'Tải thêm', onPressed: onPressed),
+        RikiSecondaryButton(label: context.l10n.loadMore, onPressed: onPressed),
       ],
     );
   }

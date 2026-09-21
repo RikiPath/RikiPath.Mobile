@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/widgets/notebook_state_views.dart';
@@ -19,10 +21,10 @@ class NotebookScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: AppBar(
-        title: const Text('Sổ từ'),
+        title: Text(context.l10n.navigationNotebook),
         actions: [
           IconButton(
-            tooltip: 'Cá nhân',
+            tooltip: context.l10n.navigationProfile,
             onPressed: () => context.go(AppRoutes.profile),
             icon: const Icon(Icons.account_circle_outlined),
           ),
@@ -40,8 +42,9 @@ class NotebookScreen extends ConsumerWidget {
             onSelectCollection: controller.selectCollection,
             onRetry: controller.retry,
             onDismissMutationError: controller.clearMutationError,
-            onCreateCollection: () => _createCollection(context, controller),
-            onAddEntry: () => _addManualEntry(context, controller),
+            onCreateCollection: () =>
+                _createCollection(context, ref, controller),
+            onAddEntry: () => _addManualEntry(context, ref, controller),
             onOpenVocabulary: (entry) {
               final routeKey = entry.vocabularyRouteKey;
               if (routeKey != null) {
@@ -49,7 +52,7 @@ class NotebookScreen extends ConsumerWidget {
               }
             },
             onRemoveEntry: (entry) =>
-                _confirmRemove(context, controller, entry),
+                _confirmRemove(context, ref, controller, entry),
           ),
         ),
       ),
@@ -58,6 +61,7 @@ class NotebookScreen extends ConsumerWidget {
 
   Future<void> _createCollection(
     BuildContext context,
+    WidgetRef ref,
     NotebookController controller,
   ) async {
     final request = await showModalBottomSheet<_CreateCollectionRequest>(
@@ -72,13 +76,14 @@ class NotebookScreen extends ConsumerWidget {
       description: request.description,
     );
     if (!context.mounted || !success) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Đã tạo danh sách mới.')));
+    ref
+        .read(rikiToastServiceProvider.notifier)
+        .success(title: context.l10n.collectionCreated);
   }
 
   Future<void> _addManualEntry(
     BuildContext context,
+    WidgetRef ref,
     NotebookController controller,
   ) async {
     final request = await showModalBottomSheet<_ManualEntryRequest>(
@@ -95,27 +100,27 @@ class NotebookScreen extends ConsumerWidget {
       note: request.note,
     );
     if (!context.mounted || !success) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Đã thêm từ vào Sổ từ.')));
+    ref
+        .read(rikiToastServiceProvider.notifier)
+        .success(title: context.l10n.wordAddedToNotebook);
   }
 
   Future<void> _confirmRemove(
     BuildContext context,
+    WidgetRef ref,
     NotebookController controller,
     NotebookEntry entry,
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xóa khỏi Sổ từ?'),
-        content: Text(
-          '“${entry.term}” sẽ bị xóa khỏi danh sách và hàng đợi ôn tập liên kết.',
-        ),
+        title: Text(context.l10n.removeFromNotebookQuestion),
+        content: Text(context.l10n.removeEntryMessage(entry.term)),
         actions: [
           TextButton(
+            key: const ValueKey<String>('notebook_cancel_remove_button'),
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Hủy'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             key: const ValueKey<String>('notebook_confirm_remove_button'),
@@ -124,7 +129,7 @@ class NotebookScreen extends ConsumerWidget {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Xóa'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -132,9 +137,9 @@ class NotebookScreen extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
     final removed = await controller.removeEntry(entry);
     if (!context.mounted || !removed) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Đã xóa khỏi Sổ từ.')));
+    ref
+        .read(rikiToastServiceProvider.notifier)
+        .success(title: context.l10n.removedFromNotebook);
   }
 }
 
@@ -179,23 +184,30 @@ class _CreateCollectionSheetState extends State<_CreateCollectionSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Tạo danh sách mới', style: AppTypography.sectionTitle),
+            Text(
+              context.l10n.createCollection,
+              style: AppTypography.sectionTitle,
+            ),
             const SizedBox(height: AppSpacing.space3),
             TextFormField(
               key: const ValueKey<String>('notebook_collection_name_field'),
               controller: _nameController,
               autofocus: true,
               maxLength: 200,
-              decoration: const InputDecoration(labelText: 'Tên danh sách *'),
+              decoration: InputDecoration(
+                labelText: context.l10n.collectionNameRequiredLabel,
+              ),
               validator: (value) => value == null || value.trim().isEmpty
-                  ? 'Vui lòng nhập tên danh sách.'
+                  ? context.l10n.collectionNameRequired
                   : null,
             ),
             const SizedBox(height: AppSpacing.space2),
             TextFormField(
               controller: _descriptionController,
               maxLines: 2,
-              decoration: const InputDecoration(labelText: 'Mô tả (tùy chọn)'),
+              decoration: InputDecoration(
+                labelText: context.l10n.optionalDescription,
+              ),
             ),
             const SizedBox(height: AppSpacing.space4),
             FilledButton(
@@ -209,7 +221,7 @@ class _CreateCollectionSheetState extends State<_CreateCollectionSheet> {
                   ),
                 );
               },
-              child: const Text('Tạo danh sách'),
+              child: Text(context.l10n.createCollectionAction),
             ),
           ],
         ),
@@ -270,10 +282,10 @@ class _ManualEntrySheetState extends State<_ManualEntrySheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Thêm từ mới', style: AppTypography.sectionTitle),
+            Text(context.l10n.addNewWord, style: AppTypography.sectionTitle),
             const SizedBox(height: AppSpacing.space1),
             Text(
-              'Chỉ các trường được API Notebook hỗ trợ.',
+              context.l10n.notebookApiFieldsHint,
               style: AppTypography.metadata,
             ),
             const SizedBox(height: AppSpacing.space4),
@@ -281,28 +293,30 @@ class _ManualEntrySheetState extends State<_ManualEntrySheet> {
               key: const ValueKey<String>('notebook_manual_word_field'),
               controller: _wordController,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Từ tiếng Nhật *'),
+              decoration: InputDecoration(
+                labelText: context.l10n.japaneseWordRequiredLabel,
+              ),
               validator: (value) => value == null || value.trim().isEmpty
-                  ? 'Vui lòng nhập từ cần lưu.'
+                  ? context.l10n.wordRequired
                   : null,
             ),
             const SizedBox(height: AppSpacing.space3),
             TextFormField(
               key: const ValueKey<String>('notebook_manual_reading_field'),
               controller: _readingController,
-              decoration: const InputDecoration(
-                labelText: 'Cách đọc (tùy chọn)',
+              decoration: InputDecoration(
+                labelText: context.l10n.optionalReading,
               ),
             ),
             const SizedBox(height: AppSpacing.space3),
             TextFormField(
               key: const ValueKey<String>('notebook_manual_meaning_field'),
               controller: _meaningController,
-              decoration: const InputDecoration(
-                labelText: 'Nghĩa tiếng Việt *',
+              decoration: InputDecoration(
+                labelText: context.l10n.meaningRequiredLabel,
               ),
               validator: (value) => value == null || value.trim().isEmpty
-                  ? 'Vui lòng nhập nghĩa của từ.'
+                  ? context.l10n.meaningRequired
                   : null,
             ),
             const SizedBox(height: AppSpacing.space3),
@@ -310,8 +324,8 @@ class _ManualEntrySheetState extends State<_ManualEntrySheet> {
               key: const ValueKey<String>('notebook_manual_note_field'),
               controller: _noteController,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Ghi chú cá nhân (tùy chọn)',
+              decoration: InputDecoration(
+                labelText: context.l10n.optionalPersonalNote,
               ),
             ),
             const SizedBox(height: AppSpacing.space4),
@@ -329,7 +343,7 @@ class _ManualEntrySheetState extends State<_ManualEntrySheet> {
                 );
               },
               icon: const Icon(Icons.bookmark_add_outlined),
-              label: const Text('Lưu vào Sổ từ'),
+              label: Text(context.l10n.saveToNotebook),
             ),
           ],
         ),

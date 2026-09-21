@@ -19,6 +19,8 @@ import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.d
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/fixture_vocabulary_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/vocabulary_detail_screen.dart';
+import 'package:rikipath_mobile/l10n/generated/app_localizations_ja.dart';
+import 'package:rikipath_mobile/l10n/generated/app_localizations_vi.dart';
 
 import '../../support/test_auth_session.dart';
 
@@ -155,6 +157,38 @@ void main() {
     );
   });
 
+  testWidgets('collection selection filters entries to the chosen list', (
+    tester,
+  ) async {
+    const secondCollection = NotebookCollection(
+      routeKey: 'remote-list-4',
+      remoteId: 4,
+      name: 'N4',
+      entryCount: 1,
+      createdAt: null,
+      source: NotebookDataSource.remote,
+    );
+    final repository = _TestNotebookRepository(
+      collections: <NotebookCollection>[_collection, secondCollection],
+      entriesByCollection: <String, List<NotebookEntry>>{
+        _collection.routeKey: <NotebookEntry>[_remoteEntry],
+        secondCollection.routeKey: <NotebookEntry>[_secondRemoteEntry],
+      },
+    );
+    await _pumpNotebook(tester, repository: repository);
+    await tester.pumpAndSettle();
+
+    expect(find.text('経験'), findsOneWidget);
+    expect(find.text('約束'), findsNothing);
+    await tester.tap(
+      find.byKey(const ValueKey<String>('notebook_collection_remote-list-4')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('経験'), findsNothing);
+    expect(find.text('約束'), findsOneWidget);
+  });
+
   testWidgets('fixture vocabulary opens detail inside Notebook branch', (
     tester,
   ) async {
@@ -181,6 +215,24 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('経験'), findsNothing);
+  });
+
+  testWidgets('remove confirmation cancel leaves the saved entry unchanged', (
+    tester,
+  ) async {
+    await _pumpNotebook(tester);
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('notebook_remove_fixture-note-keiken')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey<String>('notebook_cancel_remove_button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('経験'), findsOneWidget);
   });
 
   testWidgets('remove displays progress while the mutation is pending', (
@@ -318,6 +370,18 @@ void main() {
       );
     }
   });
+
+  test('Notebook strings are available in Vietnamese and Japanese', () {
+    final vi = AppLocalizationsVi();
+    final ja = AppLocalizationsJa();
+
+    expect(vi.navigationNotebook, isNotEmpty);
+    expect(vi.notebookSearchHint, isNotEmpty);
+    expect(vi.removeFromNotebookQuestion, isNotEmpty);
+    expect(ja.navigationNotebook, isNotEmpty);
+    expect(ja.notebookSearchHint, isNotEmpty);
+    expect(ja.removeFromNotebookQuestion, isNotEmpty);
+  });
 }
 
 const NotebookCollection _collection = NotebookCollection(
@@ -338,6 +402,17 @@ final NotebookEntry _remoteEntry = NotebookEntry(
   reading: 'けいけん',
   meaning: 'Kinh nghiệm',
   addedAt: DateTime.utc(2026, 9, 12),
+  source: NotebookDataSource.remote,
+);
+
+final NotebookEntry _secondRemoteEntry = NotebookEntry(
+  routeKey: 'remote-note-42',
+  remoteNoteEntryId: 42,
+  contentType: NotebookContentType.vocabulary,
+  term: '約束',
+  reading: 'やくそく',
+  meaning: 'Lời hứa',
+  addedAt: DateTime.utc(2026, 9, 13),
   source: NotebookDataSource.remote,
 );
 
@@ -390,6 +465,13 @@ class _PendingNotebookRepository implements NotebookRepository {
       Completer<List<NotebookCollection>>();
 
   @override
+  Stream<Set<String>> watchSavedVocabularyKeys() =>
+      Stream<Set<String>>.value(const <String>{});
+
+  @override
+  Future<bool> isVocabularySaved(String vocabularyRouteKey) async => false;
+
+  @override
   Future<List<NotebookCollection>> loadCollections() => _completer.future;
 
   @override
@@ -418,7 +500,7 @@ class _PendingNotebookRepository implements NotebookRepository {
 
   @override
   Future<NotebookBookmark> bookmarkVocabulary({
-    required int vocabularyEntryId,
+    required NotebookVocabularyDraft vocabulary,
     required NotebookCollection collection,
   }) {
     throw UnimplementedError();
@@ -441,17 +523,40 @@ class _TestNotebookRepository implements NotebookRepository {
   _TestNotebookRepository({
     required List<NotebookCollection> collections,
     List<NotebookEntry> entries = const <NotebookEntry>[],
+    Map<String, List<NotebookEntry>>? entriesByCollection,
     this.removeCompleter,
     this.removeError,
   }) : _collections = List<NotebookCollection>.of(collections),
-       _entries = List<NotebookEntry>.of(entries);
+       _entries = List<NotebookEntry>.of(entries),
+       _entriesByCollection = entriesByCollection == null
+           ? null
+           : <String, List<NotebookEntry>>{
+               for (final item in entriesByCollection.entries)
+                 item.key: List<NotebookEntry>.of(item.value),
+             };
 
   final List<NotebookCollection> _collections;
   final List<NotebookEntry> _entries;
+  final Map<String, List<NotebookEntry>>? _entriesByCollection;
   final Completer<void>? removeCompleter;
   final Object? removeError;
   final List<String> createdNames = <String>[];
   final List<String> manualWords = <String>[];
+
+  @override
+  Stream<Set<String>> watchSavedVocabularyKeys() => Stream<Set<String>>.value(
+    _entries
+        .map((entry) => entry.vocabularyRouteKey)
+        .whereType<String>()
+        .toSet(),
+  );
+
+  @override
+  Future<bool> isVocabularySaved(String vocabularyRouteKey) async {
+    return _entries.any(
+      (entry) => entry.vocabularyRouteKey == vocabularyRouteKey,
+    );
+  }
 
   @override
   Future<List<NotebookCollection>> loadCollections() async =>
@@ -460,7 +565,9 @@ class _TestNotebookRepository implements NotebookRepository {
   @override
   Future<List<NotebookEntry>> loadEntries(
     NotebookCollection collection,
-  ) async => List<NotebookEntry>.unmodifiable(_entries);
+  ) async => List<NotebookEntry>.unmodifiable(
+    _entriesByCollection?[collection.routeKey] ?? _entries,
+  );
 
   @override
   Future<NotebookCollection> createCollection({
@@ -507,7 +614,7 @@ class _TestNotebookRepository implements NotebookRepository {
 
   @override
   Future<NotebookBookmark> bookmarkVocabulary({
-    required int vocabularyEntryId,
+    required NotebookVocabularyDraft vocabulary,
     required NotebookCollection collection,
   }) async {
     return NotebookBookmark(

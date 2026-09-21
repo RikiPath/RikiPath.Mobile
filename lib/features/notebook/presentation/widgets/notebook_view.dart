@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
@@ -68,8 +69,9 @@ class _NotebookViewState extends State<NotebookView> {
     return Column(
       children: [
         if (state.isCreatingCollection || state.isAddingEntry)
-          const LinearProgressIndicator(
-            key: ValueKey<String>('notebook_mutation_progress'),
+          RikiProgressIndicator(
+            key: const ValueKey<String>('notebook_mutation_progress'),
+            semanticsLabel: context.l10n.processingSemantics,
           ),
         Expanded(
           child: ListView(
@@ -96,7 +98,7 @@ class _NotebookViewState extends State<NotebookView> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Bộ sưu tập của bạn',
+                      context.l10n.yourCollections,
                       style: AppTypography.sectionTitle,
                     ),
                   ),
@@ -104,7 +106,7 @@ class _NotebookViewState extends State<NotebookView> {
                     key: const ValueKey<String>(
                       'notebook_create_collection_button',
                     ),
-                    tooltip: 'Tạo danh sách mới',
+                    tooltip: context.l10n.createCollection,
                     onPressed: state.isCreatingCollection
                         ? null
                         : widget.onCreateCollection,
@@ -172,12 +174,12 @@ class _NotebookViewState extends State<NotebookView> {
                         widget.onSearch(value);
                       },
                       decoration: InputDecoration(
-                        hintText: 'Tìm Kanji, Kana hoặc nghĩa…',
+                        hintText: context.l10n.notebookSearchHint,
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: _searchController.text.isEmpty
                             ? null
                             : IconButton(
-                                tooltip: 'Xóa tìm kiếm',
+                                tooltip: context.l10n.clearSearch,
                                 onPressed: () {
                                   _searchController.clear();
                                   setState(() {});
@@ -191,7 +193,7 @@ class _NotebookViewState extends State<NotebookView> {
                   const SizedBox(width: AppSpacing.space2),
                   IconButton.filled(
                     key: const ValueKey<String>('notebook_add_entry_button'),
-                    tooltip: 'Thêm từ mới',
+                    tooltip: context.l10n.addNewWord,
                     onPressed: state.isAddingEntry ? null : widget.onAddEntry,
                     icon: const Icon(Icons.add),
                   ),
@@ -207,11 +209,19 @@ class _NotebookViewState extends State<NotebookView> {
               ],
               const SizedBox(height: AppSpacing.space4),
               if (state.isLoadingEntries)
-                const Padding(
-                  padding: EdgeInsets.all(AppSpacing.space8),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      key: ValueKey<String>('notebook_entries_loading'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.space4,
+                  ),
+                  child: RikiShimmer(
+                    key: const ValueKey<String>('notebook_entries_loading'),
+                    semanticsLabel: context.l10n.loading,
+                    child: const Column(
+                      children: [
+                        RikiSkeletonCard(height: 88, trailing: true),
+                        SizedBox(height: AppSpacing.space3),
+                        RikiSkeletonCard(height: 88),
+                      ],
                     ),
                   ),
                 )
@@ -231,12 +241,12 @@ class _NotebookViewState extends State<NotebookView> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Từ đã lưu',
+                        context.l10n.savedWords,
                         style: AppTypography.sectionTitle,
                       ),
                     ),
                     Text(
-                      '${state.visibleEntries.length} mục',
+                      context.l10n.itemCount(state.visibleEntries.length),
                       style: AppTypography.metadata,
                     ),
                   ],
@@ -302,11 +312,11 @@ class _OverviewCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$entryCount mục đã lưu',
+                  context.l10n.savedItemCount(entryCount),
                   style: AppTypography.sectionTitle,
                 ),
                 Text(
-                  '$collectionCount danh sách cá nhân',
+                  context.l10n.personalCollectionCount(collectionCount),
                   style: AppTypography.bodySmall,
                 ),
               ],
@@ -324,7 +334,7 @@ class _OverviewCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppRadius.pill),
               ),
               child: Text(
-                'Dữ liệu mẫu',
+                context.l10n.sampleData,
                 style: AppTypography.badgeText.copyWith(
                   color: AppColors.warningText,
                 ),
@@ -353,7 +363,7 @@ class _NotebookEntryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: onOpen != null,
-      label: onOpen == null ? null : 'Mở chi tiết từ ${entry.term}',
+      label: onOpen == null ? null : context.l10n.openWordDetail(entry.term),
       child: InkWell(
         key: ValueKey<String>('notebook_entry_${entry.routeKey}'),
         onTap: isRemoving ? null : onOpen,
@@ -393,9 +403,9 @@ class _NotebookEntryCard extends StatelessWidget {
                       dimension: 40,
                       child: Padding(
                         padding: EdgeInsets.all(AppSpacing.space2),
-                        child: CircularProgressIndicator(
+                        child: RikiInlineLoader(
                           key: ValueKey<String>('notebook_remove_progress'),
-                          strokeWidth: 2,
+                          size: 18,
                         ),
                       ),
                     )
@@ -404,7 +414,7 @@ class _NotebookEntryCard extends StatelessWidget {
                       key: ValueKey<String>(
                         'notebook_remove_${entry.routeKey}',
                       ),
-                      tooltip: 'Xóa khỏi Sổ từ',
+                      tooltip: context.l10n.removeFromNotebook,
                       onPressed: onRemove,
                       icon: const Icon(Icons.delete_outline),
                     ),
@@ -431,7 +441,7 @@ class _NotebookEntryCard extends StatelessWidget {
                   const Spacer(),
                   if (onOpen != null) ...[
                     Text(
-                      'Chi tiết',
+                      context.l10n.detail,
                       style: AppTypography.badgeText.copyWith(
                         color: AppColors.brandPrimary,
                       ),
@@ -460,10 +470,10 @@ class _ContentTypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = switch (type) {
-      NotebookContentType.vocabulary => 'Từ vựng',
+      NotebookContentType.vocabulary => context.l10n.vocabulary,
       NotebookContentType.kanji => 'Kanji',
-      NotebookContentType.manual => 'Từ cá nhân',
-      NotebookContentType.unknown => 'Mục đã lưu',
+      NotebookContentType.manual => context.l10n.personalWord,
+      NotebookContentType.unknown => context.l10n.savedItem,
     };
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -502,10 +512,13 @@ class _EmptyNotebook extends StatelessWidget {
               color: AppColors.textMuted,
             ),
             const SizedBox(height: AppSpacing.space3),
-            Text('Sổ từ của bạn đang trống', style: AppTypography.sectionTitle),
+            Text(
+              context.l10n.notebookEmptyTitle,
+              style: AppTypography.sectionTitle,
+            ),
             const SizedBox(height: AppSpacing.space1),
             Text(
-              'Tạo danh sách đầu tiên để lưu từ vựng.',
+              context.l10n.notebookEmptyMessage,
               style: AppTypography.bodySmall,
               textAlign: TextAlign.center,
             ),
@@ -516,7 +529,7 @@ class _EmptyNotebook extends StatelessWidget {
               ),
               onPressed: onCreateCollection,
               icon: const Icon(Icons.add),
-              label: const Text('Tạo danh sách'),
+              label: Text(context.l10n.createCollectionAction),
             ),
           ],
         ),
@@ -552,7 +565,9 @@ class _EmptyEntries extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.space2),
           Text(
-            hasQuery ? 'Không tìm thấy từ phù hợp' : 'Danh sách chưa có từ',
+            hasQuery
+                ? context.l10n.noMatchingWord
+                : context.l10n.collectionHasNoWords,
             style: AppTypography.sectionTitle,
             textAlign: TextAlign.center,
           ),
@@ -564,7 +579,9 @@ class _EmptyEntries extends StatelessWidget {
                   : 'notebook_empty_add_button',
             ),
             onPressed: hasQuery ? onClear : onAddEntry,
-            child: Text(hasQuery ? 'Xóa tìm kiếm' : 'Thêm từ mới'),
+            child: Text(
+              hasQuery ? context.l10n.clearSearch : context.l10n.addNewWord,
+            ),
           ),
         ],
       ),
@@ -592,7 +609,7 @@ class _EntriesError extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.space2),
-          TextButton(onPressed: onRetry, child: const Text('Thử lại')),
+          TextButton(onPressed: onRetry, child: Text(context.l10n.retry)),
         ],
       ),
     );
@@ -624,7 +641,7 @@ class _InlineError extends StatelessWidget {
           const SizedBox(width: AppSpacing.space2),
           Expanded(child: Text(message, style: AppTypography.validationText)),
           IconButton(
-            tooltip: 'Đóng',
+            tooltip: context.l10n.close,
             onPressed: onDismiss,
             icon: const Icon(Icons.close),
           ),
