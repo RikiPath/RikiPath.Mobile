@@ -16,37 +16,55 @@ Environment values are currently supplied with Dart compile-time definitions; th
 
 ## Requirements
 
-- Flutter 3.47.3 (stable)
-- Dart 3.13.3
+- Flutter stable compatible with the project's Dart SDK constraint (`>=3.12.0 <4.0.0`)
+- Tested and verified with Flutter 3.47.3
 - Android Studio with the Android SDK
+- Java 21 (the Android Studio JBR is recommended)
+- Android NDK 28.2.13676358
 - Git
+
+The Dart SDK ships with Flutter and does not need to be installed separately.
+If another machine encounters a dependency or Android toolchain compatibility
+issue, Flutter 3.47.3 is the known-good fallback for this project.
 
 Visual Studio is not required for Android development. It is only relevant when building Flutter Windows desktop applications.
 
 ## Clone
 
 ```powershell
-git clone https://github.com/minh28102004/rikipath-mobile.git
-cd rikipath-mobile
+git clone https://github.com/RikiPath/RikiPath.Mobile.git
+cd RikiPath.Mobile
 ```
 
 ## Environment Setup
 
-Create a local environment file from the public template:
+Normal development uses built-in public defaults and does not require a local
+`.env` file:
 
 ```powershell
-Copy-Item .env.example .env
+flutter run
 ```
 
-Fill the required public values described in `.env.example`: `APP_ENV`, `API_BASE_URL`, `SWAGGER_URL`, and `ENABLE_API_LOGGING`.
+To override those defaults, create an optional local environment file:
 
-The app reads these values through Dart defines. For a local CLI run, pass the file with:
+```powershell
+New-Item .env -ItemType File
+```
+
+Add only the public values you need to override, using the variable names in
+[Environment Configuration](docs/codex/ENVIRONMENT.md), then pass the file
+through Dart compile-time definitions:
 
 ```powershell
 flutter run --dart-define-from-file=.env
 ```
 
-Never put secrets, JWT signing keys, database passwords, or backend private credentials in a Flutter `.env` file. Dart-defined values can be extracted from a built mobile application and are not secret storage. The local `.env` file is ignored by Git and must not be committed.
+The built-in defaults target the current public development backend. Staging
+and production builds must supply their own deployment values.
+Never put secrets, JWT signing keys, database passwords, or backend private
+credentials in a Flutter `.env` file. Dart-defined values can be extracted from
+a built mobile application and are not secret storage. The local `.env` file is
+ignored by Git and must not be committed.
 
 See [Environment Configuration](docs/codex/ENVIRONMENT.md) for environment-specific rules and the current development HTTP limitation.
 
@@ -80,7 +98,8 @@ Run the application:
 flutter run
 ```
 
-The current configuration requires environment values at startup. Unless an IDE launch configuration already supplies them, use:
+The plain command uses the public development defaults. To override them with
+an optional file, use:
 
 ```powershell
 flutter run --dart-define-from-file=.env
@@ -101,7 +120,7 @@ flutter test
 Current validated baseline at the time this guide was written:
 
 - `flutter analyze`: No issues found
-- `flutter test`: 73 tests passed
+- `flutter test`: 320 tests passed
 
 This is a current baseline, not a permanent guarantee; update it when the test suite or toolchain changes.
 

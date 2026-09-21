@@ -6,6 +6,15 @@ final appConfigProvider = Provider<AppConfig>((ref) {
 });
 
 class AppConfig {
+  static const String defaultDevelopmentEnvironment = 'development';
+  static const String defaultDevelopmentApiBaseUrl = 'http://140.245.43.97';
+  static const String defaultDevelopmentSwaggerUrl =
+      'http://140.245.43.97/swagger/index.html';
+  static const String defaultDevelopmentApiLogging = 'true';
+
+  static const String _undefinedDartDefine =
+      '__RIKIPATH_UNDEFINED_DART_DEFINE__';
+
   const AppConfig({
     required this.environment,
     required this.apiBaseUrl,
@@ -14,12 +23,40 @@ class AppConfig {
   });
 
   factory AppConfig.fromEnvironment() {
+    const environmentValue = String.fromEnvironment(
+      'APP_ENV',
+      defaultValue: defaultDevelopmentEnvironment,
+    );
+    const apiBaseUrlValue = String.fromEnvironment(
+      'API_BASE_URL',
+      defaultValue: _undefinedDartDefine,
+    );
+    const swaggerUrlValue = String.fromEnvironment(
+      'SWAGGER_URL',
+      defaultValue: _undefinedDartDefine,
+    );
+    const apiLoggingValue = String.fromEnvironment(
+      'ENABLE_API_LOGGING',
+      defaultValue: _undefinedDartDefine,
+    );
+    final environment = AppEnv.parse(environmentValue);
+
     return AppConfig.fromValues({
-      'APP_ENV': const String.fromEnvironment('APP_ENV'),
-      'API_BASE_URL': const String.fromEnvironment('API_BASE_URL'),
-      'SWAGGER_URL': const String.fromEnvironment('SWAGGER_URL'),
-      'ENABLE_API_LOGGING': const String.fromEnvironment(
-        'ENABLE_API_LOGGING',
+      'APP_ENV': environmentValue,
+      'API_BASE_URL': _resolveDartDefine(
+        apiBaseUrlValue,
+        environment: environment,
+        developmentDefault: defaultDevelopmentApiBaseUrl,
+      ),
+      'SWAGGER_URL': _resolveDartDefine(
+        swaggerUrlValue,
+        environment: environment,
+        developmentDefault: defaultDevelopmentSwaggerUrl,
+      ),
+      'ENABLE_API_LOGGING': _resolveDartDefine(
+        apiLoggingValue,
+        environment: environment,
+        developmentDefault: defaultDevelopmentApiLogging,
       ),
     });
   }
@@ -41,9 +78,7 @@ class AppConfig {
     );
 
     if (environment.isProduction && apiBaseUrl.scheme != 'https') {
-      throw const FormatException(
-        'Production API_BASE_URL must use HTTPS.',
-      );
+      throw const FormatException('Production API_BASE_URL must use HTTPS.');
     }
     if (environment.isProduction && enableApiLogging) {
       throw const FormatException(
@@ -66,6 +101,15 @@ class AppConfig {
 
   bool get shouldLogApi =>
       environment == AppEnv.development && enableApiLogging;
+
+  static String _resolveDartDefine(
+    String value, {
+    required AppEnv environment,
+    required String developmentDefault,
+  }) {
+    if (value != _undefinedDartDefine) return value;
+    return environment == AppEnv.development ? developmentDefault : '';
+  }
 
   static String _required(Map<String, String> values, String name) {
     final value = values[name]?.trim() ?? '';

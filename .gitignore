@@ -29,7 +29,6 @@ Thumbs.db
 *.7z
 *.rar
 
-# Local environment configuration. Keep the public template committed.
+# Local environment configuration. All environment files stay local.
 .env
 .env.*
-!.env.example

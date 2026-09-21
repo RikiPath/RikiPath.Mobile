@@ -9,8 +9,8 @@ enum AppEnv {
       'staging' => AppEnv.staging,
       'production' => AppEnv.production,
       _ => throw const FormatException(
-          'APP_ENV must be development, staging, or production.',
-        ),
+        'APP_ENV must be development, staging, or production.',
+      ),
     };
   }
 

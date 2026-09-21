@@ -5,37 +5,58 @@ The Flutter app uses compile-time environment values through
 phase extends it instead of adding `flutter_dotenv` and bundling a local `.env`
 file as an application asset.
 
-## Create a local environment file
+## Default development run
 
-From the repository root, copy the public template:
+The normal development configuration is built into `AppConfig` using public,
+non-secret defaults. A fresh checkout can run with:
 
 ```powershell
-Copy-Item .env.example .env
+flutter run
 ```
 
-Then run Flutter with that file:
+The defaults point to the current public development API and enable the
+metadata-only development API logger.
+
+## Optional local override file
+
+Create a local file only when you need to override a default:
+
+```powershell
+New-Item .env -ItemType File
+```
+
+Add the required public configuration keys from the table below, then pass the
+file as Dart compile-time overrides:
 
 ```powershell
 flutter run --dart-define-from-file=.env
 ```
 
-Local `.env` and `.env.*` files are ignored by Git. `.env.example` remains
-committed as the public template. Never put JWT signing keys, database
-credentials, AWS credentials, payment secrets, private keys, or any other
-secret in these files. Dart define values are compiled into the mobile binary
-and are not a secret-storage mechanism.
+Local `.env` and `.env.*` files are ignored by Git and no environment template
+is tracked. Never put JWT signing keys, database credentials, AWS credentials,
+payment secrets, private keys, or any other secret in these files. Dart define
+values are compiled into the mobile binary and are not a secret-storage
+mechanism.
 
-## Required variables
+Individual values can also be overridden directly:
 
-| Variable | Allowed value or purpose |
-|---|---|
-| `APP_ENV` | Exactly `development`, `staging`, or `production` |
-| `API_BASE_URL` | Absolute API deployment origin, with no `/api`, Swagger path, query, or fragment |
-| `SWAGGER_URL` | Absolute Swagger UI reference URL; it is not used as the Dio base URL |
-| `ENABLE_API_LOGGING` | Exactly `true` or `false`; honored only in development and production requires `false` |
+```powershell
+flutter run --dart-define=API_BASE_URL=https://example.test
+```
 
-All four variables are required. Invalid or missing configuration fails during
-application startup instead of silently falling back to another server.
+## Configuration values
+
+| Variable | Development default | Allowed value or purpose |
+|---|---|---|
+| `APP_ENV` | `development` | Exactly `development`, `staging`, or `production` |
+| `API_BASE_URL` | `http://140.245.43.97` | Absolute API deployment origin, with no `/api`, Swagger path, query, or fragment |
+| `SWAGGER_URL` | `http://140.245.43.97/swagger/index.html` | Absolute Swagger UI reference URL; it is not used as the Dio base URL |
+| `ENABLE_API_LOGGING` | `true` | Exactly `true` or `false`; honored only in development and production requires `false` |
+
+Missing values use these defaults only when `APP_ENV` resolves to
+`development`. Selecting staging or production without supplying its external
+deployment values fails during startup instead of silently connecting to the
+development backend. Invalid explicit values also fail fast.
 
 ## Verified development API origin
 
@@ -61,7 +82,8 @@ backend error payloads. Logging is not enabled for staging or production.
 
 ## Development, staging, and production
 
-You may keep separate ignored files and select one at build or run time:
+You may keep separate ignored override files and select one at build or run
+time:
 
 ```powershell
 flutter run --dart-define-from-file=.env.development
@@ -69,11 +91,11 @@ flutter run --dart-define-from-file=.env.staging
 flutter build apk --release --dart-define-from-file=.env.production
 ```
 
-Set `APP_ENV` inside each file to match its target. Staging and production
-deployment origins are not published by the current API contract and must be
-provided by the backend/deployment owner; do not guess them or reuse the
-Swagger URL. Production configuration rejects non-HTTPS `API_BASE_URL` values
-and rejects enabled API logging.
+Set `APP_ENV` inside each file to match its target and supply every other value.
+Staging and production deployment origins are not published by the current API
+contract and must be provided by the backend/deployment owner; do not guess
+them or reuse the development Swagger URL. Production configuration rejects
+non-HTTPS `API_BASE_URL` values and rejects enabled API logging.
 
 ## HTTP development limitation
 
