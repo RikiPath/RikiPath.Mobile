@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/features/grammar/application/grammar_controller.dart';
 import 'package:rikipath_mobile/features/grammar/presentation/widgets/grammar_library_view.dart';
 import 'package:rikipath_mobile/features/grammar/presentation/widgets/grammar_state_views.dart';
@@ -19,8 +20,8 @@ class GrammarLibraryScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
-        title: 'Ngữ pháp',
-        subtitle: 'THƯ VIỆN',
+        title: context.l10n.grammar,
+        subtitle: context.l10n.library,
         level: state.value?.query.level,
         initials: null,
         onBack: context.pop,

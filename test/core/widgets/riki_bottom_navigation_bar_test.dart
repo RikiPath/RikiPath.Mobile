@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
 
 void main() {
@@ -49,17 +50,24 @@ void main() {
   ) async {
     await _pumpNavigation(tester, selectedIndex: 0);
 
-    expect(RikiBottomNavigationBar.destinations, hasLength(5));
-    for (final destination in RikiBottomNavigationBar.destinations) {
-      final label = tester.widget<Text>(find.text(destination.label));
+    const labels = <String>[
+      'Trang chủ',
+      'Học tập',
+      'Luyện tập',
+      'Sổ từ',
+      'Cá nhân',
+    ];
+    expect(RikiBottomNavigationBar.destinationCount, labels.length);
+    for (final destinationLabel in labels) {
+      final label = tester.widget<Text>(find.text(destinationLabel));
       expect(label.maxLines, 1);
     }
 
-    final itemWidths = RikiBottomNavigationBar.destinations.map((destination) {
+    final itemWidths = labels.map((destinationLabel) {
       return tester
           .getSize(
             find.byKey(
-              ValueKey<String>('bottom_navigation_item_${destination.label}'),
+              ValueKey<String>('bottom_navigation_item_$destinationLabel'),
             ),
           )
           .width;
@@ -78,16 +86,29 @@ void main() {
     await tester.tap(find.text('Cá nhân'));
     expect(selected, 4);
   });
+
+  testWidgets('renders concise Japanese destination labels', (tester) async {
+    await _pumpNavigation(tester, selectedIndex: 0, locale: const Locale('ja'));
+
+    for (final label in <String>['ホーム', '学習', '練習', '単語帳', 'マイページ']) {
+      expect(find.text(label), findsOneWidget);
+    }
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Future<void> _pumpNavigation(
   WidgetTester tester, {
   required int selectedIndex,
   ValueChanged<int>? onDestinationSelected,
+  Locale locale = const Locale('vi'),
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       theme: AppTheme.light,
+      locale: locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         bottomNavigationBar: RikiBottomNavigationBar(
           selectedIndex: selectedIndex,

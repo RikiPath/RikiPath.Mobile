@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/kanji/application/kanji_controller.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
 import 'package:rikipath_mobile/features/kanji/presentation/widgets/kanji_library_view.dart';
@@ -33,8 +35,8 @@ class _KanjiLibraryScreenState extends ConsumerState<KanjiLibraryScreen> {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
-        title: 'Kanji',
-        subtitle: 'THƯ VIỆN',
+        title: context.l10n.skillKanji,
+        subtitle: context.l10n.library,
         level: state.value?.query.level,
         initials: null,
         onBack: context.pop,
@@ -71,9 +73,12 @@ class _KanjiLibraryScreenState extends ConsumerState<KanjiLibraryScreen> {
       await ref.read(kanjiAudioPlayerProvider).play(source);
     } catch (_) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không thể phát âm thanh Kanji.')),
-      );
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .error(
+            title: context.l10n.toastAudioFailedTitle,
+            description: context.l10n.kanjiAudioFailed,
+          );
     }
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
+import 'package:rikipath_mobile/features/learning/presentation/learning_localization.dart';
 
 class LearningRoadmapView extends StatelessWidget {
   const LearningRoadmapView({
@@ -88,7 +90,7 @@ class _RoadmapProgressSummary extends StatelessWidget {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      'TIẾN ĐỘ TỔNG THỂ',
+                      context.l10n.overallProgressTitle,
                       style: AppTypography.badgeText.copyWith(
                         color: AppColors.textSecondary,
                         fontSize: 12,
@@ -107,7 +109,7 @@ class _RoadmapProgressSummary extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                       child: Text(
-                        'Đang đúng tiến độ',
+                        context.l10n.onTrack,
                         style: AppTypography.badgeText.copyWith(
                           color: AppColors.success,
                           fontSize: 10,
@@ -136,8 +138,9 @@ class _RoadmapProgressSummary extends StatelessWidget {
               minHeight: 10,
               color: AppColors.brandPrimary,
               backgroundColor: AppColors.learnerSurfaceLow,
-              semanticsLabel:
-                  'Tiến độ tổng thể ${snapshot.overallPercent} phần trăm',
+              semanticsLabel: context.l10n.overallProgressSemantics(
+                snapshot.overallPercent,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.space2),
@@ -147,16 +150,20 @@ class _RoadmapProgressSummary extends StatelessWidget {
             runSpacing: AppSpacing.space1,
             children: [
               Text(
-                'Đã hoàn thành ${snapshot.completedChapters}/'
-                '${snapshot.totalChapters} chương học',
+                context.l10n.completedChapters(
+                  snapshot.completedChapters,
+                  snapshot.totalChapters,
+                ),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
-                '${snapshot.completedLessons} / ${snapshot.totalLessons} '
-                'bài đã đạt',
+                context.l10n.achievedLessons(
+                  snapshot.completedLessons,
+                  snapshot.totalLessons,
+                ),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
@@ -219,7 +226,7 @@ class _RoadmapChapterCard extends StatelessWidget {
               child: TextButton.icon(
                 key: const ValueKey<String>('roadmap_open_progress_button'),
                 onPressed: onOpenProgress,
-                label: const Text('Xem lại kết quả'),
+                label: Text(context.l10n.reviewResults),
                 iconAlignment: IconAlignment.end,
                 icon: const Icon(Icons.chevron_right, size: 18),
               ),
@@ -232,7 +239,7 @@ class _RoadmapChapterCard extends StatelessWidget {
               child: FilledButton.icon(
                 key: const ValueKey<String>('roadmap_continue_lesson_button'),
                 onPressed: onContinueLesson,
-                label: const Text('Học tiếp: Bài 19 – 〜たり〜たりする'),
+                label: Text(context.l10n.continueLessonNineteen),
                 iconAlignment: IconAlignment.end,
                 icon: const Icon(Icons.arrow_forward, size: 18),
               ),
@@ -305,7 +312,7 @@ class _ChapterHeader extends StatelessWidget {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
-                    'CHƯƠNG ${chapter.number}',
+                    context.l10n.chapterNumberUpper(chapter.number),
                     style: AppTypography.badgeText.copyWith(
                       color: chapter.status.foreground,
                       fontSize: 12,
@@ -314,7 +321,10 @@ class _ChapterHeader extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '• Bài ${chapter.firstLesson} – Bài ${chapter.lastLesson}',
+                    context.l10n.lessonRange(
+                      chapter.firstLesson,
+                      chapter.lastLesson,
+                    ),
                     style: AppTypography.metadata.copyWith(
                       color: AppColors.textMuted,
                       fontSize: 11,
@@ -343,7 +353,7 @@ class _ChapterHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.pill),
           ),
           child: Text(
-            chapter.status.label,
+            chapter.status.localizedLabel(context),
             style: AppTypography.badgeText.copyWith(
               color: chapter.status.foreground,
               fontSize: 11,
@@ -379,8 +389,8 @@ class _ChapterSkills extends StatelessWidget {
                 Expanded(
                   child: Text(
                     chapter.status == RoadmapChapterStatus.completed
-                        ? 'KỸ NĂNG ĐẠT CHUẨN:'
-                        : 'TIẾN ĐỘ 5 KỸ NĂNG:',
+                        ? context.l10n.skillsAchievedUpper
+                        : context.l10n.fiveSkillProgressUpper,
                     style: AppTypography.badgeText.copyWith(
                       color: AppColors.textMuted,
                       fontSize: 11,
@@ -391,8 +401,10 @@ class _ChapterSkills extends StatelessWidget {
                 ),
                 if (chapter.status == RoadmapChapterStatus.current)
                   Text(
-                    '${chapter.completedLessons}/${chapter.totalLessons} '
-                    'BÀI HỌC',
+                    context.l10n.lessonCountUpper(
+                      chapter.completedLessons,
+                      chapter.totalLessons,
+                    ),
                     style: AppTypography.badgeText.copyWith(
                       color: AppColors.brandPrimary,
                       fontSize: 11,
@@ -457,7 +469,7 @@ class _CompactSkillTile extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              skill.category.label,
+              skill.category.localizedLabel(context),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.bodySmall.copyWith(
@@ -516,7 +528,7 @@ class _CurrentSkillTile extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  skill.category.label,
+                  skill.category.localizedLabel(context),
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
@@ -545,8 +557,10 @@ class _CurrentSkillTile extends StatelessWidget {
                 minHeight: 6,
                 color: color,
                 backgroundColor: AppColors.progressTrack,
-                semanticsLabel:
-                    'Tiến độ ${skill.category.label} ${skill.detail}',
+                semanticsLabel: context.l10n.progressSemantics(
+                  skill.category.localizedLabel(context),
+                  ((skill.progress ?? 0) * 100).round(),
+                ),
               ),
             ),
           ],
@@ -557,11 +571,11 @@ class _CurrentSkillTile extends StatelessWidget {
 }
 
 extension on RoadmapChapterStatus {
-  String get label => switch (this) {
-    RoadmapChapterStatus.completed => 'Hoàn thành',
-    RoadmapChapterStatus.current => 'Đang học',
-    RoadmapChapterStatus.available => 'Sẵn sàng',
-    RoadmapChapterStatus.locked => 'Chưa bắt đầu',
+  String localizedLabel(BuildContext context) => switch (this) {
+    RoadmapChapterStatus.completed => context.l10n.statusCompleted,
+    RoadmapChapterStatus.current => context.l10n.statusLearning,
+    RoadmapChapterStatus.available => context.l10n.statusReady,
+    RoadmapChapterStatus.locked => context.l10n.statusNotStarted,
   };
 
   Color get foreground => switch (this) {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/onboarding/application/onboarding_controller.dart';
 
@@ -23,21 +24,21 @@ class OnboardingScreen extends ConsumerWidget {
         body: SafeArea(
           child: switch (state.currentStep) {
             OnboardingStep.jlptTarget => _JlptTargetStep(
-                state: state,
-                onBack: () => _leaveOnboarding(context),
-                onSelect: controller.selectJlptLevel,
-                onContinue: controller.continueToStudyTime,
-              ),
+              state: state,
+              onBack: () => _leaveOnboarding(context),
+              onSelect: controller.selectJlptLevel,
+              onContinue: controller.continueToStudyTime,
+            ),
             OnboardingStep.studyTime => _StudyTimeStep(
-                state: state,
-                onBack: controller.goBack,
-                onSelect: controller.selectStudyTime,
-                onComplete: controller.completeLocally,
-              ),
+              state: state,
+              onBack: controller.goBack,
+              onSelect: controller.selectStudyTime,
+              onComplete: controller.completeLocally,
+            ),
             OnboardingStep.complete => _CompletionStep(
-                state: state,
-                onStart: () => context.go(AppRoutes.home),
-              ),
+              state: state,
+              onStart: () => context.go(AppRoutes.home),
+            ),
           },
         ),
       ),
@@ -68,15 +69,15 @@ class _JlptTargetStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return _OnboardingPage(
       header: _StepHeader(
         step: 1,
         onBack: onBack,
-        backSemanticLabel: 'Rời thiết lập',
+        backSemanticLabel: l10n.leaveSetup,
       ),
-      title: 'Mục tiêu JLPT của bạn là gì?',
-      description:
-          'Chọn trình độ bạn muốn hướng tới để RikiPath cá nhân hóa lộ trình học.',
+      title: l10n.onboardingJlptTitle,
+      description: l10n.onboardingJlptDescription,
       content: Column(
         children: JlptLevel.values.map((level) {
           return Padding(
@@ -84,8 +85,8 @@ class _JlptTargetStep extends StatelessWidget {
             child: RikiSelectionCard(
               key: ValueKey<String>('jlpt_${level.name}'),
               title: level.label,
-              description: _descriptionFor(level),
-              badge: level == JlptLevel.n3 ? 'Phổ biến' : null,
+              description: _descriptionFor(level, l10n),
+              badge: level == JlptLevel.n3 ? l10n.popular : null,
               leading: _JlptLevelTile(
                 level: level,
                 selected: state.selectedJlptLevel == level,
@@ -98,19 +99,19 @@ class _JlptTargetStep extends StatelessWidget {
       ),
       action: RikiPrimaryButton(
         key: const ValueKey<String>('onboarding_continue_button'),
-        label: 'Tiếp tục',
+        label: l10n.continueLabel,
         trailingIcon: Icons.arrow_forward,
         onPressed: state.canContinue ? onContinue : null,
       ),
-      helperText: 'Chọn N5, N4 hoặc N3 để tiếp tục.',
+      helperText: l10n.onboardingJlptHelper,
     );
   }
 
-  String _descriptionFor(JlptLevel level) {
+  String _descriptionFor(JlptLevel level, AppLocalizations l10n) {
     return switch (level) {
-      JlptLevel.n5 => 'Nền tảng tiếng Nhật cơ bản',
-      JlptLevel.n4 => 'Củng cố kiến thức sơ – trung cấp',
-      JlptLevel.n3 => 'Hướng tới trình độ trung cấp',
+      JlptLevel.n5 => l10n.jlptN5Description,
+      JlptLevel.n4 => l10n.jlptN4Description,
+      JlptLevel.n3 => l10n.jlptN3Description,
     };
   }
 }
@@ -130,26 +131,26 @@ class _StudyTimeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return _OnboardingPage(
       header: _StepHeader(
         step: 2,
         onBack: onBack,
-        backSemanticLabel: 'Quay lại bước chọn mục tiêu',
+        backSemanticLabel: l10n.backToGoalSelection,
         selectedLevel: state.selectedJlptLevel,
       ),
-      title: 'Bạn muốn học bao lâu mỗi ngày?',
-      description:
-          'Chọn nhịp học phù hợp với lịch sinh hoạt của bạn. Sự đều đặn quan trọng hơn tốc độ.',
+      title: l10n.onboardingStudyTimeTitle,
+      description: l10n.onboardingStudyTimeDescription,
       content: Column(
         children: DailyStudyTime.values.map((studyTime) {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.space3),
             child: RikiSelectionCard(
               key: ValueKey<String>('study_time_${studyTime.minutes}'),
-              title: studyTime.label,
-              description: studyTime.description,
+              title: l10n.studyMinutesPerDay(studyTime.minutes),
+              description: _studyPaceDescription(studyTime, l10n),
               badge: studyTime == DailyStudyTime.thirty
-                  ? 'Phổ biến nhất'
+                  ? l10n.mostPopular
                   : null,
               leading: _StudyTimeTile(
                 studyTime: studyTime,
@@ -163,34 +164,44 @@ class _StudyTimeStep extends StatelessWidget {
       ),
       action: RikiPrimaryButton(
         key: const ValueKey<String>('onboarding_complete_button'),
-        label: 'Hoàn tất thiết lập',
+        label: l10n.finishSetup,
         trailingIcon: Icons.check,
         onPressed: state.canComplete ? onComplete : null,
       ),
-      helperText: 'Bạn có thể quay lại để điều chỉnh các lựa chọn.',
+      helperText: l10n.onboardingAdjustHelper,
     );
+  }
+
+  String _studyPaceDescription(
+    DailyStudyTime studyTime,
+    AppLocalizations l10n,
+  ) {
+    return switch (studyTime) {
+      DailyStudyTime.fifteen => l10n.studyPaceGentle,
+      DailyStudyTime.thirty => l10n.studyPaceBalanced,
+      DailyStudyTime.fortyFive => l10n.studyPaceActive,
+      DailyStudyTime.sixty => l10n.studyPaceIntensive,
+    };
   }
 }
 
 class _CompletionStep extends StatelessWidget {
-  const _CompletionStep({
-    required this.state,
-    required this.onStart,
-  });
+  const _CompletionStep({required this.state, required this.onStart});
 
   final OnboardingState state;
   final VoidCallback onStart;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final level = state.selectedJlptLevel!;
     final studyTime = state.selectedStudyTime!;
 
     return _OnboardingPage(
-      header: const RikiAuthHeader(statusLabel: 'Thiết lập hoàn tất'),
+      header: RikiAuthHeader(statusLabel: l10n.setupCompleteStatus),
       centered: true,
-      title: 'Sẵn sàng bắt đầu! 🎉',
-      description: 'Lộ trình học của bạn đã được thiết lập.',
+      title: l10n.readyToStart,
+      description: l10n.learningPlanReady,
       beforeTitle: const _OnboardingSuccessIllustration(),
       content: RikiCard(
         backgroundColor: AppColors.successBackground,
@@ -209,14 +220,17 @@ class _CompletionStep extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Mục tiêu JLPT ${level.label}',
+                    l10n.jlptGoal(level.label),
                     style: AppTypography.sectionTitle.copyWith(
                       color: AppColors.success,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.space1),
                   Text(
-                    '${studyTime.minutes} phút/ngày · ${studyTime.description}',
+                    l10n.studySummary(
+                      studyTime.minutes,
+                      _studyPaceDescription(studyTime, l10n),
+                    ),
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.textBody,
                     ),
@@ -229,11 +243,23 @@ class _CompletionStep extends StatelessWidget {
       ),
       action: RikiPrimaryButton(
         key: const ValueKey<String>('onboarding_start_button'),
-        label: 'Bắt đầu học',
+        label: l10n.startLearning,
         trailingIcon: Icons.arrow_forward,
         onPressed: onStart,
       ),
     );
+  }
+
+  String _studyPaceDescription(
+    DailyStudyTime studyTime,
+    AppLocalizations l10n,
+  ) {
+    return switch (studyTime) {
+      DailyStudyTime.fifteen => l10n.studyPaceGentle,
+      DailyStudyTime.thirty => l10n.studyPaceBalanced,
+      DailyStudyTime.fortyFive => l10n.studyPaceActive,
+      DailyStudyTime.sixty => l10n.studyPaceIntensive,
+    };
   }
 }
 
@@ -278,7 +304,8 @@ class _OnboardingPage extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 560),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight -
+                  minHeight:
+                      constraints.maxHeight -
                       AppSpacing.space3 -
                       AppSpacing.bottomActionPadding,
                 ),
@@ -365,7 +392,7 @@ class _StepHeader extends StatelessWidget {
                 children: [
                   if (selectedLevel != null) ...[
                     Text(
-                      'Mục tiêu: ',
+                      context.l10n.goalPrefix,
                       style: AppTypography.badgeText.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -373,7 +400,7 @@ class _StepHeader extends StatelessWidget {
                     JlptBadge(selectedLevel!),
                   ],
                   Text(
-                    'Bước $step / 2',
+                    context.l10n.stepOfTwo(step),
                     style: AppTypography.badgeText.copyWith(
                       color: AppColors.brandPrimary,
                       fontWeight: FontWeight.w700,
@@ -384,7 +411,7 @@ class _StepHeader extends StatelessWidget {
               const SizedBox(height: AppSpacing.space2),
               RikiProgressIndicator(
                 value: step / 2,
-                semanticsLabel: 'Tiến độ thiết lập: bước $step trên 2',
+                semanticsLabel: context.l10n.setupProgressSemantics(step),
               ),
             ],
           ),
@@ -480,7 +507,7 @@ class _OnboardingSuccessIllustration extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Semantics(
-        label: 'Thiết lập lộ trình hoàn tất',
+        label: context.l10n.setupCompleteSemantics,
         child: SizedBox.square(
           dimension: 112,
           child: Stack(

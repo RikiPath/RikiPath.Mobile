@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
+import 'package:rikipath_mobile/features/learning/presentation/learning_localization.dart';
 
 class JlptProgressView extends StatelessWidget {
   const JlptProgressView({
@@ -30,10 +32,10 @@ class JlptProgressView extends StatelessWidget {
         const SizedBox(height: AppSpacing.space5),
         Semantics(
           enabled: false,
-          hint: 'Chi tiết bài học được triển khai trong C10',
+          hint: context.l10n.lessonDetailsComingSoon,
           child: RikiPrimaryButton(
             key: const ValueKey<String>('progress_continue_lesson_button'),
-            label: 'Tiếp tục học',
+            label: context.l10n.continueStudy,
             trailingIcon: Icons.arrow_forward,
             onPressed: null,
           ),
@@ -41,7 +43,7 @@ class JlptProgressView extends StatelessWidget {
         const SizedBox(height: AppSpacing.space3),
         RikiSecondaryButton(
           key: const ValueKey<String>('progress_open_roadmap_button'),
-          label: 'Xem lộ trình chi tiết',
+          label: context.l10n.viewDetailedRoadmap,
           leadingIcon: Icons.map_outlined,
           onPressed: onOpenRoadmap,
         ),
@@ -93,7 +95,9 @@ class _OverallProgressCard extends StatelessWidget {
                           const SizedBox(width: AppSpacing.space2),
                           Flexible(
                             child: Text(
-                              'Cấp độ mục tiêu: ${snapshot.jlptTarget.label}',
+                              context.l10n.targetLevel(
+                                snapshot.jlptTarget.label,
+                              ),
                               style: AppTypography.badgeText.copyWith(
                                 color: AppColors.brandPrimary,
                                 fontSize: 12,
@@ -106,7 +110,7 @@ class _OverallProgressCard extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.space1),
                     Text(
-                      'Tổng tiến độ toàn khóa',
+                      context.l10n.courseOverallProgress,
                       style: AppTypography.sectionTitle.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -133,8 +137,9 @@ class _OverallProgressCard extends StatelessWidget {
               minHeight: 12,
               color: AppColors.brandPrimary,
               backgroundColor: AppColors.learnerSurfaceLow,
-              semanticsLabel:
-                  'Tổng tiến độ toàn khóa ${snapshot.overallPercent} phần trăm',
+              semanticsLabel: context.l10n.courseProgressSemantics(
+                snapshot.overallPercent,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.space3),
@@ -146,15 +151,17 @@ class _OverallProgressCard extends StatelessWidget {
             runSpacing: AppSpacing.space1,
             children: [
               Text(
-                'Đã hoàn thành ${snapshot.completedLessons}/'
-                '${snapshot.totalLessons} bài học tổng thể',
+                context.l10n.completedOverallLessons(
+                  snapshot.completedLessons,
+                  snapshot.totalLessons,
+                ),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
-                'Kỳ thi dự kiến: ${snapshot.examDateLabel}',
+                context.l10n.expectedExam(snapshot.examDateLabel),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.learnerTextPrimary,
                   fontWeight: FontWeight.w600,
@@ -185,14 +192,14 @@ class _SkillProgressCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Chi tiết tiến độ kỹ năng',
+                  context.l10n.skillProgressDetail,
                   style: AppTypography.sectionTitle.copyWith(
                     color: AppColors.learnerTextPrimary,
                   ),
                 ),
               ),
               Text(
-                '${skills.length}/5 kỹ năng',
+                context.l10n.skillCount(skills.length),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w600,
@@ -242,7 +249,7 @@ class _SkillProgressRow extends StatelessWidget {
               ),
             );
             final label = Text(
-              skill.category.label,
+              skill.category.localizedLabel(context),
               style: AppTypography.cardTitle.copyWith(
                 color: AppColors.learnerTextPrimary,
               ),
@@ -252,7 +259,8 @@ class _SkillProgressRow extends StatelessWidget {
                 children: [
                   TextSpan(text: '${skill.current}'),
                   TextSpan(
-                    text: ' / ${skill.total} ${skill.unit}',
+                    text:
+                        ' / ${skill.total} ${skill.category.localizedUnit(context)}',
                     style: const TextStyle(
                       color: AppColors.textMuted,
                       fontWeight: FontWeight.w400,
@@ -321,9 +329,10 @@ class _SkillProgressRow extends StatelessWidget {
                 ? AppColors.success
                 : AppColors.brandPrimary,
             backgroundColor: AppColors.progressTrack,
-            semanticsLabel:
-                'Tiến độ ${skill.category.label} '
-                '${skill.progressPercent} phần trăm',
+            semanticsLabel: context.l10n.progressSemantics(
+              skill.category.localizedLabel(context),
+              skill.progressPercent,
+            ),
           ),
         ),
       ],

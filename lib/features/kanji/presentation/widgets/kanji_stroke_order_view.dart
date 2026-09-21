@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/kanji/application/kanji_controller.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
@@ -71,7 +72,7 @@ class KanjiStrokeOrderView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space3),
               Text(
-                'Nét ${state.currentStroke}/$totalStrokes',
+                context.l10n.strokeProgress(state.currentStroke, totalStrokes),
                 style: AppTypography.sectionTitle.copyWith(
                   color: AppColors.brandPrimary,
                 ),
@@ -90,21 +91,21 @@ class KanjiStrokeOrderView extends StatelessWidget {
                 children: [
                   IconButton.filledTonal(
                     key: const ValueKey<String>('kanji_stroke_restart'),
-                    tooltip: 'Phát lại từ đầu',
+                    tooltip: context.l10n.restartStroke,
                     onPressed: onRestart,
                     icon: const Icon(Icons.replay),
                   ),
                   const SizedBox(width: AppSpacing.space3),
                   IconButton.filledTonal(
                     key: const ValueKey<String>('kanji_stroke_previous'),
-                    tooltip: 'Nét trước',
+                    tooltip: context.l10n.previousStroke,
                     onPressed: state.currentStroke <= 1 ? null : onPrevious,
                     icon: const Icon(Icons.skip_previous),
                   ),
                   const SizedBox(width: AppSpacing.space3),
                   IconButton.filled(
                     key: const ValueKey<String>('kanji_stroke_next'),
-                    tooltip: 'Nét tiếp theo',
+                    tooltip: context.l10n.nextStroke,
                     onPressed: state.currentStroke >= totalStrokes
                         ? null
                         : onNext,
@@ -117,7 +118,10 @@ class KanjiStrokeOrderView extends StatelessWidget {
         ),
         if (steps.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.space4),
-          Text('Tiến trình từng nét', style: AppTypography.sectionTitle),
+          Text(
+            context.l10n.strokeProgressTitle,
+            style: AppTypography.sectionTitle,
+          ),
           const SizedBox(height: AppSpacing.space2),
           SizedBox(
             height: 78,
@@ -150,7 +154,7 @@ class KanjiStrokeOrderView extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          'Nét ${step.number}',
+                          context.l10n.strokeNumber(step.number),
                           style: AppTypography.badgeText.copyWith(
                             color: selected
                                 ? Colors.white
@@ -183,7 +187,10 @@ class KanjiStrokeOrderView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Quy tắc bút thuận', style: AppTypography.sectionTitle),
+                Text(
+                  context.l10n.strokeRules,
+                  style: AppTypography.sectionTitle,
+                ),
                 const SizedBox(height: AppSpacing.space3),
                 for (final (index, rule) in rules.indexed) ...[
                   Row(
@@ -208,7 +215,7 @@ class KanjiStrokeOrderView extends StatelessWidget {
                 ],
                 const SizedBox(height: AppSpacing.space2),
                 Text(
-                  'Dữ liệu mẫu từ thiết kế Stitch; backend chưa cung cấp chuỗi nét.',
+                  context.l10n.strokeFixtureWarning,
                   style: AppTypography.metadata.copyWith(
                     color: AppColors.warningText,
                   ),
@@ -219,7 +226,7 @@ class KanjiStrokeOrderView extends StatelessWidget {
         ] else if (entry.strokeOrderUrl != null) ...[
           const SizedBox(height: AppSpacing.space3),
           Text(
-            'API hiện chỉ cung cấp một ảnh thứ tự nét, không có chuỗi hoạt ảnh.',
+            context.l10n.strokeImageOnlyWarning,
             textAlign: TextAlign.center,
             style: AppTypography.bodySmall,
           ),
@@ -227,7 +234,7 @@ class KanjiStrokeOrderView extends StatelessWidget {
         const SizedBox(height: AppSpacing.space4),
         RikiPrimaryButton(
           key: const ValueKey<String>('kanji_close_strokes_button'),
-          label: 'Quay lại chi tiết chữ ${entry.character}',
+          label: context.l10n.backToKanjiDetail(entry.character),
           leadingIcon: Icons.arrow_back,
           onPressed: onClose,
         ),

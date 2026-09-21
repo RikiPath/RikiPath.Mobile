@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_header.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_roadmap_view.dart';
@@ -17,13 +18,16 @@ class LearningRoadmapScreen extends ConsumerWidget {
     final snapshot = learningState.asData?.value;
     final levelSuffix = snapshot == null ? '' : ' ${snapshot.jlptTarget.label}';
     final subtitle = snapshot == null
-        ? 'Đang tải lộ trình'
-        : '${snapshot.totalChapters} chương • ${snapshot.totalLessons} bài học';
+        ? context.l10n.loadingRoadmap
+        : context.l10n.roadmapSummary(
+            snapshot.totalChapters,
+            snapshot.totalLessons,
+          );
 
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
-        title: 'Lộ trình JLPT$levelSuffix',
+        title: context.l10n.jlptRoadmap(levelSuffix),
         subtitle: subtitle,
         level: snapshot?.jlptTarget,
         initials: snapshot?.initials,

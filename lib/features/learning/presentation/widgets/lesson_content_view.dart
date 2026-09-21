@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_session.dart';
@@ -28,19 +29,19 @@ class LessonContentTabs extends StatelessWidget {
       child: Row(
         children: [
           _LessonTabButton(
-            label: 'Nội dung',
+            label: context.l10n.contentTab,
             icon: Icons.article_outlined,
             selected: selectedTab == LessonContentTab.content,
             onPressed: () => onSelected(LessonContentTab.content),
           ),
           _LessonTabButton(
-            label: 'Ghi chú (${lesson.noteCount})',
+            label: context.l10n.notesTab(lesson.noteCount),
             icon: Icons.edit_note_outlined,
             selected: selectedTab == LessonContentTab.notes,
             onPressed: () => onSelected(LessonContentTab.notes),
           ),
           _LessonTabButton(
-            label: 'Từ vựng (${lesson.videoVocabularyCount})',
+            label: context.l10n.vocabularyTab(lesson.videoVocabularyCount),
             icon: Icons.style_outlined,
             selected: selectedTab == LessonContentTab.vocabulary,
             onPressed: () => onSelected(LessonContentTab.vocabulary),
@@ -63,7 +64,7 @@ class LessonArticleContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _ArticleCard(
-          title: 'Mục tiêu bài học',
+          title: context.l10n.lessonObjective,
           icon: Icons.flag_outlined,
           child: Text(
             lesson.objective,
@@ -75,7 +76,7 @@ class LessonArticleContent extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.space4),
         _ArticleCard(
-          title: 'Cấu trúc cốt lõi',
+          title: context.l10n.coreStructure,
           icon: Icons.auto_stories_outlined,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,7 +108,7 @@ class LessonArticleContent extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.space4),
         _ArticleCard(
-          title: 'Ý nghĩa',
+          title: context.l10n.meaning,
           icon: Icons.menu_book_outlined,
           child: Text(
             lesson.article.meaning,
@@ -118,7 +119,7 @@ class LessonArticleContent extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.space4),
         _ArticleCard(
-          title: 'Cách sử dụng & Ngữ cảnh',
+          title: context.l10n.usageAndContext,
           icon: Icons.format_list_numbered,
           child: Column(
             children: [
@@ -139,7 +140,7 @@ class LessonArticleContent extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.space4),
         Text(
-          'Các ví dụ thực tế tiêu biểu',
+          context.l10n.practicalExamplesTitle,
           style: AppTypography.sectionTitle.copyWith(
             color: AppColors.learnerTextPrimary,
           ),
@@ -156,7 +157,7 @@ class LessonArticleContent extends StatelessWidget {
         ],
         const SizedBox(height: AppSpacing.space4),
         _ArticleCard(
-          title: 'Lưu ý ngữ pháp quan trọng',
+          title: context.l10n.importantGrammarNotes,
           icon: Icons.warning_amber_rounded,
           child: Column(
             children: [
@@ -197,13 +198,13 @@ class LessonVocabularyContent extends StatelessWidget {
           runSpacing: AppSpacing.space1,
           children: [
             Text(
-              'Từ vựng quan trọng trong bài',
+              context.l10n.importantVocabulary,
               style: AppTypography.sectionTitle.copyWith(
                 color: AppColors.learnerTextPrimary,
               ),
             ),
             Text(
-              '${lesson.vocabulary.length} từ xuất hiện',
+              context.l10n.wordsAppearing(lesson.vocabulary.length),
               style: AppTypography.metadata.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -257,13 +258,13 @@ class LessonArticleOnlyView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'CHUYÊN ĐỀ ${lesson.category.toUpperCase()}',
+                      context.l10n.topicUpper(lesson.category.toUpperCase()),
                       style: AppTypography.badgeText.copyWith(
                         color: AppColors.textSecondary,
                       ),
                     ),
                     Text(
-                      'Liệt kê hành động và trạng thái tiêu biểu',
+                      context.l10n.topicSubtitle,
                       style: AppTypography.cardTitle,
                     ),
                   ],
@@ -271,7 +272,7 @@ class LessonArticleOnlyView extends StatelessWidget {
               ),
               IconButton.filled(
                 key: const ValueKey<String>('lesson_article_open_video'),
-                tooltip: 'Mở video bài học',
+                tooltip: context.l10n.openLessonVideo,
                 onPressed: onOpenVideo,
                 icon: const Icon(Icons.play_arrow),
               ),

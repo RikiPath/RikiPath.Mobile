@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
+import 'package:rikipath_mobile/core/widgets/riki_loading.dart';
 
 class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
   const HomeHeader({
@@ -56,7 +58,7 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 const SizedBox(width: AppSpacing.space1),
                 Text(
-                  'Ngày $streakDays',
+                  context.l10n.dayCount(streakDays!),
                   style: AppTypography.badgeText.copyWith(
                     color: AppColors.learnerTertiary,
                     fontSize: 13,
@@ -70,7 +72,7 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
           const _HeaderSkeleton(width: 54),
         const SizedBox(width: AppSpacing.space1),
         Semantics(
-          label: 'Thông báo',
+          label: context.l10n.notifications,
           child: SizedBox.square(
             dimension: 44,
             child: Stack(
@@ -99,7 +101,7 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         Semantics(
           button: true,
-          label: 'Mở trang cá nhân',
+          label: context.l10n.openProfile,
           child: InkResponse(
             onTap: onProfilePressed,
             radius: 24,
@@ -138,13 +140,6 @@ class _HeaderSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: 26,
-      decoration: BoxDecoration(
-        color: AppColors.learnerSurfaceHigh,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-    );
+    return RikiSkeleton(width: width, height: 26, borderRadius: AppRadius.pill);
   }
 }

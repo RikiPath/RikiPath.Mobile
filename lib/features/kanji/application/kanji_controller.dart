@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/kanji/data/api_kanji_repository.dart';
@@ -100,7 +101,7 @@ class KanjiLibraryController extends AsyncNotifier<KanjiLibraryState> {
       state = AsyncData(
         current.copyWith(
           isLoadingMore: false,
-          pageError: 'Không thể tải thêm Kanji. Vui lòng thử lại.',
+          pageError: ref.read(appLocalizationsProvider).kanjiLoadMoreFailed,
         ),
       );
     }
@@ -195,10 +196,10 @@ class KanjiDetailController extends AsyncNotifier<KanjiDetailState> {
   Future<List<KanjiNotebookList>> loadNotebookLists() async {
     final current = state.requireValue;
     if (current.entry.source == KanjiDataSource.fixture) {
-      const lists = <KanjiNotebookList>[
+      final lists = <KanjiNotebookList>[
         KanjiNotebookList(
           id: -1,
-          name: 'Mặc định (dữ liệu mẫu)',
+          name: ref.read(appLocalizationsProvider).kanjiFixtureNotebookName,
           entryCount: 48,
         ),
       ];
@@ -222,7 +223,9 @@ class KanjiDetailController extends AsyncNotifier<KanjiDetailState> {
       state = AsyncData(
         state.requireValue.copyWith(
           isLoadingNotebook: false,
-          notebookError: 'Không thể tải danh sách Sổ từ.',
+          notebookError: ref
+              .read(appLocalizationsProvider)
+              .notebookListsLoadFailed,
         ),
       );
       return const <KanjiNotebookList>[];
@@ -264,7 +267,7 @@ class KanjiDetailController extends AsyncNotifier<KanjiDetailState> {
       state = AsyncData(
         state.requireValue.copyWith(
           isSaving: false,
-          notebookError: 'Không thể lưu Kanji vào Sổ từ.',
+          notebookError: ref.read(appLocalizationsProvider).kanjiSaveFailed,
         ),
       );
       return false;
@@ -284,7 +287,7 @@ class KanjiDetailController extends AsyncNotifier<KanjiDetailState> {
       state = AsyncData(
         state.requireValue.copyWith(
           isPlayingAudio: false,
-          audioError: 'Không thể phát âm thanh Kanji.',
+          audioError: ref.read(appLocalizationsProvider).kanjiAudioFailed,
         ),
       );
       return false;

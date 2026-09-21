@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 
 class LearningLoadingView extends StatelessWidget {
@@ -7,23 +8,26 @@ class LearningLoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return RikiShimmer(
       key: const ValueKey<String>('learning_loading_view'),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.space4,
-        AppSpacing.space4,
-        AppSpacing.space4,
-        AppSpacing.space8,
+      semanticsLabel: context.l10n.loading,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.space4,
+          AppSpacing.space4,
+          AppSpacing.space4,
+          AppSpacing.space8,
+        ),
+        children: const [
+          RikiSkeleton(height: 44, borderRadius: AppRadius.input),
+          SizedBox(height: AppSpacing.space4),
+          RikiSkeletonCard(height: 216, leading: false, lineCount: 5),
+          SizedBox(height: AppSpacing.space4),
+          RikiSkeletonCard(height: 116, leading: true),
+          SizedBox(height: AppSpacing.space4),
+          RikiSkeletonCard(height: 92, leading: true, lineCount: 2),
+        ],
       ),
-      children: const [
-        _SkeletonBlock(height: 44),
-        SizedBox(height: AppSpacing.space4),
-        _SkeletonCard(height: 280),
-        SizedBox(height: AppSpacing.space4),
-        _SkeletonCard(height: 180),
-        SizedBox(height: AppSpacing.space4),
-        _SkeletonCard(height: 150),
-      ],
     );
   }
 }
@@ -54,7 +58,7 @@ class LearningErrorView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space4),
               Text(
-                'Chưa thể tải nội dung học tập',
+                context.l10n.learningLoadFailed,
                 textAlign: TextAlign.center,
                 style: AppTypography.sectionTitle.copyWith(
                   color: AppColors.learnerTextPrimary,
@@ -62,14 +66,14 @@ class LearningErrorView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                'Vui lòng kiểm tra kết nối và thử lại.',
+                context.l10n.checkConnectionRetry,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySmall,
               ),
               const SizedBox(height: AppSpacing.space5),
               RikiPrimaryButton(
                 key: const ValueKey<String>('learning_retry_button'),
-                label: 'Thử lại',
+                label: context.l10n.retry,
                 leadingIcon: Icons.refresh,
                 onPressed: onRetry,
               ),
@@ -77,38 +81,6 @@ class LearningErrorView extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _SkeletonCard extends StatelessWidget {
-  const _SkeletonCard({required this.height});
-
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return RikiCard(
-      borderColor: AppColors.learnerOutline,
-      boxShadow: const <BoxShadow>[],
-      child: _SkeletonBlock(height: height),
-    );
-  }
-}
-
-class _SkeletonBlock extends StatelessWidget {
-  const _SkeletonBlock({required this.height});
-
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        color: AppColors.learnerSurfaceHigh,
-        borderRadius: BorderRadius.circular(AppRadius.compact),
-      ),
     );
   }
 }

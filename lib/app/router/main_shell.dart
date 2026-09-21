@@ -3,10 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
 
 class MainShell extends StatelessWidget {
-  const MainShell({
-    required this.navigationShell,
-    super.key,
-  });
+  const MainShell({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
 

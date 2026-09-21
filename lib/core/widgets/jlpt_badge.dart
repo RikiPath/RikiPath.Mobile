@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 
 enum JlptLevel {
   n5('N5'),
@@ -21,7 +22,7 @@ class JlptBadge extends StatelessWidget {
     final colors = _colorsFor(level);
 
     return Semantics(
-      label: 'Trình độ JLPT ${level.label}',
+      label: context.l10n.jlptLevelSemantics(level.label),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.space2,

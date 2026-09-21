@@ -1,9 +1,5 @@
 sealed class ApiError implements Exception {
-  const ApiError(
-    this.message, {
-    this.statusCode,
-    this.details = const [],
-  });
+  const ApiError(this.message, {this.statusCode, this.details = const []});
 
   final String message;
   final int? statusCode;

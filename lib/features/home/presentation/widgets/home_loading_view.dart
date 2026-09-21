@@ -1,47 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_card.dart';
+import 'package:rikipath_mobile/core/widgets/riki_loading.dart';
 
 class HomeLoadingView extends StatelessWidget {
   const HomeLoadingView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      key: const ValueKey<String>('home_loading_view'),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.space4,
-        AppSpacing.space4,
-        AppSpacing.space4,
-        AppSpacing.space8,
-      ),
-      children: const [
-        _SkeletonLine(widthFactor: 0.5, height: 24),
-        SizedBox(height: AppSpacing.space2),
-        _SkeletonLine(widthFactor: 0.72),
-        SizedBox(height: AppSpacing.space5),
-        _SkeletonCard(lines: 4, action: true),
-        SizedBox(height: AppSpacing.space4),
-        _SkeletonCard(lines: 3, split: true),
-        SizedBox(height: AppSpacing.space4),
-        _SkeletonRecommendationCard(),
-        SizedBox(height: AppSpacing.space5),
-        _SkeletonLine(widthFactor: 0.45, height: 20),
-        SizedBox(height: AppSpacing.space3),
-        Row(
-          children: [
-            Expanded(child: _SkeletonPracticeCard()),
-            SizedBox(width: AppSpacing.space3),
-            Expanded(child: _SkeletonPracticeCard()),
-            SizedBox(width: AppSpacing.space3),
-            Expanded(child: _SkeletonPracticeCard()),
-          ],
+    return RikiShimmer(
+      semanticsLabel: context.l10n.loading,
+      child: ListView(
+        key: const ValueKey<String>('home_loading_view'),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.space4,
+          AppSpacing.space4,
+          AppSpacing.space4,
+          AppSpacing.space8,
         ),
-        SizedBox(height: AppSpacing.space5),
-        _SkeletonLine(widthFactor: 0.52, height: 20),
-        SizedBox(height: AppSpacing.space3),
-        _SkeletonActivityCard(),
-      ],
+        children: const [
+          _SkeletonLine(widthFactor: 0.5, height: 24),
+          SizedBox(height: AppSpacing.space2),
+          _SkeletonLine(widthFactor: 0.72),
+          SizedBox(height: AppSpacing.space5),
+          _SkeletonCard(lines: 4, action: true),
+          SizedBox(height: AppSpacing.space4),
+          _SkeletonCard(lines: 3, split: true),
+          SizedBox(height: AppSpacing.space4),
+          _SkeletonRecommendationCard(),
+          SizedBox(height: AppSpacing.space5),
+          _SkeletonLine(widthFactor: 0.45, height: 20),
+          SizedBox(height: AppSpacing.space3),
+          Row(
+            children: [
+              Expanded(child: _SkeletonPracticeCard()),
+              SizedBox(width: AppSpacing.space3),
+              Expanded(child: _SkeletonPracticeCard()),
+              SizedBox(width: AppSpacing.space3),
+              Expanded(child: _SkeletonPracticeCard()),
+            ],
+          ),
+          SizedBox(height: AppSpacing.space5),
+          _SkeletonLine(widthFactor: 0.52, height: 20),
+          SizedBox(height: AppSpacing.space3),
+          _SkeletonActivityCard(),
+        ],
+      ),
     );
   }
 }
@@ -176,10 +181,7 @@ class _SkeletonActivityCard extends StatelessWidget {
 }
 
 class _SkeletonLine extends StatelessWidget {
-  const _SkeletonLine({
-    required this.widthFactor,
-    this.height = 14,
-  });
+  const _SkeletonLine({required this.widthFactor, this.height = 14});
 
   final double widthFactor;
   final double height;
@@ -202,13 +204,6 @@ class _SkeletonBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: AppColors.learnerSurfaceHigh,
-        borderRadius: BorderRadius.circular(AppRadius.compact),
-      ),
-    );
+    return RikiSkeleton(width: width, height: height);
   }
 }

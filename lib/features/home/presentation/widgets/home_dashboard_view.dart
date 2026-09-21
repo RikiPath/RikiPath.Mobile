@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/home/domain/home_dashboard.dart';
 
@@ -35,18 +36,12 @@ class HomeDashboardView extends StatelessWidget {
           onPressed: onOpenLearning,
         ),
         const SizedBox(height: AppSpacing.space4),
-        _RoadmapCard(
-          roadmap: dashboard.roadmap,
-          onPressed: onOpenLearning,
-        ),
+        _RoadmapCard(roadmap: dashboard.roadmap, onPressed: onOpenLearning),
         const SizedBox(height: AppSpacing.space4),
-        _SetupCard(
-          setup: dashboard.setup,
-          onOpenLearning: onOpenLearning,
-        ),
+        _SetupCard(setup: dashboard.setup, onOpenLearning: onOpenLearning),
         const SizedBox(height: AppSpacing.space6),
         Text(
-          'Làm quen với công cụ học tập',
+          context.l10n.homeToolsTitle,
           style: AppTypography.sectionTitle.copyWith(
             color: AppColors.learnerTextPrimary,
           ),
@@ -95,7 +90,7 @@ class HomeErrorView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space4),
               Text(
-                'Chưa thể tải Trang chủ',
+                context.l10n.homeLoadFailed,
                 textAlign: TextAlign.center,
                 style: AppTypography.sectionTitle.copyWith(
                   color: AppColors.learnerTextPrimary,
@@ -103,14 +98,14 @@ class HomeErrorView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                'Vui lòng kiểm tra kết nối và thử lại.',
+                context.l10n.checkConnectionRetry,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySmall,
               ),
               const SizedBox(height: AppSpacing.space5),
               RikiPrimaryButton(
                 key: const ValueKey<String>('home_retry_button'),
-                label: 'Thử lại',
+                label: context.l10n.retry,
                 leadingIcon: Icons.refresh,
                 onPressed: onRetry,
               ),
@@ -135,7 +130,7 @@ class _GreetingSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Xin chào, ${dashboard.learnerName}! 👋',
+              context.l10n.greetingName(dashboard.learnerName),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.compactPageTitle.copyWith(
@@ -149,7 +144,7 @@ class _GreetingSection extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
-                  'Mục tiêu JLPT ${dashboard.jlptTarget.label}',
+                  context.l10n.jlptGoal(dashboard.jlptTarget.label),
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.learnerTextSecondary,
                   ),
@@ -251,10 +246,7 @@ class _FirstLessonCard extends StatelessWidget {
             spacing: AppSpacing.space3,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _Eyebrow(
-                icon: Icons.flag_outlined,
-                label: lesson.eyebrow,
-              ),
+              _Eyebrow(icon: Icons.flag_outlined, label: lesson.eyebrow),
               _Pill(label: lesson.badge),
             ],
           ),
@@ -279,13 +271,15 @@ class _FirstLessonCard extends StatelessWidget {
                 child: Text.rich(
                   TextSpan(
                     children: [
-                      const TextSpan(
-                        text: 'Chưa bắt đầu',
+                      TextSpan(
+                        text: context.l10n.notStarted,
                         style: TextStyle(fontWeight: FontWeight.w700),
                       ),
                       TextSpan(
-                        text:
-                            ' • ${lesson.completedParts}/${lesson.totalParts} phần hoàn thành',
+                        text: context.l10n.lessonPartsCompleted(
+                          lesson.completedParts,
+                          lesson.totalParts,
+                        ),
                       ),
                     ],
                   ),
@@ -312,13 +306,13 @@ class _FirstLessonCard extends StatelessWidget {
               minHeight: 10,
               color: AppColors.brandPrimary,
               backgroundColor: AppColors.learnerSurfaceHigh,
-              semanticsLabel: 'Tiến độ bài học $percentage phần trăm',
+              semanticsLabel: context.l10n.lessonProgressSemantics(percentage),
             ),
           ),
           const SizedBox(height: AppSpacing.space4),
           RikiPrimaryButton(
             key: const ValueKey<String>('home_start_learning_button'),
-            label: 'Bắt đầu học',
+            label: context.l10n.startLearning,
             trailingIcon: Icons.arrow_forward,
             onPressed: onPressed,
           ),
@@ -371,7 +365,7 @@ class _RoadmapCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.space2),
-              _Pill(label: '${roadmap.stageCount} chặng'),
+              _Pill(label: context.l10n.stageCount(roadmap.stageCount)),
             ],
           ),
           const SizedBox(height: AppSpacing.space3),
@@ -388,7 +382,7 @@ class _RoadmapCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Được cá nhân hóa theo năng lực',
+                  context.l10n.personalizedByAbility,
                   style: AppTypography.metadata.copyWith(
                     color: AppColors.learnerTextSecondary,
                     fontWeight: FontWeight.w600,
@@ -397,7 +391,7 @@ class _RoadmapCard extends StatelessWidget {
               ),
               RikiTextButton(
                 key: const ValueKey<String>('home_roadmap_button'),
-                label: 'Xem lộ trình',
+                label: context.l10n.viewRoadmap,
                 trailingIcon: Icons.arrow_forward,
                 onPressed: onPressed,
               ),
@@ -437,13 +431,13 @@ class _SetupCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Thiết lập ban đầu',
+                      context.l10n.initialSetup,
                       style: AppTypography.sectionTitle.copyWith(
                         color: AppColors.learnerTextPrimary,
                       ),
                     ),
                     Text(
-                      'Các bước khởi đầu cho người mới',
+                      context.l10n.initialSetupSubtitle,
                       style: AppTypography.metadata.copyWith(
                         color: AppColors.learnerTextSecondary,
                       ),
@@ -451,15 +445,21 @@ class _SetupCard extends StatelessWidget {
                   ],
                 ),
               ),
-              _Pill(label: '${setup.completedCount}/${setup.totalCount} hoàn tất'),
+              _Pill(
+                label: context.l10n.completedCount(
+                  setup.completedCount,
+                  setup.totalCount,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.space3),
           for (var index = 0; index < setup.items.length; index++) ...[
             _SetupItemTile(
               item: setup.items[index],
-              onPressed:
-                  setup.items[index].actionLabel == null ? null : onOpenLearning,
+              onPressed: setup.items[index].actionLabel == null
+                  ? null
+                  : onOpenLearning,
             ),
             if (index != setup.items.length - 1)
               const SizedBox(height: AppSpacing.space2),
@@ -706,11 +706,7 @@ class _IconTile extends StatelessWidget {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(AppRadius.compact),
       ),
-      child: Icon(
-        icon,
-        color: AppColors.brandPrimary,
-        size: iconSize,
-      ),
+      child: Icon(icon, color: AppColors.brandPrimary, size: iconSize),
     );
   }
 }

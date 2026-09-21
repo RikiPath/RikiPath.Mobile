@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/riki_loading.dart';
 
 class RikiPrimaryButton extends StatelessWidget {
   const RikiPrimaryButton({
@@ -164,13 +166,10 @@ class _LoadingButtonContent extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const SizedBox.square(
-          dimension: 16,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-            strokeWidth: 2,
-            semanticsLabel: 'Đang xử lý',
-          ),
+        RikiInlineLoader(
+          size: 16,
+          color: Colors.white,
+          semanticsLabel: context.l10n.processingSemantics,
         ),
         const SizedBox(width: AppSpacing.space2),
         Flexible(child: Text(label, textAlign: TextAlign.center)),

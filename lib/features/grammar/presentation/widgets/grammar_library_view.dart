@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/grammar/application/grammar_controller.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar.dart';
@@ -69,12 +70,12 @@ class _GrammarLibraryViewState extends State<GrammarLibraryView> {
             onChanged: (_) => setState(() {}),
             onSubmitted: widget.onSearch,
             decoration: InputDecoration(
-              hintText: 'Tìm cấu trúc ngữ pháp hoặc ý nghĩa…',
+              hintText: context.l10n.grammarSearchHint,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isEmpty
                   ? null
                   : IconButton(
-                      tooltip: 'Xóa tìm kiếm',
+                      tooltip: context.l10n.clearSearch,
                       onPressed: () {
                         _searchController.clear();
                         setState(() {});
@@ -93,7 +94,7 @@ class _GrammarLibraryViewState extends State<GrammarLibraryView> {
             children: [
               _LevelChip(
                 key: const ValueKey<String>('grammar_filter_all'),
-                label: 'Tất cả',
+                label: context.l10n.all,
                 selected: state.query.level == null,
                 onSelected: () => widget.onFilter(null),
               ),
@@ -130,7 +131,7 @@ class _GrammarLibraryViewState extends State<GrammarLibraryView> {
                     borderRadius: BorderRadius.circular(AppRadius.pill),
                   ),
                   child: Text(
-                    'Dữ liệu mẫu',
+                    context.l10n.sampleData,
                     style: AppTypography.badgeText.copyWith(
                       color: AppColors.warningText,
                     ),
@@ -138,7 +139,7 @@ class _GrammarLibraryViewState extends State<GrammarLibraryView> {
                 ),
               const Spacer(),
               Text(
-                '${state.page.totalCount} cấu trúc',
+                context.l10n.grammarPatternCount(state.page.totalCount),
                 style: AppTypography.metadata,
               ),
             ],
@@ -226,7 +227,7 @@ class _GrammarCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Mở chi tiết ngữ pháp ${entry.title}',
+      label: context.l10n.grammarDetailSemantics(entry.title),
       child: InkWell(
         key: ValueKey<String>('grammar_card_${entry.routeKey}'),
         onTap: onOpen,
@@ -275,7 +276,7 @@ class _GrammarCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadius.input),
                 ),
                 child: Text(
-                  'Cấu trúc: ${entry.structure}',
+                  context.l10n.grammarStructureInline(entry.structure),
                   style: AppTypography.bodySmall,
                 ),
               ),
@@ -303,10 +304,10 @@ class _LoadMore extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(AppSpacing.space4),
-          child: CircularProgressIndicator(),
+          padding: const EdgeInsets.all(AppSpacing.space4),
+          child: RikiInlineLoader(semanticsLabel: context.l10n.loading),
         ),
       );
     }
@@ -322,7 +323,7 @@ class _LoadMore extends StatelessWidget {
         ],
         RikiSecondaryButton(
           key: const ValueKey<String>('grammar_load_more_button'),
-          label: 'Tải thêm',
+          label: context.l10n.loadMore,
           onPressed: onPressed,
         ),
       ],

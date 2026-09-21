@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_session.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_content_view.dart';
@@ -80,7 +81,7 @@ class LessonVideoView extends StatelessWidget {
               const SizedBox(height: AppSpacing.space5),
               RikiPrimaryButton(
                 key: const ValueKey<String>('lesson_complete_button'),
-                label: 'Hoàn thành bài học',
+                label: context.l10n.completeLesson,
                 leadingIcon: Icons.check_circle_outline,
                 onPressed: onComplete,
               ),
@@ -126,8 +127,7 @@ class _LessonVideoFrame extends StatelessWidget {
         child: session.videoStatus == LessonVideoStatus.error
             ? _VideoError(
                 message:
-                    session.videoErrorMessage ??
-                    'Không thể tải video bài giảng',
+                    session.videoErrorMessage ?? context.l10n.videoLoadFailed,
                 onRetry: onRetry,
                 onShowArticle: onShowArticle,
               )
@@ -159,8 +159,8 @@ class _LessonVideoFrame extends StatelessWidget {
                       ),
                       child: Text(
                         session.lesson.progress.resumePositionSeconds > 0
-                            ? 'Đang xem dở'
-                            : 'Bài giảng HD',
+                            ? context.l10n.watchingInProgress
+                            : context.l10n.hdLecture,
                         style: AppTypography.badgeText.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -171,7 +171,7 @@ class _LessonVideoFrame extends StatelessWidget {
                   Center(
                     child: IconButton.filled(
                       key: const ValueKey<String>('lesson_video_toggle_button'),
-                      tooltip: _playbackTooltip,
+                      tooltip: _playbackTooltip(context),
                       onPressed:
                           session.videoStatus == LessonVideoStatus.loading
                           ? null
@@ -182,12 +182,10 @@ class _LessonVideoFrame extends StatelessWidget {
                         minimumSize: const Size.square(58),
                       ),
                       icon: session.videoStatus == LessonVideoStatus.loading
-                          ? const SizedBox.square(
-                              dimension: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
+                          ? RikiInlineLoader(
+                              size: 22,
+                              color: Colors.white,
+                              semanticsLabel: context.l10n.loading,
                             )
                           : Icon(
                               session.videoStatus == LessonVideoStatus.playing
@@ -248,11 +246,12 @@ class _LessonVideoFrame extends StatelessWidget {
     );
   }
 
-  String get _playbackTooltip {
+  String _playbackTooltip(BuildContext context) {
     return session.videoStatus == LessonVideoStatus.playing
-        ? 'Tạm dừng video'
-        : 'Tiếp tục video từ '
-              '${formatLessonTime(session.lesson.progress.resumePositionSeconds)}';
+        ? context.l10n.pauseVideo
+        : context.l10n.resumeVideoFrom(
+            formatLessonTime(session.lesson.progress.resumePositionSeconds),
+          );
   }
 }
 
@@ -286,7 +285,7 @@ class _VideoError extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.space1),
           Text(
-            'Bạn vẫn có thể học tiếp bằng phần tóm tắt bên dưới.',
+            context.l10n.articleFallbackMessage,
             maxLines: 2,
             textAlign: TextAlign.center,
             style: AppTypography.metadata.copyWith(color: Colors.white70),
@@ -299,7 +298,7 @@ class _VideoError extends StatelessWidget {
                   key: const ValueKey<String>('lesson_video_retry_button'),
                   onPressed: onRetry,
                   icon: const Icon(Icons.refresh, size: 17),
-                  label: const Text('Thử lại'),
+                  label: Text(context.l10n.retry),
                 ),
               ),
               const SizedBox(width: AppSpacing.space2),
@@ -311,7 +310,7 @@ class _VideoError extends StatelessWidget {
                     foregroundColor: Colors.white,
                   ),
                   icon: const Icon(Icons.article_outlined, size: 17),
-                  label: const Text('Xem bản chữ'),
+                  label: Text(context.l10n.viewArticle),
                 ),
               ),
             ],

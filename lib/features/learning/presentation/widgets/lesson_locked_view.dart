@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 
@@ -38,7 +39,7 @@ class LessonLockedView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space3),
               Text(
-                'NỘI DUNG CÓ KHÓA TIẾN TRÌNH',
+                context.l10n.lockedContentUpper,
                 textAlign: TextAlign.center,
                 style: AppTypography.badgeText.copyWith(
                   color: AppColors.learnerTertiary,
@@ -47,7 +48,7 @@ class LessonLockedView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                'Bài ${lesson.lessonNumber}: ${lesson.title}',
+                '${context.l10n.lessonNumber(lesson.lessonNumber)}: ${lesson.title}',
                 textAlign: TextAlign.center,
                 style: AppTypography.sectionTitle.copyWith(
                   color: AppColors.learnerTextPrimary,
@@ -55,7 +56,7 @@ class LessonLockedView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                lesson.lockedReason ?? 'Bài học này chưa được mở.',
+                lesson.lockedReason ?? context.l10n.lessonLockedDefault,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
@@ -73,7 +74,7 @@ class LessonLockedView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'ĐIỀU KIỆN MỞ KHÓA',
+                  context.l10n.unlockConditionUpper,
                   style: AppTypography.badgeText.copyWith(
                     color: AppColors.brandPrimary,
                     fontWeight: FontWeight.w700,
@@ -81,7 +82,8 @@ class LessonLockedView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.space3),
                 Text(
-                  'Bài ${prerequisite.lessonNumber}: ${prerequisite.title}',
+                  '${context.l10n.lessonNumber(prerequisite.lessonNumber)}: '
+                  '${prerequisite.title}',
                   style: AppTypography.cardTitle,
                 ),
                 const SizedBox(height: AppSpacing.space1),
@@ -108,14 +110,18 @@ class LessonLockedView extends StatelessWidget {
                   runSpacing: AppSpacing.space1,
                   children: [
                     Text(
-                      'Tiến độ: ${prerequisite.completedParts}/'
-                      '${prerequisite.totalParts} phần',
+                      context.l10n.prerequisiteProgress(
+                        prerequisite.completedParts,
+                        prerequisite.totalParts,
+                      ),
                       style: AppTypography.metadata.copyWith(
                         color: AppColors.textSecondary,
                       ),
                     ),
                     Text(
-                      'Còn ~${prerequisite.remainingMinutes} phút',
+                      context.l10n.remainingMinutes(
+                        prerequisite.remainingMinutes,
+                      ),
                       style: AppTypography.metadata.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -133,13 +139,16 @@ class LessonLockedView extends StatelessWidget {
           runSpacing: AppSpacing.space1,
           children: [
             Text(
-              'Xem trước nội dung Bài ${lesson.lessonNumber}',
+              context.l10n.previewLesson(lesson.lessonNumber),
               style: AppTypography.sectionTitle.copyWith(
                 color: AppColors.learnerTextPrimary,
               ),
             ),
             Text(
-              '${lesson.parts.length} phần học • ~${lesson.durationMinutes} phút',
+              context.l10n.lessonPartsDuration(
+                lesson.parts.length,
+                lesson.durationMinutes,
+              ),
               style: AppTypography.metadata.copyWith(
                 color: AppColors.textMuted,
               ),
@@ -156,15 +165,16 @@ class LessonLockedView extends StatelessWidget {
         if (prerequisite != null)
           RikiPrimaryButton(
             key: const ValueKey<String>('lesson_continue_prerequisite_button'),
-            label:
-                'Tiếp tục Bài ${prerequisite.lessonNumber} '
-                '(còn ${100 - prerequisite.progressPercent}%)',
+            label: context.l10n.continuePrerequisite(
+              prerequisite.lessonNumber,
+              100 - prerequisite.progressPercent,
+            ),
             trailingIcon: Icons.arrow_forward,
             onPressed: onContinuePrerequisite,
           ),
         const SizedBox(height: AppSpacing.space2),
         RikiSecondaryButton(
-          label: 'Quay lại lộ trình học tập',
+          label: context.l10n.backToLearningRoadmap,
           onPressed: onBackToRoadmap,
         ),
       ],
@@ -205,7 +215,8 @@ class _LockedPart extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${part.subtitle} • ${part.durationMinutes} phút',
+                    '${part.subtitle} • '
+                    '${context.l10n.durationMinutes(part.durationMinutes)}',
                     style: AppTypography.metadata.copyWith(
                       color: AppColors.textSecondary,
                     ),

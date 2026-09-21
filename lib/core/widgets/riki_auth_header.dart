@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
-import 'package:rikipath_mobile/core/widgets/language_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
+import 'package:rikipath_mobile/core/widgets/riki_language_switcher.dart';
 
 class RikiAuthHeader extends StatelessWidget {
   const RikiAuthHeader({
     this.level,
-    this.languageCode = 'VI',
-    this.onLanguagePressed,
     this.onBack,
-    this.backSemanticLabel = 'Quay lại',
+    this.backSemanticLabel,
     this.statusLabel,
     super.key,
   }) : assert(
@@ -19,10 +18,8 @@ class RikiAuthHeader extends StatelessWidget {
        );
 
   final JlptLevel? level;
-  final String languageCode;
-  final VoidCallback? onLanguagePressed;
   final VoidCallback? onBack;
-  final String backSemanticLabel;
+  final String? backSemanticLabel;
   final String? statusLabel;
 
   @override
@@ -36,7 +33,7 @@ class RikiAuthHeader extends StatelessWidget {
               dimension: 48,
               child: IconButton(
                 onPressed: onBack,
-                tooltip: backSemanticLabel,
+                tooltip: backSemanticLabel ?? context.l10n.back,
                 icon: const Icon(Icons.arrow_back),
               ),
             ),
@@ -56,10 +53,7 @@ class RikiAuthHeader extends StatelessWidget {
         if (statusLabel != null)
           _StatusBadge(label: statusLabel!)
         else
-          LanguageBadge(
-            languageCode: languageCode,
-            onPressed: onLanguagePressed,
-          ),
+          const RikiLanguageSwitcher(),
       ],
     );
   }

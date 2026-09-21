@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
 
@@ -60,7 +61,7 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
           : Padding(
               padding: const EdgeInsets.only(left: AppSpacing.space3),
               child: IconButton(
-                tooltip: 'Quay lại',
+                tooltip: context.l10n.back,
                 onPressed: onBack,
                 icon: const Icon(Icons.chevron_left),
                 style: IconButton.styleFrom(
@@ -72,7 +73,7 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
             ),
       title: _isRoot ? _buildBrandTitle() : _buildDetailTitle(),
       actions: _isRoot
-          ? _buildRootActions(compact: compact)
+          ? _buildRootActions(context, compact: compact)
           : _buildDetailActions(),
     );
   }
@@ -108,7 +109,10 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  List<Widget> _buildRootActions({required bool compact}) {
+  List<Widget> _buildRootActions(
+    BuildContext context, {
+    required bool compact,
+  }) {
     return [
       if (streakDays != null)
         Container(
@@ -131,7 +135,7 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
               ),
               const SizedBox(width: AppSpacing.space1),
               Text(
-                compact ? '$streakDays' : '$streakDays ngày',
+                compact ? '$streakDays' : context.l10n.dayShort(streakDays!),
                 style: AppTypography.badgeText.copyWith(
                   color: AppColors.learnerTertiary,
                   fontSize: 12,
@@ -144,7 +148,7 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
       else
         const _HeaderSkeleton(width: 58),
       Semantics(
-        label: 'Thông báo',
+        label: context.l10n.notifications,
         child: SizedBox.square(
           dimension: 44,
           child: Stack(
@@ -195,7 +199,7 @@ class _ProfileAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Mở trang cá nhân',
+      label: context.l10n.openProfile,
       child: InkResponse(
         onTap: onPressed,
         radius: 24,

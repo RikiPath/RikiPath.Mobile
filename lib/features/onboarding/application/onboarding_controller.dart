@@ -3,14 +3,10 @@ import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 
 final onboardingControllerProvider =
     NotifierProvider<OnboardingController, OnboardingState>(
-  OnboardingController.new,
-);
+      OnboardingController.new,
+    );
 
-enum OnboardingStep {
-  jlptTarget,
-  studyTime,
-  complete,
-}
+enum OnboardingStep { jlptTarget, studyTime, complete }
 
 enum DailyStudyTime {
   fifteen(minutes: 15, description: 'Nhẹ nhàng'),
@@ -18,10 +14,7 @@ enum DailyStudyTime {
   fortyFive(minutes: 45, description: 'Tích cực'),
   sixty(minutes: 60, description: 'Chuyên sâu');
 
-  const DailyStudyTime({
-    required this.minutes,
-    required this.description,
-  });
+  const DailyStudyTime({required this.minutes, required this.description});
 
   final int minutes;
   final String description;

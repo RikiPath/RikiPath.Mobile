@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/lesson_media_driver.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
@@ -91,7 +92,7 @@ class LessonController extends AsyncNotifier<LessonSession> {
       state = AsyncData(
         state.requireValue.copyWith(
           videoStatus: LessonVideoStatus.error,
-          videoErrorMessage: 'Không thể tải video bài giảng',
+          videoErrorMessage: ref.read(appLocalizationsProvider).videoLoadFailed,
         ),
       );
     }
@@ -124,7 +125,7 @@ class LessonController extends AsyncNotifier<LessonSession> {
       state = AsyncData(
         current.copyWith(
           videoStatus: LessonVideoStatus.error,
-          videoErrorMessage: 'Không thể tải video bài giảng',
+          videoErrorMessage: ref.read(appLocalizationsProvider).videoLoadFailed,
         ),
       );
     }

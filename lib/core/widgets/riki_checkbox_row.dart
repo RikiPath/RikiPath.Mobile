@@ -32,8 +32,15 @@ class RikiCheckboxRow extends StatelessWidget {
               : CrossAxisAlignment.start,
           children: [
             SizedBox.square(
-              dimension: compact ? 40 : 44,
-              child: Checkbox(value: value, onChanged: onChanged),
+              dimension: compact ? 32 : 44,
+              child: Checkbox(
+                value: value,
+                onChanged: onChanged,
+                materialTapTargetSize: compact
+                    ? MaterialTapTargetSize.shrinkWrap
+                    : null,
+                visualDensity: compact ? VisualDensity.compact : null,
+              ),
             ),
             SizedBox(width: compact ? AppSpacing.space1 : AppSpacing.space2),
             Expanded(
@@ -45,11 +52,14 @@ class RikiCheckboxRow extends StatelessWidget {
                       ? AppSpacing.space1 / 2
                       : AppSpacing.space3,
                 ),
-                child: DefaultTextStyle(
-                  style: AppTypography.metadata.copyWith(
-                    color: AppColors.textSecondary,
+                child: Transform.translate(
+                  offset: centerChild ? const Offset(0, -1) : Offset.zero,
+                  child: DefaultTextStyle(
+                    style: AppTypography.metadata.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    child: child,
                   ),
-                  child: child,
                 ),
               ),
             ),

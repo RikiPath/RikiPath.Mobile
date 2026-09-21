@@ -19,6 +19,9 @@ abstract final class AppColors {
   static const Color neutralShadow = Color(0x142D282A);
 
   static const Color background = Color(0xFFFFF9FA);
+  static const Color profileBackground = Color(0xFFF7F6F7);
+  static const Color profileNeutralSurface = Color(0xFFFFFFFF);
+  static const Color profileAccentSurface = Color(0xFFFFF3F6);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color surfaceSubtle = Color(0xFFFFF0F3);
   static const Color surfaceContainer = Color(0xFFFCE7EB);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar.dart';
 
@@ -36,7 +37,7 @@ class GrammarDetailView extends StatelessWidget {
         if (entry.explanation != null) ...[
           _SectionCard(
             key: const ValueKey<String>('grammar_explanation_section'),
-            title: 'Ý nghĩa & bản chất',
+            title: context.l10n.grammarMeaningNature,
             icon: Icons.lightbulb_outline,
             child: SelectableText(
               entry.explanation!,
@@ -47,7 +48,7 @@ class GrammarDetailView extends StatelessWidget {
         ],
         _SectionCard(
           key: const ValueKey<String>('grammar_structure_section'),
-          title: 'Cấu trúc ngữ pháp',
+          title: context.l10n.grammarStructure,
           icon: Icons.account_tree_outlined,
           child: Container(
             width: double.infinity,
@@ -67,7 +68,7 @@ class GrammarDetailView extends StatelessWidget {
         if (enrichment?.usageNotes.isNotEmpty ?? false) ...[
           const SizedBox(height: AppSpacing.space4),
           _BulletSection(
-            title: 'Cách sử dụng',
+            title: context.l10n.usage,
             icon: Icons.rule_outlined,
             items: enrichment!.usageNotes,
           ),
@@ -119,7 +120,7 @@ class _FixtureNotice extends StatelessWidget {
           const SizedBox(width: AppSpacing.space2),
           Expanded(
             child: Text(
-              'Nội dung mở rộng là dữ liệu minh họa cục bộ, không phải response API.',
+              context.l10n.grammarFixtureNotice,
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.warningText,
                 fontWeight: FontWeight.w600,
@@ -178,7 +179,7 @@ class _ExamplesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SectionCard(
       key: const ValueKey<String>('grammar_examples_section'),
-      title: 'Ví dụ thực tế',
+      title: context.l10n.practicalExamples,
       icon: Icons.format_quote_outlined,
       child: Column(
         children: [
@@ -266,7 +267,7 @@ class _CautionsSection extends StatelessWidget {
               const SizedBox(width: AppSpacing.space2),
               Expanded(
                 child: Text(
-                  'Lưu ý khi dùng',
+                  context.l10n.usageCautions,
                   style: AppTypography.sectionTitle,
                 ),
               ),
@@ -290,7 +291,7 @@ class _RelatedSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SectionCard(
       key: const ValueKey<String>('grammar_related_section'),
-      title: 'Ngữ pháp liên quan & phân biệt',
+      title: context.l10n.relatedGrammar,
       icon: Icons.compare_arrows,
       child: Column(
         children: [

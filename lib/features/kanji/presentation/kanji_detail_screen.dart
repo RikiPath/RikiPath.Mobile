@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/kanji/application/kanji_controller.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
 import 'package:rikipath_mobile/features/kanji/presentation/widgets/kanji_detail_view.dart';
@@ -27,9 +29,11 @@ class KanjiDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
-        title: showingStrokes ? 'Thứ tự nét viết' : 'Chi tiết Kanji',
+        title: showingStrokes
+            ? context.l10n.strokeOrder
+            : context.l10n.kanjiDetail,
         subtitle: entry == null
-            ? 'THƯ VIỆN'
+            ? context.l10n.library
             : '${entry.character} • ${entry.sinoVietnamese ?? entry.meaning}',
         level: entry?.level,
         initials: null,
@@ -55,7 +59,7 @@ class KanjiDetailScreen extends ConsumerWidget {
               : KanjiDetailView(
                   state: detail,
                   onPlayAudio: controller.playAudio,
-                  onSave: () => _chooseNotebookList(context, controller),
+                  onSave: () => _chooseNotebookList(context, ref, controller),
                   onOpenStrokeOrder: controller.openStrokeOrder,
                 ),
         ),
@@ -65,6 +69,7 @@ class KanjiDetailScreen extends ConsumerWidget {
 
   Future<void> _chooseNotebookList(
     BuildContext context,
+    WidgetRef ref,
     KanjiDetailController controller,
   ) async {
     final lists = await controller.loadNotebookLists();
@@ -85,14 +90,17 @@ class KanjiDetailScreen extends ConsumerWidget {
                 AppSpacing.space4,
                 AppSpacing.space2,
               ),
-              child: Text('Chọn Sổ từ', style: AppTypography.sectionTitle),
+              child: Text(
+                context.l10n.chooseNotebook,
+                style: AppTypography.sectionTitle,
+              ),
             ),
             for (final list in lists)
               ListTile(
                 key: ValueKey<String>('kanji_notebook_${list.id}'),
                 leading: const Icon(Icons.book_outlined),
                 title: Text(list.name),
-                subtitle: Text('${list.entryCount} mục'),
+                subtitle: Text(context.l10n.itemCount(list.entryCount)),
                 onTap: () => Navigator.of(context).pop(list),
               ),
           ],
@@ -103,8 +111,8 @@ class KanjiDetailScreen extends ConsumerWidget {
     if (selected == null) return;
     final saved = await controller.saveToNotebook(selected);
     if (!context.mounted || !saved) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Đã lưu vào ${selected.name}.')));
+    ref
+        .read(rikiToastServiceProvider.notifier)
+        .success(title: context.l10n.savedToCollection(selected.name));
   }
 }

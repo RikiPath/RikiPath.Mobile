@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/kanji/application/kanji_controller.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
@@ -42,7 +43,7 @@ class KanjiDetailView extends StatelessWidget {
         if (enrichment?.mnemonic != null) ...[
           const SizedBox(height: AppSpacing.space4),
           _FixtureSection(
-            title: 'Mẹo ghi nhớ',
+            title: context.l10n.memoryTip,
             icon: Icons.lightbulb_outline,
             child: Text(enrichment!.mnemonic!, style: AppTypography.body),
           ),
@@ -50,7 +51,7 @@ class KanjiDetailView extends StatelessWidget {
         if (enrichment != null && enrichment.compounds.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.space4),
           _FixtureSection(
-            title: 'Từ ghép thường gặp',
+            title: context.l10n.commonCompounds,
             icon: Icons.hub_outlined,
             child: Column(
               children: [
@@ -70,7 +71,7 @@ class KanjiDetailView extends StatelessWidget {
         if (enrichment?.example != null) ...[
           const SizedBox(height: AppSpacing.space4),
           _FixtureSection(
-            title: 'Ví dụ',
+            title: context.l10n.examples,
             icon: Icons.format_quote,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +92,9 @@ class KanjiDetailView extends StatelessWidget {
         const SizedBox(height: AppSpacing.space5),
         RikiPrimaryButton(
           key: const ValueKey<String>('kanji_save_button'),
-          label: state.isSaved ? 'Đã lưu vào Sổ từ' : 'Lưu vào Sổ từ',
+          label: state.isSaved
+              ? context.l10n.savedToNotebook
+              : context.l10n.saveToNotebook,
           leadingIcon: state.isSaved ? Icons.bookmark : Icons.bookmark_border,
           isLoading: state.isSaving || state.isLoadingNotebook,
           onPressed: state.isSaved ? null : onSave,
@@ -125,9 +128,11 @@ class _HeroCard extends StatelessWidget {
             runSpacing: AppSpacing.space2,
             children: [
               JlptBadge(entry.level),
-              _MetaPill(label: '${entry.strokeCount} nét'),
+              _MetaPill(label: context.l10n.strokeCount(entry.strokeCount)),
               if (entry.enrichment?.radical != null)
-                _MetaPill(label: 'Bộ ${entry.enrichment!.radical}'),
+                _MetaPill(
+                  label: context.l10n.radicalLabel(entry.enrichment!.radical!),
+                ),
             ],
           ),
           const SizedBox(height: AppSpacing.space4),
@@ -163,7 +168,7 @@ class _HeroCard extends StatelessWidget {
           if (entry.source == KanjiDataSource.fixture) ...[
             const SizedBox(height: AppSpacing.space3),
             Text(
-              'Nội dung mở rộng dùng dữ liệu mẫu Stitch',
+              context.l10n.stitchFixtureNotice,
               textAlign: TextAlign.center,
               style: AppTypography.metadata.copyWith(
                 color: AppColors.warningText,
@@ -191,13 +196,16 @@ class _ReadingSection extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text('Cách đọc', style: AppTypography.sectionTitle),
+                child: Text(
+                  context.l10n.reading,
+                  style: AppTypography.sectionTitle,
+                ),
               ),
               IconButton(
                 key: const ValueKey<String>('kanji_audio_button'),
                 tooltip: entry.audioUrl == null
-                    ? 'Chưa có âm thanh'
-                    : 'Nghe cách đọc',
+                    ? context.l10n.audioUnavailable
+                    : context.l10n.listenReading,
                 onPressed: entry.audioUrl == null ? null : onPlayAudio,
                 icon: Icon(
                   Icons.volume_up_outlined,
@@ -208,9 +216,9 @@ class _ReadingSection extends StatelessWidget {
               ),
             ],
           ),
-          _ReadingRow(label: 'Âm On', value: entry.onYomi),
+          _ReadingRow(label: context.l10n.onReading, value: entry.onYomi),
           const SizedBox(height: AppSpacing.space2),
-          _ReadingRow(label: 'Âm Kun', value: entry.kunYomi),
+          _ReadingRow(label: context.l10n.kunReading, value: entry.kunYomi),
         ],
       ),
     );
@@ -230,7 +238,7 @@ class _ReadingRow extends StatelessWidget {
       children: [
         SizedBox(width: 68, child: Text(label, style: AppTypography.metadata)),
         Expanded(
-          child: Text(value ?? 'Chưa có dữ liệu', style: AppTypography.body),
+          child: Text(value ?? context.l10n.noData, style: AppTypography.body),
         ),
       ],
     );
@@ -249,7 +257,7 @@ class _StrokeOrderPreview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Thứ tự nét', style: AppTypography.sectionTitle),
+          Text(context.l10n.strokeOrder, style: AppTypography.sectionTitle),
           const SizedBox(height: AppSpacing.space3),
           AspectRatio(
             aspectRatio: 2,
@@ -277,7 +285,7 @@ class _StrokeOrderPreview extends StatelessWidget {
           const SizedBox(height: AppSpacing.space3),
           RikiSecondaryButton(
             key: const ValueKey<String>('kanji_open_strokes_button'),
-            label: 'Xem chi tiết thứ tự nét',
+            label: context.l10n.viewStrokeOrder,
             leadingIcon: Icons.draw_outlined,
             onPressed: onOpen,
           ),
@@ -310,7 +318,7 @@ class _FixtureSection extends StatelessWidget {
               const SizedBox(width: AppSpacing.space2),
               Expanded(child: Text(title, style: AppTypography.sectionTitle)),
               Text(
-                'MẪU',
+                context.l10n.sampleBadge,
                 style: AppTypography.badgeText.copyWith(
                   color: AppColors.warningText,
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
 
@@ -41,14 +42,14 @@ class LearningHomeView extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Các phần học chính',
+                context.l10n.mainLearningSections,
                 style: AppTypography.sectionTitle.copyWith(
                   color: AppColors.learnerTextPrimary,
                 ),
               ),
             ),
             Text(
-              'Xem tất cả',
+              context.l10n.viewAll,
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.brandPrimary,
                 fontWeight: FontWeight.w600,
@@ -78,24 +79,24 @@ class _LearningSectionTabs extends StatelessWidget {
         color: AppColors.learnerSurfaceHighest,
         borderRadius: BorderRadius.circular(AppRadius.input),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Expanded(
             child: _LearningSectionTab(
-              label: 'Lộ trình',
+              label: context.l10n.roadmap,
               icon: Icons.map_outlined,
               selected: true,
             ),
           ),
           Expanded(
             child: _LearningSectionTab(
-              label: 'Bài học',
+              label: context.l10n.lessonPlural,
               icon: Icons.menu_book_outlined,
             ),
           ),
           Expanded(
             child: _LearningSectionTab(
-              label: 'Thư viện',
+              label: context.l10n.library,
               icon: Icons.inventory_2_outlined,
             ),
           ),
@@ -196,7 +197,7 @@ class _ProgressSummaryCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                       child: Text(
-                        'Mục tiêu JLPT ${snapshot.jlptTarget.label}',
+                        context.l10n.jlptGoal(snapshot.jlptTarget.label),
                         style: AppTypography.badgeText.copyWith(
                           color: Colors.white,
                           fontSize: 12,
@@ -205,7 +206,7 @@ class _ProgressSummaryCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Kỳ thi ${snapshot.examDateLabel}',
+                      context.l10n.examDateLabel(snapshot.examDateLabel),
                       style: AppTypography.bodySmall.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -225,7 +226,7 @@ class _ProgressSummaryCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'TIẾN ĐỘ TỔNG',
+                    context.l10n.overallProgressUpper,
                     style: AppTypography.badgeText.copyWith(
                       color: AppColors.textMuted,
                       fontSize: 10,
@@ -239,7 +240,9 @@ class _ProgressSummaryCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.space4),
           _ProgressBar(
             value: snapshot.overallProgress,
-            semanticsLabel: 'Tiến độ tổng ${snapshot.overallPercent} phần trăm',
+            semanticsLabel: context.l10n.overallProgressSemantics(
+              snapshot.overallPercent,
+            ),
             height: 10,
           ),
           const SizedBox(height: AppSpacing.space2),
@@ -249,15 +252,17 @@ class _ProgressSummaryCard extends StatelessWidget {
             runSpacing: AppSpacing.space1,
             children: [
               Text(
-                'Đã hoàn thành ${snapshot.completedLessons}/'
-                '${snapshot.totalLessons} bài học',
+                context.l10n.completedLessons(
+                  snapshot.completedLessons,
+                  snapshot.totalLessons,
+                ),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
-                'Chuỗi học: ${snapshot.streakDays} ngày 🔥',
+                context.l10n.studyStreak(snapshot.streakDays),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.learnerTextPrimary,
                   fontWeight: FontWeight.w600,
@@ -270,7 +275,7 @@ class _ProgressSummaryCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.space4),
           RikiPrimaryButton(
             key: const ValueKey<String>('learning_open_roadmap_button'),
-            label: 'Tiếp tục lộ trình',
+            label: context.l10n.continueRoadmap,
             trailingIcon: Icons.arrow_forward,
             onPressed: onOpenRoadmap,
           ),
@@ -372,7 +377,7 @@ class _CurrentLessonCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.space2),
               Expanded(
                 child: Text(
-                  'ĐANG HỌC DỞ',
+                  context.l10n.inProgressUpper,
                   style: AppTypography.badgeText.copyWith(
                     color: AppColors.brandPrimary,
                     fontSize: 12,
@@ -382,7 +387,10 @@ class _CurrentLessonCard extends StatelessWidget {
                 ),
               ),
               Text(
-                'Chương ${lesson.chapterNumber} • Bài ${lesson.lessonNumber}',
+                context.l10n.chapterAndLesson(
+                  lesson.chapterNumber,
+                  lesson.lessonNumber,
+                ),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w600,
@@ -423,7 +431,7 @@ class _CurrentLessonCard extends StatelessWidget {
                     const SizedBox(height: AppSpacing.space1),
                     Text(
                       '${lesson.category}: ${lesson.pattern} • '
-                      '${lesson.durationMinutes} phút',
+                      '${context.l10n.durationMinutes(lesson.durationMinutes)}',
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -442,8 +450,9 @@ class _CurrentLessonCard extends StatelessWidget {
               Expanded(
                 child: _ProgressBar(
                   value: lesson.progress,
-                  semanticsLabel:
-                      'Tiến độ bài học ${lesson.progressPercent} phần trăm',
+                  semanticsLabel: context.l10n.lessonProgressSemantics(
+                    lesson.progressPercent,
+                  ),
                   height: 8,
                   color: AppColors.error,
                 ),
@@ -460,7 +469,7 @@ class _CurrentLessonCard extends StatelessWidget {
               TextButton(
                 key: const ValueKey<String>('learning_continue_lesson_button'),
                 onPressed: onOpenLesson,
-                child: const Text('Học tiếp'),
+                child: Text(context.l10n.continueLearning),
               ),
             ],
           ),

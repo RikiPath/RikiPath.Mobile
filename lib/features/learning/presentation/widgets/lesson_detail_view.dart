@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_shared_widgets.dart';
@@ -32,8 +33,8 @@ class LessonDetailView extends StatelessWidget {
         _StreakCard(lesson: lesson),
         const SizedBox(height: AppSpacing.space5),
         _SectionHeader(
-          title: 'Nội dung bài học (${lesson.parts.length} phần)',
-          trailing: 'Tổng thời lượng ~${lesson.durationMinutes}m',
+          title: context.l10n.lessonContentCount(lesson.parts.length),
+          trailing: context.l10n.totalDuration(lesson.durationMinutes),
         ),
         const SizedBox(height: AppSpacing.space3),
         for (var index = 0; index < lesson.parts.length; index++) ...[
@@ -43,8 +44,8 @@ class LessonDetailView extends StatelessWidget {
         ],
         const SizedBox(height: AppSpacing.space5),
         _SectionHeader(
-          title: 'Từ vựng trọng tâm trong bài',
-          trailing: '${lesson.detailVocabularyCount} từ vựng',
+          title: context.l10n.focusVocabulary,
+          trailing: context.l10n.vocabularyCount(lesson.detailVocabularyCount),
         ),
         const SizedBox(height: AppSpacing.space3),
         for (
@@ -57,7 +58,7 @@ class LessonDetailView extends StatelessWidget {
             const SizedBox(height: AppSpacing.space2),
         ],
         const SizedBox(height: AppSpacing.space5),
-        const _SectionHeader(title: 'Ngữ pháp liên quan'),
+        _SectionHeader(title: context.l10n.relatedGrammarShort),
         const SizedBox(height: AppSpacing.space3),
         for (var index = 0; index < lesson.relatedGrammar.length; index++) ...[
           _RelatedGrammarCard(grammar: lesson.relatedGrammar[index]),
@@ -68,8 +69,10 @@ class LessonDetailView extends StatelessWidget {
         RikiPrimaryButton(
           key: const ValueKey<String>('lesson_start_button'),
           label: lesson.progress.resumePositionSeconds > 0
-              ? 'Tiếp tục bài học (${lesson.progress.progressPercent}%)'
-              : 'Bắt đầu bài học',
+              ? context.l10n.continueLessonProgress(
+                  lesson.progress.progressPercent,
+                )
+              : context.l10n.startLesson,
           trailingIcon: Icons.arrow_forward,
           onPressed: onStart,
         ),
@@ -105,7 +108,7 @@ class _LessonHero extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
-                'Trọng tâm:',
+                context.l10n.focusLabel,
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -134,8 +137,10 @@ class _LessonHero extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              'Phần ${lesson.currentPartNumber} / '
-              '${lesson.parts.length}',
+              context.l10n.partProgress(
+                lesson.currentPartNumber,
+                lesson.parts.length,
+              ),
               style: AppTypography.metadata.copyWith(
                 color: AppColors.textMuted,
               ),
@@ -173,7 +178,7 @@ class _ObjectiveCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Mục tiêu bài học',
+                  context.l10n.lessonObjective,
                   style: AppTypography.cardTitle.copyWith(
                     color: AppColors.learnerTextPrimary,
                   ),
@@ -218,14 +223,14 @@ class _StreakCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Chuỗi ${lesson.streakDays} ngày bền bỉ',
+                  context.l10n.streakMotivation(lesson.streakDays),
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.learnerTextPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
-                  'Hoàn thành bài này để giữ lửa streak!',
+                  context.l10n.keepStreakMessage,
                   style: AppTypography.metadata.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -294,7 +299,8 @@ class _LessonPartTile extends StatelessWidget {
                   style: AppTypography.cardTitle.copyWith(color: color),
                 ),
                 Text(
-                  '${part.subtitle} • ${part.durationMinutes} phút',
+                  '${part.subtitle} • '
+                  '${context.l10n.durationMinutes(part.durationMinutes)}',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.metadata.copyWith(
@@ -307,7 +313,7 @@ class _LessonPartTile extends StatelessWidget {
           const SizedBox(width: AppSpacing.space2),
           if (isCompleted)
             Text(
-              'Đã xong',
+              context.l10n.done,
               style: AppTypography.badgeText.copyWith(
                 color: AppColors.success,
                 fontWeight: FontWeight.w700,

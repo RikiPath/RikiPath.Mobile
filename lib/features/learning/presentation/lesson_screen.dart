@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/features/learning/application/lesson_controller.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_session.dart';
@@ -28,8 +29,8 @@ class LessonScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
-        title: _title(session),
-        subtitle: _subtitle(session),
+        title: _title(context, session),
+        subtitle: _subtitle(context, session),
         level: session?.lesson.level,
         initials: null,
         onBack: () => _handleBack(context, controller, session),
@@ -93,26 +94,29 @@ class LessonScreen extends ConsumerWidget {
     };
   }
 
-  String _title(LessonSession? session) {
+  String _title(BuildContext context, LessonSession? session) {
     if (session == null) {
-      return 'Bài học';
+      return context.l10n.lesson;
     }
     if (session.stage == LessonStage.completed) {
-      return 'Hoàn thành bài học';
+      return context.l10n.completeLesson;
     }
-    return 'Bài ${session.lesson.lessonNumber}';
+    return context.l10n.lessonNumber(session.lesson.lessonNumber);
   }
 
-  String _subtitle(LessonSession? session) {
+  String _subtitle(BuildContext context, LessonSession? session) {
     if (session == null) {
-      return 'Đang tải nội dung';
+      return context.l10n.loadingContent;
     }
     if (session.stage == LessonStage.video ||
         session.stage == LessonStage.article) {
       return '${session.lesson.curriculum} • ${session.lesson.focus}';
     }
-    return 'Chương ${session.lesson.chapterNumber} • '
-        '${session.lesson.category} ${session.lesson.level.label}';
+    return context.l10n.chapterLessonSummary(
+      session.lesson.chapterNumber,
+      session.lesson.category,
+      session.lesson.level.label,
+    );
   }
 
   void _handleBack(

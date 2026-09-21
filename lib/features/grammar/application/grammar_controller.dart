@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/grammar/data/api_grammar_repository.dart';
@@ -85,7 +86,7 @@ class GrammarLibraryController extends AsyncNotifier<GrammarLibraryState> {
       state = AsyncData(
         current.copyWith(
           isLoadingMore: false,
-          pageError: 'Không thể tải thêm ngữ pháp. Vui lòng thử lại.',
+          pageError: ref.read(appLocalizationsProvider).grammarLoadMoreFailed,
         ),
       );
     }

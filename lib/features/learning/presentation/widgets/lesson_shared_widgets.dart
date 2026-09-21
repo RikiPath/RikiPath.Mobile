@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 
@@ -18,7 +19,7 @@ class LessonMetadataWrap extends StatelessWidget {
         JlptBadge(lesson.level),
         _MetadataPill(label: lesson.category),
         _MetadataPill(
-          label: '${lesson.durationMinutes} phút',
+          label: context.l10n.durationMinutes(lesson.durationMinutes),
           icon: Icons.schedule_outlined,
         ),
       ],
@@ -48,7 +49,7 @@ class LessonProgressMeter extends StatelessWidget {
           runSpacing: AppSpacing.space1,
           children: [
             Text(
-              'Tiến độ bài học',
+              context.l10n.lessonProgressTitle,
               style: AppTypography.bodySmall.copyWith(
                 color: color,
                 fontWeight: FontWeight.w700,
@@ -56,8 +57,10 @@ class LessonProgressMeter extends StatelessWidget {
             ),
             Text(
               progress.isCompleted
-                  ? '100% HOÀN THÀNH'
-                  : '${progress.progressPercent}% • Đang học',
+                  ? context.l10n.completedUpper
+                  : context.l10n.learningProgressValue(
+                      progress.progressPercent,
+                    ),
               key: const ValueKey<String>('lesson_progress_value'),
               style: AppTypography.bodySmall.copyWith(
                 color: color,
@@ -74,8 +77,9 @@ class LessonProgressMeter extends StatelessWidget {
             minHeight: 9,
             color: color,
             backgroundColor: AppColors.learnerSurfaceLow,
-            semanticsLabel:
-                'Tiến độ bài học ${progress.progressPercent} phần trăm',
+            semanticsLabel: context.l10n.lessonProgressSemantics(
+              progress.progressPercent,
+            ),
           ),
         ),
       ],
@@ -147,7 +151,9 @@ class LessonVocabularyTile extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.space1),
                 Text(
-                  item.isSaved ? 'Đã lưu' : 'Sổ từ',
+                  item.isSaved
+                      ? context.l10n.saved
+                      : context.l10n.notebookShort,
                   style: AppTypography.badgeText.copyWith(
                     color: AppColors.brandPrimary,
                     fontWeight: FontWeight.w700,

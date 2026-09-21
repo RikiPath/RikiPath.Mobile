@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/kanji/application/kanji_controller.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
@@ -46,10 +47,10 @@ class KanjiLibraryView extends StatelessWidget {
           textInputAction: TextInputAction.search,
           onSubmitted: onSearch,
           decoration: InputDecoration(
-            hintText: 'Tìm theo Kanji hoặc ý nghĩa',
+            hintText: context.l10n.kanjiSearchHint,
             prefixIcon: const Icon(Icons.search),
             suffixIcon: IconButton(
-              tooltip: 'Tìm kiếm',
+              tooltip: context.l10n.search,
               onPressed: () => onSearch(searchController.text),
               icon: const Icon(Icons.arrow_forward),
             ),
@@ -61,7 +62,7 @@ class KanjiLibraryView extends StatelessWidget {
           child: Row(
             children: [
               _LevelChip(
-                label: 'Tất cả',
+                label: context.l10n.all,
                 selected: state.query.level == null,
                 onSelected: () => onFilter(null),
               ),
@@ -81,7 +82,7 @@ class KanjiLibraryView extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                '${state.page.totalCount} Kanji',
+                context.l10n.kanjiCount(state.page.totalCount),
                 style: AppTypography.sectionTitle,
               ),
             ),
@@ -97,7 +98,7 @@ class KanjiLibraryView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
                 child: Text(
-                  'Dữ liệu mẫu',
+                  context.l10n.sampleData,
                   style: AppTypography.badgeText.copyWith(
                     color: AppColors.warningText,
                   ),
@@ -127,12 +128,13 @@ class KanjiLibraryView extends StatelessWidget {
         if (state.page.hasNextPage)
           Center(
             child: state.isLoadingMore
-                ? const CircularProgressIndicator(
+                ? RikiInlineLoader(
                     key: ValueKey<String>('kanji_loading_more'),
+                    semanticsLabel: context.l10n.loading,
                   )
                 : RikiSecondaryButton(
                     key: const ValueKey<String>('kanji_load_more_button'),
-                    label: 'Xem thêm',
+                    label: context.l10n.showMore,
                     onPressed: onLoadMore,
                   ),
           ),
@@ -190,7 +192,7 @@ class _KanjiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Mở chi tiết Kanji ${entry.character}',
+      label: context.l10n.kanjiDetailSemantics(entry.character),
       child: InkWell(
         key: ValueKey<String>('kanji_card_${entry.routeKey}'),
         onTap: onOpen,
@@ -224,7 +226,7 @@ class _KanjiCard extends StatelessWidget {
                       children: [
                         JlptBadge(entry.level),
                         Text(
-                          '${entry.strokeCount} nét',
+                          context.l10n.strokeCount(entry.strokeCount),
                           style: AppTypography.metadata,
                         ),
                         if (entry.sinoVietnamese != null)
@@ -247,8 +249,10 @@ class _KanjiCard extends StatelessWidget {
                       const SizedBox(height: AppSpacing.space1),
                       Text(
                         [
-                          if (entry.onYomi != null) 'Âm On: ${entry.onYomi}',
-                          if (entry.kunYomi != null) 'Âm Kun: ${entry.kunYomi}',
+                          if (entry.onYomi != null)
+                            '${context.l10n.onReading}: ${entry.onYomi}',
+                          if (entry.kunYomi != null)
+                            '${context.l10n.kunReading}: ${entry.kunYomi}',
                         ].join('  •  '),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -259,7 +263,9 @@ class _KanjiCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: onPlayAudio == null ? 'Chưa có âm thanh' : 'Nghe đọc',
+                tooltip: onPlayAudio == null
+                    ? context.l10n.audioUnavailable
+                    : context.l10n.listenReading,
                 onPressed: onPlayAudio,
                 icon: Icon(
                   Icons.volume_up_outlined,

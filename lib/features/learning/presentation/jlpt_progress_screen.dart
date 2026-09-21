@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/jlpt_progress_view.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_header.dart';
@@ -20,8 +21,8 @@ class JlptProgressScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
-        title: 'Tiến độ JLPT$levelSuffix',
-        subtitle: 'Chi tiết phân bổ 5 kỹ năng',
+        title: context.l10n.jlptProgress(levelSuffix),
+        subtitle: context.l10n.fiveSkillBreakdown,
         level: snapshot?.jlptTarget,
         initials: snapshot?.initials,
         onBack: () => _goBack(context),

@@ -94,10 +94,7 @@ class HomeSetupItem {
   final String? actionLabel;
 }
 
-enum HomeToolDestination {
-  notebook,
-  practice,
-}
+enum HomeToolDestination { notebook, practice }
 
 @immutable
 class HomeToolSummary {

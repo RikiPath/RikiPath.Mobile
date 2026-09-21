@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 
 class RikiTextField extends StatelessWidget {
   const RikiTextField({
@@ -18,6 +20,8 @@ class RikiTextField extends StatelessWidget {
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.autofillHints,
+    this.inputFormatters,
+    this.autofocus = false,
     this.enableSuggestions = true,
     this.autocorrect = true,
     this.onChanged,
@@ -41,6 +45,8 @@ class RikiTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final TextCapitalization textCapitalization;
   final Iterable<String>? autofillHints;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool autofocus;
   final bool enableSuggestions;
   final bool autocorrect;
   final ValueChanged<String>? onChanged;
@@ -80,6 +86,8 @@ class RikiTextField extends StatelessWidget {
             textInputAction: textInputAction,
             textCapitalization: textCapitalization,
             autofillHints: autofillHints,
+            inputFormatters: inputFormatters,
+            autofocus: autofocus,
             enableSuggestions: enableSuggestions,
             autocorrect: autocorrect,
             onChanged: onChanged,
@@ -200,7 +208,9 @@ class _RikiPasswordFieldState extends State<RikiPasswordField> {
                 _obscured = !_obscured;
               })
             : null,
-        tooltip: _obscured ? 'Hiện mật khẩu' : 'Ẩn mật khẩu',
+        tooltip: _obscured
+            ? context.l10n.showPassword
+            : context.l10n.hidePassword,
         icon: Icon(
           _obscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
           size: 20,

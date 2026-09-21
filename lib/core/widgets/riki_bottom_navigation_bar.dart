@@ -1,47 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 
 class RikiBottomNavigationBar extends StatelessWidget {
   const RikiBottomNavigationBar({
     required this.selectedIndex,
     required this.onDestinationSelected,
     super.key,
-  }) : assert(selectedIndex >= 0 && selectedIndex < destinations.length);
+  }) : assert(selectedIndex >= 0 && selectedIndex < destinationCount);
 
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
 
-  static const List<RikiNavigationDestination> destinations =
-      <RikiNavigationDestination>[
-        RikiNavigationDestination(
-          label: 'Trang chủ',
-          icon: Icons.home_outlined,
-          selectedIcon: Icons.home,
-        ),
-        RikiNavigationDestination(
-          label: 'Học tập',
-          icon: Icons.menu_book_outlined,
-          selectedIcon: Icons.menu_book,
-        ),
-        RikiNavigationDestination(
-          label: 'Luyện tập',
-          icon: Icons.quiz_outlined,
-          selectedIcon: Icons.quiz,
-        ),
-        RikiNavigationDestination(
-          label: 'Sổ từ',
-          icon: Icons.style_outlined,
-          selectedIcon: Icons.style,
-        ),
-        RikiNavigationDestination(
-          label: 'Cá nhân',
-          icon: Icons.person_outline,
-          selectedIcon: Icons.person,
-        ),
-      ];
+  static const int destinationCount = 5;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final destinations = <RikiNavigationDestination>[
+      RikiNavigationDestination(
+        label: l10n.navigationHome,
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home,
+      ),
+      RikiNavigationDestination(
+        label: l10n.navigationLearn,
+        icon: Icons.menu_book_outlined,
+        selectedIcon: Icons.menu_book,
+      ),
+      RikiNavigationDestination(
+        label: l10n.navigationPractice,
+        icon: Icons.quiz_outlined,
+        selectedIcon: Icons.quiz,
+      ),
+      RikiNavigationDestination(
+        label: l10n.navigationNotebook,
+        icon: Icons.style_outlined,
+        selectedIcon: Icons.style,
+      ),
+      RikiNavigationDestination(
+        label: l10n.navigationProfile,
+        icon: Icons.person_outline,
+        selectedIcon: Icons.person,
+      ),
+    ];
     return DecoratedBox(
       decoration: const BoxDecoration(
         color: AppColors.surface,

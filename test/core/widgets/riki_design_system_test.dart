@@ -1,9 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 
 void main() {
+  test('loading copy is available in Vietnamese and Japanese', () async {
+    final vietnamese = await AppLocalizations.delegate.load(const Locale('vi'));
+    final japanese = await AppLocalizations.delegate.load(const Locale('ja'));
+
+    expect(
+      vietnamese.preparingLearningContent,
+      'RikiPath đang chuẩn bị bài học cho bạn...',
+    );
+    expect(japanese.preparingLearningContent, '学習内容を準備しています…');
+  });
+
   test('theme exposes the canonical brand and focused input tokens', () {
     final theme = AppTheme.light;
     final focusedBorder = theme.inputDecorationTheme.focusedBorder;
@@ -98,10 +112,74 @@ void main() {
 
     final button = tester.widget<FilledButton>(find.byType(FilledButton));
     expect(button.onPressed, isNull);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(RikiInlineLoader), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(find.text('Đang đăng nhập...'), findsOneWidget);
     expect(presses, 0);
   });
+
+  testWidgets('full-screen study loader has a reduced-motion fallback', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localeControllerProvider.overrideWith(
+            () => _VietnameseLocaleController(),
+          ),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: const Scaffold(
+              body: RikiFullScreenLoader(
+                title: 'RikiPath đang chuẩn bị bài học cho bạn...',
+                subtitle: 'Nội dung sẽ sẵn sàng trong giây lát.',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      find.byKey(const ValueKey<String>('riki_animated_study_loader')),
+      findsOneWidget,
+    );
+    expect(find.text('文'), findsOneWidget);
+    expect(
+      find.text('RikiPath đang chuẩn bị bài học cho bạn...'),
+      findsOneWidget,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'section skeleton preserves content structure without a spinner',
+    (tester) async {
+      await tester.pumpWidget(
+        _testHost(
+          const SizedBox(
+            height: 520,
+            child: RikiSectionSkeleton(itemCount: 2, cardHeight: 96),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(RikiShimmer), findsOneWidget);
+      expect(find.byType(RikiSkeletonCard), findsNWidgets(2));
+      expect(find.byType(RikiSkeleton), findsWidgets);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('text field displays validation treatment and message', (
     tester,
@@ -205,10 +283,10 @@ void main() {
     },
   );
 
-  testWidgets('language badge exposes the approved compact VI state', (
+  testWidgets('language switcher exposes the approved compact VI state', (
     tester,
   ) async {
-    await tester.pumpWidget(_testHost(const LanguageBadge()));
+    await tester.pumpWidget(_testHost(const RikiLanguageSwitcher()));
 
     expect(find.text('VI'), findsOneWidget);
     expect(find.byIcon(Icons.language), findsOneWidget);
@@ -244,15 +322,30 @@ void main() {
 }
 
 Widget _testHost(Widget child) {
-  return MaterialApp(
-    theme: AppTheme.light,
-    home: Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.space6),
-        child: child,
+  return ProviderScope(
+    overrides: [
+      localeControllerProvider.overrideWith(
+        () => _VietnameseLocaleController(),
+      ),
+    ],
+    child: MaterialApp(
+      theme: AppTheme.light,
+      locale: const Locale('vi'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.space6),
+          child: child,
+        ),
       ),
     ),
   );
+}
+
+class _VietnameseLocaleController extends LocaleController {
+  @override
+  Locale build() => const Locale('vi');
 }
 
 void _noop() {}

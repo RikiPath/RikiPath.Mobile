@@ -34,6 +34,10 @@ void main() {
     expect(find.text('Các phần học chính'), findsOneWidget);
     expect(find.text('Lộ trình'), findsWidgets);
     expect(find.text('Bài học'), findsWidgets);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey<String>('learning_section_library')),
+      160,
+    );
     expect(find.text('Thư viện'), findsWidgets);
   });
 

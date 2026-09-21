@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_shared_widgets.dart';
@@ -47,14 +48,14 @@ class LessonCompletionView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Xuất sắc hoàn thành',
+                          context.l10n.excellentCompletion,
                           style: AppTypography.badgeText.copyWith(
                             color: AppColors.success,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         Text(
-                          'Chúc mừng bạn đã hoàn thành!',
+                          context.l10n.completionCongratulations,
                           style: AppTypography.sectionTitle.copyWith(
                             color: AppColors.learnerTextPrimary,
                           ),
@@ -68,7 +69,7 @@ class LessonCompletionView extends StatelessWidget {
               const Divider(height: 1),
               const SizedBox(height: AppSpacing.space3),
               Text(
-                'BÀI ${lesson.lessonNumber}',
+                context.l10n.lessonUpper(lesson.lessonNumber),
                 style: AppTypography.badgeText.copyWith(
                   color: AppColors.brandPrimary,
                   fontWeight: FontWeight.w700,
@@ -111,7 +112,7 @@ class LessonCompletionView extends StatelessWidget {
                     const SizedBox(width: AppSpacing.space2),
                     Expanded(
                       child: Text(
-                        'Chuỗi học tập: ${lesson.streakDays} ngày liên tiếp',
+                        context.l10n.streakConsecutive(lesson.streakDays),
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.learnerTextPrimary,
                           fontWeight: FontWeight.w700,
@@ -142,13 +143,13 @@ class LessonCompletionView extends StatelessWidget {
                 runSpacing: AppSpacing.space1,
                 children: [
                   Text(
-                    'Nội dung bạn đã nắm vững',
+                    context.l10n.masteredContent,
                     style: AppTypography.sectionTitle.copyWith(
                       color: AppColors.learnerTextPrimary,
                     ),
                   ),
                   Text(
-                    '${lesson.masteryItems.length}/${lesson.masteryItems.length} mục',
+                    context.l10n.masteredItemCount(lesson.masteryItems.length),
                     style: AppTypography.badgeText.copyWith(
                       color: AppColors.success,
                       fontWeight: FontWeight.w700,
@@ -175,7 +176,9 @@ class LessonCompletionView extends StatelessWidget {
           const SizedBox(height: AppSpacing.space4),
           RikiPrimaryButton(
             key: const ValueKey<String>('lesson_next_button'),
-            label: 'Học bài tiếp theo (Bài ${lesson.nextLesson!.lessonNumber})',
+            label: context.l10n.nextLessonAction(
+              lesson.nextLesson!.lessonNumber,
+            ),
             trailingIcon: Icons.arrow_forward,
             onPressed: onNextLesson,
           ),
@@ -183,7 +186,7 @@ class LessonCompletionView extends StatelessWidget {
         const SizedBox(height: AppSpacing.space2),
         RikiTextButton(
           key: const ValueKey<String>('lesson_back_roadmap_button'),
-          label: 'Quay lại Lộ trình học ${lesson.level.label}',
+          label: context.l10n.backToLevelRoadmap(lesson.level.label),
           leadingIcon: Icons.arrow_back,
           onPressed: onBackToRoadmap,
         ),
@@ -255,7 +258,7 @@ class _NextLessonCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Bài học tiếp theo trong lộ trình',
+            context.l10n.nextLessonInRoadmap,
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,
@@ -288,7 +291,7 @@ class _NextLessonCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '~${nextLesson.durationMinutes} phút • '
+                      '~${context.l10n.durationMinutes(nextLesson.durationMinutes)} • '
                       '${nextLesson.level.label}',
                       style: AppTypography.metadata.copyWith(
                         color: AppColors.textSecondary,
