@@ -33,9 +33,9 @@ void main() {
       ]);
       expect(collections.single.routeKey, 'remote-list-3');
       expect(collections.single.remoteId, 3);
-      expect(entries.single.routeKey, 'remote-note-41');
+      expect(entries.single.routeKey, 'live:vocabulary:41');
       expect(entries.single.remoteNoteEntryId, 41);
-      expect(entries.single.reviewItemId, 52);
+      expect(entries.single.reviewCardId, 52);
     });
 
     test('maps every source-backed entry field and nullable values', () async {
@@ -135,7 +135,7 @@ void main() {
       );
 
       expect(client.lastData, <String, Object?>{
-        'vocabularyListId': 3,
+        'learnerNoteId': 3,
         'word': '経験',
         'reading': 'けいけん',
         'meaning': 'Kinh nghiệm',
@@ -155,8 +155,8 @@ void main() {
       );
 
       expect(client.lastData, <String, Object?>{
-        'vocabularyListId': 3,
-        'vocabularyEntryId': 7,
+        'learnerNoteId': 3,
+        'vocabularyId': 7,
       });
       expect(bookmark.noteEntryId, 41);
       expect(bookmark.collectionRouteKey, 'remote-list-3');
@@ -272,7 +272,7 @@ Map<String, Object?> _entryJson({
   String? note,
 }) => <String, Object?>{
   'noteEntryId': 41,
-  'reviewItemId': 52,
+  'reviewCardId': 52,
   'contentType': contentType,
   'term': '経験',
   'reading': reading,

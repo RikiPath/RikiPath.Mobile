@@ -13,9 +13,10 @@ class NotebookView extends StatefulWidget {
     required this.onSelectCollection,
     required this.onRetry,
     required this.onDismissMutationError,
+    required this.onDismissEntriesError,
     required this.onCreateCollection,
     required this.onAddEntry,
-    required this.onOpenVocabulary,
+    required this.onOpenEntry,
     required this.onRemoveEntry,
     super.key,
   });
@@ -26,9 +27,10 @@ class NotebookView extends StatefulWidget {
   final ValueChanged<NotebookCollection> onSelectCollection;
   final VoidCallback onRetry;
   final VoidCallback onDismissMutationError;
+  final VoidCallback onDismissEntriesError;
   final VoidCallback onCreateCollection;
   final VoidCallback onAddEntry;
-  final ValueChanged<NotebookEntry> onOpenVocabulary;
+  final ValueChanged<NotebookEntry> onOpenEntry;
   final ValueChanged<NotebookEntry> onRemoveEntry;
 
   @override
@@ -88,9 +90,6 @@ class _NotebookViewState extends State<NotebookView> {
                 entryCount: state.collections.fold<int>(
                   0,
                   (total, item) => total + item.entryCount,
-                ),
-                isFixture: state.collections.any(
-                  (item) => item.source == NotebookDataSource.fixture,
                 ),
               ),
               const SizedBox(height: AppSpacing.space4),
@@ -194,7 +193,9 @@ class _NotebookViewState extends State<NotebookView> {
                   IconButton.filled(
                     key: const ValueKey<String>('notebook_add_entry_button'),
                     tooltip: context.l10n.addNewWord,
-                    onPressed: state.isAddingEntry ? null : widget.onAddEntry,
+                    onPressed: state.isAddingEntry || !state.canAddManualEntry
+                        ? null
+                        : widget.onAddEntry,
                     icon: const Icon(Icons.add),
                   ),
                 ],
@@ -225,7 +226,7 @@ class _NotebookViewState extends State<NotebookView> {
                     ),
                   ),
                 )
-              else if (state.entriesError != null)
+              else if (state.entriesError != null && state.entries.isEmpty)
                 _EntriesError(
                   message: state.entriesError!,
                   onRetry: widget.onRetry,
@@ -237,6 +238,14 @@ class _NotebookViewState extends State<NotebookView> {
                   onAddEntry: widget.onAddEntry,
                 )
               else ...[
+                if (state.entriesError != null) ...[
+                  _InlineError(
+                    key: const ValueKey<String>('notebook_live_entries_error'),
+                    message: state.entriesError!,
+                    onDismiss: widget.onDismissEntriesError,
+                  ),
+                  const SizedBox(height: AppSpacing.space3),
+                ],
                 Row(
                   children: [
                     Expanded(
@@ -260,9 +269,7 @@ class _NotebookViewState extends State<NotebookView> {
                       isRemoving: state.removingEntryKeys.contains(
                         entry.routeKey,
                       ),
-                      onOpen: entry.vocabularyRouteKey == null
-                          ? null
-                          : () => widget.onOpenVocabulary(entry),
+                      onOpen: () => widget.onOpenEntry(entry),
                       onRemove: () => widget.onRemoveEntry(entry),
                     ),
                   ),
@@ -280,12 +287,10 @@ class _OverviewCard extends StatelessWidget {
   const _OverviewCard({
     required this.collectionCount,
     required this.entryCount,
-    required this.isFixture,
   });
 
   final int collectionCount;
   final int entryCount;
-  final bool isFixture;
 
   @override
   Widget build(BuildContext context) {
@@ -322,24 +327,6 @@ class _OverviewCard extends StatelessWidget {
               ],
             ),
           ),
-          if (isFixture)
-            Container(
-              key: const ValueKey<String>('notebook_fixture_label'),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.space2,
-                vertical: AppSpacing.space1,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.warningBackground,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-              ),
-              child: Text(
-                context.l10n.sampleData,
-                style: AppTypography.badgeText.copyWith(
-                  color: AppColors.warningText,
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -471,7 +458,8 @@ class _ContentTypeBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = switch (type) {
       NotebookContentType.vocabulary => context.l10n.vocabulary,
-      NotebookContentType.kanji => 'Kanji',
+      NotebookContentType.kanji => context.l10n.notebookKanjiLabel,
+      NotebookContentType.grammar => context.l10n.grammar,
       NotebookContentType.manual => context.l10n.personalWord,
       NotebookContentType.unknown => context.l10n.savedItem,
     };
@@ -499,40 +487,15 @@ class _EmptyNotebook extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return RikiEmptyState(
       key: const ValueKey<String>('notebook_empty_view'),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.space6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.collections_bookmark_outlined,
-              size: 52,
-              color: AppColors.textMuted,
-            ),
-            const SizedBox(height: AppSpacing.space3),
-            Text(
-              context.l10n.notebookEmptyTitle,
-              style: AppTypography.sectionTitle,
-            ),
-            const SizedBox(height: AppSpacing.space1),
-            Text(
-              context.l10n.notebookEmptyMessage,
-              style: AppTypography.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.space4),
-            FilledButton.icon(
-              key: const ValueKey<String>(
-                'notebook_empty_create_collection_button',
-              ),
-              onPressed: onCreateCollection,
-              icon: const Icon(Icons.add),
-              label: Text(context.l10n.createCollectionAction),
-            ),
-          ],
-        ),
+      icon: Icons.collections_bookmark_outlined,
+      title: context.l10n.notebookEmptyTitle,
+      message: context.l10n.notebookEmptyMessage,
+      actionLabel: context.l10n.createCollectionAction,
+      onAction: onCreateCollection,
+      actionKey: const ValueKey<String>(
+        'notebook_empty_create_collection_button',
       ),
     );
   }
@@ -551,40 +514,25 @@ class _EmptyEntries extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return RikiEmptyState(
       key: ValueKey<String>(
         hasQuery ? 'notebook_search_empty_view' : 'notebook_entries_empty_view',
       ),
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.space8),
-      child: Column(
-        children: [
-          Icon(
-            hasQuery ? Icons.search_off : Icons.bookmark_border,
-            size: 42,
-            color: AppColors.textMuted,
-          ),
-          const SizedBox(height: AppSpacing.space2),
-          Text(
-            hasQuery
-                ? context.l10n.noMatchingWord
-                : context.l10n.collectionHasNoWords,
-            style: AppTypography.sectionTitle,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.space3),
-          TextButton(
-            key: ValueKey<String>(
-              hasQuery
-                  ? 'notebook_clear_search_button'
-                  : 'notebook_empty_add_button',
-            ),
-            onPressed: hasQuery ? onClear : onAddEntry,
-            child: Text(
-              hasQuery ? context.l10n.clearSearch : context.l10n.addNewWord,
-            ),
-          ),
-        ],
+      icon: hasQuery ? Icons.search_off_outlined : Icons.bookmark_border,
+      title: hasQuery
+          ? context.l10n.noMatchingWord
+          : context.l10n.collectionHasNoWords,
+      message: hasQuery
+          ? context.l10n.notebookSearchEmptyMessage
+          : context.l10n.notebookCollectionEmptyMessage,
+      actionLabel: hasQuery
+          ? context.l10n.clearSearch
+          : context.l10n.addNewWord,
+      onAction: hasQuery ? onClear : onAddEntry,
+      actionKey: ValueKey<String>(
+        hasQuery ? 'notebook_clear_search_button' : 'notebook_empty_add_button',
       ),
+      compact: true,
     );
   }
 }
@@ -633,7 +581,7 @@ class _InlineError extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.errorBackground,
         borderRadius: BorderRadius.circular(AppRadius.input),
-        border: Border.all(color: AppColors.brandBorder),
+        border: Border.all(color: AppColors.errorBorder),
       ),
       child: Row(
         children: [

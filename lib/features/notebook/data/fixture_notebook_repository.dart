@@ -33,40 +33,43 @@ class FixtureNotebookRepository implements NotebookRepository {
       <String, List<NotebookEntry>>{
         defaultCollection.routeKey: <NotebookEntry>[
           NotebookEntry(
-            routeKey: 'fixture-note-keiken',
+            key: NotebookEntryKey.fixture(
+              contentType: NotebookContentType.vocabulary,
+              stableKey: 'fixture-note-keiken',
+            ),
             remoteNoteEntryId: null,
-            reviewItemId: null,
             contentType: NotebookContentType.vocabulary,
             term: '経験',
             reading: 'けいけん',
             meaning: 'Kinh nghiệm',
             note: 'Dữ liệu minh họa cục bộ',
             addedAt: DateTime.utc(2026, 9, 12),
-            source: NotebookDataSource.fixture,
             vocabularyRouteKey: 'fixture-keiken',
           ),
           NotebookEntry(
-            routeKey: 'fixture-note-kaizen',
+            key: NotebookEntryKey.fixture(
+              contentType: NotebookContentType.vocabulary,
+              stableKey: 'fixture-note-kaizen',
+            ),
             remoteNoteEntryId: null,
-            reviewItemId: null,
             contentType: NotebookContentType.vocabulary,
             term: '改善',
             reading: 'かいぜん',
             meaning: 'Cải thiện, cải tiến',
             addedAt: DateTime.utc(2026, 9, 11),
-            source: NotebookDataSource.fixture,
             vocabularyRouteKey: 'fixture-kaizen',
           ),
           NotebookEntry(
-            routeKey: 'fixture-note-yakusoku',
+            key: NotebookEntryKey.fixture(
+              contentType: NotebookContentType.manual,
+              stableKey: 'fixture-note-yakusoku',
+            ),
             remoteNoteEntryId: null,
-            reviewItemId: null,
             contentType: NotebookContentType.manual,
             term: '約束',
             reading: 'やくそく',
             meaning: 'Lời hứa, cuộc hẹn',
             addedAt: DateTime.utc(2026, 9, 10),
-            source: NotebookDataSource.fixture,
           ),
         ],
       };
@@ -136,14 +139,16 @@ class FixtureNotebookRepository implements NotebookRepository {
       existing.insert(
         0,
         NotebookEntry(
-          routeKey: 'fixture-note-${vocabulary.routeKey}',
+          key: NotebookEntryKey.fixture(
+            contentType: NotebookContentType.vocabulary,
+            stableKey: vocabulary.routeKey,
+          ),
           remoteNoteEntryId: null,
           contentType: NotebookContentType.vocabulary,
           term: vocabulary.term,
           reading: vocabulary.reading,
           meaning: vocabulary.meaning,
           addedAt: DateTime.now().toUtc(),
-          source: NotebookDataSource.fixture,
           vocabularyRouteKey: vocabulary.routeKey,
         ),
       );

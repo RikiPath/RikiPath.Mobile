@@ -87,28 +87,23 @@ class PersistentNotebookRepository implements NotebookRepository {
     required String meaning,
     String? note,
   }) async {
+    if (collection.source != NotebookDataSource.remote ||
+        collection.remoteId == null ||
+        collection.remoteId! <= 0) {
+      throw ArgumentError.value(
+        collection.routeKey,
+        'collection',
+        'Manual entries require a verified LIVE notebook collection.',
+      );
+    }
     final ownerUserId = await _ownerUserId();
-    final normalizedReading = _optionalText(reading);
-    final normalizedNote = _optionalText(note);
-    final entry = collection.remoteId == null
-        ? NotebookEntry(
-            routeKey: 'local-manual-${DateTime.now().microsecondsSinceEpoch}',
-            remoteNoteEntryId: null,
-            contentType: NotebookContentType.manual,
-            term: word.trim(),
-            reading: normalizedReading,
-            meaning: meaning.trim(),
-            note: normalizedNote,
-            addedAt: DateTime.now().toUtc(),
-            source: NotebookDataSource.local,
-          )
-        : await _remote.addManualEntry(
-            collection: collection,
-            word: word,
-            reading: reading,
-            meaning: meaning,
-            note: note,
-          );
+    final entry = await _remote.addManualEntry(
+      collection: collection,
+      word: word,
+      reading: reading,
+      meaning: meaning,
+      note: note,
+    );
     await _local.saveEntry(ownerUserId, collection, entry);
     return entry;
   }
@@ -118,6 +113,16 @@ class PersistentNotebookRepository implements NotebookRepository {
     required NotebookVocabularyDraft vocabulary,
     required NotebookCollection collection,
   }) async {
+    final vocabularyId = vocabulary.remoteId;
+    if (collection.source != NotebookDataSource.remote ||
+        collection.remoteId == null ||
+        collection.remoteId! <= 0 ||
+        vocabularyId == null ||
+        vocabularyId <= 0) {
+      throw ArgumentError(
+        'A LIVE collection and positive backend vocabulary ID are required.',
+      );
+    }
     final ownerUserId = await _ownerUserId();
     final existing = await _local.findByVocabularyRouteKey(
       ownerUserId,
@@ -131,34 +136,26 @@ class PersistentNotebookRepository implements NotebookRepository {
       );
     }
 
-    NotebookBookmark bookmark;
-    if (collection.remoteId != null && vocabulary.remoteId != null) {
-      bookmark = await _remote.bookmarkVocabulary(
-        vocabularyEntryId: vocabulary.remoteId!,
-        collection: collection,
-      );
-    } else {
-      bookmark = NotebookBookmark(
-        noteEntryId: null,
-        collectionRouteKey: collection.routeKey,
-        collectionName: collection.name,
-      );
-    }
+    final bookmark = await _remote.bookmarkVocabulary(
+      vocabularyEntryId: vocabularyId,
+      collection: collection,
+    );
 
     final noteEntryId = bookmark.noteEntryId;
+    if (noteEntryId == null || noteEntryId <= 0) {
+      throw StateError('LIVE bookmark response omitted a note-entry ID.');
+    }
     final entry = NotebookEntry(
-      routeKey: noteEntryId == null
-          ? 'local-vocabulary-${Uri.encodeComponent(vocabulary.routeKey)}'
-          : 'remote-note-$noteEntryId',
+      key: NotebookEntryKey.live(
+        contentType: NotebookContentType.vocabulary,
+        noteEntryId: noteEntryId,
+      ),
       remoteNoteEntryId: noteEntryId,
       contentType: NotebookContentType.vocabulary,
       term: vocabulary.term,
       reading: _optionalText(vocabulary.reading),
       meaning: vocabulary.meaning,
       addedAt: DateTime.now().toUtc(),
-      source: noteEntryId == null
-          ? NotebookDataSource.local
-          : NotebookDataSource.remote,
       vocabularyRouteKey: vocabulary.routeKey,
     );
     await _local.saveEntry(ownerUserId, collection, entry);
@@ -167,10 +164,17 @@ class PersistentNotebookRepository implements NotebookRepository {
 
   @override
   Future<void> removeEntry(NotebookEntry entry) async {
-    final ownerUserId = await _ownerUserId();
-    if (entry.remoteNoteEntryId != null) {
-      await _remote.removeEntry(entry);
+    if (entry.origin != NotebookItemOrigin.live ||
+        entry.key.liveNoteEntryId == null ||
+        entry.remoteNoteEntryId != entry.key.liveNoteEntryId) {
+      throw ArgumentError.value(
+        entry.routeKey,
+        'entry',
+        'A verified LIVE notebook entry is required.',
+      );
     }
+    final ownerUserId = await _ownerUserId();
+    await _remote.removeEntry(entry);
     await _local.removeEntry(ownerUserId, entry);
   }
 

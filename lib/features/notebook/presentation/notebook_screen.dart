@@ -5,6 +5,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
+import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/widgets/notebook_state_views.dart';
@@ -42,15 +43,12 @@ class NotebookScreen extends ConsumerWidget {
             onSelectCollection: controller.selectCollection,
             onRetry: controller.retry,
             onDismissMutationError: controller.clearMutationError,
+            onDismissEntriesError: controller.clearEntriesError,
             onCreateCollection: () =>
                 _createCollection(context, ref, controller),
             onAddEntry: () => _addManualEntry(context, ref, controller),
-            onOpenVocabulary: (entry) {
-              final routeKey = entry.vocabularyRouteKey;
-              if (routeKey != null) {
-                context.push(AppRoutes.notebookVocabularyDetail(routeKey));
-              }
-            },
+            onOpenEntry: (entry) =>
+                context.push(AppRoutes.notebookEntryDetail(entry.routeKey)),
             onRemoveEntry: (entry) =>
                 _confirmRemove(context, ref, controller, entry),
           ),
@@ -66,6 +64,7 @@ class NotebookScreen extends ConsumerWidget {
   ) async {
     final request = await showModalBottomSheet<_CreateCollectionRequest>(
       context: context,
+      useSafeArea: true,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => const _CreateCollectionSheet(),
@@ -88,6 +87,7 @@ class NotebookScreen extends ConsumerWidget {
   ) async {
     final request = await showModalBottomSheet<_ManualEntryRequest>(
       context: context,
+      useSafeArea: true,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => const _ManualEntrySheet(),
@@ -111,28 +111,16 @@ class NotebookScreen extends ConsumerWidget {
     NotebookController controller,
     NotebookEntry entry,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showRikiConfirmationDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.removeFromNotebookQuestion),
-        content: Text(context.l10n.removeEntryMessage(entry.term)),
-        actions: [
-          TextButton(
-            key: const ValueKey<String>('notebook_cancel_remove_button'),
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            key: const ValueKey<String>('notebook_confirm_remove_button'),
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(context.l10n.delete),
-          ),
-        ],
-      ),
+      title: context.l10n.removeFromNotebookQuestion,
+      message: context.l10n.removeEntryMessage(entry.term),
+      confirmLabel: context.l10n.delete,
+      cancelLabel: context.l10n.cancel,
+      icon: Icons.bookmark_remove_outlined,
+      destructive: true,
+      cancelKey: const ValueKey<String>('notebook_cancel_remove_button'),
+      confirmKey: const ValueKey<String>('notebook_confirm_remove_button'),
     );
     if (confirmed != true || !context.mounted) return;
     final removed = await controller.removeEntry(entry);
@@ -171,7 +159,7 @@ class _CreateCollectionSheetState extends State<_CreateCollectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.space4,
         0,

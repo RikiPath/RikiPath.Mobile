@@ -15,17 +15,20 @@ abstract final class NotebookMapper {
   }
 
   static NotebookEntry entryFromRemote(NotebookEntryDto dto) {
+    final contentType = _contentType(dto.contentType);
     return NotebookEntry(
-      routeKey: 'remote-note-${dto.noteEntryId}',
+      key: NotebookEntryKey.live(
+        contentType: contentType,
+        noteEntryId: dto.noteEntryId,
+      ),
       remoteNoteEntryId: dto.noteEntryId,
-      reviewItemId: dto.reviewItemId,
-      contentType: _contentType(dto.contentType),
+      reviewCardId: dto.reviewCardId,
+      contentType: contentType,
       term: dto.term,
       reading: _nonEmpty(dto.reading),
       meaning: dto.meaning,
       note: _nonEmpty(dto.note),
       addedAt: dto.addedAt,
-      source: NotebookDataSource.remote,
       // The backend response omits VocabularyEntryId, so no detail route can
       // be derived safely here.
       vocabularyRouteKey: null,
@@ -36,6 +39,7 @@ abstract final class NotebookMapper {
     return switch (value.trim().toLowerCase()) {
       'vocabulary' => NotebookContentType.vocabulary,
       'kanji' => NotebookContentType.kanji,
+      'grammar' => NotebookContentType.grammar,
       'manual' => NotebookContentType.manual,
       _ => NotebookContentType.unknown,
     };

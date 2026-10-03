@@ -187,7 +187,7 @@ class NotebookLocalStore {
           PersonalVocabularyEntriesCompanion(
             id: Value(_storageKey(ownerUserId, entry.routeKey)),
             remoteNoteEntryId: Value(entry.remoteNoteEntryId),
-            reviewItemId: Value(entry.reviewItemId),
+            reviewItemId: Value(entry.reviewCardId),
             sourceVocabularyId: Value(entry.vocabularyRouteKey),
             listId: Value(_storageKey(ownerUserId, collectionRouteKey)),
             contentType: Value(entry.contentType.name),
@@ -243,17 +243,32 @@ class NotebookLocalStore {
   }
 
   NotebookEntry _entryFromRow(int ownerUserId, PersonalVocabularyEntry row) {
+    final contentType = _contentType(row.contentType);
+    final source = _dataSource(row.source);
+    final routeKey = _routeKey(ownerUserId, row.id);
+    final key =
+        source == NotebookDataSource.remote &&
+            row.remoteNoteEntryId != null &&
+            row.remoteNoteEntryId! > 0
+        ? NotebookEntryKey.live(
+            contentType: contentType,
+            noteEntryId: row.remoteNoteEntryId!,
+          )
+        : NotebookEntryKey.fixture(
+            contentType: contentType,
+            stableKey:
+                NotebookEntryKey.tryParse(routeKey)?.stableKey ?? routeKey,
+          );
     return NotebookEntry(
-      routeKey: _routeKey(ownerUserId, row.id),
+      key: key,
       remoteNoteEntryId: row.remoteNoteEntryId,
-      reviewItemId: row.reviewItemId,
-      contentType: _contentType(row.contentType),
+      reviewCardId: row.reviewItemId,
+      contentType: contentType,
       term: row.word,
       reading: row.reading,
       meaning: row.meaning,
       note: row.note,
       addedAt: row.addedAt ?? row.updatedAt,
-      source: _dataSource(row.source),
       vocabularyRouteKey: row.sourceVocabularyId,
     );
   }
@@ -262,19 +277,7 @@ class NotebookLocalStore {
     NotebookEntry entry,
     String? vocabularyRouteKey,
   ) {
-    return NotebookEntry(
-      routeKey: entry.routeKey,
-      remoteNoteEntryId: entry.remoteNoteEntryId,
-      reviewItemId: entry.reviewItemId,
-      contentType: entry.contentType,
-      term: entry.term,
-      reading: entry.reading,
-      meaning: entry.meaning,
-      note: entry.note,
-      addedAt: entry.addedAt,
-      source: entry.source,
-      vocabularyRouteKey: vocabularyRouteKey,
-    );
+    return entry.copyWith(vocabularyRouteKey: vocabularyRouteKey);
   }
 
   NotebookDataSource _dataSource(String value) {

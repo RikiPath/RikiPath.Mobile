@@ -27,7 +27,7 @@ class NotebookCollectionDto {
 class NotebookEntryDto {
   const NotebookEntryDto({
     required this.noteEntryId,
-    required this.reviewItemId,
+    required this.reviewCardId,
     required this.contentType,
     required this.term,
     required this.reading,
@@ -39,7 +39,7 @@ class NotebookEntryDto {
   factory NotebookEntryDto.fromJson(Map<String, Object?> json) {
     return NotebookEntryDto(
       noteEntryId: _requiredInt(json, 'noteEntryId'),
-      reviewItemId: _optionalInt(json, 'reviewItemId'),
+      reviewCardId: _optionalInt(json, 'reviewCardId'),
       contentType: _requiredString(json, 'contentType'),
       term: _requiredString(json, 'term'),
       reading: _optionalString(json, 'reading'),
@@ -50,7 +50,7 @@ class NotebookEntryDto {
   }
 
   final int noteEntryId;
-  final int? reviewItemId;
+  final int? reviewCardId;
   final String contentType;
   final String term;
   final String? reading;
@@ -76,21 +76,21 @@ class CreateNotebookCollectionRequestDto {
 
 class AddManualNotebookEntryRequestDto {
   const AddManualNotebookEntryRequestDto({
-    required this.vocabularyListId,
+    required this.learnerNoteId,
     required this.word,
     required this.reading,
     required this.meaning,
     required this.note,
   });
 
-  final int vocabularyListId;
+  final int learnerNoteId;
   final String word;
   final String? reading;
   final String meaning;
   final String? note;
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'vocabularyListId': vocabularyListId,
+    'learnerNoteId': learnerNoteId,
     'word': word,
     'reading': reading,
     'meaning': meaning,
@@ -100,16 +100,16 @@ class AddManualNotebookEntryRequestDto {
 
 class BookmarkVocabularyRequestDto {
   const BookmarkVocabularyRequestDto({
-    required this.vocabularyListId,
-    required this.vocabularyEntryId,
+    required this.learnerNoteId,
+    required this.vocabularyId,
   });
 
-  final int vocabularyListId;
-  final int vocabularyEntryId;
+  final int learnerNoteId;
+  final int vocabularyId;
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'vocabularyListId': vocabularyListId,
-    'vocabularyEntryId': vocabularyEntryId,
+    'learnerNoteId': learnerNoteId,
+    'vocabularyId': vocabularyId,
   };
 }
 

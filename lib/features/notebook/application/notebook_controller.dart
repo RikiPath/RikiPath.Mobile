@@ -1,13 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/database/database_provider.dart';
-import 'package:rikipath_mobile/core/errors/api_error.dart';
+import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/core/storage/json_preference_store.dart';
 import 'package:rikipath_mobile/core/storage/token_storage.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/notebook/data/api_notebook_repository.dart';
 import 'package:rikipath_mobile/features/notebook/data/notebook_local_store.dart';
 import 'package:rikipath_mobile/features/notebook/data/persistent_notebook_repository.dart';
+import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook_repository.dart';
 
@@ -23,34 +25,94 @@ final notebookRepositoryProvider = Provider<NotebookRepository>((ref) {
 
 final savedVocabularyKeysProvider = StreamProvider.autoDispose<Set<String>>((
   ref,
-) {
-  return ref.watch(notebookRepositoryProvider).watchSavedVocabularyKeys();
+) async* {
+  final localState = ref.watch(demoNotebookControllerProvider).value;
+  final localKeys = (localState?.entries ?? const <NotebookEntry>[])
+      .where((entry) => entry.contentType == NotebookContentType.vocabulary)
+      .map((entry) => entry.vocabularyRouteKey)
+      .whereType<String>()
+      .toSet();
+  yield localKeys;
+  try {
+    await for (final liveKeys
+        in ref.watch(notebookRepositoryProvider).watchSavedVocabularyKeys()) {
+      yield <String>{...localKeys, ...liveKeys};
+    }
+  } catch (_) {
+    // Fixture truth remains observable when the authenticated live cache is
+    // unavailable. The owning screen already reports live failures.
+  }
 });
 
 final notebookControllerProvider =
     AsyncNotifierProvider<NotebookController, NotebookLibraryState>(
       NotebookController.new,
+      retry: (_, _) => null,
     );
 
 class NotebookController extends AsyncNotifier<NotebookLibraryState> {
+  static const String demoCollectionRouteKey = 'fixture-learning-saved';
+
   NotebookRepository get _repository => ref.read(notebookRepositoryProvider);
 
   @override
   Future<NotebookLibraryState> build() async {
-    final collections = await _repository.loadCollections();
+    final demoState = await ref.watch(demoNotebookControllerProvider.future);
+    final localEntries = demoState.entries;
+    var remoteCollections = const <NotebookCollection>[];
+    String? remoteLoadError;
+    try {
+      remoteCollections = await _repository.loadCollections();
+    } catch (_) {
+      if (localEntries.isEmpty) rethrow;
+      remoteLoadError = ref
+          .read(appLocalizationsProvider)
+          .notebookListsLoadFailed;
+    }
+    final collections = <NotebookCollection>[
+      if (localEntries.isNotEmpty)
+        NotebookCollection(
+          routeKey: demoCollectionRouteKey,
+          remoteId: null,
+          name: ref.read(appLocalizationsProvider).savedFromLessons,
+          entryCount: localEntries.length,
+          createdAt: null,
+          source: NotebookDataSource.fixture,
+        ),
+      ...remoteCollections,
+    ];
     if (collections.isEmpty) {
       return const NotebookLibraryState(
         collections: <NotebookCollection>[],
-        entries: <NotebookEntry>[],
+        localEntries: <NotebookEntry>[],
+        liveEntries: <NotebookEntry>[],
       );
     }
 
-    final selected = collections.first;
-    final entries = await _repository.loadEntries(selected);
+    final selected = remoteCollections.firstOrNull ?? collections.first;
+    var liveEntries = const <NotebookEntry>[];
+    String? entriesError;
+    if (selected.source == NotebookDataSource.remote) {
+      try {
+        liveEntries = await _repository.loadEntries(selected);
+      } catch (error) {
+        entriesError = _message(
+          error,
+          ref.read(appLocalizationsProvider).notebookEntriesLoadFailed,
+        );
+      }
+    }
+    final localRestoreError =
+        demoState.persistenceStatus == LocalPersistenceStatus.unavailable
+        ? ref.read(appLocalizationsProvider).notebookLocalRestoreUnavailable
+        : null;
     return NotebookLibraryState(
       collections: collections,
       selectedCollectionKey: selected.routeKey,
-      entries: entries,
+      localEntries: localEntries,
+      liveEntries: liveEntries,
+      entriesError: entriesError,
+      mutationError: remoteLoadError ?? localRestoreError,
     );
   }
 
@@ -78,18 +140,23 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
     state = AsyncData(
       current.copyWith(
         selectedCollectionKey: collection.routeKey,
-        entries: const <NotebookEntry>[],
+        liveEntries: const <NotebookEntry>[],
         query: '',
-        isLoadingEntries: true,
+        isLoadingEntries: collection.source == NotebookDataSource.remote,
         clearEntriesError: true,
         clearMutationError: true,
       ),
     );
 
+    if (collection.source != NotebookDataSource.remote) return;
+
     try {
       final entries = await _repository.loadEntries(collection);
       state = AsyncData(
-        state.requireValue.copyWith(entries: entries, isLoadingEntries: false),
+        state.requireValue.copyWith(
+          liveEntries: entries,
+          isLoadingEntries: false,
+        ),
       );
     } catch (error) {
       state = AsyncData(
@@ -138,7 +205,7 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
         state.requireValue.copyWith(
           collections: collections,
           selectedCollectionKey: created.routeKey,
-          entries: const <NotebookEntry>[],
+          liveEntries: const <NotebookEntry>[],
           query: '',
           isCreatingCollection: false,
           clearEntriesError: true,
@@ -181,6 +248,17 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
       );
       return false;
     }
+    if (collection.source != NotebookDataSource.remote ||
+        collection.remoteId == null) {
+      state = AsyncData(
+        current.copyWith(
+          mutationError: ref
+              .read(appLocalizationsProvider)
+              .selectLiveCollectionForManualEntry,
+        ),
+      );
+      return false;
+    }
 
     state = AsyncData(
       current.copyWith(isAddingEntry: true, clearMutationError: true),
@@ -196,7 +274,10 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
       final latest = state.requireValue;
       state = AsyncData(
         latest.copyWith(
-          entries: <NotebookEntry>[entry, ...latest.entries],
+          liveEntries: _mergeEntries(<NotebookEntry>[
+            entry,
+            ...latest.liveEntries,
+          ]),
           collections: _adjustEntryCount(
             latest.collections,
             collection.routeKey,
@@ -226,6 +307,30 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
       return false;
     }
 
+    if (entry.origin == NotebookItemOrigin.fixture) {
+      await ref
+          .read(demoNotebookControllerProvider.notifier)
+          .removeEntry(entry);
+      final localState = await ref.read(demoNotebookControllerProvider.future);
+      final removed = !localState.entries.any(
+        (candidate) => candidate.key == entry.key,
+      );
+      state = AsyncData(
+        current.copyWith(
+          localEntries: localState.entries,
+          collections: _replaceDemoCollectionCount(
+            current.collections,
+            localState.entries.length,
+          ),
+          mutationError: removed
+              ? null
+              : ref.read(appLocalizationsProvider).notebookLocalRemoveFailed,
+          clearMutationError: removed,
+        ),
+      );
+      return removed;
+    }
+
     state = AsyncData(
       current.copyWith(
         removingEntryKeys: <String>{
@@ -241,7 +346,7 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
       final selectedKey = latest.selectedCollectionKey;
       state = AsyncData(
         latest.copyWith(
-          entries: latest.entries
+          liveEntries: latest.liveEntries
               .where((item) => item.routeKey != entry.routeKey)
               .toList(growable: false),
           collections: selectedKey == null
@@ -274,6 +379,12 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
     state = AsyncData(current.copyWith(clearMutationError: true));
   }
 
+  void clearEntriesError() {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncData(current.copyWith(clearEntriesError: true));
+  }
+
   List<NotebookCollection> _adjustEntryCount(
     List<NotebookCollection> collections,
     String collectionKey,
@@ -290,18 +401,64 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
         .toList(growable: false);
   }
 
-  String _message(Object error, String fallback) {
-    if (error is ApiError && error.message.trim().isNotEmpty) {
-      return error.message;
+  List<NotebookCollection> _replaceDemoCollectionCount(
+    List<NotebookCollection> collections,
+    int count,
+  ) {
+    if (count == 0) {
+      return collections
+          .where((item) => item.routeKey != demoCollectionRouteKey)
+          .toList(growable: false);
     }
-    return fallback;
+    final containsDemo = collections.any(
+      (item) => item.routeKey == demoCollectionRouteKey,
+    );
+    if (!containsDemo) {
+      return <NotebookCollection>[
+        NotebookCollection(
+          routeKey: demoCollectionRouteKey,
+          remoteId: null,
+          name: ref.read(appLocalizationsProvider).savedFromLessons,
+          entryCount: count,
+          createdAt: null,
+          source: NotebookDataSource.fixture,
+        ),
+        ...collections,
+      ];
+    }
+    return collections
+        .map(
+          (item) => item.routeKey == demoCollectionRouteKey
+              ? item.copyWith(entryCount: count)
+              : item,
+        )
+        .toList(growable: false);
+  }
+
+  List<NotebookEntry> _mergeEntries(List<NotebookEntry> entries) {
+    final unique = <NotebookEntryKey, NotebookEntry>{};
+    final sorted = List<NotebookEntry>.of(entries)
+      ..sort((left, right) => right.addedAt.compareTo(left.addedAt));
+    for (final entry in sorted) {
+      unique.putIfAbsent(entry.key, () => entry);
+    }
+    return List<NotebookEntry>.unmodifiable(unique.values);
+  }
+
+  String _message(Object error, String fallback) {
+    return appErrorMessage(
+      error,
+      ref.read(appLocalizationsProvider),
+      fallback: fallback,
+    );
   }
 }
 
 class NotebookLibraryState {
   const NotebookLibraryState({
     required this.collections,
-    required this.entries,
+    required this.localEntries,
+    required this.liveEntries,
     this.selectedCollectionKey,
     this.query = '',
     this.isLoadingEntries = false,
@@ -314,7 +471,8 @@ class NotebookLibraryState {
 
   final List<NotebookCollection> collections;
   final String? selectedCollectionKey;
-  final List<NotebookEntry> entries;
+  final List<NotebookEntry> localEntries;
+  final List<NotebookEntry> liveEntries;
   final String query;
   final bool isLoadingEntries;
   final bool isCreatingCollection;
@@ -330,6 +488,23 @@ class NotebookLibraryState {
     return null;
   }
 
+  List<NotebookEntry> get entries {
+    final candidates = selectedCollection?.source == NotebookDataSource.fixture
+        ? localEntries
+        : <NotebookEntry>[...localEntries, ...liveEntries];
+    final sorted = List<NotebookEntry>.of(candidates)
+      ..sort((left, right) => right.addedAt.compareTo(left.addedAt));
+    final unique = <NotebookEntryKey, NotebookEntry>{};
+    for (final entry in sorted) {
+      unique.putIfAbsent(entry.key, () => entry);
+    }
+    return List<NotebookEntry>.unmodifiable(unique.values);
+  }
+
+  bool get canAddManualEntry =>
+      selectedCollection?.source == NotebookDataSource.remote &&
+      selectedCollection?.remoteId != null;
+
   List<NotebookEntry> get visibleEntries {
     final normalized = query.trim().toLowerCase();
     if (normalized.isEmpty) return entries;
@@ -344,12 +519,13 @@ class NotebookLibraryState {
 
   bool get usesFixtureData =>
       collections.any((item) => item.source == NotebookDataSource.fixture) ||
-      entries.any((item) => item.source == NotebookDataSource.fixture);
+      localEntries.isNotEmpty;
 
   NotebookLibraryState copyWith({
     List<NotebookCollection>? collections,
     String? selectedCollectionKey,
-    List<NotebookEntry>? entries,
+    List<NotebookEntry>? localEntries,
+    List<NotebookEntry>? liveEntries,
     String? query,
     bool? isLoadingEntries,
     bool? isCreatingCollection,
@@ -364,7 +540,8 @@ class NotebookLibraryState {
       collections: collections ?? this.collections,
       selectedCollectionKey:
           selectedCollectionKey ?? this.selectedCollectionKey,
-      entries: entries ?? this.entries,
+      localEntries: localEntries ?? this.localEntries,
+      liveEntries: liveEntries ?? this.liveEntries,
       query: query ?? this.query,
       isLoadingEntries: isLoadingEntries ?? this.isLoadingEntries,
       isCreatingCollection: isCreatingCollection ?? this.isCreatingCollection,

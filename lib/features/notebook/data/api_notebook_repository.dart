@@ -77,7 +77,7 @@ class ApiNotebookRepository implements NotebookRemoteDataSource {
     String? note,
   }) async {
     final request = AddManualNotebookEntryRequestDto(
-      vocabularyListId: _remoteCollectionId(collection),
+      learnerNoteId: _remoteCollectionId(collection),
       word: word.trim(),
       reading: _optionalText(reading),
       meaning: meaning.trim(),
@@ -102,8 +102,8 @@ class ApiNotebookRepository implements NotebookRemoteDataSource {
     required NotebookCollection collection,
   }) async {
     final request = BookmarkVocabularyRequestDto(
-      vocabularyListId: _remoteCollectionId(collection),
-      vocabularyEntryId: vocabularyEntryId,
+      learnerNoteId: _remoteCollectionId(collection),
+      vocabularyId: vocabularyEntryId,
     );
     final response = await _apiClient.post<Object?>(
       NotebookApiPaths.bookmarkVocabulary,
@@ -125,18 +125,34 @@ class ApiNotebookRepository implements NotebookRemoteDataSource {
 
   @override
   Future<void> removeEntry(NotebookEntry entry) async {
-    final noteEntryId = entry.remoteNoteEntryId;
-    if (noteEntryId == null || noteEntryId <= 0) {
+    if (entry.origin != NotebookItemOrigin.live) {
       throw ArgumentError.value(
-        noteEntryId,
-        'entry.remoteNoteEntryId',
-        'A positive remote note entry ID is required.',
+        entry.origin,
+        'entry.origin',
+        'A LIVE notebook entry is required.',
+      );
+    }
+    final noteEntryId = entry.key.liveNoteEntryId;
+    if (noteEntryId == null ||
+        noteEntryId <= 0 ||
+        entry.remoteNoteEntryId != noteEntryId) {
+      throw ArgumentError.value(
+        entry.remoteNoteEntryId,
+        'entry',
+        'The typed LIVE key and remote note-entry ID must match.',
       );
     }
     await _apiClient.delete<Object?>(NotebookApiPaths.removeEntry(noteEntryId));
   }
 
   int _remoteCollectionId(NotebookCollection collection) {
+    if (collection.source != NotebookDataSource.remote) {
+      throw ArgumentError.value(
+        collection.source,
+        'collection.source',
+        'A LIVE notebook collection is required.',
+      );
+    }
     final id = collection.remoteId;
     if (id == null || id <= 0) {
       throw ArgumentError.value(

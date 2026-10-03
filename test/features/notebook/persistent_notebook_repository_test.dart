@@ -99,39 +99,36 @@ void main() {
     );
   });
 
-  test(
-    'local fixture identity persists without fabricating backend IDs',
-    () async {
-      const collection = NotebookCollection(
-        routeKey: 'local-default',
-        remoteId: null,
-        name: 'Mặc định',
-        entryCount: 0,
-        createdAt: null,
-        source: NotebookDataSource.local,
-      );
-      const vocabulary = NotebookVocabularyDraft(
-        routeKey: 'fixture-keiken',
-        remoteId: null,
-        term: '経験',
-        reading: 'けいけん',
-        meaning: 'Kinh nghiệm',
-        jlptLevel: 'N3',
-      );
+  test('local fixture identity is rejected before a live mutation', () async {
+    const collection = NotebookCollection(
+      routeKey: 'local-default',
+      remoteId: null,
+      name: 'Mặc định',
+      entryCount: 0,
+      createdAt: null,
+      source: NotebookDataSource.local,
+    );
+    const vocabulary = NotebookVocabularyDraft(
+      routeKey: 'fixture-keiken',
+      remoteId: null,
+      term: '経験',
+      reading: 'けいけん',
+      meaning: 'Kinh nghiệm',
+      jlptLevel: 'N3',
+    );
 
-      final bookmark = await repository.bookmarkVocabulary(
+    await expectLater(
+      repository.bookmarkVocabulary(
         vocabulary: vocabulary,
         collection: collection,
-      );
-      final entries = await repository.loadEntries(collection);
+      ),
+      throwsA(isA<ArgumentError>()),
+    );
+    final entries = await repository.loadEntries(collection);
 
-      expect(remote.bookmarkCalls, 0);
-      expect(bookmark.noteEntryId, isNull);
-      expect(entries.single.remoteNoteEntryId, isNull);
-      expect(entries.single.vocabularyRouteKey, vocabulary.routeKey);
-      expect(entries.single.routeKey, contains('fixture-keiken'));
-    },
-  );
+    expect(remote.bookmarkCalls, 0);
+    expect(entries, isEmpty);
+  });
 
   test(
     'remote list and entries are cached for deterministic offline search',
@@ -139,14 +136,16 @@ void main() {
       remote.collections = <NotebookCollection>[_remoteCollection()];
       remote.entries = <NotebookEntry>[
         NotebookEntry(
-          routeKey: 'remote-note-55',
+          key: NotebookEntryKey.live(
+            contentType: NotebookContentType.vocabulary,
+            noteEntryId: 55,
+          ),
           remoteNoteEntryId: 55,
           contentType: NotebookContentType.vocabulary,
           term: '改善',
           reading: 'かいぜん',
           meaning: 'Cải thiện',
           addedAt: DateTime.utc(2026, 9, 20),
-          source: NotebookDataSource.remote,
         ),
       ];
 
@@ -232,14 +231,16 @@ class _FakeNotebookRemote implements NotebookRemoteDataSource {
     expect(collection.remoteId, 3);
     entries = <NotebookEntry>[
       NotebookEntry(
-        routeKey: 'remote-note-91',
+        key: NotebookEntryKey.live(
+          contentType: NotebookContentType.vocabulary,
+          noteEntryId: 91,
+        ),
         remoteNoteEntryId: 91,
         contentType: NotebookContentType.vocabulary,
         term: '経験',
         reading: 'けいけん',
         meaning: 'Kinh nghiệm',
         addedAt: DateTime.utc(2026, 9, 20),
-        source: NotebookDataSource.remote,
       ),
     ];
     return NotebookBookmark(

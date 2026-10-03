@@ -11,14 +11,16 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/login_screen.dart';
+import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/data/fixture_notebook_repository.dart';
+import 'package:rikipath_mobile/features/notebook/data/session_demo_notebook_repository.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook_repository.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
+import 'package:rikipath_mobile/features/notebook/presentation/notebook_entry_detail_screen.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/fixture_vocabulary_repository.dart';
-import 'package:rikipath_mobile/features/vocabulary/presentation/vocabulary_detail_screen.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations_ja.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations_vi.dart';
 
@@ -68,15 +70,17 @@ void main() {
     expect(find.text('改善'), findsOneWidget);
   });
 
-  testWidgets('fixture data is visibly identified', (tester) async {
+  testWidgets('fixture entries do not expose internal source labels', (
+    tester,
+  ) async {
     await _pumpNotebook(tester);
     await tester.pumpAndSettle();
 
     expect(
       find.byKey(const ValueKey<String>('notebook_fixture_label')),
-      findsOneWidget,
+      findsNothing,
     );
-    expect(find.text('Dữ liệu mẫu'), findsOneWidget);
+    expect(find.text('Dữ liệu mẫu'), findsNothing);
   });
 
   testWidgets('empty Notebook renders the first-list action', (tester) async {
@@ -133,6 +137,34 @@ void main() {
     );
     expect(
       find.byKey(const ValueKey<String>('notebook_retry_button')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('saved lesson item remains visible when live lists fail', (
+    tester,
+  ) async {
+    final demoRepository = SessionDemoNotebookRepository();
+    await demoRepository.saveEntry(
+      const NotebookFixtureDraft(
+        stableKey: 'fixture-n4-lesson:vocabulary:0',
+        contentType: NotebookContentType.vocabulary,
+        term: '経験',
+        reading: 'けいけん',
+        meaning: 'Kinh nghiệm',
+        jlptLevel: 'N4',
+      ),
+    );
+    await _pumpNotebook(
+      tester,
+      repository: _FailingNotebookRepository(),
+      demoRepository: demoRepository,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('経験'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('notebook_mutation_error')),
       findsOneWidget,
     );
   });
@@ -196,11 +228,15 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(
-      find.byKey(const ValueKey<String>('notebook_entry_fixture-note-keiken')),
+      find.byKey(
+        const ValueKey<String>(
+          'notebook_entry_fixture:vocabulary:fixture-note-keiken',
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(VocabularyDetailScreen), findsOneWidget);
+    expect(find.byType(NotebookEntryDetailScreen), findsOneWidget);
     final navigation = tester.widget<RikiBottomNavigationBar>(
       find.byType(RikiBottomNavigationBar),
     );
@@ -211,7 +247,7 @@ void main() {
     await _pumpNotebook(tester);
     await tester.pumpAndSettle();
 
-    await _startRemove(tester, 'fixture-note-keiken');
+    await _startRemove(tester, 'fixture:vocabulary:fixture-note-keiken');
     await tester.pumpAndSettle();
 
     expect(find.text('経験'), findsNothing);
@@ -224,7 +260,11 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(
-      find.byKey(const ValueKey<String>('notebook_remove_fixture-note-keiken')),
+      find.byKey(
+        const ValueKey<String>(
+          'notebook_remove_fixture:vocabulary:fixture-note-keiken',
+        ),
+      ),
     );
     await tester.pumpAndSettle();
     await tester.tap(
@@ -394,31 +434,36 @@ const NotebookCollection _collection = NotebookCollection(
 );
 
 final NotebookEntry _remoteEntry = NotebookEntry(
-  routeKey: 'remote-note-41',
+  key: NotebookEntryKey.live(
+    contentType: NotebookContentType.vocabulary,
+    noteEntryId: 41,
+  ),
   remoteNoteEntryId: 41,
-  reviewItemId: 52,
+  reviewCardId: 52,
   contentType: NotebookContentType.vocabulary,
   term: '経験',
   reading: 'けいけん',
   meaning: 'Kinh nghiệm',
   addedAt: DateTime.utc(2026, 9, 12),
-  source: NotebookDataSource.remote,
 );
 
 final NotebookEntry _secondRemoteEntry = NotebookEntry(
-  routeKey: 'remote-note-42',
+  key: NotebookEntryKey.live(
+    contentType: NotebookContentType.vocabulary,
+    noteEntryId: 42,
+  ),
   remoteNoteEntryId: 42,
   contentType: NotebookContentType.vocabulary,
   term: '約束',
   reading: 'やくそく',
   meaning: 'Lời hứa',
   addedAt: DateTime.utc(2026, 9, 13),
-  source: NotebookDataSource.remote,
 );
 
 Future<GoRouter> _pumpNotebook(
   WidgetTester tester, {
   NotebookRepository? repository,
+  SessionDemoNotebookRepository? demoRepository,
   AuthSessionState authState = AuthSessionState.authenticated,
   Size viewportSize = const Size(390, 844),
 }) async {
@@ -435,14 +480,36 @@ Future<GoRouter> _pumpNotebook(
   addTearDown(session.dispose);
   addTearDown(router.dispose);
 
+  final effectiveDemoRepository =
+      demoRepository ?? SessionDemoNotebookRepository();
+  if (repository == null && demoRepository == null) {
+    for (final entry in FixtureNotebookRepository.defaultEntries.values.expand(
+      (entries) => entries,
+    )) {
+      await effectiveDemoRepository.saveEntry(
+        NotebookFixtureDraft(
+          stableKey: entry.key.stableKey,
+          contentType: entry.contentType,
+          term: entry.term,
+          reading: entry.reading,
+          meaning: entry.meaning,
+          note: entry.note,
+        ),
+      );
+    }
+  }
+
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         notebookRepositoryProvider.overrideWithValue(
-          repository ?? FixtureNotebookRepository(),
+          repository ?? _TestNotebookRepository(collections: const []),
         ),
         vocabularyRepositoryProvider.overrideWithValue(
           const FixtureVocabularyRepository(),
+        ),
+        demoNotebookRepositoryProvider.overrideWithValue(
+          effectiveDemoRepository,
         ),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
@@ -598,7 +665,10 @@ class _TestNotebookRepository implements NotebookRepository {
   }) async {
     manualWords.add(word);
     final entry = NotebookEntry(
-      routeKey: 'remote-note-created',
+      key: NotebookEntryKey.live(
+        contentType: NotebookContentType.manual,
+        noteEntryId: 77,
+      ),
       remoteNoteEntryId: 77,
       contentType: NotebookContentType.manual,
       term: word,
@@ -606,7 +676,6 @@ class _TestNotebookRepository implements NotebookRepository {
       meaning: meaning,
       note: note,
       addedAt: DateTime.utc(2026, 9, 13),
-      source: NotebookDataSource.remote,
     );
     _entries.insert(0, entry);
     return entry;
