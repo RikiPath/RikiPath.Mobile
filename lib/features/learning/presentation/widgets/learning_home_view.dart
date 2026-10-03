@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart'
 class LearningHomeView extends StatelessWidget {
   const LearningHomeView({
     required this.snapshot,
+    required this.onSelectLevel,
     required this.onOpenRoadmap,
     required this.onOpenVocabulary,
     required this.onOpenLesson,
@@ -14,6 +15,7 @@ class LearningHomeView extends StatelessWidget {
   });
 
   final LearningSnapshot snapshot;
+  final ValueChanged<JlptLevel> onSelectLevel;
   final VoidCallback onOpenRoadmap;
   final VoidCallback onOpenVocabulary;
   final VoidCallback onOpenLesson;
@@ -30,6 +32,22 @@ class LearningHomeView extends StatelessWidget {
       ),
       children: [
         const _LearningSectionTabs(),
+        const SizedBox(height: AppSpacing.space3),
+        _JlptLevelSelector(
+          selected: snapshot.hasSelectedLevel ? snapshot.jlptTarget : null,
+          onSelected: onSelectLevel,
+        ),
+        if (!snapshot.hasSelectedLevel) ...[
+          const SizedBox(height: AppSpacing.space3),
+          RikiCard(
+            backgroundColor: AppColors.learnerSurface,
+            boxShadow: const <BoxShadow>[],
+            child: Text(
+              context.l10n.jlptSelectionSafeHint,
+              style: AppTypography.bodySmall,
+            ),
+          ),
+        ],
         const SizedBox(height: AppSpacing.space4),
         _ProgressSummaryCard(snapshot: snapshot, onOpenRoadmap: onOpenRoadmap),
         const SizedBox(height: AppSpacing.space4),
@@ -64,6 +82,48 @@ class LearningHomeView extends StatelessWidget {
           onOpenVocabulary: onOpenVocabulary,
         ),
       ],
+    );
+  }
+}
+
+class _JlptLevelSelector extends StatelessWidget {
+  const _JlptLevelSelector({required this.selected, required this.onSelected});
+
+  final JlptLevel? selected;
+  final ValueChanged<JlptLevel> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return RikiCard(
+      key: const ValueKey<String>('learning_jlpt_selector'),
+      padding: const EdgeInsets.all(AppSpacing.space3),
+      boxShadow: const <BoxShadow>[],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.jlptSelectionTitle,
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.learnerTextSecondary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space2),
+          Wrap(
+            spacing: AppSpacing.space2,
+            runSpacing: AppSpacing.space1,
+            children: [
+              for (final level in JlptLevel.values)
+                ChoiceChip(
+                  key: ValueKey<String>('learning_level_${level.name}'),
+                  label: Text(level.label),
+                  selected: selected == level,
+                  onSelected: (_) => onSelected(level),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

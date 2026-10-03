@@ -19,6 +19,8 @@ class LearningSnapshot {
     required this.sections,
     required this.chapters,
     required this.skillProgress,
+    this.hasSelectedLevel = true,
+    this.hasCurrentLesson = true,
   });
 
   final String initials;
@@ -36,8 +38,40 @@ class LearningSnapshot {
   final List<LearningSectionSummary> sections;
   final List<RoadmapChapter> chapters;
   final List<LearningSkillProgress> skillProgress;
+  final bool hasSelectedLevel;
+  final bool hasCurrentLesson;
 
   int get overallPercent => (overallProgress * 100).round();
+
+  LearningSnapshot copyWith({
+    JlptLevel? jlptTarget,
+    double? overallProgress,
+    int? completedLessons,
+    CurrentLessonSummary? currentLesson,
+    List<RoadmapChapter>? chapters,
+    bool? hasSelectedLevel,
+    bool? hasCurrentLesson,
+  }) {
+    return LearningSnapshot(
+      initials: initials,
+      jlptTarget: jlptTarget ?? this.jlptTarget,
+      streakDays: streakDays,
+      hasUnreadNotifications: hasUnreadNotifications,
+      examDateLabel: examDateLabel,
+      overallProgress: overallProgress ?? this.overallProgress,
+      completedLessons: completedLessons ?? this.completedLessons,
+      totalLessons: totalLessons,
+      completedChapters: completedChapters,
+      totalChapters: totalChapters,
+      metrics: metrics,
+      currentLesson: currentLesson ?? this.currentLesson,
+      sections: sections,
+      chapters: chapters ?? this.chapters,
+      skillProgress: skillProgress,
+      hasSelectedLevel: hasSelectedLevel ?? this.hasSelectedLevel,
+      hasCurrentLesson: hasCurrentLesson ?? this.hasCurrentLesson,
+    );
+  }
 }
 
 @immutable
@@ -77,6 +111,26 @@ class CurrentLessonSummary {
   final double progress;
 
   int get progressPercent => (progress * 100).round();
+
+  CurrentLessonSummary copyWith({
+    String? routeId,
+    int? lessonNumber,
+    String? title,
+    String? pattern,
+    int? durationMinutes,
+    double? progress,
+  }) {
+    return CurrentLessonSummary(
+      routeId: routeId ?? this.routeId,
+      chapterNumber: chapterNumber,
+      lessonNumber: lessonNumber ?? this.lessonNumber,
+      title: title ?? this.title,
+      category: category,
+      pattern: pattern ?? this.pattern,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      progress: progress ?? this.progress,
+    );
+  }
 }
 
 enum LearningSectionKind { roadmap, lessons, library }
@@ -123,6 +177,21 @@ class RoadmapChapter {
   final int totalLessons;
   final List<ChapterSkillSummary> skills;
   final String? lockedReason;
+
+  RoadmapChapter copyWith({int? completedLessons}) {
+    return RoadmapChapter(
+      number: number,
+      firstLesson: firstLesson,
+      lastLesson: lastLesson,
+      title: title,
+      description: description,
+      status: status,
+      completedLessons: completedLessons ?? this.completedLessons,
+      totalLessons: totalLessons,
+      skills: skills,
+      lockedReason: lockedReason,
+    );
+  }
 }
 
 enum ChapterSkillStatus { completed, inProgress, notStarted, locked }

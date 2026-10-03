@@ -182,9 +182,14 @@ class LessonArticleContent extends StatelessWidget {
 }
 
 class LessonVocabularyContent extends StatelessWidget {
-  const LessonVocabularyContent({required this.lesson, super.key});
+  const LessonVocabularyContent({
+    required this.lesson,
+    required this.onToggleBookmark,
+    super.key,
+  });
 
   final Lesson lesson;
+  final ValueChanged<int> onToggleBookmark;
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +218,10 @@ class LessonVocabularyContent extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.space3),
         for (var index = 0; index < lesson.vocabulary.length; index++) ...[
-          LessonVocabularyTile(item: lesson.vocabulary[index]),
+          LessonVocabularyTile(
+            item: lesson.vocabulary[index],
+            onBookmark: () => onToggleBookmark(index),
+          ),
           if (index != lesson.vocabulary.length - 1)
             const SizedBox(height: AppSpacing.space3),
         ],

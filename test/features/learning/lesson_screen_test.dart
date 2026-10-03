@@ -333,6 +333,19 @@ void main() {
       target: find.byKey(const ValueKey<String>('lesson_next_button')),
     );
     expect(find.text('Học bài tiếp theo (Bài 20)'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey<String>('lesson_next_button')));
+    await tester.pumpAndSettle();
+    expect(find.byType(LessonScreen), findsOneWidget);
+    expect(find.text('Bài 20'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('lesson_detail_view')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('lesson_locked_view')),
+      findsNothing,
+    );
   });
 
   testWidgets('lesson progress is rendered from repository data', (
@@ -388,7 +401,7 @@ void main() {
     router.go(AppRoutes.lesson(FixtureLessonRepository.lesson20RouteId));
     await tester.pumpAndSettle();
     expect(
-      find.byKey(const ValueKey<String>('lesson_locked_view')),
+      find.byKey(const ValueKey<String>('lesson_detail_view')),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);

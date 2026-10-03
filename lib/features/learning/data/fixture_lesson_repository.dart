@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/learning/data/lesson_fixture_dto.dart';
 import 'package:rikipath_mobile/features/learning/data/lesson_mapper.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
@@ -13,15 +14,57 @@ class FixtureLessonRepository implements LessonRepository {
   static const String lesson19RouteId = 'fixture-n4-grammar-lesson-19';
   static const String lesson20RouteId = 'fixture-n4-grammar-lesson-20';
 
+  static String lesson19RouteIdFor(JlptLevel level) =>
+      _routeForLevel(lesson19RouteId, level);
+
+  static String lesson20RouteIdFor(JlptLevel level) =>
+      _routeForLevel(lesson20RouteId, level);
+
+  static List<String> orderedRouteIdsFor(JlptLevel level) => List.unmodifiable(
+    _lessons.map((lesson) => _routeForLevel(lesson.routeId, level)),
+  );
+
+  static String? nextRouteIdFor(String routeId) {
+    final level = _levelFromRoute(routeId);
+    final normalized = _routeForLevel(routeId, JlptLevel.n4);
+    final index = _lessons.indexWhere((lesson) => lesson.routeId == normalized);
+    if (index < 0 || index == _lessons.length - 1) return null;
+    return _routeForLevel(_lessons[index + 1].routeId, level);
+  }
+
   @override
   Future<Lesson> loadLesson(String routeId) async {
+    final level = _levelFromRoute(routeId);
+    final normalizedRouteId = _routeForLevel(routeId, JlptLevel.n4);
     final dto = _lessons
-        .where((lesson) => lesson.routeId == routeId)
+        .where((lesson) => lesson.routeId == normalizedRouteId)
         .firstOrNull;
     if (dto == null) {
       throw StateError('Không tìm thấy bài học trong dữ liệu mẫu.');
     }
-    return LessonMapper.fromFixture(dto);
+    final lesson = LessonMapper.fromFixture(dto);
+    final lessonIndex = _lessons.indexOf(dto);
+    final nextDto = lessonIndex < _lessons.length - 1
+        ? _lessons[lessonIndex + 1]
+        : null;
+    final prerequisite = lesson.prerequisite;
+    return lesson.copyWith(
+      routeId: routeId,
+      level: level,
+      nextLesson: nextDto == null
+          ? null
+          : LessonLink(
+              routeId: _routeForLevel(nextDto.routeId, level),
+              lessonNumber: nextDto.lessonNumber,
+              title: nextDto.title,
+              subtitle: nextDto.focus,
+              durationMinutes: (nextDto.durationSeconds / 60).ceil(),
+              level: level,
+            ),
+      prerequisite: prerequisite?.copyWith(
+        routeId: _routeForLevel(prerequisite.routeId, level),
+      ),
+    );
   }
 
   @override
@@ -293,4 +336,17 @@ class FixtureLessonRepository implements LessonRepository {
       ),
     ),
   ];
+
+  static String _routeForLevel(String routeId, JlptLevel level) {
+    return routeId.replaceFirst(
+      RegExp(r'^fixture-n[345]-'),
+      'fixture-${level.name}-',
+    );
+  }
+
+  static JlptLevel _levelFromRoute(String routeId) {
+    if (routeId.startsWith('fixture-n5-')) return JlptLevel.n5;
+    if (routeId.startsWith('fixture-n3-')) return JlptLevel.n3;
+    return JlptLevel.n4;
+  }
 }

@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/lesson_media_driver.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_session.dart';
+import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
+import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 
 typedef LessonMediaDriverFactory = LessonMediaDriver Function();
 
@@ -39,9 +42,62 @@ class LessonController extends AsyncNotifier<LessonSession> {
 
   @override
   Future<LessonSession> build() async {
-    final lesson = await ref
+    final loadedLesson = await ref
         .watch(lessonRepositoryProvider)
         .loadLesson(lessonId);
+    final journey = await ref.watch(learnerJourneyControllerProvider.future);
+    final storedProgress = journey.progressFor(lessonId);
+    var lesson = storedProgress == null
+        ? loadedLesson
+        : loadedLesson.copyWith(progress: storedProgress);
+    final prerequisite = lesson.prerequisite;
+    if (lesson.availability == LessonAvailability.locked &&
+        prerequisite != null &&
+        journey.isLessonCompleted(prerequisite.routeId)) {
+      lesson = lesson.copyWith(
+        availability: LessonAvailability.available,
+        parts: [
+          for (var index = 0; index < lesson.parts.length; index++)
+            LessonPart(
+              number: lesson.parts[index].number,
+              title: lesson.parts[index].title,
+              subtitle: lesson.parts[index].subtitle,
+              durationMinutes: lesson.parts[index].durationMinutes,
+              status: index == 0
+                  ? LessonPartStatus.current
+                  : LessonPartStatus.locked,
+            ),
+        ],
+        clearLockedReason: true,
+        clearPrerequisite: true,
+      );
+    }
+    final demoNotebook = await ref.watch(demoNotebookControllerProvider.future);
+    lesson = lesson.copyWith(
+      vocabulary: [
+        for (var index = 0; index < lesson.vocabulary.length; index++)
+          lesson.vocabulary[index].copyWith(
+            isSaved: demoNotebook.entries.any(
+              (entry) =>
+                  entry.vocabularyRouteKey ==
+                  _vocabularyStableKey(index, lesson),
+            ),
+          ),
+      ],
+      relatedGrammar: [
+        for (var index = 0; index < lesson.relatedGrammar.length; index++)
+          lesson.relatedGrammar[index].copyWith(
+            isSaved: demoNotebook.entries.any(
+              (entry) =>
+                  entry.key ==
+                  NotebookEntryKey.fixture(
+                    contentType: NotebookContentType.grammar,
+                    stableKey: _grammarStableKey(index, lesson),
+                  ),
+            ),
+          ),
+      ],
+    );
     return LessonSession(
       lesson: lesson,
       stage: lesson.progress.isCompleted
@@ -168,6 +224,61 @@ class LessonController extends AsyncNotifier<LessonSession> {
     state = AsyncData(current.copyWith(selectedTab: tab));
   }
 
+  Future<void> toggleFixtureVocabulary(int index) async {
+    final current = state.value;
+    if (current == null ||
+        index < 0 ||
+        index >= current.lesson.vocabulary.length) {
+      return;
+    }
+    final item = current.lesson.vocabulary[index];
+    final isSaved = await ref
+        .read(demoNotebookControllerProvider.notifier)
+        .toggleEntry(
+          NotebookFixtureDraft(
+            stableKey: _vocabularyStableKey(index, current.lesson),
+            contentType: NotebookContentType.vocabulary,
+            term: item.word,
+            reading: item.reading,
+            meaning: item.meaning,
+            jlptLevel: current.lesson.level.label,
+          ),
+        );
+    final vocabulary = [...current.lesson.vocabulary];
+    vocabulary[index] = item.copyWith(isSaved: isSaved);
+    state = AsyncData(
+      current.copyWith(lesson: current.lesson.copyWith(vocabulary: vocabulary)),
+    );
+  }
+
+  Future<void> toggleFixtureGrammar(int index) async {
+    final current = state.value;
+    if (current == null ||
+        index < 0 ||
+        index >= current.lesson.relatedGrammar.length) {
+      return;
+    }
+    final item = current.lesson.relatedGrammar[index];
+    final isSaved = await ref
+        .read(demoNotebookControllerProvider.notifier)
+        .toggleEntry(
+          NotebookFixtureDraft(
+            stableKey: _grammarStableKey(index, current.lesson),
+            contentType: NotebookContentType.grammar,
+            term: item.title,
+            meaning: item.description,
+            jlptLevel: current.lesson.level.label,
+          ),
+        );
+    final grammar = [...current.lesson.relatedGrammar];
+    grammar[index] = item.copyWith(isSaved: isSaved);
+    state = AsyncData(
+      current.copyWith(
+        lesson: current.lesson.copyWith(relatedGrammar: grammar),
+      ),
+    );
+  }
+
   Future<void> savePlaybackPosition(int positionSeconds) async {
     final current = state.value;
     if (current == null) {
@@ -181,6 +292,9 @@ class LessonController extends AsyncNotifier<LessonSession> {
     state = AsyncData(
       current.copyWith(lesson: current.lesson.copyWith(progress: progress)),
     );
+    await ref
+        .read(learnerJourneyControllerProvider.notifier)
+        .recordLessonProgress(lessonId, progress);
   }
 
   Future<void> completeLesson() async {
@@ -201,5 +315,14 @@ class LessonController extends AsyncNotifier<LessonSession> {
         clearVideoError: true,
       ),
     );
+    await ref
+        .read(learnerJourneyControllerProvider.notifier)
+        .recordLessonProgress(lessonId, progress);
   }
+
+  String _vocabularyStableKey(int index, Lesson lesson) =>
+      '${lesson.routeId}:vocabulary:$index:${lesson.vocabulary[index].word}';
+
+  String _grammarStableKey(int index, Lesson lesson) =>
+      '${lesson.routeId}:grammar:$index:${lesson.relatedGrammar[index].title}';
 }

@@ -88,9 +88,14 @@ class LessonProgressMeter extends StatelessWidget {
 }
 
 class LessonVocabularyTile extends StatelessWidget {
-  const LessonVocabularyTile({required this.item, super.key});
+  const LessonVocabularyTile({
+    required this.item,
+    required this.onBookmark,
+    super.key,
+  });
 
   final LessonVocabularyItem item;
+  final VoidCallback onBookmark;
 
   @override
   Widget build(BuildContext context) {
@@ -133,33 +138,44 @@ class LessonVocabularyTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.space2),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-            decoration: BoxDecoration(
-              color: AppColors.learnerSurfaceLow,
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              key: ValueKey<String>('lesson_bookmark_${item.word}'),
+              onTap: onBookmark,
               borderRadius: BorderRadius.circular(AppRadius.pill),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  item.isSaved
-                      ? Icons.bookmark_added_outlined
-                      : Icons.bookmark_add_outlined,
-                  size: 16,
-                  color: AppColors.brandPrimary,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 7,
                 ),
-                const SizedBox(width: AppSpacing.space1),
-                Text(
-                  item.isSaved
-                      ? context.l10n.saved
-                      : context.l10n.notebookShort,
-                  style: AppTypography.badgeText.copyWith(
-                    color: AppColors.brandPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                decoration: BoxDecoration(
+                  color: AppColors.learnerSurfaceLow,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
-              ],
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      item.isSaved
+                          ? Icons.bookmark_added_outlined
+                          : Icons.bookmark_add_outlined,
+                      size: 16,
+                      color: AppColors.brandPrimary,
+                    ),
+                    const SizedBox(width: AppSpacing.space1),
+                    Text(
+                      item.isSaved
+                          ? context.l10n.saved
+                          : context.l10n.notebookShort,
+                      style: AppTypography.badgeText.copyWith(
+                        color: AppColors.brandPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],

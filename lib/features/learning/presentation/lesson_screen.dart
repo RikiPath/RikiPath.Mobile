@@ -68,6 +68,12 @@ class LessonScreen extends ConsumerWidget {
       LessonStage.detail => LessonDetailView(
         lesson: lesson,
         onStart: controller.openVideo,
+        onToggleBookmark: (index) {
+          controller.toggleFixtureVocabulary(index);
+        },
+        onToggleGrammar: (index) {
+          controller.toggleFixtureGrammar(index);
+        },
       ),
       LessonStage.video => LessonVideoView(
         session: session,
@@ -79,6 +85,9 @@ class LessonScreen extends ConsumerWidget {
         onShowArticle: controller.showArticle,
         onSelectTab: controller.selectTab,
         onComplete: controller.completeLesson,
+        onToggleBookmark: (index) {
+          controller.toggleFixtureVocabulary(index);
+        },
       ),
       LessonStage.article => LessonArticleOnlyView(
         lesson: lesson,

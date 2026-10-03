@@ -95,36 +95,51 @@ class Lesson {
     return progress.isCompleted ? parts.length : 1;
   }
 
-  Lesson copyWith({LessonProgress? progress}) {
+  Lesson copyWith({
+    String? routeId,
+    String? objective,
+    List<LessonPart>? parts,
+    JlptLevel? level,
+    List<LessonVocabularyItem>? vocabulary,
+    List<LessonRelatedGrammar>? relatedGrammar,
+    LessonProgress? progress,
+    LessonAvailability? availability,
+    LessonLink? nextLesson,
+    LessonPrerequisite? prerequisite,
+    bool clearLockedReason = false,
+    bool clearPrerequisite = false,
+  }) {
     return Lesson(
-      routeId: routeId,
+      routeId: routeId ?? this.routeId,
       remoteLessonId: remoteLessonId,
       title: title,
       focus: focus,
-      level: level,
+      level: level ?? this.level,
       category: category,
       curriculum: curriculum,
       chapterNumber: chapterNumber,
       lessonNumber: lessonNumber,
       durationSeconds: durationSeconds,
-      objective: objective,
-      parts: parts,
-      vocabulary: vocabulary,
+      objective: objective ?? this.objective,
+      parts: parts ?? this.parts,
+      vocabulary: vocabulary ?? this.vocabulary,
       detailVocabularyCount: detailVocabularyCount,
       videoVocabularyCount: videoVocabularyCount,
-      relatedGrammar: relatedGrammar,
+      relatedGrammar: relatedGrammar ?? this.relatedGrammar,
       article: article,
       progress: progress ?? this.progress,
-      availability: availability,
+      availability: availability ?? this.availability,
       noteCount: noteCount,
       streakDays: streakDays,
       detailXp: detailXp,
       completionXp: completionXp,
       masteryItems: masteryItems,
       mediaSource: mediaSource,
-      lockedReason: lockedReason,
-      prerequisite: prerequisite,
-      nextLesson: nextLesson,
+      lockedReason: clearLockedReason ? null : lockedReason,
+      prerequisite: clearPrerequisite
+          ? null
+          : prerequisite ?? this.prerequisite,
+      nextLesson: nextLesson ?? this.nextLesson,
     );
   }
 }
@@ -176,6 +191,15 @@ class LessonVocabularyItem {
   final String reading;
   final String meaning;
   final bool isSaved;
+
+  LessonVocabularyItem copyWith({bool? isSaved}) {
+    return LessonVocabularyItem(
+      word: word,
+      reading: reading,
+      meaning: meaning,
+      isSaved: isSaved ?? this.isSaved,
+    );
+  }
 }
 
 @immutable
@@ -184,11 +208,22 @@ class LessonRelatedGrammar {
     required this.number,
     required this.title,
     required this.description,
+    this.isSaved = false,
   });
 
   final int number;
   final String title;
   final String description;
+  final bool isSaved;
+
+  LessonRelatedGrammar copyWith({bool? isSaved}) {
+    return LessonRelatedGrammar(
+      number: number,
+      title: title,
+      description: description,
+      isSaved: isSaved ?? this.isSaved,
+    );
+  }
 }
 
 @immutable
@@ -242,6 +277,19 @@ class LessonPrerequisite {
   final int completedParts;
   final int totalParts;
   final int remainingMinutes;
+
+  LessonPrerequisite copyWith({String? routeId}) {
+    return LessonPrerequisite(
+      routeId: routeId ?? this.routeId,
+      lessonNumber: lessonNumber,
+      title: title,
+      focus: focus,
+      progressPercent: progressPercent,
+      completedParts: completedParts,
+      totalParts: totalParts,
+      remainingMinutes: remainingMinutes,
+    );
+  }
 }
 
 @immutable
@@ -261,6 +309,17 @@ class LessonLink {
   final String subtitle;
   final int durationMinutes;
   final JlptLevel level;
+
+  LessonLink copyWith({String? routeId, JlptLevel? level}) {
+    return LessonLink(
+      routeId: routeId ?? this.routeId,
+      lessonNumber: lessonNumber,
+      title: title,
+      subtitle: subtitle,
+      durationMinutes: durationMinutes,
+      level: level ?? this.level,
+    );
+  }
 }
 
 @immutable

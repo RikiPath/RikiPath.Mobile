@@ -9,11 +9,15 @@ class LessonDetailView extends StatelessWidget {
   const LessonDetailView({
     required this.lesson,
     required this.onStart,
+    required this.onToggleBookmark,
+    required this.onToggleGrammar,
     super.key,
   });
 
   final Lesson lesson;
   final VoidCallback onStart;
+  final ValueChanged<int> onToggleBookmark;
+  final ValueChanged<int> onToggleGrammar;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +57,10 @@ class LessonDetailView extends StatelessWidget {
           index < lesson.vocabulary.take(2).length;
           index++
         ) ...[
-          LessonVocabularyTile(item: lesson.vocabulary[index]),
+          LessonVocabularyTile(
+            item: lesson.vocabulary[index],
+            onBookmark: () => onToggleBookmark(index),
+          ),
           if (index != lesson.vocabulary.take(2).length - 1)
             const SizedBox(height: AppSpacing.space2),
         ],
@@ -61,7 +68,10 @@ class LessonDetailView extends StatelessWidget {
         _SectionHeader(title: context.l10n.relatedGrammarShort),
         const SizedBox(height: AppSpacing.space3),
         for (var index = 0; index < lesson.relatedGrammar.length; index++) ...[
-          _RelatedGrammarCard(grammar: lesson.relatedGrammar[index]),
+          _RelatedGrammarCard(
+            grammar: lesson.relatedGrammar[index],
+            onBookmark: () => onToggleGrammar(index),
+          ),
           if (index != lesson.relatedGrammar.length - 1)
             const SizedBox(height: AppSpacing.space2),
         ],
@@ -334,9 +344,10 @@ class _LessonPartTile extends StatelessWidget {
 }
 
 class _RelatedGrammarCard extends StatelessWidget {
-  const _RelatedGrammarCard({required this.grammar});
+  const _RelatedGrammarCard({required this.grammar, required this.onBookmark});
 
   final LessonRelatedGrammar grammar;
+  final VoidCallback onBookmark;
 
   @override
   Widget build(BuildContext context) {
@@ -376,7 +387,19 @@ class _RelatedGrammarCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.textMuted),
+          IconButton(
+            key: ValueKey<String>('lesson_grammar_bookmark_${grammar.number}'),
+            tooltip: grammar.isSaved
+                ? context.l10n.saved
+                : context.l10n.saveToNotebook,
+            onPressed: onBookmark,
+            color: AppColors.brandPrimary,
+            icon: Icon(
+              grammar.isSaved
+                  ? Icons.bookmark_added_outlined
+                  : Icons.bookmark_add_outlined,
+            ),
+          ),
         ],
       ),
     );

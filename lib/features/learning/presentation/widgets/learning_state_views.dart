@@ -39,48 +39,13 @@ class LearningErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return RikiErrorState(
       key: const ValueKey<String>('learning_error_view'),
-      padding: const EdgeInsets.all(AppSpacing.space4),
-      children: [
-        const SizedBox(height: AppSpacing.space10),
-        RikiCard(
-          borderColor: AppColors.learnerOutline,
-          boxShadow: const <BoxShadow>[],
-          padding: const EdgeInsets.all(AppSpacing.space6),
-          child: Column(
-            children: [
-              const CircleAvatar(
-                radius: 26,
-                backgroundColor: AppColors.errorBackground,
-                foregroundColor: AppColors.errorText,
-                child: Icon(Icons.cloud_off_outlined),
-              ),
-              const SizedBox(height: AppSpacing.space4),
-              Text(
-                context.l10n.learningLoadFailed,
-                textAlign: TextAlign.center,
-                style: AppTypography.sectionTitle.copyWith(
-                  color: AppColors.learnerTextPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.space2),
-              Text(
-                context.l10n.checkConnectionRetry,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodySmall,
-              ),
-              const SizedBox(height: AppSpacing.space5),
-              RikiPrimaryButton(
-                key: const ValueKey<String>('learning_retry_button'),
-                label: context.l10n.retry,
-                leadingIcon: Icons.refresh,
-                onPressed: onRetry,
-              ),
-            ],
-          ),
-        ),
-      ],
+      title: context.l10n.learningLoadFailed,
+      message: context.l10n.checkConnectionRetry,
+      actionLabel: context.l10n.retry,
+      actionKey: const ValueKey<String>('learning_retry_button'),
+      onAction: onRetry,
     );
   }
 }

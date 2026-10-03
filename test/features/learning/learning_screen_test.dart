@@ -31,13 +31,13 @@ void main() {
     expect(find.text('Mục tiêu JLPT N4'), findsOneWidget);
     expect(find.text('Tiếp tục lộ trình'), findsOneWidget);
     expect(find.text('ĐANG HỌC DỞ'), findsOneWidget);
-    expect(find.text('Các phần học chính'), findsOneWidget);
-    expect(find.text('Lộ trình'), findsWidgets);
-    expect(find.text('Bài học'), findsWidgets);
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey<String>('learning_section_library')),
       160,
     );
+    expect(find.text('Các phần học chính'), findsOneWidget);
+    expect(find.text('Lộ trình'), findsWidgets);
+    expect(find.text('Bài học'), findsWidgets);
     expect(find.text('Thư viện'), findsWidgets);
   });
 

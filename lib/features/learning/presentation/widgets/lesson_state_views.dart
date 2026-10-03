@@ -34,48 +34,13 @@ class LessonLoadErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return RikiErrorState(
       key: const ValueKey<String>('lesson_load_error_view'),
-      padding: const EdgeInsets.all(AppSpacing.space4),
-      children: [
-        const SizedBox(height: AppSpacing.space10),
-        RikiCard(
-          boxShadow: const <BoxShadow>[],
-          child: Column(
-            children: [
-              const CircleAvatar(
-                radius: 25,
-                backgroundColor: AppColors.errorBackground,
-                foregroundColor: AppColors.errorText,
-                child: Icon(Icons.cloud_off_outlined),
-              ),
-              const SizedBox(height: AppSpacing.space4),
-              Text(
-                context.l10n.lessonLoadFailed,
-                textAlign: TextAlign.center,
-                style: AppTypography.sectionTitle.copyWith(
-                  color: AppColors.learnerTextPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.space2),
-              Text(
-                context.l10n.checkConnectionRetry,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.space4),
-              RikiPrimaryButton(
-                key: const ValueKey<String>('lesson_load_retry_button'),
-                label: context.l10n.retry,
-                leadingIcon: Icons.refresh,
-                onPressed: onRetry,
-              ),
-            ],
-          ),
-        ),
-      ],
+      title: context.l10n.lessonLoadFailed,
+      message: context.l10n.checkConnectionRetry,
+      actionLabel: context.l10n.retry,
+      actionKey: const ValueKey<String>('lesson_load_retry_button'),
+      onAction: onRetry,
     );
   }
 }

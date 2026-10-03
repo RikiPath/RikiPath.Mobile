@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_header.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_home_view.dart';
@@ -19,7 +20,7 @@ class LearnScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.root(
-        level: snapshot?.jlptTarget,
+        level: snapshot?.hasSelectedLevel == true ? snapshot?.jlptTarget : null,
         streakDays: snapshot?.streakDays,
         hasUnreadNotifications: snapshot?.hasUnreadNotifications ?? false,
         initials: snapshot?.initials,
@@ -34,6 +35,11 @@ class LearnScreen extends ConsumerWidget {
           ),
           data: (data) => LearningHomeView(
             snapshot: data,
+            onSelectLevel: (level) {
+              ref
+                  .read(learnerJourneyControllerProvider.notifier)
+                  .selectLevel(level);
+            },
             onOpenRoadmap: () => context.push(AppRoutes.learnRoadmap),
             onOpenVocabulary: () => context.push(AppRoutes.vocabulary),
             onOpenLesson: () =>

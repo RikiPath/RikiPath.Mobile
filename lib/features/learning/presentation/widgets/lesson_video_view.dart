@@ -16,6 +16,7 @@ class LessonVideoView extends StatelessWidget {
     required this.onShowArticle,
     required this.onSelectTab,
     required this.onComplete,
+    required this.onToggleBookmark,
     super.key,
   });
 
@@ -26,6 +27,7 @@ class LessonVideoView extends StatelessWidget {
   final VoidCallback onShowArticle;
   final ValueChanged<LessonContentTab> onSelectTab;
   final VoidCallback onComplete;
+  final ValueChanged<int> onToggleBookmark;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +77,10 @@ class LessonVideoView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.space4),
               if (session.selectedTab == LessonContentTab.vocabulary)
-                LessonVocabularyContent(lesson: lesson)
+                LessonVocabularyContent(
+                  lesson: lesson,
+                  onToggleBookmark: onToggleBookmark,
+                )
               else
                 LessonArticleContent(lesson: lesson),
               const SizedBox(height: AppSpacing.space5),
