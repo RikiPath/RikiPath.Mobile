@@ -5,7 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
+import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/auth/application/verify_email_controller.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
 import 'package:rikipath_mobile/features/auth/presentation/change_password_screen.dart';
@@ -14,6 +17,7 @@ import 'package:rikipath_mobile/features/auth/presentation/verify_email_screen.d
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
+import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 
 import '../../support/test_auth_session.dart';
 
@@ -36,6 +40,34 @@ void main() {
       expect(
         tester.widget<TextField>(_textField('verify_email_code_field')).enabled,
         isFalse,
+      );
+      expect(repository.verifyEmailCalls, 0);
+    });
+
+    testWidgets('non-positive registration userId cannot verify email', (
+      tester,
+    ) async {
+      final repository = _AccountAuthRepository();
+      await _pumpScreen(
+        tester,
+        screen: const VerifyEmailScreen(userId: 0),
+        repository: repository,
+        session: createTestAuthSession(
+          initialState: AuthSessionState.unauthenticated,
+        ),
+      );
+
+      expect(
+        tester.widget<TextField>(_textField('verify_email_code_field')).enabled,
+        isFalse,
+      );
+      expect(
+        tester
+            .widget<RikiPrimaryButton>(
+              find.byKey(const Key('verify_email_submit_button')),
+            )
+            .onPressed,
+        isNull,
       );
       expect(repository.verifyEmailCalls, 0);
     });
@@ -95,6 +127,8 @@ void main() {
         tester,
         find.byKey(const Key('verify_email_submit_button')),
       );
+      await tester.tap(find.byKey(const Key('verify_email_submit_button')));
+      await tester.pump();
 
       expect(find.text('Đang xác thực...'), findsOneWidget);
       expect(repository.verifyEmailCalls, 1);
@@ -151,6 +185,256 @@ void main() {
 
       expect(find.text('Không thể xác thực email'), findsOneWidget);
       expect(find.textContaining('không hợp lệ'), findsOneWidget);
+    });
+
+    testWidgets('resend sends exact email and blocks duplicate taps', (
+      tester,
+    ) async {
+      final clock = _MutableClock();
+      final completer = Completer<void>();
+      final repository = _AccountAuthRepository(resendCompleter: completer);
+      await _pumpScreen(
+        tester,
+        screen: const VerifyEmailScreen(
+          userId: 42,
+          email: ' learner@example.com ',
+        ),
+        repository: repository,
+        now: clock.call,
+      );
+
+      expect(find.text('Gửi lại mã sau 01:00'), findsOneWidget);
+      clock.advance(const Duration(seconds: 60));
+      _refreshVerifyEmailCooldown(tester);
+      await tester.pump();
+
+      final resendButton = find.byKey(const Key('verify_email_resend_button'));
+      await tester.ensureVisible(resendButton);
+      await tester.tap(resendButton);
+      await tester.tap(resendButton);
+      await tester.pump();
+
+      expect(repository.resendVerificationCalls, 1);
+      expect(repository.lastResendRequest?.email, 'learner@example.com');
+      expect(find.byKey(const Key('verify_email_resend_button')), findsNothing);
+
+      completer.complete();
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.byKey(const Key('verify_email_resend_success')),
+        findsOneWidget,
+      );
+      expect(find.text('Gửi lại mã sau 01:00'), findsOneWidget);
+      expect(repository.verifyEmailCalls, 0);
+    });
+
+    testWidgets('resend error preserves the entered verification code', (
+      tester,
+    ) async {
+      final clock = _MutableClock();
+      final repository = _AccountAuthRepository(
+        resendError: const ValidationError(message: 'Please try again.'),
+      );
+      await _pumpScreen(
+        tester,
+        screen: const VerifyEmailScreen(
+          userId: 42,
+          email: 'learner@example.com',
+        ),
+        repository: repository,
+        now: clock.call,
+      );
+      await tester.enterText(_textField('verify_email_code_field'), '123456');
+      clock.advance(const Duration(seconds: 60));
+      _refreshVerifyEmailCooldown(tester);
+      await tester.pump();
+
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('verify_email_resend_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('verify_email_resend_error')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<TextField>(_textField('verify_email_code_field'))
+            .controller
+            ?.text,
+        '123456',
+      );
+      expect(find.byType(VerifyEmailScreen), findsOneWidget);
+      expect(repository.verifyEmailCalls, 0);
+    });
+
+    testWidgets(
+      'initial cooldown masks email and follows elapsed wall-clock time',
+      (tester) async {
+        final clock = _MutableClock();
+        final repository = _AccountAuthRepository();
+        await _pumpScreen(
+          tester,
+          screen: const VerifyEmailScreen(
+            userId: 42,
+            email: 'name@example.com',
+          ),
+          repository: repository,
+          now: clock.call,
+        );
+
+        expect(find.text('n***@example.com'), findsOneWidget);
+        expect(find.text('42'), findsNothing);
+        expect(find.text('Gửi lại mã sau 01:00'), findsOneWidget);
+        expect(
+          tester
+              .widget<RikiTextButton>(
+                find.byKey(const Key('verify_email_resend_button')),
+              )
+              .onPressed,
+          isNull,
+        );
+
+        await tester.pump();
+        expect(find.text('Gửi lại mã sau 01:00'), findsOneWidget);
+
+        clock.advance(const Duration(seconds: 30));
+        _refreshVerifyEmailCooldown(tester);
+        await tester.pump();
+        expect(find.text('Gửi lại mã sau 00:30'), findsOneWidget);
+
+        clock.advance(const Duration(seconds: 30));
+        _refreshVerifyEmailCooldown(tester);
+        await tester.pump();
+        expect(find.text('Gửi lại mã'), findsOneWidget);
+        expect(
+          tester
+              .widget<RikiTextButton>(
+                find.byKey(const Key('verify_email_resend_button')),
+              )
+              .onPressed,
+          isNotNull,
+        );
+      },
+    );
+
+    testWidgets('network-ambiguous resend failure restarts safe cooldown', (
+      tester,
+    ) async {
+      final clock = _MutableClock();
+      final repository = _AccountAuthRepository(
+        resendError: const NetworkError(),
+      );
+      await _pumpScreen(
+        tester,
+        screen: const VerifyEmailScreen(
+          userId: 42,
+          email: 'learner@example.com',
+        ),
+        repository: repository,
+        now: clock.call,
+      );
+      clock.advance(const Duration(seconds: 60));
+      _refreshVerifyEmailCooldown(tester);
+      await tester.pump();
+
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('verify_email_resend_button')),
+      );
+      await tester.pump();
+
+      expect(
+        find.byKey(const Key('verify_email_resend_error')),
+        findsOneWidget,
+      );
+      expect(find.text('Gửi lại mã sau 01:00'), findsOneWidget);
+      expect(find.byType(VerifyEmailScreen), findsOneWidget);
+    });
+
+    testWidgets('hourly resend limit is shown with safe localized feedback', (
+      tester,
+    ) async {
+      final clock = _MutableClock();
+      final repository = _AccountAuthRepository(
+        resendError: const ValidationError(
+          message: 'Bạn đã vượt quá số lần gửi lại email trong 1 giờ.',
+        ),
+      );
+      await _pumpScreen(
+        tester,
+        screen: const VerifyEmailScreen(
+          userId: 42,
+          email: 'learner@example.com',
+        ),
+        repository: repository,
+        now: clock.call,
+      );
+      clock.advance(const Duration(seconds: 60));
+      _refreshVerifyEmailCooldown(tester);
+      await tester.pump();
+
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('verify_email_resend_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Bạn đã yêu cầu gửi lại mã quá nhiều lần. Vui lòng thử lại sau.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('1 giờ'), findsNothing);
+      expect(find.byType(VerifyEmailScreen), findsOneWidget);
+    });
+
+    testWidgets('Japanese resend UI is localized without layout errors', (
+      tester,
+    ) async {
+      final clock = _MutableClock();
+      await _pumpScreen(
+        tester,
+        screen: const VerifyEmailScreen(
+          userId: 42,
+          email: 'learner@example.com',
+        ),
+        repository: _AccountAuthRepository(),
+        now: clock.call,
+        locale: const Locale('ja'),
+        physicalSize: const Size(320, 844),
+      );
+
+      expect(find.text('コードが届きませんか？'), findsOneWidget);
+      expect(find.text('01:00後にコードを再送信'), findsOneWidget);
+      expect(find.text('l***@example.com'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('disposing Verify Email cleans its cooldown ticker', (
+      tester,
+    ) async {
+      final clock = _MutableClock();
+      await _pumpScreen(
+        tester,
+        screen: const VerifyEmailScreen(
+          userId: 42,
+          email: 'learner@example.com',
+        ),
+        repository: _AccountAuthRepository(),
+        now: clock.call,
+      );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      clock.advance(const Duration(minutes: 2));
+      await tester.pump(const Duration(minutes: 2));
+
+      expect(tester.takeException(), isNull);
     });
   });
 
@@ -336,24 +620,30 @@ void main() {
 class _AccountAuthRepository implements AuthRepository {
   _AccountAuthRepository({
     this.verifyCompleter,
+    this.resendCompleter,
     this.updateCompleter,
     this.changeCompleter,
     this.verifyError,
+    this.resendError,
     this.updateError,
     this.changeError,
   });
 
   final Completer<void>? verifyCompleter;
+  final Completer<void>? resendCompleter;
   final Completer<void>? updateCompleter;
   final Completer<void>? changeCompleter;
   final Object? verifyError;
+  final Object? resendError;
   final Object? updateError;
   final Object? changeError;
 
   int verifyEmailCalls = 0;
+  int resendVerificationCalls = 0;
   int updateEmailCalls = 0;
   int changePasswordCalls = 0;
   VerifyEmailRequestDto? lastVerifyRequest;
+  ResendVerificationEmailRequestDto? lastResendRequest;
   int? lastUpdateUserId;
   UpdateEmailRequestDto? lastUpdateRequest;
   int? lastChangeUserId;
@@ -365,6 +655,16 @@ class _AccountAuthRepository implements AuthRepository {
     lastVerifyRequest = request;
     if (verifyError != null) return Future.error(verifyError!);
     return verifyCompleter?.future ?? Future.value();
+  }
+
+  @override
+  Future<void> resendVerificationEmail(
+    ResendVerificationEmailRequestDto request,
+  ) {
+    resendVerificationCalls += 1;
+    lastResendRequest = request;
+    if (resendError != null) return Future.error(resendError!);
+    return resendCompleter?.future ?? Future.value();
   }
 
   @override
@@ -409,8 +709,11 @@ Future<void> _pumpScreen(
   required Widget screen,
   required AuthRepository repository,
   AuthSessionController? session,
+  DateTime Function()? now,
+  Locale locale = const Locale('vi'),
+  Size physicalSize = const Size(390, 844),
 }) async {
-  tester.view.physicalSize = const Size(390, 844);
+  tester.view.physicalSize = physicalSize;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -422,14 +725,46 @@ Future<void> _pumpScreen(
       overrides: [
         authRepositoryProvider.overrideWithValue(repository),
         authSessionControllerProvider.overrideWithValue(authSession),
+        if (now != null) verifyEmailClockProvider.overrideWithValue(now),
+        localeControllerProvider.overrideWith(
+          () => _AccountTestLocaleController(locale),
+        ),
         userProfileRepositoryProvider.overrideWithValue(
           const _AccountProfileRepository(),
         ),
       ],
-      child: MaterialApp(theme: AppTheme.light, home: screen),
+      child: MaterialApp(
+        theme: AppTheme.light,
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: screen,
+      ),
     ),
   );
   await tester.pump();
+}
+
+class _MutableClock {
+  DateTime _now = DateTime.utc(2026, 10, 3, 8);
+
+  DateTime call() => _now;
+
+  void advance(Duration duration) {
+    _now = _now.add(duration);
+  }
+}
+
+class _AccountTestLocaleController extends LocaleController {
+  _AccountTestLocaleController(this.initialLocale);
+
+  final Locale initialLocale;
+
+  @override
+  Locale build() => initialLocale;
+
+  @override
+  Future<void> changeLocale(Locale locale) async => state = locale;
 }
 
 class _AccountProfileRepository implements UserProfileRepository {
@@ -488,4 +823,10 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pump();
+}
+
+void _refreshVerifyEmailCooldown(WidgetTester tester) {
+  final observer =
+      tester.state(find.byType(VerifyEmailScreen)) as WidgetsBindingObserver;
+  observer.didChangeAppLifecycleState(AppLifecycleState.resumed);
 }

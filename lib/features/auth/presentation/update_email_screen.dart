@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/update_email_controller.dart';
+import 'package:rikipath_mobile/features/auth/domain/verify_email_arguments.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
 
@@ -138,8 +139,13 @@ class _UpdateEmailScreenState extends ConsumerState<UpdateEmailScreen> {
                 key: const Key('update_email_verify_action'),
                 label: l10n.enterVerificationCode,
                 trailingIcon: Icons.arrow_forward,
-                onPressed: () =>
-                    context.push(AppRoutes.verifyEmail, extra: userId),
+                onPressed: () => context.push(
+                  AppRoutes.verifyEmail,
+                  extra: VerifyEmailArguments(
+                    userId: userId,
+                    email: _emailController.text.trim(),
+                  ),
+                ),
               ),
             ],
           ],

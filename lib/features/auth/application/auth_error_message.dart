@@ -7,6 +7,7 @@ enum AuthOperation {
   login,
   register,
   verifyEmail,
+  resendVerification,
   updateEmail,
   changePassword,
   passwordRecovery,
@@ -23,6 +24,11 @@ String authErrorMessage(
   }
   if (error is UnsupportedUserRoleException) {
     return l10n.authErrorUnsupportedRole;
+  }
+  if (operation == AuthOperation.resendVerification &&
+      error is ApiError &&
+      _isResendRateLimit(error)) {
+    return l10n.authErrorResendRateLimited;
   }
   if (error is NetworkError) {
     return l10n.authErrorNetwork;
@@ -52,6 +58,7 @@ String authErrorMessage(
       AuthOperation.login => l10n.authErrorLoginValidation,
       AuthOperation.register => l10n.authErrorRegisterValidation,
       AuthOperation.verifyEmail => l10n.authErrorVerifyValidation,
+      AuthOperation.resendVerification => l10n.authErrorResendValidation,
       AuthOperation.updateEmail => l10n.authErrorUpdateEmailValidation,
       AuthOperation.changePassword => l10n.authErrorChangePasswordValidation,
       AuthOperation.passwordRecovery => l10n.authErrorRecoveryValidation,
@@ -61,4 +68,17 @@ String authErrorMessage(
     return l10n.authErrorServer;
   }
   return l10n.authErrorUnknown;
+}
+
+bool _isResendRateLimit(ApiError error) {
+  if (error.statusCode == 429) return true;
+  if (error is! ValidationError) return false;
+
+  final sourceText = <String>[
+    error.message,
+    ...error.details,
+  ].join(' ').toLowerCase();
+  return sourceText.contains('vượt quá số lần gửi lại') ||
+      sourceText.contains('quá nhiều lần') ||
+      sourceText.contains('too many resend');
 }

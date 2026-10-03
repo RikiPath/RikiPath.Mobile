@@ -7,8 +7,10 @@ import 'package:rikipath_mobile/core/storage/token_storage.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_api_paths.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 
 import '../../support/test_auth_session.dart';
+import '../../support/test_jwt.dart';
 
 void main() {
   const request = LoginRequestDto(
@@ -28,9 +30,23 @@ void main() {
 
     expect(apiClient.lastPath, AuthApiPaths.login);
     expect(apiClient.lastData, request.toJson());
-    expect(response.role, 'Learner');
-    expect(secureStore.values['access_token'], 'access-token');
+    expect(response.role, BackendUserRole.learner);
+    expect(secureStore.values['access_token'], response.accessToken);
     expect(secureStore.values['authenticated_user_id'], '42');
+    expect(secureStore.values['authenticated_user_role'], 'Learner');
+  });
+
+  test('mentor login is accepted and stores the exact backend role', () async {
+    final secureStore = TestSecureKeyValueStore();
+    final repository = ApiAuthRepository(
+      apiClient: _StubApiClient(_loginEnvelope(role: 'Mentor')),
+      tokenStorage: TokenStorage(secureStore),
+    );
+
+    final response = await repository.login(request, persistSession: true);
+
+    expect(response.role, BackendUserRole.mentor);
+    expect(secureStore.values['authenticated_user_role'], 'Mentor');
   });
 
   test('non-learner login is rejected before token storage', () async {
@@ -100,6 +116,75 @@ void main() {
     expect(secureStore.values, isEmpty);
   });
 
+  test('malformed access token is rejected before session storage', () async {
+    final secureStore = TestSecureKeyValueStore();
+    final repository = ApiAuthRepository(
+      apiClient: _StubApiClient(
+        _loginEnvelope(role: 'Learner', accessToken: 'not-a-jwt'),
+      ),
+      tokenStorage: TokenStorage(secureStore),
+    );
+
+    await expectLater(
+      repository.login(request, persistSession: true),
+      throwsA(isA<UnknownError>()),
+    );
+    expect(secureStore.values, isEmpty);
+  });
+
+  test('login response identity must match access-token claims', () async {
+    final secureStore = TestSecureKeyValueStore();
+    final repository = ApiAuthRepository(
+      apiClient: _StubApiClient(
+        _loginEnvelope(role: 'Learner', tokenUserId: 84),
+      ),
+      tokenStorage: TokenStorage(secureStore),
+    );
+
+    await expectLater(
+      repository.login(request, persistSession: true),
+      throwsA(isA<UnknownError>()),
+    );
+    expect(secureStore.values, isEmpty);
+  });
+
+  test('login response role must match access-token claims', () async {
+    final secureStore = TestSecureKeyValueStore();
+    final repository = ApiAuthRepository(
+      apiClient: _StubApiClient(
+        _loginEnvelope(role: 'Learner', tokenRole: 'Mentor'),
+      ),
+      tokenStorage: TokenStorage(secureStore),
+    );
+
+    await expectLater(
+      repository.login(request, persistSession: true),
+      throwsA(isA<UnknownError>()),
+    );
+    expect(secureStore.values, isEmpty);
+  });
+
+  test('expired access token is rejected before session storage', () async {
+    final secureStore = TestSecureKeyValueStore();
+    final repository = ApiAuthRepository(
+      apiClient: _StubApiClient(
+        _loginEnvelope(
+          role: 'Learner',
+          tokenExpiresAt: DateTime.now().toUtc().subtract(
+            const Duration(minutes: 1),
+          ),
+        ),
+      ),
+      tokenStorage: TokenStorage(secureStore),
+    );
+
+    await expectLater(
+      repository.login(request, persistSession: true),
+      throwsA(isA<UnknownError>()),
+    );
+    expect(secureStore.values, isEmpty);
+  });
+
   test('verify email posts the exact source-backed request', () async {
     const verifyRequest = VerifyEmailRequestDto(
       userId: 42,
@@ -118,6 +203,25 @@ void main() {
     expect(apiClient.lastData, verifyRequest.toJson());
   });
 
+  test('resend verification posts the exact source-backed request', () async {
+    const resendRequest = ResendVerificationEmailRequestDto(
+      email: 'learner@example.com',
+    );
+    final apiClient = _StubApiClient(_successEnvelope());
+    final repository = ApiAuthRepository(
+      apiClient: apiClient,
+      tokenStorage: TokenStorage(TestSecureKeyValueStore()),
+    );
+
+    await repository.resendVerificationEmail(resendRequest);
+
+    expect(apiClient.lastMethod, 'POST');
+    expect(apiClient.lastPath, AuthApiPaths.resendVerificationEmail);
+    expect(apiClient.lastPath, isNot('/api/Email/send-validation'));
+    expect(apiClient.lastData, resendRequest.toJson());
+    expect(apiClient.lastData, isNot(containsPair('htmlContent', anything)));
+  });
+
   test(
     'update email uses the authenticated user path and exact body',
     () async {
@@ -125,6 +229,7 @@ void main() {
       final secureStore = TestSecureKeyValueStore(
         accessToken: 'access-token',
         userId: 42,
+        role: 'Learner',
       );
       final apiClient = _StubApiClient(_successEnvelope());
       final repository = ApiAuthRepository(
@@ -139,6 +244,7 @@ void main() {
       expect(apiClient.lastData, updateRequest.toJson());
       expect(secureStore.values['access_token'], 'access-token');
       expect(secureStore.values['authenticated_user_id'], '42');
+      expect(secureStore.values['authenticated_user_role'], 'Learner');
     },
   );
 
@@ -153,6 +259,7 @@ void main() {
       final secureStore = TestSecureKeyValueStore(
         accessToken: 'access-token',
         userId: 42,
+        role: 'Learner',
       );
       final apiClient = _StubApiClient(_successEnvelope());
       final repository = ApiAuthRepository(
@@ -168,18 +275,32 @@ void main() {
       expect(secureStore.values, const <String, String>{
         'access_token': 'access-token',
         'authenticated_user_id': '42',
+        'authenticated_user_role': 'Learner',
       });
     },
   );
 }
 
-Map<String, Object?> _loginEnvelope({required String role}) {
+Map<String, Object?> _loginEnvelope({
+  required String role,
+  int userId = 42,
+  int? tokenUserId,
+  String? tokenRole,
+  DateTime? tokenExpiresAt,
+  String? accessToken,
+}) {
   return <String, Object?>{
     'statusCode': 200,
     'isSuccess': true,
     'result': <String, Object?>{
-      'accessToken': 'access-token',
-      'userId': 42,
+      'accessToken':
+          accessToken ??
+          createTestJwt(
+            userId: tokenUserId ?? userId,
+            role: tokenRole ?? role,
+            expiresAt: tokenExpiresAt,
+          ),
+      'userId': userId,
       'email': 'learner@example.com',
       'fullName': 'Nguyễn Minh Anh',
       'role': role,
@@ -192,6 +313,7 @@ Map<String, Object?> _registerEnvelope() {
     'statusCode': 201,
     'isSuccess': true,
     'result': <String, Object?>{
+      'userId': 42,
       'fullName': 'Nguyễn Minh Anh',
       'email': 'learner@example.com',
     },

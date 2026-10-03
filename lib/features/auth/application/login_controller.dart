@@ -66,7 +66,7 @@ class LoginController extends Notifier<LoginState> {
           );
       ref
           .read(authSessionControllerProvider)
-          .markAuthenticated(userId: account.userId);
+          .markAuthenticated(userId: account.userId, role: account.role);
       state = const LoginState(succeeded: true);
       return true;
     } catch (error) {

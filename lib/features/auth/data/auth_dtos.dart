@@ -1,3 +1,5 @@
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
+
 class LoginRequestDto {
   const LoginRequestDto({required this.email, required this.password});
 
@@ -44,12 +46,17 @@ class LoginResponseDto {
   });
 
   factory LoginResponseDto.fromJson(Map<String, Object?> json) {
+    final roleValue = _requiredString(json, 'role');
+    final role = BackendUserRole.fromApiValue(roleValue);
+    if (role == null) {
+      throw FormatException('Unknown backend role: $roleValue.');
+    }
     return LoginResponseDto(
       accessToken: _requiredString(json, 'accessToken'),
       userId: _requiredInt(json, 'userId'),
       email: _requiredString(json, 'email'),
       fullName: _requiredString(json, 'fullName'),
-      role: _requiredString(json, 'role'),
+      role: role,
     );
   }
 
@@ -57,27 +64,27 @@ class LoginResponseDto {
   final int userId;
   final String email;
   final String fullName;
-  final String role;
+  final BackendUserRole role;
 }
 
 class RegisterResponseDto {
   const RegisterResponseDto({
     required this.fullName,
     required this.email,
-    this.userId,
+    required this.userId,
   });
 
   factory RegisterResponseDto.fromJson(Map<String, Object?> json) {
     return RegisterResponseDto(
       fullName: _requiredString(json, 'fullName'),
       email: _requiredString(json, 'email'),
-      userId: _optionalInt(json, 'userId'),
+      userId: _requiredInt(json, 'userId'),
     );
   }
 
   final String fullName;
   final String email;
-  final int? userId;
+  final int userId;
 }
 
 class VerifyEmailRequestDto {
@@ -93,6 +100,14 @@ class VerifyEmailRequestDto {
     'userId': userId,
     'verificationCode': verificationCode,
   };
+}
+
+class ResendVerificationEmailRequestDto {
+  const ResendVerificationEmailRequestDto({required this.email});
+
+  final String email;
+
+  Map<String, Object?> toJson() => <String, Object?>{'email': email};
 }
 
 class UpdateEmailRequestDto {
@@ -129,15 +144,6 @@ String _requiredString(Map<String, Object?> json, String field) {
 
 int _requiredInt(Map<String, Object?> json, String field) {
   final value = json[field];
-  if (value is int) return value;
-  if (value is num) return value.toInt();
-  throw FormatException('Expected an integer field named $field.');
-}
-
-int? _optionalInt(Map<String, Object?> json, String field) {
-  final value = json[field];
-  if (value == null) return null;
-  if (value is int) return value;
-  if (value is num) return value.toInt();
-  throw FormatException('Expected an integer field named $field.');
+  if (value is int && value > 0) return value;
+  throw FormatException('Expected a positive integer field named $field.');
 }

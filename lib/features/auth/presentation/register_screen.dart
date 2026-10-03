@@ -7,9 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/register_controller.dart';
+import 'package:rikipath_mobile/features/auth/domain/verify_email_arguments.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_page.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/register_success_celebration.dart';
 
@@ -55,19 +57,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<Locale>(localeControllerProvider, (previous, next) {
+      if (previous?.languageCode != next.languageCode) {
+        ref.read(registerControllerProvider.notifier).clearFeedback();
+      }
+    });
     final l10n = context.l10n;
     final state = ref.watch(registerControllerProvider);
     if (state.succeeded) {
       return _RegisterSuccess(
         email: state.registeredAccount!.email,
         userId: state.registeredAccount!.userId,
-        onVerifyEmail: state.registeredAccount!.userId == null
-            ? null
-            : () {
-                final userId = state.registeredAccount!.userId!;
-                ref.read(registerControllerProvider.notifier).reset();
-                context.go(AppRoutes.verifyEmail, extra: userId);
-              },
+        onVerifyEmail: () {
+          final userId = state.registeredAccount!.userId;
+          ref.read(registerControllerProvider.notifier).reset();
+          context.go(
+            AppRoutes.verifyEmail,
+            extra: VerifyEmailArguments(
+              userId: userId,
+              email: state.registeredAccount!.email,
+            ),
+          );
+        },
         onReturnToLogin: () {
           ref.read(registerControllerProvider.notifier).reset();
           context.go(AppRoutes.login);
@@ -276,8 +287,8 @@ class _RegisterSuccess extends StatefulWidget {
   });
 
   final String email;
-  final int? userId;
-  final VoidCallback? onVerifyEmail;
+  final int userId;
+  final VoidCallback onVerifyEmail;
   final VoidCallback onReturnToLogin;
 
   @override
@@ -397,9 +408,7 @@ class _RegisterSuccessState extends State<_RegisterSuccess>
                 end: 0.58,
                 child: RikiWarningBanner(
                   icon: Icons.mark_email_unread_outlined,
-                  message: widget.userId == null
-                      ? l10n.verificationBackendBlocker
-                      : l10n.verificationCodeValidity,
+                  message: l10n.verificationCodeValidity,
                 ),
               ),
             ],
@@ -409,23 +418,17 @@ class _RegisterSuccessState extends State<_RegisterSuccess>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (widget.onVerifyEmail != null) ...[
-                  RikiPrimaryButton(
-                    key: const Key('register_open_verify_email_button'),
-                    label: l10n.enterVerificationCode,
-                    trailingIcon: Icons.arrow_forward,
-                    onPressed: widget.onVerifyEmail,
-                  ),
-                  const SizedBox(height: AppSpacing.space2),
-                  RikiTextButton(
-                    label: l10n.returnToLogin,
-                    onPressed: widget.onReturnToLogin,
-                  ),
-                ] else
-                  RikiPrimaryButton(
-                    label: l10n.returnToLogin,
-                    onPressed: widget.onReturnToLogin,
-                  ),
+                RikiPrimaryButton(
+                  key: const Key('register_open_verify_email_button'),
+                  label: l10n.enterVerificationCode,
+                  trailingIcon: Icons.arrow_forward,
+                  onPressed: widget.onVerifyEmail,
+                ),
+                const SizedBox(height: AppSpacing.space2),
+                RikiTextButton(
+                  label: l10n.returnToLogin,
+                  onPressed: widget.onReturnToLogin,
+                ),
                 const SizedBox(height: AppSpacing.space4),
                 const AuthSecurityFooter(),
               ],

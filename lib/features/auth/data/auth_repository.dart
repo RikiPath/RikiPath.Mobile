@@ -4,6 +4,7 @@ import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/storage/token_storage.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_api_paths.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
+import 'package:rikipath_mobile/features/auth/domain/jwt_session_claims.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return ApiAuthRepository(
@@ -21,6 +22,10 @@ abstract interface class AuthRepository {
   Future<RegisterResponseDto> register(RegisterRequestDto request);
 
   Future<void> verifyEmail(VerifyEmailRequestDto request);
+
+  Future<void> resendVerificationEmail(
+    ResendVerificationEmailRequestDto request,
+  );
 
   Future<void> updateEmail(int userId, UpdateEmailRequestDto request);
 
@@ -48,12 +53,21 @@ class ApiAuthRepository implements AuthRepository {
 
     try {
       final login = LoginResponseDto.fromJson(result);
-      if (login.role != 'Learner') {
-        throw UnsupportedUserRoleException(login.role);
+      final claims = JwtSessionClaims.parse(login.accessToken);
+      if (claims.userId != login.userId ||
+          claims.role != login.role ||
+          claims.isExpiredAt(DateTime.now().toUtc())) {
+        throw const FormatException(
+          'Login response and access-token claims are inconsistent.',
+        );
+      }
+      if (!login.role.isMobileSupported) {
+        throw UnsupportedUserRoleException(login.role.apiValue);
       }
       await _tokenStorage.saveAuthenticatedSession(
         accessToken: login.accessToken,
         userId: login.userId,
+        role: login.role.apiValue,
         persist: persistSession,
       );
       return login;
@@ -68,6 +82,17 @@ class ApiAuthRepository implements AuthRepository {
   Future<void> verifyEmail(VerifyEmailRequestDto request) async {
     final response = await _apiClient.post<Object?>(
       AuthApiPaths.verifyEmail,
+      data: request.toJson(),
+    );
+    _ensureSuccessEnvelope(response.data);
+  }
+
+  @override
+  Future<void> resendVerificationEmail(
+    ResendVerificationEmailRequestDto request,
+  ) async {
+    final response = await _apiClient.post<Object?>(
+      AuthApiPaths.resendVerificationEmail,
       data: request.toJson(),
     );
     _ensureSuccessEnvelope(response.data);

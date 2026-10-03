@@ -1,7 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 
 void main() {
+  test('backend role mapping uses only the verified enum literals', () {
+    expect(BackendUserRole.values.map((role) => role.apiValue), const <String>[
+      'Learner',
+      'ContentAuthor',
+      'Mentor',
+      'Admin',
+    ]);
+    expect(
+      BackendUserRole.values
+          .where((role) => role.isMobileSupported)
+          .map((role) => role.apiValue),
+      const <String>['Learner', 'Mentor'],
+    );
+    expect(BackendUserRole.fromApiValue('Consultant'), isNull);
+    expect(BackendUserRole.fromApiValue('learner'), isNull);
+    expect(BackendUserRole.fromApiValue(' Learner'), isNull);
+    expect(BackendUserRole.fromApiValue('Learner '), isNull);
+    expect(BackendUserRole.fromApiValue(''), isNull);
+  });
+
   test('login request uses the exact backend JSON field names', () {
     const request = LoginRequestDto(
       email: 'learner@example.com',
@@ -43,7 +64,7 @@ void main() {
 
     expect(response.accessToken, 'access-token');
     expect(response.userId, 42);
-    expect(response.role, 'Learner');
+    expect(response.role, BackendUserRole.learner);
   });
 
   test('register response reads the userId used by email verification', () {
@@ -58,13 +79,50 @@ void main() {
     expect(response.email, 'learner@example.com');
   });
 
-  test('register response remains safe when an older server omits userId', () {
-    final response = RegisterResponseDto.fromJson(const <String, Object?>{
-      'fullName': 'Nguyễn Minh Anh',
-      'email': 'learner@example.com',
-    });
+  test('register response rejects a missing verification userId', () {
+    expect(
+      () => RegisterResponseDto.fromJson(const <String, Object?>{
+        'fullName': 'Nguyễn Minh Anh',
+        'email': 'learner@example.com',
+      }),
+      throwsFormatException,
+    );
+  });
 
-    expect(response.userId, isNull);
+  test('register response rejects non-positive and non-integer userId', () {
+    for (final invalidUserId in <Object?>[null, 0, -1, 42.5, '42']) {
+      expect(
+        () => RegisterResponseDto.fromJson(<String, Object?>{
+          'userId': invalidUserId,
+          'fullName': 'Nguyá»…n Minh Anh',
+          'email': 'learner@example.com',
+        }),
+        throwsFormatException,
+        reason: 'userId=$invalidUserId must not open email verification',
+      );
+    }
+  });
+
+  test('login response rejects unknown, null, and malformed role values', () {
+    for (final invalidRole in <Object?>[
+      null,
+      '',
+      'learner',
+      ' Learner',
+      'Learner ',
+      'FutureRole',
+    ]) {
+      expect(
+        () => LoginResponseDto.fromJson(<String, Object?>{
+          'accessToken': 'token',
+          'userId': 42,
+          'email': 'learner@example.com',
+          'fullName': 'Nguyá»…n Minh Anh',
+          'role': invalidRole,
+        }),
+        throwsFormatException,
+      );
+    }
   });
 
   test('verify-email request uses exact backend JSON field names', () {
@@ -76,6 +134,16 @@ void main() {
     expect(request.toJson(), const <String, Object?>{
       'userId': 42,
       'verificationCode': '123456',
+    });
+  });
+
+  test('resend verification request uses only the verified email field', () {
+    const request = ResendVerificationEmailRequestDto(
+      email: 'learner@example.com',
+    );
+
+    expect(request.toJson(), const <String, Object?>{
+      'email': 'learner@example.com',
     });
   });
 

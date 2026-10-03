@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/login_controller.dart';
@@ -42,6 +43,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<Locale>(localeControllerProvider, (previous, next) {
+      if (previous?.languageCode != next.languageCode) {
+        ref.read(loginControllerProvider.notifier).clearFeedback();
+      }
+    });
     final l10n = context.l10n;
     final state = ref.watch(loginControllerProvider);
     final hasFeedback =
@@ -113,7 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   label: l10n.forgotPassword,
                   onPressed: state.isLoading
                       ? null
-                      : () => context.go(AppRoutes.forgotPassword),
+                      : () => context.push(AppRoutes.forgotPassword),
                 ),
               ),
               RikiCheckboxRow(
@@ -162,7 +168,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   actionLabel: l10n.register,
                   onPressed: state.isLoading
                       ? null
-                      : () => context.go(AppRoutes.register),
+                      : () => context.push(AppRoutes.register),
                 ),
                 const AuthSecurityFooter(),
               ],

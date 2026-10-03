@@ -10,11 +10,14 @@ import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/widgets/riki_toast_host.dart';
 import 'package:rikipath_mobile/core/widgets/riki_buttons.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/auth/application/verify_email_controller.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/auth/presentation/forgot_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/login_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/register_screen.dart';
@@ -119,6 +122,27 @@ void main() {
       expect(find.text('Vui lòng nhập mật khẩu.'), findsOneWidget);
     });
 
+    testWidgets('language switch clears stale localized validation feedback', (
+      tester,
+    ) async {
+      await _pumpAuthRoute(tester, AppRoutes.login, _FakeAuthRepository());
+
+      await _tapVisible(tester, find.byKey(const Key('login_submit_button')));
+      expect(find.text('Vui lòng nhập email.'), findsOneWidget);
+
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('language_switcher_button')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('language_option_ja')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('メールアドレス'), findsOneWidget);
+      expect(find.text('Vui lòng nhập email.'), findsNothing);
+      expect(find.text('Vui lòng nhập mật khẩu.'), findsNothing);
+    });
+
     testWidgets('password visibility toggle changes obscuring', (tester) async {
       await _pumpAuthRoute(tester, AppRoutes.login, _FakeAuthRepository());
 
@@ -173,7 +197,11 @@ void main() {
     testWidgets('forgot-password action opens the canonical route', (
       tester,
     ) async {
-      await _pumpAuthRoute(tester, AppRoutes.login, _FakeAuthRepository());
+      final router = await _pumpAuthRoute(
+        tester,
+        AppRoutes.login,
+        _FakeAuthRepository(),
+      );
 
       final passwordBottom = tester
           .getBottomLeft(find.byKey(const Key('login_password_field')))
@@ -187,15 +215,33 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ForgotPasswordScreen), findsOneWidget);
+      expect(router.canPop(), isTrue);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LoginScreen), findsOneWidget);
     });
 
-    testWidgets('register action opens registration', (tester) async {
-      await _pumpAuthRoute(tester, AppRoutes.login, _FakeAuthRepository());
+    testWidgets('register action preserves Login for Android Back', (
+      tester,
+    ) async {
+      final router = await _pumpAuthRoute(
+        tester,
+        AppRoutes.login,
+        _FakeAuthRepository(),
+      );
 
       await _tapVisible(tester, find.text('Đăng ký'));
       await tester.pumpAndSettle();
 
       expect(find.byType(RegisterScreen), findsOneWidget);
+      expect(router.canPop(), isTrue);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LoginScreen), findsOneWidget);
     });
 
     testWidgets('invalid credentials render mapped server feedback', (
@@ -280,6 +326,30 @@ void main() {
       );
 
       expect(find.text('Mật khẩu xác nhận không khớp.'), findsOneWidget);
+    });
+
+    testWidgets('language switch clears stale registration validation', (
+      tester,
+    ) async {
+      await _pumpAuthRoute(tester, AppRoutes.register, _FakeAuthRepository());
+
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('register_submit_button')),
+      );
+      expect(find.text('Vui lòng nhập email.'), findsOneWidget);
+
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('language_switcher_button')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('language_option_ja')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('新規登録'), findsWidgets);
+      expect(find.text('Vui lòng nhập email.'), findsNothing);
+      expect(find.text('Vui lòng nhập mật khẩu.'), findsNothing);
     });
 
     testWidgets('loading state is represented and disables submit', (
@@ -402,7 +472,14 @@ void main() {
     testWidgets('successful register hands its userId to Verify Email', (
       tester,
     ) async {
-      await _pumpAuthRoute(tester, AppRoutes.register, _FakeAuthRepository());
+      final clock = _MutableClock();
+      final repository = _FakeAuthRepository();
+      await _pumpAuthRoute(
+        tester,
+        AppRoutes.register,
+        repository,
+        now: clock.call,
+      );
       await _registerSuccessfully(tester);
       await tester.pumpAndSettle();
 
@@ -418,6 +495,22 @@ void main() {
         isTrue,
       );
       expect(find.text('Chưa thể tiếp tục từ đăng ký'), findsNothing);
+      expect(find.text('l***@example.com'), findsOneWidget);
+      expect(find.text('Gửi lại mã sau 01:00'), findsOneWidget);
+
+      clock.advance(const Duration(seconds: 60));
+      final observer =
+          tester.state(find.byType(VerifyEmailScreen))
+              as WidgetsBindingObserver;
+      observer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await tester.pump();
+
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('verify_email_resend_button')),
+      );
+      expect(repository.resendVerificationCalls, 1);
+      expect(repository.lastResendRequest?.email, 'learner@example.com');
     });
 
     testWidgets(
@@ -570,7 +663,7 @@ void main() {
       expect(find.byType(LoginScreen), findsOneWidget);
     });
 
-    testWidgets('missing production endpoint renders an explicit error', (
+    testWidgets('unavailable password recovery renders a safe error', (
       tester,
     ) async {
       final repository = _FakeAuthRepository(
@@ -587,7 +680,7 @@ void main() {
 
       expect(find.text('Chưa thể gửi yêu cầu'), findsOneWidget);
       expect(
-        find.textContaining('chưa được kết nối với máy chủ'),
+        find.textContaining('chưa khả dụng trong ứng dụng'),
         findsOneWidget,
       );
     });
@@ -626,7 +719,7 @@ void main() {
       await _registerSuccessfully(tester);
       await tester.pumpAndSettle();
 
-      expect(find.text('アカウントを作成しました'), findsOneWidget);
+      expect(find.text('アカウントを作成しました'), findsWidgets);
       expect(
         find.byKey(const Key('register_success_celebration')),
         findsOneWidget,
@@ -641,7 +734,7 @@ const _loginResponse = LoginResponseDto(
   userId: 42,
   email: 'learner@example.com',
   fullName: 'Nguyễn Minh Anh',
-  role: 'Learner',
+  role: BackendUserRole.learner,
 );
 
 const _registerResponse = RegisterResponseDto(
@@ -668,7 +761,9 @@ class _FakeAuthRepository implements AuthRepository {
   int loginCalls = 0;
   int registerCalls = 0;
   int passwordResetCalls = 0;
+  int resendVerificationCalls = 0;
   RegisterRequestDto? lastRegisterRequest;
+  ResendVerificationEmailRequestDto? lastResendRequest;
 
   @override
   Future<LoginResponseDto> login(
@@ -690,6 +785,14 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> verifyEmail(VerifyEmailRequestDto request) async {}
+
+  @override
+  Future<void> resendVerificationEmail(
+    ResendVerificationEmailRequestDto request,
+  ) async {
+    resendVerificationCalls += 1;
+    lastResendRequest = request;
+  }
 
   @override
   Future<void> updateEmail(int userId, UpdateEmailRequestDto request) async {}
@@ -720,6 +823,7 @@ Future<GoRouter> _pumpAuthRoute(
   String initialLocation,
   AuthRepository repository, {
   Locale locale = const Locale('vi'),
+  DateTime Function()? now,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -740,20 +844,48 @@ Future<GoRouter> _pumpAuthRoute(
       overrides: [
         authRepositoryProvider.overrideWithValue(repository),
         authSessionControllerProvider.overrideWithValue(session),
+        if (now != null) verifyEmailClockProvider.overrideWithValue(now),
+        localeControllerProvider.overrideWith(
+          () => _TestLocaleController(locale),
+        ),
       ],
-      child: MaterialApp.router(
-        theme: AppTheme.light,
-        locale: locale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: router,
-        builder: (context, child) =>
-            RikiToastHost(child: child ?? const SizedBox.shrink()),
+      child: Consumer(
+        builder: (context, ref, child) => MaterialApp.router(
+          theme: AppTheme.light,
+          locale: ref.watch(localeControllerProvider),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+          builder: (context, child) =>
+              RikiToastHost(child: child ?? const SizedBox.shrink()),
+        ),
       ),
     ),
   );
   await tester.pump();
   return router;
+}
+
+class _MutableClock {
+  DateTime _now = DateTime.utc(2026, 10, 3, 8);
+
+  DateTime call() => _now;
+
+  void advance(Duration duration) {
+    _now = _now.add(duration);
+  }
+}
+
+class _TestLocaleController extends LocaleController {
+  _TestLocaleController(this.initialLocale);
+
+  final Locale initialLocale;
+
+  @override
+  Locale build() => initialLocale;
+
+  @override
+  Future<void> changeLocale(Locale locale) async => state = locale;
 }
 
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {

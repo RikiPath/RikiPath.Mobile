@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_error_message.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
+import 'package:rikipath_mobile/l10n/generated/app_localizations_vi.dart';
 
 void main() {
   test('invalid credentials are mapped without exposing a raw exception', () {
@@ -41,13 +42,35 @@ void main() {
     expect(message, isNot(contains('500')));
   });
 
-  test('missing recovery endpoint has an explicit production message', () {
+  test('resend validation uses dedicated safe feedback', () {
+    final message = authErrorMessage(
+      const ValidationError(message: 'raw backend resend detail'),
+      AuthOperation.resendVerification,
+    );
+
+    expect(message, AppLocalizationsVi().authErrorResendValidation);
+    expect(message, isNot(contains('raw backend')));
+  });
+
+  test('resend hourly limit uses dedicated localized feedback', () {
+    final message = authErrorMessage(
+      const ValidationError(
+        message: 'Bạn đã vượt quá số lần gửi lại email trong 1 giờ.',
+      ),
+      AuthOperation.resendVerification,
+    );
+
+    expect(message, AppLocalizationsVi().authErrorResendRateLimited);
+    expect(message, isNot(contains('1 giờ')));
+  });
+
+  test('unavailable password recovery has a learner-facing message', () {
     final message = authErrorMessage(
       const PasswordRecoveryUnavailableException(),
       AuthOperation.passwordRecovery,
     );
 
-    expect(message, contains('chưa được kết nối với máy chủ'));
+    expect(message, contains('chưa khả dụng trong ứng dụng'));
   });
 
   test('unsupported backend roles get a learner-app message', () {
@@ -56,7 +79,10 @@ void main() {
       AuthOperation.login,
     );
 
-    expect(message, 'Ứng dụng di động hiện chỉ hỗ trợ tài khoản học viên.');
+    expect(
+      message,
+      'Ứng dụng di động hiện chỉ hỗ trợ tài khoản Học viên và Mentor.',
+    );
     expect(message, isNot(contains('Admin')));
   });
 
