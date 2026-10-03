@@ -19,11 +19,11 @@ dependencies:
   intl: any
   drift: ^2.34.4
   drift_flutter: ^0.3.1
-  connectivity_plus: ^7.3.1
   image_picker: ^1.2.1
   flutter_svg: ^2.2.1
   video_player: ^2.14.0
   just_audio: ^0.10.6
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
