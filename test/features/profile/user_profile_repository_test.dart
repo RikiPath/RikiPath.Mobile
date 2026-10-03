@@ -39,6 +39,14 @@ void main() {
       expect(dto.targetJlptLevelId, isNull);
       expect(dto.targetJlptLevelName, isNull);
     });
+
+    test('rejects fractional integer fields instead of truncating them', () {
+      final body = _profileEnvelope();
+      final result = body['result']! as Map<String, Object?>;
+      result['dailyStudyMinutes'] = 30.5;
+
+      expect(() => UserProfileDto.fromEnvelope(body), throwsFormatException);
+    });
   });
 
   group('API UserProfile repository', () {

@@ -526,8 +526,15 @@ void main() {
               find.byKey(const ValueKey<String>('jlpt_goal_save_button')),
             )
             .onPressed,
-        isNull,
+        isNotNull,
       );
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -80));
+      await tester.pump();
+      await tester.tap(
+        find.byKey(const ValueKey<String>('jlpt_goal_save_button')),
+      );
+      await tester.pumpAndSettle();
+      expect(repository.jlptCalls, 0);
     });
 
     testWidgets('Japanese selectors do not overflow at 320px', (tester) async {

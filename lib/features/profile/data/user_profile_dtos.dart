@@ -134,7 +134,6 @@ String? _optionalString(Map<String, Object?> json, String field) {
 int _requiredInt(Map<String, Object?> json, String field) {
   final value = json[field];
   if (value is int) return value;
-  if (value is num) return value.toInt();
   throw FormatException('Expected an integer field named $field.');
 }
 
@@ -142,7 +141,6 @@ int? _optionalInt(Map<String, Object?> json, String field) {
   final value = json[field];
   if (value == null) return null;
   if (value is int) return value;
-  if (value is num) return value.toInt();
   throw FormatException('Expected a nullable integer field named $field.');
 }
 

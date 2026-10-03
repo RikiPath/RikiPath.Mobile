@@ -222,7 +222,7 @@ class _ProfileSuccessViewState extends State<_ProfileSuccessView>
                 icon: Icons.insights_outlined,
                 title: l10n.progressAndHistory,
                 subtitle: l10n.profileProgressSubtitle,
-                onTap: () => context.go(AppRoutes.learnProgress),
+                onTap: () => context.push(AppRoutes.analytics),
               ),
             ],
           ),
@@ -286,30 +286,13 @@ class _ProfileErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        key: const ValueKey<String>('profile_error_view'),
-        padding: const EdgeInsets.all(AppSpacing.space5),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RikiErrorBanner(
-                title: context.l10n.profileLoadFailedTitle,
-                message: message,
-              ),
-              const SizedBox(height: AppSpacing.space4),
-              RikiSecondaryButton(
-                key: const ValueKey<String>('profile_retry_button'),
-                label: context.l10n.retry,
-                leadingIcon: Icons.refresh,
-                onPressed: onRetry,
-              ),
-            ],
-          ),
-        ),
-      ),
+    return RikiErrorState(
+      key: const ValueKey<String>('profile_error_view'),
+      title: context.l10n.profileLoadFailedTitle,
+      message: message,
+      actionLabel: context.l10n.retry,
+      actionKey: const ValueKey<String>('profile_retry_button'),
+      onAction: onRetry,
     );
   }
 }

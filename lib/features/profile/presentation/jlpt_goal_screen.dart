@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
@@ -19,7 +21,7 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
   int? _selectedMinutes;
   bool _initialized = false;
 
-  void _initialize(JlptLevel? level, int minutes) {
+  void _initialize(JlptLevel level, int minutes) {
     if (_initialized) return;
     _selectedLevel = level;
     _selectedMinutes = minutes > 0 ? minutes : null;
@@ -29,6 +31,7 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
   @override
   Widget build(BuildContext context) {
     final profileValue = ref.watch(userProfileControllerProvider);
+    final localJourneyValue = ref.watch(learnerJourneyControllerProvider);
     return Scaffold(
       backgroundColor: AppColors.profileBackground,
       appBar: ProfileDetailHeader(title: context.l10n.jlptGoalSettings),
@@ -47,9 +50,19 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
             ),
           ),
         ),
-        data: (state) {
-          final profile = state.profile;
-          _initialize(profile.supportedJlptLevel, profile.dailyStudyMinutes);
+        data: (_) {
+          final localJourney = localJourneyValue.value;
+          if (localJourney == null) {
+            return const ProfileDetailSkeleton(
+              key: ValueKey<String>('profile_jlpt_local_loading_view'),
+              groupCount: 3,
+              rowsPerGroup: 1,
+            );
+          }
+          _initialize(
+            localJourney.selectedLevel,
+            localJourney.dailyStudyMinutes,
+          );
           return ProfileAnimatedEntrance(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(
@@ -71,31 +84,27 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
                     ProfileSettingsTile(
                       icon: Icons.flag_outlined,
                       title: context.l10n.currentJlptGoal,
-                      subtitle:
-                          profile.supportedJlptLevel?.label ??
-                          context.l10n.notConfigured,
+                      subtitle: localJourney.hasSelectedLevel
+                          ? localJourney.selectedLevel.label
+                          : context.l10n.notConfigured,
                       onTap: null,
-                      trailing: profile.supportedJlptLevel == null
-                          ? null
-                          : JlptBadge(profile.supportedJlptLevel!),
+                      trailing: localJourney.hasSelectedLevel
+                          ? JlptBadge(localJourney.selectedLevel)
+                          : null,
                     ),
                     ProfileSettingsTile(
                       icon: Icons.schedule_outlined,
                       title: context.l10n.currentDailyStudyTime,
-                      subtitle: profile.dailyStudyMinutes > 0
-                          ? context.l10n.studyMinutesPerDay(
-                              profile.dailyStudyMinutes,
-                            )
-                          : context.l10n.notConfigured,
+                      subtitle: context.l10n.studyMinutesPerDay(
+                        localJourney.dailyStudyMinutes,
+                      ),
                       onTap: null,
-                      trailing: profile.dailyStudyMinutes > 0
-                          ? Text(
-                              context.l10n.studyMinutesPerDay(
-                                profile.dailyStudyMinutes,
-                              ),
-                              style: AppTypography.cardTitle,
-                            )
-                          : null,
+                      trailing: Text(
+                        context.l10n.studyMinutesPerDay(
+                          localJourney.dailyStudyMinutes,
+                        ),
+                        style: AppTypography.cardTitle,
+                      ),
                     ),
                   ],
                 ),
@@ -147,7 +156,22 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
                 RikiPrimaryButton(
                   key: const ValueKey<String>('jlpt_goal_save_button'),
                   label: context.l10n.saveChanges,
-                  onPressed: null,
+                  onPressed: _selectedLevel == null || _selectedMinutes == null
+                      ? null
+                      : () async {
+                          await ref
+                              .read(learnerJourneyControllerProvider.notifier)
+                              .setPreferences(
+                                level: _selectedLevel!,
+                                dailyStudyMinutes: _selectedMinutes!,
+                              );
+                          if (!context.mounted) return;
+                          ref
+                              .read(rikiToastServiceProvider.notifier)
+                              .success(
+                                title: context.l10n.localJlptPreferenceSaved,
+                              );
+                        },
                 ),
               ],
             ),

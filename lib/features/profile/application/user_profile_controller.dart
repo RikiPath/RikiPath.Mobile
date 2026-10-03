@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
 import 'package:rikipath_mobile/features/profile/data/api_user_profile_repository.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
@@ -23,17 +25,27 @@ class UserProfileController extends AsyncNotifier<UserProfileState> {
 
   @override
   Future<UserProfileState> build() async {
-    final profile = await ref
-        .watch(userProfileRepositoryProvider)
-        .loadProfile();
-    return UserProfileState(profile: profile);
+    try {
+      final profile = await ref
+          .watch(userProfileRepositoryProvider)
+          .loadProfile();
+      return UserProfileState(profile: profile);
+    } catch (error) {
+      await _signOutExpiredSession(error);
+      rethrow;
+    }
   }
 
   Future<void> retry() async {
     state = const AsyncLoading<UserProfileState>();
     state = await AsyncValue.guard(() async {
-      final profile = await _repository.loadProfile();
-      return UserProfileState(profile: profile);
+      try {
+        final profile = await _repository.loadProfile();
+        return UserProfileState(profile: profile);
+      } catch (error) {
+        await _signOutExpiredSession(error);
+        rethrow;
+      }
     });
   }
 
@@ -116,6 +128,10 @@ class UserProfileController extends AsyncNotifier<UserProfileState> {
           );
       return true;
     } catch (error) {
+      if (error is UnauthorizedError) {
+        await _signOutExpiredSession(error);
+        return false;
+      }
       state = AsyncData(
         current.copyWith(mutationError: error, clearActiveMutation: true),
       );
@@ -127,6 +143,14 @@ class UserProfileController extends AsyncNotifier<UserProfileState> {
             description: userProfileErrorMessage(error, l10n),
           );
       return false;
+    }
+  }
+
+  Future<void> _signOutExpiredSession(Object error) async {
+    if (error is! UnauthorizedError) return;
+    final session = ref.read(authSessionControllerProvider);
+    if (session.value == AuthSessionState.authenticated) {
+      await session.signOut();
     }
   }
 }

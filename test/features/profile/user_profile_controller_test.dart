@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
+
+import '../../support/test_auth_session.dart';
 
 void main() {
   test('initial load exposes loading then the API-backed profile', () async {
@@ -138,6 +141,42 @@ void main() {
       expect(state.profile.emailNotificationsEnabled, isTrue);
       expect(state.profile.systemNotificationsEnabled, isFalse);
       expect(state.mutationError, isA<NetworkError>());
+    },
+  );
+
+  test(
+    'forbidden profile mutation does not sign out an authenticated user',
+    () async {
+      final session = createTestAuthSession();
+      addTearDown(session.dispose);
+      final repository = _FakeUserProfileRepository(
+        notificationError: const ForbiddenError(),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          authSessionControllerProvider.overrideWithValue(session),
+          userProfileRepositoryProvider.overrideWithValue(repository),
+        ],
+      );
+      addTearDown(container.dispose);
+      final subscription = container.listen(
+        userProfileControllerProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+      addTearDown(subscription.close);
+      await container.read(userProfileControllerProvider.future);
+
+      final succeeded = await container
+          .read(userProfileControllerProvider.notifier)
+          .updateNotificationSettings(
+            emailNotificationsEnabled: false,
+            systemNotificationsEnabled: true,
+          );
+
+      expect(succeeded, isFalse);
+      expect(session.value, AuthSessionState.authenticated);
+      expect(session.currentUserId, 42);
     },
   );
 }
