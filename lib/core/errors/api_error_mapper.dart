@@ -10,17 +10,15 @@ class ApiErrorMapper {
       DioExceptionType.sendTimeout ||
       DioExceptionType.receiveTimeout ||
       DioExceptionType.connectionError ||
-      DioExceptionType.badCertificate => const NetworkError(),
-      DioExceptionType.transformTimeout => const UnknownError(
-        message: 'The response took too long to process.',
-      ),
+      DioExceptionType.badCertificate ||
+      DioExceptionType.transformTimeout => const NetworkError(),
       DioExceptionType.cancel => const UnknownError(
         message: 'The request was cancelled.',
       ),
       DioExceptionType.badResponse => _fromResponse(exception.response),
       DioExceptionType.unknown =>
         exception.response == null
-            ? const UnknownError()
+            ? const NetworkError()
             : _fromResponse(exception.response),
     };
   }
@@ -47,10 +45,10 @@ class ApiErrorMapper {
     final details = payload?.errors ?? const <String>[];
     final message = payload?.errorMessage;
 
-    if (statusCode == 400) {
+    if (statusCode == 400 || statusCode == 422) {
       return ValidationError(
         message: message ?? 'The request contains invalid data.',
-        statusCode: 400,
+        statusCode: statusCode!,
         details: details,
       );
     }
@@ -70,6 +68,13 @@ class ApiErrorMapper {
     if (statusCode == 404) {
       return NotFoundError(
         message: message ?? 'The requested resource was not found.',
+        details: details,
+      );
+    }
+    if (statusCode == 409) {
+      return ConflictError(
+        message:
+            message ?? 'The request conflicts with the current resource state.',
         details: details,
       );
     }
@@ -115,7 +120,7 @@ class _BackendErrorPayload {
 
     return _BackendErrorPayload(
       isSuccess: data['isSuccess'] is bool ? data['isSuccess'] as bool : null,
-      statusCode: rawStatusCode is num ? rawStatusCode.toInt() : null,
+      statusCode: _readInteger(rawStatusCode),
       errorMessage:
           rawErrorMessage is String && rawErrorMessage.trim().isNotEmpty
           ? rawErrorMessage.trim()
@@ -128,6 +133,14 @@ class _BackendErrorPayload {
   final int? statusCode;
   final String? errorMessage;
   final List<String> errors;
+}
+
+int? _readInteger(Object? value) {
+  if (value is int) return value;
+  if (value is double && value.isFinite && value == value.truncateToDouble()) {
+    return value.toInt();
+  }
+  return null;
 }
 
 List<String> _readErrors(Object? rawErrors) {

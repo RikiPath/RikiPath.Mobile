@@ -2,15 +2,26 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/config/app_config.dart';
+import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/errors/api_error_mapper.dart';
 import 'package:rikipath_mobile/core/storage/token_storage.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 
 final _apiErrorMapperProvider = Provider<ApiErrorMapper>((ref) {
   return const ApiErrorMapper();
 });
 
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(ref.watch(_dioProvider), ref.watch(_apiErrorMapperProvider));
+  return ApiClient(
+    ref.watch(_dioProvider),
+    ref.watch(_apiErrorMapperProvider),
+    onUnauthorized: () async {
+      final session = ref.read(authSessionControllerProvider);
+      if (session.value == AuthSessionState.authenticated) {
+        await session.signOut();
+      }
+    },
+  );
 });
 
 final _dioProvider = Provider<Dio>((ref) {
@@ -28,13 +39,19 @@ final _dioProvider = Provider<Dio>((ref) {
   );
 
   final tokenStorage = ref.watch(tokenStorageProvider);
+  final configuredBaseUrl = config.apiBaseUrl;
 
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await tokenStorage.readAccessToken();
-        if (token != null && token.isNotEmpty) {
-          options.headers['Authorization'] = 'Bearer $token';
+        if (shouldAttachBearerToken(
+          baseUrl: configuredBaseUrl,
+          requestUrl: options.uri,
+        )) {
+          final token = await tokenStorage.readAccessToken();
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
         }
         handler.next(options);
       },
@@ -48,11 +65,25 @@ final _dioProvider = Provider<Dio>((ref) {
   return dio;
 });
 
+bool shouldAttachBearerToken({required Uri baseUrl, required Uri requestUrl}) {
+  final resolvedRequest = baseUrl.resolveUri(requestUrl);
+  return resolvedRequest.scheme.toLowerCase() == baseUrl.scheme.toLowerCase() &&
+      resolvedRequest.host.toLowerCase() == baseUrl.host.toLowerCase() &&
+      resolvedRequest.port == baseUrl.port;
+}
+
 class ApiClient {
-  ApiClient(this._dio, this._errorMapper);
+  ApiClient(
+    Dio dio,
+    ApiErrorMapper errorMapper, {
+    Future<void> Function()? onUnauthorized,
+  }) : this._(dio, errorMapper, onUnauthorized);
+
+  ApiClient._(this._dio, this._errorMapper, this._onUnauthorized);
 
   final Dio _dio;
   final ApiErrorMapper _errorMapper;
+  final Future<void> Function()? _onUnauthorized;
 
   Uri get baseUrl => Uri.parse(_dio.options.baseUrl);
   Duration? get connectTimeout => _dio.options.connectTimeout;
@@ -159,7 +190,21 @@ class ApiClient {
       }
       return response;
     } on DioException catch (exception) {
-      throw _errorMapper.fromDioException(exception);
+      final error = _errorMapper.fromDioException(exception);
+      await _invalidateUnauthorizedSession(error);
+      throw error;
+    } on UnauthorizedError catch (error) {
+      await _invalidateUnauthorizedSession(error);
+      rethrow;
+    }
+  }
+
+  Future<void> _invalidateUnauthorizedSession(ApiError error) async {
+    if (error is! UnauthorizedError || _onUnauthorized == null) return;
+    try {
+      await _onUnauthorized();
+    } catch (_) {
+      // Session cleanup failure must not replace the original 401 contract.
     }
   }
 }

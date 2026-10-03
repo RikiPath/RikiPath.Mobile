@@ -36,6 +36,13 @@ final class NotFoundError extends ApiError {
   }) : super(message, statusCode: 404, details: details);
 }
 
+final class ConflictError extends ApiError {
+  const ConflictError({
+    String message = 'The request conflicts with the current resource state.',
+    List<String> details = const [],
+  }) : super(message, statusCode: 409, details: details);
+}
+
 final class ValidationError extends ApiError {
   const ValidationError({
     String message = 'The request contains invalid data.',

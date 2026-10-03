@@ -44,9 +44,11 @@ class TokenStorage {
   final SecureKeyValueStore _storage;
   String? _sessionAccessToken;
   int? _sessionUserId;
+  String? _sessionRole;
 
   static const _accessTokenKey = 'access_token';
   static const _userIdKey = 'authenticated_user_id';
+  static const _roleKey = 'authenticated_user_role';
 
   Future<String?> readAccessToken() async {
     final sessionToken = _sessionAccessToken;
@@ -60,6 +62,12 @@ class TokenStorage {
 
     final storedUserId = await _storage.read(key: _userIdKey);
     return storedUserId == null ? null : int.tryParse(storedUserId);
+  }
+
+  Future<String?> readAuthenticatedRole() async {
+    final sessionRole = _sessionRole;
+    if (sessionRole != null) return sessionRole;
+    return _storage.read(key: _roleKey);
   }
 
   Future<void> saveAccessToken(
@@ -77,23 +85,29 @@ class TokenStorage {
   Future<void> saveAuthenticatedSession({
     required String accessToken,
     required int userId,
+    required String role,
     bool persist = true,
   }) async {
     await saveAccessToken(accessToken, persist: persist);
     if (persist) {
       await _storage.write(key: _userIdKey, value: userId.toString());
+      await _storage.write(key: _roleKey, value: role);
     } else {
       await _storage.delete(key: _userIdKey);
+      await _storage.delete(key: _roleKey);
     }
     _sessionUserId = userId;
+    _sessionRole = role;
   }
 
   Future<void> clear() async {
     _sessionAccessToken = null;
     _sessionUserId = null;
+    _sessionRole = null;
     await Future.wait([
       _storage.delete(key: _accessTokenKey),
       _storage.delete(key: _userIdKey),
+      _storage.delete(key: _roleKey),
     ]);
   }
 }
