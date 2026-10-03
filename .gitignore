@@ -19,8 +19,8 @@ ios/.symlinks/
 # Local audit output that is not maintained project documentation.
 /FILE_INVENTORY.txt
 
-# Large Stitch UI references are kept locally and excluded from Git.
-docs/ui_reference/
+# Project documentation and design references are local-only.
+/docs/
 
 # OS and archive artifacts.
 .DS_Store
@@ -28,6 +28,11 @@ Thumbs.db
 *.zip
 *.7z
 *.rar
+
+# Local runtime and packaged build artifacts.
+*.log
+*.tmp
+*.apk
 
 # Local environment configuration. All environment files stay local.
 .env

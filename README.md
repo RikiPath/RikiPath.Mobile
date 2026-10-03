@@ -84,6 +84,13 @@ dart run build_runner build
 
 Rerun this command after changing Drift tables, database annotations, or other generated model definitions, and whenever generated `.g.dart` files are missing or out of date.
 
+Localization output is generated from `lib/l10n/app_vi.arb` and
+`lib/l10n/app_ja.arb`. Regenerate it after changing either ARB file:
+
+```powershell
+flutter gen-l10n
+```
+
 ## Run Application
 
 List available devices:
@@ -107,6 +114,18 @@ flutter run --dart-define-from-file=.env
 
 To start an Android emulator, open Android Studio, go to **Tools > Device Manager**, create a virtual device if needed, and press the play button beside the device. Wait for it to boot before running `flutter devices` or `flutter run`.
 
+## Android Debug Build
+
+Create a local debug APK with:
+
+```powershell
+flutter build apk --debug
+```
+
+The APK is written under `build/`, which is ignored by Git. Release signing is
+not configured for production distribution; do not treat a debug APK as a
+store-ready artifact.
+
 ## Development Validation
 
 Before committing, run:
@@ -120,7 +139,8 @@ flutter test
 Current validated baseline at the time this guide was written:
 
 - `flutter analyze`: No issues found
-- `flutter test`: 320 tests passed
+- `flutter test`: 583 tests passed
+- `flutter build apk --debug`: Passed
 
 This is a current baseline, not a permanent guarantee; update it when the test suite or toolchain changes.
 
@@ -152,6 +172,19 @@ UI
 - The learner mobile JLPT scope is N5, N4, and N3.
 - Store authentication tokens through `flutter_secure_storage`.
 
+## Known Backend Limitations
+
+Some learner flows intentionally remain local or hybrid until the Backend
+publishes complete, safe contracts. These include live Learning discovery,
+live Review submission, learner-safe Mock Test question delivery/submission,
+fixture Lesson-to-Notebook identity, Grammar Notebook semantics, payments and
+booking, and Mentor mutations/grading. Firebase Phone Auth is experimental
+Backend test functionality and is not part of the current Mobile scope.
+
+See [Backend Replacement Points](docs/codex/BACKEND_REPLACEMENT_POINTS.md) and
+[Backend Requests](docs/codex/BACKEND_FE_FIX_REQUESTS.md) for the verified
+boundaries. Do not replace them with invented frontend behavior.
+
 ## Git Workflow
 
 Use Conventional Commits, with one logical feature per commit. Examples:
@@ -174,9 +207,11 @@ chore(config): update development configuration
 ```powershell
 flutter pub get
 dart run build_runner build
+flutter gen-l10n
 dart format .
 flutter analyze
 flutter test
+flutter build apk --debug
 flutter run
 ```
 
@@ -215,3 +250,6 @@ flutter pub get
 - [Environment Configuration](docs/codex/ENVIRONMENT.md)
 - [Routing Architecture](docs/codex/ROUTING_ARCHITECTURE.md)
 - [Flutter Design System](docs/codex/FLUTTER_DESIGN_SYSTEM.md)
+- [Demo Runbook](docs/codex/DEMO_RUNBOOK.md)
+- [R8 Android QA Report](docs/codex/R8_ANDROID_QA_REPORT.md)
+- [Backend Replacement Points](docs/codex/BACKEND_REPLACEMENT_POINTS.md)
