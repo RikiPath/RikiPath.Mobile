@@ -47,6 +47,13 @@ void main() {
       expect(entry.isSaved, isNull);
     });
 
+    test('rejects a fractional integer field instead of truncating it', () {
+      final json = _kanjiJson();
+      json['strokeCount'] = 18.5;
+
+      expect(() => KanjiCardDto.fromJson(json), throwsFormatException);
+    });
+
     test('rejects JLPT levels outside the mobile N5/N4/N3 scope', () {
       expect(() => KanjiMapper.parseLevel('N2'), throwsFormatException);
     });
@@ -171,8 +178,8 @@ void main() {
       );
 
       expect(client.lastData, <String, Object?>{
-        'vocabularyListId': 3,
-        'kanjiEntryId': 7,
+        'learnerNoteId': 3,
+        'kanjiId': 7,
       });
       expect(bookmark.noteEntryId, 41);
     });

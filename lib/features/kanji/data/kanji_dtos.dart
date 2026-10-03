@@ -127,16 +127,16 @@ class KanjiNotebookListDto {
 
 class BookmarkKanjiRequestDto {
   const BookmarkKanjiRequestDto({
-    required this.vocabularyListId,
-    required this.kanjiEntryId,
+    required this.learnerNoteId,
+    required this.kanjiId,
   });
 
-  final int vocabularyListId;
-  final int kanjiEntryId;
+  final int learnerNoteId;
+  final int kanjiId;
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'vocabularyListId': vocabularyListId,
-    'kanjiEntryId': kanjiEntryId,
+    'learnerNoteId': learnerNoteId,
+    'kanjiId': kanjiId,
   };
 }
 
@@ -210,6 +210,5 @@ String? optionalString(Map<String, Object?> json, String field) {
 int requiredInt(Map<String, Object?> json, String field) {
   final value = json[field];
   if (value is int) return value;
-  if (value is num) return value.toInt();
   throw FormatException('Expected an integer field named $field.');
 }

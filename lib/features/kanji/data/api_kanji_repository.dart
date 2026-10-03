@@ -97,9 +97,14 @@ class ApiKanjiNotebookRepository implements KanjiNotebookRepository {
     required int kanjiEntryId,
     required KanjiNotebookList list,
   }) async {
+    if (list.id <= 0 || kanjiEntryId <= 0) {
+      throw ArgumentError(
+        'Positive LIVE learner-note and Kanji IDs are required.',
+      );
+    }
     final request = BookmarkKanjiRequestDto(
-      vocabularyListId: list.id,
-      kanjiEntryId: kanjiEntryId,
+      learnerNoteId: list.id,
+      kanjiId: kanjiEntryId,
     );
     final response = await _apiClient.post<Object?>(
       KanjiApiPaths.bookmarkKanji,

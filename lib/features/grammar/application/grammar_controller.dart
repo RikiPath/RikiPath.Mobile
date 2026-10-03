@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/core/utils/stable_merge.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/grammar/data/api_grammar_repository.dart';
 import 'package:rikipath_mobile/features/grammar/data/fallback_grammar_repository.dart';
@@ -18,6 +19,7 @@ final grammarRepositoryProvider = Provider<GrammarRepository>((ref) {
 final grammarLibraryControllerProvider =
     AsyncNotifierProvider<GrammarLibraryController, GrammarLibraryState>(
       GrammarLibraryController.new,
+      retry: (_, _) => null,
     );
 
 class GrammarLibraryController extends AsyncNotifier<GrammarLibraryState> {
@@ -73,7 +75,11 @@ class GrammarLibraryController extends AsyncNotifier<GrammarLibraryState> {
         GrammarLibraryState(
           query: nextQuery,
           page: GrammarPage(
-            items: <GrammarEntry>[...current.page.items, ...nextPage.items],
+            items: mergeUniqueByKey(
+              current.page.items,
+              nextPage.items,
+              (entry) => entry.routeKey,
+            ),
             page: nextPage.page,
             pageSize: nextPage.pageSize,
             totalCount: nextPage.totalCount,
@@ -135,6 +141,7 @@ class GrammarLibraryState {
 final grammarDetailControllerProvider = AsyncNotifierProvider.autoDispose
     .family<GrammarDetailController, GrammarEntry, String>(
       GrammarDetailController.new,
+      retry: (_, _) => null,
     );
 
 class GrammarDetailController extends AsyncNotifier<GrammarEntry> {

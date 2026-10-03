@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/core/utils/stable_merge.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
+import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/api_vocabulary_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/fallback_vocabulary_repository.dart';
@@ -30,6 +32,7 @@ final vocabularyAudioPlayerProvider =
 final vocabularyLibraryControllerProvider =
     AsyncNotifierProvider<VocabularyLibraryController, VocabularyLibraryState>(
       VocabularyLibraryController.new,
+      retry: (_, _) => null,
     );
 
 class VocabularyLibraryController
@@ -90,7 +93,11 @@ class VocabularyLibraryController
       );
       final nextPage = await _repository.search(nextQuery);
       final combined = VocabularyPage(
-        items: <VocabularyEntry>[...current.page.items, ...nextPage.items],
+        items: mergeUniqueByKey(
+          current.page.items,
+          nextPage.items,
+          (entry) => entry.routeKey,
+        ),
         page: nextPage.page,
         pageSize: nextPage.pageSize,
         totalCount: nextPage.totalCount,
@@ -153,6 +160,7 @@ class VocabularyLibraryState {
 final vocabularyDetailControllerProvider = AsyncNotifierProvider.autoDispose
     .family<VocabularyDetailController, VocabularyDetailState, String>(
       VocabularyDetailController.new,
+      retry: (_, _) => null,
     );
 
 class VocabularyDetailController extends AsyncNotifier<VocabularyDetailState> {
@@ -175,6 +183,21 @@ class VocabularyDetailController extends AsyncNotifier<VocabularyDetailState> {
 
   Future<List<NotebookCollection>> loadNotebookLists() async {
     final current = state.requireValue;
+    if (current.entry.source == VocabularyDataSource.fixture) {
+      final local = await ref.read(demoNotebookControllerProvider.future);
+      final list = NotebookCollection(
+        routeKey: NotebookController.demoCollectionRouteKey,
+        remoteId: null,
+        name: ref.read(appLocalizationsProvider).savedFromLessons,
+        entryCount: local.entries.length,
+        createdAt: null,
+        source: NotebookDataSource.fixture,
+      );
+      state = AsyncData(
+        current.copyWith(notebookLists: <NotebookCollection>[list]),
+      );
+      return <NotebookCollection>[list];
+    }
     state = AsyncData(
       current.copyWith(isLoadingNotebook: true, clearNotebookError: true),
     );
@@ -205,6 +228,28 @@ class VocabularyDetailController extends AsyncNotifier<VocabularyDetailState> {
   Future<bool> saveToNotebook(NotebookCollection list) async {
     final current = state.requireValue;
     if (current.isSaving) return false;
+
+    if (current.entry.source == VocabularyDataSource.fixture) {
+      state = AsyncData(
+        current.copyWith(isSaving: true, clearNotebookError: true),
+      );
+      final saved = await ref
+          .read(demoNotebookControllerProvider.notifier)
+          .saveEntry(
+            NotebookFixtureDraft(
+              stableKey: current.entry.routeKey,
+              contentType: NotebookContentType.vocabulary,
+              term: current.entry.word,
+              reading: current.entry.reading,
+              meaning: current.entry.meaning,
+              note: current.entry.exampleSentence,
+              jlptLevel: current.entry.level.label,
+            ),
+          );
+      state = AsyncData(state.requireValue.copyWith(isSaving: false));
+      ref.invalidate(notebookControllerProvider);
+      return saved;
+    }
 
     final notebook = ref.read(notebookRepositoryProvider);
     if (await notebook.isVocabularySaved(current.entry.routeKey)) return true;

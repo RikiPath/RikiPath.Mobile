@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/core/utils/stable_merge.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/kanji/data/api_kanji_repository.dart';
 import 'package:rikipath_mobile/features/kanji/data/fallback_kanji_repository.dart';
@@ -8,6 +9,9 @@ import 'package:rikipath_mobile/features/kanji/data/fixture_kanji_repository.dar
 import 'package:rikipath_mobile/features/kanji/data/kanji_audio_player.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji_repository.dart';
+import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
+import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
+import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 
 final kanjiRepositoryProvider = Provider<KanjiRepository>((ref) {
   return FallbackKanjiRepository(
@@ -31,6 +35,7 @@ final kanjiAudioPlayerProvider = Provider.autoDispose<KanjiAudioPlayer>((ref) {
 final kanjiLibraryControllerProvider =
     AsyncNotifierProvider<KanjiLibraryController, KanjiLibraryState>(
       KanjiLibraryController.new,
+      retry: (_, _) => null,
     );
 
 class KanjiLibraryController extends AsyncNotifier<KanjiLibraryState> {
@@ -88,7 +93,11 @@ class KanjiLibraryController extends AsyncNotifier<KanjiLibraryState> {
         KanjiLibraryState(
           query: nextQuery,
           page: KanjiPage(
-            items: <KanjiEntry>[...current.page.items, ...nextPage.items],
+            items: mergeUniqueByKey(
+              current.page.items,
+              nextPage.items,
+              (entry) => entry.routeKey,
+            ),
             page: nextPage.page,
             pageSize: nextPage.pageSize,
             totalCount: nextPage.totalCount,
@@ -150,6 +159,7 @@ class KanjiLibraryState {
 final kanjiDetailControllerProvider = AsyncNotifierProvider.autoDispose
     .family<KanjiDetailController, KanjiDetailState, String>(
       KanjiDetailController.new,
+      retry: (_, _) => null,
     );
 
 class KanjiDetailController extends AsyncNotifier<KanjiDetailState> {
@@ -159,7 +169,17 @@ class KanjiDetailController extends AsyncNotifier<KanjiDetailState> {
 
   @override
   Future<KanjiDetailState> build() async {
-    final entry = await ref.watch(kanjiRepositoryProvider).loadDetail(routeKey);
+    var entry = await ref.watch(kanjiRepositoryProvider).loadDetail(routeKey);
+    if (entry.source == KanjiDataSource.fixture) {
+      final local = await ref.watch(demoNotebookControllerProvider.future);
+      final key = NotebookEntryKey.fixture(
+        contentType: NotebookContentType.kanji,
+        stableKey: entry.routeKey,
+      );
+      entry = entry.copyWith(
+        isSaved: local.entries.any((candidate) => candidate.key == key),
+      );
+    }
     return KanjiDetailState(entry: entry);
   }
 
@@ -196,11 +216,12 @@ class KanjiDetailController extends AsyncNotifier<KanjiDetailState> {
   Future<List<KanjiNotebookList>> loadNotebookLists() async {
     final current = state.requireValue;
     if (current.entry.source == KanjiDataSource.fixture) {
+      final local = await ref.read(demoNotebookControllerProvider.future);
       final lists = <KanjiNotebookList>[
         KanjiNotebookList(
           id: -1,
           name: ref.read(appLocalizationsProvider).kanjiFixtureNotebookName,
-          entryCount: 48,
+          entryCount: local.entries.length,
         ),
       ];
       state = AsyncData(current.copyWith(notebookLists: lists));
@@ -237,9 +258,21 @@ class KanjiDetailController extends AsyncNotifier<KanjiDetailState> {
     if (current.isSaving || current.isSaved) return current.isSaved;
 
     if (current.entry.source == KanjiDataSource.fixture) {
+      final saved = await ref
+          .read(demoNotebookControllerProvider.notifier)
+          .saveEntry(
+            NotebookFixtureDraft(
+              stableKey: current.entry.routeKey,
+              contentType: NotebookContentType.kanji,
+              term: current.entry.character,
+              reading: current.entry.onYomi ?? current.entry.kunYomi,
+              meaning: current.entry.meaning,
+              jlptLevel: current.entry.level.label,
+            ),
+          );
       state = AsyncData(
         current.copyWith(
-          entry: current.entry.copyWith(isSaved: true),
+          entry: current.entry.copyWith(isSaved: saved),
           bookmark: KanjiBookmark(
             noteEntryId: null,
             listId: list.id,
@@ -247,7 +280,8 @@ class KanjiDetailController extends AsyncNotifier<KanjiDetailState> {
           ),
         ),
       );
-      return true;
+      ref.invalidate(notebookControllerProvider);
+      return saved;
     }
 
     final remoteId = current.entry.remoteId;

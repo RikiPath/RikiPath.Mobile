@@ -15,6 +15,8 @@ import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji_repository.dart';
 import 'package:rikipath_mobile/features/kanji/presentation/kanji_detail_screen.dart';
 import 'package:rikipath_mobile/features/kanji/presentation/kanji_library_screen.dart';
+import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
+import 'package:rikipath_mobile/features/notebook/data/session_demo_notebook_repository.dart';
 
 import '../../support/test_auth_session.dart';
 
@@ -98,7 +100,7 @@ void main() {
     expect(find.byType(KanjiDetailScreen), findsOneWidget);
     expect(find.text('験'), findsWidgets);
     expect(find.text('Cách đọc'), findsOneWidget);
-    expect(find.textContaining('dữ liệu mẫu Stitch'), findsOneWidget);
+    expect(find.textContaining('Nội dung bổ sung'), findsOneWidget);
     await _scrollWithin(
       tester,
       find.text('Từ ghép thường gặp'),
@@ -379,10 +381,16 @@ Future<GoRouter> _pumpKanji(
   );
   addTearDown(session.dispose);
   addTearDown(router.dispose);
+  final demoNotebookRepository = SessionDemoNotebookRepository();
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [kanjiRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        kanjiRepositoryProvider.overrideWithValue(repository),
+        demoNotebookRepositoryProvider.overrideWithValue(
+          demoNotebookRepository,
+        ),
+      ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );

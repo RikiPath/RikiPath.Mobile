@@ -87,20 +87,24 @@ class KanjiLibraryView extends StatelessWidget {
               ),
             ),
             if (state.page.source == KanjiDataSource.fixture)
-              Container(
-                key: const ValueKey<String>('kanji_fixture_label'),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.space2,
-                  vertical: AppSpacing.space1,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.warningBackground,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-                child: Text(
-                  context.l10n.sampleData,
-                  style: AppTypography.badgeText.copyWith(
-                    color: AppColors.warningText,
+              Flexible(
+                child: Container(
+                  key: const ValueKey<String>('kanji_fixture_label'),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.space2,
+                    vertical: AppSpacing.space1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.warningBackground,
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                  child: Text(
+                    context.l10n.sampleData,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.badgeText.copyWith(
+                      color: AppColors.warningText,
+                    ),
                   ),
                 ),
               ),

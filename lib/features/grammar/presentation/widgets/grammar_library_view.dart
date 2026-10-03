@@ -119,25 +119,31 @@ class _GrammarLibraryViewState extends State<GrammarLibraryView> {
           ),
           child: Row(
             children: [
-              if (state.page.source == GrammarDataSource.fixture)
-                Container(
-                  key: const ValueKey<String>('grammar_fixture_label'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.space2,
-                    vertical: AppSpacing.space1,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.warningBackground,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
-                  child: Text(
-                    context.l10n.sampleData,
-                    style: AppTypography.badgeText.copyWith(
-                      color: AppColors.warningText,
+              if (state.page.source == GrammarDataSource.fixture) ...[
+                Flexible(
+                  child: Container(
+                    key: const ValueKey<String>('grammar_fixture_label'),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.space2,
+                      vertical: AppSpacing.space1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.warningBackground,
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                    child: Text(
+                      context.l10n.sampleData,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.badgeText.copyWith(
+                        color: AppColors.warningText,
+                      ),
                     ),
                   ),
                 ),
-              const Spacer(),
+                const SizedBox(width: AppSpacing.space2),
+              ] else
+                const Spacer(),
               Text(
                 context.l10n.grammarPatternCount(state.page.totalCount),
                 style: AppTypography.metadata,

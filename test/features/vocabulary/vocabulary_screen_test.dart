@@ -10,8 +10,10 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_toast_host.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
+import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/data/fixture_notebook_repository.dart';
+import 'package:rikipath_mobile/features/notebook/data/session_demo_notebook_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/fixture_vocabulary_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
@@ -44,7 +46,7 @@ void main() {
     expect(find.text('JLPT N5'), findsOneWidget);
     expect(find.text('JLPT N4'), findsOneWidget);
     expect(find.text('JLPT N3'), findsOneWidget);
-    expect(find.text('Dữ liệu minh họa'), findsOneWidget);
+    expect(find.text('Nội dung bổ sung'), findsOneWidget);
     expect(find.text('N1'), findsNothing);
     expect(find.text('N2'), findsNothing);
 
@@ -100,7 +102,7 @@ void main() {
     );
     expect(find.text('経験'), findsOneWidget);
     expect(find.text('Ý nghĩa'), findsOneWidget);
-    expect(find.text('Dữ liệu minh họa'), findsNothing);
+    expect(find.text('Nội dung bổ sung'), findsNothing);
     expect(
       find.byKey(const ValueKey<String>('vocabulary_detail_fixture_notice')),
       findsOneWidget,
@@ -117,6 +119,11 @@ void main() {
       const ValueKey<String>('learning_section_library'),
     );
     await tester.scrollUntilVisible(libraryCard, 180);
+    await tester.drag(
+      find.byKey(const ValueKey<String>('learning_home_success_view')),
+      const Offset(0, -120),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(libraryCard);
     await tester.pumpAndSettle();
 
@@ -146,17 +153,15 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(
-      find.byKey(const ValueKey<String>('vocabulary_notebook_fixture-list-n3')),
+      find.byKey(
+        const ValueKey<String>('vocabulary_notebook_fixture-learning-saved'),
+      ),
     );
     await tester.pumpAndSettle();
 
     expect(
       find.byKey(const ValueKey<String>('vocabulary_saved_banner')),
       findsOneWidget,
-    );
-    expect(
-      find.textContaining(FixtureNotebookRepository.defaultCollection.name),
-      findsWidgets,
     );
   });
 
@@ -178,7 +183,9 @@ void main() {
     await tester.tap(saveButton);
     await tester.pumpAndSettle();
     await tester.tap(
-      find.byKey(const ValueKey<String>('vocabulary_notebook_fixture-list-n3')),
+      find.byKey(
+        const ValueKey<String>('vocabulary_notebook_fixture-learning-saved'),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -186,14 +193,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       find.byKey(
-        const ValueKey<String>('notebook_entry_fixture-note-fixture-keiken'),
+        const ValueKey<String>(
+          'notebook_entry_fixture:vocabulary:fixture-keiken',
+        ),
       ),
       findsOneWidget,
     );
 
     await tester.tap(
       find.byKey(
-        const ValueKey<String>('notebook_remove_fixture-note-fixture-keiken'),
+        const ValueKey<String>(
+          'notebook_remove_fixture:vocabulary:fixture-keiken',
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -356,6 +367,7 @@ Future<GoRouter> _pumpVocabulary(
   );
   addTearDown(session.dispose);
   addTearDown(router.dispose);
+  final demoNotebookRepository = SessionDemoNotebookRepository();
 
   await tester.pumpWidget(
     ProviderScope(
@@ -363,6 +375,9 @@ Future<GoRouter> _pumpVocabulary(
         vocabularyRepositoryProvider.overrideWithValue(repository),
         notebookRepositoryProvider.overrideWithValue(
           FixtureNotebookRepository(entries: const {}),
+        ),
+        demoNotebookRepositoryProvider.overrideWithValue(
+          demoNotebookRepository,
         ),
       ],
       child: MaterialApp.router(

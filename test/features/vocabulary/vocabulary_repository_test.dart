@@ -7,10 +7,18 @@ import 'package:rikipath_mobile/features/vocabulary/data/api_vocabulary_reposito
 import 'package:rikipath_mobile/features/vocabulary/data/fallback_vocabulary_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/fixture_vocabulary_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/vocabulary_api_paths.dart';
+import 'package:rikipath_mobile/features/vocabulary/data/vocabulary_dtos.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary_repository.dart';
 
 void main() {
+  test('vocabulary DTO rejects a fractional remote ID', () {
+    final json = _vocabularyJson(id: 7);
+    json['id'] = 7.5;
+
+    expect(() => VocabularyCardDto.fromJson(json), throwsFormatException);
+  });
+
   group('API vocabulary repository', () {
     test(
       'uses the exact search route, body fields, and response envelope',

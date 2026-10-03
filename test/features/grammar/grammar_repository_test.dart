@@ -43,6 +43,13 @@ void main() {
       expect(entry.remoteId, 19);
     });
 
+    test('rejects a fractional remote ID instead of truncating it', () {
+      final json = _grammarJson();
+      json['id'] = 19.5;
+
+      expect(() => GrammarCardDto.fromJson(json), throwsFormatException);
+    });
+
     test('rejects JLPT levels outside mobile N5/N4/N3 scope', () {
       expect(() => GrammarMapper.parseLevel('N2'), throwsFormatException);
       expect(() => GrammarMapper.parseLevel('N1'), throwsFormatException);
