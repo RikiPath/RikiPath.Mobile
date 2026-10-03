@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
@@ -10,10 +9,12 @@ import 'package:rikipath_mobile/features/auth/presentation/account_settings_scre
 import 'package:rikipath_mobile/features/auth/presentation/change_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/forgot_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/login_screen.dart';
+import 'package:rikipath_mobile/features/auth/presentation/mobile_role_landing_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/register_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/splash_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/update_email_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/verify_email_screen.dart';
+import 'package:rikipath_mobile/features/auth/domain/verify_email_arguments.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
 import 'package:rikipath_mobile/features/grammar/presentation/grammar_detail_screen.dart';
 import 'package:rikipath_mobile/features/grammar/presentation/grammar_library_screen.dart';
@@ -24,7 +25,16 @@ import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart
 import 'package:rikipath_mobile/features/learning/presentation/learning_roadmap_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/lesson_screen.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_meeting_detail_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_meetings_screen.dart';
+import 'package:rikipath_mobile/features/practice/presentation/daily_review_screen.dart';
+import 'package:rikipath_mobile/features/practice/presentation/mock_test_result_screen.dart';
+import 'package:rikipath_mobile/features/practice/presentation/mock_test_screen.dart';
+import 'package:rikipath_mobile/features/notifications/presentation/notifications_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
+import 'package:rikipath_mobile/features/notebook/presentation/notebook_entry_detail_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/edit_profile_screen.dart';
@@ -32,6 +42,8 @@ import 'package:rikipath_mobile/features/profile/presentation/jlpt_goal_screen.d
 import 'package:rikipath_mobile/features/profile/presentation/notification_settings_screen.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/vocabulary_detail_screen.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/vocabulary_library_screen.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
+import 'package:rikipath_mobile/features/analytics/presentation/learner_analytics_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authSession = ref.watch(authSessionControllerProvider);
@@ -41,16 +53,45 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 });
 
 GoRouter createAppRouter({
-  required ValueListenable<AuthSessionState> authSession,
+  required AuthSessionController authSession,
   String initialLocation = AppRoutes.splash,
 }) {
+  String? pendingLocation;
   return GoRouter(
     initialLocation: initialLocation,
     refreshListenable: authSession,
-    redirect: (context, state) => authRouteRedirect(
-      authState: authSession.value,
-      matchedLocation: state.matchedLocation,
-    ),
+    redirect: (context, state) {
+      final authState = authSession.value;
+      if (authState == AuthSessionState.unknown) {
+        if (state.matchedLocation != AppRoutes.splash) {
+          pendingLocation ??= state.uri.toString();
+        }
+        return authRouteRedirect(
+          authState: authState,
+          role: authSession.currentRole,
+          matchedLocation: state.matchedLocation,
+        );
+      }
+
+      if (authState == AuthSessionState.authenticated &&
+          pendingLocation != null) {
+        final intendedLocation = pendingLocation!;
+        pendingLocation = null;
+        final intendedPath = Uri.parse(intendedLocation).path;
+        return authRouteRedirect(
+              authState: authState,
+              role: authSession.currentRole,
+              matchedLocation: intendedPath,
+            ) ??
+            intendedLocation;
+      }
+
+      return authRouteRedirect(
+        authState: authState,
+        role: authSession.currentRole,
+        matchedLocation: state.matchedLocation,
+      );
+    },
     routes: [
       GoRoute(
         path: AppRoutes.splash,
@@ -70,13 +111,59 @@ GoRouter createAppRouter({
       ),
       GoRoute(
         path: AppRoutes.verifyEmail,
-        builder: (context, state) => VerifyEmailScreen(
-          userId: state.extra is int ? state.extra! as int : null,
+        builder: (context, state) {
+          final arguments = state.extra;
+          return VerifyEmailScreen(
+            userId: switch (arguments) {
+              VerifyEmailArguments(:final userId) => userId,
+              int userId => userId,
+              _ => null,
+            },
+            email: arguments is VerifyEmailArguments ? arguments.email : null,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.unsupportedRole,
+        builder: (context, state) => UnsupportedRoleScreen(
+          role: authSession.currentRole?.apiValue ?? 'Unknown',
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.mentor,
+        builder: (context, state) => const MentorHomeScreen(),
+        routes: [
+          GoRoute(
+            path: AppRoutes.mentorAvailabilitySegment,
+            builder: (context, state) => const MentorAvailabilityScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.mentorMeetingsSegment,
+            builder: (context, state) => const MentorMeetingsScreen(),
+            routes: [
+              GoRoute(
+                path: AppRoutes.mentorMeetingDetailSegment,
+                builder: (context, state) => MentorMeetingDetailScreen(
+                  meetingId: int.tryParse(
+                    state.pathParameters['meetingId'] ?? '',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.analytics,
+        builder: (context, state) => const LearnerAnalyticsScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -151,6 +238,34 @@ GoRouter createAppRouter({
               GoRoute(
                 path: AppRoutes.practice,
                 builder: (context, state) => const PracticeScreen(),
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.reviewSegment,
+                    builder: (context, state) => const DailyReviewScreen(),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.mockTestSegment,
+                    builder: (context, state) =>
+                        MockTestScreen(testId: state.pathParameters['testId']!),
+                    routes: [
+                      GoRoute(
+                        path: AppRoutes.mockResultSegment,
+                        builder: (context, state) => MockTestResultScreen(
+                          testId: state.pathParameters['testId']!,
+                        ),
+                        routes: [
+                          GoRoute(
+                            path: AppRoutes.mockDetailedReviewSegment,
+                            builder: (context, state) =>
+                                MockTestDetailedReviewScreen(
+                                  testId: state.pathParameters['testId']!,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
@@ -164,6 +279,12 @@ GoRouter createAppRouter({
                     path: AppRoutes.notebookVocabularyDetailSegment,
                     builder: (context, state) => VocabularyDetailScreen(
                       routeKey: state.pathParameters['entryKey']!,
+                    ),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.notebookEntryDetailSegment,
+                    builder: (context, state) => NotebookEntryDetailScreen(
+                      entryKey: state.pathParameters['entryKey']!,
                     ),
                   ),
                 ],
@@ -267,6 +388,7 @@ CustomTransitionPage<void> _profileDetailPage({
 
 String? authRouteRedirect({
   required AuthSessionState authState,
+  required BackendUserRole? role,
   required String matchedLocation,
 }) {
   final isSplash = matchedLocation == AppRoutes.splash;
@@ -281,7 +403,40 @@ String? authRouteRedirect({
     AuthSessionState.unknown => isSplash ? null : AppRoutes.splash,
     AuthSessionState.unauthenticated =>
       isPublicAuthRoute ? null : AppRoutes.login,
-    AuthSessionState.authenticated =>
-      isSplash || isEntryAuthRoute ? AppRoutes.home : null,
+    AuthSessionState.authenticated => _authenticatedRoleRedirect(
+      role: role,
+      matchedLocation: matchedLocation,
+      isSplash: isSplash,
+      isAuthRoute: isPublicAuthRoute,
+    ),
   };
+}
+
+String? _authenticatedRoleRedirect({
+  required BackendUserRole? role,
+  required String matchedLocation,
+  required bool isSplash,
+  required bool isAuthRoute,
+}) {
+  final isMentorRoute =
+      matchedLocation == AppRoutes.mentor ||
+      matchedLocation.startsWith('${AppRoutes.mentor}/');
+
+  if (role == BackendUserRole.learner) {
+    if (isSplash ||
+        isAuthRoute ||
+        isMentorRoute ||
+        matchedLocation == AppRoutes.unsupportedRole) {
+      return AppRoutes.home;
+    }
+    return null;
+  }
+
+  if (role == BackendUserRole.mentor) {
+    return isMentorRoute ? null : AppRoutes.mentor;
+  }
+
+  return matchedLocation == AppRoutes.unsupportedRole
+      ? null
+      : AppRoutes.unsupportedRole;
 }

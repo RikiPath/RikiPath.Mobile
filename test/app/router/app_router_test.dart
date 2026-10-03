@@ -5,12 +5,16 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/errors/api_error.dart';
+import 'package:rikipath_mobile/core/storage/token_storage.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/auth/presentation/account_settings_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/change_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/forgot_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/login_screen.dart';
+import 'package:rikipath_mobile/features/auth/presentation/mobile_role_landing_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/register_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/splash_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/update_email_screen.dart';
@@ -18,6 +22,10 @@ import 'package:rikipath_mobile/features/auth/presentation/verify_email_screen.d
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_repository.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dart';
@@ -29,6 +37,7 @@ import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 
 import '../../support/test_auth_session.dart';
+import '../../support/test_jwt.dart';
 
 void main() {
   test('route constants expose the supported navigation paths', () {
@@ -37,7 +46,12 @@ void main() {
     expect(AppRoutes.register, '/auth/register');
     expect(AppRoutes.forgotPassword, '/auth/forgot-password');
     expect(AppRoutes.verifyEmail, '/auth/verify-email');
+    expect(AppRoutes.unsupportedRole, '/auth/unsupported-role');
     expect(AppRoutes.onboarding, '/onboarding');
+    expect(AppRoutes.mentor, '/mentor');
+    expect(AppRoutes.mentorAvailability, '/mentor/availability');
+    expect(AppRoutes.mentorMeetings, '/mentor/meetings');
+    expect(AppRoutes.mentorMeetingDetail(17), '/mentor/meetings/17');
     expect(AppRoutes.home, '/home');
     expect(AppRoutes.learn, '/learn');
     expect(AppRoutes.practice, '/practice');
@@ -120,6 +134,24 @@ void main() {
 
     expect(find.byType(LoginScreen), findsOneWidget);
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
+  });
+
+  testWidgets('unauthenticated mentor route redirects to login', (
+    tester,
+  ) async {
+    final session = createTestAuthSession(
+      initialState: AuthSessionState.unauthenticated,
+    );
+
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.mentor,
+      authSession: session,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.byType(MentorHomeScreen), findsNothing);
   });
 
   testWidgets('unauthenticated account mutation route redirects to login', (
@@ -206,7 +238,7 @@ void main() {
     tester,
   ) async {
     final session = createTestAuthSession(userId: 42);
-    await _pumpRouter(
+    final router = await _pumpRouter(
       tester,
       initialLocation: AppRoutes.profileAccount,
       authSession: session,
@@ -229,6 +261,36 @@ void main() {
     expect(session.value, AuthSessionState.unauthenticated);
     expect(session.currentUserId, isNull);
     expect(find.byType(LoginScreen), findsOneWidget);
+    expect(router.canPop(), isFalse);
+
+    router.go(AppRoutes.profileAccount);
+    await tester.pumpAndSettle();
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.byType(AccountSettingsScreen), findsNothing);
+  });
+
+  testWidgets('expired profile session clears tokens and returns to Login', (
+    tester,
+  ) async {
+    final secureStore = TestSecureKeyValueStore(
+      accessToken: 'expired-token',
+      userId: 42,
+    );
+    final session = createTestAuthSession(secureStore: secureStore, userId: 42);
+
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.profile,
+      authSession: session,
+      profileRepository: const _UnauthorizedProfileRepository(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(session.value, AuthSessionState.unauthenticated);
+    expect(session.currentUserId, isNull);
+    expect(secureStore.values, isEmpty);
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.byType(RikiBottomNavigationBar), findsNothing);
   });
 
   testWidgets('authenticated auth route redirects once to learner home', (
@@ -242,17 +304,121 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('authenticated learner cannot remain on verify-email', (
+    tester,
+  ) async {
+    await _pumpRouter(tester, initialLocation: AppRoutes.verifyEmail);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(VerifyEmailScreen), findsNothing);
+  });
+
+  testWidgets('persisted learner session restores a nested learner route', (
+    tester,
+  ) async {
+    final store = TestSecureKeyValueStore(
+      accessToken: createTestJwt(userId: 42, role: 'Learner'),
+      userId: 42,
+      role: 'Learner',
+    );
+    final session = AuthSessionController(TokenStorage(store));
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.profileAccount,
+      authSession: session,
+    );
+
+    expect(find.byType(SplashScreen), findsOneWidget);
+    await session.restore();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AccountSettingsScreen), findsOneWidget);
+    expect(find.byType(LoginScreen), findsNothing);
+  });
+
+  testWidgets('persisted Mentor session restores only the Mentor home', (
+    tester,
+  ) async {
+    final store = TestSecureKeyValueStore(
+      accessToken: createTestJwt(userId: 84, role: 'Mentor'),
+      userId: 84,
+      role: 'Mentor',
+    );
+    final session = AuthSessionController(TokenStorage(store));
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.mentor,
+      authSession: session,
+    );
+
+    await session.restore();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MentorHomeScreen), findsOneWidget);
+    expect(find.byType(RikiBottomNavigationBar), findsNothing);
+  });
+
+  testWidgets('authenticated Mentor is isolated from the learner shell', (
+    tester,
+  ) async {
+    final session = createTestAuthSession(role: BackendUserRole.mentor);
+
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.home,
+      authSession: session,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MentorHomeScreen), findsOneWidget);
+    expect(find.byType(HomeScreen), findsNothing);
+    expect(find.byType(RikiBottomNavigationBar), findsNothing);
+  });
+
+  testWidgets('unsupported backend role reaches only the safe logout screen', (
+    tester,
+  ) async {
+    final session = createTestAuthSession(role: BackendUserRole.contentAuthor);
+
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.home,
+      authSession: session,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(UnsupportedRoleScreen), findsOneWidget);
+    expect(find.byType(HomeScreen), findsNothing);
+    expect(find.byType(RikiBottomNavigationBar), findsNothing);
+
+    await tester.tap(find.byKey(const Key('role_landing_logout_button')));
+    await tester.pumpAndSettle();
+    expect(session.value, AuthSessionState.unauthenticated);
+    expect(find.byType(LoginScreen), findsOneWidget);
+  });
+
   test('stable auth destinations do not redirect and cannot loop', () {
     expect(
       authRouteRedirect(
         authState: AuthSessionState.unknown,
+        role: null,
         matchedLocation: AppRoutes.splash,
       ),
       isNull,
     );
     expect(
       authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.mentor,
+        matchedLocation: AppRoutes.mentorMeetings,
+      ),
+      isNull,
+    );
+    expect(
+      authRouteRedirect(
         authState: AuthSessionState.unauthenticated,
+        role: null,
         matchedLocation: AppRoutes.login,
       ),
       isNull,
@@ -260,6 +426,7 @@ void main() {
     expect(
       authRouteRedirect(
         authState: AuthSessionState.authenticated,
+        role: BackendUserRole.learner,
         matchedLocation: AppRoutes.home,
       ),
       isNull,
@@ -267,6 +434,7 @@ void main() {
     expect(
       authRouteRedirect(
         authState: AuthSessionState.unauthenticated,
+        role: null,
         matchedLocation: AppRoutes.verifyEmail,
       ),
       isNull,
@@ -274,9 +442,42 @@ void main() {
     expect(
       authRouteRedirect(
         authState: AuthSessionState.authenticated,
+        role: BackendUserRole.learner,
         matchedLocation: AppRoutes.verifyEmail,
       ),
+      AppRoutes.home,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.mentor,
+        matchedLocation: AppRoutes.mentor,
+      ),
       isNull,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.contentAuthor,
+        matchedLocation: AppRoutes.home,
+      ),
+      AppRoutes.unsupportedRole,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.admin,
+        matchedLocation: AppRoutes.home,
+      ),
+      AppRoutes.unsupportedRole,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: null,
+        matchedLocation: AppRoutes.home,
+      ),
+      AppRoutes.unsupportedRole,
     );
   });
 
@@ -337,6 +538,8 @@ Future<GoRouter> _pumpRouter(
   WidgetTester tester, {
   required String initialLocation,
   AuthSessionController? authSession,
+  UserProfileRepository profileRepository = const _RouterProfileRepository(),
+  MentorRepository mentorRepository = const _RouterMentorRepository(),
 }) async {
   final session = authSession ?? createTestAuthSession();
   final router = createAppRouter(
@@ -350,15 +553,24 @@ Future<GoRouter> _pumpRouter(
     ProviderScope(
       overrides: [
         authSessionControllerProvider.overrideWithValue(session),
-        userProfileRepositoryProvider.overrideWithValue(
-          const _RouterProfileRepository(),
-        ),
+        userProfileRepositoryProvider.overrideWithValue(profileRepository),
+        mentorRepositoryProvider.overrideWithValue(mentorRepository),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pump();
   return router;
+}
+
+class _RouterMentorRepository implements MentorRepository {
+  const _RouterMentorRepository();
+
+  @override
+  Future<List<MentorAvailabilitySlot>> loadAvailability() async => const [];
+
+  @override
+  Future<List<MentorMeetingSummary>> loadMeetings() async => const [];
 }
 
 class _RouterProfileRepository implements UserProfileRepository {
@@ -403,4 +615,11 @@ class _RouterProfileRepository implements UserProfileRepository {
     required bool emailNotificationsEnabled,
     required bool systemNotificationsEnabled,
   }) async => _profile;
+}
+
+class _UnauthorizedProfileRepository extends _RouterProfileRepository {
+  const _UnauthorizedProfileRepository();
+
+  @override
+  Future<UserProfile> loadProfile() async => throw const UnauthorizedError();
 }
