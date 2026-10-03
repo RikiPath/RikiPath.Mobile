@@ -593,7 +593,7 @@ abstract class AppLocalizations {
   /// No description provided for @verificationBackendBlocker.
   ///
   /// In vi, this message translates to:
-  /// **'Email chứa mã xác thực 6 chữ số, có hiệu lực trong 30 phút. Phản hồi đăng ký hiện chưa trả về mã tài khoản mà API xác thực yêu cầu, nên ứng dụng chưa thể gửi mã này một cách an toàn.'**
+  /// **'Email chứa mã xác thực 6 chữ số, có hiệu lực trong 30 phút. RikiPath chưa nhận đủ thông tin tài khoản để mở bước nhập mã một cách an toàn.'**
   String get verificationBackendBlocker;
 
   /// No description provided for @returnToLogin.
@@ -626,6 +626,18 @@ abstract class AppLocalizations {
   /// **'Nhập mã 6 chữ số đã được gửi tới email của bạn.'**
   String get verifyEmailSubtitle;
 
+  /// No description provided for @verificationCodeSentTo.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mã xác thực đã được gửi đến'**
+  String get verificationCodeSentTo;
+
+  /// No description provided for @verificationCodeSentToYourEmail.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mã xác thực đã được gửi đến email của bạn.'**
+  String get verificationCodeSentToYourEmail;
+
   /// No description provided for @verificationCode.
   ///
   /// In vi, this message translates to:
@@ -637,6 +649,42 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'000000'**
   String get verificationCodeHint;
+
+  /// No description provided for @didNotReceiveVerificationCode.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không nhận được mã?'**
+  String get didNotReceiveVerificationCode;
+
+  /// No description provided for @resendVerificationCode.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi lại mã'**
+  String get resendVerificationCode;
+
+  /// No description provided for @resendVerificationCodeIn.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi lại mã sau {time}'**
+  String resendVerificationCodeIn(String time);
+
+  /// No description provided for @resendingVerificationCode.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang gửi lại...'**
+  String get resendingVerificationCode;
+
+  /// No description provided for @verificationCodeResentMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'RikiPath đã gửi một mã xác thực mới tới email của bạn.'**
+  String get verificationCodeResentMessage;
+
+  /// No description provided for @resendVerificationFailedTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể gửi lại mã'**
+  String get resendVerificationFailedTitle;
 
   /// No description provided for @verify.
   ///
@@ -917,14 +965,260 @@ abstract class AppLocalizations {
   /// No description provided for @authErrorPasswordRecoveryUnavailable.
   ///
   /// In vi, this message translates to:
-  /// **'Tính năng lấy lại mật khẩu chưa được kết nối với máy chủ. Vui lòng liên hệ trung tâm trợ giúp.'**
+  /// **'Tính năng lấy lại mật khẩu hiện chưa khả dụng trong ứng dụng. Vui lòng liên hệ trung tâm trợ giúp.'**
   String get authErrorPasswordRecoveryUnavailable;
 
   /// No description provided for @authErrorUnsupportedRole.
   ///
   /// In vi, this message translates to:
-  /// **'Ứng dụng di động hiện chỉ hỗ trợ tài khoản học viên.'**
+  /// **'Ứng dụng di động hiện chỉ hỗ trợ tài khoản Học viên và Mentor.'**
   String get authErrorUnsupportedRole;
+
+  /// No description provided for @mentorLandingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không gian Mentor'**
+  String get mentorLandingTitle;
+
+  /// No description provided for @mentorLandingDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Theo dõi lịch trống và các buổi meeting sắp tới của bạn.'**
+  String get mentorLandingDescription;
+
+  /// No description provided for @mentorHomeGreeting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chào mừng trở lại'**
+  String get mentorHomeGreeting;
+
+  /// No description provided for @mentorAvailabilityTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lịch trống của tôi'**
+  String get mentorAvailabilityTitle;
+
+  /// No description provided for @mentorAvailabilityDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Các khung giờ đang được hiển thị cho học viên.'**
+  String get mentorAvailabilityDescription;
+
+  /// No description provided for @mentorAvailabilityCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} khung giờ'**
+  String mentorAvailabilityCount(int count);
+
+  /// No description provided for @mentorAvailabilityEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn chưa có khung giờ trống nào.'**
+  String get mentorAvailabilityEmpty;
+
+  /// No description provided for @mentorAvailabilityError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể tải lịch trống. Vui lòng thử lại.'**
+  String get mentorAvailabilityError;
+
+  /// No description provided for @mentorAvailabilityReadOnlyTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chế độ chỉ đọc'**
+  String get mentorAvailabilityReadOnlyTitle;
+
+  /// No description provided for @mentorAvailabilityReadOnlyMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn có thể xem lịch trống trên ứng dụng. Tính năng thay đổi lịch sẽ được mở khi cách xử lý múi giờ được thống nhất.'**
+  String get mentorAvailabilityReadOnlyMessage;
+
+  /// No description provided for @mentorViewAvailability.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem lịch trống'**
+  String get mentorViewAvailability;
+
+  /// No description provided for @mentorMeetingsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Meeting của tôi'**
+  String get mentorMeetingsTitle;
+
+  /// No description provided for @mentorMeetingsDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Các buổi meeting đã được xác nhận cho tài khoản Mentor này.'**
+  String get mentorMeetingsDescription;
+
+  /// No description provided for @mentorMeetingsCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} meeting'**
+  String mentorMeetingsCount(int count);
+
+  /// No description provided for @mentorMeetingsEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn chưa có meeting nào.'**
+  String get mentorMeetingsEmpty;
+
+  /// No description provided for @mentorMeetingsError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể tải danh sách meeting. Vui lòng thử lại.'**
+  String get mentorMeetingsError;
+
+  /// No description provided for @mentorViewMeetings.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem meeting'**
+  String get mentorViewMeetings;
+
+  /// No description provided for @mentorMeetingDetailTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiết meeting'**
+  String get mentorMeetingDetailTitle;
+
+  /// No description provided for @mentorLearnerLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học viên'**
+  String get mentorLearnerLabel;
+
+  /// No description provided for @mentorLearnerUnknown.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có thông tin học viên'**
+  String get mentorLearnerUnknown;
+
+  /// No description provided for @mentorScheduleLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thời gian'**
+  String get mentorScheduleLabel;
+
+  /// No description provided for @mentorSchedulePending.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa xác định thời gian'**
+  String get mentorSchedulePending;
+
+  /// No description provided for @mentorStartTimeLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bắt đầu'**
+  String get mentorStartTimeLabel;
+
+  /// No description provided for @mentorEndTimeLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết thúc'**
+  String get mentorEndTimeLabel;
+
+  /// No description provided for @mentorStatusLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trạng thái'**
+  String get mentorStatusLabel;
+
+  /// No description provided for @mentorSlotOpen.
+  ///
+  /// In vi, this message translates to:
+  /// **'Còn trống'**
+  String get mentorSlotOpen;
+
+  /// No description provided for @mentorSlotBooked.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã được đặt'**
+  String get mentorSlotBooked;
+
+  /// No description provided for @mentorJoinMeeting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tham gia meeting'**
+  String get mentorJoinMeeting;
+
+  /// No description provided for @mentorMeetingLinkUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Liên kết tham gia chưa khả dụng.'**
+  String get mentorMeetingLinkUnavailable;
+
+  /// No description provided for @mentorMeetingNotFound.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tìm thấy meeting trong lịch của bạn.'**
+  String get mentorMeetingNotFound;
+
+  /// No description provided for @mentorJoinFailedTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể mở meeting'**
+  String get mentorJoinFailedTitle;
+
+  /// No description provided for @mentorJoinFailedDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Liên kết meeting không thể mở trên thiết bị này.'**
+  String get mentorJoinFailedDescription;
+
+  /// No description provided for @mentorStatusAwaitingPayment.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chờ thanh toán'**
+  String get mentorStatusAwaitingPayment;
+
+  /// No description provided for @mentorStatusPendingAssignment.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chờ phân công'**
+  String get mentorStatusPendingAssignment;
+
+  /// No description provided for @mentorStatusAssigned.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã phân công'**
+  String get mentorStatusAssigned;
+
+  /// No description provided for @mentorStatusAccepted.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã chấp nhận'**
+  String get mentorStatusAccepted;
+
+  /// No description provided for @mentorStatusCompleted.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã hoàn thành'**
+  String get mentorStatusCompleted;
+
+  /// No description provided for @mentorStatusCancelled.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã hủy'**
+  String get mentorStatusCancelled;
+
+  /// No description provided for @mentorStatusUnknown.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa xác định'**
+  String get mentorStatusUnknown;
+
+  /// No description provided for @unsupportedRoleTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vai trò chưa được hỗ trợ'**
+  String get unsupportedRoleTitle;
+
+  /// No description provided for @unsupportedRoleDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vai trò {role} không thuộc phạm vi ứng dụng di động. Vui lòng đăng xuất và dùng tài khoản Học viên hoặc Mentor.'**
+  String unsupportedRoleDescription(String role);
 
   /// No description provided for @authErrorNetwork.
   ///
@@ -974,6 +1268,18 @@ abstract class AppLocalizations {
   /// **'Mã xác thực không hợp lệ, đã hết hạn hoặc đã được sử dụng.'**
   String get authErrorVerifyValidation;
 
+  /// No description provided for @authErrorResendValidation.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể gửi lại mã cho email này. Vui lòng kiểm tra và thử lại.'**
+  String get authErrorResendValidation;
+
+  /// No description provided for @authErrorResendRateLimited.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn đã yêu cầu gửi lại mã quá nhiều lần. Vui lòng thử lại sau.'**
+  String get authErrorResendRateLimited;
+
   /// No description provided for @authErrorUpdateEmailValidation.
   ///
   /// In vi, this message translates to:
@@ -1007,13 +1313,19 @@ abstract class AppLocalizations {
   /// No description provided for @authErrorVerifyMissingUserId.
   ///
   /// In vi, this message translates to:
-  /// **'Máy chủ chưa cung cấp mã tài khoản cần thiết để xác thực email.'**
+  /// **'RikiPath chưa nhận đủ thông tin tài khoản cần thiết để xác thực email.'**
   String get authErrorVerifyMissingUserId;
+
+  /// No description provided for @authErrorResendMissingEmail.
+  ///
+  /// In vi, this message translates to:
+  /// **'RikiPath chưa nhận được email cần gửi lại mã xác thực.'**
+  String get authErrorResendMissingEmail;
 
   /// No description provided for @authErrorSessionMissingUserId.
   ///
   /// In vi, this message translates to:
-  /// **'Không tìm thấy mã tài khoản trong phiên hiện tại. Vui lòng đăng nhập lại.'**
+  /// **'Phiên hiện tại thiếu thông tin tài khoản cần thiết. Vui lòng đăng nhập lại.'**
   String get authErrorSessionMissingUserId;
 
   /// No description provided for @profileTitle.
@@ -1091,7 +1403,7 @@ abstract class AppLocalizations {
   /// No description provided for @verifyEmailBlockedMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Phản hồi đăng ký hiện chưa trả về mã tài khoản mà API xác thực yêu cầu. RikiPath không tự đoán mã này.'**
+  /// **'RikiPath chưa nhận đủ thông tin tài khoản để gửi mã xác thực một cách an toàn.'**
   String get verifyEmailBlockedMessage;
 
   /// No description provided for @verificationCodeValidity.
@@ -1181,7 +1493,7 @@ abstract class AppLocalizations {
   /// No description provided for @missingSessionMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Phiên cũ chưa lưu mã tài khoản. Vui lòng đăng xuất rồi đăng nhập lại.'**
+  /// **'Phiên đăng nhập hiện tại thiếu thông tin cần thiết. Vui lòng đăng xuất rồi đăng nhập lại.'**
   String get missingSessionMessage;
 
   /// No description provided for @changeEmailFailedTitle.
@@ -1613,7 +1925,7 @@ abstract class AppLocalizations {
   /// No description provided for @illustrationData.
   ///
   /// In vi, this message translates to:
-  /// **'Dữ liệu minh họa'**
+  /// **'Nội dung bổ sung'**
   String get illustrationData;
 
   /// No description provided for @saved.
@@ -1661,7 +1973,7 @@ abstract class AppLocalizations {
   /// No description provided for @localFixtureNotice.
   ///
   /// In vi, this message translates to:
-  /// **'Nội dung mở rộng bên dưới là dữ liệu minh họa cục bộ.'**
+  /// **'Nội dung bổ sung bên dưới được lưu sẵn trên thiết bị.'**
   String get localFixtureNotice;
 
   /// No description provided for @meaning.
@@ -1775,7 +2087,7 @@ abstract class AppLocalizations {
   /// No description provided for @sampleData.
   ///
   /// In vi, this message translates to:
-  /// **'Dữ liệu mẫu'**
+  /// **'Nội dung bổ sung'**
   String get sampleData;
 
   /// No description provided for @showMore.
@@ -1847,7 +2159,7 @@ abstract class AppLocalizations {
   /// No description provided for @stitchFixtureNotice.
   ///
   /// In vi, this message translates to:
-  /// **'Nội dung mở rộng dùng dữ liệu mẫu Stitch'**
+  /// **'Nội dung bổ sung được lưu sẵn trên thiết bị.'**
   String get stitchFixtureNotice;
 
   /// No description provided for @reading.
@@ -1871,7 +2183,7 @@ abstract class AppLocalizations {
   /// No description provided for @sampleBadge.
   ///
   /// In vi, this message translates to:
-  /// **'MẪU'**
+  /// **'BỔ SUNG'**
   String get sampleBadge;
 
   /// No description provided for @strokeProgress.
@@ -1919,13 +2231,13 @@ abstract class AppLocalizations {
   /// No description provided for @strokeFixtureWarning.
   ///
   /// In vi, this message translates to:
-  /// **'Dữ liệu mẫu từ thiết kế Stitch; backend chưa cung cấp chuỗi nét.'**
+  /// **'Phần minh họa nét viết này được cung cấp để bạn tham khảo.'**
   String get strokeFixtureWarning;
 
   /// No description provided for @strokeImageOnlyWarning.
   ///
   /// In vi, this message translates to:
-  /// **'API hiện chỉ cung cấp một ảnh thứ tự nét, không có chuỗi hoạt ảnh.'**
+  /// **'Hiện chỉ có ảnh thứ tự nét; chưa hỗ trợ phát từng nét.'**
   String get strokeImageOnlyWarning;
 
   /// No description provided for @backToKanjiDetail.
@@ -1997,7 +2309,7 @@ abstract class AppLocalizations {
   /// No description provided for @grammarFixtureNotice.
   ///
   /// In vi, this message translates to:
-  /// **'Nội dung mở rộng là dữ liệu minh họa cục bộ, không phải response API.'**
+  /// **'Nội dung giải thích bổ sung được lưu sẵn trên thiết bị.'**
   String get grammarFixtureNotice;
 
   /// No description provided for @practicalExamples.
@@ -2093,7 +2405,7 @@ abstract class AppLocalizations {
   /// No description provided for @notebookApiFieldsHint.
   ///
   /// In vi, this message translates to:
-  /// **'Chỉ các trường được API Notebook hỗ trợ.'**
+  /// **'Nhập từ, cách đọc, ý nghĩa và ghi chú bạn muốn lưu.'**
   String get notebookApiFieldsHint;
 
   /// No description provided for @japaneseWordRequiredLabel.
@@ -2215,6 +2527,18 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Danh sách chưa có từ'**
   String get collectionHasNoWords;
+
+  /// No description provided for @notebookSearchEmptyMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử từ khóa khác hoặc xóa tìm kiếm hiện tại.'**
+  String get notebookSearchEmptyMessage;
+
+  /// No description provided for @notebookCollectionEmptyMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm từ đầu tiên để bắt đầu ôn tập trong danh sách này.'**
+  String get notebookCollectionEmptyMessage;
 
   /// No description provided for @notebookLoadFailed.
   ///
@@ -2879,7 +3203,7 @@ abstract class AppLocalizations {
   /// No description provided for @fixtureDefaultNotebookName.
   ///
   /// In vi, this message translates to:
-  /// **'Mặc định · dữ liệu mẫu'**
+  /// **'Đã lưu từ bài học'**
   String get fixtureDefaultNotebookName;
 
   /// No description provided for @notebookListsLoadFailed.
@@ -2903,7 +3227,7 @@ abstract class AppLocalizations {
   /// No description provided for @kanjiFixtureNotebookName.
   ///
   /// In vi, this message translates to:
-  /// **'Mặc định (dữ liệu mẫu)'**
+  /// **'Đã lưu từ bài học'**
   String get kanjiFixtureNotebookName;
 
   /// No description provided for @kanjiSaveFailed.
@@ -2941,6 +3265,30 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Không thể xóa mục khỏi Sổ từ. Vui lòng thử lại.'**
   String get notebookRemoveFailed;
+
+  /// No description provided for @notebookLocalRemoveFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể cập nhật mục đã lưu trên thiết bị.'**
+  String get notebookLocalRemoveFailed;
+
+  /// No description provided for @notebookLocalRestoreUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dữ liệu đã lưu trên thiết bị tạm thời không khả dụng. Dữ liệu trực tuyến vẫn được giữ nguyên.'**
+  String get notebookLocalRestoreUnavailable;
+
+  /// No description provided for @selectLiveCollectionForManualEntry.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hãy chọn một danh sách có thể đồng bộ để thêm mục thủ công.'**
+  String get selectLiveCollectionForManualEntry;
+
+  /// No description provided for @notebookKanjiLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kanji'**
+  String get notebookKanjiLabel;
 
   /// No description provided for @wordAndMeaningRequired.
   ///
@@ -3293,7 +3641,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationSettingsSubtitle.
   ///
   /// In vi, this message translates to:
-  /// **'Chỉ các tùy chọn được backend hỗ trợ mới được đồng bộ.'**
+  /// **'Các tùy chọn khả dụng sẽ được đồng bộ với tài khoản của bạn.'**
   String get notificationSettingsSubtitle;
 
   /// No description provided for @emailNotifications.
@@ -3353,7 +3701,7 @@ abstract class AppLocalizations {
   /// No description provided for @jlptGoalMappingUnavailableMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Backend chưa cung cấp ánh xạ ID đáng tin cậy cho N5, N4 và N3. RikiPath sẽ không gửi ID phỏng đoán.'**
+  /// **'Chưa thể đồng bộ mục tiêu JLPT lúc này. Lựa chọn hiện tại của bạn vẫn được giữ nguyên.'**
   String get jlptGoalMappingUnavailableMessage;
 
   /// No description provided for @currentJlptGoal.
@@ -3491,14 +3839,722 @@ abstract class AppLocalizations {
   /// No description provided for @jlptSelectionSafeHint.
   ///
   /// In vi, this message translates to:
-  /// **'Bạn có thể xem trước lựa chọn. Nút lưu được giữ an toàn cho tới khi backend cung cấp ánh xạ ID chính xác.'**
+  /// **'Lựa chọn được lưu trên thiết bị này và bạn có thể thay đổi sau.'**
   String get jlptSelectionSafeHint;
 
   /// No description provided for @profileConsultationSubtitle.
   ///
   /// In vi, this message translates to:
-  /// **'Dịch vụ tư vấn học tập sẽ xuất hiện tại đây khi backend sẵn sàng.'**
+  /// **'Dịch vụ tư vấn học tập hiện chưa khả dụng.'**
   String get profileConsultationSubtitle;
+
+  /// No description provided for @savedFromLessons.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ đã lưu trong bài học'**
+  String get savedFromLessons;
+
+  /// No description provided for @localJlptPreferenceSaved.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã lưu mục tiêu học trên thiết bị'**
+  String get localJlptPreferenceSaved;
+
+  /// No description provided for @dailyReviewTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ôn tập hôm nay'**
+  String get dailyReviewTitle;
+
+  /// No description provided for @reviewLoadingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'RikiPath đang chuẩn bị thẻ ôn tập...'**
+  String get reviewLoadingTitle;
+
+  /// No description provided for @reviewProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'{current} / {total} thẻ'**
+  String reviewProgress(int current, int total);
+
+  /// No description provided for @reviewRecallPrompt.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn còn nhớ nội dung này không?'**
+  String get reviewRecallPrompt;
+
+  /// No description provided for @revealAnswer.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hiện đáp án'**
+  String get revealAnswer;
+
+  /// No description provided for @reviewAgain.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học lại'**
+  String get reviewAgain;
+
+  /// No description provided for @reviewHard.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khó'**
+  String get reviewHard;
+
+  /// No description provided for @reviewGood.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tốt'**
+  String get reviewGood;
+
+  /// No description provided for @reviewEasy.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dễ'**
+  String get reviewEasy;
+
+  /// No description provided for @reviewCompleteTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hoàn thành phiên ôn tập'**
+  String get reviewCompleteTitle;
+
+  /// No description provided for @reviewCompleteCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn đã ôn {count} thẻ trong phiên này.'**
+  String reviewCompleteCount(int count);
+
+  /// No description provided for @reviewResponseCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'{label}: {count}'**
+  String reviewResponseCount(String label, int count);
+
+  /// No description provided for @reviewAgainAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ôn lại phiên này'**
+  String get reviewAgainAction;
+
+  /// No description provided for @backToPractice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quay lại Luyện tập'**
+  String get backToPractice;
+
+  /// No description provided for @reviewQueueEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hôm nay chưa có thẻ cần ôn.'**
+  String get reviewQueueEmpty;
+
+  /// No description provided for @reviewLoadFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể tải phiên ôn tập'**
+  String get reviewLoadFailed;
+
+  /// No description provided for @reviewDueCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} thẻ đang chờ bạn ôn lại'**
+  String reviewDueCount(int count);
+
+  /// No description provided for @mockLoadingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'RikiPath đang chuẩn bị đề thi...'**
+  String get mockLoadingTitle;
+
+  /// No description provided for @mockLoadFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể tải đề thi thử.'**
+  String get mockLoadFailed;
+
+  /// No description provided for @mockTestUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đề thi thử này hiện không khả dụng.'**
+  String get mockTestUnavailable;
+
+  /// No description provided for @leaveMockTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Rời khỏi bài thi?'**
+  String get leaveMockTitle;
+
+  /// No description provided for @leaveMockMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Các đáp án trong phiên hiện tại vẫn được giữ khi bạn quay lại.'**
+  String get leaveMockMessage;
+
+  /// No description provided for @continueAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiếp tục làm bài'**
+  String get continueAction;
+
+  /// No description provided for @leaveAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Rời bài thi'**
+  String get leaveAction;
+
+  /// No description provided for @submitMockTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nộp bài thi thử?'**
+  String get submitMockTitle;
+
+  /// No description provided for @submitMockMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn có thể nộp dù vẫn còn câu chưa trả lời. Điểm được tính cục bộ trên thiết bị.'**
+  String get submitMockMessage;
+
+  /// No description provided for @submitAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nộp bài'**
+  String get submitAction;
+
+  /// No description provided for @mockMinutes.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thời gian: {minutes} phút'**
+  String mockMinutes(int minutes);
+
+  /// No description provided for @mockQuestionCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'Số câu: {count}'**
+  String mockQuestionCount(int count);
+
+  /// No description provided for @mockLocalScoringNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đề luyện tập được chấm trên thiết bị và không phải kết quả JLPT chính thức.'**
+  String get mockLocalScoringNotice;
+
+  /// No description provided for @startMockTest.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bắt đầu làm bài'**
+  String get startMockTest;
+
+  /// No description provided for @questionProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu {current} / {total}'**
+  String questionProgress(int current, int total);
+
+  /// No description provided for @previousQuestion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu trước'**
+  String get previousQuestion;
+
+  /// No description provided for @nextQuestion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu tiếp'**
+  String get nextQuestion;
+
+  /// No description provided for @mockResultTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả thi thử'**
+  String get mockResultTitle;
+
+  /// No description provided for @mockResultUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có kết quả cho đề thi này.'**
+  String get mockResultUnavailable;
+
+  /// No description provided for @mockCorrectCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đúng {correct} / {total} câu'**
+  String mockCorrectCount(int correct, int total);
+
+  /// No description provided for @mockLocalResultNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả này dùng để luyện tập và không phải điểm JLPT chính thức.'**
+  String get mockLocalResultNotice;
+
+  /// No description provided for @sectionBreakdown.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả theo phần'**
+  String get sectionBreakdown;
+
+  /// No description provided for @mockSectionResult.
+  ///
+  /// In vi, this message translates to:
+  /// **'{correct}/{total} đúng • {percentage}%'**
+  String mockSectionResult(int correct, int total, int percentage);
+
+  /// No description provided for @detailedReview.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem chi tiết đáp án'**
+  String get detailedReview;
+
+  /// No description provided for @retakeMockTest.
+  ///
+  /// In vi, this message translates to:
+  /// **'Làm lại đề'**
+  String get retakeMockTest;
+
+  /// No description provided for @questionNumber.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu {number}'**
+  String questionNumber(int number);
+
+  /// No description provided for @selectedAnswer.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn chọn: {answer}'**
+  String selectedAnswer(String answer);
+
+  /// No description provided for @correctAnswer.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đáp án đúng: {answer}'**
+  String correctAnswer(String answer);
+
+  /// No description provided for @notAnswered.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa trả lời'**
+  String get notAnswered;
+
+  /// No description provided for @practiceLoadingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'RikiPath đang chuẩn bị nội dung luyện tập...'**
+  String get practiceLoadingTitle;
+
+  /// No description provided for @practiceJourneyTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Luyện tập theo nhịp của bạn'**
+  String get practiceJourneyTitle;
+
+  /// No description provided for @practiceJourneySubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ôn lại kiến thức, thử sức với đề JLPT và theo dõi từng bước tiến bộ.'**
+  String get practiceJourneySubtitle;
+
+  /// No description provided for @mockSummary.
+  ///
+  /// In vi, this message translates to:
+  /// **'{level} • {minutes} phút • {count} câu'**
+  String mockSummary(String level, int minutes, int count);
+
+  /// No description provided for @mockInProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang làm {answered}/{total} câu'**
+  String mockInProgress(int answered, int total);
+
+  /// No description provided for @mockCompletedStatus.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã hoàn thành • {percentage}%'**
+  String mockCompletedStatus(int percentage);
+
+  /// No description provided for @additionalPractice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Luyện tập bổ sung'**
+  String get additionalPractice;
+
+  /// No description provided for @aiWritingPractice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Luyện viết cùng AI'**
+  String get aiWritingPractice;
+
+  /// No description provided for @practiceAnswerLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu trả lời luyện tập'**
+  String get practiceAnswerLabel;
+
+  /// No description provided for @gradePractice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chấm bài luyện tập'**
+  String get gradePractice;
+
+  /// No description provided for @gradingPractice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang chấm...'**
+  String get gradingPractice;
+
+  /// No description provided for @aiGradingResult.
+  ///
+  /// In vi, this message translates to:
+  /// **'Điểm {score}/100 • {feedback}'**
+  String aiGradingResult(int score, String feedback);
+
+  /// No description provided for @mentorConsultation.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tư vấn cùng Mentor'**
+  String get mentorConsultation;
+
+  /// No description provided for @openDemoBooking.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem trước lịch tư vấn'**
+  String get openDemoBooking;
+
+  /// No description provided for @confirmDemoBooking.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận xem trước'**
+  String get confirmDemoBooking;
+
+  /// No description provided for @demoBookingConfirmed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn đã hoàn tất phần xem trước lịch tư vấn.'**
+  String get demoBookingConfirmed;
+
+  /// No description provided for @practiceLoadFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể tải nội dung luyện tập'**
+  String get practiceLoadFailed;
+
+  /// No description provided for @learningAnalyticsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiến độ học tập'**
+  String get learningAnalyticsTitle;
+
+  /// No description provided for @analyticsLoadingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'RikiPath đang tổng hợp tiến độ của bạn...'**
+  String get analyticsLoadingTitle;
+
+  /// No description provided for @analyticsEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có dữ liệu học tập để hiển thị.'**
+  String get analyticsEmpty;
+
+  /// No description provided for @studyStreakLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chuỗi ngày học'**
+  String get studyStreakLabel;
+
+  /// No description provided for @streakDaysValue.
+  ///
+  /// In vi, this message translates to:
+  /// **'{days} ngày'**
+  String streakDaysValue(int days);
+
+  /// No description provided for @completedLessonsLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bài học đã hoàn thành'**
+  String get completedLessonsLabel;
+
+  /// No description provided for @analyticsCompletedLessons.
+  ///
+  /// In vi, this message translates to:
+  /// **'{completed} / {total} bài'**
+  String analyticsCompletedLessons(int completed, int total);
+
+  /// No description provided for @skillBreakdown.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiến độ theo kỹ năng'**
+  String get skillBreakdown;
+
+  /// No description provided for @analyticsSkillsEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có dữ liệu kỹ năng.'**
+  String get analyticsSkillsEmpty;
+
+  /// No description provided for @analyticsSectionUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phần dữ liệu này tạm thời chưa tải được.'**
+  String get analyticsSectionUnavailable;
+
+  /// No description provided for @analyticsLoadFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể tải tiến độ học tập'**
+  String get analyticsLoadFailed;
+
+  /// No description provided for @markAllNotificationsRead.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đọc tất cả'**
+  String get markAllNotificationsRead;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có thông báo trong ứng dụng.'**
+  String get notificationsEmpty;
+
+  /// No description provided for @notificationsLoadFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể tải thông báo'**
+  String get notificationsLoadFailed;
+
+  /// No description provided for @notebookEntryTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ đã lưu'**
+  String get notebookEntryTitle;
+
+  /// No description provided for @notebookEntryUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục đã lưu này không còn khả dụng.'**
+  String get notebookEntryUnavailable;
+
+  /// No description provided for @homeChooseJlptTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn mục tiêu JLPT để bắt đầu'**
+  String get homeChooseJlptTitle;
+
+  /// No description provided for @homeChooseJlptDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'RikiPath sẽ chuẩn bị lộ trình phù hợp sau khi bạn chọn N5, N4 hoặc N3.'**
+  String get homeChooseJlptDescription;
+
+  /// No description provided for @homeChooseJlptAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn mục tiêu'**
+  String get homeChooseJlptAction;
+
+  /// No description provided for @homeContinueLearningTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiếp tục học'**
+  String get homeContinueLearningTitle;
+
+  /// No description provided for @homeCurrentLessonMeta.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bài {lesson} • {minutes} phút'**
+  String homeCurrentLessonMeta(int lesson, int minutes);
+
+  /// No description provided for @homeRoadmapProgressTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiến độ lộ trình'**
+  String get homeRoadmapProgressTitle;
+
+  /// No description provided for @homeRoadmapProgressDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiến độ bài học được lưu trên thiết bị này.'**
+  String get homeRoadmapProgressDescription;
+
+  /// No description provided for @homeRoadmapProgressValue.
+  ///
+  /// In vi, this message translates to:
+  /// **'{completed}/{total} bài • {percentage}%'**
+  String homeRoadmapProgressValue(int completed, int total, int percentage);
+
+  /// No description provided for @homeLiveProgressTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thống kê học tập'**
+  String get homeLiveProgressTitle;
+
+  /// No description provided for @homeLiveProgressDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dữ liệu tổng hợp từ tài khoản RikiPath của bạn.'**
+  String get homeLiveProgressDescription;
+
+  /// No description provided for @homeViewProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem tiến độ'**
+  String get homeViewProgress;
+
+  /// No description provided for @homeAnalyticsUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thống kê trực tuyến tạm thời chưa tải được.'**
+  String get homeAnalyticsUnavailable;
+
+  /// No description provided for @homeReviewDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ôn lại kiến thức theo nhịp học hiện tại của bạn.'**
+  String get homeReviewDescription;
+
+  /// No description provided for @homeResumeReview.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiếp tục ôn tập'**
+  String get homeResumeReview;
+
+  /// No description provided for @homeReviewNow.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ôn tập ngay'**
+  String get homeReviewNow;
+
+  /// No description provided for @homePracticeTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Luyện đề'**
+  String get homePracticeTitle;
+
+  /// No description provided for @homeStartPractice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bắt đầu luyện tập'**
+  String get homeStartPractice;
+
+  /// No description provided for @homeResumeMock.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiếp tục đề thi thử'**
+  String get homeResumeMock;
+
+  /// No description provided for @homeResumeMockDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bài làm trên thiết bị vẫn đang được lưu.'**
+  String get homeResumeMockDescription;
+
+  /// No description provided for @homeRecentMockResult.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả gần đây'**
+  String get homeRecentMockResult;
+
+  /// No description provided for @homeRecentMockScore.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đúng {score}/{total} câu • {percentage}%'**
+  String homeRecentMockScore(int score, int total, int percentage);
+
+  /// No description provided for @homeViewResult.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem kết quả'**
+  String get homeViewResult;
+
+  /// No description provided for @homeNotebookShortcutTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sổ từ cá nhân'**
+  String get homeNotebookShortcutTitle;
+
+  /// No description provided for @homeNotebookShortcutDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem lại từ vựng và nội dung bạn đã lưu.'**
+  String get homeNotebookShortcutDescription;
+
+  /// No description provided for @homeSectionUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phần này tạm thời chưa tải được.'**
+  String get homeSectionUnavailable;
+
+  /// No description provided for @homeRefreshSemantics.
+  ///
+  /// In vi, this message translates to:
+  /// **'Làm mới thống kê và thông báo'**
+  String get homeRefreshSemantics;
+
+  /// No description provided for @commonErrorNetwork.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể kết nối tới RikiPath. Vui lòng kiểm tra mạng và thử lại.'**
+  String get commonErrorNetwork;
+
+  /// No description provided for @commonErrorUnauthorized.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'**
+  String get commonErrorUnauthorized;
+
+  /// No description provided for @commonErrorForbidden.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn không có quyền thực hiện thao tác này.'**
+  String get commonErrorForbidden;
+
+  /// No description provided for @commonErrorNotFound.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nội dung này không còn khả dụng.'**
+  String get commonErrorNotFound;
+
+  /// No description provided for @commonErrorConflict.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dữ liệu đã thay đổi. Vui lòng tải lại và thử lại.'**
+  String get commonErrorConflict;
+
+  /// No description provided for @commonErrorValidation.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thông tin chưa hợp lệ. Vui lòng kiểm tra lại.'**
+  String get commonErrorValidation;
+
+  /// No description provided for @commonErrorServer.
+  ///
+  /// In vi, this message translates to:
+  /// **'RikiPath đang gặp sự cố. Vui lòng thử lại sau.'**
+  String get commonErrorServer;
+
+  /// No description provided for @commonErrorUnknown.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể hoàn tất thao tác. Vui lòng thử lại.'**
+  String get commonErrorUnknown;
+
+  /// No description provided for @notificationsUpdateFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể cập nhật thông báo'**
+  String get notificationsUpdateFailed;
+
+  /// No description provided for @notificationsCountUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Số thông báo chưa đọc tạm thời chưa cập nhật.'**
+  String get notificationsCountUnavailable;
+
+  /// No description provided for @analyticsSkillScore.
+  ///
+  /// In vi, this message translates to:
+  /// **'{score}% • {attempts} lượt'**
+  String analyticsSkillScore(String score, int attempts);
 }
 
 class _AppLocalizationsDelegate

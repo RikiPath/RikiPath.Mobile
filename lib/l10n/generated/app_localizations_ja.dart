@@ -260,7 +260,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get verificationBackendBlocker =>
-      'メールに6桁の確認コードが届きます。有効期限は30分です。現在、登録APIから認証に必要なユーザーIDが返らないため、アプリから安全に送信できません。';
+      'メールに6桁の確認コードが届きます。有効期限は30分です。安全にコード入力へ進むためのアカウント情報がまだ揃っていません。';
 
   @override
   String get returnToLogin => 'ログインに戻る';
@@ -278,10 +278,36 @@ class AppLocalizationsJa extends AppLocalizations {
   String get verifyEmailSubtitle => 'メールに届いた6桁のコードを入力してください。';
 
   @override
+  String get verificationCodeSentTo => '確認コードの送信先';
+
+  @override
+  String get verificationCodeSentToYourEmail => '確認コードをメールアドレスに送信しました。';
+
+  @override
   String get verificationCode => '確認コード';
 
   @override
   String get verificationCodeHint => '000000';
+
+  @override
+  String get didNotReceiveVerificationCode => 'コードが届きませんか？';
+
+  @override
+  String get resendVerificationCode => 'コードを再送信';
+
+  @override
+  String resendVerificationCodeIn(String time) {
+    return '$time後にコードを再送信';
+  }
+
+  @override
+  String get resendingVerificationCode => '再送信中...';
+
+  @override
+  String get verificationCodeResentMessage => '新しい確認コードをメールに送信しました。';
+
+  @override
+  String get resendVerificationFailedTitle => 'コードを再送信できません';
 
   @override
   String get verify => '認証する';
@@ -427,10 +453,140 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get authErrorPasswordRecoveryUnavailable =>
-      'パスワード再設定はまだサーバーに接続されていません。サポートへお問い合わせください。';
+      'パスワード再設定は現在アプリで利用できません。サポートへお問い合わせください。';
 
   @override
-  String get authErrorUnsupportedRole => 'モバイルアプリは学習者アカウントのみ対応しています。';
+  String get authErrorUnsupportedRole => 'モバイルアプリは学習者とメンターのアカウントに対応しています。';
+
+  @override
+  String get mentorLandingTitle => 'メンターエリア';
+
+  @override
+  String get mentorLandingDescription => '公開中の空き時間と今後のミーティングを確認できます。';
+
+  @override
+  String get mentorHomeGreeting => 'おかえりなさい';
+
+  @override
+  String get mentorAvailabilityTitle => '自分の空き時間';
+
+  @override
+  String get mentorAvailabilityDescription => '学習者に公開されている時間枠です。';
+
+  @override
+  String mentorAvailabilityCount(int count) {
+    return '$count件の時間枠';
+  }
+
+  @override
+  String get mentorAvailabilityEmpty => '空き時間はまだ登録されていません。';
+
+  @override
+  String get mentorAvailabilityError => '空き時間を読み込めませんでした。もう一度お試しください。';
+
+  @override
+  String get mentorAvailabilityReadOnlyTitle => '閲覧のみ';
+
+  @override
+  String get mentorAvailabilityReadOnlyMessage =>
+      'アプリでは空き時間を確認できます。タイムゾーンの取り扱いが確定後、編集機能を提供します。';
+
+  @override
+  String get mentorViewAvailability => '空き時間を見る';
+
+  @override
+  String get mentorMeetingsTitle => '自分のミーティング';
+
+  @override
+  String get mentorMeetingsDescription => 'このメンターアカウントで確定したミーティングです。';
+
+  @override
+  String mentorMeetingsCount(int count) {
+    return '$count件のミーティング';
+  }
+
+  @override
+  String get mentorMeetingsEmpty => 'ミーティングはまだありません。';
+
+  @override
+  String get mentorMeetingsError => 'ミーティングを読み込めませんでした。もう一度お試しください。';
+
+  @override
+  String get mentorViewMeetings => 'ミーティングを見る';
+
+  @override
+  String get mentorMeetingDetailTitle => 'ミーティング詳細';
+
+  @override
+  String get mentorLearnerLabel => '学習者';
+
+  @override
+  String get mentorLearnerUnknown => '学習者情報はまだありません';
+
+  @override
+  String get mentorScheduleLabel => '日時';
+
+  @override
+  String get mentorSchedulePending => '日時未定';
+
+  @override
+  String get mentorStartTimeLabel => '開始';
+
+  @override
+  String get mentorEndTimeLabel => '終了';
+
+  @override
+  String get mentorStatusLabel => 'ステータス';
+
+  @override
+  String get mentorSlotOpen => '空きあり';
+
+  @override
+  String get mentorSlotBooked => '予約済み';
+
+  @override
+  String get mentorJoinMeeting => 'ミーティングに参加';
+
+  @override
+  String get mentorMeetingLinkUnavailable => '参加リンクはまだ利用できません。';
+
+  @override
+  String get mentorMeetingNotFound => 'あなたの予定にこのミーティングはありません。';
+
+  @override
+  String get mentorJoinFailedTitle => 'ミーティングを開けません';
+
+  @override
+  String get mentorJoinFailedDescription => 'この端末ではミーティングリンクを開けませんでした。';
+
+  @override
+  String get mentorStatusAwaitingPayment => '支払い待ち';
+
+  @override
+  String get mentorStatusPendingAssignment => '割り当て待ち';
+
+  @override
+  String get mentorStatusAssigned => '割り当て済み';
+
+  @override
+  String get mentorStatusAccepted => '承認済み';
+
+  @override
+  String get mentorStatusCompleted => '完了';
+
+  @override
+  String get mentorStatusCancelled => 'キャンセル済み';
+
+  @override
+  String get mentorStatusUnknown => '未確定';
+
+  @override
+  String get unsupportedRoleTitle => '未対応のロール';
+
+  @override
+  String unsupportedRoleDescription(String role) {
+    return 'ロール $role はモバイルアプリの対象外です。ログアウトして学習者またはメンターのアカウントをご利用ください。';
+  }
 
   @override
   String get authErrorNetwork => 'RikiPathに接続できません。通信環境を確認して再試行してください。';
@@ -457,6 +613,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get authErrorVerifyValidation => '確認コードが無効、期限切れ、または使用済みです。';
 
   @override
+  String get authErrorResendValidation =>
+      'このメールアドレスにコードを再送信できません。内容を確認して再試行してください。';
+
+  @override
+  String get authErrorResendRateLimited => '再送信の回数が上限に達しました。しばらくしてから再試行してください。';
+
+  @override
   String get authErrorUpdateEmailValidation => '新しいメールアドレスが無効、または使用済みです。';
 
   @override
@@ -473,11 +636,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get authErrorUnknown => '予期しないエラーが発生しました。再試行してください。';
 
   @override
-  String get authErrorVerifyMissingUserId => 'メール認証に必要なユーザーIDがサーバーから返されていません。';
+  String get authErrorVerifyMissingUserId => 'メール認証に必要なアカウント情報がまだ揃っていません。';
+
+  @override
+  String get authErrorResendMissingEmail => '確認コードの再送信に必要なメールアドレスがありません。';
 
   @override
   String get authErrorSessionMissingUserId =>
-      '現在のセッションにユーザーIDがありません。もう一度ログインしてください。';
+      '現在のセッションに必要なアカウント情報がありません。もう一度ログインしてください。';
 
   @override
   String get profileTitle => 'マイページ';
@@ -516,8 +682,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get verifyEmailBlockedTitle => '登録画面から続行できません';
 
   @override
-  String get verifyEmailBlockedMessage =>
-      '登録APIから認証に必要なユーザーIDが返されていません。RikiPathがIDを推測することはありません。';
+  String get verifyEmailBlockedMessage => '安全に確認コードを送信するためのアカウント情報がまだ揃っていません。';
 
   @override
   String get verificationCodeValidity => 'コードは6桁の数字で、有効期限は30分です。';
@@ -565,7 +730,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get missingSessionMessage =>
-      '以前のセッションにユーザーIDが保存されていません。ログアウトしてから、もう一度ログインしてください。';
+      '現在のセッションに必要な情報がありません。ログアウトしてから、もう一度ログインしてください。';
 
   @override
   String get changeEmailFailedTitle => 'メールを変更できません';
@@ -810,7 +975,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clearSearch => '検索をクリア';
 
   @override
-  String get illustrationData => 'サンプルデータ';
+  String get illustrationData => '補足コンテンツ';
 
   @override
   String get saved => '保存済み';
@@ -834,7 +999,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vocabularyLoadFailed => '語彙ライブラリを読み込めません';
 
   @override
-  String get localFixtureNotice => '以下の追加内容は端末内のサンプルデータです。';
+  String get localFixtureNotice => '以下の補足内容は端末に保存されています。';
 
   @override
   String get meaning => '意味';
@@ -895,7 +1060,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get sampleData => 'サンプルデータ';
+  String get sampleData => '補足コンテンツ';
 
   @override
   String get showMore => 'さらに表示';
@@ -935,7 +1100,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get stitchFixtureNotice => '追加内容はStitchのサンプルデータです';
+  String get stitchFixtureNotice => '補足内容は端末に保存されています。';
 
   @override
   String get reading => '読み方';
@@ -947,7 +1112,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get viewStrokeOrder => '筆順の詳細を見る';
 
   @override
-  String get sampleBadge => 'サンプル';
+  String get sampleBadge => '補足';
 
   @override
   String strokeProgress(int current, int total) {
@@ -975,11 +1140,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get strokeRules => '筆順の規則';
 
   @override
-  String get strokeFixtureWarning =>
-      'Stitchデザインのサンプルデータです。バックエンドは画ごとのデータを提供していません。';
+  String get strokeFixtureWarning => 'この筆順例は学習の参考として表示しています。';
 
   @override
-  String get strokeImageOnlyWarning => 'APIが提供するのは筆順画像のみで、アニメーション用データはありません。';
+  String get strokeImageOnlyWarning => '現在は筆順画像のみ利用でき、画ごとの再生には対応していません。';
 
   @override
   String backToKanjiDetail(String character) {
@@ -1021,7 +1185,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get usage => '使い方';
 
   @override
-  String get grammarFixtureNotice => '追加内容は端末内のサンプルデータであり、APIレスポンスではありません。';
+  String get grammarFixtureNotice => '補足説明は端末に保存されています。';
 
   @override
   String get practicalExamples => '実用例';
@@ -1071,7 +1235,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get addNewWord => '単語を追加';
 
   @override
-  String get notebookApiFieldsHint => 'Notebook APIが対応している項目のみ入力できます。';
+  String get notebookApiFieldsHint => '保存する単語、読み方、意味、メモを入力してください。';
 
   @override
   String get japaneseWordRequiredLabel => '日本語の単語 *';
@@ -1138,6 +1302,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get collectionHasNoWords => 'このリストには単語がありません';
+
+  @override
+  String get notebookSearchEmptyMessage => '別のキーワードを試すか、現在の検索をクリアしてください。';
+
+  @override
+  String get notebookCollectionEmptyMessage => '最初の単語を追加して、このリストで復習を始めましょう。';
 
   @override
   String get notebookLoadFailed => '単語帳を読み込めません';
@@ -1560,7 +1730,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vocabularyLoadMoreFailed => '語彙を追加で読み込めませんでした。もう一度お試しください。';
 
   @override
-  String get fixtureDefaultNotebookName => 'デフォルト・サンプルデータ';
+  String get fixtureDefaultNotebookName => 'レッスンから保存';
 
   @override
   String get notebookListsLoadFailed => '単語帳の一覧を読み込めませんでした。';
@@ -1572,7 +1742,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get kanjiLoadMoreFailed => '漢字を追加で読み込めませんでした。もう一度お試しください。';
 
   @override
-  String get kanjiFixtureNotebookName => 'デフォルト（サンプルデータ）';
+  String get kanjiFixtureNotebookName => 'レッスンから保存';
 
   @override
   String get kanjiSaveFailed => '漢字を単語帳に保存できませんでした。';
@@ -1591,6 +1761,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notebookRemoveFailed => '単語帳から項目を削除できませんでした。もう一度お試しください。';
+
+  @override
+  String get notebookLocalRemoveFailed => '端末に保存した項目を更新できませんでした。';
+
+  @override
+  String get notebookLocalRestoreUnavailable =>
+      '端末内の保存データを一時的に読み込めません。オンラインデータには影響しません。';
+
+  @override
+  String get selectLiveCollectionForManualEntry =>
+      '手動で追加するには同期可能なリストを選択してください。';
+
+  @override
+  String get notebookKanjiLabel => '漢字';
 
   @override
   String get wordAndMeaningRequired => '日本語の単語と意味は必須です。';
@@ -1781,7 +1965,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notificationSettingsTitle => '通知設定';
 
   @override
-  String get notificationSettingsSubtitle => 'バックエンドが対応している設定のみ同期されます。';
+  String get notificationSettingsSubtitle => '利用可能な設定はアカウントと同期されます。';
 
   @override
   String get emailNotifications => 'メール通知';
@@ -1812,7 +1996,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get jlptGoalMappingUnavailableMessage =>
-      'バックエンドからN5・N4・N3の信頼できるID対応表が提供されていません。推測したIDは送信しません。';
+      '現在JLPT目標を同期できません。現在の選択はそのまま保持されます。';
 
   @override
   String get currentJlptGoal => '現在の目標';
@@ -1881,10 +2065,406 @@ class AppLocalizationsJa extends AppLocalizations {
   String get dailyStudySelectionTitle => '1日の学習時間';
 
   @override
-  String get jlptSelectionSafeHint =>
-      '選択内容を確認できます。バックエンドから正確なID対応が提供されるまで、保存は安全のため無効です。';
+  String get jlptSelectionSafeHint => '選択内容はこの端末に保存され、あとから変更できます。';
 
   @override
-  String get profileConsultationSubtitle =>
-      'バックエンドの準備が整い次第、学習相談サービスがここに表示されます。';
+  String get profileConsultationSubtitle => '学習相談サービスは現在利用できません。';
+
+  @override
+  String get savedFromLessons => 'レッスンで保存した単語';
+
+  @override
+  String get localJlptPreferenceSaved => '端末に学習目標を保存しました';
+
+  @override
+  String get dailyReviewTitle => '今日の復習';
+
+  @override
+  String get reviewLoadingTitle => '復習カードを準備しています…';
+
+  @override
+  String reviewProgress(int current, int total) {
+    return '$current / $total 枚';
+  }
+
+  @override
+  String get reviewRecallPrompt => 'この内容を覚えていますか？';
+
+  @override
+  String get revealAnswer => '答えを見る';
+
+  @override
+  String get reviewAgain => 'もう一度';
+
+  @override
+  String get reviewHard => '難しい';
+
+  @override
+  String get reviewGood => '覚えた';
+
+  @override
+  String get reviewEasy => '簡単';
+
+  @override
+  String get reviewCompleteTitle => '復習が完了しました';
+
+  @override
+  String reviewCompleteCount(int count) {
+    return 'このセッションで$count枚を復習しました。';
+  }
+
+  @override
+  String reviewResponseCount(String label, int count) {
+    return '$label：$count';
+  }
+
+  @override
+  String get reviewAgainAction => 'もう一度復習する';
+
+  @override
+  String get backToPractice => '練習に戻る';
+
+  @override
+  String get reviewQueueEmpty => '今日は復習するカードがありません。';
+
+  @override
+  String get reviewLoadFailed => '復習を読み込めませんでした';
+
+  @override
+  String reviewDueCount(int count) {
+    return '$count枚のカードが復習待ちです';
+  }
+
+  @override
+  String get mockLoadingTitle => '模擬試験を準備しています…';
+
+  @override
+  String get mockLoadFailed => '模擬試験を読み込めませんでした。';
+
+  @override
+  String get mockTestUnavailable => 'この模擬試験は現在利用できません。';
+
+  @override
+  String get leaveMockTitle => '試験を終了しますか？';
+
+  @override
+  String get leaveMockMessage => '戻ったときに現在の解答は保持されます。';
+
+  @override
+  String get continueAction => '試験を続ける';
+
+  @override
+  String get leaveAction => '試験を終了';
+
+  @override
+  String get submitMockTitle => '模擬試験を提出しますか？';
+
+  @override
+  String get submitMockMessage => '未回答の問題があっても提出できます。採点は端末内で行われます。';
+
+  @override
+  String get submitAction => '提出する';
+
+  @override
+  String mockMinutes(int minutes) {
+    return '時間：$minutes分';
+  }
+
+  @override
+  String mockQuestionCount(int count) {
+    return '問題数：$count';
+  }
+
+  @override
+  String get mockLocalScoringNotice => 'この練習問題は端末内で採点され、公式JLPT結果ではありません。';
+
+  @override
+  String get startMockTest => '試験を始める';
+
+  @override
+  String questionProgress(int current, int total) {
+    return '問題 $current / $total';
+  }
+
+  @override
+  String get previousQuestion => '前の問題';
+
+  @override
+  String get nextQuestion => '次の問題';
+
+  @override
+  String get mockResultTitle => '模擬試験の結果';
+
+  @override
+  String get mockResultUnavailable => 'この試験の結果はまだありません。';
+
+  @override
+  String mockCorrectCount(int correct, int total) {
+    return '$total問中$correct問正解';
+  }
+
+  @override
+  String get mockLocalResultNotice => 'この結果は練習用で、公式JLPTスコアではありません。';
+
+  @override
+  String get sectionBreakdown => 'セクション別結果';
+
+  @override
+  String mockSectionResult(int correct, int total, int percentage) {
+    return '$total問中$correct問正解・$percentage%';
+  }
+
+  @override
+  String get detailedReview => '解答を詳しく確認';
+
+  @override
+  String get retakeMockTest => 'もう一度受ける';
+
+  @override
+  String questionNumber(int number) {
+    return '問題 $number';
+  }
+
+  @override
+  String selectedAnswer(String answer) {
+    return '選んだ答え：$answer';
+  }
+
+  @override
+  String correctAnswer(String answer) {
+    return '正解：$answer';
+  }
+
+  @override
+  String get notAnswered => '未回答';
+
+  @override
+  String get practiceLoadingTitle => '練習内容を準備しています…';
+
+  @override
+  String get practiceJourneyTitle => '自分のペースで練習';
+
+  @override
+  String get practiceJourneySubtitle => '復習、JLPT模擬試験、学習の振り返りを一つの流れで進めます。';
+
+  @override
+  String mockSummary(String level, int minutes, int count) {
+    return '$level・$minutes分・$count問';
+  }
+
+  @override
+  String mockInProgress(int answered, int total) {
+    return '$total問中$answered問回答済み';
+  }
+
+  @override
+  String mockCompletedStatus(int percentage) {
+    return '完了・$percentage%';
+  }
+
+  @override
+  String get additionalPractice => '追加練習';
+
+  @override
+  String get aiWritingPractice => 'AIと作文練習';
+
+  @override
+  String get practiceAnswerLabel => '練習の回答';
+
+  @override
+  String get gradePractice => '練習を採点';
+
+  @override
+  String get gradingPractice => '採点中…';
+
+  @override
+  String aiGradingResult(int score, String feedback) {
+    return 'スコア $score/100・$feedback';
+  }
+
+  @override
+  String get mentorConsultation => 'メンター相談';
+
+  @override
+  String get openDemoBooking => '相談予定をプレビュー';
+
+  @override
+  String get confirmDemoBooking => 'プレビューを確認';
+
+  @override
+  String get demoBookingConfirmed => '相談予定のプレビューを完了しました。';
+
+  @override
+  String get practiceLoadFailed => '練習内容を読み込めませんでした';
+
+  @override
+  String get learningAnalyticsTitle => '学習進捗';
+
+  @override
+  String get analyticsLoadingTitle => '学習進捗を集計しています…';
+
+  @override
+  String get analyticsEmpty => '表示できる学習データがまだありません。';
+
+  @override
+  String get studyStreakLabel => '連続学習日数';
+
+  @override
+  String streakDaysValue(int days) {
+    return '$days日';
+  }
+
+  @override
+  String get completedLessonsLabel => '完了したレッスン';
+
+  @override
+  String analyticsCompletedLessons(int completed, int total) {
+    return '$completed / $total レッスン';
+  }
+
+  @override
+  String get skillBreakdown => 'スキル別進捗';
+
+  @override
+  String get analyticsSkillsEmpty => 'スキルデータがまだありません。';
+
+  @override
+  String get analyticsSectionUnavailable => 'このデータは一時的に読み込めません。';
+
+  @override
+  String get analyticsLoadFailed => '学習進捗を読み込めませんでした';
+
+  @override
+  String get markAllNotificationsRead => 'すべて既読';
+
+  @override
+  String get notificationsEmpty => 'アプリ内通知はまだありません。';
+
+  @override
+  String get notificationsLoadFailed => '通知を読み込めませんでした';
+
+  @override
+  String get notebookEntryTitle => '保存した単語';
+
+  @override
+  String get notebookEntryUnavailable => 'この保存項目は利用できなくなりました。';
+
+  @override
+  String get homeChooseJlptTitle => 'JLPT目標を選んで始めましょう';
+
+  @override
+  String get homeChooseJlptDescription => 'N5・N4・N3から選ぶと、RikiPathが学習プランを準備します。';
+
+  @override
+  String get homeChooseJlptAction => '目標を選ぶ';
+
+  @override
+  String get homeContinueLearningTitle => '学習を続ける';
+
+  @override
+  String homeCurrentLessonMeta(int lesson, int minutes) {
+    return 'レッスン$lesson・$minutes分';
+  }
+
+  @override
+  String get homeRoadmapProgressTitle => '学習プランの進捗';
+
+  @override
+  String get homeRoadmapProgressDescription => 'レッスン進捗はこの端末に保存されています。';
+
+  @override
+  String homeRoadmapProgressValue(int completed, int total, int percentage) {
+    return '$completed/$totalレッスン・$percentage%';
+  }
+
+  @override
+  String get homeLiveProgressTitle => '学習統計';
+
+  @override
+  String get homeLiveProgressDescription => 'RikiPathアカウントから集計したデータです。';
+
+  @override
+  String get homeViewProgress => '進捗を見る';
+
+  @override
+  String get homeAnalyticsUnavailable => 'オンライン統計を一時的に読み込めません。';
+
+  @override
+  String get homeReviewDescription => '現在の学習ペースに合わせて復習しましょう。';
+
+  @override
+  String get homeResumeReview => '復習を続ける';
+
+  @override
+  String get homeReviewNow => '今すぐ復習';
+
+  @override
+  String get homePracticeTitle => '模擬練習';
+
+  @override
+  String get homeStartPractice => '練習を始める';
+
+  @override
+  String get homeResumeMock => '模擬試験を続ける';
+
+  @override
+  String get homeResumeMockDescription => 'この端末の解答は保存されています。';
+
+  @override
+  String get homeRecentMockResult => '最近の結果';
+
+  @override
+  String homeRecentMockScore(int score, int total, int percentage) {
+    return '$total問中$score問正解・$percentage%';
+  }
+
+  @override
+  String get homeViewResult => '結果を見る';
+
+  @override
+  String get homeNotebookShortcutTitle => '単語ノート';
+
+  @override
+  String get homeNotebookShortcutDescription => '保存した単語や学習内容を確認します。';
+
+  @override
+  String get homeSectionUnavailable => 'このセクションを一時的に読み込めません。';
+
+  @override
+  String get homeRefreshSemantics => '学習統計と通知を更新';
+
+  @override
+  String get commonErrorNetwork => 'RikiPathに接続できません。通信環境を確認して再試行してください。';
+
+  @override
+  String get commonErrorUnauthorized => 'セッションの有効期限が切れました。再度ログインしてください。';
+
+  @override
+  String get commonErrorForbidden => 'この操作を行う権限がありません。';
+
+  @override
+  String get commonErrorNotFound => 'この内容は現在利用できません。';
+
+  @override
+  String get commonErrorConflict => 'データが更新されました。読み込み直してお試しください。';
+
+  @override
+  String get commonErrorValidation => '入力内容を確認してください。';
+
+  @override
+  String get commonErrorServer => 'RikiPathで問題が発生しています。しばらく後に再試行してください。';
+
+  @override
+  String get commonErrorUnknown => '操作を完了できませんでした。再試行してください。';
+
+  @override
+  String get notificationsUpdateFailed => '通知を更新できませんでした';
+
+  @override
+  String get notificationsCountUnavailable => '未読数を一時的に更新できません。';
+
+  @override
+  String analyticsSkillScore(String score, int attempts) {
+    return '$score%・$attempts回';
+  }
 }

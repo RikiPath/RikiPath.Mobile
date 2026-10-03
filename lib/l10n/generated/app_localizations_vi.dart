@@ -274,7 +274,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get verificationBackendBlocker =>
-      'Email chứa mã xác thực 6 chữ số, có hiệu lực trong 30 phút. Phản hồi đăng ký hiện chưa trả về mã tài khoản mà API xác thực yêu cầu, nên ứng dụng chưa thể gửi mã này một cách an toàn.';
+      'Email chứa mã xác thực 6 chữ số, có hiệu lực trong 30 phút. RikiPath chưa nhận đủ thông tin tài khoản để mở bước nhập mã một cách an toàn.';
 
   @override
   String get returnToLogin => 'Quay lại đăng nhập';
@@ -293,10 +293,38 @@ class AppLocalizationsVi extends AppLocalizations {
       'Nhập mã 6 chữ số đã được gửi tới email của bạn.';
 
   @override
+  String get verificationCodeSentTo => 'Mã xác thực đã được gửi đến';
+
+  @override
+  String get verificationCodeSentToYourEmail =>
+      'Mã xác thực đã được gửi đến email của bạn.';
+
+  @override
   String get verificationCode => 'Mã xác thực';
 
   @override
   String get verificationCodeHint => '000000';
+
+  @override
+  String get didNotReceiveVerificationCode => 'Không nhận được mã?';
+
+  @override
+  String get resendVerificationCode => 'Gửi lại mã';
+
+  @override
+  String resendVerificationCodeIn(String time) {
+    return 'Gửi lại mã sau $time';
+  }
+
+  @override
+  String get resendingVerificationCode => 'Đang gửi lại...';
+
+  @override
+  String get verificationCodeResentMessage =>
+      'RikiPath đã gửi một mã xác thực mới tới email của bạn.';
+
+  @override
+  String get resendVerificationFailedTitle => 'Không thể gửi lại mã';
 
   @override
   String get verify => 'Xác thực';
@@ -449,11 +477,148 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get authErrorPasswordRecoveryUnavailable =>
-      'Tính năng lấy lại mật khẩu chưa được kết nối với máy chủ. Vui lòng liên hệ trung tâm trợ giúp.';
+      'Tính năng lấy lại mật khẩu hiện chưa khả dụng trong ứng dụng. Vui lòng liên hệ trung tâm trợ giúp.';
 
   @override
   String get authErrorUnsupportedRole =>
-      'Ứng dụng di động hiện chỉ hỗ trợ tài khoản học viên.';
+      'Ứng dụng di động hiện chỉ hỗ trợ tài khoản Học viên và Mentor.';
+
+  @override
+  String get mentorLandingTitle => 'Không gian Mentor';
+
+  @override
+  String get mentorLandingDescription =>
+      'Theo dõi lịch trống và các buổi meeting sắp tới của bạn.';
+
+  @override
+  String get mentorHomeGreeting => 'Chào mừng trở lại';
+
+  @override
+  String get mentorAvailabilityTitle => 'Lịch trống của tôi';
+
+  @override
+  String get mentorAvailabilityDescription =>
+      'Các khung giờ đang được hiển thị cho học viên.';
+
+  @override
+  String mentorAvailabilityCount(int count) {
+    return '$count khung giờ';
+  }
+
+  @override
+  String get mentorAvailabilityEmpty => 'Bạn chưa có khung giờ trống nào.';
+
+  @override
+  String get mentorAvailabilityError =>
+      'Chưa thể tải lịch trống. Vui lòng thử lại.';
+
+  @override
+  String get mentorAvailabilityReadOnlyTitle => 'Chế độ chỉ đọc';
+
+  @override
+  String get mentorAvailabilityReadOnlyMessage =>
+      'Bạn có thể xem lịch trống trên ứng dụng. Tính năng thay đổi lịch sẽ được mở khi cách xử lý múi giờ được thống nhất.';
+
+  @override
+  String get mentorViewAvailability => 'Xem lịch trống';
+
+  @override
+  String get mentorMeetingsTitle => 'Meeting của tôi';
+
+  @override
+  String get mentorMeetingsDescription =>
+      'Các buổi meeting đã được xác nhận cho tài khoản Mentor này.';
+
+  @override
+  String mentorMeetingsCount(int count) {
+    return '$count meeting';
+  }
+
+  @override
+  String get mentorMeetingsEmpty => 'Bạn chưa có meeting nào.';
+
+  @override
+  String get mentorMeetingsError =>
+      'Chưa thể tải danh sách meeting. Vui lòng thử lại.';
+
+  @override
+  String get mentorViewMeetings => 'Xem meeting';
+
+  @override
+  String get mentorMeetingDetailTitle => 'Chi tiết meeting';
+
+  @override
+  String get mentorLearnerLabel => 'Học viên';
+
+  @override
+  String get mentorLearnerUnknown => 'Chưa có thông tin học viên';
+
+  @override
+  String get mentorScheduleLabel => 'Thời gian';
+
+  @override
+  String get mentorSchedulePending => 'Chưa xác định thời gian';
+
+  @override
+  String get mentorStartTimeLabel => 'Bắt đầu';
+
+  @override
+  String get mentorEndTimeLabel => 'Kết thúc';
+
+  @override
+  String get mentorStatusLabel => 'Trạng thái';
+
+  @override
+  String get mentorSlotOpen => 'Còn trống';
+
+  @override
+  String get mentorSlotBooked => 'Đã được đặt';
+
+  @override
+  String get mentorJoinMeeting => 'Tham gia meeting';
+
+  @override
+  String get mentorMeetingLinkUnavailable => 'Liên kết tham gia chưa khả dụng.';
+
+  @override
+  String get mentorMeetingNotFound =>
+      'Không tìm thấy meeting trong lịch của bạn.';
+
+  @override
+  String get mentorJoinFailedTitle => 'Không thể mở meeting';
+
+  @override
+  String get mentorJoinFailedDescription =>
+      'Liên kết meeting không thể mở trên thiết bị này.';
+
+  @override
+  String get mentorStatusAwaitingPayment => 'Chờ thanh toán';
+
+  @override
+  String get mentorStatusPendingAssignment => 'Chờ phân công';
+
+  @override
+  String get mentorStatusAssigned => 'Đã phân công';
+
+  @override
+  String get mentorStatusAccepted => 'Đã chấp nhận';
+
+  @override
+  String get mentorStatusCompleted => 'Đã hoàn thành';
+
+  @override
+  String get mentorStatusCancelled => 'Đã hủy';
+
+  @override
+  String get mentorStatusUnknown => 'Chưa xác định';
+
+  @override
+  String get unsupportedRoleTitle => 'Vai trò chưa được hỗ trợ';
+
+  @override
+  String unsupportedRoleDescription(String role) {
+    return 'Vai trò $role không thuộc phạm vi ứng dụng di động. Vui lòng đăng xuất và dùng tài khoản Học viên hoặc Mentor.';
+  }
 
   @override
   String get authErrorNetwork =>
@@ -486,6 +651,14 @@ class AppLocalizationsVi extends AppLocalizations {
       'Mã xác thực không hợp lệ, đã hết hạn hoặc đã được sử dụng.';
 
   @override
+  String get authErrorResendValidation =>
+      'Không thể gửi lại mã cho email này. Vui lòng kiểm tra và thử lại.';
+
+  @override
+  String get authErrorResendRateLimited =>
+      'Bạn đã yêu cầu gửi lại mã quá nhiều lần. Vui lòng thử lại sau.';
+
+  @override
   String get authErrorUpdateEmailValidation =>
       'Email mới chưa hợp lệ hoặc đã được sử dụng.';
 
@@ -506,11 +679,15 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get authErrorVerifyMissingUserId =>
-      'Máy chủ chưa cung cấp mã tài khoản cần thiết để xác thực email.';
+      'RikiPath chưa nhận đủ thông tin tài khoản cần thiết để xác thực email.';
+
+  @override
+  String get authErrorResendMissingEmail =>
+      'RikiPath chưa nhận được email cần gửi lại mã xác thực.';
 
   @override
   String get authErrorSessionMissingUserId =>
-      'Không tìm thấy mã tài khoản trong phiên hiện tại. Vui lòng đăng nhập lại.';
+      'Phiên hiện tại thiếu thông tin tài khoản cần thiết. Vui lòng đăng nhập lại.';
 
   @override
   String get profileTitle => 'Cá nhân';
@@ -552,7 +729,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get verifyEmailBlockedMessage =>
-      'Phản hồi đăng ký hiện chưa trả về mã tài khoản mà API xác thực yêu cầu. RikiPath không tự đoán mã này.';
+      'RikiPath chưa nhận đủ thông tin tài khoản để gửi mã xác thực một cách an toàn.';
 
   @override
   String get verificationCodeValidity =>
@@ -604,7 +781,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get missingSessionMessage =>
-      'Phiên cũ chưa lưu mã tài khoản. Vui lòng đăng xuất rồi đăng nhập lại.';
+      'Phiên đăng nhập hiện tại thiếu thông tin cần thiết. Vui lòng đăng xuất rồi đăng nhập lại.';
 
   @override
   String get changeEmailFailedTitle => 'Không thể đổi email';
@@ -854,7 +1031,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get clearSearch => 'Xóa tìm kiếm';
 
   @override
-  String get illustrationData => 'Dữ liệu minh họa';
+  String get illustrationData => 'Nội dung bổ sung';
 
   @override
   String get saved => 'Đã lưu';
@@ -879,7 +1056,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get localFixtureNotice =>
-      'Nội dung mở rộng bên dưới là dữ liệu minh họa cục bộ.';
+      'Nội dung bổ sung bên dưới được lưu sẵn trên thiết bị.';
 
   @override
   String get meaning => 'Ý nghĩa';
@@ -941,7 +1118,7 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get sampleData => 'Dữ liệu mẫu';
+  String get sampleData => 'Nội dung bổ sung';
 
   @override
   String get showMore => 'Xem thêm';
@@ -981,7 +1158,8 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get stitchFixtureNotice => 'Nội dung mở rộng dùng dữ liệu mẫu Stitch';
+  String get stitchFixtureNotice =>
+      'Nội dung bổ sung được lưu sẵn trên thiết bị.';
 
   @override
   String get reading => 'Cách đọc';
@@ -993,7 +1171,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get viewStrokeOrder => 'Xem chi tiết thứ tự nét';
 
   @override
-  String get sampleBadge => 'MẪU';
+  String get sampleBadge => 'BỔ SUNG';
 
   @override
   String strokeProgress(int current, int total) {
@@ -1022,11 +1200,11 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get strokeFixtureWarning =>
-      'Dữ liệu mẫu từ thiết kế Stitch; backend chưa cung cấp chuỗi nét.';
+      'Phần minh họa nét viết này được cung cấp để bạn tham khảo.';
 
   @override
   String get strokeImageOnlyWarning =>
-      'API hiện chỉ cung cấp một ảnh thứ tự nét, không có chuỗi hoạt ảnh.';
+      'Hiện chỉ có ảnh thứ tự nét; chưa hỗ trợ phát từng nét.';
 
   @override
   String backToKanjiDetail(String character) {
@@ -1069,7 +1247,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get grammarFixtureNotice =>
-      'Nội dung mở rộng là dữ liệu minh họa cục bộ, không phải response API.';
+      'Nội dung giải thích bổ sung được lưu sẵn trên thiết bị.';
 
   @override
   String get practicalExamples => 'Ví dụ thực tế';
@@ -1120,7 +1298,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get notebookApiFieldsHint =>
-      'Chỉ các trường được API Notebook hỗ trợ.';
+      'Nhập từ, cách đọc, ý nghĩa và ghi chú bạn muốn lưu.';
 
   @override
   String get japaneseWordRequiredLabel => 'Từ tiếng Nhật *';
@@ -1187,6 +1365,14 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get collectionHasNoWords => 'Danh sách chưa có từ';
+
+  @override
+  String get notebookSearchEmptyMessage =>
+      'Thử từ khóa khác hoặc xóa tìm kiếm hiện tại.';
+
+  @override
+  String get notebookCollectionEmptyMessage =>
+      'Thêm từ đầu tiên để bắt đầu ôn tập trong danh sách này.';
 
   @override
   String get notebookLoadFailed => 'Không thể tải Sổ từ';
@@ -1611,7 +1797,7 @@ class AppLocalizationsVi extends AppLocalizations {
       'Không thể tải thêm từ vựng. Vui lòng thử lại.';
 
   @override
-  String get fixtureDefaultNotebookName => 'Mặc định · dữ liệu mẫu';
+  String get fixtureDefaultNotebookName => 'Đã lưu từ bài học';
 
   @override
   String get notebookListsLoadFailed => 'Không thể tải danh sách Sổ từ.';
@@ -1624,7 +1810,7 @@ class AppLocalizationsVi extends AppLocalizations {
       'Không thể tải thêm Kanji. Vui lòng thử lại.';
 
   @override
-  String get kanjiFixtureNotebookName => 'Mặc định (dữ liệu mẫu)';
+  String get kanjiFixtureNotebookName => 'Đã lưu từ bài học';
 
   @override
   String get kanjiSaveFailed => 'Không thể lưu Kanji vào Sổ từ.';
@@ -1648,6 +1834,21 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get notebookRemoveFailed =>
       'Không thể xóa mục khỏi Sổ từ. Vui lòng thử lại.';
+
+  @override
+  String get notebookLocalRemoveFailed =>
+      'Không thể cập nhật mục đã lưu trên thiết bị.';
+
+  @override
+  String get notebookLocalRestoreUnavailable =>
+      'Dữ liệu đã lưu trên thiết bị tạm thời không khả dụng. Dữ liệu trực tuyến vẫn được giữ nguyên.';
+
+  @override
+  String get selectLiveCollectionForManualEntry =>
+      'Hãy chọn một danh sách có thể đồng bộ để thêm mục thủ công.';
+
+  @override
+  String get notebookKanjiLabel => 'Kanji';
 
   @override
   String get wordAndMeaningRequired =>
@@ -1847,7 +2048,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get notificationSettingsSubtitle =>
-      'Chỉ các tùy chọn được backend hỗ trợ mới được đồng bộ.';
+      'Các tùy chọn khả dụng sẽ được đồng bộ với tài khoản của bạn.';
 
   @override
   String get emailNotifications => 'Thông báo qua email';
@@ -1882,7 +2083,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get jlptGoalMappingUnavailableMessage =>
-      'Backend chưa cung cấp ánh xạ ID đáng tin cậy cho N5, N4 và N3. RikiPath sẽ không gửi ID phỏng đoán.';
+      'Chưa thể đồng bộ mục tiêu JLPT lúc này. Lựa chọn hiện tại của bạn vẫn được giữ nguyên.';
 
   @override
   String get currentJlptGoal => 'Mục tiêu hiện tại';
@@ -1959,9 +2160,431 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get jlptSelectionSafeHint =>
-      'Bạn có thể xem trước lựa chọn. Nút lưu được giữ an toàn cho tới khi backend cung cấp ánh xạ ID chính xác.';
+      'Lựa chọn được lưu trên thiết bị này và bạn có thể thay đổi sau.';
 
   @override
   String get profileConsultationSubtitle =>
-      'Dịch vụ tư vấn học tập sẽ xuất hiện tại đây khi backend sẵn sàng.';
+      'Dịch vụ tư vấn học tập hiện chưa khả dụng.';
+
+  @override
+  String get savedFromLessons => 'Từ đã lưu trong bài học';
+
+  @override
+  String get localJlptPreferenceSaved => 'Đã lưu mục tiêu học trên thiết bị';
+
+  @override
+  String get dailyReviewTitle => 'Ôn tập hôm nay';
+
+  @override
+  String get reviewLoadingTitle => 'RikiPath đang chuẩn bị thẻ ôn tập...';
+
+  @override
+  String reviewProgress(int current, int total) {
+    return '$current / $total thẻ';
+  }
+
+  @override
+  String get reviewRecallPrompt => 'Bạn còn nhớ nội dung này không?';
+
+  @override
+  String get revealAnswer => 'Hiện đáp án';
+
+  @override
+  String get reviewAgain => 'Học lại';
+
+  @override
+  String get reviewHard => 'Khó';
+
+  @override
+  String get reviewGood => 'Tốt';
+
+  @override
+  String get reviewEasy => 'Dễ';
+
+  @override
+  String get reviewCompleteTitle => 'Hoàn thành phiên ôn tập';
+
+  @override
+  String reviewCompleteCount(int count) {
+    return 'Bạn đã ôn $count thẻ trong phiên này.';
+  }
+
+  @override
+  String reviewResponseCount(String label, int count) {
+    return '$label: $count';
+  }
+
+  @override
+  String get reviewAgainAction => 'Ôn lại phiên này';
+
+  @override
+  String get backToPractice => 'Quay lại Luyện tập';
+
+  @override
+  String get reviewQueueEmpty => 'Hôm nay chưa có thẻ cần ôn.';
+
+  @override
+  String get reviewLoadFailed => 'Chưa thể tải phiên ôn tập';
+
+  @override
+  String reviewDueCount(int count) {
+    return '$count thẻ đang chờ bạn ôn lại';
+  }
+
+  @override
+  String get mockLoadingTitle => 'RikiPath đang chuẩn bị đề thi...';
+
+  @override
+  String get mockLoadFailed => 'Chưa thể tải đề thi thử.';
+
+  @override
+  String get mockTestUnavailable => 'Đề thi thử này hiện không khả dụng.';
+
+  @override
+  String get leaveMockTitle => 'Rời khỏi bài thi?';
+
+  @override
+  String get leaveMockMessage =>
+      'Các đáp án trong phiên hiện tại vẫn được giữ khi bạn quay lại.';
+
+  @override
+  String get continueAction => 'Tiếp tục làm bài';
+
+  @override
+  String get leaveAction => 'Rời bài thi';
+
+  @override
+  String get submitMockTitle => 'Nộp bài thi thử?';
+
+  @override
+  String get submitMockMessage =>
+      'Bạn có thể nộp dù vẫn còn câu chưa trả lời. Điểm được tính cục bộ trên thiết bị.';
+
+  @override
+  String get submitAction => 'Nộp bài';
+
+  @override
+  String mockMinutes(int minutes) {
+    return 'Thời gian: $minutes phút';
+  }
+
+  @override
+  String mockQuestionCount(int count) {
+    return 'Số câu: $count';
+  }
+
+  @override
+  String get mockLocalScoringNotice =>
+      'Đề luyện tập được chấm trên thiết bị và không phải kết quả JLPT chính thức.';
+
+  @override
+  String get startMockTest => 'Bắt đầu làm bài';
+
+  @override
+  String questionProgress(int current, int total) {
+    return 'Câu $current / $total';
+  }
+
+  @override
+  String get previousQuestion => 'Câu trước';
+
+  @override
+  String get nextQuestion => 'Câu tiếp';
+
+  @override
+  String get mockResultTitle => 'Kết quả thi thử';
+
+  @override
+  String get mockResultUnavailable => 'Chưa có kết quả cho đề thi này.';
+
+  @override
+  String mockCorrectCount(int correct, int total) {
+    return 'Đúng $correct / $total câu';
+  }
+
+  @override
+  String get mockLocalResultNotice =>
+      'Kết quả này dùng để luyện tập và không phải điểm JLPT chính thức.';
+
+  @override
+  String get sectionBreakdown => 'Kết quả theo phần';
+
+  @override
+  String mockSectionResult(int correct, int total, int percentage) {
+    return '$correct/$total đúng • $percentage%';
+  }
+
+  @override
+  String get detailedReview => 'Xem chi tiết đáp án';
+
+  @override
+  String get retakeMockTest => 'Làm lại đề';
+
+  @override
+  String questionNumber(int number) {
+    return 'Câu $number';
+  }
+
+  @override
+  String selectedAnswer(String answer) {
+    return 'Bạn chọn: $answer';
+  }
+
+  @override
+  String correctAnswer(String answer) {
+    return 'Đáp án đúng: $answer';
+  }
+
+  @override
+  String get notAnswered => 'Chưa trả lời';
+
+  @override
+  String get practiceLoadingTitle =>
+      'RikiPath đang chuẩn bị nội dung luyện tập...';
+
+  @override
+  String get practiceJourneyTitle => 'Luyện tập theo nhịp của bạn';
+
+  @override
+  String get practiceJourneySubtitle =>
+      'Ôn lại kiến thức, thử sức với đề JLPT và theo dõi từng bước tiến bộ.';
+
+  @override
+  String mockSummary(String level, int minutes, int count) {
+    return '$level • $minutes phút • $count câu';
+  }
+
+  @override
+  String mockInProgress(int answered, int total) {
+    return 'Đang làm $answered/$total câu';
+  }
+
+  @override
+  String mockCompletedStatus(int percentage) {
+    return 'Đã hoàn thành • $percentage%';
+  }
+
+  @override
+  String get additionalPractice => 'Luyện tập bổ sung';
+
+  @override
+  String get aiWritingPractice => 'Luyện viết cùng AI';
+
+  @override
+  String get practiceAnswerLabel => 'Câu trả lời luyện tập';
+
+  @override
+  String get gradePractice => 'Chấm bài luyện tập';
+
+  @override
+  String get gradingPractice => 'Đang chấm...';
+
+  @override
+  String aiGradingResult(int score, String feedback) {
+    return 'Điểm $score/100 • $feedback';
+  }
+
+  @override
+  String get mentorConsultation => 'Tư vấn cùng Mentor';
+
+  @override
+  String get openDemoBooking => 'Xem trước lịch tư vấn';
+
+  @override
+  String get confirmDemoBooking => 'Xác nhận xem trước';
+
+  @override
+  String get demoBookingConfirmed =>
+      'Bạn đã hoàn tất phần xem trước lịch tư vấn.';
+
+  @override
+  String get practiceLoadFailed => 'Chưa thể tải nội dung luyện tập';
+
+  @override
+  String get learningAnalyticsTitle => 'Tiến độ học tập';
+
+  @override
+  String get analyticsLoadingTitle =>
+      'RikiPath đang tổng hợp tiến độ của bạn...';
+
+  @override
+  String get analyticsEmpty => 'Chưa có dữ liệu học tập để hiển thị.';
+
+  @override
+  String get studyStreakLabel => 'Chuỗi ngày học';
+
+  @override
+  String streakDaysValue(int days) {
+    return '$days ngày';
+  }
+
+  @override
+  String get completedLessonsLabel => 'Bài học đã hoàn thành';
+
+  @override
+  String analyticsCompletedLessons(int completed, int total) {
+    return '$completed / $total bài';
+  }
+
+  @override
+  String get skillBreakdown => 'Tiến độ theo kỹ năng';
+
+  @override
+  String get analyticsSkillsEmpty => 'Chưa có dữ liệu kỹ năng.';
+
+  @override
+  String get analyticsSectionUnavailable =>
+      'Phần dữ liệu này tạm thời chưa tải được.';
+
+  @override
+  String get analyticsLoadFailed => 'Chưa thể tải tiến độ học tập';
+
+  @override
+  String get markAllNotificationsRead => 'Đọc tất cả';
+
+  @override
+  String get notificationsEmpty => 'Chưa có thông báo trong ứng dụng.';
+
+  @override
+  String get notificationsLoadFailed => 'Chưa thể tải thông báo';
+
+  @override
+  String get notebookEntryTitle => 'Từ đã lưu';
+
+  @override
+  String get notebookEntryUnavailable => 'Mục đã lưu này không còn khả dụng.';
+
+  @override
+  String get homeChooseJlptTitle => 'Chọn mục tiêu JLPT để bắt đầu';
+
+  @override
+  String get homeChooseJlptDescription =>
+      'RikiPath sẽ chuẩn bị lộ trình phù hợp sau khi bạn chọn N5, N4 hoặc N3.';
+
+  @override
+  String get homeChooseJlptAction => 'Chọn mục tiêu';
+
+  @override
+  String get homeContinueLearningTitle => 'Tiếp tục học';
+
+  @override
+  String homeCurrentLessonMeta(int lesson, int minutes) {
+    return 'Bài $lesson • $minutes phút';
+  }
+
+  @override
+  String get homeRoadmapProgressTitle => 'Tiến độ lộ trình';
+
+  @override
+  String get homeRoadmapProgressDescription =>
+      'Tiến độ bài học được lưu trên thiết bị này.';
+
+  @override
+  String homeRoadmapProgressValue(int completed, int total, int percentage) {
+    return '$completed/$total bài • $percentage%';
+  }
+
+  @override
+  String get homeLiveProgressTitle => 'Thống kê học tập';
+
+  @override
+  String get homeLiveProgressDescription =>
+      'Dữ liệu tổng hợp từ tài khoản RikiPath của bạn.';
+
+  @override
+  String get homeViewProgress => 'Xem tiến độ';
+
+  @override
+  String get homeAnalyticsUnavailable =>
+      'Thống kê trực tuyến tạm thời chưa tải được.';
+
+  @override
+  String get homeReviewDescription =>
+      'Ôn lại kiến thức theo nhịp học hiện tại của bạn.';
+
+  @override
+  String get homeResumeReview => 'Tiếp tục ôn tập';
+
+  @override
+  String get homeReviewNow => 'Ôn tập ngay';
+
+  @override
+  String get homePracticeTitle => 'Luyện đề';
+
+  @override
+  String get homeStartPractice => 'Bắt đầu luyện tập';
+
+  @override
+  String get homeResumeMock => 'Tiếp tục đề thi thử';
+
+  @override
+  String get homeResumeMockDescription =>
+      'Bài làm trên thiết bị vẫn đang được lưu.';
+
+  @override
+  String get homeRecentMockResult => 'Kết quả gần đây';
+
+  @override
+  String homeRecentMockScore(int score, int total, int percentage) {
+    return 'Đúng $score/$total câu • $percentage%';
+  }
+
+  @override
+  String get homeViewResult => 'Xem kết quả';
+
+  @override
+  String get homeNotebookShortcutTitle => 'Sổ từ cá nhân';
+
+  @override
+  String get homeNotebookShortcutDescription =>
+      'Xem lại từ vựng và nội dung bạn đã lưu.';
+
+  @override
+  String get homeSectionUnavailable => 'Phần này tạm thời chưa tải được.';
+
+  @override
+  String get homeRefreshSemantics => 'Làm mới thống kê và thông báo';
+
+  @override
+  String get commonErrorNetwork =>
+      'Không thể kết nối tới RikiPath. Vui lòng kiểm tra mạng và thử lại.';
+
+  @override
+  String get commonErrorUnauthorized =>
+      'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+
+  @override
+  String get commonErrorForbidden =>
+      'Bạn không có quyền thực hiện thao tác này.';
+
+  @override
+  String get commonErrorNotFound => 'Nội dung này không còn khả dụng.';
+
+  @override
+  String get commonErrorConflict =>
+      'Dữ liệu đã thay đổi. Vui lòng tải lại và thử lại.';
+
+  @override
+  String get commonErrorValidation =>
+      'Thông tin chưa hợp lệ. Vui lòng kiểm tra lại.';
+
+  @override
+  String get commonErrorServer =>
+      'RikiPath đang gặp sự cố. Vui lòng thử lại sau.';
+
+  @override
+  String get commonErrorUnknown =>
+      'Chưa thể hoàn tất thao tác. Vui lòng thử lại.';
+
+  @override
+  String get notificationsUpdateFailed => 'Chưa thể cập nhật thông báo';
+
+  @override
+  String get notificationsCountUnavailable =>
+      'Số thông báo chưa đọc tạm thời chưa cập nhật.';
+
+  @override
+  String analyticsSkillScore(String score, int attempts) {
+    return '$score% • $attempts lượt';
+  }
 }
