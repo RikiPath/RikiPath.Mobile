@@ -9,17 +9,21 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
   const HomeHeader({
     required this.level,
     required this.streakDays,
-    required this.hasUnreadNotifications,
+    required this.isStreakLoading,
+    required this.unreadNotificationCount,
     required this.initials,
     required this.onProfilePressed,
+    required this.onNotificationsPressed,
     super.key,
   });
 
   final JlptLevel? level;
   final int? streakDays;
-  final bool hasUnreadNotifications;
+  final bool isStreakLoading;
+  final int? unreadNotificationCount;
   final String? initials;
   final VoidCallback onProfilePressed;
+  final VoidCallback onNotificationsPressed;
 
   @override
   Size get preferredSize => const Size.fromHeight(64);
@@ -68,34 +72,60 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
               ],
             ),
           )
-        else
+        else if (isStreakLoading)
           const _HeaderSkeleton(width: 54),
         const SizedBox(width: AppSpacing.space1),
         Semantics(
+          button: true,
           label: context.l10n.notifications,
-          child: SizedBox.square(
-            dimension: 44,
-            child: Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                const Icon(
-                  Icons.notifications_outlined,
-                  size: 24,
-                  color: AppColors.learnerTextSecondary,
-                ),
-                if (hasUnreadNotifications)
-                  const Positioned(
-                    top: 9,
-                    right: 9,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: AppColors.brandPrimary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: SizedBox.square(dimension: 7),
-                    ),
+          child: InkResponse(
+            onTap: onNotificationsPressed,
+            radius: 24,
+            child: SizedBox.square(
+              dimension: 44,
+              child: Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  const Icon(
+                    Icons.notifications_outlined,
+                    size: 24,
+                    color: AppColors.learnerTextSecondary,
                   ),
-              ],
+                  if ((unreadNotificationCount ?? 0) > 0)
+                    Positioned(
+                      key: const ValueKey<String>(
+                        'home_notification_unread_badge',
+                      ),
+                      top: 4,
+                      right: 3,
+                      child: Container(
+                        constraints: const BoxConstraints(minWidth: 18),
+                        height: 18,
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.brandPrimary,
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                          border: Border.all(
+                            color: AppColors.surface,
+                            width: 2,
+                          ),
+                        ),
+                        child: Text(
+                          unreadNotificationCount! > 99
+                              ? '99+'
+                              : '$unreadNotificationCount',
+                          style: AppTypography.badgeText.copyWith(
+                            color: Colors.white,
+                            fontSize: 9,
+                            height: 1,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

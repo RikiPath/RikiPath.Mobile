@@ -1,594 +1,541 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
 import 'package:rikipath_mobile/features/home/domain/home_dashboard.dart';
+import 'package:rikipath_mobile/features/learning/domain/learner_journey.dart';
+import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
+import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
 
 class HomeDashboardView extends StatelessWidget {
   const HomeDashboardView({
-    required this.dashboard,
+    required this.dashboardState,
+    required this.journeyState,
+    required this.learningState,
+    required this.analyticsState,
+    required this.practiceState,
+    required this.onRefreshLive,
+    required this.onRetryHome,
+    required this.onRetryLearning,
+    required this.onRetryAnalytics,
+    required this.onRetryPractice,
     required this.onOpenLearning,
+    required this.onOpenRoadmap,
     required this.onOpenNotebook,
     required this.onOpenPractice,
+    required this.onOpenReview,
+    required this.onOpenAnalytics,
     super.key,
   });
 
-  final HomeDashboard dashboard;
+  final AsyncValue<HomeDashboard> dashboardState;
+  final AsyncValue<LearnerJourneyState> journeyState;
+  final AsyncValue<LearningSnapshot> learningState;
+  final AsyncValue<LearnerAnalytics> analyticsState;
+  final AsyncValue<DemoPracticeState> practiceState;
+  final Future<void> Function() onRefreshLive;
+  final VoidCallback onRetryHome;
+  final VoidCallback onRetryLearning;
+  final VoidCallback onRetryAnalytics;
+  final VoidCallback onRetryPractice;
   final VoidCallback onOpenLearning;
+  final VoidCallback onOpenRoadmap;
   final VoidCallback onOpenNotebook;
   final VoidCallback onOpenPractice;
+  final VoidCallback onOpenReview;
+  final VoidCallback onOpenAnalytics;
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      key: const ValueKey<String>('home_success_view'),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.space4,
-        AppSpacing.space4,
-        AppSpacing.space4,
-        AppSpacing.space8,
+    return RefreshIndicator(
+      onRefresh: onRefreshLive,
+      color: AppColors.brandPrimary,
+      semanticsLabel: context.l10n.homeRefreshSemantics,
+      child: ListView(
+        key: const ValueKey<String>('home_success_view'),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.space4,
+          AppSpacing.space4,
+          AppSpacing.space4,
+          AppSpacing.space8,
+        ),
+        children: [
+          _GreetingSection(state: dashboardState, onRetry: onRetryHome),
+          const SizedBox(height: AppSpacing.space5),
+          _ContinueLearningSection(
+            journeyState: journeyState,
+            learningState: learningState,
+            onOpenLearning: onOpenLearning,
+            onRetry: onRetryLearning,
+          ),
+          const SizedBox(height: AppSpacing.space4),
+          _LocalProgressSection(
+            journeyState: journeyState,
+            learningState: learningState,
+            onOpenRoadmap: onOpenRoadmap,
+            onRetry: onRetryLearning,
+          ),
+          const SizedBox(height: AppSpacing.space5),
+          _AnalyticsSection(
+            state: analyticsState,
+            onOpen: onOpenAnalytics,
+            onRetry: onRetryAnalytics,
+          ),
+          const SizedBox(height: AppSpacing.space5),
+          _PracticeSections(
+            state: practiceState,
+            onOpenReview: onOpenReview,
+            onOpenPractice: onOpenPractice,
+            onRetry: onRetryPractice,
+          ),
+          const SizedBox(height: AppSpacing.space4),
+          _NotebookShortcut(onPressed: onOpenNotebook),
+        ],
       ),
-      children: [
-        _GreetingSection(dashboard: dashboard),
-        const SizedBox(height: AppSpacing.space5),
-        _FirstLessonCard(
-          lesson: dashboard.firstLesson,
-          onPressed: onOpenLearning,
-        ),
-        const SizedBox(height: AppSpacing.space4),
-        _RoadmapCard(roadmap: dashboard.roadmap, onPressed: onOpenLearning),
-        const SizedBox(height: AppSpacing.space4),
-        _SetupCard(setup: dashboard.setup, onOpenLearning: onOpenLearning),
-        const SizedBox(height: AppSpacing.space6),
-        Text(
-          context.l10n.homeToolsTitle,
-          style: AppTypography.sectionTitle.copyWith(
-            color: AppColors.learnerTextPrimary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.space3),
-        _ToolGrid(
-          tools: dashboard.tools,
-          onOpenNotebook: onOpenNotebook,
-          onOpenPractice: onOpenPractice,
-        ),
-      ],
-    );
-  }
-}
-
-class HomeErrorView extends StatelessWidget {
-  const HomeErrorView({required this.onRetry, super.key});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      key: const ValueKey<String>('home_error_view'),
-      padding: const EdgeInsets.all(AppSpacing.space4),
-      children: [
-        const SizedBox(height: AppSpacing.space10),
-        RikiCard(
-          borderColor: AppColors.learnerOutline,
-          boxShadow: const <BoxShadow>[],
-          padding: const EdgeInsets.all(AppSpacing.space6),
-          child: Column(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: AppColors.errorBackground,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.cloud_off_outlined,
-                  color: AppColors.errorText,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.space4),
-              Text(
-                context.l10n.homeLoadFailed,
-                textAlign: TextAlign.center,
-                style: AppTypography.sectionTitle.copyWith(
-                  color: AppColors.learnerTextPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.space2),
-              Text(
-                context.l10n.checkConnectionRetry,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodySmall,
-              ),
-              const SizedBox(height: AppSpacing.space5),
-              RikiPrimaryButton(
-                key: const ValueKey<String>('home_retry_button'),
-                label: context.l10n.retry,
-                leadingIcon: Icons.refresh,
-                onPressed: onRetry,
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
 
 class _GreetingSection extends StatelessWidget {
-  const _GreetingSection({required this.dashboard});
+  const _GreetingSection({required this.state, required this.onRetry});
 
-  final HomeDashboard dashboard;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final greeting = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.greetingName(dashboard.learnerName),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.compactPageTitle.copyWith(
-                color: AppColors.learnerTextPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.space1),
-            Wrap(
-              spacing: AppSpacing.space2,
-              runSpacing: AppSpacing.space1,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  context.l10n.jlptGoal(dashboard.jlptTarget.label),
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.learnerTextSecondary,
-                  ),
-                ),
-                const _DotSeparator(),
-                Text(
-                  dashboard.goalStatus,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.brandPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-        final status = _JourneyStatus(label: dashboard.journeyStatus);
-
-        if (constraints.maxWidth < 380) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              greeting,
-              const SizedBox(height: AppSpacing.space3),
-              status,
-            ],
-          );
-        }
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: greeting),
-            const SizedBox(width: AppSpacing.space3),
-            status,
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _JourneyStatus extends StatelessWidget {
-  const _JourneyStatus({required this.label});
-
-  final String label;
+  final AsyncValue<HomeDashboard> state;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space3,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.learnerOutline),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        boxShadow: AppShadows.cardSoft,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('🌱', style: TextStyle(fontSize: 16)),
-          const SizedBox(width: AppSpacing.space1),
-          Text(
-            label,
-            style: AppTypography.badgeText.copyWith(
-              color: AppColors.brandPrimary,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FirstLessonCard extends StatelessWidget {
-  const _FirstLessonCard({required this.lesson, required this.onPressed});
-
-  final HomeLessonSummary lesson;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final percentage = (lesson.progress * 100).round();
-
-    return RikiCard(
-      borderColor: AppColors.learnerOutline,
-      padding: const EdgeInsets.all(AppSpacing.space5),
-      child: Column(
+    return state.when(
+      loading: () => const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            runSpacing: AppSpacing.space2,
-            spacing: AppSpacing.space3,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              _Eyebrow(icon: Icons.flag_outlined, label: lesson.eyebrow),
-              _Pill(label: lesson.badge),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.space3),
+          RikiSkeleton(width: 210, height: 28),
+          SizedBox(height: AppSpacing.space2),
+          RikiSkeleton(width: 150, height: 16),
+        ],
+      ),
+      error: (_, _) =>
+          _CompactError(title: context.l10n.homeLoadFailed, onRetry: onRetry),
+      data: (dashboard) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
-            lesson.title,
-            style: AppTypography.pageTitle.copyWith(
+            context.l10n.greetingName(dashboard.learnerName),
+            key: const ValueKey<String>('home_greeting'),
+            style: AppTypography.compactPageTitle.copyWith(
               color: AppColors.learnerTextPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.space1),
           Text(
-            lesson.description,
+            context.l10n.practiceJourneySubtitle,
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.learnerTextSecondary,
             ),
           ),
-          const SizedBox(height: AppSpacing.space4),
-          Row(
-            children: [
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: context.l10n.notStarted,
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      TextSpan(
-                        text: context.l10n.lessonPartsCompleted(
-                          lesson.completedParts,
-                          lesson.totalParts,
-                        ),
-                      ),
-                    ],
-                  ),
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.learnerTextSecondary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.space3),
-              Text(
-                '$percentage%',
-                style: AppTypography.badgeText.copyWith(
-                  color: AppColors.learnerTextSecondary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.space2),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-            child: LinearProgressIndicator(
-              value: lesson.progress,
-              minHeight: 10,
-              color: AppColors.brandPrimary,
-              backgroundColor: AppColors.learnerSurfaceHigh,
-              semanticsLabel: context.l10n.lessonProgressSemantics(percentage),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.space4),
-          RikiPrimaryButton(
-            key: const ValueKey<String>('home_start_learning_button'),
-            label: context.l10n.startLearning,
-            trailingIcon: Icons.arrow_forward,
-            onPressed: onPressed,
-          ),
         ],
       ),
     );
   }
 }
 
-class _RoadmapCard extends StatelessWidget {
-  const _RoadmapCard({required this.roadmap, required this.onPressed});
-
-  final HomeRoadmapSummary roadmap;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return RikiCard(
-      borderColor: AppColors.learnerOutline,
-      padding: const EdgeInsets.all(AppSpacing.space5),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _IconTile(
-                icon: Icons.map_outlined,
-                backgroundColor: AppColors.learnerSurfaceHigh,
-              ),
-              const SizedBox(width: AppSpacing.space3),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      roadmap.title,
-                      style: AppTypography.sectionTitle.copyWith(
-                        color: AppColors.learnerTextPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.space1),
-                    Text(
-                      roadmap.subtitle,
-                      style: AppTypography.metadata.copyWith(
-                        color: AppColors.learnerTextSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.space2),
-              _Pill(label: context.l10n.stageCount(roadmap.stageCount)),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.space3),
-          Text(
-            roadmap.description,
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.learnerTextSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.space3),
-          const Divider(height: 1),
-          const SizedBox(height: AppSpacing.space2),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  context.l10n.personalizedByAbility,
-                  style: AppTypography.metadata.copyWith(
-                    color: AppColors.learnerTextSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              RikiTextButton(
-                key: const ValueKey<String>('home_roadmap_button'),
-                label: context.l10n.viewRoadmap,
-                trailingIcon: Icons.arrow_forward,
-                onPressed: onPressed,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SetupCard extends StatelessWidget {
-  const _SetupCard({required this.setup, required this.onOpenLearning});
-
-  final HomeSetupSummary setup;
-  final VoidCallback onOpenLearning;
-
-  @override
-  Widget build(BuildContext context) {
-    return RikiCard(
-      backgroundColor: AppColors.learnerSurface,
-      borderColor: AppColors.learnerSurfaceHigh,
-      boxShadow: const <BoxShadow>[],
-      padding: const EdgeInsets.all(AppSpacing.space5),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _IconTile(
-                icon: Icons.task_alt,
-                backgroundColor: AppColors.learnerSurfaceHigh,
-              ),
-              const SizedBox(width: AppSpacing.space3),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.initialSetup,
-                      style: AppTypography.sectionTitle.copyWith(
-                        color: AppColors.learnerTextPrimary,
-                      ),
-                    ),
-                    Text(
-                      context.l10n.initialSetupSubtitle,
-                      style: AppTypography.metadata.copyWith(
-                        color: AppColors.learnerTextSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _Pill(
-                label: context.l10n.completedCount(
-                  setup.completedCount,
-                  setup.totalCount,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.space3),
-          for (var index = 0; index < setup.items.length; index++) ...[
-            _SetupItemTile(
-              item: setup.items[index],
-              onPressed: setup.items[index].actionLabel == null
-                  ? null
-                  : onOpenLearning,
-            ),
-            if (index != setup.items.length - 1)
-              const SizedBox(height: AppSpacing.space2),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _SetupItemTile extends StatelessWidget {
-  const _SetupItemTile({required this.item, this.onPressed});
-
-  final HomeSetupItem item;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return RikiCard(
-      borderColor: item.isComplete
-          ? AppColors.learnerOutline
-          : AppColors.brandSelectedBorder,
-      boxShadow: const <BoxShadow>[],
-      padding: const EdgeInsets.all(AppSpacing.space3),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: item.isComplete
-                  ? AppColors.learnerPrimaryFixed
-                  : AppColors.learnerSurface,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              item.isComplete ? Icons.check : Icons.hourglass_top,
-              color: AppColors.brandPrimary,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: AppTypography.cardTitle.copyWith(
-                    color: item.isComplete
-                        ? AppColors.learnerTextPrimary
-                        : AppColors.brandPrimary,
-                  ),
-                ),
-                Text(
-                  item.description,
-                  style: AppTypography.metadata.copyWith(
-                    color: AppColors.learnerTextSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (item.actionLabel != null) ...[
-            const SizedBox(width: AppSpacing.space2),
-            TextButton(
-              key: const ValueKey<String>('home_setup_learning_button'),
-              onPressed: onPressed,
-              child: Text(item.actionLabel!),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ToolGrid extends StatelessWidget {
-  const _ToolGrid({
-    required this.tools,
-    required this.onOpenNotebook,
-    required this.onOpenPractice,
+class _ContinueLearningSection extends StatelessWidget {
+  const _ContinueLearningSection({
+    required this.journeyState,
+    required this.learningState,
+    required this.onOpenLearning,
+    required this.onRetry,
   });
 
-  final List<HomeToolSummary> tools;
-  final VoidCallback onOpenNotebook;
-  final VoidCallback onOpenPractice;
+  final AsyncValue<LearnerJourneyState> journeyState;
+  final AsyncValue<LearningSnapshot> learningState;
+  final VoidCallback onOpenLearning;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
+    if (journeyState.isLoading || learningState.isLoading) {
+      return const _SectionSkeleton(key: ValueKey('home_learning_loading'));
+    }
+    if (journeyState.hasError || learningState.hasError) {
+      return _CompactError(
+        title: context.l10n.learningLoadFailed,
+        onRetry: onRetry,
+      );
+    }
+
+    final journey = journeyState.requireValue;
+    if (!journey.hasSelectedLevel) {
+      return _FeatureCard(
+        key: const ValueKey<String>('home_choose_jlpt_card'),
+        icon: Icons.flag_outlined,
+        title: context.l10n.homeChooseJlptTitle,
+        description: context.l10n.homeChooseJlptDescription,
+        actionLabel: context.l10n.homeChooseJlptAction,
+        onPressed: onOpenLearning,
+      );
+    }
+
+    final snapshot = learningState.requireValue;
+    if (!snapshot.hasCurrentLesson) {
+      return _FeatureCard(
+        key: const ValueKey<String>('home_view_roadmap_card'),
+        icon: Icons.route_outlined,
+        title: context.l10n.homeRoadmapProgressTitle,
+        description: context.l10n.homeRoadmapProgressDescription,
+        actionLabel: context.l10n.viewRoadmap,
+        onPressed: onOpenLearning,
+      );
+    }
+    final lesson = snapshot.currentLesson;
+    return RikiCard(
+      key: const ValueKey<String>('home_continue_learning_card'),
+      backgroundColor: AppColors.surface,
+      borderColor: AppColors.brandSelectedBorder,
+      padding: const EdgeInsets.all(AppSpacing.space5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const _IconTile(icon: Icons.play_arrow_rounded),
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(
+                child: Text(
+                  context.l10n.homeContinueLearningTitle,
+                  style: AppTypography.sectionTitle,
+                ),
+              ),
+              _LevelPill(label: snapshot.jlptTarget.label),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.space4),
+          Text(
+            lesson.title,
+            key: const ValueKey<String>('home_current_lesson_title'),
+            style: AppTypography.cardTitle.copyWith(fontSize: 20),
+          ),
+          const SizedBox(height: AppSpacing.space1),
+          Text(
+            context.l10n.homeCurrentLessonMeta(
+              lesson.lessonNumber,
+              lesson.durationMinutes,
+            ),
+            style: AppTypography.bodySmall,
+          ),
+          const SizedBox(height: AppSpacing.space4),
+          _ProgressBar(value: lesson.progress),
+          const SizedBox(height: AppSpacing.space2),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '${lesson.progressPercent}%',
+              style: AppTypography.badgeText.copyWith(
+                color: AppColors.brandPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space3),
+          RikiPrimaryButton(
+            key: const ValueKey<String>('home_continue_learning_button'),
+            label: context.l10n.continueStudy,
+            trailingIcon: Icons.arrow_forward,
+            onPressed: onOpenLearning,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LocalProgressSection extends StatelessWidget {
+  const _LocalProgressSection({
+    required this.journeyState,
+    required this.learningState,
+    required this.onOpenRoadmap,
+    required this.onRetry,
+  });
+
+  final AsyncValue<LearnerJourneyState> journeyState;
+  final AsyncValue<LearningSnapshot> learningState;
+  final VoidCallback onOpenRoadmap;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    if (journeyState.isLoading || learningState.isLoading) {
+      return const _SectionSkeleton(key: ValueKey('home_progress_loading'));
+    }
+    if (journeyState.hasError || learningState.hasError) {
+      return _CompactError(
+        title: context.l10n.homeSectionUnavailable,
+        onRetry: onRetry,
+      );
+    }
+    final journey = journeyState.requireValue;
+    if (!journey.hasSelectedLevel) return const SizedBox.shrink();
+    final snapshot = learningState.requireValue;
+    return RikiCard(
+      key: const ValueKey<String>('home_local_progress_card'),
+      boxShadow: const <BoxShadow>[],
+      backgroundColor: AppColors.learnerSurface,
+      padding: const EdgeInsets.all(AppSpacing.space4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const _IconTile(icon: Icons.route_outlined, compact: true),
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.homeRoadmapProgressTitle,
+                      style: AppTypography.cardTitle,
+                    ),
+                    Text(
+                      context.l10n.homeRoadmapProgressDescription,
+                      style: AppTypography.metadata,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.space4),
+          Text(
+            context.l10n.homeRoadmapProgressValue(
+              snapshot.completedLessons,
+              snapshot.totalLessons,
+              snapshot.overallPercent,
+            ),
+            key: const ValueKey<String>('home_local_progress_value'),
+            style: AppTypography.sectionTitle.copyWith(
+              color: AppColors.learnerTextPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space2),
+          _ProgressBar(value: snapshot.overallProgress),
+          const SizedBox(height: AppSpacing.space3),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              key: const ValueKey<String>('home_view_roadmap_button'),
+              onPressed: onOpenRoadmap,
+              icon: const Icon(Icons.map_outlined, size: 18),
+              label: Text(context.l10n.viewRoadmap),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnalyticsSection extends StatelessWidget {
+  const _AnalyticsSection({
+    required this.state,
+    required this.onOpen,
+    required this.onRetry,
+  });
+
+  final AsyncValue<LearnerAnalytics> state;
+  final VoidCallback onOpen;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SectionHeading(
+          title: context.l10n.homeLiveProgressTitle,
+          actionLabel: context.l10n.homeViewProgress,
+          onAction: onOpen,
+        ),
+        const SizedBox(height: AppSpacing.space3),
+        if (state.isLoading)
+          const _SectionSkeleton(key: ValueKey('home_analytics_loading'))
+        else if (state.hasError)
+          _CompactError(
+            key: const ValueKey<String>('home_analytics_error'),
+            title: context.l10n.homeAnalyticsUnavailable,
+            onRetry: onRetry,
+          )
+        else
+          _AnalyticsSummary(data: state.requireValue),
+      ],
+    );
+  }
+}
+
+class _AnalyticsSummary extends StatelessWidget {
+  const _AnalyticsSummary({required this.data});
+
+  final LearnerAnalytics data;
+
+  @override
+  Widget build(BuildContext context) {
+    final tiles = <Widget>[
+      if (data.isAvailable(AnalyticsSection.streak))
+        _MetricTile(
+          key: const ValueKey<String>('home_analytics_streak'),
+          icon: Icons.local_fire_department_outlined,
+          label: context.l10n.studyStreakLabel,
+          value: context.l10n.streakDaysValue(data.streakDays),
+        ),
+      if (data.isAvailable(AnalyticsSection.completion))
+        _MetricTile(
+          key: const ValueKey<String>('home_analytics_completion'),
+          icon: Icons.task_alt_outlined,
+          label: context.l10n.completedLessonsLabel,
+          value: context.l10n.analyticsCompletedLessons(
+            data.completedLessons,
+            data.totalLessons,
+          ),
+        ),
+      if (data.isAvailable(AnalyticsSection.skills) && data.skills.isNotEmpty)
+        _MetricTile(
+          key: const ValueKey<String>('home_analytics_skill'),
+          icon: Icons.auto_graph_outlined,
+          label: context.l10n.skillBreakdown,
+          value: data.skills.first.skill,
+        ),
+    ];
+
+    if (tiles.isEmpty) {
+      return RikiCard(
+        boxShadow: const <BoxShadow>[],
+        child: Text(context.l10n.analyticsEmpty),
+      );
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
-        final cards = tools.map((tool) {
-          final isNotebook = tool.destination == HomeToolDestination.notebook;
-          return _ToolCard(
-            key: ValueKey<String>(
-              isNotebook ? 'home_notebook_shortcut' : 'home_practice_shortcut',
-            ),
-            tool: tool,
-            icon: isNotebook ? Icons.style_outlined : Icons.quiz_outlined,
-            iconBackground: isNotebook
-                ? AppColors.learnerPrimaryFixed
-                : AppColors.learnerSurfaceHigh,
-            onPressed: isNotebook ? onOpenNotebook : onOpenPractice,
-          );
-        }).toList();
-
-        if (constraints.maxWidth < 340) {
+        if (constraints.maxWidth < 350 || tiles.length == 1) {
           return Column(
             children: [
-              for (var index = 0; index < cards.length; index++) ...[
-                cards[index],
-                if (index != cards.length - 1)
-                  const SizedBox(height: AppSpacing.space3),
+              for (var index = 0; index < tiles.length; index++) ...[
+                tiles[index],
+                if (index < tiles.length - 1)
+                  const SizedBox(height: AppSpacing.space2),
               ],
             ],
           );
         }
+        return Wrap(
+          spacing: AppSpacing.space2,
+          runSpacing: AppSpacing.space2,
+          children: [
+            for (final tile in tiles)
+              SizedBox(
+                width: (constraints.maxWidth - AppSpacing.space2) / 2,
+                child: tile,
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
 
+class _PracticeSections extends StatelessWidget {
+  const _PracticeSections({
+    required this.state,
+    required this.onOpenReview,
+    required this.onOpenPractice,
+    required this.onRetry,
+  });
+
+  final AsyncValue<DemoPracticeState> state;
+  final VoidCallback onOpenReview;
+  final VoidCallback onOpenPractice;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    if (state.isLoading) {
+      return const _SectionSkeleton(key: ValueKey('home_practice_loading'));
+    }
+    if (state.hasError) {
+      return _CompactError(
+        key: const ValueKey<String>('home_practice_error'),
+        title: context.l10n.practiceLoadFailed,
+        onRetry: onRetry,
+      );
+    }
+    final practice = state.requireValue;
+    final reviewAction = practice.reviewIndex > 0 && !practice.isReviewComplete
+        ? context.l10n.homeResumeReview
+        : context.l10n.homeReviewNow;
+    final result = practice.mockResult;
+    final practiceTitle = practice.hasActiveMockAttempt
+        ? context.l10n.homeResumeMock
+        : practice.hasRecentMockResult
+        ? context.l10n.homeRecentMockResult
+        : context.l10n.homePracticeTitle;
+    final practiceDescription = practice.hasActiveMockAttempt
+        ? context.l10n.homeResumeMockDescription
+        : result != null
+        ? context.l10n.homeRecentMockScore(
+            result.score,
+            result.total,
+            result.percentage,
+          )
+        : context.l10n.practiceJourneySubtitle;
+    final practiceAction = practice.hasActiveMockAttempt
+        ? context.l10n.continueAction
+        : practice.hasRecentMockResult
+        ? context.l10n.homeViewResult
+        : context.l10n.homeStartPractice;
+
+    final cards = <Widget>[
+      _ActionCard(
+        key: const ValueKey<String>('home_daily_review_card'),
+        icon: Icons.style_outlined,
+        title: context.l10n.dailyReviewTitle,
+        description: context.l10n.homeReviewDescription,
+        actionLabel: reviewAction,
+        onPressed: onOpenReview,
+      ),
+      _ActionCard(
+        key: ValueKey<String>(
+          practice.hasActiveMockAttempt
+              ? 'home_resume_mock_card'
+              : practice.hasRecentMockResult
+              ? 'home_recent_mock_card'
+              : 'home_start_practice_card',
+        ),
+        icon: Icons.quiz_outlined,
+        title: practiceTitle,
+        description: practiceDescription,
+        actionLabel: practiceAction,
+        onPressed: onOpenPractice,
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 360) {
+          return Column(
+            children: [
+              cards.first,
+              const SizedBox(height: AppSpacing.space3),
+              cards.last,
+            ],
+          );
+        }
         return IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (var index = 0; index < cards.length; index++) ...[
-                Expanded(child: cards[index]),
-                if (index != cards.length - 1)
-                  const SizedBox(width: AppSpacing.space3),
-              ],
+              Expanded(child: cards.first),
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(child: cards.last),
             ],
           ),
         );
@@ -597,85 +544,227 @@ class _ToolGrid extends StatelessWidget {
   }
 }
 
-class _ToolCard extends StatelessWidget {
-  const _ToolCard({
-    required this.tool,
-    required this.icon,
-    required this.iconBackground,
-    required this.onPressed,
-    super.key,
-  });
+class _NotebookShortcut extends StatelessWidget {
+  const _NotebookShortcut({required this.onPressed});
 
-  final HomeToolSummary tool;
-  final IconData icon;
-  final Color iconBackground;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: tool.title,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          child: RikiCard(
-            borderColor: AppColors.learnerOutline,
-            boxShadow: const <BoxShadow>[],
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return _FeatureCard(
+      key: const ValueKey<String>('home_notebook_shortcut'),
+      icon: Icons.bookmark_outline,
+      title: context.l10n.homeNotebookShortcutTitle,
+      description: context.l10n.homeNotebookShortcutDescription,
+      actionLabel: context.l10n.navigationNotebook,
+      onPressed: onPressed,
+      compact: true,
+    );
+  }
+}
+
+class _FeatureCard extends StatelessWidget {
+  const _FeatureCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.actionLabel,
+    required this.onPressed,
+    this.compact = false,
+    super.key,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final String actionLabel;
+  final VoidCallback onPressed;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return RikiCard(
+      padding: EdgeInsets.all(compact ? AppSpacing.space3 : AppSpacing.space4),
+      boxShadow: compact ? const <BoxShadow>[] : AppShadows.cardSoft,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final content = Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _IconTile(icon: icon, compact: true),
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: AppTypography.cardTitle),
+                    const SizedBox(height: AppSpacing.space1),
+                    Text(description, style: AppTypography.bodySmall),
+                  ],
+                ),
+              ),
+            ],
+          );
+          final action = TextButton(
+            onPressed: onPressed,
+            child: Text(actionLabel),
+          );
+
+          if (constraints.maxWidth < 300) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _IconTile(icon: icon, backgroundColor: iconBackground),
-                const SizedBox(height: AppSpacing.space3),
-                Text(
-                  tool.title,
-                  style: AppTypography.sectionTitle.copyWith(
-                    color: AppColors.learnerTextPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.space1),
-                Text(
-                  tool.description,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.learnerTextSecondary,
-                  ),
-                ),
+                content,
+                const SizedBox(height: AppSpacing.space2),
+                Align(alignment: Alignment.centerRight, child: action),
               ],
-            ),
-          ),
-        ),
+            );
+          }
+
+          return Row(
+            children: [
+              Expanded(child: content),
+              const SizedBox(width: AppSpacing.space2),
+              action,
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class _Eyebrow extends StatelessWidget {
-  const _Eyebrow({required this.icon, required this.label});
+class _ActionCard extends StatelessWidget {
+  const _ActionCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.actionLabel,
+    required this.onPressed,
+    super.key,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final String actionLabel;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return RikiCard(
+      padding: const EdgeInsets.all(AppSpacing.space4),
+      boxShadow: const <BoxShadow>[],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _IconTile(icon: icon),
+          const SizedBox(height: AppSpacing.space3),
+          Text(title, style: AppTypography.cardTitle),
+          const SizedBox(height: AppSpacing.space1),
+          Text(description, style: AppTypography.bodySmall),
+          const SizedBox(height: AppSpacing.space3),
+          TextButton.icon(
+            onPressed: onPressed,
+            iconAlignment: IconAlignment.end,
+            icon: const Icon(Icons.arrow_forward, size: 18),
+            label: Text(actionLabel),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricTile extends StatelessWidget {
+  const _MetricTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    super.key,
+  });
 
   final IconData icon;
   final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return RikiCard(
+      padding: const EdgeInsets.all(AppSpacing.space3),
+      boxShadow: const <BoxShadow>[],
+      child: Row(
+        children: [
+          _IconTile(icon: icon, compact: true),
+          const SizedBox(width: AppSpacing.space2),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.metadata,
+                ),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.cardTitle,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeading extends StatelessWidget {
+  const _SectionHeading({
+    required this.title,
+    required this.actionLabel,
+    required this.onAction,
+  });
+
+  final String title;
+  final String actionLabel;
+  final VoidCallback onAction;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        _IconTile(
-          icon: icon,
-          backgroundColor: AppColors.learnerPrimaryFixed,
-          size: 32,
-          iconSize: 18,
+        Expanded(child: Text(title, style: AppTypography.sectionTitle)),
+        TextButton(onPressed: onAction, child: Text(actionLabel)),
+      ],
+    );
+  }
+}
+
+class _CompactError extends StatelessWidget {
+  const _CompactError({required this.title, required this.onRetry, super.key});
+
+  final String title;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        RikiErrorBanner(
+          title: title,
+          message: context.l10n.checkConnectionRetry,
         ),
-        const SizedBox(width: AppSpacing.space2),
-        Text(
-          label.toUpperCase(),
-          style: AppTypography.badgeText.copyWith(
-            color: AppColors.learnerTextSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.7,
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh, size: 18),
+            label: Text(context.l10n.retry),
           ),
         ),
       ],
@@ -683,46 +772,62 @@ class _Eyebrow extends StatelessWidget {
   }
 }
 
-class _IconTile extends StatelessWidget {
-  const _IconTile({
-    required this.icon,
-    required this.backgroundColor,
-    this.size = 36,
-    this.iconSize = 20,
-  });
-
-  final IconData icon;
-  final Color backgroundColor;
-  final double size;
-  final double iconSize;
+class _SectionSkeleton extends StatelessWidget {
+  const _SectionSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return const RikiShimmer(
+      child: RikiCard(
+        boxShadow: <BoxShadow>[],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RikiSkeleton(width: 160, height: 20),
+            SizedBox(height: AppSpacing.space3),
+            RikiSkeleton(height: 16),
+            SizedBox(height: AppSpacing.space2),
+            RikiSkeleton(width: 220, height: 16),
+            SizedBox(height: AppSpacing.space4),
+            RikiSkeleton(height: 44),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _IconTile extends StatelessWidget {
+  const _IconTile({required this.icon, this.compact = false});
+
+  final IconData icon;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = compact ? 36.0 : 44.0;
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: AppColors.learnerPrimaryFixed,
         borderRadius: BorderRadius.circular(AppRadius.compact),
       ),
-      child: Icon(icon, color: AppColors.brandPrimary, size: iconSize),
+      child: Icon(icon, color: AppColors.brandPrimary, size: compact ? 19 : 22),
     );
   }
 }
 
-class _Pill extends StatelessWidget {
-  const _Pill({required this.label});
+class _LevelPill extends StatelessWidget {
+  const _LevelPill({required this.label});
 
   final String label;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: AppSpacing.space1,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: AppColors.learnerPrimaryFixed,
         borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -730,25 +835,29 @@ class _Pill extends StatelessWidget {
       child: Text(
         label,
         style: AppTypography.badgeText.copyWith(
-          color: AppColors.brandPrimaryPressed,
-          fontWeight: FontWeight.w700,
+          color: AppColors.brandPrimary,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );
   }
 }
 
-class _DotSeparator extends StatelessWidget {
-  const _DotSeparator();
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({required this.value});
+
+  final double value;
 
   @override
   Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.learnerOutline,
-        shape: BoxShape.circle,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.pill),
+      child: LinearProgressIndicator(
+        value: value.clamp(0, 1),
+        minHeight: 8,
+        color: AppColors.brandPrimary,
+        backgroundColor: AppColors.brandTint,
       ),
-      child: SizedBox.square(dimension: 4),
     );
   }
 }
