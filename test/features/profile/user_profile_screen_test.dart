@@ -376,6 +376,26 @@ void main() {
   });
 
   group('AccountSettingsScreen', () {
+    testWidgets('does not expose backend-blocked account mutations', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        const AccountSettingsScreen(),
+        repository: _ProfileRepository(),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey<String>('account_change_email_action')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('account_change_password_action')),
+        findsNothing,
+      );
+    });
+
     testWidgets('Japanese account groups fit a narrow 320px screen', (
       tester,
     ) async {
@@ -393,7 +413,7 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
 
-      expect(find.text('セキュリティ'), findsOneWidget);
+      expect(find.text('設定'), findsOneWidget);
       expect(find.text('セッション'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

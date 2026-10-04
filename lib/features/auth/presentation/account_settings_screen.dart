@@ -85,28 +85,6 @@ class AccountSettingsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space6),
               ProfileSettingsGroup(
-                label: l10n.accountSecuritySection,
-                children: [
-                  ProfileSettingsTile(
-                    key: const ValueKey<String>('account_change_email_action'),
-                    icon: Icons.alternate_email_rounded,
-                    title: l10n.changeEmail,
-                    subtitle: l10n.changeEmailSubtitle,
-                    onTap: () => context.push(AppRoutes.profileChangeEmail),
-                  ),
-                  ProfileSettingsTile(
-                    key: const ValueKey<String>(
-                      'account_change_password_action',
-                    ),
-                    icon: Icons.lock_outline_rounded,
-                    title: l10n.changePassword,
-                    subtitle: l10n.changePasswordSubtitle,
-                    onTap: () => context.push(AppRoutes.profileChangePassword),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.space6),
-              ProfileSettingsGroup(
                 label: l10n.accountOptionsSection,
                 children: [
                   ProfileSettingsTile(
