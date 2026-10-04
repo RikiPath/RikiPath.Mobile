@@ -15,6 +15,7 @@ import 'package:rikipath_mobile/features/practice/domain/demo_practice.dart';
 import 'package:rikipath_mobile/features/practice/domain/demo_practice_repository.dart';
 import 'package:rikipath_mobile/features/practice/presentation/daily_review_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/mock_test_result_screen.dart';
+import 'package:rikipath_mobile/features/practice/presentation/mock_test_screen.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 
 import '../../support/test_auth_session.dart';
@@ -466,10 +467,61 @@ void main() {
       expect(persistence, isNot(contains('/api/')));
       expect(persistence, contains('localAttemptKey'));
     });
+
+    testWidgets('36. submit confirmation opens result exactly once', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final harness = await _startedHarness();
+      await harness.controller.showMockQuestion(
+        harness.value.mockTest.questions.length - 1,
+      );
+      final session = createTestAuthSession();
+      final router = createAppRouter(
+        authSession: session,
+        initialLocation: AppRoutes.mockTest(harness.value.mockTest.id),
+      );
+      addTearDown(session.dispose);
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: harness.container,
+          child: MaterialApp.router(
+            theme: AppTheme.light,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(MockTestScreen), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const ValueKey<String>('mock_test_submit_button')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.widgetWithText(FilledButton, 'Nộp bài'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MockTestResultScreen), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('mock_test_result_view')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('R7 responsive presentation', () {
-    testWidgets('36. semantic review actions fit a 320px phone', (
+    testWidgets('37. semantic review actions fit a 320px phone', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(320, 700);
@@ -496,7 +548,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('37. result hierarchy fits a 320px phone', (tester) async {
+    testWidgets('38. result hierarchy fits a 320px phone', (tester) async {
       tester.view.physicalSize = const Size(320, 700);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);

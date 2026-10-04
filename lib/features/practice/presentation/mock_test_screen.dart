@@ -21,6 +21,7 @@ class MockTestScreen extends ConsumerStatefulWidget {
 
 class _MockTestScreenState extends ConsumerState<MockTestScreen> {
   Timer? _timer;
+  bool _resultNavigationScheduled = false;
 
   @override
   void dispose() {
@@ -42,7 +43,7 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
           .read(demoPracticeControllerProvider.notifier)
           .finalizeExpiredMockTest();
       if (didFinish) {
-        _openResult(state.mockTest.id);
+        _scheduleResultNavigation(state.mockTest.id);
         return;
       }
       setState(() {});
@@ -95,9 +96,7 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
             if (state.mockAttempt?.status == DemoMockSessionStatus.submitted) {
               final testPath = AppRoutes.mockTest(state.mockTest.id);
               if (GoRouterState.of(context).uri.path == testPath) {
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _openResult(state.mockTest.id),
-                );
+                _scheduleResultNavigation(state.mockTest.id);
               }
               return const SizedBox.shrink();
             }
@@ -149,8 +148,13 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
     );
     if (shouldSubmit != true) return;
     await ref.read(demoPracticeControllerProvider.notifier).submitMockTest();
-    if (!mounted) return;
-    _openResult(widget.testId);
+    _scheduleResultNavigation(widget.testId);
+  }
+
+  void _scheduleResultNavigation(String testId) {
+    if (_resultNavigationScheduled || !mounted) return;
+    _resultNavigationScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openResult(testId));
   }
 
   void _openResult(String testId) {
