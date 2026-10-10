@@ -462,7 +462,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mentorLandingTitle => 'メンターエリア';
 
   @override
-  String get mentorLandingDescription => '公開中の空き時間と今後のミーティングを確認できます。';
+  String get mentorLandingDescription => '公開中の空き時間と今後の相談予定を確認できます。';
 
   @override
   String get mentorHomeGreeting => 'おかえりなさい';
@@ -495,27 +495,27 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mentorViewAvailability => '空き時間を見る';
 
   @override
-  String get mentorMeetingsTitle => '自分のミーティング';
+  String get mentorMeetingsTitle => '自分の相談予定';
 
   @override
-  String get mentorMeetingsDescription => 'このメンターアカウントで確定したミーティングです。';
+  String get mentorMeetingsDescription => '学習者との確定した相談予定です。';
 
   @override
   String mentorMeetingsCount(int count) {
-    return '$count件のミーティング';
+    return '$count件の相談';
   }
 
   @override
-  String get mentorMeetingsEmpty => 'ミーティングはまだありません。';
+  String get mentorMeetingsEmpty => '相談予定はまだありません。';
 
   @override
-  String get mentorMeetingsError => 'ミーティングを読み込めませんでした。もう一度お試しください。';
+  String get mentorMeetingsError => '相談予定を読み込めませんでした。もう一度お試しください。';
 
   @override
-  String get mentorViewMeetings => 'ミーティングを見る';
+  String get mentorViewMeetings => '相談予定を見る';
 
   @override
-  String get mentorMeetingDetailTitle => 'ミーティング詳細';
+  String get mentorMeetingDetailTitle => '相談の詳細';
 
   @override
   String get mentorLearnerLabel => '学習者';
@@ -545,19 +545,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mentorSlotBooked => '予約済み';
 
   @override
-  String get mentorJoinMeeting => 'ミーティングに参加';
+  String get mentorJoinMeeting => '相談に参加';
 
   @override
-  String get mentorMeetingLinkUnavailable => '参加リンクはまだ利用できません。';
+  String get mentorMeetingLinkUnavailable => 'この相談のミーティングルームはまだ利用できません。';
 
   @override
-  String get mentorMeetingNotFound => 'あなたの予定にこのミーティングはありません。';
+  String get mentorMeetingNotFound => 'あなたの予定にこの相談はありません。';
 
   @override
-  String get mentorJoinFailedTitle => 'ミーティングを開けません';
+  String get mentorJoinFailedTitle => 'ミーティングルームを開けません';
 
   @override
-  String get mentorJoinFailedDescription => 'この端末ではミーティングリンクを開けませんでした。';
+  String get mentorJoinFailedDescription => 'この端末ではミーティングルームのリンクを開けませんでした。';
 
   @override
   String get mentorStatusAwaitingPayment => '支払い待ち';
@@ -2068,7 +2068,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get jlptSelectionSafeHint => '選択内容はこの端末に保存され、あとから変更できます。';
 
   @override
-  String get profileConsultationSubtitle => '学習相談サービスは現在利用できません。';
+  String get profileConsultationSubtitle => '相談プランと予約状況を確認できます。';
 
   @override
   String get savedFromLessons => 'レッスンで保存した単語';
@@ -2466,5 +2466,463 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String analyticsSkillScore(String score, int attempts) {
     return '$score%・$attempts回';
+  }
+
+  @override
+  String get learnerMentorTitle => 'メンター相談';
+
+  @override
+  String get learnerMentorSubtitle => '学習プランに合うパッケージと時間を選びましょう。';
+
+  @override
+  String get learnerMentorExplore => '見る';
+
+  @override
+  String get learnerMentorPlansTitle => '相談パッケージ';
+
+  @override
+  String get learnerMentorPlansEmpty => '現在利用できる相談パッケージはありません。';
+
+  @override
+  String get learnerMentorPlansError => '相談パッケージを読み込めませんでした。';
+
+  @override
+  String get learnerMentorMyMeetings => '相談予定';
+
+  @override
+  String learnerMentorPlanDuration(int days) {
+    return '有効期間 $days日';
+  }
+
+  @override
+  String learnerMentorPlanSessions(int count) {
+    return '相談 $count回';
+  }
+
+  @override
+  String get learnerMentorChoosePlan => 'パッケージを選ぶ';
+
+  @override
+  String get learnerMentorAvailabilityTitle => '相談日時を選ぶ';
+
+  @override
+  String get learnerMentorAvailabilitySubtitle => '今後30日間の空き時間です。';
+
+  @override
+  String get learnerMentorAvailabilityEmpty => '選択した日に空き時間はありません。';
+
+  @override
+  String get learnerMentorAvailabilityError => 'メンターの空き時間を読み込めませんでした。';
+
+  @override
+  String learnerMentorSlotTime(String start, String end) {
+    return '$start～$end';
+  }
+
+  @override
+  String get learnerMentorSelectSlot => '時間を選ぶ';
+
+  @override
+  String get learnerMentorPurchase => '支払いへ進む';
+
+  @override
+  String get learnerMentorPurchaseBlockedTitle => '予約は一時停止中です';
+
+  @override
+  String get learnerMentorPurchaseBlocked =>
+      'パッケージと空き時間は確認できます。同じ時間の重複予約を防ぐ安全な枠確保がBackendで保証された後に、支払いを有効にします。';
+
+  @override
+  String get learnerMentorBookingsEmpty => 'メンター相談の予定はまだありません。';
+
+  @override
+  String get learnerMentorBookingsError => '相談予定を読み込めませんでした。';
+
+  @override
+  String get learnerMentorMeetingDetailTitle => '相談の詳細';
+
+  @override
+  String get learnerMentorMeetingNotFound => 'この相談予定は見つかりませんでした。';
+
+  @override
+  String get learnerMentorMentorLabel => 'メンター';
+
+  @override
+  String get learnerMentorPaymentLabel => '支払い';
+
+  @override
+  String get learnerMentorJoin => '相談に参加';
+
+  @override
+  String get learnerMentorJoinUnavailable => 'ミーティングルームが未準備、またはリンクが安全ではありません。';
+
+  @override
+  String get learnerMentorPurchaseStatus => 'パッケージの状態';
+
+  @override
+  String get learnerMentorPurchaseStatusError => '支払い状態を読み込めませんでした。';
+
+  @override
+  String get learnerMentorPaymentPending => '支払い待ち';
+
+  @override
+  String get learnerMentorPaymentPaid => '支払い済み';
+
+  @override
+  String get learnerMentorPaymentFailed => '支払い失敗';
+
+  @override
+  String get learnerMentorPaymentRefunded => '返金済み';
+
+  @override
+  String get learnerMentorPaymentUnknown => '不明';
+
+  @override
+  String learnerMentorSessionsUsage(int used, int included) {
+    return '$included回中$used回利用';
+  }
+
+  @override
+  String get learnerMentorRefreshStatus => '状態を再確認';
+
+  @override
+  String get learnerMentorStatusPolling =>
+      'RikiPathはBackendの状態を確認します。支払い画面から戻っただけでは支払い完了になりません。';
+
+  @override
+  String get learnerMentorUnknownMentor => 'メンター未定';
+
+  @override
+  String get learnerMentorCheckoutExpired => '支払いリンクの有効期限が切れました';
+
+  @override
+  String get learnerMentorBookingReadOnly => '予約情報はBackendから直接同期されています。';
+
+  @override
+  String get practiceSpeechTitle => '日本語スピーキング練習';
+
+  @override
+  String get practiceSpeechDescription => '日本語を話して、リアルタイムの認識結果を確認できます。';
+
+  @override
+  String get practiceSpeechStatus => 'リアルタイム認識';
+
+  @override
+  String get practiceTextScanTitle => '日本語テキストスキャン';
+
+  @override
+  String get practiceTextScanDescription => '作文の画像から日本語テキストを読み取り、編集できます。';
+
+  @override
+  String get practiceTextScanStatus => '画像 → テキスト';
+
+  @override
+  String get speechPracticeTitle => 'スピーキング練習';
+
+  @override
+  String get speechPracticeHeading => '音声をテキストに変換';
+
+  @override
+  String get speechPracticeSubtitle => '日本語の文を自然に読んでみましょう。話した内容がリアルタイムで表示されます。';
+
+  @override
+  String get speechSampleLabel => '練習文';
+
+  @override
+  String get speechSampleSentence => '日本語の話し方を練習しています。';
+
+  @override
+  String get speechTranscriptLabel => '認識したテキスト';
+
+  @override
+  String get speechTranscriptEmpty => '話し始めると、認識した日本語がここに表示されます。';
+
+  @override
+  String get speechStart => '話し始める';
+
+  @override
+  String get speechStop => '録音を停止';
+
+  @override
+  String get speechConnecting => 'マイクを準備中...';
+
+  @override
+  String get speechRetry => 'もう一度試す';
+
+  @override
+  String get speechSpeakAgain => 'もう一度練習';
+
+  @override
+  String get speechCopy => 'テキストをコピー';
+
+  @override
+  String get speechClear => '内容を消去';
+
+  @override
+  String get speechCopied => 'テキストをコピーしました';
+
+  @override
+  String get speechPermissionTitle => 'マイクの許可が必要です';
+
+  @override
+  String get speechPermissionMessage =>
+      '端末の設定でRikiPathのマイク使用を許可してから、もう一度お試しください。';
+
+  @override
+  String get speechNetworkTitle => '接続できません';
+
+  @override
+  String get speechNetworkMessage => '通信環境を確認して、スピーキング練習を再開してください。';
+
+  @override
+  String get speechProviderTitle => '音声認識が中断されました';
+
+  @override
+  String get speechProviderMessage => '少し待ってから再開してください。認識済みの内容は保持されています。';
+
+  @override
+  String get speechListeningTitle => '聞き取り中です';
+
+  @override
+  String get speechListeningMessage => 'はっきり話し、端末を近くに置いてください。';
+
+  @override
+  String get speechReadyMessage => 'マイクは開始ボタンを押したときだけ動作し、画面を離れると停止します。';
+
+  @override
+  String get textScanTitle => 'テキストスキャン';
+
+  @override
+  String get textScanHeading => '日本語の手書き文字を認識';
+
+  @override
+  String get textScanSubtitle => '鮮明なJPG・PNG・WEBP画像を選んでください。結果は端末上で編集、コピーできます。';
+
+  @override
+  String get textScanChooseImage => 'ライブラリから画像を選ぶ';
+
+  @override
+  String get textScanSelecting => 'ライブラリを開いています...';
+
+  @override
+  String get textScanDropTitle => '日本語作文の画像を選択';
+
+  @override
+  String get textScanRequirements => 'JPG・PNG・WEBP • 最大10 MB';
+
+  @override
+  String get textScanPrivacyNote =>
+      '画像は文字認識のためRikiPathサービスへ送信されますが、保存済み作文としては表示されません。';
+
+  @override
+  String get textScanAction => 'テキストをスキャン';
+
+  @override
+  String get textScanScanning => '文字を認識中...';
+
+  @override
+  String get textScanChooseAnother => '別の画像を選ぶ';
+
+  @override
+  String get textScanClear => '画像と結果を消去';
+
+  @override
+  String get textScanResultLabel => '認識結果';
+
+  @override
+  String get textScanResultHint => '認識したテキストがここに表示されます。';
+
+  @override
+  String get textScanLocalEditNote => 'この画面での編集内容は、まだアカウント履歴に保存されません。';
+
+  @override
+  String get textScanCopy => '結果をコピー';
+
+  @override
+  String get textScanCopied => '結果をコピーしました';
+
+  @override
+  String get textScanUnsupportedType => 'JPG・PNG・WEBP画像のみ対応しています。';
+
+  @override
+  String get textScanTooLarge => '画像が10 MBを超えています。小さい画像を選んでください。';
+
+  @override
+  String get textScanPickerFailedTitle => '写真ライブラリを開けません';
+
+  @override
+  String get textScanPickerError => '写真へのアクセス権を確認して、もう一度お試しください。';
+
+  @override
+  String get textScanFailedTitle => '画像をスキャンできません';
+
+  @override
+  String get textScanNetworkError => '通信環境を確認して、もう一度スキャンしてください。';
+
+  @override
+  String get textScanProviderError => '文字認識サービスは現在利用できません。画像は再試行できるよう保持されています。';
+
+  @override
+  String get textScanCompleted => '認識が完了しました。テキストを確認、編集、コピーできます。';
+
+  @override
+  String get practiceStudioTitle => 'Studio Riki';
+
+  @override
+  String get practiceStudioSubtitle => '話す・書く・読み取るインタラクティブな練習ツールです。';
+
+  @override
+  String get practiceWritingTitle => 'かな・漢字の書き取り';
+
+  @override
+  String get practiceWritingDescription => '書き順を確認し、画面に書いて復習記録を保存します。';
+
+  @override
+  String get practiceWritingStatus => 'インタラクティブ書写';
+
+  @override
+  String get writingTitle => '書き取り練習';
+
+  @override
+  String get writingSubtitle => '文字を選び、正しい書き順と方向で練習しましょう。';
+
+  @override
+  String get writingHiragana => 'ひらがな';
+
+  @override
+  String get writingKatakana => 'カタカナ';
+
+  @override
+  String get writingKanji => '漢字';
+
+  @override
+  String get writingDue => '復習';
+
+  @override
+  String get writingAll => 'すべて';
+
+  @override
+  String get writingQueueHint => '復習期限の文字を優先し、その後に承認済みの新しい文字を表示します。';
+
+  @override
+  String get writingSelectCharacter => '練習する文字を選択';
+
+  @override
+  String get writingEmptyTitle => '練習できる文字がありません';
+
+  @override
+  String writingKanaEmptyMessage(String script) {
+    return 'Backendから承認済みの$script文字が返されていません。';
+  }
+
+  @override
+  String get writingKanjiEmptyMessage => 'この一覧には現在練習できる漢字がありません。';
+
+  @override
+  String get writingLoadFailed => '書き取り一覧を読み込めませんでした';
+
+  @override
+  String writingStrokeCount(int count) {
+    return '$count画';
+  }
+
+  @override
+  String get writingNewCharacter => '新規';
+
+  @override
+  String get writingReviewCharacter => '復習';
+
+  @override
+  String writingLastScore(int score) {
+    return '前回 $score/100';
+  }
+
+  @override
+  String get writingMeaningUnavailable => '意味は未登録です';
+
+  @override
+  String get writingTargetLabel => '練習する文字';
+
+  @override
+  String get writingOnReading => '音読み';
+
+  @override
+  String get writingKunReading => '訓読み';
+
+  @override
+  String get writingReadingUnavailable => '未登録';
+
+  @override
+  String get writingGuidedMode => 'なぞり書き';
+
+  @override
+  String get writingFreeMode => '自分で書く';
+
+  @override
+  String get writingGuidedHint => '薄いガイドに沿って、正しい順番と方向で書いてください。';
+
+  @override
+  String get writingFreeHint => '見本を隠して、書き順と方向を思い出しながら書きます。';
+
+  @override
+  String get writingGestureHint => '枠内で指を動かして書く • 枠外でスクロール';
+
+  @override
+  String get writingShowStrokes => '書き順を見る';
+
+  @override
+  String get writingStart => '書き始める';
+
+  @override
+  String get writingRewrite => 'もう一度書く';
+
+  @override
+  String get writingNext => '次の文字';
+
+  @override
+  String get writingLoadingStrokeData => '書き順データを準備中...';
+
+  @override
+  String get writingStrokeDataFailedTitle => '書き順を読み込めません';
+
+  @override
+  String get writingStrokeDataFailedMessage =>
+      '通信環境を確認して再試行してください。一度読み込んだデータはオフラインでも利用できます。';
+
+  @override
+  String get writingQuizInProgress => '書き取り中・順番どおりに一画ずつ書いてください';
+
+  @override
+  String get writingAnimationInProgress => '書き順を表示中...';
+
+  @override
+  String get writingCompleteTitle => '書き取り完了';
+
+  @override
+  String writingMistakeCount(int count) {
+    return '間違い $count回';
+  }
+
+  @override
+  String writingResultScore(int score) {
+    return 'スコア $score/100';
+  }
+
+  @override
+  String get writingSavingResult => '学習記録を保存中...';
+
+  @override
+  String get writingResultSaved => '次の復習予定を保存しました';
+
+  @override
+  String get writingResultSaveFailed =>
+      '結果は端末に保持されていますが、RikiPathにはまだ保存できていません。';
+
+  @override
+  String get writingRetrySave => 'もう一度保存';
+
+  @override
+  String writingProgress(int current, int total) {
+    return '$current/$total';
   }
 }

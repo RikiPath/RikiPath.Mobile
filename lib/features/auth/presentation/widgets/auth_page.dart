@@ -4,20 +4,64 @@ import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 
-class AuthPage extends StatelessWidget {
-  const AuthPage({required this.child, this.compact = false, super.key});
+class AuthPage extends StatefulWidget {
+  const AuthPage({
+    required this.child,
+    this.compact = false,
+    this.animateEntrance = true,
+    super.key,
+  });
 
   final Widget child;
   final bool compact;
+  final bool animateEntrance;
+
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _entranceController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 300),
+  );
+  late final Animation<double> _entrance = CurvedAnimation(
+    parent: _entranceController,
+    curve: Curves.easeOutCubic,
+  );
+  bool _hasStartedEntrance = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final mediaQuery = MediaQuery.maybeOf(context);
+    final reduceMotion =
+        (mediaQuery?.disableAnimations ?? false) ||
+        (mediaQuery?.accessibleNavigation ?? false);
+    if (!widget.animateEntrance || reduceMotion) {
+      _entranceController.value = 1;
+      _hasStartedEntrance = true;
+    } else if (!_hasStartedEntrance) {
+      _hasStartedEntrance = true;
+      _entranceController.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _entranceController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final horizontalPadding = compact
+    final horizontalPadding = widget.compact
         ? AppSpacing.screenHorizontalCompact
         : AppSpacing.screenHorizontal;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.authBackground,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: LayoutBuilder(
@@ -40,11 +84,83 @@ class AuthPage extends StatelessWidget {
                     minHeight: minimumHeight,
                     maxWidth: 560,
                   ),
-                  child: IntrinsicHeight(child: child),
+                  child: FadeTransition(
+                    key: const ValueKey<String>('auth_page_entrance'),
+                    opacity: _entrance,
+                    child: AnimatedBuilder(
+                      animation: _entrance,
+                      child: IntrinsicHeight(child: widget.child),
+                      builder: (context, child) => Transform.translate(
+                        offset: Offset(0, 10 * (1 - _entrance.value)),
+                        child: child,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class AuthTipCard extends StatelessWidget {
+  const AuthTipCard({required this.title, required this.message, super.key});
+
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      label: '$title. $message',
+      child: Container(
+        key: const ValueKey<String>('auth_tip_card'),
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.space4),
+        decoration: BoxDecoration(
+          color: AppColors.authTipBackground,
+          border: Border.all(color: AppColors.authTipBorder),
+          borderRadius: BorderRadius.circular(AppRadius.banner),
+          boxShadow: AppShadows.cardSoft,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 1),
+              child: Icon(
+                Icons.lightbulb_outline,
+                size: 19,
+                color: AppColors.warning,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.space3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.space1),
+                  Text(
+                    message,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -71,7 +187,14 @@ class AuthNavigationPrompt extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        Text(message, style: AppTypography.bodySmall),
+        Flexible(
+          child: Text(
+            message,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.bodySmall,
+          ),
+        ),
         TextButton(
           onPressed: onPressed,
           style: TextButton.styleFrom(

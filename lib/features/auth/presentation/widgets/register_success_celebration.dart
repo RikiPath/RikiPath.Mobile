@@ -28,7 +28,7 @@ class RegisterSuccessCelebration extends StatelessWidget {
               child: Transform.scale(scale: _iconScale(progress), child: child),
             );
           },
-          child: AuthSuccessIllustration(icon: icon),
+          child: AuthSuccessIllustration(icon: icon, animate: false),
         ),
       ),
     );

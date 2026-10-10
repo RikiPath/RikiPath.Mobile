@@ -98,6 +98,62 @@ void main() {
       );
     });
 
+    testWidgets('uses a solid neutral Auth canvas and honors reduced motion', (
+      tester,
+    ) async {
+      tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      await _pumpAuthRoute(tester, AppRoutes.login, _FakeAuthRepository());
+
+      expect(
+        tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
+        AppColors.authBackground,
+      );
+      expect(AppColors.authBackground, AppColors.backgroundSecondary);
+      expect(AppColors.authBackground, isNot(AppColors.brandTint));
+      expect(
+        tester
+            .widget<FadeTransition>(
+              find.byKey(const ValueKey<String>('auth_page_entrance')),
+            )
+            .opacity
+            .value,
+        1,
+      );
+      final tip = tester.widget<Container>(
+        find.byKey(const ValueKey<String>('auth_tip_card')),
+      );
+      final decoration = tip.decoration! as BoxDecoration;
+      expect(decoration.color, AppColors.authTipBackground);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('remains scrollable with the keyboard on a short phone', (
+      tester,
+    ) async {
+      await _pumpAuthRoute(
+        tester,
+        AppRoutes.login,
+        _FakeAuthRepository(),
+        physicalSize: const Size(320, 568),
+      );
+      tester.view.viewInsets = const FakeViewPadding(bottom: 260);
+      addTearDown(tester.view.resetViewInsets);
+
+      await tester.showKeyboard(_textField('login_password_field'));
+      await tester.pump();
+      final submit = find.byKey(const Key('login_submit_button'));
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
+
+      expect(submit.hitTestable(), findsOneWidget);
+      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('empty form prevents repository submission', (tester) async {
       final repository = _FakeAuthRepository();
       await _pumpAuthRoute(tester, AppRoutes.login, repository);
@@ -824,8 +880,9 @@ Future<GoRouter> _pumpAuthRoute(
   AuthRepository repository, {
   Locale locale = const Locale('vi'),
   DateTime Function()? now,
+  Size physicalSize = const Size(390, 844),
 }) async {
-  tester.view.physicalSize = const Size(390, 844);
+  tester.view.physicalSize = physicalSize;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);

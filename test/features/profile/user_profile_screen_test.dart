@@ -163,6 +163,11 @@ void main() {
       expect(find.textContaining('XP'), findsNothing);
       expect(find.textContaining('xếp hạng'), findsNothing);
       expect(find.textContaining('chuỗi học'), findsNothing);
+      expect(find.text('Tư vấn'), findsOneWidget);
+      expect(
+        find.text('Khám phá gói tư vấn và lịch hẹn của bạn.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('error state retries without exposing raw exception text', (

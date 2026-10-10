@@ -4,6 +4,17 @@ import 'package:rikipath_mobile/core/config/app_env.dart';
 
 void main() {
   group('AppConfig', () {
+    test('plain development uses the verified public backend', () {
+      expect(
+        AppConfig.defaultDevelopmentApiBaseUrl,
+        'https://fact-like-tracy-displays.trycloudflare.com',
+      );
+      expect(
+        AppConfig.defaultDevelopmentSwaggerUrl,
+        'https://fact-like-tracy-displays.trycloudflare.com/swagger/index.html',
+      );
+    });
+
     test('uses compile-time overrides or safe development defaults', () {
       const expectedEnvironment = String.fromEnvironment(
         'APP_ENV',

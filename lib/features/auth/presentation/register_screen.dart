@@ -350,6 +350,7 @@ class _RegisterSuccessState extends State<_RegisterSuccess>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return AuthPage(
+      animateEntrance: false,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,

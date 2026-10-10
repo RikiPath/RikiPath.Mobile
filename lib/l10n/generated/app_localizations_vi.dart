@@ -488,7 +488,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get mentorLandingDescription =>
-      'Theo dõi lịch trống và các buổi meeting sắp tới của bạn.';
+      'Theo dõi lịch trống và các lịch tư vấn sắp tới của bạn.';
 
   @override
   String get mentorHomeGreeting => 'Chào mừng trở lại';
@@ -523,29 +523,29 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mentorViewAvailability => 'Xem lịch trống';
 
   @override
-  String get mentorMeetingsTitle => 'Meeting của tôi';
+  String get mentorMeetingsTitle => 'Lịch tư vấn của tôi';
 
   @override
   String get mentorMeetingsDescription =>
-      'Các buổi meeting đã được xác nhận cho tài khoản Mentor này.';
+      'Các buổi tư vấn đã được xác nhận với học viên.';
 
   @override
   String mentorMeetingsCount(int count) {
-    return '$count meeting';
+    return '$count buổi tư vấn';
   }
 
   @override
-  String get mentorMeetingsEmpty => 'Bạn chưa có meeting nào.';
+  String get mentorMeetingsEmpty => 'Bạn chưa có lịch tư vấn nào.';
 
   @override
   String get mentorMeetingsError =>
-      'Chưa thể tải danh sách meeting. Vui lòng thử lại.';
+      'Chưa thể tải lịch tư vấn. Vui lòng thử lại.';
 
   @override
-  String get mentorViewMeetings => 'Xem meeting';
+  String get mentorViewMeetings => 'Xem lịch tư vấn';
 
   @override
-  String get mentorMeetingDetailTitle => 'Chi tiết meeting';
+  String get mentorMeetingDetailTitle => 'Chi tiết buổi tư vấn';
 
   @override
   String get mentorLearnerLabel => 'Học viên';
@@ -575,21 +575,22 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mentorSlotBooked => 'Đã được đặt';
 
   @override
-  String get mentorJoinMeeting => 'Tham gia meeting';
+  String get mentorJoinMeeting => 'Tham gia buổi tư vấn';
 
   @override
-  String get mentorMeetingLinkUnavailable => 'Liên kết tham gia chưa khả dụng.';
+  String get mentorMeetingLinkUnavailable =>
+      'Phòng họp chưa sẵn sàng cho lịch tư vấn này.';
 
   @override
   String get mentorMeetingNotFound =>
-      'Không tìm thấy meeting trong lịch của bạn.';
+      'Không tìm thấy buổi tư vấn trong lịch của bạn.';
 
   @override
-  String get mentorJoinFailedTitle => 'Không thể mở meeting';
+  String get mentorJoinFailedTitle => 'Không thể mở phòng họp';
 
   @override
   String get mentorJoinFailedDescription =>
-      'Liên kết meeting không thể mở trên thiết bị này.';
+      'Liên kết phòng họp không thể mở trên thiết bị này.';
 
   @override
   String get mentorStatusAwaitingPayment => 'Chờ thanh toán';
@@ -2164,7 +2165,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get profileConsultationSubtitle =>
-      'Dịch vụ tư vấn học tập hiện chưa khả dụng.';
+      'Khám phá gói tư vấn và lịch hẹn của bạn.';
 
   @override
   String get savedFromLessons => 'Từ đã lưu trong bài học';
@@ -2586,5 +2587,494 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String analyticsSkillScore(String score, int attempts) {
     return '$score% • $attempts lượt';
+  }
+
+  @override
+  String get learnerMentorTitle => 'Tư vấn cùng Mentor';
+
+  @override
+  String get learnerMentorSubtitle =>
+      'Chọn gói và khung giờ phù hợp với hành trình học của bạn.';
+
+  @override
+  String get learnerMentorExplore => 'Khám phá';
+
+  @override
+  String get learnerMentorPlansTitle => 'Gói tư vấn';
+
+  @override
+  String get learnerMentorPlansEmpty => 'Hiện chưa có gói tư vấn khả dụng.';
+
+  @override
+  String get learnerMentorPlansError => 'Chưa thể tải các gói tư vấn.';
+
+  @override
+  String get learnerMentorMyMeetings => 'Lịch tư vấn của tôi';
+
+  @override
+  String learnerMentorPlanDuration(int days) {
+    return 'Hiệu lực $days ngày';
+  }
+
+  @override
+  String learnerMentorPlanSessions(int count) {
+    return '$count buổi tư vấn';
+  }
+
+  @override
+  String get learnerMentorChoosePlan => 'Chọn gói';
+
+  @override
+  String get learnerMentorAvailabilityTitle => 'Chọn lịch tư vấn';
+
+  @override
+  String get learnerMentorAvailabilitySubtitle =>
+      'Các khung giờ trống trong 30 ngày tới.';
+
+  @override
+  String get learnerMentorAvailabilityEmpty =>
+      'Không có khung giờ trống trong ngày đã chọn.';
+
+  @override
+  String get learnerMentorAvailabilityError =>
+      'Chưa thể tải lịch trống của Mentor.';
+
+  @override
+  String learnerMentorSlotTime(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get learnerMentorSelectSlot => 'Chọn khung giờ';
+
+  @override
+  String get learnerMentorPurchase => 'Tiếp tục thanh toán';
+
+  @override
+  String get learnerMentorPurchaseBlockedTitle => 'Đặt lịch đang tạm khóa';
+
+  @override
+  String get learnerMentorPurchaseBlocked =>
+      'Bạn vẫn có thể xem gói và lịch trống. RikiPath sẽ mở thanh toán khi Backend bảo đảm giữ chỗ an toàn, tránh hai người đặt cùng một khung giờ.';
+
+  @override
+  String get learnerMentorBookingsEmpty => 'Bạn chưa có lịch tư vấn Mentor.';
+
+  @override
+  String get learnerMentorBookingsError => 'Chưa thể tải lịch tư vấn của bạn.';
+
+  @override
+  String get learnerMentorMeetingDetailTitle => 'Chi tiết buổi tư vấn';
+
+  @override
+  String get learnerMentorMeetingNotFound => 'Không tìm thấy buổi tư vấn này.';
+
+  @override
+  String get learnerMentorMentorLabel => 'Mentor';
+
+  @override
+  String get learnerMentorPaymentLabel => 'Thanh toán';
+
+  @override
+  String get learnerMentorJoin => 'Tham gia buổi tư vấn';
+
+  @override
+  String get learnerMentorJoinUnavailable =>
+      'Phòng họp chưa sẵn sàng hoặc liên kết không an toàn.';
+
+  @override
+  String get learnerMentorPurchaseStatus => 'Trạng thái gói tư vấn';
+
+  @override
+  String get learnerMentorPurchaseStatusError =>
+      'Chưa thể tải trạng thái thanh toán.';
+
+  @override
+  String get learnerMentorPaymentPending => 'Đang chờ thanh toán';
+
+  @override
+  String get learnerMentorPaymentPaid => 'Đã thanh toán';
+
+  @override
+  String get learnerMentorPaymentFailed => 'Thanh toán thất bại';
+
+  @override
+  String get learnerMentorPaymentRefunded => 'Đã hoàn tiền';
+
+  @override
+  String get learnerMentorPaymentUnknown => 'Chưa xác định';
+
+  @override
+  String learnerMentorSessionsUsage(int used, int included) {
+    return 'Đã dùng $used/$included buổi';
+  }
+
+  @override
+  String get learnerMentorRefreshStatus => 'Kiểm tra lại trạng thái';
+
+  @override
+  String get learnerMentorStatusPolling =>
+      'RikiPath đang đối chiếu trạng thái với Backend. Chuyển hướng thanh toán không được xem là xác nhận thành công.';
+
+  @override
+  String get learnerMentorUnknownMentor => 'Mentor chưa được xác định';
+
+  @override
+  String get learnerMentorCheckoutExpired => 'Liên kết thanh toán đã hết hạn';
+
+  @override
+  String get learnerMentorBookingReadOnly =>
+      'Thông tin lịch hẹn được đồng bộ trực tiếp từ Backend.';
+
+  @override
+  String get practiceSpeechTitle => 'Luyện nói tiếng Nhật';
+
+  @override
+  String get practiceSpeechDescription =>
+      'Nói tiếng Nhật và xem nội dung được nhận dạng theo thời gian thực.';
+
+  @override
+  String get practiceSpeechStatus => 'Nhận dạng trực tiếp';
+
+  @override
+  String get practiceTextScanTitle => 'Quét văn bản tiếng Nhật';
+
+  @override
+  String get practiceTextScanDescription =>
+      'Chọn ảnh bài viết để nhận dạng và chỉnh sửa văn bản tiếng Nhật.';
+
+  @override
+  String get practiceTextScanStatus => 'Ảnh → Văn bản';
+
+  @override
+  String get speechPracticeTitle => 'Luyện nói';
+
+  @override
+  String get speechPracticeHeading => 'Biến giọng nói thành văn bản';
+
+  @override
+  String get speechPracticeSubtitle =>
+      'Đọc một câu tiếng Nhật thật tự nhiên. RikiPath sẽ hiển thị nội dung nhận dạng ngay khi bạn nói.';
+
+  @override
+  String get speechSampleLabel => 'Câu gợi ý';
+
+  @override
+  String get speechSampleSentence => '日本語の話し方を練習しています。';
+
+  @override
+  String get speechTranscriptLabel => 'Nội dung nhận dạng';
+
+  @override
+  String get speechTranscriptEmpty =>
+      'Văn bản tiếng Nhật sẽ xuất hiện tại đây khi bạn bắt đầu nói.';
+
+  @override
+  String get speechStart => 'Bắt đầu nói';
+
+  @override
+  String get speechStop => 'Dừng ghi âm';
+
+  @override
+  String get speechConnecting => 'Đang chuẩn bị micro...';
+
+  @override
+  String get speechRetry => 'Thử lại';
+
+  @override
+  String get speechSpeakAgain => 'Luyện nói lại';
+
+  @override
+  String get speechCopy => 'Sao chép văn bản';
+
+  @override
+  String get speechClear => 'Xóa nội dung';
+
+  @override
+  String get speechCopied => 'Đã sao chép văn bản';
+
+  @override
+  String get speechPermissionTitle => 'Cần quyền sử dụng micro';
+
+  @override
+  String get speechPermissionMessage =>
+      'Hãy cho phép RikiPath sử dụng micro trong cài đặt thiết bị rồi thử lại.';
+
+  @override
+  String get speechNetworkTitle => 'Chưa thể kết nối';
+
+  @override
+  String get speechNetworkMessage =>
+      'Kiểm tra kết nối mạng rồi bắt đầu lại buổi luyện nói.';
+
+  @override
+  String get speechProviderTitle => 'Nhận dạng giọng nói bị gián đoạn';
+
+  @override
+  String get speechProviderMessage =>
+      'Dừng lại một chút rồi thử bắt đầu lại. Nội dung đã nhận dạng vẫn được giữ nguyên.';
+
+  @override
+  String get speechListeningTitle => 'RikiPath đang lắng nghe';
+
+  @override
+  String get speechListeningMessage =>
+      'Hãy nói rõ ràng và giữ thiết bị gần bạn.';
+
+  @override
+  String get speechReadyMessage =>
+      'Micro chỉ hoạt động khi bạn nhấn bắt đầu và sẽ dừng khi rời màn hình.';
+
+  @override
+  String get textScanTitle => 'Quét văn bản';
+
+  @override
+  String get textScanHeading => 'Nhận dạng chữ viết tiếng Nhật';
+
+  @override
+  String get textScanSubtitle =>
+      'Chọn ảnh JPG, PNG hoặc WEBP rõ nét. Bạn có thể chỉnh sửa và sao chép kết quả ngay trên thiết bị.';
+
+  @override
+  String get textScanChooseImage => 'Chọn ảnh từ thư viện';
+
+  @override
+  String get textScanSelecting => 'Đang mở thư viện...';
+
+  @override
+  String get textScanDropTitle => 'Chọn ảnh bài viết tiếng Nhật';
+
+  @override
+  String get textScanRequirements => 'JPG, PNG hoặc WEBP • tối đa 10 MB';
+
+  @override
+  String get textScanPrivacyNote =>
+      'Ảnh được gửi tới dịch vụ RikiPath để nhận dạng văn bản và không được hiển thị như một bài đã lưu.';
+
+  @override
+  String get textScanAction => 'Quét văn bản';
+
+  @override
+  String get textScanScanning => 'Đang nhận dạng...';
+
+  @override
+  String get textScanChooseAnother => 'Chọn ảnh khác';
+
+  @override
+  String get textScanClear => 'Xóa ảnh và kết quả';
+
+  @override
+  String get textScanResultLabel => 'Văn bản nhận dạng';
+
+  @override
+  String get textScanResultHint => 'Kết quả nhận dạng sẽ xuất hiện tại đây.';
+
+  @override
+  String get textScanLocalEditNote =>
+      'Các chỉnh sửa trên màn hình này chưa được lưu vào lịch sử tài khoản.';
+
+  @override
+  String get textScanCopy => 'Sao chép kết quả';
+
+  @override
+  String get textScanCopied => 'Đã sao chép kết quả';
+
+  @override
+  String get textScanUnsupportedType =>
+      'RikiPath chỉ hỗ trợ ảnh JPG, PNG hoặc WEBP.';
+
+  @override
+  String get textScanTooLarge =>
+      'Ảnh vượt quá giới hạn 10 MB. Hãy chọn ảnh nhỏ hơn.';
+
+  @override
+  String get textScanPickerFailedTitle => 'Chưa thể mở thư viện ảnh';
+
+  @override
+  String get textScanPickerError =>
+      'Hãy kiểm tra quyền truy cập ảnh rồi thử lại.';
+
+  @override
+  String get textScanFailedTitle => 'Chưa thể quét ảnh';
+
+  @override
+  String get textScanNetworkError => 'Kiểm tra kết nối mạng rồi thử quét lại.';
+
+  @override
+  String get textScanProviderError =>
+      'Dịch vụ nhận dạng văn bản hiện chưa sẵn sàng. Ảnh của bạn vẫn được giữ để thử lại.';
+
+  @override
+  String get textScanCompleted =>
+      'Đã nhận dạng xong. Bạn có thể kiểm tra, chỉnh sửa hoặc sao chép văn bản.';
+
+  @override
+  String get practiceStudioTitle => 'Studio Riki';
+
+  @override
+  String get practiceStudioSubtitle =>
+      'Luyện nói, luyện viết và khám phá tiếng Nhật bằng các công cụ tương tác.';
+
+  @override
+  String get practiceWritingTitle => 'Luyện viết Kana & Kanji';
+
+  @override
+  String get practiceWritingDescription =>
+      'Xem thứ tự nét, viết trực tiếp và lưu tiến độ ôn tập.';
+
+  @override
+  String get practiceWritingStatus => 'Nét chữ tương tác';
+
+  @override
+  String get writingTitle => 'Luyện viết';
+
+  @override
+  String get writingSubtitle =>
+      'Chọn một ký tự rồi luyện theo đúng thứ tự và hướng nét.';
+
+  @override
+  String get writingHiragana => 'Hiragana';
+
+  @override
+  String get writingKatakana => 'Katakana';
+
+  @override
+  String get writingKanji => 'Kanji';
+
+  @override
+  String get writingDue => 'Đến hạn';
+
+  @override
+  String get writingAll => 'Tất cả';
+
+  @override
+  String get writingQueueHint =>
+      'Ký tự đến hạn được ưu tiên trước, sau đó là nội dung mới đã được duyệt.';
+
+  @override
+  String get writingSelectCharacter => 'Chọn ký tự để bắt đầu';
+
+  @override
+  String get writingEmptyTitle => 'Chưa có ký tự để luyện';
+
+  @override
+  String writingKanaEmptyMessage(String script) {
+    return 'Backend chưa trả về ký tự $script đã được duyệt cho tài khoản này.';
+  }
+
+  @override
+  String get writingKanjiEmptyMessage =>
+      'Hôm nay chưa có Kanji phù hợp trong danh sách này.';
+
+  @override
+  String get writingLoadFailed => 'Chưa thể tải danh sách luyện viết';
+
+  @override
+  String writingStrokeCount(int count) {
+    return '$count nét';
+  }
+
+  @override
+  String get writingNewCharacter => 'Mới';
+
+  @override
+  String get writingReviewCharacter => 'Ôn lại';
+
+  @override
+  String writingLastScore(int score) {
+    return 'Điểm gần nhất $score/100';
+  }
+
+  @override
+  String get writingMeaningUnavailable => 'Chưa cập nhật nghĩa';
+
+  @override
+  String get writingTargetLabel => 'Ký tự mục tiêu';
+
+  @override
+  String get writingOnReading => 'Âm On';
+
+  @override
+  String get writingKunReading => 'Âm Kun';
+
+  @override
+  String get writingReadingUnavailable => 'Chưa cập nhật';
+
+  @override
+  String get writingGuidedMode => 'Theo nét mẫu';
+
+  @override
+  String get writingFreeMode => 'Tự viết';
+
+  @override
+  String get writingGuidedHint =>
+      'Nét mờ sẽ hướng dẫn vị trí. Hãy viết đúng thứ tự và hướng nét.';
+
+  @override
+  String get writingFreeHint =>
+      'Mẫu được ẩn để bạn tự nhớ thứ tự và hướng nét.';
+
+  @override
+  String get writingGestureHint =>
+      'Vuốt trong khung để viết • Vuốt bên ngoài để cuộn';
+
+  @override
+  String get writingShowStrokes => 'Xem nét mẫu';
+
+  @override
+  String get writingStart => 'Bắt đầu viết';
+
+  @override
+  String get writingRewrite => 'Viết lại';
+
+  @override
+  String get writingNext => 'Ký tự tiếp theo';
+
+  @override
+  String get writingLoadingStrokeData => 'Đang chuẩn bị dữ liệu nét chữ...';
+
+  @override
+  String get writingStrokeDataFailedTitle => 'Chưa tải được nét chữ';
+
+  @override
+  String get writingStrokeDataFailedMessage =>
+      'Kiểm tra kết nối rồi thử lại. Dữ liệu đã tải trước đó vẫn có thể dùng khi ngoại tuyến.';
+
+  @override
+  String get writingQuizInProgress =>
+      'Đang viết • hoàn thành từng nét theo thứ tự';
+
+  @override
+  String get writingAnimationInProgress => 'Đang trình diễn thứ tự nét...';
+
+  @override
+  String get writingCompleteTitle => 'Hoàn thành bài viết';
+
+  @override
+  String writingMistakeCount(int count) {
+    return '$count nét sai';
+  }
+
+  @override
+  String writingResultScore(int score) {
+    return 'Điểm $score/100';
+  }
+
+  @override
+  String get writingSavingResult => 'Đang lưu tiến độ...';
+
+  @override
+  String get writingResultSaved => 'Đã lưu lịch ôn tiếp theo';
+
+  @override
+  String get writingResultSaveFailed =>
+      'Kết quả vẫn được giữ trên thiết bị nhưng chưa lưu được lên RikiPath.';
+
+  @override
+  String get writingRetrySave => 'Lưu lại';
+
+  @override
+  String writingProgress(int current, int total) {
+    return '$current/$total';
   }
 }

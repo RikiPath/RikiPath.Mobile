@@ -7,9 +7,10 @@ final appConfigProvider = Provider<AppConfig>((ref) {
 
 class AppConfig {
   static const String defaultDevelopmentEnvironment = 'development';
-  static const String defaultDevelopmentApiBaseUrl = 'http://140.245.43.97';
+  static const String defaultDevelopmentApiBaseUrl =
+      'https://fact-like-tracy-displays.trycloudflare.com';
   static const String defaultDevelopmentSwaggerUrl =
-      'http://140.245.43.97/swagger/index.html';
+      'https://fact-like-tracy-displays.trycloudflare.com/swagger/index.html';
   static const String defaultDevelopmentApiLogging = 'true';
 
   static const String _undefinedDartDefine =

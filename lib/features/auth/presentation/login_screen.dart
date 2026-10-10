@@ -152,7 +152,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 RikiProgressIndicator(semanticsLabel: l10n.loggingInSemantics),
               ] else if (!hasFeedback) ...[
                 const SizedBox(height: AppSpacing.space5),
-                RikiWarningBanner(
+                AuthTipCard(
                   title: l10n.loginTipTitle,
                   message: l10n.loginTipMessage,
                 ),

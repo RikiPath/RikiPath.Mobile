@@ -26,11 +26,7 @@ class RikiBrandLockup extends StatelessWidget {
             height: markSize,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.brandPrimary, AppColors.brandGradientEnd],
-              ),
+              color: AppColors.brandPrimary,
               borderRadius: BorderRadius.circular(AppRadius.compact),
               boxShadow: AppShadows.cardSoft,
             ),

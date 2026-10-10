@@ -18,17 +18,20 @@ class RikiPromotionalPill extends StatelessWidget {
         border: Border.all(color: AppColors.brandBorder),
         borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
-      child: Wrap(
-        spacing: 6,
-        runSpacing: AppSpacing.space1,
-        crossAxisAlignment: WrapCrossAlignment.center,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('✨', style: AppTypography.metadata),
-          Text(
-            message,
-            style: AppTypography.metadata.copyWith(
-              color: AppColors.textBody,
-              fontWeight: FontWeight.w500,
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              message,
+              softWrap: true,
+              style: AppTypography.metadata.copyWith(
+                color: AppColors.textBody,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],

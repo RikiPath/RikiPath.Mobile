@@ -11,19 +11,33 @@ abstract final class AppColors {
   static const Color brandBorder = Color(0xFFF8BBD0);
   static const Color brandSelectedTint = Color(0xFFFFF0F3);
   static const Color brandSelectedBorder = Color(0xFFE05A7A);
-  static const Color brandGradientEnd = Color(0xFFFF8FA3);
   static const Color brandShadowSoft = Color(0x14E05A7A);
   static const Color brandShadow = Color(0x4DE05A7A);
   static const Color brandShadowStrong = Color(0x59E05A7A);
   static const Color neutralShadowSoft = Color(0x0A2D282A);
   static const Color neutralShadow = Color(0x142D282A);
 
-  static const Color background = Color(0xFFFFF9FA);
-  static const Color profileBackground = Color(0xFFF7F6F7);
-  static const Color profileNeutralSurface = Color(0xFFFFFFFF);
+  // Neutral foundations keep Sakura as an accent instead of tinting every
+  // layer of the learner experience. Brand tints remain available below for
+  // selected, interactive, and progress states.
+  static const Color backgroundPrimary = Color(0xFFF7F6F7);
+  static const Color backgroundSecondary = Color(0xFFFBFAFA);
+  static const Color surfacePrimary = Color(0xFFFFFFFF);
+  static const Color surfaceMuted = Color(0xFFF4F2F3);
+  static const Color surfaceMutedStrong = Color(0xFFEDE9EA);
+
+  // Auth uses a warm neutral paper-like canvas while keeping Sakura for
+  // brand and interaction accents rather than tinting the full page.
+  static const Color authBackground = backgroundSecondary;
+  static const Color authTipBackground = Color(0xFFFFFAEE);
+  static const Color authTipBorder = Color(0xFFF1E4C8);
+
+  static const Color background = backgroundPrimary;
+  static const Color profileBackground = backgroundPrimary;
+  static const Color profileNeutralSurface = surfacePrimary;
   static const Color profileAccentSurface = Color(0xFFFFF3F6);
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceSubtle = Color(0xFFFFF0F3);
+  static const Color surface = surfacePrimary;
+  static const Color surfaceSubtle = surfaceMuted;
   static const Color surfaceContainer = Color(0xFFFCE7EB);
   static const Color surfaceContainerHigh = Color(0xFFF8DBE2);
   static const Color input = Color(0xFFFFFFFF);
@@ -35,7 +49,7 @@ abstract final class AppColors {
   static const Color textMuted = Color(0xFF9E9397);
   static const Color textDisabled = Color(0xFF9E9397);
 
-  static const Color border = Color(0xFFE8DDE0);
+  static const Color border = Color(0xFFE5E0E2);
   static const Color borderStrong = Color(0xFFDDBFC3);
   static const Color borderFocused = brandPrimary;
 
@@ -61,12 +75,12 @@ abstract final class AppColors {
   static const Color infoBorder = Color(0xFFD8E7FA);
 
   // Compatibility roles used throughout the existing learner presentation.
-  // They intentionally resolve to the same Sakura surface system.
+  // Large areas stay neutral; Sakura is reserved for purposeful emphasis.
   static const Color learnerBackground = background;
-  static const Color learnerSurfaceLow = brandTint;
-  static const Color learnerSurface = surfaceContainer;
-  static const Color learnerSurfaceHigh = brandSecondaryPressed;
-  static const Color learnerSurfaceHighest = surfaceContainerHigh;
+  static const Color learnerSurfaceLow = backgroundSecondary;
+  static const Color learnerSurface = surfacePrimary;
+  static const Color learnerSurfaceHigh = surfaceMuted;
+  static const Color learnerSurfaceHighest = surfaceMutedStrong;
   static const Color learnerTextPrimary = textPrimary;
   static const Color learnerTextSecondary = textSecondary;
   static const Color learnerOutline = border;

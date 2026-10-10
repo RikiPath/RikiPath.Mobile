@@ -355,6 +355,7 @@ class ProfileServiceCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.status,
+    this.onTap,
     super.key,
   });
 
@@ -362,58 +363,76 @@ class ProfileServiceCard extends StatelessWidget {
   final String title;
   final String description;
   final String status;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.space4),
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(AppRadius.card),
+    );
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.profileAccentSurface,
         borderRadius: BorderRadius.circular(AppRadius.card),
         boxShadow: AppShadows.cardSoft,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 46,
-            height: 46,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.input),
-            ),
-            child: Icon(icon, color: AppColors.brandPrimary, size: 23),
-          ),
-          const SizedBox(width: AppSpacing.space3),
-          Expanded(
-            child: Column(
+      child: Material(
+        color: AppColors.profileAccentSurface,
+        shape: shape,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: shape,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.space4),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.cardTitle),
-                const SizedBox(height: AppSpacing.space1),
-                Text(description, style: AppTypography.metadata),
-                const SizedBox(height: AppSpacing.space2),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.space2,
-                    vertical: AppSpacing.space1,
-                  ),
+                  width: 46,
+                  height: 46,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                    borderRadius: BorderRadius.circular(AppRadius.input),
                   ),
-                  child: Text(
-                    status,
-                    style: AppTypography.badgeText.copyWith(
-                      color: AppColors.brandPrimary,
-                    ),
+                  child: Icon(icon, color: AppColors.brandPrimary, size: 23),
+                ),
+                const SizedBox(width: AppSpacing.space3),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: AppTypography.cardTitle),
+                      const SizedBox(height: AppSpacing.space1),
+                      Text(description, style: AppTypography.metadata),
+                      const SizedBox(height: AppSpacing.space2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.space2,
+                          vertical: AppSpacing.space1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                        child: Text(
+                          status,
+                          style: AppTypography.badgeText.copyWith(
+                            color: AppColors.brandPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                if (onTap != null) ...[
+                  const SizedBox(width: AppSpacing.space2),
+                  const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                ],
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

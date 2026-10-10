@@ -27,11 +27,21 @@ import 'package:rikipath_mobile/features/learning/presentation/lesson_screen.dar
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_availability_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_booking_detail_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_bookings_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_meetings_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_purchase_status_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_meeting_detail_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_meetings_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/daily_review_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/mock_test_result_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/mock_test_screen.dart';
+import 'package:rikipath_mobile/features/speech/presentation/speech_to_text_screen.dart';
+import 'package:rikipath_mobile/features/text_scan/presentation/text_scan_screen.dart';
+import 'package:rikipath_mobile/features/writing_practice/domain/writing_practice.dart';
+import 'package:rikipath_mobile/features/writing_practice/presentation/writing_practice_detail_screen.dart';
+import 'package:rikipath_mobile/features/writing_practice/presentation/writing_practice_screen.dart';
 import 'package:rikipath_mobile/features/notifications/presentation/notifications_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_entry_detail_screen.dart';
@@ -154,6 +164,40 @@ GoRouter createAppRouter({
         ],
       ),
       GoRoute(
+        path: AppRoutes.learnerMentorMeetings,
+        builder: (context, state) => const LearnerMentorMeetingsScreen(),
+        routes: [
+          GoRoute(
+            path: AppRoutes.learnerMentorAvailabilitySegment,
+            builder: (context, state) => LearnerMentorAvailabilityScreen(
+              planId: int.tryParse(state.pathParameters['planId'] ?? ''),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.learnerMentorBookingsSegment,
+            builder: (context, state) => const LearnerMentorBookingsScreen(),
+            routes: [
+              GoRoute(
+                path: AppRoutes.learnerMentorBookingDetailSegment,
+                builder: (context, state) => LearnerMentorBookingDetailScreen(
+                  bookingId: int.tryParse(
+                    state.pathParameters['bookingId'] ?? '',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: AppRoutes.learnerMentorPurchaseStatusSegment,
+            builder: (context, state) => LearnerMentorPurchaseStatusScreen(
+              subscriptionId: int.tryParse(
+                state.pathParameters['subscriptionId'] ?? '',
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
         path: AppRoutes.onboarding,
         builder: (context, state) => const OnboardingScreen(),
       ),
@@ -242,6 +286,35 @@ GoRouter createAppRouter({
                   GoRoute(
                     path: AppRoutes.reviewSegment,
                     builder: (context, state) => const DailyReviewScreen(),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.writingSegment,
+                    redirect: (context, state) =>
+                        state.uri.path == AppRoutes.writing
+                        ? AppRoutes.writingHiragana
+                        : null,
+                    routes: [
+                      _writingRoute(
+                        segment: AppRoutes.writingHiraganaSegment,
+                        script: WritingScript.hiragana,
+                      ),
+                      _writingRoute(
+                        segment: AppRoutes.writingKatakanaSegment,
+                        script: WritingScript.katakana,
+                      ),
+                      _writingRoute(
+                        segment: AppRoutes.writingKanjiSegment,
+                        script: WritingScript.kanji,
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: AppRoutes.speechSegment,
+                    builder: (context, state) => const SpeechToTextScreen(),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.textScanSegment,
+                    builder: (context, state) => const TextScanScreen(),
                   ),
                   GoRoute(
                     path: AppRoutes.mockTestSegment,
@@ -349,6 +422,25 @@ GoRouter createAppRouter({
     errorBuilder: (context, state) => Scaffold(
       body: Center(child: Text(context.l10n.pageNotFound('${state.uri}'))),
     ),
+  );
+}
+
+GoRoute _writingRoute({
+  required String segment,
+  required WritingScript script,
+}) {
+  return GoRoute(
+    path: segment,
+    builder: (context, state) => WritingPracticeScreen(script: script),
+    routes: [
+      GoRoute(
+        path: ':characterId',
+        builder: (context, state) => WritingPracticeDetailScreen(
+          script: script,
+          characterId: int.tryParse(state.pathParameters['characterId'] ?? ''),
+        ),
+      ),
+    ],
   );
 }
 

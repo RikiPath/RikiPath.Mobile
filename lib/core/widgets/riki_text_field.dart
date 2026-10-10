@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 
-class RikiTextField extends StatelessWidget {
+class RikiTextField extends StatefulWidget {
   const RikiTextField({
     required this.label,
     this.controller,
@@ -54,61 +54,171 @@ class RikiTextField extends StatelessWidget {
   final String? semanticLabel;
 
   @override
+  State<RikiTextField> createState() => _RikiTextFieldState();
+}
+
+class _RikiTextFieldState extends State<RikiTextField>
+    with SingleTickerProviderStateMixin {
+  late FocusNode _effectiveFocusNode;
+  late bool _ownsFocusNode;
+  late final AnimationController _shakeController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+  );
+  late final Animation<double> _shakeOffset = TweenSequence<double>([
+    TweenSequenceItem(tween: Tween<double>(begin: 0, end: -3), weight: 20),
+    TweenSequenceItem(tween: Tween<double>(begin: -3, end: 3), weight: 25),
+    TweenSequenceItem(tween: Tween<double>(begin: 3, end: -2), weight: 25),
+    TweenSequenceItem(tween: Tween<double>(begin: -2, end: 0), weight: 30),
+  ]).animate(CurvedAnimation(parent: _shakeController, curve: Curves.easeOut));
+  bool _reduceMotion = false;
+
+  bool get _hasError =>
+      widget.errorText != null && widget.errorText!.isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _attachFocusNode(widget.focusNode);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final mediaQuery = MediaQuery.maybeOf(context);
+    _reduceMotion =
+        (mediaQuery?.disableAnimations ?? false) ||
+        (mediaQuery?.accessibleNavigation ?? false);
+    if (_reduceMotion) _shakeController.reset();
+  }
+
+  @override
+  void didUpdateWidget(RikiTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      _detachFocusNode();
+      _attachFocusNode(widget.focusNode);
+    }
+    if (!_reduceMotion &&
+        _hasError &&
+        oldWidget.errorText != widget.errorText) {
+      _shakeController.forward(from: 0);
+    }
+  }
+
+  void _attachFocusNode(FocusNode? focusNode) {
+    _ownsFocusNode = focusNode == null;
+    _effectiveFocusNode = focusNode ?? FocusNode();
+    _effectiveFocusNode.addListener(_handleFocusChange);
+  }
+
+  void _detachFocusNode() {
+    _effectiveFocusNode.removeListener(_handleFocusChange);
+    if (_ownsFocusNode) _effectiveFocusNode.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _detachFocusNode();
+    _shakeController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final hasError = errorText != null && errorText!.isNotEmpty;
-    final resolvedSuffix = _buildSuffix(hasError);
-    final isProcessing = !enabled || readOnly;
+    final resolvedSuffix = _buildSuffix(_hasError);
+    final isProcessing = !widget.enabled || widget.readOnly;
+    final showFocusGlow =
+        _effectiveFocusNode.hasFocus && widget.enabled && !_hasError;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (labelTrailing == null)
-          Text(label, style: AppTypography.inputLabel)
+        if (widget.labelTrailing == null)
+          Text(widget.label, style: AppTypography.inputLabel)
         else
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(child: Text(label, style: AppTypography.inputLabel)),
+              Expanded(
+                child: Text(widget.label, style: AppTypography.inputLabel),
+              ),
               const SizedBox(width: AppSpacing.space2),
-              labelTrailing!,
+              widget.labelTrailing!,
             ],
           ),
         const SizedBox(height: AppSpacing.fieldLabelGap),
-        Semantics(
-          label: semanticLabel ?? label,
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            enabled: enabled,
-            readOnly: readOnly,
-            obscureText: obscureText,
-            keyboardType: keyboardType,
-            textInputAction: textInputAction,
-            textCapitalization: textCapitalization,
-            autofillHints: autofillHints,
-            inputFormatters: inputFormatters,
-            autofocus: autofocus,
-            enableSuggestions: enableSuggestions,
-            autocorrect: autocorrect,
-            onChanged: onChanged,
-            onSubmitted: onSubmitted,
-            style: AppTypography.inputText.copyWith(
-              color: isProcessing
-                  ? AppColors.textSecondary
-                  : AppColors.textPrimary,
+        AnimatedBuilder(
+          key: const ValueKey<String>('riki_text_field_error_motion'),
+          animation: _shakeOffset,
+          child: AnimatedContainer(
+            key: const ValueKey<String>('riki_text_field_focus_surface'),
+            duration: _reduceMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.input),
+              boxShadow: showFocusGlow
+                  ? AppShadows.authInputFocused
+                  : const <BoxShadow>[],
             ),
-            cursorColor: AppColors.brandPrimary,
-            decoration: InputDecoration(
-              hintText: hintText,
-              prefixIcon: prefixIcon == null ? null : Icon(prefixIcon),
-              suffixIcon: resolvedSuffix,
-              fillColor: isProcessing
-                  ? AppColors.inputProcessing
-                  : hasError
-                  ? AppColors.errorBackground
-                  : AppColors.input,
-              error: hasError ? _ValidationMessage(errorText!) : null,
+            child: Semantics(
+              label: widget.semanticLabel ?? widget.label,
+              child: TextField(
+                controller: widget.controller,
+                focusNode: _effectiveFocusNode,
+                enabled: widget.enabled,
+                readOnly: widget.readOnly,
+                obscureText: widget.obscureText,
+                keyboardType: widget.keyboardType,
+                textInputAction: widget.textInputAction,
+                textCapitalization: widget.textCapitalization,
+                autofillHints: widget.autofillHints,
+                inputFormatters: widget.inputFormatters,
+                autofocus: widget.autofocus,
+                enableSuggestions: widget.enableSuggestions,
+                autocorrect: widget.autocorrect,
+                onChanged: widget.onChanged,
+                onSubmitted: widget.onSubmitted,
+                style: AppTypography.inputText.copyWith(
+                  color: isProcessing
+                      ? AppColors.textSecondary
+                      : AppColors.textPrimary,
+                ),
+                cursorColor: AppColors.brandPrimary,
+                decoration: InputDecoration(
+                  hintText: widget.hintText,
+                  prefixIcon: widget.prefixIcon == null
+                      ? null
+                      : Icon(
+                          widget.prefixIcon,
+                          color: _hasError
+                              ? AppColors.error
+                              : showFocusGlow
+                              ? AppColors.brandPrimary
+                              : AppColors.textMuted,
+                        ),
+                  suffixIcon: resolvedSuffix,
+                  fillColor: isProcessing
+                      ? AppColors.inputProcessing
+                      : _hasError
+                      ? AppColors.errorBackground
+                      : AppColors.input,
+                  error: _hasError
+                      ? _ValidationMessage(widget.errorText!)
+                      : null,
+                ),
+              ),
             ),
+          ),
+          builder: (context, child) => Transform.translate(
+            offset: Offset(_reduceMotion ? 0 : _shakeOffset.value, 0),
+            child: child,
           ),
         ),
       ],
@@ -116,7 +226,7 @@ class RikiTextField extends StatelessWidget {
   }
 
   Widget? _buildSuffix(bool hasError) {
-    if (!hasError) return suffixIcon;
+    if (!hasError) return widget.suffixIcon;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -124,7 +234,7 @@ class RikiTextField extends StatelessWidget {
         const ExcludeSemantics(
           child: Icon(Icons.error, size: 18, color: AppColors.error),
         ),
-        ?suffixIcon,
+        ?widget.suffixIcon,
       ],
     );
   }

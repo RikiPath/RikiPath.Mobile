@@ -19,6 +19,10 @@ abstract final class AppShadows {
     ),
   ];
 
+  static const List<BoxShadow> authInputFocused = <BoxShadow>[
+    BoxShadow(color: Color(0x21E05A7A), blurRadius: 0, spreadRadius: 3),
+  ];
+
   static const List<BoxShadow> primaryButton = <BoxShadow>[
     BoxShadow(
       color: AppColors.brandShadow,

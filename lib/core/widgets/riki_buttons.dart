@@ -3,7 +3,7 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_loading.dart';
 
-class RikiPrimaryButton extends StatelessWidget {
+class RikiPrimaryButton extends StatefulWidget {
   const RikiPrimaryButton({
     required this.label,
     required this.onPressed,
@@ -22,48 +22,86 @@ class RikiPrimaryButton extends StatelessWidget {
   final IconData? trailingIcon;
 
   @override
-  Widget build(BuildContext context) {
-    final effectiveOnPressed = isLoading ? null : onPressed;
+  State<RikiPrimaryButton> createState() => _RikiPrimaryButtonState();
+}
 
-    return FilledButton(
-      onPressed: effectiveOnPressed,
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-          if (isLoading) return AppColors.brandPrimary;
-          if (states.contains(WidgetState.disabled)) {
-            return AppColors.brandPrimaryDisabled;
-          }
-          if (states.contains(WidgetState.pressed)) {
-            return AppColors.brandPrimaryPressed;
-          }
-          return AppColors.brandPrimary;
-        }),
-        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-          if (isLoading) return Colors.white;
-          return states.contains(WidgetState.disabled)
-              ? AppColors.textDisabled
-              : Colors.white;
-        }),
-        elevation: WidgetStateProperty.resolveWith<double>((states) {
-          if (isLoading) return 4;
-          if (states.contains(WidgetState.disabled)) return 0;
-          if (states.contains(WidgetState.pressed)) return 1;
-          return 3;
-        }),
-      ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 180),
-        child: isLoading
-            ? _LoadingButtonContent(
-                key: const ValueKey<String>('loading'),
-                label: loadingLabel ?? label,
-              )
-            : _ButtonContent(
-                key: const ValueKey<String>('label'),
-                label: label,
-                leadingIcon: leadingIcon,
-                trailingIcon: trailingIcon,
-              ),
+class _RikiPrimaryButtonState extends State<RikiPrimaryButton> {
+  bool _isPressed = false;
+
+  void _setPressed(bool value) {
+    if (_isPressed == value || !mounted) return;
+    setState(() => _isPressed = value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveOnPressed = widget.isLoading ? null : widget.onPressed;
+    final mediaQuery = MediaQuery.maybeOf(context);
+    final reduceMotion =
+        (mediaQuery?.disableAnimations ?? false) ||
+        (mediaQuery?.accessibleNavigation ?? false);
+
+    return Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerDown: effectiveOnPressed == null
+          ? null
+          : (_) => _setPressed(true),
+      onPointerUp: effectiveOnPressed == null
+          ? null
+          : (_) => _setPressed(false),
+      onPointerCancel: effectiveOnPressed == null
+          ? null
+          : (_) => _setPressed(false),
+      child: AnimatedScale(
+        key: const ValueKey<String>('riki_primary_button_scale'),
+        scale: _isPressed && effectiveOnPressed != null ? 0.98 : 1,
+        duration: reduceMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 110),
+        curve: Curves.easeOutCubic,
+        child: FilledButton(
+          onPressed: effectiveOnPressed,
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+              if (widget.isLoading) return AppColors.brandPrimary;
+              if (states.contains(WidgetState.disabled)) {
+                return AppColors.brandPrimaryDisabled;
+              }
+              if (states.contains(WidgetState.pressed)) {
+                return AppColors.brandPrimaryPressed;
+              }
+              return AppColors.brandPrimary;
+            }),
+            foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+              if (widget.isLoading) return Colors.white;
+              return states.contains(WidgetState.disabled)
+                  ? AppColors.textDisabled
+                  : Colors.white;
+            }),
+            elevation: WidgetStateProperty.resolveWith<double>((states) {
+              if (widget.isLoading) return 4;
+              if (states.contains(WidgetState.disabled)) return 0;
+              if (states.contains(WidgetState.pressed)) return 1;
+              return 3;
+            }),
+          ),
+          child: AnimatedSwitcher(
+            duration: reduceMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 180),
+            child: widget.isLoading
+                ? _LoadingButtonContent(
+                    key: const ValueKey<String>('loading'),
+                    label: widget.loadingLabel ?? widget.label,
+                  )
+                : _ButtonContent(
+                    key: const ValueKey<String>('label'),
+                    label: widget.label,
+                    leadingIcon: widget.leadingIcon,
+                    trailingIcon: widget.trailingIcon,
+                  ),
+          ),
+        ),
       ),
     );
   }

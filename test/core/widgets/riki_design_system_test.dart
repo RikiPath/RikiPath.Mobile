@@ -41,6 +41,17 @@ void main() {
     );
   });
 
+  test('learner surfaces keep neutral hierarchy and Sakura accents', () {
+    expect(AppColors.background, const Color(0xFFF7F6F7));
+    expect(AppColors.learnerBackground, AppColors.backgroundPrimary);
+    expect(AppColors.learnerSurface, AppColors.surfacePrimary);
+    expect(AppColors.learnerSurfaceLow, AppColors.backgroundSecondary);
+    expect(AppColors.learnerSurfaceHigh, AppColors.surfaceMuted);
+    expect(AppColors.learnerBackground, isNot(AppColors.learnerSurface));
+    expect(AppColors.learnerSurfaceLow, isNot(AppColors.brandTint));
+    expect(AppColors.learnerPrimaryFixed, AppColors.surfaceContainer);
+  });
+
   testWidgets('brand lockup is shared across normal and compact headers', (
     tester,
   ) async {
@@ -71,9 +82,14 @@ void main() {
       marks.map((mark) => mark.decoration),
       everyElement(isA<BoxDecoration>()),
     );
+    final decorations = marks.map((mark) => mark.decoration! as BoxDecoration);
     expect(
-      marks.map((mark) => (mark.decoration! as BoxDecoration).gradient),
-      everyElement(isA<LinearGradient>()),
+      decorations.map((decoration) => decoration.color),
+      everyElement(AppColors.brandPrimary),
+    );
+    expect(
+      decorations.map((decoration) => decoration.gradient),
+      everyElement(isNull),
     );
   });
 
@@ -91,6 +107,44 @@ void main() {
     expect(find.text('Đăng nhập'), findsOneWidget);
     await tester.tap(find.text('Đăng nhập'));
     await tester.pump();
+    expect(presses, 1);
+  });
+
+  testWidgets('primary button uses a subtle press scale without layout shift', (
+    tester,
+  ) async {
+    var presses = 0;
+    await tester.pumpWidget(
+      _testHost(
+        RikiPrimaryButton(label: 'Tiếp tục', onPressed: () => presses += 1),
+      ),
+    );
+    final button = find.byType(FilledButton);
+    final initialRect = tester.getRect(button);
+
+    final gesture = await tester.startGesture(tester.getCenter(button));
+    await tester.pump();
+    expect(
+      tester
+          .widget<AnimatedScale>(
+            find.byKey(const ValueKey<String>('riki_primary_button_scale')),
+          )
+          .scale,
+      0.98,
+    );
+    expect(tester.getRect(button), initialRect);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<AnimatedScale>(
+            find.byKey(const ValueKey<String>('riki_primary_button_scale')),
+          )
+          .scale,
+      1,
+    );
+    expect(tester.getRect(button), initialRect);
     expect(presses, 1);
   });
 
@@ -202,6 +256,72 @@ void main() {
     );
     expect(find.byIcon(Icons.error), findsOneWidget);
     expect(find.byIcon(Icons.info_outline), findsOneWidget);
+  });
+
+  testWidgets('text field strengthens its Sakura focus treatment', (
+    tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      _testHost(
+        RikiTextField(
+          label: 'Email học viên',
+          focusNode: focusNode,
+          prefixIcon: Icons.mail_outline,
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    final surface = tester.widget<AnimatedContainer>(
+      find.byKey(const ValueKey<String>('riki_text_field_focus_surface')),
+    );
+    final decoration = surface.decoration! as BoxDecoration;
+
+    expect(decoration.boxShadow, AppShadows.authInputFocused);
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.mail_outline)).color,
+      AppColors.brandPrimary,
+    );
+  });
+
+  testWidgets('text field error motion stays subtle and settles in place', (
+    tester,
+  ) async {
+    String? errorText;
+    late StateSetter updateField;
+    await tester.pumpWidget(
+      _testHost(
+        StatefulBuilder(
+          builder: (context, setState) {
+            updateField = setState;
+            return RikiTextField(
+              label: 'Email học viên',
+              errorText: errorText,
+              prefixIcon: Icons.mail_outline,
+            );
+          },
+        ),
+      ),
+    );
+
+    updateField(() {
+      errorText = 'Email không hợp lệ.';
+    });
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 55));
+
+    final motion = tester.widget<AnimatedBuilder>(
+      find.byKey(const ValueKey<String>('riki_text_field_error_motion')),
+    );
+    expect((motion.animation as Animation<double>).value.abs(), greaterThan(0));
+
+    await tester.pumpAndSettle();
+    expect((motion.animation as Animation<double>).value, 0);
+    expect(find.text('Email không hợp lệ.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('password visibility toggle updates obscure state', (

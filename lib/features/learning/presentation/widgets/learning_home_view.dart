@@ -430,7 +430,7 @@ class _CurrentLessonCard extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: const BoxDecoration(
-                  color: AppColors.error,
+                  color: AppColors.brandPrimary,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -514,7 +514,7 @@ class _CurrentLessonCard extends StatelessWidget {
                     lesson.progressPercent,
                   ),
                   height: 8,
-                  color: AppColors.error,
+                  color: AppColors.brandPrimary,
                 ),
               ),
               const SizedBox(width: AppSpacing.space3),

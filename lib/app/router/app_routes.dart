@@ -21,6 +21,41 @@ abstract final class AppRoutes {
     return '$mentorMeetings/$meetingId';
   }
 
+  static const String learnerMentorMeetings = '/mentor-meetings';
+  static const String learnerMentorAvailabilitySegment =
+      'plans/:planId/availability';
+  static const String learnerMentorBookingsSegment = 'bookings';
+  static const String learnerMentorBookingDetailSegment = ':bookingId';
+  static const String learnerMentorPurchaseStatusSegment =
+      'purchases/:subscriptionId';
+  static const String learnerMentorBookings =
+      '$learnerMentorMeetings/$learnerMentorBookingsSegment';
+
+  static String learnerMentorAvailability(int planId) {
+    if (planId <= 0) {
+      throw ArgumentError.value(planId, 'planId', 'Must be positive');
+    }
+    return '$learnerMentorMeetings/plans/$planId/availability';
+  }
+
+  static String learnerMentorBookingDetail(int bookingId) {
+    if (bookingId <= 0) {
+      throw ArgumentError.value(bookingId, 'bookingId', 'Must be positive');
+    }
+    return '$learnerMentorBookings/$bookingId';
+  }
+
+  static String learnerMentorPurchaseStatus(int subscriptionId) {
+    if (subscriptionId <= 0) {
+      throw ArgumentError.value(
+        subscriptionId,
+        'subscriptionId',
+        'Must be positive',
+      );
+    }
+    return '$learnerMentorMeetings/purchases/$subscriptionId';
+  }
+
   static const String home = '/home';
   static const String notifications = '/notifications';
   static const String learn = '/learn';
@@ -48,10 +83,31 @@ abstract final class AppRoutes {
       '$learn/lesson/${Uri.encodeComponent(lessonId)}';
   static const String practice = '/practice';
   static const String reviewSegment = 'review';
+  static const String writingSegment = 'writing';
+  static const String writingHiraganaSegment = 'hiragana';
+  static const String writingKatakanaSegment = 'katakana';
+  static const String writingKanjiSegment = 'kanji';
+  static const String writingHiraganaDetailSegment = 'hiragana/:characterId';
+  static const String writingKatakanaDetailSegment = 'katakana/:characterId';
+  static const String writingKanjiDetailSegment = 'kanji/:characterId';
+  static const String speechSegment = 'speech';
+  static const String textScanSegment = 'scan-text';
   static const String mockTestSegment = 'mock/:testId';
   static const String mockResultSegment = 'result';
   static const String mockDetailedReviewSegment = 'review';
   static const String dailyReview = '$practice/$reviewSegment';
+  static const String writing = '$practice/$writingSegment';
+  static const String writingHiragana = '$writing/$writingHiraganaSegment';
+  static const String writingKatakana = '$writing/$writingKatakanaSegment';
+  static const String writingKanji = '$writing/$writingKanjiSegment';
+  static String writingHiraganaDetail(int characterId) =>
+      '$writingHiragana/${_positiveId(characterId, "characterId")}';
+  static String writingKatakanaDetail(int characterId) =>
+      '$writingKatakana/${_positiveId(characterId, "characterId")}';
+  static String writingKanjiDetail(int characterId) =>
+      '$writingKanji/${_positiveId(characterId, "characterId")}';
+  static const String speechPractice = '$practice/$speechSegment';
+  static const String textScan = '$practice/$textScanSegment';
   static String mockTest(String testId) =>
       '$practice/mock/${Uri.encodeComponent(testId)}';
   static String mockTestResult(String testId) => '${mockTest(testId)}/result';
@@ -81,4 +137,11 @@ abstract final class AppRoutes {
       '$profile/$profileChangeEmailSegment';
   static const String profileChangePassword =
       '$profile/$profileChangePasswordSegment';
+
+  static int _positiveId(int value, String name) {
+    if (value <= 0) {
+      throw ArgumentError.value(value, name, 'Must be positive');
+    }
+    return value;
+  }
 }

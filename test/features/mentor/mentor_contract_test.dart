@@ -560,6 +560,8 @@ void main() {
       );
       expect(find.text('Hana'), findsOneWidget);
       expect(find.text('Ken'), findsOneWidget);
+      expect(find.text('Lịch tư vấn của tôi'), findsWidgets);
+      expect(find.text('Meeting của tôi'), findsNothing);
     });
 
     testWidgets('29. displays the meetings empty state', (tester) async {
@@ -782,6 +784,17 @@ void main() {
 
       expect(find.text('自分の空き時間'), findsWidgets);
       expect(find.text('閲覧のみ'), findsOneWidget);
+
+      await _pumpMentor(
+        tester,
+        const MentorMeetingsScreen(),
+        repository: _TestMentorRepository.empty(),
+        locale: const Locale('ja'),
+      );
+
+      expect(find.text('自分の相談予定'), findsWidgets);
+      expect(find.text('相談予定はまだありません。'), findsOneWidget);
+      expect(find.textContaining('ミーティング'), findsNothing);
     });
 
     test(
