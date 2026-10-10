@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:rikipath_mobile/core/network/safe_external_http_uri.dart';
 
 @immutable
 class MentorTimestamp {
@@ -86,11 +87,6 @@ class MentorMeetingSummary {
   final String? meetingLink;
 
   Uri? get safeMeetingUri {
-    final rawLink = meetingLink?.trim();
-    if (rawLink == null || rawLink.isEmpty) return null;
-    final uri = Uri.tryParse(rawLink);
-    if (uri == null || !uri.hasAuthority || uri.host.isEmpty) return null;
-    if (uri.scheme != 'https' && uri.scheme != 'http') return null;
-    return uri;
+    return parseSafeExternalHttpUri(meetingLink);
   }
 }

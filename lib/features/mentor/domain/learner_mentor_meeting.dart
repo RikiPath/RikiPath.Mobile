@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:rikipath_mobile/core/network/safe_external_http_uri.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 
 @immutable
@@ -170,10 +171,5 @@ class MentorMeetingPurchaseStatus {
 }
 
 Uri? safeExternalHttpUri(String? rawValue) {
-  final normalized = rawValue?.trim();
-  if (normalized == null || normalized.isEmpty) return null;
-  final uri = Uri.tryParse(normalized);
-  if (uri == null || !uri.hasAuthority || uri.host.isEmpty) return null;
-  if (uri.scheme != 'https' && uri.scheme != 'http') return null;
-  return uri;
+  return parseSafeExternalHttpUri(rawValue);
 }

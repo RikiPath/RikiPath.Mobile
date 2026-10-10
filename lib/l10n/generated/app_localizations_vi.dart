@@ -3077,4 +3077,82 @@ class AppLocalizationsVi extends AppLocalizations {
   String writingProgress(int current, int total) {
     return '$current/$total';
   }
+
+  @override
+  String get orDivider => 'hoặc';
+
+  @override
+  String get meetingTitle => 'Phòng họp';
+
+  @override
+  String get meetingJoinTitle => 'Tham gia cuộc họp';
+
+  @override
+  String get meetingJoinAction => 'Tham gia cuộc họp';
+
+  @override
+  String get meetingContinueAction => 'Tiếp tục';
+
+  @override
+  String get meetingLandingDescription =>
+      'Nhập liên kết phòng họp đã được chia sẻ với bạn. RikiPath sẽ mở phòng bằng trình duyệt an toàn.';
+
+  @override
+  String get meetingJoinDescription =>
+      'Dán liên kết đầy đủ bắt đầu bằng http:// hoặc https:// để tiếp tục.';
+
+  @override
+  String get meetingLinkLabel => 'Liên kết cuộc họp';
+
+  @override
+  String get meetingLinkHint => 'https://example.com/meeting/...';
+
+  @override
+  String get meetingLinkRequired => 'Vui lòng nhập liên kết cuộc họp.';
+
+  @override
+  String get meetingLinkInvalid =>
+      'Liên kết không hợp lệ. Chỉ chấp nhận địa chỉ http hoặc https đầy đủ.';
+
+  @override
+  String get meetingAuthorizationNotice =>
+      'Liên kết không tự động cấp quyền truy cập. Phòng họp sẽ kiểm tra tài khoản và quyền tham gia của bạn.';
+
+  @override
+  String get meetingAuthRequiredTitle => 'Đăng nhập để tham gia cuộc họp';
+
+  @override
+  String get meetingAuthRequiredDescription =>
+      'Liên kết đã được giữ tạm thời trên thiết bị này. Sau khi đăng nhập, bạn sẽ quay lại bước tham gia.';
+
+  @override
+  String get meetingReadyTitle => 'Sẵn sàng mở phòng họp';
+
+  @override
+  String get meetingEnterRoom => 'Vào phòng họp';
+
+  @override
+  String get meetingOpenFailedTitle => 'Chưa thể mở phòng họp';
+
+  @override
+  String get meetingOpenFailedDescription =>
+      'Vui lòng kiểm tra trình duyệt và kết nối mạng rồi thử lại.';
+
+  @override
+  String get meetingDetailsAction => 'Chi tiết';
+
+  @override
+  String get homeMeetingFallbackTitle => 'Phòng họp';
+
+  @override
+  String get homeMeetingFallbackDescription =>
+      'Tham gia bằng liên kết cuộc họp.';
+
+  @override
+  String get homeUpcomingMeetingTitle => 'Buổi tư vấn sắp tới';
+
+  @override
+  String homeMeetingSchedule(String date, String time) {
+    return '$date • $time';
+  }
 }

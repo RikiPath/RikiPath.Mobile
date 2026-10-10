@@ -48,6 +48,8 @@ void main() {
     expect(AppRoutes.verifyEmail, '/auth/verify-email');
     expect(AppRoutes.unsupportedRole, '/auth/unsupported-role');
     expect(AppRoutes.onboarding, '/onboarding');
+    expect(AppRoutes.meeting, '/meeting');
+    expect(AppRoutes.meetingJoin, '/meeting/join');
     expect(AppRoutes.mentor, '/mentor');
     expect(AppRoutes.mentorAvailability, '/mentor/availability');
     expect(AppRoutes.mentorMeetings, '/mentor/meetings');
@@ -441,6 +443,14 @@ void main() {
     );
     expect(
       authRouteRedirect(
+        authState: AuthSessionState.unauthenticated,
+        role: null,
+        matchedLocation: AppRoutes.meetingJoin,
+      ),
+      isNull,
+    );
+    expect(
+      authRouteRedirect(
         authState: AuthSessionState.authenticated,
         role: BackendUserRole.learner,
         matchedLocation: AppRoutes.verifyEmail,
@@ -452,6 +462,14 @@ void main() {
         authState: AuthSessionState.authenticated,
         role: BackendUserRole.mentor,
         matchedLocation: AppRoutes.mentor,
+      ),
+      isNull,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.mentor,
+        matchedLocation: AppRoutes.meetingJoin,
       ),
       isNull,
     );

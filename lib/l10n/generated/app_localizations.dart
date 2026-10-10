@@ -5419,6 +5419,144 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'{current}/{total}'**
   String writingProgress(int current, int total);
+
+  /// No description provided for @orDivider.
+  ///
+  /// In vi, this message translates to:
+  /// **'hoặc'**
+  String get orDivider;
+
+  /// No description provided for @meetingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phòng họp'**
+  String get meetingTitle;
+
+  /// No description provided for @meetingJoinTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tham gia cuộc họp'**
+  String get meetingJoinTitle;
+
+  /// No description provided for @meetingJoinAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tham gia cuộc họp'**
+  String get meetingJoinAction;
+
+  /// No description provided for @meetingContinueAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiếp tục'**
+  String get meetingContinueAction;
+
+  /// No description provided for @meetingLandingDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập liên kết phòng họp đã được chia sẻ với bạn. RikiPath sẽ mở phòng bằng trình duyệt an toàn.'**
+  String get meetingLandingDescription;
+
+  /// No description provided for @meetingJoinDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dán liên kết đầy đủ bắt đầu bằng http:// hoặc https:// để tiếp tục.'**
+  String get meetingJoinDescription;
+
+  /// No description provided for @meetingLinkLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Liên kết cuộc họp'**
+  String get meetingLinkLabel;
+
+  /// No description provided for @meetingLinkHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'https://example.com/meeting/...'**
+  String get meetingLinkHint;
+
+  /// No description provided for @meetingLinkRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập liên kết cuộc họp.'**
+  String get meetingLinkRequired;
+
+  /// No description provided for @meetingLinkInvalid.
+  ///
+  /// In vi, this message translates to:
+  /// **'Liên kết không hợp lệ. Chỉ chấp nhận địa chỉ http hoặc https đầy đủ.'**
+  String get meetingLinkInvalid;
+
+  /// No description provided for @meetingAuthorizationNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Liên kết không tự động cấp quyền truy cập. Phòng họp sẽ kiểm tra tài khoản và quyền tham gia của bạn.'**
+  String get meetingAuthorizationNotice;
+
+  /// No description provided for @meetingAuthRequiredTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập để tham gia cuộc họp'**
+  String get meetingAuthRequiredTitle;
+
+  /// No description provided for @meetingAuthRequiredDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Liên kết đã được giữ tạm thời trên thiết bị này. Sau khi đăng nhập, bạn sẽ quay lại bước tham gia.'**
+  String get meetingAuthRequiredDescription;
+
+  /// No description provided for @meetingReadyTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sẵn sàng mở phòng họp'**
+  String get meetingReadyTitle;
+
+  /// No description provided for @meetingEnterRoom.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vào phòng họp'**
+  String get meetingEnterRoom;
+
+  /// No description provided for @meetingOpenFailedTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể mở phòng họp'**
+  String get meetingOpenFailedTitle;
+
+  /// No description provided for @meetingOpenFailedDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng kiểm tra trình duyệt và kết nối mạng rồi thử lại.'**
+  String get meetingOpenFailedDescription;
+
+  /// No description provided for @meetingDetailsAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiết'**
+  String get meetingDetailsAction;
+
+  /// No description provided for @homeMeetingFallbackTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phòng họp'**
+  String get homeMeetingFallbackTitle;
+
+  /// No description provided for @homeMeetingFallbackDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tham gia bằng liên kết cuộc họp.'**
+  String get homeMeetingFallbackDescription;
+
+  /// No description provided for @homeUpcomingMeetingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Buổi tư vấn sắp tới'**
+  String get homeUpcomingMeetingTitle;
+
+  /// No description provided for @homeMeetingSchedule.
+  ///
+  /// In vi, this message translates to:
+  /// **'{date} • {time}'**
+  String homeMeetingSchedule(String date, String time);
 }
 
 class _AppLocalizationsDelegate

@@ -7,6 +7,8 @@ import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart
 import 'package:rikipath_mobile/features/home/domain/home_dashboard.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
+import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
+import 'package:rikipath_mobile/features/meeting/presentation/meeting_home_section.dart';
 import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
 
 class HomeDashboardView extends StatelessWidget {
@@ -16,6 +18,7 @@ class HomeDashboardView extends StatelessWidget {
     required this.learningState,
     required this.analyticsState,
     required this.practiceState,
+    required this.upcomingMeetingState,
     required this.onRefreshLive,
     required this.onRetryHome,
     required this.onRetryLearning,
@@ -27,6 +30,9 @@ class HomeDashboardView extends StatelessWidget {
     required this.onOpenPractice,
     required this.onOpenReview,
     required this.onOpenAnalytics,
+    required this.onOpenMeeting,
+    required this.onOpenMeetingDetail,
+    required this.onJoinMeeting,
     super.key,
   });
 
@@ -35,6 +41,7 @@ class HomeDashboardView extends StatelessWidget {
   final AsyncValue<LearningSnapshot> learningState;
   final AsyncValue<LearnerAnalytics> analyticsState;
   final AsyncValue<DemoPracticeState> practiceState;
+  final AsyncValue<UpcomingMeeting?> upcomingMeetingState;
   final Future<void> Function() onRefreshLive;
   final VoidCallback onRetryHome;
   final VoidCallback onRetryLearning;
@@ -46,6 +53,9 @@ class HomeDashboardView extends StatelessWidget {
   final VoidCallback onOpenPractice;
   final VoidCallback onOpenReview;
   final VoidCallback onOpenAnalytics;
+  final VoidCallback onOpenMeeting;
+  final ValueChanged<int> onOpenMeetingDetail;
+  final ValueChanged<Uri> onJoinMeeting;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +100,13 @@ class HomeDashboardView extends StatelessWidget {
             onOpenReview: onOpenReview,
             onOpenPractice: onOpenPractice,
             onRetry: onRetryPractice,
+          ),
+          const SizedBox(height: AppSpacing.space4),
+          MeetingHomeSection(
+            state: upcomingMeetingState,
+            onOpenMeeting: onOpenMeeting,
+            onOpenDetail: onOpenMeetingDetail,
+            onJoin: onJoinMeeting,
           ),
           const SizedBox(height: AppSpacing.space4),
           _NotebookShortcut(onPressed: onOpenNotebook),

@@ -2925,4 +2925,80 @@ class AppLocalizationsJa extends AppLocalizations {
   String writingProgress(int current, int total) {
     return '$current/$total';
   }
+
+  @override
+  String get orDivider => 'または';
+
+  @override
+  String get meetingTitle => 'ミーティングルーム';
+
+  @override
+  String get meetingJoinTitle => 'ミーティングに参加';
+
+  @override
+  String get meetingJoinAction => 'ミーティングに参加';
+
+  @override
+  String get meetingContinueAction => '次へ';
+
+  @override
+  String get meetingLandingDescription =>
+      '共有されたミーティングリンクを入力してください。RikiPathが安全にブラウザでルームを開きます。';
+
+  @override
+  String get meetingJoinDescription =>
+      'http:// または https:// で始まる完全なリンクを貼り付けてください。';
+
+  @override
+  String get meetingLinkLabel => 'ミーティングリンク';
+
+  @override
+  String get meetingLinkHint => 'https://example.com/meeting/...';
+
+  @override
+  String get meetingLinkRequired => 'ミーティングリンクを入力してください。';
+
+  @override
+  String get meetingLinkInvalid =>
+      'リンクが正しくありません。完全な http または https アドレスのみ使用できます。';
+
+  @override
+  String get meetingAuthorizationNotice =>
+      'リンクだけでは参加権限は付与されません。ルーム側でアカウントと参加権限が確認されます。';
+
+  @override
+  String get meetingAuthRequiredTitle => 'ログインしてミーティングに参加';
+
+  @override
+  String get meetingAuthRequiredDescription =>
+      'リンクはこの端末に一時的に保持されます。ログイン後、参加画面に戻ります。';
+
+  @override
+  String get meetingReadyTitle => 'ミーティングを開く準備ができました';
+
+  @override
+  String get meetingEnterRoom => 'ルームに入る';
+
+  @override
+  String get meetingOpenFailedTitle => 'ミーティングを開けません';
+
+  @override
+  String get meetingOpenFailedDescription => 'ブラウザと通信環境を確認して、もう一度お試しください。';
+
+  @override
+  String get meetingDetailsAction => '詳細';
+
+  @override
+  String get homeMeetingFallbackTitle => 'ミーティングルーム';
+
+  @override
+  String get homeMeetingFallbackDescription => 'ミーティングリンクから参加します。';
+
+  @override
+  String get homeUpcomingMeetingTitle => '次の相談予定';
+
+  @override
+  String homeMeetingSchedule(String date, String time) {
+    return '$date • $time';
+  }
 }

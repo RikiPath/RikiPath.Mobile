@@ -25,6 +25,8 @@ import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart
 import 'package:rikipath_mobile/features/learning/presentation/learning_roadmap_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/lesson_screen.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
+import 'package:rikipath_mobile/features/meeting/presentation/meeting_join_screen.dart';
+import 'package:rikipath_mobile/features/meeting/presentation/meeting_landing_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_availability_screen.dart';
@@ -138,6 +140,16 @@ GoRouter createAppRouter({
         builder: (context, state) => UnsupportedRoleScreen(
           role: authSession.currentRole?.apiValue ?? 'Unknown',
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.meeting,
+        builder: (context, state) => const MeetingLandingScreen(),
+        routes: [
+          GoRoute(
+            path: AppRoutes.meetingJoinSegment,
+            builder: (context, state) => const MeetingJoinScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.mentor,
@@ -490,16 +502,20 @@ String? authRouteRedirect({
       matchedLocation == AppRoutes.forgotPassword;
   final isPublicAuthRoute =
       isEntryAuthRoute || matchedLocation == AppRoutes.verifyEmail;
+  final isPublicMeetingRoute =
+      matchedLocation == AppRoutes.meeting ||
+      matchedLocation.startsWith('${AppRoutes.meeting}/');
 
   return switch (authState) {
     AuthSessionState.unknown => isSplash ? null : AppRoutes.splash,
     AuthSessionState.unauthenticated =>
-      isPublicAuthRoute ? null : AppRoutes.login,
+      isPublicAuthRoute || isPublicMeetingRoute ? null : AppRoutes.login,
     AuthSessionState.authenticated => _authenticatedRoleRedirect(
       role: role,
       matchedLocation: matchedLocation,
       isSplash: isSplash,
       isAuthRoute: isPublicAuthRoute,
+      isMeetingRoute: isPublicMeetingRoute,
     ),
   };
 }
@@ -509,6 +525,7 @@ String? _authenticatedRoleRedirect({
   required String matchedLocation,
   required bool isSplash,
   required bool isAuthRoute,
+  required bool isMeetingRoute,
 }) {
   final isMentorRoute =
       matchedLocation == AppRoutes.mentor ||
@@ -525,7 +542,7 @@ String? _authenticatedRoleRedirect({
   }
 
   if (role == BackendUserRole.mentor) {
-    return isMentorRoute ? null : AppRoutes.mentor;
+    return isMentorRoute || isMeetingRoute ? null : AppRoutes.mentor;
   }
 
   return matchedLocation == AppRoutes.unsupportedRole

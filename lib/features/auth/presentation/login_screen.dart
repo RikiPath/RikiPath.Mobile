@@ -8,6 +8,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/login_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_page.dart';
+import 'package:rikipath_mobile/features/meeting/application/meeting_join_intent_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -38,7 +39,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           rememberSession: _rememberSession,
         );
     if (!mounted) return;
-    if (succeeded) context.go(AppRoutes.home);
+    if (succeeded) {
+      final hasPendingMeeting = ref
+          .read(meetingJoinIntentControllerProvider)
+          .hasPendingTarget;
+      context.go(hasPendingMeeting ? AppRoutes.meetingJoin : AppRoutes.home);
+    }
   }
 
   @override
@@ -141,6 +147,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 trailingIcon: Icons.arrow_forward,
                 isLoading: state.isLoading,
                 onPressed: _submit,
+              ),
+              const SizedBox(height: AppSpacing.space4),
+              Row(
+                children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.space3,
+                    ),
+                    child: Text(l10n.orDivider, style: AppTypography.metadata),
+                  ),
+                  const Expanded(child: Divider()),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.space3),
+              RikiSecondaryButton(
+                key: const ValueKey<String>('login_meeting_join_button'),
+                label: l10n.meetingJoinAction,
+                leadingIcon: Icons.videocam_outlined,
+                onPressed: state.isLoading
+                    ? null
+                    : () => context.push(AppRoutes.meetingJoin),
               ),
               if (state.isLoading) ...[
                 const SizedBox(height: AppSpacing.space4),

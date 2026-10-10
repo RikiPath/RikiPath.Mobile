@@ -10,8 +10,13 @@ import 'package:rikipath_mobile/features/home/presentation/widgets/home_dashboar
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
+import 'package:rikipath_mobile/features/meeting/application/upcoming_meeting_provider.dart';
+import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -25,6 +30,7 @@ class HomeScreen extends ConsumerWidget {
     final analyticsState = ref.watch(learnerAnalyticsControllerProvider);
     final practiceState = ref.watch(demoPracticeControllerProvider);
     final notificationState = ref.watch(notificationControllerProvider);
+    final upcomingMeetingState = ref.watch(upcomingMeetingProvider);
     final analytics = analyticsState.value;
     final selectedLevel = journeyState.value?.hasSelectedLevel == true
         ? journeyState.value?.selectedLevel
@@ -52,6 +58,7 @@ class HomeScreen extends ConsumerWidget {
           learningState: learningState,
           analyticsState: analyticsState,
           practiceState: practiceState,
+          upcomingMeetingState: upcomingMeetingState,
           onRefreshLive: () => _refreshLiveData(ref),
           onRetryHome: ref.read(homeControllerProvider.notifier).retry,
           onRetryLearning: ref.read(learningControllerProvider.notifier).retry,
@@ -94,10 +101,25 @@ class HomeScreen extends ConsumerWidget {
           },
           onOpenReview: () => context.go(AppRoutes.dailyReview),
           onOpenAnalytics: () => context.push(AppRoutes.analytics),
+          onOpenMeeting: () => context.push(AppRoutes.meeting),
+          onOpenMeetingDetail: (bookingId) =>
+              context.push(AppRoutes.learnerMentorBookingDetail(bookingId)),
+          onJoinMeeting: (uri) => _openMeeting(ref, context, uri),
         ),
       ),
     );
   }
+}
+
+Future<void> _openMeeting(WidgetRef ref, BuildContext context, Uri uri) async {
+  final opened = await ref.read(mentorMeetingLinkLauncherProvider).open(uri);
+  if (opened || !context.mounted) return;
+  ref
+      .read(rikiToastServiceProvider.notifier)
+      .error(
+        title: context.l10n.meetingOpenFailedTitle,
+        description: context.l10n.meetingOpenFailedDescription,
+      );
 }
 
 Future<void> _refreshLiveData(WidgetRef ref) async {
@@ -112,5 +134,6 @@ Future<void> _refreshLiveData(WidgetRef ref) async {
   await Future.wait(<Future<void>>[
     settle(ref.refresh(learnerAnalyticsControllerProvider.future)),
     settle(ref.refresh(notificationControllerProvider.future)),
+    settle(ref.refresh(learnerMentorBookingsControllerProvider.future)),
   ]);
 }

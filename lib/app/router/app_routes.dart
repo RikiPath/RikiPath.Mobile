@@ -8,6 +8,10 @@ abstract final class AppRoutes {
   static const String unsupportedRole = '/auth/unsupported-role';
   static const String onboarding = '/onboarding';
 
+  static const String meeting = '/meeting';
+  static const String meetingJoinSegment = 'join';
+  static const String meetingJoin = '$meeting/$meetingJoinSegment';
+
   static const String mentor = '/mentor';
   static const String mentorAvailabilitySegment = 'availability';
   static const String mentorMeetingsSegment = 'meetings';
