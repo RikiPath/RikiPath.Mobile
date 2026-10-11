@@ -20,6 +20,7 @@ import 'package:rikipath_mobile/features/auth/presentation/splash_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/update_email_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/verify_email_screen.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
+import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
@@ -523,6 +524,10 @@ void main() {
 
       expect(find.byType(destination.screen), findsOneWidget);
       expect(find.byType(RikiBottomNavigationBar), findsOneWidget);
+      expect(
+        find.byType(HomeHeader),
+        destination.path == AppRoutes.learn ? findsNothing : findsOneWidget,
+      );
       final navigationBar = tester.widget<RikiBottomNavigationBar>(
         find.byType(RikiBottomNavigationBar),
       );

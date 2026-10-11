@@ -20,11 +20,8 @@ class LearnScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.root(
-        level: snapshot?.hasSelectedLevel == true ? snapshot?.jlptTarget : null,
         streakDays: snapshot?.streakDays,
         hasUnreadNotifications: snapshot?.hasUnreadNotifications ?? false,
-        initials: snapshot?.initials,
-        onProfilePressed: () => context.go(AppRoutes.profile),
       ),
       body: SafeArea(
         top: false,

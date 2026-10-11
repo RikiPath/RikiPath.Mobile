@@ -171,6 +171,44 @@ class NotebookController extends AsyncNotifier<NotebookLibraryState> {
     }
   }
 
+  Future<void> retrySelectedCollection() async {
+    final current = state.value;
+    final collection = current?.selectedCollection;
+    if (current == null ||
+        collection == null ||
+        current.isLoadingEntries ||
+        collection.source != NotebookDataSource.remote) {
+      return;
+    }
+
+    state = AsyncData(
+      current.copyWith(
+        isLoadingEntries: true,
+        clearEntriesError: true,
+        clearMutationError: true,
+      ),
+    );
+    try {
+      final entries = await _repository.loadEntries(collection);
+      state = AsyncData(
+        state.requireValue.copyWith(
+          liveEntries: entries,
+          isLoadingEntries: false,
+        ),
+      );
+    } catch (error) {
+      state = AsyncData(
+        state.requireValue.copyWith(
+          isLoadingEntries: false,
+          entriesError: _message(
+            error,
+            ref.read(appLocalizationsProvider).notebookEntriesLoadFailed,
+          ),
+        ),
+      );
+    }
+  }
+
   Future<bool> createCollection({
     required String name,
     String? description,
@@ -491,7 +529,7 @@ class NotebookLibraryState {
   List<NotebookEntry> get entries {
     final candidates = selectedCollection?.source == NotebookDataSource.fixture
         ? localEntries
-        : <NotebookEntry>[...localEntries, ...liveEntries];
+        : liveEntries;
     final sorted = List<NotebookEntry>.of(candidates)
       ..sort((left, right) => right.addedAt.compareTo(left.addedAt));
     final unique = <NotebookEntryKey, NotebookEntry>{};

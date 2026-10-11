@@ -132,7 +132,7 @@ class _RikiTextFieldState extends State<RikiTextField>
   Widget build(BuildContext context) {
     final resolvedSuffix = _buildSuffix(_hasError);
     final isProcessing = !widget.enabled || widget.readOnly;
-    final showFocusGlow =
+    final isFocused =
         _effectiveFocusNode.hasFocus && widget.enabled && !_hasError;
 
     return Column(
@@ -163,9 +163,7 @@ class _RikiTextFieldState extends State<RikiTextField>
             curve: Curves.easeOutCubic,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadius.input),
-              boxShadow: showFocusGlow
-                  ? AppShadows.authInputFocused
-                  : const <BoxShadow>[],
+              boxShadow: const <BoxShadow>[],
             ),
             child: Semantics(
               label: widget.semanticLabel ?? widget.label,
@@ -199,7 +197,7 @@ class _RikiTextFieldState extends State<RikiTextField>
                           widget.prefixIcon,
                           color: _hasError
                               ? AppColors.error
-                              : showFocusGlow
+                              : isFocused
                               ? AppColors.brandPrimary
                               : AppColors.textMuted,
                         ),

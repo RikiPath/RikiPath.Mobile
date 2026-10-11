@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
+import 'package:rikipath_mobile/features/notebook/presentation/widgets/notebook_view.dart';
 
 class NotebookEntryDetailScreen extends ConsumerWidget {
   const NotebookEntryDetailScreen({required this.entryKey, super.key});
@@ -121,45 +123,127 @@ class _EntryDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final addedAt = DateFormat.yMMMd(locale).format(entry.addedAt.toLocal());
     return ListView(
       key: const ValueKey<String>('notebook_entry_detail_view'),
-      padding: const EdgeInsets.all(AppSpacing.space4),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.space4,
+        AppSpacing.space3,
+        AppSpacing.space4,
+        AppSpacing.space8,
+      ),
       children: [
         RikiCard(
+          borderColor: AppColors.learnerOutline,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (entry.reading != null)
+                          Text(
+                            entry.reading!,
+                            style: AppTypography.cardTitle.copyWith(
+                              color: AppColors.brandPrimary,
+                            ),
+                          ),
+                        Text(
+                          entry.term,
+                          style: AppTypography.heroTitle.copyWith(
+                            color: AppColors.learnerTextPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  NotebookContentTypeBadge(type: entry.contentType),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.space5),
               Text(
-                entry.term,
-                style: AppTypography.heroTitle.copyWith(
-                  color: AppColors.learnerTextPrimary,
+                context.l10n.meaning,
+                style: AppTypography.metadata.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              if (entry.reading != null) ...[
-                const SizedBox(height: AppSpacing.space1),
-                Text(
-                  entry.reading!,
-                  style: AppTypography.cardTitle.copyWith(
-                    color: AppColors.brandPrimary,
-                  ),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.space4),
+              const SizedBox(height: AppSpacing.space2),
               Text(entry.meaning, style: AppTypography.sectionTitle),
-              if (entry.note != null) ...[
-                const SizedBox(height: AppSpacing.space3),
-                Text(entry.note!, style: AppTypography.bodySmall),
-              ],
             ],
           ),
         ),
+        if (entry.note != null) ...[
+          const SizedBox(height: AppSpacing.space4),
+          RikiCard(
+            borderColor: AppColors.learnerOutline,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.edit_note_outlined,
+                      color: AppColors.brandPrimary,
+                    ),
+                    const SizedBox(width: AppSpacing.space2),
+                    Text(
+                      context.l10n.personalNoteLabel,
+                      style: AppTypography.cardTitle,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.space3),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.space3),
+                  decoration: BoxDecoration(
+                    color: AppColors.learnerSurfaceLow,
+                    borderRadius: BorderRadius.circular(AppRadius.input),
+                  ),
+                  child: Text(entry.note!, style: AppTypography.body),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: AppSpacing.space4),
+        RikiCard(
+          borderColor: AppColors.learnerOutline,
+          child: Row(
+            children: [
+              const Icon(Icons.event_outlined, color: AppColors.textSecondary),
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.addedToNotebookLabel,
+                      style: AppTypography.metadata,
+                    ),
+                    const SizedBox(height: AppSpacing.space1),
+                    Text(addedAt, style: AppTypography.cardTitle),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.space5),
         OutlinedButton.icon(
           key: const ValueKey<String>('notebook_detail_remove_button'),
           onPressed: onRemove,
           icon: const Icon(Icons.delete_outline),
           label: Text(context.l10n.removeFromNotebook),
-          style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.error,
+            side: const BorderSide(color: AppColors.errorBorder),
+          ),
         ),
       ],
     );

@@ -24,7 +24,7 @@ class ProfileDetailHeader extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.profileBackground,
+      backgroundColor: AppColors.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,

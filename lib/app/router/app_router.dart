@@ -27,6 +27,8 @@ import 'package:rikipath_mobile/features/learning/presentation/lesson_screen.dar
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_join_screen.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_landing_screen.dart';
+import 'package:rikipath_mobile/features/meeting/presentation/meeting_room_screen.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_availability_screen.dart';
@@ -148,6 +150,18 @@ GoRouter createAppRouter({
           GoRoute(
             path: AppRoutes.meetingJoinSegment,
             builder: (context, state) => const MeetingJoinScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.meetingRoomSegment,
+            builder: (context, state) {
+              final roomId = state.pathParameters['roomId'];
+              final extra = state.extra;
+              final room = extra is MeetingRoomReference
+                  ? extra
+                  : MeetingRoomReference.resolve(roomId: roomId);
+              if (room == null) return const MeetingJoinScreen();
+              return MeetingRoomScreen(room: room);
+            },
           ),
         ],
       ),
@@ -360,6 +374,12 @@ GoRouter createAppRouter({
                 path: AppRoutes.notebook,
                 builder: (context, state) => const NotebookScreen(),
                 routes: [
+                  GoRoute(
+                    path: AppRoutes.notebookCollectionSegment,
+                    builder: (context, state) => NotebookCollectionScreen(
+                      collectionKey: state.pathParameters['collectionKey']!,
+                    ),
+                  ),
                   GoRoute(
                     path: AppRoutes.notebookVocabularyDetailSegment,
                     builder: (context, state) => VocabularyDetailScreen(

@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/app/theme/app_typography.dart';
 
 export 'app_borders.dart';
 export 'app_colors.dart';
+export 'app_feature_tones.dart';
 export 'app_radius.dart';
 export 'app_shadows.dart';
 export 'app_spacing.dart';
@@ -49,6 +50,7 @@ abstract final class AppTheme {
         foregroundColor: AppColors.textPrimary,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: AppTypography.sectionTitle,
       ),

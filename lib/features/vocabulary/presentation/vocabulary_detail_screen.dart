@@ -30,10 +30,7 @@ class VocabularyDetailScreen extends ConsumerWidget {
       appBar: LearningHeader.detail(
         title: context.l10n.vocabularyDetail,
         subtitle: entry?.reading ?? context.l10n.library,
-        level: entry?.level,
-        initials: null,
         onBack: context.pop,
-        onProfilePressed: () => context.go(AppRoutes.profile),
       ),
       body: SafeArea(
         top: false,

@@ -133,7 +133,33 @@ class _WritingScriptTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _SegmentedControl(
+      surfaceKey: const ValueKey<String>('writing_script_control_surface'),
+      children: [
+        for (final script in WritingScript.values)
+          Expanded(
+            child: _SegmentButton(
+              key: ValueKey<String>('writing_tab_${script.name}'),
+              label: _scriptLabel(context, script),
+              selected: script == selected,
+              onPressed: () => context.go(_scriptRoute(script)),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _SegmentedControl extends StatelessWidget {
+  const _SegmentedControl({required this.surfaceKey, required this.children});
+
+  final Key surfaceKey;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
     return DecoratedBox(
+      key: surfaceKey,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.input),
@@ -142,19 +168,7 @@ class _WritingScriptTabs extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.space1),
-        child: Row(
-          children: [
-            for (final script in WritingScript.values)
-              Expanded(
-                child: _SegmentButton(
-                  key: ValueKey<String>('writing_tab_${script.name}'),
-                  label: _scriptLabel(context, script),
-                  selected: script == selected,
-                  onPressed: () => context.go(_scriptRoute(script)),
-                ),
-              ),
-          ],
-        ),
+        child: Row(children: children),
       ),
     );
   }
@@ -168,7 +182,10 @@ class _KanjiCollectionControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return _SegmentedControl(
+      surfaceKey: const ValueKey<String>(
+        'writing_kanji_collection_control_surface',
+      ),
       children: [
         for (final collection in KanjiWritingCollection.values) ...[
           Expanded(
@@ -183,8 +200,6 @@ class _KanjiCollectionControl extends StatelessWidget {
               onPressed: () => onChanged(collection),
             ),
           ),
-          if (collection != KanjiWritingCollection.values.last)
-            const SizedBox(width: AppSpacing.space2),
         ],
       ],
     );
@@ -206,7 +221,7 @@ class _SegmentButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? AppColors.brandTint : Colors.transparent,
+      color: selected ? AppColors.brandTint : AppColors.surface,
       borderRadius: BorderRadius.circular(AppRadius.compact),
       child: InkWell(
         onTap: onPressed,
@@ -221,11 +236,9 @@ class _SegmentButton extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.badgeText.copyWith(
-              color: selected
-                  ? AppColors.brandPrimary
-                  : AppColors.textSecondary,
-              fontWeight: FontWeight.w700,
+            style: AppTypography.inputLabel.copyWith(
+              color: selected ? AppColors.brandPrimary : AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),

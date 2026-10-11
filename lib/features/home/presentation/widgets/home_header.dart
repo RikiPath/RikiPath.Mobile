@@ -1,46 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
-import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
+import 'package:rikipath_mobile/core/widgets/riki_language_switcher.dart';
+import 'package:rikipath_mobile/core/widgets/riki_learner_header.dart';
 import 'package:rikipath_mobile/core/widgets/riki_loading.dart';
 
 class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
   const HomeHeader({
-    required this.level,
     required this.streakDays,
     required this.isStreakLoading,
     required this.unreadNotificationCount,
-    required this.initials,
-    required this.onProfilePressed,
     required this.onNotificationsPressed,
     super.key,
   });
 
-  final JlptLevel? level;
   final int? streakDays;
   final bool isStreakLoading;
   final int? unreadNotificationCount;
-  final String? initials;
-  final VoidCallback onProfilePressed;
   final VoidCallback onNotificationsPressed;
 
   @override
-  Size get preferredSize => const Size.fromHeight(64);
+  Size get preferredSize => const Size.fromHeight(RikiLearnerHeader.height);
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      automaticallyImplyLeading: false,
-      backgroundColor: AppColors.surface,
-      surfaceTintColor: Colors.transparent,
-      toolbarHeight: 64,
-      titleSpacing: AppSpacing.space4,
-      elevation: 0,
-      flexibleSpace: const DecoratedBox(
-        decoration: BoxDecoration(boxShadow: AppShadows.learnerHeader),
-      ),
-      title: RikiBrandLockup(level: level, compact: true),
+    return RikiLearnerHeader(
+      title: const RikiBrandLockup(compact: true),
       actions: [
         if (streakDays != null)
           Container(
@@ -129,34 +115,7 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
         ),
-        Semantics(
-          button: true,
-          label: context.l10n.openProfile,
-          child: InkResponse(
-            onTap: onProfilePressed,
-            radius: 24,
-            child: SizedBox.square(
-              dimension: 44,
-              child: Center(
-                child: CircleAvatar(
-                  radius: 16,
-                  backgroundColor: AppColors.brandPrimary,
-                  foregroundColor: Colors.white,
-                  child: initials == null
-                      ? const Icon(Icons.person_outline, size: 18)
-                      : Text(
-                          initials!,
-                          style: AppTypography.badgeText.copyWith(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        const RikiLanguageSwitcher(),
         const SizedBox(width: AppSpacing.space2),
       ],
     );

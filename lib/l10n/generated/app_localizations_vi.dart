@@ -1323,6 +1323,25 @@ class AppLocalizationsVi extends AppLocalizations {
   String get yourCollections => 'Bộ sưu tập của bạn';
 
   @override
+  String get collectionSearchHint => 'Tìm bộ sưu tập…';
+
+  @override
+  String get noMatchingCollection => 'Không tìm thấy bộ sưu tập phù hợp';
+
+  @override
+  String get collectionSearchEmptyMessage =>
+      'Thử từ khóa khác hoặc xóa tìm kiếm hiện tại.';
+
+  @override
+  String openCollection(String name) {
+    return 'Mở bộ sưu tập $name';
+  }
+
+  @override
+  String get notebookCollectionUnavailable =>
+      'Bộ sưu tập này không còn khả dụng.';
+
+  @override
   String get notebookSearchHint => 'Tìm Kanji, Kana hoặc nghĩa…';
 
   @override
@@ -1354,6 +1373,12 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get savedItem => 'Mục đã lưu';
+
+  @override
+  String get personalNoteLabel => 'Ghi chú cá nhân';
+
+  @override
+  String get addedToNotebookLabel => 'Đã thêm vào Sổ từ';
 
   @override
   String get notebookEmptyTitle => 'Sổ từ của bạn đang trống';
@@ -3095,24 +3120,46 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get meetingLandingDescription =>
-      'Nhập liên kết phòng họp đã được chia sẻ với bạn. RikiPath sẽ mở phòng bằng trình duyệt an toàn.';
+      'Tham gia bằng mã phòng hoặc liên kết RikiPath được chia sẻ với bạn.';
 
   @override
   String get meetingJoinDescription =>
-      'Dán liên kết đầy đủ bắt đầu bằng http:// hoặc https:// để tiếp tục.';
+      'Nhập mã phòng hoặc dán liên kết RikiPath để tham gia.';
 
   @override
-  String get meetingLinkLabel => 'Liên kết cuộc họp';
+  String get meetingLinkLabel => 'Mã phòng hoặc liên kết';
 
   @override
-  String get meetingLinkHint => 'https://example.com/meeting/...';
+  String get meetingLinkHint => 'Nhập mã phòng hoặc dán liên kết';
 
   @override
-  String get meetingLinkRequired => 'Vui lòng nhập liên kết cuộc họp.';
+  String get meetingLinkRequired => 'Vui lòng nhập mã phòng hoặc liên kết.';
 
   @override
   String get meetingLinkInvalid =>
-      'Liên kết không hợp lệ. Chỉ chấp nhận địa chỉ http hoặc https đầy đủ.';
+      'Mã phòng không hợp lệ. Vui lòng kiểm tra lại.';
+
+  @override
+  String get meetingPasteAction => 'Dán';
+
+  @override
+  String get meetingRoomCodeHelper => 'Mã phòng nằm ở cuối liên kết cuộc họp.';
+
+  @override
+  String get meetingErrorRoomNotFound =>
+      'Không tìm thấy phòng họp này. Vui lòng kiểm tra lại mã phòng.';
+
+  @override
+  String get meetingErrorNotAuthorized =>
+      'Tài khoản của bạn không có quyền tham gia phòng họp này.';
+
+  @override
+  String get meetingErrorAuthRequired =>
+      'Vui lòng đăng nhập để tham gia phòng họp.';
+
+  @override
+  String get meetingErrorNetwork =>
+      'Không thể kết nối tới phòng họp. Vui lòng kiểm tra mạng và thử lại.';
 
   @override
   String get meetingAuthorizationNotice =>
@@ -3123,7 +3170,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get meetingAuthRequiredDescription =>
-      'Liên kết đã được giữ tạm thời trên thiết bị này. Sau khi đăng nhập, bạn sẽ quay lại bước tham gia.';
+      'Mã phòng đã được giữ tạm thời trên thiết bị này. Sau khi đăng nhập, bạn sẽ tự động quay lại phòng họp.';
 
   @override
   String get meetingReadyTitle => 'Sẵn sàng mở phòng họp';
@@ -3142,11 +3189,119 @@ class AppLocalizationsVi extends AppLocalizations {
   String get meetingDetailsAction => 'Chi tiết';
 
   @override
+  String meetingNativeParticipantsCount(int count) {
+    return '$count người tham gia';
+  }
+
+  @override
+  String get meetingNativeConnecting => 'Đang kết nối phòng họp...';
+
+  @override
+  String get meetingNativeJoining => 'Đang vào phòng...';
+
+  @override
+  String get meetingNativeReconnecting => 'Đang kết nối lại...';
+
+  @override
+  String get meetingNativeFailedTitle => 'Không thể kết nối phòng họp';
+
+  @override
+  String get meetingNativeFailedDescription =>
+      'Vui lòng kiểm tra kết nối và quyền tham gia phòng rồi thử lại.';
+
+  @override
+  String get meetingNativeRetry => 'Thử lại';
+
+  @override
+  String get meetingNativeOpenWeb => 'Mở phiên bản web';
+
+  @override
+  String get meetingNativeMicrophone => 'Mic';
+
+  @override
+  String get meetingNativeCamera => 'Camera';
+
+  @override
+  String get meetingNativeSwitchCamera => 'Đổi camera';
+
+  @override
+  String get meetingNativeRaiseHand => 'Giơ tay';
+
+  @override
+  String get meetingNativeLowerHand => 'Hạ tay';
+
+  @override
+  String get meetingNativeChat => 'Trò chuyện';
+
+  @override
+  String get meetingNativeParticipants => 'Người tham gia';
+
+  @override
+  String get meetingNativeMoreActions => 'Tùy chọn khác';
+
+  @override
+  String get meetingNativeMinimize => 'Thu nhỏ';
+
+  @override
+  String get meetingNativeLeave => 'Rời phòng';
+
+  @override
+  String get meetingNativeLeaveTitle => 'Rời cuộc họp?';
+
+  @override
+  String get meetingNativeLeaveDescription =>
+      'Camera và microphone sẽ được tắt khi bạn rời phòng.';
+
+  @override
+  String get meetingNativeStay => 'Ở lại';
+
+  @override
+  String get meetingNativeNoParticipants => 'Đang chờ người khác tham gia';
+
+  @override
+  String get meetingNativeChatEmpty => 'Chưa có tin nhắn nào.';
+
+  @override
+  String get meetingNativeChatHint => 'Nhập tin nhắn...';
+
+  @override
+  String get meetingNativeSend => 'Gửi';
+
+  @override
+  String get meetingNativeYou => 'Bạn';
+
+  @override
+  String get meetingNativeMentor => 'Mentor';
+
+  @override
+  String get meetingNativeLearner => 'Học viên';
+
+  @override
+  String get meetingNativePermissionDenied =>
+      'Bạn có thể tiếp tục nghe/xem. Hãy cấp quyền Camera và Microphone trong Cài đặt để phát hình và âm thanh.';
+
+  @override
+  String get meetingNativeCameraDenied =>
+      'Camera chưa được cấp quyền. Bạn vẫn có thể tham gia bằng âm thanh.';
+
+  @override
+  String get meetingNativeMicrophoneDenied =>
+      'Microphone chưa được cấp quyền. Bạn vẫn có thể tham gia ở chế độ nghe.';
+
+  @override
+  String get meetingNativeMediaUnavailable =>
+      'Không thể mở Camera hoặc Microphone. Bạn vẫn có thể xem và trò chuyện.';
+
+  @override
+  String get meetingNativeScreenShareDeferred =>
+      'Chia sẻ màn hình hiện dùng phiên bản web.';
+
+  @override
   String get homeMeetingFallbackTitle => 'Phòng họp';
 
   @override
   String get homeMeetingFallbackDescription =>
-      'Tham gia bằng liên kết cuộc họp.';
+      'Tham gia bằng mã phòng hoặc liên kết.';
 
   @override
   String get homeUpcomingMeetingTitle => 'Buổi tư vấn sắp tới';

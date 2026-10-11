@@ -23,10 +23,7 @@ class JlptProgressScreen extends ConsumerWidget {
       appBar: LearningHeader.detail(
         title: context.l10n.jlptProgress(levelSuffix),
         subtitle: context.l10n.fiveSkillBreakdown,
-        level: snapshot?.jlptTarget,
-        initials: snapshot?.initials,
         onBack: () => _goBack(context),
-        onProfilePressed: () => context.go(AppRoutes.profile),
       ),
       body: SafeArea(
         top: false,

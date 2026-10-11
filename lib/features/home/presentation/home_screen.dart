@@ -13,6 +13,8 @@ import 'package:rikipath_mobile/features/learning/application/learning_controlle
 import 'package:rikipath_mobile/features/meeting/application/upcoming_meeting_provider.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
@@ -24,7 +26,6 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardState = ref.watch(homeControllerProvider);
-    final dashboard = dashboardState.asData?.value;
     final journeyState = ref.watch(learnerJourneyControllerProvider);
     final learningState = ref.watch(learningControllerProvider);
     final analyticsState = ref.watch(learnerAnalyticsControllerProvider);
@@ -32,9 +33,6 @@ class HomeScreen extends ConsumerWidget {
     final notificationState = ref.watch(notificationControllerProvider);
     final upcomingMeetingState = ref.watch(upcomingMeetingProvider);
     final analytics = analyticsState.value;
-    final selectedLevel = journeyState.value?.hasSelectedLevel == true
-        ? journeyState.value?.selectedLevel
-        : null;
     final liveStreak = analytics?.isAvailable(AnalyticsSection.streak) == true
         ? analytics?.streakDays
         : null;
@@ -42,12 +40,9 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: HomeHeader(
-        level: selectedLevel,
         streakDays: liveStreak,
         isStreakLoading: analyticsState.isLoading,
         unreadNotificationCount: notificationState.value?.unreadCount,
-        initials: dashboard?.initials,
-        onProfilePressed: () => context.go(AppRoutes.profile),
         onNotificationsPressed: () => context.push(AppRoutes.notifications),
       ),
       body: SafeArea(
@@ -101,7 +96,7 @@ class HomeScreen extends ConsumerWidget {
           },
           onOpenReview: () => context.go(AppRoutes.dailyReview),
           onOpenAnalytics: () => context.push(AppRoutes.analytics),
-          onOpenMeeting: () => context.push(AppRoutes.meeting),
+          onOpenMeeting: () => context.push(AppRoutes.meetingJoin),
           onOpenMeetingDetail: (bookingId) =>
               context.push(AppRoutes.learnerMentorBookingDetail(bookingId)),
           onJoinMeeting: (uri) => _openMeeting(ref, context, uri),
@@ -112,6 +107,20 @@ class HomeScreen extends ConsumerWidget {
 }
 
 Future<void> _openMeeting(WidgetRef ref, BuildContext context, Uri uri) async {
+  final room = MeetingRoomReference.resolve(webUri: uri);
+  if (MeetingNativeRollout.isEnabled) {
+    if (room == null) {
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .error(
+            title: context.l10n.meetingOpenFailedTitle,
+            description: context.l10n.meetingLinkInvalid,
+          );
+      return;
+    }
+    await context.push(AppRoutes.meetingRoom(room.roomId), extra: room);
+    return;
+  }
   final opened = await ref.read(mentorMeetingLinkLauncherProvider).open(uri);
   if (opened || !context.mounted) return;
   ref

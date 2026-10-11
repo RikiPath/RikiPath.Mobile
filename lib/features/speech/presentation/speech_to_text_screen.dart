@@ -85,7 +85,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen>
                   Text(
                     context.l10n.speechSampleLabel,
                     style: AppTypography.badgeText.copyWith(
-                      color: AppColors.brandPrimary,
+                      color: AppFeatureTones.speech.foreground,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.space2),
@@ -218,18 +218,18 @@ class _SpeechHero extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isListening
-              ? AppColors.brandSecondaryPressed
-              : AppColors.brandTint,
-          border: Border.all(color: AppColors.brandBorder),
+              ? AppFeatureTones.speech.border
+              : AppFeatureTones.speech.background,
+          border: Border.all(color: AppFeatureTones.speech.border),
           boxShadow: isListening ? AppShadows.cardSoft : const <BoxShadow>[],
         ),
         child: Center(
           child: Container(
             width: 72,
             height: 72,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.brandPrimary,
+              color: AppFeatureTones.speech.foreground,
             ),
             child: Icon(
               isListening ? Icons.graphic_eq_rounded : Icons.mic_rounded,

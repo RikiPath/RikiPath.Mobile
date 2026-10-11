@@ -183,20 +183,36 @@ void main() {
     expect(NotebookEntryKey.tryParse('live:vocabulary:not-an-id'), isNull);
   });
 
-  test('13. Mixed live and local items merge deterministically', () async {
+  test('13. Live and local entries stay isolated by collection', () async {
     final store = TestJsonPreferenceStore();
     await PersistentDemoNotebookRepository(store).saveEntry(_fixtureVocabulary);
     final container = _container(store, _RecordingNotebookRepository());
     addTearDown(container.dispose);
 
     final notebook = await container.read(notebookControllerProvider.future);
-    expect(notebook.entries.map((entry) => entry.key).toSet(), {
-      _fixtureVocabulary.key,
+    expect(notebook.entries.map((entry) => entry.key), <NotebookEntryKey>[
       _liveEntry.key,
-    });
+    ]);
+    expect(notebook.localEntries.single.key, _fixtureVocabulary.key);
+
+    final localCollection = notebook.collections.firstWhere(
+      (collection) => collection.source == NotebookDataSource.fixture,
+    );
+    await container
+        .read(notebookControllerProvider.notifier)
+        .selectCollection(localCollection);
+    expect(
+      container
+          .read(notebookControllerProvider)
+          .requireValue
+          .entries
+          .single
+          .key,
+      _fixtureVocabulary.key,
+    );
   });
 
-  test('14. Live empty plus local data still renders local', () async {
+  test('14. Live empty keeps the local collection available', () async {
     final store = TestJsonPreferenceStore();
     await PersistentDemoNotebookRepository(store).saveEntry(_fixtureKanji);
     final container = _container(
@@ -206,10 +222,24 @@ void main() {
     addTearDown(container.dispose);
 
     final notebook = await container.read(notebookControllerProvider.future);
-    expect(notebook.entries.single.key, _fixtureKanji.key);
+    final localCollection = notebook.collections.firstWhere(
+      (collection) => collection.source == NotebookDataSource.fixture,
+    );
+    await container
+        .read(notebookControllerProvider.notifier)
+        .selectCollection(localCollection);
+    expect(
+      container
+          .read(notebookControllerProvider)
+          .requireValue
+          .entries
+          .single
+          .key,
+      _fixtureKanji.key,
+    );
   });
 
-  test('15. Live failure plus local data still renders local', () async {
+  test('15. Live failure keeps the local collection available', () async {
     final store = TestJsonPreferenceStore();
     await PersistentDemoNotebookRepository(store).saveEntry(_fixtureGrammar);
     final container = _container(
@@ -219,8 +249,22 @@ void main() {
     addTearDown(container.dispose);
 
     final notebook = await container.read(notebookControllerProvider.future);
-    expect(notebook.entries.single.key, _fixtureGrammar.key);
     expect(notebook.entriesError, isNotNull);
+    final localCollection = notebook.collections.firstWhere(
+      (collection) => collection.source == NotebookDataSource.fixture,
+    );
+    await container
+        .read(notebookControllerProvider.notifier)
+        .selectCollection(localCollection);
+    expect(
+      container
+          .read(notebookControllerProvider)
+          .requireValue
+          .entries
+          .single
+          .key,
+      _fixtureGrammar.key,
+    );
   });
 
   test('16. Local restore failure does not block live data', () async {
@@ -243,7 +287,9 @@ void main() {
     await container.read(notebookControllerProvider.notifier).retry();
     final refreshed = container.read(notebookControllerProvider).requireValue;
     expect(
-      refreshed.entries.any((entry) => entry.key == _fixtureVocabulary.key),
+      refreshed.localEntries.any(
+        (entry) => entry.key == _fixtureVocabulary.key,
+      ),
       isTrue,
     );
   });
@@ -261,7 +307,7 @@ void main() {
     final matches = container
         .read(notebookControllerProvider)
         .requireValue
-        .entries
+        .localEntries
         .where((entry) => entry.key == _fixtureVocabulary.key);
     expect(matches, hasLength(1));
   });
@@ -271,7 +317,13 @@ void main() {
     await PersistentDemoNotebookRepository(store).saveEntry(_fixtureKanji);
     final container = _container(store, _RecordingNotebookRepository());
     addTearDown(container.dispose);
-    await container.read(notebookControllerProvider.future);
+    final notebook = await container.read(notebookControllerProvider.future);
+    final localCollection = notebook.collections.firstWhere(
+      (collection) => collection.source == NotebookDataSource.fixture,
+    );
+    await container
+        .read(notebookControllerProvider.notifier)
+        .selectCollection(localCollection);
 
     container.read(notebookControllerProvider.notifier).search('かん');
     final state = container.read(notebookControllerProvider).requireValue;

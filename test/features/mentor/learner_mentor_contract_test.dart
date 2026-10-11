@@ -7,11 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/config/app_config.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/errors/api_error_mapper.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
 import 'package:rikipath_mobile/features/mentor/data/api_learner_mentor_repository.dart';
@@ -562,12 +564,18 @@ void main() {
       tester,
     ) async {
       final launcher = _RecordingMeetingLinkLauncher();
-      await _pumpLearnerMentor(
+      await _pumpLearnerMentorRouter(
         tester,
-        const LearnerMentorBookingDetailScreen(bookingId: 44),
         repository: _TestLearnerMentorRepository(
           bookingResults: [
-            [_booking(link: 'https://meet.example.com/room-44')],
+            [
+              _booking(
+                link:
+                    'https://meet.example.com/meeting-room/'
+                    '123e4567-e89b-42d3-a456-426614174000',
+                roomId: '123e4567-e89b-42d3-a456-426614174000',
+              ),
+            ],
           ],
         ),
         launcher: launcher,
@@ -581,12 +589,27 @@ void main() {
       expect(find.text('Tham gia buổi tư vấn'), findsOneWidget);
       expect(find.text('Mã lịch hẹn'), findsNothing);
       expect(find.text('44'), findsNothing);
-      await tester.tap(find.byKey(const Key('learner_mentor_join_button')));
-      await tester.pump();
-      expect(launcher.opened.single.toString(), contains('room-44'));
       expect(
         find.byKey(const Key('learner_mentor_purchase_status_button')),
         findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('learner_mentor_join_button')));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(
+        find.byKey(const Key('native_meeting_room_screen')),
+        MeetingNativeRollout.isEnabled ? findsOneWidget : findsNothing,
+      );
+      expect(
+        launcher.opened,
+        MeetingNativeRollout.isEnabled
+            ? isEmpty
+            : <Uri>[
+                Uri.parse(
+                  'https://meet.example.com/meeting-room/'
+                  '123e4567-e89b-42d3-a456-426614174000',
+                ),
+              ],
       );
     });
 
@@ -619,7 +642,14 @@ void main() {
         const LearnerMentorBookingDetailScreen(bookingId: 44),
         repository: _TestLearnerMentorRepository(
           bookingResults: [
-            [_booking(link: 'https://meet.example.com/room-44')],
+            [
+              _booking(
+                link:
+                    'https://meet.example.com/meeting-room/'
+                    '123e4567-e89b-42d3-a456-426614174000',
+                roomId: '123e4567-e89b-42d3-a456-426614174000',
+              ),
+            ],
           ],
         ),
         locale: const Locale('ja'),
@@ -769,17 +799,19 @@ LearnerMentorAvailability _slot({required int id}) => LearnerMentorAvailability(
   isBooked: false,
 );
 
-LearnerMentorBooking _booking({String? link}) => LearnerMentorBooking(
-  id: 44,
-  userSubscriptionId: 21,
-  mentorAvailabilityId: 12,
-  mentorId: 5,
-  mentorName: 'Sato Haru',
-  status: MentorMeetingStatus.accepted,
-  paymentStatus: MentorPaymentStatus.paid,
-  scheduledAt: MentorTimestamp.parse('2026-10-12T02:00:00Z'),
-  meetingLink: link,
-);
+LearnerMentorBooking _booking({String? link, String? roomId}) =>
+    LearnerMentorBooking(
+      id: 44,
+      userSubscriptionId: 21,
+      mentorAvailabilityId: 12,
+      mentorId: 5,
+      mentorName: 'Sato Haru',
+      status: MentorMeetingStatus.accepted,
+      paymentStatus: MentorPaymentStatus.paid,
+      scheduledAt: MentorTimestamp.parse('2026-10-12T02:00:00Z'),
+      meetingLink: link,
+      roomId: roomId,
+    );
 
 MentorMeetingPurchase _purchase() => MentorMeetingPurchase(
   subscriptionId: 21,
@@ -840,6 +872,44 @@ Future<void> _pumpLearnerMentor(
     ),
   );
   await tester.pump();
+  await tester.pumpAndSettle();
+}
+
+Future<void> _pumpLearnerMentorRouter(
+  WidgetTester tester, {
+  required LearnerMentorRepository repository,
+  MentorMeetingLinkLauncher? launcher,
+}) async {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+  final session = createTestAuthSession(role: BackendUserRole.learner);
+  final router = createAppRouter(
+    authSession: session,
+    initialLocation: AppRoutes.learnerMentorBookingDetail(44),
+  );
+  addTearDown(session.dispose);
+  addTearDown(router.dispose);
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        appConfigProvider.overrideWithValue(AppConfig.fromEnvironment()),
+        authSessionControllerProvider.overrideWithValue(session),
+        learnerMentorRepositoryProvider.overrideWithValue(repository),
+        if (launcher != null)
+          mentorMeetingLinkLauncherProvider.overrideWithValue(launcher),
+      ],
+      child: MaterialApp.router(
+        theme: AppTheme.light,
+        locale: const Locale('vi'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
+      ),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 

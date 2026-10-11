@@ -11,6 +11,8 @@ import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 
 class LearnerMentorBookingDetailScreen extends ConsumerWidget {
   const LearnerMentorBookingDetailScreen({required this.bookingId, super.key});
@@ -42,14 +44,37 @@ class LearnerMentorBookingDetailScreen extends ConsumerWidget {
             booking: value
                 .where((booking) => booking.id == bookingId)
                 .firstOrNull,
-            onJoin: (uri) => _openUri(ref, context, uri),
+            onJoin: (booking) => _joinMeeting(ref, context, booking),
           ),
         },
       ),
     );
   }
 
-  Future<void> _openUri(WidgetRef ref, BuildContext context, Uri uri) async {
+  Future<void> _joinMeeting(
+    WidgetRef ref,
+    BuildContext context,
+    LearnerMentorBooking booking,
+  ) async {
+    final room = MeetingRoomReference.resolve(
+      roomId: booking.roomId,
+      webUri: booking.safeMeetingUri,
+    );
+    if (MeetingNativeRollout.isEnabled) {
+      if (room == null) {
+        ref
+            .read(rikiToastServiceProvider.notifier)
+            .error(
+              title: context.l10n.mentorJoinFailedTitle,
+              description: context.l10n.meetingLinkInvalid,
+            );
+        return;
+      }
+      await context.push(AppRoutes.meetingRoom(room.roomId), extra: room);
+      return;
+    }
+    final uri = booking.safeMeetingUri;
+    if (uri == null) return;
     final opened = await ref.read(mentorMeetingLinkLauncherProvider).open(uri);
     if (opened || !context.mounted) return;
     ref
@@ -65,7 +90,7 @@ class _DetailBody extends StatelessWidget {
   const _DetailBody({required this.booking, required this.onJoin});
 
   final LearnerMentorBooking? booking;
-  final Future<void> Function(Uri uri) onJoin;
+  final Future<void> Function(LearnerMentorBooking booking) onJoin;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +105,13 @@ class _DetailBody extends StatelessWidget {
     }
     final mentorName = value.mentorName?.trim();
     final meetingUri = value.safeMeetingUri;
+    final nativeRoom = MeetingRoomReference.resolve(
+      roomId: value.roomId,
+      webUri: meetingUri,
+    );
+    final canJoin = MeetingNativeRollout.isEnabled
+        ? nativeRoom != null
+        : meetingUri != null;
     return ListView(
       key: const Key('learner_mentor_booking_detail_content'),
       padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
@@ -130,7 +162,7 @@ class _DetailBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.space3),
-        if (meetingUri == null)
+        if (!canJoin)
           RikiInfoBanner(
             key: const Key('learner_mentor_join_unavailable'),
             message: context.l10n.learnerMentorJoinUnavailable,
@@ -139,8 +171,8 @@ class _DetailBody extends StatelessWidget {
           RikiPrimaryButton(
             key: const Key('learner_mentor_join_button'),
             label: context.l10n.learnerMentorJoin,
-            leadingIcon: Icons.open_in_new,
-            onPressed: () => onJoin(meetingUri),
+            leadingIcon: Icons.videocam_outlined,
+            onPressed: () => onJoin(value),
           ),
       ],
     );

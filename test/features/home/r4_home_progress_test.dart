@@ -18,6 +18,7 @@ import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart
 import 'package:rikipath_mobile/features/analytics/presentation/learner_analytics_screen.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_dashboard_view.dart';
+import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
@@ -559,6 +560,22 @@ void main() {
         notifications: notifications,
       );
       await _pumpFrames(tester);
+      final header = find.byType(HomeHeader);
+      expect(
+        find.descendant(
+          of: header,
+          matching: find.byKey(const Key('language_switcher_button')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: header, matching: find.byType(JlptBadge)),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: header, matching: find.byType(CircleAvatar)),
+        findsNothing,
+      );
       expect(
         find.byKey(const ValueKey<String>('home_notification_unread_badge')),
         findsOneWidget,

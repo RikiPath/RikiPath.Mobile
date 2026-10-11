@@ -31,10 +31,7 @@ class LessonScreen extends ConsumerWidget {
       appBar: LearningHeader.detail(
         title: _title(context, session),
         subtitle: _subtitle(context, session),
-        level: session?.lesson.level,
-        initials: null,
         onBack: () => _handleBack(context, controller, session),
-        onProfilePressed: () => context.go(AppRoutes.profile),
       ),
       body: SafeArea(
         top: false,

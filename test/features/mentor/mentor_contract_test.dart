@@ -8,11 +8,13 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/config/app_config.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/errors/api_error_mapper.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
 import 'package:rikipath_mobile/features/mentor/data/api_mentor_repository.dart';
@@ -653,7 +655,7 @@ void main() {
       expect(find.byKey(const Key('mentor_join_meeting_button')), findsNothing);
     });
 
-    testWidgets('34. Join opens exactly the safe URL returned by Backend', (
+    testWidgets('34. verified Backend room follows rollout policy', (
       tester,
     ) async {
       final launcher = _RecordingMeetingLinkLauncher();
@@ -664,7 +666,9 @@ void main() {
             _meeting(
               id: 73,
               learnerName: 'Sora',
-              link: 'https://meet.example.com/backend-room-73',
+              link:
+                  'https://meet.example.com/meeting-room/'
+                  '123e4567-e89b-42d3-a456-426614174000',
             ),
           ],
         ],
@@ -677,11 +681,23 @@ void main() {
         launcher: launcher,
       );
       await tester.tap(find.byKey(const Key('mentor_join_meeting_button')));
-      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
-      expect(launcher.opened, [
-        Uri.parse('https://meet.example.com/backend-room-73'),
-      ]);
+      expect(
+        find.byKey(const Key('native_meeting_room_screen')),
+        MeetingNativeRollout.isEnabled ? findsOneWidget : findsNothing,
+      );
+      expect(
+        launcher.opened,
+        MeetingNativeRollout.isEnabled
+            ? isEmpty
+            : <Uri>[
+                Uri.parse(
+                  'https://meet.example.com/meeting-room/'
+                  '123e4567-e89b-42d3-a456-426614174000',
+                ),
+              ],
+      );
     });
 
     testWidgets('35. malformed link is never offered to the launcher', (
@@ -923,6 +939,7 @@ Future<GoRouter> _pumpMentorRouter(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        appConfigProvider.overrideWithValue(AppConfig.fromEnvironment()),
         authSessionControllerProvider.overrideWithValue(session),
         mentorRepositoryProvider.overrideWithValue(repository),
         if (launcher != null)

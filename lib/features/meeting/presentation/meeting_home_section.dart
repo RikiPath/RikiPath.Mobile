@@ -48,6 +48,7 @@ class MeetingHomeSection extends StatelessWidget {
 
     return RikiCard(
       key: const ValueKey<String>('home_upcoming_meeting_card'),
+      borderColor: AppFeatureTones.meeting.border,
       boxShadow: AppShadows.cardSoft,
       padding: const EdgeInsets.all(AppSpacing.space4),
       child: Column(
@@ -96,11 +97,18 @@ class MeetingHomeSection extends StatelessWidget {
               TextButton(
                 key: const ValueKey<String>('home_meeting_detail_button'),
                 onPressed: () => onOpenDetail(meeting.bookingId),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppFeatureTones.meeting.foreground,
+                ),
                 child: Text(context.l10n.meetingDetailsAction),
               ),
               FilledButton.icon(
                 key: const ValueKey<String>('home_meeting_join_button'),
                 onPressed: () => onJoin(meeting.meetingUri),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.brandPrimary,
+                  foregroundColor: Colors.white,
+                ),
                 icon: const Icon(Icons.open_in_new, size: 18),
                 label: Text(context.l10n.meetingEnterRoom),
               ),
@@ -121,8 +129,10 @@ class _MeetingShortcut extends StatelessWidget {
   Widget build(BuildContext context) {
     return RikiCard(
       key: const ValueKey<String>('home_meeting_fallback_card'),
+      borderColor: AppFeatureTones.meeting.border,
       boxShadow: const <BoxShadow>[],
       padding: const EdgeInsets.all(AppSpacing.space3),
+      onTap: onPressed,
       child: Row(
         children: [
           const _MeetingIcon(),
@@ -143,11 +153,10 @@ class _MeetingShortcut extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            key: const ValueKey<String>('home_meeting_shortcut_button'),
-            tooltip: context.l10n.meetingJoinAction,
-            onPressed: onPressed,
-            icon: const Icon(Icons.arrow_forward),
+          const Icon(
+            Icons.arrow_forward,
+            key: ValueKey<String>('home_meeting_shortcut_button'),
+            color: AppColors.textSecondary,
           ),
         ],
       ),
@@ -160,14 +169,9 @@ class _MeetingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: AppColors.brandTint,
-        borderRadius: BorderRadius.circular(AppRadius.input),
-      ),
-      child: const Icon(Icons.videocam_outlined, color: AppColors.brandPrimary),
+    return const RikiFeatureIcon(
+      icon: Icons.videocam_outlined,
+      tone: AppFeatureTones.meeting,
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,10 +8,14 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
+import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
+import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/widgets/notebook_state_views.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/widgets/notebook_view.dart';
+import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 
 class NotebookScreen extends ConsumerWidget {
   const NotebookScreen({super.key});
@@ -18,18 +24,20 @@ class NotebookScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(notebookControllerProvider);
     final controller = ref.read(notebookControllerProvider.notifier);
+    final analyticsState = ref.watch(learnerAnalyticsControllerProvider);
+    final notificationState = ref.watch(notificationControllerProvider);
+    final analytics = analyticsState.value;
+    final liveStreak = analytics?.isAvailable(AnalyticsSection.streak) == true
+        ? analytics?.streakDays
+        : null;
 
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(
-        title: Text(context.l10n.navigationNotebook),
-        actions: [
-          IconButton(
-            tooltip: context.l10n.navigationProfile,
-            onPressed: () => context.go(AppRoutes.profile),
-            icon: const Icon(Icons.account_circle_outlined),
-          ),
-        ],
+      appBar: HomeHeader(
+        streakDays: liveStreak,
+        isStreakLoading: analyticsState.isLoading,
+        unreadNotificationCount: notificationState.value?.unreadCount,
+        onNotificationsPressed: () => context.push(AppRoutes.notifications),
       ),
       body: SafeArea(
         top: false,
@@ -38,19 +46,13 @@ class NotebookScreen extends ConsumerWidget {
           error: (_, _) => NotebookErrorView(onRetry: controller.retry),
           data: (data) => NotebookView(
             state: data,
-            onSearch: controller.search,
-            onClearSearch: controller.clearSearch,
-            onSelectCollection: controller.selectCollection,
-            onRetry: controller.retry,
             onDismissMutationError: controller.clearMutationError,
-            onDismissEntriesError: controller.clearEntriesError,
             onCreateCollection: () =>
                 _createCollection(context, ref, controller),
-            onAddEntry: () => _addManualEntry(context, ref, controller),
-            onOpenEntry: (entry) =>
-                context.push(AppRoutes.notebookEntryDetail(entry.routeKey)),
-            onRemoveEntry: (entry) =>
-                _confirmRemove(context, ref, controller, entry),
+            onOpenCollection: (collection) {
+              unawaited(controller.selectCollection(collection));
+              context.push(AppRoutes.notebookCollection(collection.routeKey));
+            },
           ),
         ),
       ),
@@ -78,11 +80,94 @@ class NotebookScreen extends ConsumerWidget {
     ref
         .read(rikiToastServiceProvider.notifier)
         .success(title: context.l10n.collectionCreated);
+    final created = ref
+        .read(notebookControllerProvider)
+        .value
+        ?.selectedCollection;
+    if (created != null && context.mounted) {
+      context.push(AppRoutes.notebookCollection(created.routeKey));
+    }
+  }
+}
+
+class NotebookCollectionScreen extends ConsumerStatefulWidget {
+  const NotebookCollectionScreen({required this.collectionKey, super.key});
+
+  final String collectionKey;
+
+  @override
+  ConsumerState<NotebookCollectionScreen> createState() =>
+      _NotebookCollectionScreenState();
+}
+
+class _NotebookCollectionScreenState
+    extends ConsumerState<NotebookCollectionScreen> {
+  bool _selectionRequested = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final asyncState = ref.watch(notebookControllerProvider);
+    final controller = ref.read(notebookControllerProvider.notifier);
+    final data = asyncState.value;
+    final collection = data?.collections
+        .where((item) => item.routeKey == widget.collectionKey)
+        .firstOrNull;
+
+    if (collection != null &&
+        data?.selectedCollectionKey != collection.routeKey &&
+        !_selectionRequested) {
+      _selectionRequested = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(controller.selectCollection(collection));
+      });
+    }
+
+    return Scaffold(
+      backgroundColor: AppColors.learnerBackground,
+      appBar: AppBar(
+        title: Text(collection?.name ?? context.l10n.navigationNotebook),
+      ),
+      body: SafeArea(
+        top: false,
+        child: asyncState.when(
+          loading: NotebookLoadingView.new,
+          error: (_, _) => NotebookErrorView(onRetry: controller.retry),
+          data: (state) {
+            if (collection == null) {
+              return Center(
+                key: const ValueKey<String>('notebook_collection_unavailable'),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.space6),
+                  child: Text(
+                    context.l10n.notebookCollectionUnavailable,
+                    style: AppTypography.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            }
+            return NotebookCollectionView(
+              state: state,
+              collection: collection,
+              onSearch: controller.search,
+              onClearSearch: controller.clearSearch,
+              onRetryEntries: controller.retrySelectedCollection,
+              onDismissMutationError: controller.clearMutationError,
+              onDismissEntriesError: controller.clearEntriesError,
+              onAddEntry: () => _addManualEntry(context, controller),
+              onOpenEntry: (entry) =>
+                  context.push(AppRoutes.notebookEntryDetail(entry.routeKey)),
+              onRemoveEntry: (entry) =>
+                  _confirmRemove(context, controller, entry),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _addManualEntry(
     BuildContext context,
-    WidgetRef ref,
     NotebookController controller,
   ) async {
     final request = await showModalBottomSheet<_ManualEntryRequest>(
@@ -107,7 +192,6 @@ class NotebookScreen extends ConsumerWidget {
 
   Future<void> _confirmRemove(
     BuildContext context,
-    WidgetRef ref,
     NotebookController controller,
     NotebookEntry entry,
   ) async {

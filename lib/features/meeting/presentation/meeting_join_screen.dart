@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
@@ -9,6 +10,7 @@ import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/meeting/application/meeting_join_intent_controller.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_join_target.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
 
 class MeetingJoinScreen extends ConsumerStatefulWidget {
@@ -36,11 +38,31 @@ class _MeetingJoinScreenState extends ConsumerState<MeetingJoinScreen> {
     super.dispose();
   }
 
-  void _continue() {
+  Future<void> _continue() async {
     FocusScope.of(context).unfocus();
-    ref
+    final accepted = ref
         .read(meetingJoinIntentControllerProvider.notifier)
         .submit(_linkController.text);
+    if (!accepted) return;
+    await _joinPendingIfAuthenticated();
+  }
+
+  Future<void> _joinPendingIfAuthenticated() async {
+    final session = ref.read(authSessionControllerProvider);
+    if (session.value != AuthSessionState.authenticated) return;
+    final target = ref.read(meetingJoinIntentControllerProvider).target;
+    if (target != null) await _openMeeting(target);
+  }
+
+  Future<void> _pasteFromClipboard() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (!mounted || data?.text == null) return;
+    final value = data!.text!;
+    _linkController.value = TextEditingValue(
+      text: value,
+      selection: TextSelection.collapsed(offset: value.length),
+    );
+    ref.read(meetingJoinIntentControllerProvider.notifier).updateRawLink(value);
   }
 
   void _cancel() {
@@ -52,9 +74,16 @@ class _MeetingJoinScreenState extends ConsumerState<MeetingJoinScreen> {
   Future<void> _openMeeting(MeetingJoinTarget target) async {
     if (_isOpening) return;
     setState(() => _isOpening = true);
+    final room = target.room;
+    if (MeetingNativeRollout.isEnabled) {
+      ref.read(meetingJoinIntentControllerProvider.notifier).clear();
+      await context.push(AppRoutes.meetingRoom(room.roomId), extra: room);
+      if (mounted) setState(() => _isOpening = false);
+      return;
+    }
     final opened = await ref
         .read(mentorMeetingLinkLauncherProvider)
-        .open(target.uri);
+        .open(target.browserFallbackUri);
     if (!mounted) return;
     setState(() => _isOpening = false);
     if (opened) {
@@ -110,6 +139,11 @@ class _MeetingJoinScreenState extends ConsumerState<MeetingJoinScreen> {
                 hintText: context.l10n.meetingLinkHint,
                 controller: _linkController,
                 prefixIcon: Icons.link,
+                suffixIcon: TextButton(
+                  key: const ValueKey<String>('meeting_paste_button'),
+                  onPressed: _isOpening ? null : _pasteFromClipboard,
+                  child: Text(context.l10n.meetingPasteAction),
+                ),
                 keyboardType: TextInputType.url,
                 textInputAction: TextInputAction.done,
                 autocorrect: false,
@@ -128,37 +162,40 @@ class _MeetingJoinScreenState extends ConsumerState<MeetingJoinScreen> {
                 },
                 onSubmitted: (_) => _continue(),
               ),
+              const SizedBox(height: AppSpacing.space2),
+              Text(
+                context.l10n.meetingRoomCodeHelper,
+                style: AppTypography.metadata,
+              ),
               const SizedBox(height: AppSpacing.space4),
-              if (!intent.hasPendingTarget)
-                RikiPrimaryButton(
-                  key: const ValueKey<String>('meeting_continue_button'),
-                  label: context.l10n.meetingContinueAction,
-                  trailingIcon: Icons.arrow_forward,
-                  onPressed: _continue,
-                )
-              else
-                ValueListenableBuilder<AuthSessionState>(
-                  valueListenable: session,
-                  builder: (context, authState, _) {
-                    if (authState == AuthSessionState.authenticated) {
-                      return _AuthenticatedJoinCard(
-                        host: intent.target!.uri.host,
-                        isOpening: _isOpening,
-                        onJoin: () => _openMeeting(intent.target!),
-                        onCancel: _cancel,
-                      );
-                    }
+              ValueListenableBuilder<AuthSessionState>(
+                valueListenable: session,
+                builder: (context, authState, _) {
+                  if (intent.hasPendingTarget &&
+                      authState != AuthSessionState.authenticated) {
                     return _AuthRequiredCard(
                       onLogin: () => context.push(AppRoutes.login),
                       onRegister: () => context.push(AppRoutes.register),
                       onCancel: _cancel,
                     );
-                  },
-                ),
+                  }
+                  return RikiPrimaryButton(
+                    key: const ValueKey<String>('meeting_continue_button'),
+                    label: context.l10n.meetingJoinAction,
+                    leadingIcon: Icons.videocam_outlined,
+                    trailingIcon: Icons.arrow_forward,
+                    isLoading: _isOpening,
+                    onPressed: _isOpening ? null : _continue,
+                  );
+                },
+              ),
               const SizedBox(height: AppSpacing.space4),
               RikiInfoBanner(
                 icon: Icons.lock_outline,
                 message: context.l10n.meetingAuthorizationNotice,
+                foregroundColor: AppFeatureTones.meeting.foreground,
+                backgroundColor: AppFeatureTones.meeting.background,
+                borderColor: AppFeatureTones.meeting.border,
               ),
             ],
           ),
@@ -208,62 +245,11 @@ class _AuthRequiredCard extends StatelessWidget {
             label: context.l10n.register,
             onPressed: onRegister,
           ),
-          RikiTextButton(label: context.l10n.cancel, onPressed: onCancel),
-        ],
-      ),
-    );
-  }
-}
-
-class _AuthenticatedJoinCard extends StatelessWidget {
-  const _AuthenticatedJoinCard({
-    required this.host,
-    required this.isOpening,
-    required this.onJoin,
-    required this.onCancel,
-  });
-
-  final String host;
-  final bool isOpening;
-  final VoidCallback onJoin;
-  final VoidCallback onCancel;
-
-  @override
-  Widget build(BuildContext context) {
-    return RikiCard(
-      key: const ValueKey<String>('meeting_prejoin_card'),
-      boxShadow: AppShadows.cardSoft,
-      padding: const EdgeInsets.all(AppSpacing.space4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.videocam_outlined,
-                color: AppColors.brandPrimary,
-              ),
-              const SizedBox(width: AppSpacing.space2),
-              Expanded(
-                child: Text(
-                  context.l10n.meetingReadyTitle,
-                  style: AppTypography.cardTitle,
-                ),
-              ),
-            ],
+          RikiTextButton(
+            key: const ValueKey<String>('meeting_cancel_button'),
+            label: context.l10n.cancel,
+            onPressed: onCancel,
           ),
-          const SizedBox(height: AppSpacing.space2),
-          Text(host, style: AppTypography.metadata),
-          const SizedBox(height: AppSpacing.space4),
-          RikiPrimaryButton(
-            key: const ValueKey<String>('meeting_open_button'),
-            label: context.l10n.meetingEnterRoom,
-            leadingIcon: Icons.open_in_new,
-            isLoading: isOpening,
-            onPressed: onJoin,
-          ),
-          const SizedBox(height: AppSpacing.space2),
-          RikiTextButton(label: context.l10n.cancel, onPressed: onCancel),
         ],
       ),
     );

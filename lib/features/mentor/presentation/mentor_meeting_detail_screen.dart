@@ -9,6 +9,9 @@ import 'package:rikipath_mobile/features/mentor/application/mentor_controller.da
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 
 class MentorMeetingDetailScreen extends ConsumerWidget {
   const MentorMeetingDetailScreen({required this.meetingId, super.key});
@@ -53,6 +56,20 @@ class MentorMeetingDetailScreen extends ConsumerWidget {
     BuildContext context,
     Uri uri,
   ) async {
+    final room = MeetingRoomReference.resolve(webUri: uri);
+    if (MeetingNativeRollout.isEnabled) {
+      if (room == null) {
+        ref
+            .read(rikiToastServiceProvider.notifier)
+            .error(
+              title: context.l10n.mentorJoinFailedTitle,
+              description: context.l10n.meetingLinkInvalid,
+            );
+        return;
+      }
+      await context.push(AppRoutes.meetingRoom(room.roomId), extra: room);
+      return;
+    }
     final opened = await ref.read(mentorMeetingLinkLauncherProvider).open(uri);
     if (opened || !context.mounted) return;
     ref
@@ -88,6 +105,10 @@ class _DetailData extends StatelessWidget {
     }
 
     final meetingUri = value.safeMeetingUri;
+    final nativeRoom = MeetingRoomReference.resolve(webUri: meetingUri);
+    final canJoin = MeetingNativeRollout.isEnabled
+        ? nativeRoom != null
+        : meetingUri != null;
     return ListView(
       key: const Key('mentor_meeting_detail_content'),
       padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
@@ -123,7 +144,7 @@ class _DetailData extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.space4),
-        if (meetingUri == null)
+        if (!canJoin)
           RikiInfoBanner(
             key: const Key('mentor_meeting_link_unavailable'),
             message: context.l10n.mentorMeetingLinkUnavailable,
@@ -132,8 +153,8 @@ class _DetailData extends StatelessWidget {
           RikiPrimaryButton(
             key: const Key('mentor_join_meeting_button'),
             label: context.l10n.mentorJoinMeeting,
-            leadingIcon: Icons.open_in_new,
-            onPressed: () => onJoin(meetingUri),
+            leadingIcon: Icons.videocam_outlined,
+            onPressed: () => onJoin(meetingUri!),
           ),
         const SizedBox(height: AppSpacing.space3),
         RikiTextButton(

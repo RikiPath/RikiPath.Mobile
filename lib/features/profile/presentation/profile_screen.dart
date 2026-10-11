@@ -5,6 +5,10 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
+import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
+import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
+import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
@@ -17,60 +21,23 @@ class ProfileScreen extends ConsumerStatefulWidget {
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _headerController = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 420),
-  );
-  bool _headerStarted = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_headerStarted) return;
-    _headerStarted = true;
-    final mediaQuery = MediaQuery.maybeOf(context);
-    final reduceMotion =
-        (mediaQuery?.disableAnimations ?? false) ||
-        (mediaQuery?.accessibleNavigation ?? false);
-    if (reduceMotion) {
-      _headerController.value = 1;
-    } else {
-      _headerController.forward();
-    }
-  }
-
-  @override
-  void dispose() {
-    _headerController.dispose();
-    super.dispose();
-  }
-
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profileState = ref.watch(userProfileControllerProvider);
-    final headerAnimation = CurvedAnimation(
-      parent: _headerController,
-      curve: Curves.easeOutCubic,
-    );
+    final analyticsState = ref.watch(learnerAnalyticsControllerProvider);
+    final notificationState = ref.watch(notificationControllerProvider);
+    final analytics = analyticsState.value;
+    final liveStreak = analytics?.isAvailable(AnalyticsSection.streak) == true
+        ? analytics?.streakDays
+        : null;
     return Scaffold(
       backgroundColor: AppColors.profileBackground,
-      appBar: AppBar(
-        backgroundColor: AppColors.profileBackground,
-        title: FadeTransition(
-          opacity: headerAnimation,
-          child: Text(context.l10n.profileTitle),
-        ),
-        actions: [
-          FadeTransition(
-            opacity: headerAnimation,
-            child: const Padding(
-              padding: EdgeInsets.only(right: AppSpacing.space3),
-              child: RikiLanguageSwitcher(),
-            ),
-          ),
-        ],
+      appBar: HomeHeader(
+        streakDays: liveStreak,
+        isStreakLoading: analyticsState.isLoading,
+        unreadNotificationCount: notificationState.value?.unreadCount,
+        onNotificationsPressed: () => context.push(AppRoutes.notifications),
       ),
       body: profileState.when(
         loading: () => const ProfileSkeleton(),
@@ -255,20 +222,15 @@ class _ProfileSuccessViewState extends State<_ProfileSuccessView>
         _entrance(
           begin: 0.5,
           end: 1,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ProfileSection(
+            title: l10n.profileServicesSection,
             children: [
-              Text(
-                l10n.profileServicesSection,
-                style: AppTypography.sectionTitle,
-              ),
-              const SizedBox(height: AppSpacing.space3),
-              ProfileServiceCard(
+              ProfileActionTile(
                 key: const ValueKey<String>('profile_consultation_action'),
                 icon: Icons.support_agent_outlined,
                 title: l10n.consultation,
-                description: l10n.profileConsultationSubtitle,
-                status: l10n.learnerMentorExplore,
+                subtitle: l10n.profileConsultationSubtitle,
+                emphasized: true,
                 onTap: () => context.push(AppRoutes.learnerMentorMeetings),
               ),
             ],

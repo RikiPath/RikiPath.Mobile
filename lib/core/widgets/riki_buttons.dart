@@ -11,6 +11,8 @@ class RikiPrimaryButton extends StatefulWidget {
     this.loadingLabel,
     this.leadingIcon,
     this.trailingIcon,
+    this.backgroundColor = AppColors.brandPrimary,
+    this.pressedColor = AppColors.brandPrimaryPressed,
     super.key,
   });
 
@@ -20,6 +22,8 @@ class RikiPrimaryButton extends StatefulWidget {
   final String? loadingLabel;
   final IconData? leadingIcon;
   final IconData? trailingIcon;
+  final Color backgroundColor;
+  final Color pressedColor;
 
   @override
   State<RikiPrimaryButton> createState() => _RikiPrimaryButtonState();
@@ -63,14 +67,14 @@ class _RikiPrimaryButtonState extends State<RikiPrimaryButton> {
           onPressed: effectiveOnPressed,
           style: ButtonStyle(
             backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-              if (widget.isLoading) return AppColors.brandPrimary;
+              if (widget.isLoading) return widget.backgroundColor;
               if (states.contains(WidgetState.disabled)) {
                 return AppColors.brandPrimaryDisabled;
               }
               if (states.contains(WidgetState.pressed)) {
-                return AppColors.brandPrimaryPressed;
+                return widget.pressedColor;
               }
-              return AppColors.brandPrimary;
+              return widget.backgroundColor;
             }),
             foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
               if (widget.isLoading) return Colors.white;
@@ -84,6 +88,9 @@ class _RikiPrimaryButtonState extends State<RikiPrimaryButton> {
               if (states.contains(WidgetState.pressed)) return 1;
               return 3;
             }),
+            shadowColor: WidgetStatePropertyAll<Color>(
+              widget.backgroundColor.withValues(alpha: 0.24),
+            ),
           ),
           child: AnimatedSwitcher(
             duration: reduceMotion

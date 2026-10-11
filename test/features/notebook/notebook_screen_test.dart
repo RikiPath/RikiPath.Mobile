@@ -30,6 +30,10 @@ void main() {
   test('Notebook detail route stays under the Notebook shell branch', () {
     expect(AppRoutes.notebook, '/notebook');
     expect(
+      AppRoutes.notebookCollection('remote-list-3'),
+      '/notebook/collection/remote-list-3',
+    );
+    expect(
       AppRoutes.notebookVocabularyDetail('fixture-keiken'),
       '/notebook/vocabulary/fixture-keiken',
     );
@@ -58,12 +62,22 @@ void main() {
     expect(find.byType(NotebookScreen), findsNothing);
   });
 
-  testWidgets('saved list renders Japanese Unicode and Vietnamese meaning', (
+  testWidgets('Notebook Home shows collections without rendering words', (
     tester,
   ) async {
     await _pumpNotebook(tester);
     await tester.pumpAndSettle();
 
+    expect(
+      find.byKey(
+        const ValueKey<String>('notebook_collection_fixture-learning-saved'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('経験'), findsNothing);
+    expect(find.text('改善'), findsNothing);
+
+    await _openCollection(tester, NotebookController.demoCollectionRouteKey);
     expect(find.text('経験'), findsOneWidget);
     expect(find.text('けいけん'), findsOneWidget);
     expect(find.text('Kinh nghiệm'), findsOneWidget);
@@ -91,6 +105,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
+      find.descendant(
+        of: find.byKey(
+          const ValueKey<String>('notebook_empty_create_collection_button'),
+        ),
+        matching: find.byIcon(Icons.add),
+      ),
+      findsOneWidget,
+    );
+
+    expect(
       find.byKey(const ValueKey<String>('notebook_empty_view')),
       findsOneWidget,
     );
@@ -108,12 +132,28 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openCollection(tester, _collection.routeKey);
 
     expect(
       find.byKey(const ValueKey<String>('notebook_entries_empty_view')),
       findsOneWidget,
     );
     expect(find.text('Danh sách chưa có từ'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('notebook_empty_add_button')),
+        matching: find.byIcon(Icons.add),
+      ),
+      findsOneWidget,
+    );
+
+    final addButton = tester.widget<IconButton>(
+      find.byKey(const ValueKey<String>('notebook_add_entry_button')),
+    );
+    expect(
+      addButton.style?.foregroundColor?.resolve(const <WidgetState>{}),
+      Colors.white,
+    );
   });
 
   testWidgets('pending repository renders loading', (tester) async {
@@ -162,11 +202,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('経験'), findsOneWidget);
     expect(
       find.byKey(const ValueKey<String>('notebook_mutation_error')),
       findsOneWidget,
     );
+    await _openCollection(tester, NotebookController.demoCollectionRouteKey);
+    expect(find.text('経験'), findsOneWidget);
   });
 
   testWidgets('search matches reading and has a no-result state', (
@@ -174,6 +215,7 @@ void main() {
   ) async {
     await _pumpNotebook(tester);
     await tester.pumpAndSettle();
+    await _openCollection(tester, NotebookController.demoCollectionRouteKey);
     final search = find.byKey(const ValueKey<String>('notebook_search_field'));
 
     await tester.enterText(search, 'かいぜん');
@@ -187,6 +229,45 @@ void main() {
       find.byKey(const ValueKey<String>('notebook_search_empty_view')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('collection search filters only collection metadata', (
+    tester,
+  ) async {
+    const secondCollection = NotebookCollection(
+      routeKey: 'remote-list-travel',
+      remoteId: 8,
+      name: 'Du lịch',
+      description: 'Từ dùng khi đi tàu',
+      entryCount: 2,
+      createdAt: null,
+      source: NotebookDataSource.remote,
+    );
+    await _pumpNotebook(
+      tester,
+      repository: _TestNotebookRepository(
+        collections: <NotebookCollection>[_collection, secondCollection],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final search = find.byKey(
+      const ValueKey<String>('notebook_collection_search_field'),
+    );
+    await tester.enterText(search, 'tàu');
+    await tester.pump();
+
+    expect(
+      find.byKey(
+        const ValueKey<String>('notebook_collection_remote-list-travel'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('notebook_collection_remote-list-3')),
+      findsNothing,
+    );
+    expect(find.text('経験'), findsNothing);
   });
 
   testWidgets('collection selection filters entries to the chosen list', (
@@ -210,11 +291,14 @@ void main() {
     await _pumpNotebook(tester, repository: repository);
     await tester.pumpAndSettle();
 
+    expect(find.text('経験'), findsNothing);
+    expect(find.text('約束'), findsNothing);
+    await _openCollection(tester, _collection.routeKey);
     expect(find.text('経験'), findsOneWidget);
     expect(find.text('約束'), findsNothing);
-    await tester.tap(
-      find.byKey(const ValueKey<String>('notebook_collection_remote-list-4')),
-    );
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await _openCollection(tester, secondCollection.routeKey);
     await tester.pumpAndSettle();
 
     expect(find.text('経験'), findsNothing);
@@ -226,6 +310,7 @@ void main() {
   ) async {
     await _pumpNotebook(tester);
     await tester.pumpAndSettle();
+    await _openCollection(tester, NotebookController.demoCollectionRouteKey);
 
     await tester.tap(
       find.byKey(
@@ -246,6 +331,7 @@ void main() {
   testWidgets('remove confirmation deletes a saved entry', (tester) async {
     await _pumpNotebook(tester);
     await tester.pumpAndSettle();
+    await _openCollection(tester, NotebookController.demoCollectionRouteKey);
 
     await _startRemove(tester, 'fixture:vocabulary:fixture-note-keiken');
     await tester.pumpAndSettle();
@@ -258,6 +344,7 @@ void main() {
   ) async {
     await _pumpNotebook(tester);
     await tester.pumpAndSettle();
+    await _openCollection(tester, NotebookController.demoCollectionRouteKey);
 
     await tester.tap(
       find.byKey(
@@ -286,6 +373,7 @@ void main() {
     );
     await _pumpNotebook(tester, repository: repository);
     await tester.pumpAndSettle();
+    await _openCollection(tester, _collection.routeKey);
 
     await _startRemove(tester, _remoteEntry.routeKey);
     expect(
@@ -308,6 +396,7 @@ void main() {
     );
     await _pumpNotebook(tester, repository: repository);
     await tester.pumpAndSettle();
+    await _openCollection(tester, _collection.routeKey);
 
     await _startRemove(tester, _remoteEntry.routeKey);
     await tester.pumpAndSettle();
@@ -350,6 +439,7 @@ void main() {
     );
     await _pumpNotebook(tester, repository: repository);
     await tester.pumpAndSettle();
+    await _openCollection(tester, _collection.routeKey);
 
     await tester.tap(
       find.byKey(const ValueKey<String>('notebook_add_entry_button')),
@@ -384,8 +474,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
+    await _openCollection(tester, NotebookController.demoCollectionRouteKey);
+    expect(tester.takeException(), isNull);
+
     await tester.drag(
-      find.byKey(const ValueKey<String>('notebook_content')),
+      find.byKey(const ValueKey<String>('notebook_collection_content')),
       const Offset(0, -450),
     );
     await tester.pumpAndSettle();
@@ -416,9 +509,13 @@ void main() {
     final ja = AppLocalizationsJa();
 
     expect(vi.navigationNotebook, isNotEmpty);
+    expect(vi.collectionSearchHint, isNotEmpty);
+    expect(vi.openCollection('N4'), isNotEmpty);
     expect(vi.notebookSearchHint, isNotEmpty);
     expect(vi.removeFromNotebookQuestion, isNotEmpty);
     expect(ja.navigationNotebook, isNotEmpty);
+    expect(ja.collectionSearchHint, isNotEmpty);
+    expect(ja.openCollection('N4'), isNotEmpty);
     expect(ja.notebookSearchHint, isNotEmpty);
     expect(ja.removeFromNotebookQuestion, isNotEmpty);
   });
@@ -525,6 +622,17 @@ Future<void> _startRemove(WidgetTester tester, String routeKey) async {
     find.byKey(const ValueKey<String>('notebook_confirm_remove_button')),
   );
   await tester.pump();
+}
+
+Future<void> _openCollection(
+  WidgetTester tester,
+  String collectionRouteKey,
+) async {
+  await tester.tap(
+    find.byKey(ValueKey<String>('notebook_collection_$collectionRouteKey')),
+  );
+  await tester.pumpAndSettle();
+  expect(find.byType(NotebookCollectionScreen), findsOneWidget);
 }
 
 class _PendingNotebookRepository implements NotebookRepository {

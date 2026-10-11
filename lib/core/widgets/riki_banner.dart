@@ -6,12 +6,18 @@ class RikiInfoBanner extends StatelessWidget {
     required this.message,
     this.title,
     this.icon = Icons.info_outline,
+    this.foregroundColor = AppColors.info,
+    this.backgroundColor = AppColors.infoBackground,
+    this.borderColor = AppColors.infoBorder,
     super.key,
   });
 
   final String message;
   final String? title;
   final IconData icon;
+  final Color foregroundColor;
+  final Color backgroundColor;
+  final Color borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +25,9 @@ class RikiInfoBanner extends StatelessWidget {
       title: title,
       message: message,
       icon: icon,
-      foregroundColor: AppColors.info,
-      backgroundColor: AppColors.infoBackground,
-      borderColor: AppColors.infoBorder,
+      foregroundColor: foregroundColor,
+      backgroundColor: backgroundColor,
+      borderColor: borderColor,
     );
   }
 }

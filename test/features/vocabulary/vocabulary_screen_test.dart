@@ -191,6 +191,12 @@ void main() {
 
     router.go(AppRoutes.notebook);
     await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('notebook_collection_fixture-learning-saved'),
+      ),
+    );
+    await tester.pumpAndSettle();
     expect(
       find.byKey(
         const ValueKey<String>(

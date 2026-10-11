@@ -191,6 +191,7 @@ class _ContinueLearningSection extends StatelessWidget {
         title: context.l10n.homeChooseJlptTitle,
         description: context.l10n.homeChooseJlptDescription,
         actionLabel: context.l10n.homeChooseJlptAction,
+        tone: AppFeatureTones.brand,
         onPressed: onOpenLearning,
       );
     }
@@ -203,6 +204,7 @@ class _ContinueLearningSection extends StatelessWidget {
         title: context.l10n.homeRoadmapProgressTitle,
         description: context.l10n.homeRoadmapProgressDescription,
         actionLabel: context.l10n.viewRoadmap,
+        tone: AppFeatureTones.learning,
         onPressed: onOpenLearning,
       );
     }
@@ -210,14 +212,17 @@ class _ContinueLearningSection extends StatelessWidget {
     return RikiCard(
       key: const ValueKey<String>('home_continue_learning_card'),
       backgroundColor: AppColors.surface,
-      borderColor: AppColors.brandSelectedBorder,
       padding: const EdgeInsets.all(AppSpacing.space5),
+      onTap: onOpenLearning,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              const _IconTile(icon: Icons.play_arrow_rounded),
+              const _IconTile(
+                icon: Icons.play_arrow_rounded,
+                tone: AppFeatureTones.learning,
+              ),
               const SizedBox(width: AppSpacing.space3),
               Expanded(
                 child: Text(
@@ -243,14 +248,14 @@ class _ContinueLearningSection extends StatelessWidget {
             style: AppTypography.bodySmall,
           ),
           const SizedBox(height: AppSpacing.space4),
-          _ProgressBar(value: lesson.progress),
+          _ProgressBar(value: lesson.progress, tone: AppFeatureTones.learning),
           const SizedBox(height: AppSpacing.space2),
           Align(
             alignment: Alignment.centerRight,
             child: Text(
               '${lesson.progressPercent}%',
               style: AppTypography.badgeText.copyWith(
-                color: AppColors.brandPrimary,
+                color: AppFeatureTones.learning.foreground,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -300,12 +305,17 @@ class _LocalProgressSection extends StatelessWidget {
       boxShadow: const <BoxShadow>[],
       backgroundColor: AppColors.learnerSurface,
       padding: const EdgeInsets.all(AppSpacing.space4),
+      onTap: onOpenRoadmap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              const _IconTile(icon: Icons.route_outlined, compact: true),
+              const _IconTile(
+                icon: Icons.route_outlined,
+                compact: true,
+                tone: AppFeatureTones.learning,
+              ),
               const SizedBox(width: AppSpacing.space3),
               Expanded(
                 child: Column(
@@ -337,7 +347,10 @@ class _LocalProgressSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.space2),
-          _ProgressBar(value: snapshot.overallProgress),
+          _ProgressBar(
+            value: snapshot.overallProgress,
+            tone: AppFeatureTones.learning,
+          ),
           const SizedBox(height: AppSpacing.space3),
           Align(
             alignment: Alignment.centerRight,
@@ -403,6 +416,7 @@ class _AnalyticsSummary extends StatelessWidget {
         _MetricTile(
           key: const ValueKey<String>('home_analytics_streak'),
           icon: Icons.local_fire_department_outlined,
+          tone: AppFeatureTones.review,
           label: context.l10n.studyStreakLabel,
           value: context.l10n.streakDaysValue(data.streakDays),
         ),
@@ -410,6 +424,7 @@ class _AnalyticsSummary extends StatelessWidget {
         _MetricTile(
           key: const ValueKey<String>('home_analytics_completion'),
           icon: Icons.task_alt_outlined,
+          tone: AppFeatureTones.success,
           label: context.l10n.completedLessonsLabel,
           value: context.l10n.analyticsCompletedLessons(
             data.completedLessons,
@@ -420,6 +435,7 @@ class _AnalyticsSummary extends StatelessWidget {
         _MetricTile(
           key: const ValueKey<String>('home_analytics_skill'),
           icon: Icons.auto_graph_outlined,
+          tone: AppFeatureTones.learning,
           label: context.l10n.skillBreakdown,
           value: data.skills.first.skill,
         ),
@@ -514,6 +530,7 @@ class _PracticeSections extends StatelessWidget {
       _ActionCard(
         key: const ValueKey<String>('home_daily_review_card'),
         icon: Icons.style_outlined,
+        tone: AppFeatureTones.review,
         title: context.l10n.dailyReviewTitle,
         description: context.l10n.homeReviewDescription,
         actionLabel: reviewAction,
@@ -528,6 +545,7 @@ class _PracticeSections extends StatelessWidget {
               : 'home_start_practice_card',
         ),
         icon: Icons.quiz_outlined,
+        tone: AppFeatureTones.practice,
         title: practiceTitle,
         description: practiceDescription,
         actionLabel: practiceAction,
@@ -574,6 +592,7 @@ class _NotebookShortcut extends StatelessWidget {
       title: context.l10n.homeNotebookShortcutTitle,
       description: context.l10n.homeNotebookShortcutDescription,
       actionLabel: context.l10n.navigationNotebook,
+      tone: AppFeatureTones.neutral,
       onPressed: onPressed,
       compact: true,
     );
@@ -586,6 +605,7 @@ class _FeatureCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.actionLabel,
+    required this.tone,
     required this.onPressed,
     this.compact = false,
     super.key,
@@ -595,6 +615,7 @@ class _FeatureCard extends StatelessWidget {
   final String title;
   final String description;
   final String actionLabel;
+  final RikiFeatureTone tone;
   final VoidCallback onPressed;
   final bool compact;
 
@@ -603,12 +624,13 @@ class _FeatureCard extends StatelessWidget {
     return RikiCard(
       padding: EdgeInsets.all(compact ? AppSpacing.space3 : AppSpacing.space4),
       boxShadow: compact ? const <BoxShadow>[] : AppShadows.cardSoft,
+      onTap: onPressed,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final content = Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _IconTile(icon: icon, compact: true),
+              _IconTile(icon: icon, compact: true, tone: tone),
               const SizedBox(width: AppSpacing.space3),
               Expanded(
                 child: Column(
@@ -624,6 +646,7 @@ class _FeatureCard extends StatelessWidget {
           );
           final action = TextButton(
             onPressed: onPressed,
+            style: TextButton.styleFrom(foregroundColor: tone.foreground),
             child: Text(actionLabel),
           );
 
@@ -657,6 +680,7 @@ class _ActionCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.actionLabel,
+    required this.tone,
     required this.onPressed,
     super.key,
   });
@@ -665,6 +689,7 @@ class _ActionCard extends StatelessWidget {
   final String title;
   final String description;
   final String actionLabel;
+  final RikiFeatureTone tone;
   final VoidCallback onPressed;
 
   @override
@@ -672,10 +697,11 @@ class _ActionCard extends StatelessWidget {
     return RikiCard(
       padding: const EdgeInsets.all(AppSpacing.space4),
       boxShadow: const <BoxShadow>[],
+      onTap: onPressed,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _IconTile(icon: icon),
+          _IconTile(icon: icon, tone: tone),
           const SizedBox(height: AppSpacing.space3),
           Text(title, style: AppTypography.cardTitle),
           const SizedBox(height: AppSpacing.space1),
@@ -683,6 +709,7 @@ class _ActionCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.space3),
           TextButton.icon(
             onPressed: onPressed,
+            style: TextButton.styleFrom(foregroundColor: tone.foreground),
             iconAlignment: IconAlignment.end,
             icon: const Icon(Icons.arrow_forward, size: 18),
             label: Text(actionLabel),
@@ -698,12 +725,14 @@ class _MetricTile extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    required this.tone,
     super.key,
   });
 
   final IconData icon;
   final String label;
   final String value;
+  final RikiFeatureTone tone;
 
   @override
   Widget build(BuildContext context) {
@@ -712,7 +741,7 @@ class _MetricTile extends StatelessWidget {
       boxShadow: const <BoxShadow>[],
       child: Row(
         children: [
-          _IconTile(icon: icon, compact: true),
+          _IconTile(icon: icon, compact: true, tone: tone),
           const SizedBox(width: AppSpacing.space2),
           Expanded(
             child: Column(
@@ -815,23 +844,24 @@ class _SectionSkeleton extends StatelessWidget {
 }
 
 class _IconTile extends StatelessWidget {
-  const _IconTile({required this.icon, this.compact = false});
+  const _IconTile({
+    required this.icon,
+    this.compact = false,
+    this.tone = AppFeatureTones.brand,
+  });
 
   final IconData icon;
   final bool compact;
+  final RikiFeatureTone tone;
 
   @override
   Widget build(BuildContext context) {
     final size = compact ? 36.0 : 44.0;
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: AppColors.learnerPrimaryFixed,
-        borderRadius: BorderRadius.circular(AppRadius.compact),
-      ),
-      child: Icon(icon, color: AppColors.brandPrimary, size: compact ? 19 : 22),
+    return RikiFeatureIcon(
+      icon: icon,
+      tone: tone,
+      extent: size,
+      iconSize: compact ? 19 : 22,
     );
   }
 }
@@ -861,9 +891,10 @@ class _LevelPill extends StatelessWidget {
 }
 
 class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({required this.value});
+  const _ProgressBar({required this.value, required this.tone});
 
   final double value;
+  final RikiFeatureTone tone;
 
   @override
   Widget build(BuildContext context) {
@@ -872,8 +903,8 @@ class _ProgressBar extends StatelessWidget {
       child: LinearProgressIndicator(
         value: value.clamp(0, 1),
         minHeight: 8,
-        color: AppColors.brandPrimary,
-        backgroundColor: AppColors.brandTint,
+        color: tone.foreground,
+        backgroundColor: tone.background,
       ),
     );
   }

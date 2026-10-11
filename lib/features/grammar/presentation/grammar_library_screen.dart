@@ -22,10 +22,7 @@ class GrammarLibraryScreen extends ConsumerWidget {
       appBar: LearningHeader.detail(
         title: context.l10n.grammar,
         subtitle: context.l10n.library,
-        level: state.value?.query.level,
-        initials: null,
         onBack: context.pop,
-        onProfilePressed: () => context.go(AppRoutes.profile),
       ),
       body: SafeArea(
         top: false,

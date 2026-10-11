@@ -20,6 +20,7 @@ import 'package:rikipath_mobile/features/profile/presentation/edit_profile_scree
 import 'package:rikipath_mobile/features/profile/presentation/jlpt_goal_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/notification_settings_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dart';
+import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_components.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations_ja.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations_vi.dart';
@@ -168,6 +169,11 @@ void main() {
         find.text('Khám phá gói tư vấn và lịch hẹn của bạn.'),
         findsOneWidget,
       );
+      final consultationTile = tester.widget<ProfileActionTile>(
+        find.byKey(const ValueKey<String>('profile_consultation_action')),
+      );
+      expect(consultationTile.emphasized, isTrue);
+      expect(find.text('Khám phá'), findsNothing);
     });
 
     testWidgets('error state retries without exposing raw exception text', (

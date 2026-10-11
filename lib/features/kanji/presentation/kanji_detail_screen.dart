@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
@@ -35,12 +34,9 @@ class KanjiDetailScreen extends ConsumerWidget {
         subtitle: entry == null
             ? context.l10n.library
             : '${entry.character} • ${entry.sinoVietnamese ?? entry.meaning}',
-        level: entry?.level,
-        initials: null,
         onBack: showingStrokes
             ? controller.closeStrokeOrder
             : () => context.pop(),
-        onProfilePressed: () => context.go(AppRoutes.profile),
       ),
       body: SafeArea(
         top: false,

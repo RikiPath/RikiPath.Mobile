@@ -11,6 +11,10 @@ abstract final class AppRoutes {
   static const String meeting = '/meeting';
   static const String meetingJoinSegment = 'join';
   static const String meetingJoin = '$meeting/$meetingJoinSegment';
+  static const String meetingRoomSegment = 'room/:roomId';
+
+  static String meetingRoom(String roomId) =>
+      '$meeting/room/${Uri.encodeComponent(roomId)}';
 
   static const String mentor = '/mentor';
   static const String mentorAvailabilitySegment = 'availability';
@@ -119,8 +123,11 @@ abstract final class AppRoutes {
       '${mockTestResult(testId)}/review';
   static const String analytics = '/analytics';
   static const String notebook = '/notebook';
+  static const String notebookCollectionSegment = 'collection/:collectionKey';
   static const String notebookVocabularyDetailSegment = 'vocabulary/:entryKey';
   static const String notebookEntryDetailSegment = 'item/:entryKey';
+  static String notebookCollection(String collectionKey) =>
+      '$notebook/collection/${Uri.encodeComponent(collectionKey)}';
   static String notebookVocabularyDetail(String entryKey) =>
       '$notebook/vocabulary/${Uri.encodeComponent(entryKey)}';
   static String notebookEntryDetail(String entryKey) =>

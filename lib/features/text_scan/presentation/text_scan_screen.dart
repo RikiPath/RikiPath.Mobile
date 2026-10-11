@@ -191,18 +191,11 @@ class _ImagePickerCard extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: const BoxDecoration(
-                              color: AppColors.brandTint,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.document_scanner_outlined,
-                              size: 32,
-                              color: AppColors.brandPrimary,
-                            ),
+                          const RikiFeatureIcon(
+                            icon: Icons.document_scanner_outlined,
+                            tone: AppFeatureTones.textScan,
+                            extent: 64,
+                            iconSize: 32,
                           ),
                           const SizedBox(height: AppSpacing.space3),
                           Text(

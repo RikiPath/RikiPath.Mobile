@@ -58,6 +58,7 @@ class _AnalyticsContent extends StatelessWidget {
         if (data.isAvailable(AnalyticsSection.streak))
           _MetricCard(
             icon: Icons.local_fire_department_outlined,
+            tone: AppFeatureTones.review,
             label: context.l10n.studyStreakLabel,
             value: context.l10n.streakDaysValue(data.streakDays),
           )
@@ -67,6 +68,7 @@ class _AnalyticsContent extends StatelessWidget {
         if (data.isAvailable(AnalyticsSection.completion))
           _MetricCard(
             icon: Icons.task_alt_outlined,
+            tone: AppFeatureTones.success,
             label: context.l10n.completedLessonsLabel,
             value: context.l10n.analyticsCompletedLessons(
               data.completedLessons,
@@ -100,11 +102,13 @@ class _AnalyticsContent extends StatelessWidget {
 class _MetricCard extends StatelessWidget {
   const _MetricCard({
     required this.icon,
+    required this.tone,
     required this.label,
     required this.value,
   });
 
   final IconData icon;
+  final RikiFeatureTone tone;
   final String label;
   final String value;
 
@@ -113,11 +117,7 @@ class _MetricCard extends StatelessWidget {
     return RikiCard(
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundColor: AppColors.brandTint,
-            foregroundColor: AppColors.brandPrimary,
-            child: Icon(icon),
-          ),
+          RikiFeatureIcon(icon: icon, tone: tone),
           const SizedBox(width: AppSpacing.space3),
           Expanded(
             child: Column(
@@ -163,7 +163,8 @@ class _SkillCard extends StatelessWidget {
           RikiProgressIndicator(
             value: skill.progress,
             minHeight: 8,
-            backgroundColor: AppColors.brandTint,
+            color: AppFeatureTones.learning.foreground,
+            backgroundColor: AppFeatureTones.learning.background,
             semanticsLabel: skill.skill,
           ),
         ],

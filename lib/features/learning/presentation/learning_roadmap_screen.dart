@@ -29,10 +29,7 @@ class LearningRoadmapScreen extends ConsumerWidget {
       appBar: LearningHeader.detail(
         title: context.l10n.jlptRoadmap(levelSuffix),
         subtitle: subtitle,
-        level: snapshot?.jlptTarget,
-        initials: snapshot?.initials,
         onBack: () => _goBack(context),
-        onProfilePressed: () => context.go(AppRoutes.profile),
       ),
       body: SafeArea(
         top: false,

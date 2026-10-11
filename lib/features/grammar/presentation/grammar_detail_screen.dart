@@ -25,10 +25,7 @@ class GrammarDetailScreen extends ConsumerWidget {
       appBar: LearningHeader.detail(
         title: context.l10n.grammarDetail,
         subtitle: state.value?.title ?? context.l10n.library,
-        level: state.value?.level,
-        initials: null,
         onBack: context.pop,
-        onProfilePressed: () => context.go(AppRoutes.profile),
       ),
       body: SafeArea(
         top: false,

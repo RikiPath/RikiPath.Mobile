@@ -20,6 +20,9 @@ import 'package:rikipath_mobile/features/home/domain/home_dashboard.dart';
 import 'package:rikipath_mobile/features/home/domain/home_repository.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
+import 'package:rikipath_mobile/features/meeting/application/upcoming_meeting_provider.dart';
+import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
+import 'package:rikipath_mobile/features/meeting/presentation/meeting_join_screen.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/notifications/domain/app_notification.dart';
 import 'package:rikipath_mobile/features/notifications/domain/notification_repository.dart';
@@ -107,6 +110,46 @@ void main() {
       find.byType(RikiBottomNavigationBar),
     );
     expect(navigation.selectedIndex, 1);
+  });
+
+  testWidgets('notebook shortcut opens from the whole card surface', (
+    tester,
+  ) async {
+    final router = await _pumpHome(tester);
+    await tester.pumpAndSettle();
+
+    const cardKey = ValueKey<String>('home_notebook_shortcut');
+    final card = find.byKey(cardKey);
+    await tester.scrollUntilVisible(card, 300);
+    await tester.pumpAndSettle();
+    final bounds = tester.getRect(card);
+
+    await tester.tapAt(Offset(bounds.left + 24, bounds.center.dy));
+    await tester.pumpAndSettle();
+
+    expect(router.routeInformationProvider.value.uri.path, AppRoutes.notebook);
+  });
+
+  testWidgets('meeting shortcut opens the join screen directly', (
+    tester,
+  ) async {
+    await _pumpHome(tester);
+    await tester.pumpAndSettle();
+
+    final card = find.byKey(
+      const ValueKey<String>('home_meeting_fallback_card'),
+    );
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey<String>('home_notebook_shortcut')),
+      300,
+    );
+    await tester.pumpAndSettle();
+
+    expect(card.hitTestable(), findsOneWidget);
+    await tester.tap(card.hitTestable());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MeetingJoinScreen), findsOneWidget);
   });
 
   testWidgets('progress action opens the shared Analytics screen', (
@@ -202,6 +245,9 @@ Future<GoRouter> _pumpHome(
         ),
         practiceSessionRepositoryProvider.overrideWithValue(
           _PracticeSessionRepository(),
+        ),
+        upcomingMeetingProvider.overrideWithValue(
+          const AsyncData<UpcomingMeeting?>(null),
         ),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),

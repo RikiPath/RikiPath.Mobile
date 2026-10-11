@@ -1259,6 +1259,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get yourCollections => '自分のコレクション';
 
   @override
+  String get collectionSearchHint => 'コレクションを検索…';
+
+  @override
+  String get noMatchingCollection => '一致するコレクションがありません';
+
+  @override
+  String get collectionSearchEmptyMessage => '別のキーワードを試すか、検索をクリアしてください。';
+
+  @override
+  String openCollection(String name) {
+    return '「$name」を開く';
+  }
+
+  @override
+  String get notebookCollectionUnavailable => 'このコレクションは利用できなくなりました。';
+
+  @override
   String get notebookSearchHint => '漢字、かな、意味を検索…';
 
   @override
@@ -1290,6 +1307,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get savedItem => '保存済み項目';
+
+  @override
+  String get personalNoteLabel => '個人メモ';
+
+  @override
+  String get addedToNotebookLabel => '単語帳に追加した日';
 
   @override
   String get notebookEmptyTitle => '単語帳はまだ空です';
@@ -2942,25 +2965,40 @@ class AppLocalizationsJa extends AppLocalizations {
   String get meetingContinueAction => '次へ';
 
   @override
-  String get meetingLandingDescription =>
-      '共有されたミーティングリンクを入力してください。RikiPathが安全にブラウザでルームを開きます。';
+  String get meetingLandingDescription => '共有されたルームコードまたはRikiPathのリンクで参加できます。';
 
   @override
-  String get meetingJoinDescription =>
-      'http:// または https:// で始まる完全なリンクを貼り付けてください。';
+  String get meetingJoinDescription => 'ルームコードを入力するか、RikiPathのリンクを貼り付けてください。';
 
   @override
-  String get meetingLinkLabel => 'ミーティングリンク';
+  String get meetingLinkLabel => 'ルームコードまたはリンク';
 
   @override
-  String get meetingLinkHint => 'https://example.com/meeting/...';
+  String get meetingLinkHint => 'ルームコードを入力、またはリンクを貼り付け';
 
   @override
-  String get meetingLinkRequired => 'ミーティングリンクを入力してください。';
+  String get meetingLinkRequired => 'ルームコードまたはリンクを入力してください。';
 
   @override
-  String get meetingLinkInvalid =>
-      'リンクが正しくありません。完全な http または https アドレスのみ使用できます。';
+  String get meetingLinkInvalid => 'ルームコードが正しくありません。もう一度確認してください。';
+
+  @override
+  String get meetingPasteAction => '貼り付け';
+
+  @override
+  String get meetingRoomCodeHelper => 'ルームコードはミーティングリンクの末尾にあります。';
+
+  @override
+  String get meetingErrorRoomNotFound => 'ミーティングルームが見つかりません。ルームコードを確認してください。';
+
+  @override
+  String get meetingErrorNotAuthorized => 'このミーティングルームに参加する権限がありません。';
+
+  @override
+  String get meetingErrorAuthRequired => 'ミーティングに参加するにはログインしてください。';
+
+  @override
+  String get meetingErrorNetwork => 'ミーティングに接続できません。通信環境を確認して、もう一度お試しください。';
 
   @override
   String get meetingAuthorizationNotice =>
@@ -2971,7 +3009,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get meetingAuthRequiredDescription =>
-      'リンクはこの端末に一時的に保持されます。ログイン後、参加画面に戻ります。';
+      'ルームコードはこの端末に一時的に保持されます。ログイン後、自動的にミーティングへ戻ります。';
 
   @override
   String get meetingReadyTitle => 'ミーティングを開く準備ができました';
@@ -2989,10 +3027,113 @@ class AppLocalizationsJa extends AppLocalizations {
   String get meetingDetailsAction => '詳細';
 
   @override
+  String meetingNativeParticipantsCount(int count) {
+    return '参加者 $count人';
+  }
+
+  @override
+  String get meetingNativeConnecting => 'ミーティングに接続しています…';
+
+  @override
+  String get meetingNativeJoining => 'ルームに参加しています…';
+
+  @override
+  String get meetingNativeReconnecting => '再接続しています…';
+
+  @override
+  String get meetingNativeFailedTitle => 'ミーティングに接続できません';
+
+  @override
+  String get meetingNativeFailedDescription => '通信環境と参加権限を確認して、もう一度お試しください。';
+
+  @override
+  String get meetingNativeRetry => 'もう一度試す';
+
+  @override
+  String get meetingNativeOpenWeb => 'Web版を開く';
+
+  @override
+  String get meetingNativeMicrophone => 'マイク';
+
+  @override
+  String get meetingNativeCamera => 'カメラ';
+
+  @override
+  String get meetingNativeSwitchCamera => 'カメラ切替';
+
+  @override
+  String get meetingNativeRaiseHand => '手を挙げる';
+
+  @override
+  String get meetingNativeLowerHand => '手を下げる';
+
+  @override
+  String get meetingNativeChat => 'チャット';
+
+  @override
+  String get meetingNativeParticipants => '参加者';
+
+  @override
+  String get meetingNativeMoreActions => 'その他の操作';
+
+  @override
+  String get meetingNativeMinimize => '小さく表示';
+
+  @override
+  String get meetingNativeLeave => '退出';
+
+  @override
+  String get meetingNativeLeaveTitle => 'ミーティングから退出しますか？';
+
+  @override
+  String get meetingNativeLeaveDescription => '退出するとカメラとマイクが停止します。';
+
+  @override
+  String get meetingNativeStay => '残る';
+
+  @override
+  String get meetingNativeNoParticipants => 'ほかの参加者を待っています';
+
+  @override
+  String get meetingNativeChatEmpty => 'まだメッセージはありません。';
+
+  @override
+  String get meetingNativeChatHint => 'メッセージを入力…';
+
+  @override
+  String get meetingNativeSend => '送信';
+
+  @override
+  String get meetingNativeYou => 'あなた';
+
+  @override
+  String get meetingNativeMentor => 'メンター';
+
+  @override
+  String get meetingNativeLearner => '学習者';
+
+  @override
+  String get meetingNativePermissionDenied =>
+      '視聴は続けられます。映像と音声を送るには、設定でカメラとマイクを許可してください。';
+
+  @override
+  String get meetingNativeCameraDenied => 'カメラが許可されていません。音声のみで参加できます。';
+
+  @override
+  String get meetingNativeMicrophoneDenied => 'マイクが許可されていません。視聴モードで参加できます。';
+
+  @override
+  String get meetingNativeMediaUnavailable =>
+      'カメラまたはマイクを開始できません。視聴とチャットは利用できます。';
+
+  @override
+  String get meetingNativeScreenShareDeferred => '画面共有は現在Web版で利用できます。';
+
+  @override
   String get homeMeetingFallbackTitle => 'ミーティングルーム';
 
   @override
-  String get homeMeetingFallbackDescription => 'ミーティングリンクから参加します。';
+  String get homeMeetingFallbackDescription => 'ルームコードまたはリンクで参加します。';
 
   @override
   String get homeUpcomingMeetingTitle => '次の相談予定';

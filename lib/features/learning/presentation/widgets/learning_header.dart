@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
-import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
+import 'package:rikipath_mobile/core/widgets/riki_language_switcher.dart';
+import 'package:rikipath_mobile/core/widgets/riki_learner_header.dart';
 
 class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
   const LearningHeader.root({
-    required this.level,
     required this.streakDays,
     required this.hasUnreadNotifications,
-    required this.initials,
-    required this.onProfilePressed,
     super.key,
   }) : title = null,
        subtitle = null,
@@ -19,55 +17,57 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
   const LearningHeader.detail({
     required this.title,
     required this.subtitle,
-    required this.level,
-    required this.initials,
     required this.onBack,
-    required this.onProfilePressed,
     super.key,
   }) : streakDays = null,
        hasUnreadNotifications = false;
 
   final String? title;
   final String? subtitle;
-  final JlptLevel? level;
   final int? streakDays;
   final bool hasUnreadNotifications;
-  final String? initials;
   final VoidCallback? onBack;
-  final VoidCallback onProfilePressed;
 
   bool get _isRoot => onBack == null;
 
   @override
-  Size get preferredSize => const Size.fromHeight(64);
+  Size get preferredSize => const Size.fromHeight(RikiLearnerHeader.height);
 
   @override
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width < 360;
 
-    return AppBar(
-      automaticallyImplyLeading: false,
-      backgroundColor: AppColors.surface,
-      surfaceTintColor: Colors.transparent,
-      toolbarHeight: preferredSize.height,
+    return RikiLearnerHeader(
       titleSpacing: _isRoot ? AppSpacing.space4 : 0,
-      elevation: 0,
-      flexibleSpace: const DecoratedBox(
-        decoration: BoxDecoration(boxShadow: AppShadows.learnerHeader),
-      ),
-      leadingWidth: _isRoot ? 0 : 56,
+      leadingWidth: _isRoot ? 0 : 64,
       leading: _isRoot
           ? null
           : Padding(
               padding: const EdgeInsets.only(left: AppSpacing.space3),
-              child: IconButton(
-                tooltip: context.l10n.back,
-                onPressed: onBack,
-                icon: const Icon(Icons.chevron_left),
-                style: IconButton.styleFrom(
-                  foregroundColor: AppColors.learnerTextPrimary,
-                  backgroundColor: AppColors.surface,
-                  side: const BorderSide(color: AppColors.border),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox.square(
+                  dimension: 40,
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      color: AppColors.brandTint,
+                      shape: BoxShape.circle,
+                      boxShadow: AppShadows.cardSoft,
+                    ),
+                    child: IconButton(
+                      key: const Key('learning_detail_back_button'),
+                      tooltip: context.l10n.back,
+                      onPressed: onBack,
+                      padding: EdgeInsets.zero,
+                      iconSize: 22,
+                      icon: const Icon(Icons.chevron_left),
+                      style: IconButton.styleFrom(
+                        foregroundColor: AppColors.brandPrimary,
+                        backgroundColor: Colors.transparent,
+                        shape: const CircleBorder(),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -79,11 +79,12 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildBrandTitle() {
-    return RikiBrandLockup(level: level, compact: true);
+    return const RikiBrandLockup(compact: true);
   }
 
   Widget _buildDetailTitle() {
     return Column(
+      key: const Key('learning_detail_title'),
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -174,57 +175,16 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      _ProfileAvatar(initials: initials, onPressed: onProfilePressed),
+      const RikiLanguageSwitcher(),
       const SizedBox(width: AppSpacing.space2),
     ];
   }
 
   List<Widget> _buildDetailActions() {
     return [
-      if (level != null) JlptBadge(level!),
-      const SizedBox(width: AppSpacing.space1),
-      _ProfileAvatar(initials: initials, onPressed: onProfilePressed),
+      const RikiLanguageSwitcher(),
       const SizedBox(width: AppSpacing.space2),
     ];
-  }
-}
-
-class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar({required this.initials, required this.onPressed});
-
-  final String? initials;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: context.l10n.openProfile,
-      child: InkResponse(
-        onTap: onPressed,
-        radius: 24,
-        child: SizedBox.square(
-          dimension: 44,
-          child: Center(
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.brandPrimary,
-              foregroundColor: Colors.white,
-              child: initials == null
-                  ? const Icon(Icons.person_outline, size: 18)
-                  : Text(
-                      initials!,
-                      style: AppTypography.badgeText.copyWith(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 

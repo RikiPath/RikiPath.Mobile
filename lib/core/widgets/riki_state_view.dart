@@ -12,6 +12,7 @@ class RikiEmptyState extends StatelessWidget {
     this.actionLabel,
     this.onAction,
     this.actionKey,
+    this.actionIcon,
     this.compact = false,
     super.key,
   }) : assert(
@@ -25,6 +26,7 @@ class RikiEmptyState extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
   final Key? actionKey;
+  final IconData? actionIcon;
   final bool compact;
 
   @override
@@ -38,6 +40,7 @@ class RikiEmptyState extends StatelessWidget {
       actionLabel: actionLabel,
       onAction: onAction,
       actionKey: actionKey,
+      actionIcon: actionIcon,
       compact: compact,
     );
   }

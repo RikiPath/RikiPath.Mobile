@@ -74,6 +74,34 @@ abstract final class AppColors {
   static const Color infoBackground = Color(0xFFEAF2FD);
   static const Color infoBorder = Color(0xFFD8E7FA);
 
+  // Calm feature accents keep cards neutral while giving each learning tool
+  // a stable visual meaning. These colors are intentionally desaturated so
+  // Sakura remains the strongest brand and primary-action color.
+  static const Color featureBlue = Color(0xFF4F6F99);
+  static const Color featureBluePressed = Color(0xFF3D587B);
+  static const Color featureBlueBackground = Color(0xFFEEF3F8);
+  static const Color featureBlueBorder = Color(0xFFD6E0EA);
+
+  static const Color featureViolet = Color(0xFF74558A);
+  static const Color featureVioletPressed = Color(0xFF5B426D);
+  static const Color featureVioletBackground = Color(0xFFF4EFF7);
+  static const Color featureVioletBorder = Color(0xFFDDD1E5);
+
+  static const Color featureIndigo = Color(0xFF4F628C);
+  static const Color featureIndigoPressed = Color(0xFF3E4F73);
+  static const Color featureIndigoBackground = Color(0xFFEFF1F7);
+  static const Color featureIndigoBorder = Color(0xFFD4DAE7);
+
+  static const Color featureTeal = Color(0xFF2E7872);
+  static const Color featureTealPressed = Color(0xFF245F5A);
+  static const Color featureTealBackground = Color(0xFFEDF7F5);
+  static const Color featureTealBorder = Color(0xFFCBE4DF);
+
+  static const Color featureAmber = Color(0xFF956119);
+  static const Color featureAmberPressed = Color(0xFF754B12);
+  static const Color featureAmberBackground = Color(0xFFFFF5E7);
+  static const Color featureAmberBorder = Color(0xFFEED9B8);
+
   // Compatibility roles used throughout the existing learner presentation.
   // Large areas stay neutral; Sakura is reserved for purposeful emphasis.
   static const Color learnerBackground = background;

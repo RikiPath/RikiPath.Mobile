@@ -2450,6 +2450,36 @@ abstract class AppLocalizations {
   /// **'Bộ sưu tập của bạn'**
   String get yourCollections;
 
+  /// No description provided for @collectionSearchHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tìm bộ sưu tập…'**
+  String get collectionSearchHint;
+
+  /// No description provided for @noMatchingCollection.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tìm thấy bộ sưu tập phù hợp'**
+  String get noMatchingCollection;
+
+  /// No description provided for @collectionSearchEmptyMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử từ khóa khác hoặc xóa tìm kiếm hiện tại.'**
+  String get collectionSearchEmptyMessage;
+
+  /// No description provided for @openCollection.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mở bộ sưu tập {name}'**
+  String openCollection(String name);
+
+  /// No description provided for @notebookCollectionUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bộ sưu tập này không còn khả dụng.'**
+  String get notebookCollectionUnavailable;
+
   /// No description provided for @notebookSearchHint.
   ///
   /// In vi, this message translates to:
@@ -2503,6 +2533,18 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Mục đã lưu'**
   String get savedItem;
+
+  /// No description provided for @personalNoteLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi chú cá nhân'**
+  String get personalNoteLabel;
+
+  /// No description provided for @addedToNotebookLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã thêm vào Sổ từ'**
+  String get addedToNotebookLabel;
 
   /// No description provided for @notebookEmptyTitle.
   ///
@@ -5453,38 +5495,74 @@ abstract class AppLocalizations {
   /// No description provided for @meetingLandingDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Nhập liên kết phòng họp đã được chia sẻ với bạn. RikiPath sẽ mở phòng bằng trình duyệt an toàn.'**
+  /// **'Tham gia bằng mã phòng hoặc liên kết RikiPath được chia sẻ với bạn.'**
   String get meetingLandingDescription;
 
   /// No description provided for @meetingJoinDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Dán liên kết đầy đủ bắt đầu bằng http:// hoặc https:// để tiếp tục.'**
+  /// **'Nhập mã phòng hoặc dán liên kết RikiPath để tham gia.'**
   String get meetingJoinDescription;
 
   /// No description provided for @meetingLinkLabel.
   ///
   /// In vi, this message translates to:
-  /// **'Liên kết cuộc họp'**
+  /// **'Mã phòng hoặc liên kết'**
   String get meetingLinkLabel;
 
   /// No description provided for @meetingLinkHint.
   ///
   /// In vi, this message translates to:
-  /// **'https://example.com/meeting/...'**
+  /// **'Nhập mã phòng hoặc dán liên kết'**
   String get meetingLinkHint;
 
   /// No description provided for @meetingLinkRequired.
   ///
   /// In vi, this message translates to:
-  /// **'Vui lòng nhập liên kết cuộc họp.'**
+  /// **'Vui lòng nhập mã phòng hoặc liên kết.'**
   String get meetingLinkRequired;
 
   /// No description provided for @meetingLinkInvalid.
   ///
   /// In vi, this message translates to:
-  /// **'Liên kết không hợp lệ. Chỉ chấp nhận địa chỉ http hoặc https đầy đủ.'**
+  /// **'Mã phòng không hợp lệ. Vui lòng kiểm tra lại.'**
   String get meetingLinkInvalid;
+
+  /// No description provided for @meetingPasteAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dán'**
+  String get meetingPasteAction;
+
+  /// No description provided for @meetingRoomCodeHelper.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mã phòng nằm ở cuối liên kết cuộc họp.'**
+  String get meetingRoomCodeHelper;
+
+  /// No description provided for @meetingErrorRoomNotFound.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tìm thấy phòng họp này. Vui lòng kiểm tra lại mã phòng.'**
+  String get meetingErrorRoomNotFound;
+
+  /// No description provided for @meetingErrorNotAuthorized.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tài khoản của bạn không có quyền tham gia phòng họp này.'**
+  String get meetingErrorNotAuthorized;
+
+  /// No description provided for @meetingErrorAuthRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng đăng nhập để tham gia phòng họp.'**
+  String get meetingErrorAuthRequired;
+
+  /// No description provided for @meetingErrorNetwork.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể kết nối tới phòng họp. Vui lòng kiểm tra mạng và thử lại.'**
+  String get meetingErrorNetwork;
 
   /// No description provided for @meetingAuthorizationNotice.
   ///
@@ -5501,7 +5579,7 @@ abstract class AppLocalizations {
   /// No description provided for @meetingAuthRequiredDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Liên kết đã được giữ tạm thời trên thiết bị này. Sau khi đăng nhập, bạn sẽ quay lại bước tham gia.'**
+  /// **'Mã phòng đã được giữ tạm thời trên thiết bị này. Sau khi đăng nhập, bạn sẽ tự động quay lại phòng họp.'**
   String get meetingAuthRequiredDescription;
 
   /// No description provided for @meetingReadyTitle.
@@ -5534,6 +5612,204 @@ abstract class AppLocalizations {
   /// **'Chi tiết'**
   String get meetingDetailsAction;
 
+  /// No description provided for @meetingNativeParticipantsCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} người tham gia'**
+  String meetingNativeParticipantsCount(int count);
+
+  /// No description provided for @meetingNativeConnecting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang kết nối phòng họp...'**
+  String get meetingNativeConnecting;
+
+  /// No description provided for @meetingNativeJoining.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang vào phòng...'**
+  String get meetingNativeJoining;
+
+  /// No description provided for @meetingNativeReconnecting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang kết nối lại...'**
+  String get meetingNativeReconnecting;
+
+  /// No description provided for @meetingNativeFailedTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể kết nối phòng họp'**
+  String get meetingNativeFailedTitle;
+
+  /// No description provided for @meetingNativeFailedDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng kiểm tra kết nối và quyền tham gia phòng rồi thử lại.'**
+  String get meetingNativeFailedDescription;
+
+  /// No description provided for @meetingNativeRetry.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử lại'**
+  String get meetingNativeRetry;
+
+  /// No description provided for @meetingNativeOpenWeb.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mở phiên bản web'**
+  String get meetingNativeOpenWeb;
+
+  /// No description provided for @meetingNativeMicrophone.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mic'**
+  String get meetingNativeMicrophone;
+
+  /// No description provided for @meetingNativeCamera.
+  ///
+  /// In vi, this message translates to:
+  /// **'Camera'**
+  String get meetingNativeCamera;
+
+  /// No description provided for @meetingNativeSwitchCamera.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi camera'**
+  String get meetingNativeSwitchCamera;
+
+  /// No description provided for @meetingNativeRaiseHand.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giơ tay'**
+  String get meetingNativeRaiseHand;
+
+  /// No description provided for @meetingNativeLowerHand.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hạ tay'**
+  String get meetingNativeLowerHand;
+
+  /// No description provided for @meetingNativeChat.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trò chuyện'**
+  String get meetingNativeChat;
+
+  /// No description provided for @meetingNativeParticipants.
+  ///
+  /// In vi, this message translates to:
+  /// **'Người tham gia'**
+  String get meetingNativeParticipants;
+
+  /// No description provided for @meetingNativeMoreActions.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tùy chọn khác'**
+  String get meetingNativeMoreActions;
+
+  /// No description provided for @meetingNativeMinimize.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu nhỏ'**
+  String get meetingNativeMinimize;
+
+  /// No description provided for @meetingNativeLeave.
+  ///
+  /// In vi, this message translates to:
+  /// **'Rời phòng'**
+  String get meetingNativeLeave;
+
+  /// No description provided for @meetingNativeLeaveTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Rời cuộc họp?'**
+  String get meetingNativeLeaveTitle;
+
+  /// No description provided for @meetingNativeLeaveDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Camera và microphone sẽ được tắt khi bạn rời phòng.'**
+  String get meetingNativeLeaveDescription;
+
+  /// No description provided for @meetingNativeStay.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ở lại'**
+  String get meetingNativeStay;
+
+  /// No description provided for @meetingNativeNoParticipants.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang chờ người khác tham gia'**
+  String get meetingNativeNoParticipants;
+
+  /// No description provided for @meetingNativeChatEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có tin nhắn nào.'**
+  String get meetingNativeChatEmpty;
+
+  /// No description provided for @meetingNativeChatHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập tin nhắn...'**
+  String get meetingNativeChatHint;
+
+  /// No description provided for @meetingNativeSend.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi'**
+  String get meetingNativeSend;
+
+  /// No description provided for @meetingNativeYou.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn'**
+  String get meetingNativeYou;
+
+  /// No description provided for @meetingNativeMentor.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mentor'**
+  String get meetingNativeMentor;
+
+  /// No description provided for @meetingNativeLearner.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học viên'**
+  String get meetingNativeLearner;
+
+  /// No description provided for @meetingNativePermissionDenied.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn có thể tiếp tục nghe/xem. Hãy cấp quyền Camera và Microphone trong Cài đặt để phát hình và âm thanh.'**
+  String get meetingNativePermissionDenied;
+
+  /// No description provided for @meetingNativeCameraDenied.
+  ///
+  /// In vi, this message translates to:
+  /// **'Camera chưa được cấp quyền. Bạn vẫn có thể tham gia bằng âm thanh.'**
+  String get meetingNativeCameraDenied;
+
+  /// No description provided for @meetingNativeMicrophoneDenied.
+  ///
+  /// In vi, this message translates to:
+  /// **'Microphone chưa được cấp quyền. Bạn vẫn có thể tham gia ở chế độ nghe.'**
+  String get meetingNativeMicrophoneDenied;
+
+  /// No description provided for @meetingNativeMediaUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể mở Camera hoặc Microphone. Bạn vẫn có thể xem và trò chuyện.'**
+  String get meetingNativeMediaUnavailable;
+
+  /// No description provided for @meetingNativeScreenShareDeferred.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chia sẻ màn hình hiện dùng phiên bản web.'**
+  String get meetingNativeScreenShareDeferred;
+
   /// No description provided for @homeMeetingFallbackTitle.
   ///
   /// In vi, this message translates to:
@@ -5543,7 +5819,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeMeetingFallbackDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Tham gia bằng liên kết cuộc họp.'**
+  /// **'Tham gia bằng mã phòng hoặc liên kết.'**
   String get homeMeetingFallbackDescription;
 
   /// No description provided for @homeUpcomingMeetingTitle.

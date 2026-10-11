@@ -52,6 +52,80 @@ void main() {
     expect(AppColors.learnerPrimaryFixed, AppColors.surfaceContainer);
   });
 
+  test('feature tones keep Sakura primary and success visibly green', () {
+    expect(AppFeatureTones.brand.foreground, AppColors.brandPrimary);
+    expect(AppFeatureTones.writing.foreground, AppColors.brandPrimary);
+    expect(AppFeatureTones.learning.foreground, AppColors.brandPrimary);
+    expect(AppFeatureTones.practice.foreground, AppColors.brandPrimary);
+    expect(AppFeatureTones.review.foreground, AppColors.brandPrimary);
+    expect(AppFeatureTones.success.foreground, AppColors.success);
+    expect(AppFeatureTones.speech.foreground, AppColors.brandPrimary);
+    expect(AppFeatureTones.textScan.foreground, AppColors.brandPrimary);
+    expect(AppFeatureTones.meeting.foreground, AppColors.brandPrimary);
+    expect(AppFeatureTones.neutral.foreground, AppColors.textSecondary);
+    expect(AppFeatureTones.success.foreground, isNot(AppColors.brandPrimary));
+  });
+
+  testWidgets('feature icon and status pill use their semantic tone', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _testHost(
+        const Row(
+          children: [
+            RikiFeatureIcon(
+              icon: Icons.mic_none_rounded,
+              tone: AppFeatureTones.speech,
+            ),
+            SizedBox(width: AppSpacing.space2),
+            RikiStatusPill(label: 'Listening', tone: AppFeatureTones.speech),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.mic_none_rounded), findsOneWidget);
+    expect(find.text('Listening'), findsOneWidget);
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.mic_none_rounded)).color,
+      AppColors.brandPrimary,
+    );
+  });
+
+  testWidgets('tappable card uses subtle press motion without layout shift', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _testHost(RikiCard(onTap: _noop, child: const Text('Open'))),
+    );
+    final card = find.byType(RikiCard);
+    final initialRect = tester.getRect(card);
+
+    final gesture = await tester.startGesture(tester.getCenter(card));
+    await tester.pump();
+    expect(
+      tester
+          .widget<AnimatedScale>(
+            find.byKey(const ValueKey<String>('riki_card_press_scale')),
+          )
+          .scale,
+      0.985,
+    );
+    expect(tester.getRect(card), initialRect);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<AnimatedScale>(
+            find.byKey(const ValueKey<String>('riki_card_press_scale')),
+          )
+          .scale,
+      1,
+    );
+    expect(tester.getRect(card), initialRect);
+  });
+
   testWidgets('brand lockup is shared across normal and compact headers', (
     tester,
   ) async {
@@ -258,7 +332,7 @@ void main() {
     expect(find.byIcon(Icons.info_outline), findsOneWidget);
   });
 
-  testWidgets('text field strengthens its Sakura focus treatment', (
+  testWidgets('focused text field uses a crisp border without an outer glow', (
     tester,
   ) async {
     final focusNode = FocusNode();
@@ -280,7 +354,7 @@ void main() {
     );
     final decoration = surface.decoration! as BoxDecoration;
 
-    expect(decoration.boxShadow, AppShadows.authInputFocused);
+    expect(decoration.boxShadow, isEmpty);
     expect(
       tester.widget<Icon>(find.byIcon(Icons.mail_outline)).color,
       AppColors.brandPrimary,

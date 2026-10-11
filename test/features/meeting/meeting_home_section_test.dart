@@ -51,13 +51,21 @@ void main() {
   testWidgets('Home shows generic Meeting shortcut without an upcoming room', (
     tester,
   ) async {
-    await _pumpSection(tester, const AsyncData<UpcomingMeeting?>(null));
-
-    expect(
-      find.byKey(const ValueKey<String>('home_meeting_fallback_card')),
-      findsOneWidget,
+    var opened = 0;
+    await _pumpSection(
+      tester,
+      const AsyncData<UpcomingMeeting?>(null),
+      onOpenMeeting: () => opened += 1,
     );
-    expect(find.text('Tham gia bằng liên kết cuộc họp.'), findsOneWidget);
+
+    final card = find.byKey(
+      const ValueKey<String>('home_meeting_fallback_card'),
+    );
+    expect(card, findsOneWidget);
+    expect(find.text('Tham gia bằng mã phòng hoặc liên kết.'), findsOneWidget);
+    await tester.tap(card);
+
+    expect(opened, 1);
   });
 
   testWidgets('Home shows real upcoming consultation actions', (tester) async {
@@ -97,6 +105,7 @@ void main() {
 Future<void> _pumpSection(
   WidgetTester tester,
   AsyncValue<UpcomingMeeting?> state, {
+  VoidCallback? onOpenMeeting,
   ValueChanged<int>? onOpenDetail,
   ValueChanged<Uri>? onJoin,
 }) async {
@@ -115,7 +124,7 @@ Future<void> _pumpSection(
           padding: const EdgeInsets.all(16),
           child: MeetingHomeSection(
             state: state,
-            onOpenMeeting: () {},
+            onOpenMeeting: onOpenMeeting ?? () {},
             onOpenDetail: onOpenDetail ?? (_) {},
             onJoin: onJoin ?? (_) {},
           ),

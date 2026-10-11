@@ -493,6 +493,64 @@ void main() {
       );
     });
 
+    testWidgets('Kanji collection uses the same segmented surface as scripts', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await _pumpWriting(
+        tester,
+        script: WritingScript.kanji,
+        repository: _FakeWritingRepository(<WritingCharacter>[kanji]),
+      );
+      await tester.pumpAndSettle();
+
+      final scriptSurface = tester.widget<DecoratedBox>(
+        find.byKey(const ValueKey<String>('writing_script_control_surface')),
+      );
+      final collectionSurface = tester.widget<DecoratedBox>(
+        find.byKey(
+          const ValueKey<String>('writing_kanji_collection_control_surface'),
+        ),
+      );
+
+      expect(collectionSurface.decoration, scriptSurface.decoration);
+
+      final hiraganaTab = find.byKey(
+        const ValueKey<String>('writing_tab_hiragana'),
+      );
+      final kanjiTab = find.byKey(const ValueKey<String>('writing_tab_kanji'));
+      final hiraganaMaterial = tester.widget<Material>(
+        find.descendant(of: hiraganaTab, matching: find.byType(Material)),
+      );
+      final kanjiMaterial = tester.widget<Material>(
+        find.descendant(of: kanjiTab, matching: find.byType(Material)),
+      );
+      final hiraganaLabel = tester.widget<Text>(
+        find.descendant(of: hiraganaTab, matching: find.text('Hiragana')),
+      );
+      final kanjiLabel = tester.widget<Text>(
+        find.descendant(of: kanjiTab, matching: find.text('Kanji')),
+      );
+
+      expect(hiraganaMaterial.color, AppColors.surface);
+      expect(kanjiMaterial.color, AppColors.brandTint);
+      expect(hiraganaLabel.style?.color, AppColors.textPrimary);
+      expect(hiraganaLabel.style?.fontWeight, FontWeight.w800);
+      expect(kanjiLabel.style?.fontWeight, FontWeight.w800);
+      expect(
+        find.byKey(const ValueKey<String>('writing_kanji_collection_due')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('writing_kanji_collection_all')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('writing detail fits a 320px phone with the native engine', (
       tester,
     ) async {

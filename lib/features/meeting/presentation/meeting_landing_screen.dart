@@ -24,6 +24,7 @@ class MeetingLandingScreen extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
           children: [
             RikiCard(
+              borderColor: AppFeatureTones.meeting.border,
               boxShadow: AppShadows.cardSoft,
               padding: const EdgeInsets.all(AppSpacing.space5),
               child: Column(
@@ -31,18 +32,11 @@ class MeetingLandingScreen extends StatelessWidget {
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: AppColors.brandTint,
-                        borderRadius: BorderRadius.circular(AppRadius.card),
-                      ),
-                      child: const Icon(
-                        Icons.videocam_outlined,
-                        color: AppColors.brandPrimary,
-                        size: 30,
-                      ),
+                    child: const RikiFeatureIcon(
+                      icon: Icons.videocam_outlined,
+                      tone: AppFeatureTones.meeting,
+                      extent: 56,
+                      iconSize: 30,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.space4),
@@ -72,6 +66,9 @@ class MeetingLandingScreen extends StatelessWidget {
             RikiInfoBanner(
               icon: Icons.lock_outline,
               message: context.l10n.meetingAuthorizationNotice,
+              foregroundColor: AppFeatureTones.meeting.foreground,
+              backgroundColor: AppFeatureTones.meeting.background,
+              borderColor: AppFeatureTones.meeting.border,
             ),
           ],
         ),
