@@ -12,11 +12,7 @@ class FallbackKanjiRepository implements KanjiRepository {
     // The backend exposes only numeric JLPT IDs and no learner-facing mapping.
     if (query.level != null) return fixture.search(query);
 
-    final remotePage = await remote.search(query);
-    if (query.page == 1 && remotePage.totalCount == 0) {
-      return fixture.search(query);
-    }
-    return remotePage;
+    return remote.search(query);
   }
 
   @override

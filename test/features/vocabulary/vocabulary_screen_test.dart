@@ -14,6 +14,7 @@ import 'package:rikipath_mobile/features/notebook/application/demo_notebook_cont
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/data/fixture_notebook_repository.dart';
 import 'package:rikipath_mobile/features/notebook/data/session_demo_notebook_repository.dart';
+import 'package:rikipath_mobile/features/shared_bank/presentation/shared_bank_screen.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/fixture_vocabulary_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
@@ -109,7 +110,7 @@ void main() {
     );
   });
 
-  testWidgets('Learning Home library card opens the vocabulary route', (
+  testWidgets('Learning Home opens SharedBank with all learner entries', (
     tester,
   ) async {
     await _pumpVocabulary(tester, initialLocation: AppRoutes.learn);
@@ -127,11 +128,29 @@ void main() {
     await tester.tap(libraryCard);
     await tester.pumpAndSettle();
 
-    expect(find.byType(VocabularyLibraryScreen), findsOneWidget);
+    expect(find.byType(SharedBankScreen), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('shared_bank_vocabulary')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('shared_bank_kanji')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('shared_bank_grammar')),
+      findsOneWidget,
+    );
     final navigation = tester.widget<RikiBottomNavigationBar>(
       find.byType(RikiBottomNavigationBar),
     );
     expect(navigation.selectedIndex, 1);
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('shared_bank_vocabulary')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(VocabularyLibraryScreen), findsOneWidget);
   });
 
   testWidgets('fixture detail can exercise the notebook save state locally', (

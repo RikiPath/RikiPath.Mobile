@@ -7,17 +7,12 @@ import 'package:rikipath_mobile/features/notebook/application/notebook_controlle
 import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/api_vocabulary_repository.dart';
-import 'package:rikipath_mobile/features/vocabulary/data/fallback_vocabulary_repository.dart';
-import 'package:rikipath_mobile/features/vocabulary/data/fixture_vocabulary_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/vocabulary_audio_player.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary_repository.dart';
 
 final vocabularyRepositoryProvider = Provider<VocabularyRepository>((ref) {
-  return FallbackVocabularyRepository(
-    remote: ApiVocabularyRepository(ref.watch(apiClientProvider)),
-    fixture: const FixtureVocabularyRepository(),
-  );
+  return ApiVocabularyRepository(ref.watch(apiClientProvider));
 });
 
 final vocabularyAudioPlayerProvider =

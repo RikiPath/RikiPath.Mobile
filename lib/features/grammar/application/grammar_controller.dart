@@ -1,19 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/utils/stable_merge.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/grammar/data/api_grammar_repository.dart';
-import 'package:rikipath_mobile/features/grammar/data/fallback_grammar_repository.dart';
-import 'package:rikipath_mobile/features/grammar/data/fixture_grammar_repository.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar_repository.dart';
 
 final grammarRepositoryProvider = Provider<GrammarRepository>((ref) {
-  return FallbackGrammarRepository(
-    remote: ApiGrammarRepository(ref.watch(apiClientProvider)),
-    fixture: const FixtureGrammarRepository(),
-  );
+  return ApiGrammarRepository(ref.watch(apiClientProvider));
+});
+
+final grammarBookmarkRepositoryProvider = Provider<GrammarBookmarkRepository>((
+  ref,
+) {
+  return ApiGrammarBookmarkRepository(ref.watch(apiClientProvider));
 });
 
 final grammarLibraryControllerProvider =
@@ -139,23 +141,101 @@ class GrammarLibraryState {
 }
 
 final grammarDetailControllerProvider = AsyncNotifierProvider.autoDispose
-    .family<GrammarDetailController, GrammarEntry, String>(
+    .family<GrammarDetailController, GrammarDetailState, String>(
       GrammarDetailController.new,
       retry: (_, _) => null,
     );
 
-class GrammarDetailController extends AsyncNotifier<GrammarEntry> {
+class GrammarDetailController extends AsyncNotifier<GrammarDetailState> {
   GrammarDetailController(this.routeKey);
 
   final String routeKey;
 
   @override
-  Future<GrammarEntry> build() {
-    return ref.watch(grammarRepositoryProvider).loadDetail(routeKey);
+  Future<GrammarDetailState> build() async {
+    final entry = await ref
+        .watch(grammarRepositoryProvider)
+        .loadDetail(routeKey);
+    return GrammarDetailState(entry: entry);
   }
 
   Future<void> retry() async {
-    state = const AsyncLoading<GrammarEntry>();
+    state = const AsyncLoading<GrammarDetailState>();
     state = await AsyncValue.guard(build);
+  }
+
+  Future<bool> saveBookmark() async {
+    final current = state.requireValue;
+    if (current.isSaving || current.isSaved) return current.isSaved;
+    final grammarId = current.entry.remoteId;
+    if (current.entry.source != GrammarDataSource.remote ||
+        grammarId == null ||
+        grammarId <= 0) {
+      return false;
+    }
+
+    state = AsyncData(
+      current.copyWith(isSaving: true, clearBookmarkError: true),
+    );
+    try {
+      final bookmark = await ref
+          .read(grammarBookmarkRepositoryProvider)
+          .bookmarkGrammar(grammarId);
+      state = AsyncData(
+        state.requireValue.copyWith(isSaving: false, bookmark: bookmark),
+      );
+      return true;
+    } on ConflictError {
+      state = AsyncData(
+        state.requireValue.copyWith(isSaving: false, alreadySaved: true),
+      );
+      return true;
+    } catch (_) {
+      state = AsyncData(
+        state.requireValue.copyWith(
+          isSaving: false,
+          bookmarkError: ref.read(appLocalizationsProvider).grammarSaveFailed,
+        ),
+      );
+      return false;
+    }
+  }
+}
+
+class GrammarDetailState {
+  const GrammarDetailState({
+    required this.entry,
+    this.bookmark,
+    this.isSaving = false,
+    this.alreadySaved = false,
+    this.bookmarkError,
+  });
+
+  final GrammarEntry entry;
+  final GrammarBookmark? bookmark;
+  final bool isSaving;
+  final bool alreadySaved;
+  final String? bookmarkError;
+
+  bool get isSaved => bookmark != null || alreadySaved;
+  bool get canBookmark =>
+      entry.source == GrammarDataSource.remote && (entry.remoteId ?? 0) > 0;
+
+  GrammarDetailState copyWith({
+    GrammarBookmark? bookmark,
+    bool? isSaving,
+    bool? alreadySaved,
+    String? bookmarkError,
+    bool clearBookmarkError = false,
+  }) {
+    return GrammarDetailState(
+      entry: entry,
+      bookmark: bookmark ?? this.bookmark,
+      isSaving: isSaving ?? this.isSaving,
+      alreadySaved: alreadySaved ?? this.alreadySaved,
+      bookmarkError: clearBookmarkError
+          ? null
+          : bookmarkError ?? this.bookmarkError,
+    );
   }
 }

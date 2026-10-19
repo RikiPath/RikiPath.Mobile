@@ -2,20 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/grammar/application/grammar_controller.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar.dart';
 
 class GrammarDetailView extends StatelessWidget {
   const GrammarDetailView({
-    required this.entry,
+    required this.state,
+    required this.onSave,
     required this.onOpenRelated,
     super.key,
   });
 
-  final GrammarEntry entry;
+  final GrammarDetailState state;
+  final VoidCallback onSave;
   final ValueChanged<RelatedGrammar> onOpenRelated;
 
   @override
   Widget build(BuildContext context) {
+    final entry = state.entry;
     final enrichment = entry.enrichment;
     final examples = enrichment?.examples ?? const <GrammarExample>[];
 
@@ -91,6 +95,26 @@ class GrammarDetailView extends StatelessWidget {
         if (enrichment?.related.isNotEmpty ?? false) ...[
           const SizedBox(height: AppSpacing.space4),
           _RelatedSection(items: enrichment!.related, onOpen: onOpenRelated),
+        ],
+        if (state.canBookmark) ...[
+          const SizedBox(height: AppSpacing.space5),
+          RikiPrimaryButton(
+            key: const ValueKey<String>('grammar_save_button'),
+            label: state.isSaved
+                ? context.l10n.grammarBookmarked
+                : context.l10n.grammarBookmark,
+            leadingIcon: state.isSaved ? Icons.bookmark : Icons.bookmark_border,
+            isLoading: state.isSaving,
+            onPressed: state.isSaved ? null : onSave,
+          ),
+          if (state.bookmarkError != null) ...[
+            const SizedBox(height: AppSpacing.space2),
+            Text(
+              state.bookmarkError!,
+              textAlign: TextAlign.center,
+              style: AppTypography.validationText,
+            ),
+          ],
         ],
       ],
     );

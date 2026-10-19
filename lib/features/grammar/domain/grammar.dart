@@ -32,6 +32,19 @@ class GrammarEntry {
 }
 
 @immutable
+class GrammarBookmark {
+  const GrammarBookmark({
+    required this.reviewCardId,
+    required this.grammarPatternId,
+    required this.grammarTitle,
+  });
+
+  final int reviewCardId;
+  final int grammarPatternId;
+  final String grammarTitle;
+}
+
+@immutable
 class GrammarEnrichment {
   const GrammarEnrichment({
     this.examples = const <GrammarExample>[],

@@ -56,27 +56,29 @@ class KanjiLibraryView extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.space3),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _LevelChip(
-                label: context.l10n.all,
-                selected: state.query.level == null,
-                onSelected: () => onFilter(null),
-              ),
-              for (final level in JlptLevel.values) ...[
-                const SizedBox(width: AppSpacing.space2),
+        if (state.page.source == KanjiDataSource.fixture) ...[
+          const SizedBox(height: AppSpacing.space3),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
                 _LevelChip(
-                  label: level.label,
-                  selected: state.query.level == level,
-                  onSelected: () => onFilter(level),
+                  label: context.l10n.all,
+                  selected: state.query.level == null,
+                  onSelected: () => onFilter(null),
                 ),
+                for (final level in JlptLevel.values) ...[
+                  const SizedBox(width: AppSpacing.space2),
+                  _LevelChip(
+                    label: level.label,
+                    selected: state.query.level == level,
+                    onSelected: () => onFilter(level),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
+        ],
         const SizedBox(height: AppSpacing.space4),
         Row(
           children: [

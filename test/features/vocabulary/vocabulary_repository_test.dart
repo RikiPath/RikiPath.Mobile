@@ -130,25 +130,22 @@ void main() {
       );
     });
 
-    test(
-      'fallback uses fixtures only for an empty first remote page',
-      () async {
-        final remote = _FakeVocabularyRepository(
-          page: _emptyPage(VocabularyDataSource.remote),
-        );
-        const fixture = FixtureVocabularyRepository();
-        final repository = FallbackVocabularyRepository(
-          remote: remote,
-          fixture: fixture,
-        );
+    test('fallback preserves a valid empty first remote page', () async {
+      final remote = _FakeVocabularyRepository(
+        page: _emptyPage(VocabularyDataSource.remote),
+      );
+      const fixture = FixtureVocabularyRepository();
+      final repository = FallbackVocabularyRepository(
+        remote: remote,
+        fixture: fixture,
+      );
 
-        final page = await repository.search(const VocabularyQuery());
+      final page = await repository.search(const VocabularyQuery());
 
-        expect(remote.searchCalls, 1);
-        expect(page.source, VocabularyDataSource.fixture);
-        expect(page.items, isNotEmpty);
-      },
-    );
+      expect(remote.searchCalls, 1);
+      expect(page.source, VocabularyDataSource.remote);
+      expect(page.items, isEmpty);
+    });
 
     test('fallback keeps remote results when the API has vocabulary', () async {
       final remoteEntry = VocabularyEntry(

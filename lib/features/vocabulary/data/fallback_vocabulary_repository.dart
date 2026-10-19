@@ -18,11 +18,7 @@ class FallbackVocabularyRepository implements VocabularyRepository {
       return fixture.search(query);
     }
 
-    final remotePage = await remote.search(query);
-    if (query.page == 1 && remotePage.totalCount == 0) {
-      return fixture.search(query);
-    }
-    return remotePage;
+    return remote.search(query);
   }
 
   @override

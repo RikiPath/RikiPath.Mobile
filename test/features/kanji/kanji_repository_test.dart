@@ -241,7 +241,7 @@ void main() {
     });
 
     test(
-      'fallback uses fixture for empty first page and JLPT filters',
+      'fallback preserves remote empty results and isolates JLPT fixtures',
       () async {
         final remote = _FakeKanjiRepository(
           page: _emptyPage(KanjiDataSource.remote),
@@ -256,7 +256,8 @@ void main() {
           const KanjiQuery(level: JlptLevel.n4),
         );
 
-        expect(emptyFallback.source, KanjiDataSource.fixture);
+        expect(emptyFallback.source, KanjiDataSource.remote);
+        expect(emptyFallback.items, isEmpty);
         expect(levelFallback.source, KanjiDataSource.fixture);
         expect(remote.searchCalls, 1);
       },

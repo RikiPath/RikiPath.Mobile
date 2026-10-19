@@ -8,7 +8,8 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
-import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
+import 'package:rikipath_mobile/core/errors/api_error.dart';
+import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/grammar/application/grammar_controller.dart';
 import 'package:rikipath_mobile/features/grammar/data/fixture_grammar_repository.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar.dart';
@@ -248,6 +249,77 @@ void main() {
     );
   });
 
+  testWidgets('successful bookmark uses the real ID and updates the UI', (
+    tester,
+  ) async {
+    final bookmarkRepository = _FakeGrammarBookmarkRepository();
+    await _pumpGrammar(
+      tester,
+      repository: const _RemoteGrammarRepository(),
+      bookmarkRepository: bookmarkRepository,
+      initialLocation: AppRoutes.grammarDetail('remote-19'),
+    );
+    await tester.pumpAndSettle();
+
+    final button = find.byKey(const ValueKey<String>('grammar_save_button'));
+    await _scrollWithin(tester, button, 'grammar_detail_view');
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    expect(bookmarkRepository.lastGrammarId, 19);
+    expect(bookmarkRepository.calls, 1);
+    final savedButton = tester.widget<RikiPrimaryButton>(button);
+    expect(savedButton.onPressed, isNull);
+  });
+
+  testWidgets('duplicate bookmark conflict is treated as already saved', (
+    tester,
+  ) async {
+    final bookmarkRepository = _FakeGrammarBookmarkRepository(
+      error: const ConflictError(),
+    );
+    await _pumpGrammar(
+      tester,
+      repository: const _RemoteGrammarRepository(),
+      bookmarkRepository: bookmarkRepository,
+      initialLocation: AppRoutes.grammarDetail('remote-19'),
+    );
+    await tester.pumpAndSettle();
+
+    final button = find.byKey(const ValueKey<String>('grammar_save_button'));
+    await _scrollWithin(tester, button, 'grammar_detail_view');
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<RikiPrimaryButton>(button).onPressed, isNull);
+    expect(find.text('Không thể đánh dấu ngữ pháp.'), findsNothing);
+  });
+
+  for (final failure in <ApiError>[
+    const ValidationError(),
+    const NetworkError(),
+  ]) {
+    testWidgets('${failure.runtimeType} bookmark failure is controlled', (
+      tester,
+    ) async {
+      await _pumpGrammar(
+        tester,
+        repository: const _RemoteGrammarRepository(),
+        bookmarkRepository: _FakeGrammarBookmarkRepository(error: failure),
+        initialLocation: AppRoutes.grammarDetail('remote-19'),
+      );
+      await tester.pumpAndSettle();
+
+      final button = find.byKey(const ValueKey<String>('grammar_save_button'));
+      await _scrollWithin(tester, button, 'grammar_detail_view');
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Không thể đánh dấu ngữ pháp.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('library keeps the Learn bottom-navigation tab active', (
     tester,
   ) async {
@@ -375,10 +447,61 @@ class _PagedGrammarRepository implements GrammarRepository {
   }
 }
 
+class _RemoteGrammarRepository implements GrammarRepository {
+  const _RemoteGrammarRepository();
+
+  static final GrammarEntry entry = GrammarEntry(
+    routeKey: 'remote-19',
+    remoteId: 19,
+    title: FixtureGrammarRepository.entries.first.title,
+    structure: FixtureGrammarRepository.entries.first.structure,
+    explanation: FixtureGrammarRepository.entries.first.explanation,
+    exampleSentence: FixtureGrammarRepository.entries.first.exampleSentence,
+    level: FixtureGrammarRepository.entries.first.level,
+    source: GrammarDataSource.remote,
+  );
+
+  @override
+  Future<GrammarPage> search(GrammarQuery query) async {
+    return GrammarPage(
+      items: <GrammarEntry>[entry],
+      page: 1,
+      pageSize: query.pageSize,
+      totalCount: 1,
+      totalPages: 1,
+      source: GrammarDataSource.remote,
+    );
+  }
+
+  @override
+  Future<GrammarEntry> loadDetail(String routeKey) async => entry;
+}
+
+class _FakeGrammarBookmarkRepository implements GrammarBookmarkRepository {
+  _FakeGrammarBookmarkRepository({this.error});
+
+  final Object? error;
+  int calls = 0;
+  int? lastGrammarId;
+
+  @override
+  Future<GrammarBookmark> bookmarkGrammar(int grammarPatternId) async {
+    calls++;
+    lastGrammarId = grammarPatternId;
+    if (error != null) throw error!;
+    return GrammarBookmark(
+      reviewCardId: 811,
+      grammarPatternId: grammarPatternId,
+      grammarTitle: _RemoteGrammarRepository.entry.title,
+    );
+  }
+}
+
 Future<GoRouter> _pumpGrammar(
   WidgetTester tester, {
   String initialLocation = AppRoutes.grammar,
   GrammarRepository repository = const FixtureGrammarRepository(),
+  GrammarBookmarkRepository? bookmarkRepository,
   Size viewportSize = const Size(390, 844),
 }) async {
   tester.view.physicalSize = viewportSize;
@@ -396,7 +519,13 @@ Future<GoRouter> _pumpGrammar(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [grammarRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        grammarRepositoryProvider.overrideWithValue(repository),
+        if (bookmarkRepository != null)
+          grammarBookmarkRepositoryProvider.overrideWithValue(
+            bookmarkRepository,
+          ),
+      ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );

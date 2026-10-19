@@ -76,7 +76,7 @@ void main() {
   });
 
   group('Meeting join flow', () {
-    testWidgets('logged-out Login exposes a secondary Meeting entry', (
+    testWidgets('logged-out Login omits the standalone Meeting entry', (
       tester,
     ) async {
       final harness = await _pumpMeetingApp(
@@ -88,7 +88,7 @@ void main() {
 
       expect(
         find.byKey(const ValueKey<String>('login_meeting_join_button')),
-        findsOneWidget,
+        findsNothing,
       );
     });
 

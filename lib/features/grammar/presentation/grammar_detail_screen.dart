@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/grammar/application/grammar_controller.dart';
 import 'package:rikipath_mobile/features/grammar/presentation/widgets/grammar_detail_view.dart';
 import 'package:rikipath_mobile/features/grammar/presentation/widgets/grammar_state_views.dart';
@@ -24,7 +25,7 @@ class GrammarDetailScreen extends ConsumerWidget {
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
         title: context.l10n.grammarDetail,
-        subtitle: state.value?.title ?? context.l10n.library,
+        subtitle: state.value?.entry.title ?? context.l10n.library,
         onBack: context.pop,
       ),
       body: SafeArea(
@@ -32,13 +33,26 @@ class GrammarDetailScreen extends ConsumerWidget {
         child: state.when(
           loading: GrammarLoadingView.new,
           error: (_, _) => GrammarErrorView(onRetry: controller.retry),
-          data: (entry) => GrammarDetailView(
-            entry: entry,
+          data: (detail) => GrammarDetailView(
+            state: detail,
+            onSave: () => _save(context, ref, controller),
             onOpenRelated: (related) =>
                 context.push(AppRoutes.grammarDetail(related.routeKey)),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _save(
+    BuildContext context,
+    WidgetRef ref,
+    GrammarDetailController controller,
+  ) async {
+    final saved = await controller.saveBookmark();
+    if (!context.mounted || !saved) return;
+    ref
+        .read(rikiToastServiceProvider.notifier)
+        .success(title: context.l10n.grammarBookmarked);
   }
 }

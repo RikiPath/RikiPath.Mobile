@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +38,11 @@ void main() {
       expect(find.text('N4'), findsNothing);
       expect(find.text('Chào mừng trở lại! 👋'), findsOneWidget);
       expect(find.text('Email học viên'), findsOneWidget);
-      expect(find.text('Mẹo đăng nhập'), findsOneWidget);
+      expect(find.text('Mẹo đăng nhập'), findsNothing);
+      expect(find.text('Tham gia cuộc họp'), findsNothing);
+      expect(find.text('hoặc'), findsNothing);
+      expect(find.text('Chưa có tài khoản?'), findsOneWidget);
+      expect(find.text('Đăng ký'), findsOneWidget);
       expect(find.text('Bảo mật chuẩn mã hóa Riki Learning'), findsOneWidget);
       expect(
         tester
@@ -79,6 +84,21 @@ void main() {
       final submitButton = tester.getRect(
         find.byKey(const Key('login_submit_button')),
       );
+      final registerPrompt = tester.getRect(promptFinder);
+      final registerAction = tester.getRect(actionFinder);
+      final securityFooter = tester.getRect(
+        find.text('Bảo mật chuẩn mã hóa Riki Learning'),
+      );
+      expect(submitButton.height, 54);
+      expect(
+        registerPrompt.top - submitButton.bottom,
+        lessThanOrEqualTo(AppSpacing.space8),
+      );
+      expect(
+        securityFooter.top -
+            math.max(registerPrompt.bottom, registerAction.bottom),
+        lessThanOrEqualTo(AppSpacing.space4),
+      );
       expect(
         rememberText.top - forgotPasswordText.bottom,
         lessThanOrEqualTo(AppSpacing.space6),
@@ -98,7 +118,7 @@ void main() {
       );
     });
 
-    testWidgets('uses a solid neutral Auth canvas and honors reduced motion', (
+    testWidgets('uses the Sakura background and honors reduced motion', (
       tester,
     ) async {
       tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
@@ -112,8 +132,24 @@ void main() {
         tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
         AppColors.authBackground,
       );
-      expect(AppColors.authBackground, AppColors.backgroundSecondary);
-      expect(AppColors.authBackground, isNot(AppColors.brandTint));
+      final background = tester.widget<Image>(
+        find.byKey(const ValueKey<String>('auth_sakura_background')),
+      );
+      expect(
+        (background.image as AssetImage).assetName,
+        'assets/images/auth/auth_sakura_background.webp',
+      );
+      expect(background.fit, BoxFit.cover);
+      expect(background.alignment, Alignment.topCenter);
+
+      final scrim = tester.widget<DecoratedBox>(
+        find.byKey(const ValueKey<String>('auth_sakura_scrim')),
+      );
+      final scrimGradient =
+          (scrim.decoration as BoxDecoration).gradient! as LinearGradient;
+      expect(scrimGradient.begin, Alignment.topCenter);
+      expect(scrimGradient.end, Alignment.bottomCenter);
+      expect(scrimGradient.colors, hasLength(5));
       expect(
         tester
             .widget<FadeTransition>(
@@ -123,11 +159,37 @@ void main() {
             .value,
         1,
       );
-      final tip = tester.widget<Container>(
-        find.byKey(const ValueKey<String>('auth_tip_card')),
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('shares the Sakura background across Auth screens', (
+      tester,
+    ) async {
+      final router = await _pumpAuthRoute(
+        tester,
+        AppRoutes.login,
+        _FakeAuthRepository(),
       );
-      final decoration = tip.decoration! as BoxDecoration;
-      expect(decoration.color, AppColors.authTipBackground);
+
+      expect(
+        find.byKey(const ValueKey<String>('auth_sakura_background')),
+        findsOneWidget,
+      );
+      router.go(AppRoutes.register);
+      await tester.pumpAndSettle();
+      expect(find.byType(RegisterScreen), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('auth_sakura_background')),
+        findsOneWidget,
+      );
+
+      router.go(AppRoutes.forgotPassword);
+      await tester.pumpAndSettle();
+      expect(find.byType(ForgotPasswordScreen), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('auth_sakura_background')),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     });
 
@@ -144,7 +206,15 @@ void main() {
       addTearDown(tester.view.resetViewInsets);
 
       await tester.showKeyboard(_textField('login_password_field'));
-      await tester.pump();
+      await tester.pumpAndSettle();
+      final keyboardScrollView = tester.widget<SingleChildScrollView>(
+        find.byType(SingleChildScrollView),
+      );
+      expect(
+        (keyboardScrollView.padding! as EdgeInsets).top,
+        AppSpacing.space5,
+      );
+      expect(_textField('login_password_field').hitTestable(), findsOneWidget);
       final submit = find.byKey(const Key('login_submit_button'));
       await tester.ensureVisible(submit);
       await tester.pumpAndSettle();
@@ -154,6 +224,46 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    for (final size in <Size>[
+      const Size(360, 800),
+      const Size(393, 873),
+      const Size(412, 915),
+    ]) {
+      testWidgets('renders without overflow at ${size.width}x${size.height}', (
+        tester,
+      ) async {
+        await _pumpAuthRoute(
+          tester,
+          AppRoutes.login,
+          _FakeAuthRepository(),
+          physicalSize: size,
+        );
+        await tester.pumpAndSettle();
+
+        final scrollView = tester.widget<SingleChildScrollView>(
+          find.byType(SingleChildScrollView),
+        );
+        expect(
+          (scrollView.padding! as EdgeInsets).top,
+          AppSpacing.space5 + AppSpacing.space12,
+        );
+        expect(
+          tester
+              .getTopLeft(find.byKey(const ValueKey<String>('riki_brand_mark')))
+              .dy,
+          inInclusiveRange(60, 80),
+        );
+
+        await tester.ensureVisible(
+          find.text('Bảo mật chuẩn mã hóa Riki Learning'),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(SingleChildScrollView), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
     testWidgets('empty form prevents repository submission', (tester) async {
       final repository = _FakeAuthRepository();
       await _pumpAuthRoute(tester, AppRoutes.login, repository);
@@ -161,6 +271,28 @@ void main() {
       await _tapVisible(tester, find.byKey(const Key('login_submit_button')));
 
       expect(repository.loginCalls, 0);
+    });
+
+    testWidgets('remember-session checkbox controls login persistence', (
+      tester,
+    ) async {
+      final repository = _FakeAuthRepository();
+      await _pumpAuthRoute(tester, AppRoutes.login, repository);
+
+      expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isTrue);
+      await tester.tap(find.byType(Checkbox));
+      await tester.pump();
+      expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
+
+      await tester.enterText(
+        _textField('login_email_field'),
+        'learner@example.com',
+      );
+      await tester.enterText(_textField('login_password_field'), 'secret');
+      await _tapVisible(tester, find.byKey(const Key('login_submit_button')));
+
+      expect(repository.loginCalls, 1);
+      expect(repository.lastPersistSession, isFalse);
     });
 
     testWidgets('invalid email and empty password show field errors', (
@@ -818,6 +950,7 @@ class _FakeAuthRepository implements AuthRepository {
   int registerCalls = 0;
   int passwordResetCalls = 0;
   int resendVerificationCalls = 0;
+  bool? lastPersistSession;
   RegisterRequestDto? lastRegisterRequest;
   ResendVerificationEmailRequestDto? lastResendRequest;
 
@@ -827,6 +960,7 @@ class _FakeAuthRepository implements AuthRepository {
     required bool persistSession,
   }) {
     loginCalls += 1;
+    lastPersistSession = persistSession;
     if (loginError != null) return Future.error(loginError!);
     return loginCompleter?.future ?? Future.value(_loginResponse);
   }

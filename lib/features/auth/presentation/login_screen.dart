@@ -56,26 +56,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
     final l10n = context.l10n;
     final state = ref.watch(loginControllerProvider);
-    final hasFeedback =
-        state.emailError != null ||
-        state.passwordError != null ||
-        state.serverError != null;
 
     return AuthPage(
+      topContentOffset: AppSpacing.space12,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const RikiAuthHeader(),
-              const SizedBox(height: AppSpacing.space8),
+              const SizedBox(height: AppSpacing.space6),
               Align(
                 alignment: Alignment.centerLeft,
                 child: RikiPromotionalPill(message: l10n.authPromotion),
               ),
-              const SizedBox(height: AppSpacing.space5),
+              const SizedBox(height: AppSpacing.space4),
               Text(l10n.loginWelcome, style: AppTypography.pageTitle),
               const SizedBox(height: AppSpacing.space2),
               Text(
@@ -84,7 +81,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   color: AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(height: AppSpacing.space8),
+              const SizedBox(height: AppSpacing.space6),
               RikiTextField(
                 key: const Key('login_email_field'),
                 label: l10n.studentEmail,
@@ -139,36 +136,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       },
                 child: Text(l10n.rememberSession),
               ),
-              const SizedBox(height: AppSpacing.space2),
-              RikiPrimaryButton(
-                key: const Key('login_submit_button'),
-                label: l10n.login,
-                loadingLabel: l10n.loggingIn,
-                trailingIcon: Icons.arrow_forward,
-                isLoading: state.isLoading,
-                onPressed: _submit,
-              ),
-              const SizedBox(height: AppSpacing.space4),
-              Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.space3,
-                    ),
-                    child: Text(l10n.orDivider, style: AppTypography.metadata),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
               const SizedBox(height: AppSpacing.space3),
-              RikiSecondaryButton(
-                key: const ValueKey<String>('login_meeting_join_button'),
-                label: l10n.meetingJoinAction,
-                leadingIcon: Icons.videocam_outlined,
-                onPressed: state.isLoading
-                    ? null
-                    : () => context.push(AppRoutes.meetingJoin),
+              SizedBox(
+                height: 54,
+                child: RikiPrimaryButton(
+                  key: const Key('login_submit_button'),
+                  label: l10n.login,
+                  loadingLabel: l10n.loggingIn,
+                  trailingIcon: Icons.arrow_forward,
+                  isLoading: state.isLoading,
+                  onPressed: _submit,
+                ),
               ),
               if (state.isLoading) ...[
                 const SizedBox(height: AppSpacing.space4),
@@ -178,17 +156,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: AppSpacing.space3),
                 RikiProgressIndicator(semanticsLabel: l10n.loggingInSemantics),
-              ] else if (!hasFeedback) ...[
-                const SizedBox(height: AppSpacing.space5),
-                AuthTipCard(
-                  title: l10n.loginTipTitle,
-                  message: l10n.loginTipMessage,
-                ),
               ],
             ],
           ),
           Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.space8),
+            padding: const EdgeInsets.only(top: AppSpacing.space4),
             child: Column(
               children: [
                 AuthNavigationPrompt(

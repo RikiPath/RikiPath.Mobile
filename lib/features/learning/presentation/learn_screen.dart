@@ -38,7 +38,7 @@ class LearnScreen extends ConsumerWidget {
                   .selectLevel(level);
             },
             onOpenRoadmap: () => context.push(AppRoutes.learnRoadmap),
-            onOpenVocabulary: () => context.push(AppRoutes.vocabulary),
+            onOpenLibrary: () => context.push(AppRoutes.sharedBank),
             onOpenLesson: () =>
                 context.push(AppRoutes.lesson(data.currentLesson.routeId)),
           ),

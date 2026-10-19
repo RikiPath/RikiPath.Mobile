@@ -69,6 +69,7 @@ abstract final class AppRoutes {
   static const String learn = '/learn';
   static const String learnRoadmapSegment = 'roadmap';
   static const String learnProgressSegment = 'progress';
+  static const String sharedBankSegment = 'library';
   static const String vocabularySegment = 'vocabulary';
   static const String vocabularyDetailSegment = 'vocabulary/:entryKey';
   static const String kanjiSegment = 'kanji';
@@ -78,6 +79,7 @@ abstract final class AppRoutes {
   static const String lessonSegment = 'lesson/:lessonId';
   static const String learnRoadmap = '$learn/$learnRoadmapSegment';
   static const String learnProgress = '$learn/$learnProgressSegment';
+  static const String sharedBank = '$learn/$sharedBankSegment';
   static const String vocabulary = '$learn/$vocabularySegment';
   static String vocabularyDetail(String entryKey) =>
       '$learn/vocabulary/${Uri.encodeComponent(entryKey)}';

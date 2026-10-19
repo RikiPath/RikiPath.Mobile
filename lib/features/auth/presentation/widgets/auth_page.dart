@@ -9,12 +9,14 @@ class AuthPage extends StatefulWidget {
     required this.child,
     this.compact = false,
     this.animateEntrance = true,
+    this.topContentOffset = 0,
     super.key,
   });
 
   final Widget child;
   final bool compact;
   final bool animateEntrance;
+  final double topContentOffset;
 
   @override
   State<AuthPage> createState() => _AuthPageState();
@@ -24,7 +26,7 @@ class _AuthPageState extends State<AuthPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _entranceController = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 300),
+    duration: const Duration(milliseconds: 220),
   );
   late final Animation<double> _entrance = CurvedAnimation(
     parent: _entranceController,
@@ -59,109 +61,105 @@ class _AuthPageState extends State<AuthPage>
     final horizontalPadding = widget.compact
         ? AppSpacing.screenHorizontalCompact
         : AppSpacing.screenHorizontal;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final effectiveTopOffset = keyboardInset > 0
+        ? 0.0
+        : widget.topContentOffset;
+    final topPadding = AppSpacing.space5 + effectiveTopOffset;
 
     return Scaffold(
       backgroundColor: AppColors.authBackground,
       resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            const verticalPadding = AppSpacing.space5 * 2;
-            final minimumHeight = math.max(
-              0.0,
-              constraints.maxHeight - verticalPadding,
-            );
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          const _AuthSakuraBackground(),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final verticalPadding = topPadding + AppSpacing.space5;
+                final minimumHeight = math.max(
+                  0.0,
+                  constraints.maxHeight - verticalPadding,
+                );
 
-            return SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: EdgeInsets.symmetric(
-                horizontal: horizontalPadding,
-                vertical: AppSpacing.space5,
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: minimumHeight,
-                    maxWidth: 560,
+                return SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    topPadding,
+                    horizontalPadding,
+                    AppSpacing.space5 + keyboardInset,
                   ),
-                  child: FadeTransition(
-                    key: const ValueKey<String>('auth_page_entrance'),
-                    opacity: _entrance,
-                    child: AnimatedBuilder(
-                      animation: _entrance,
-                      child: IntrinsicHeight(child: widget.child),
-                      builder: (context, child) => Transform.translate(
-                        offset: Offset(0, 10 * (1 - _entrance.value)),
-                        child: child,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: minimumHeight,
+                        maxWidth: 560,
+                      ),
+                      child: FadeTransition(
+                        key: const ValueKey<String>('auth_page_entrance'),
+                        opacity: _entrance,
+                        child: AnimatedBuilder(
+                          animation: _entrance,
+                          child: IntrinsicHeight(child: widget.child),
+                          builder: (context, child) => Transform.translate(
+                            offset: Offset(0, 10 * (1 - _entrance.value)),
+                            child: child,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            );
-          },
-        ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class AuthTipCard extends StatelessWidget {
-  const AuthTipCard({required this.title, required this.message, super.key});
+class _AuthSakuraBackground extends StatelessWidget {
+  const _AuthSakuraBackground();
 
-  final String title;
-  final String message;
+  static const assetPath = 'assets/images/auth/auth_sakura_background.webp';
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      label: '$title. $message',
-      child: Container(
-        key: const ValueKey<String>('auth_tip_card'),
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.space4),
-        decoration: BoxDecoration(
-          color: AppColors.authTipBackground,
-          border: Border.all(color: AppColors.authTipBorder),
-          borderRadius: BorderRadius.circular(AppRadius.banner),
-          boxShadow: AppShadows.cardSoft,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 1),
-              child: Icon(
-                Icons.lightbulb_outline,
-                size: 19,
-                color: AppColors.warning,
-              ),
+    return RepaintBoundary(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ExcludeSemantics(
+            child: Image.asset(
+              assetPath,
+              key: const ValueKey<String>('auth_sakura_background'),
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+              filterQuality: FilterQuality.medium,
             ),
-            const SizedBox(width: AppSpacing.space3),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.space1),
-                  Text(
-                    message,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
+          ),
+          const DecoratedBox(
+            key: ValueKey<String>('auth_sakura_scrim'),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: <double>[0, 0.2, 0.52, 0.8, 1],
+                colors: <Color>[
+                  Color(0xC7FFFCFC),
+                  Color(0xDDFFF9FA),
+                  Color(0xF0FFFCFC),
+                  Color(0xE3FFF9FA),
+                  Color(0xC2FFFCFC),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

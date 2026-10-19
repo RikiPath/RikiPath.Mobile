@@ -84,8 +84,32 @@ class GrammarPageDto {
   final int totalPages;
 }
 
+class GrammarBookmarkDto {
+  const GrammarBookmarkDto({
+    required this.reviewCardId,
+    required this.grammarPatternId,
+    required this.grammarTitle,
+  });
+
+  factory GrammarBookmarkDto.fromJson(Map<String, Object?> json) {
+    return GrammarBookmarkDto(
+      reviewCardId: _requiredInt(json, 'reviewCardId'),
+      grammarPatternId: _requiredInt(json, 'grammarPatternId'),
+      grammarTitle: _requiredString(json, 'grammarTitle'),
+    );
+  }
+
+  final int reviewCardId;
+  final int grammarPatternId;
+  final String grammarTitle;
+}
+
 GrammarCardDto readGrammarDetail(Object? body) {
   return GrammarCardDto.fromJson(_readEnvelopeResult(body));
+}
+
+GrammarBookmarkDto readGrammarBookmark(Object? body) {
+  return GrammarBookmarkDto.fromJson(_readEnvelopeResult(body));
 }
 
 Map<String, Object?> _readEnvelopeResult(Object? body) {

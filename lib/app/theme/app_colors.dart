@@ -29,8 +29,6 @@ abstract final class AppColors {
   // Auth uses a warm neutral paper-like canvas while keeping Sakura for
   // brand and interaction accents rather than tinting the full page.
   static const Color authBackground = backgroundSecondary;
-  static const Color authTipBackground = Color(0xFFFFFAEE);
-  static const Color authTipBorder = Color(0xFFF1E4C8);
 
   static const Color background = backgroundPrimary;
   static const Color profileBackground = backgroundPrimary;

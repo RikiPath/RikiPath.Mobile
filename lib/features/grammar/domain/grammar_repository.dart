@@ -5,3 +5,7 @@ abstract interface class GrammarRepository {
 
   Future<GrammarEntry> loadDetail(String routeKey);
 }
+
+abstract interface class GrammarBookmarkRepository {
+  Future<GrammarBookmark> bookmarkGrammar(int grammarPatternId);
+}

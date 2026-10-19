@@ -428,18 +428,6 @@ abstract class AppLocalizations {
   /// **'Đang kết nối an toàn với tài khoản của bạn...'**
   String get loginSecureConnection;
 
-  /// No description provided for @loginTipTitle.
-  ///
-  /// In vi, this message translates to:
-  /// **'Mẹo đăng nhập'**
-  String get loginTipTitle;
-
-  /// No description provided for @loginTipMessage.
-  ///
-  /// In vi, this message translates to:
-  /// **'Sử dụng tài khoản đã đăng ký khóa học để đồng bộ chuỗi streak và lộ trình AI.'**
-  String get loginTipMessage;
-
   /// No description provided for @loginFailedTitle.
   ///
   /// In vi, this message translates to:
@@ -3284,6 +3272,24 @@ abstract class AppLocalizations {
   /// **'Không thể tải thêm ngữ pháp. Vui lòng thử lại.'**
   String get grammarLoadMoreFailed;
 
+  /// No description provided for @grammarBookmark.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đánh dấu ngữ pháp'**
+  String get grammarBookmark;
+
+  /// No description provided for @grammarBookmarked.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đánh dấu ngữ pháp'**
+  String get grammarBookmarked;
+
+  /// No description provided for @grammarSaveFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể đánh dấu ngữ pháp.'**
+  String get grammarSaveFailed;
+
   /// No description provided for @notebookEntriesLoadFailed.
   ///
   /// In vi, this message translates to:
@@ -5461,12 +5467,6 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'{current}/{total}'**
   String writingProgress(int current, int total);
-
-  /// No description provided for @orDivider.
-  ///
-  /// In vi, this message translates to:
-  /// **'hoặc'**
-  String get orDivider;
 
   /// No description provided for @meetingTitle.
   ///

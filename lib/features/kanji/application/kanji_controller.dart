@@ -4,8 +4,6 @@ import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/utils/stable_merge.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/kanji/data/api_kanji_repository.dart';
-import 'package:rikipath_mobile/features/kanji/data/fallback_kanji_repository.dart';
-import 'package:rikipath_mobile/features/kanji/data/fixture_kanji_repository.dart';
 import 'package:rikipath_mobile/features/kanji/data/kanji_audio_player.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji_repository.dart';
@@ -14,10 +12,7 @@ import 'package:rikipath_mobile/features/notebook/application/notebook_controlle
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 
 final kanjiRepositoryProvider = Provider<KanjiRepository>((ref) {
-  return FallbackKanjiRepository(
-    remote: ApiKanjiRepository(ref.watch(apiClientProvider)),
-    fixture: const FixtureKanjiRepository(),
-  );
+  return ApiKanjiRepository(ref.watch(apiClientProvider));
 });
 
 final kanjiNotebookRepositoryProvider = Provider<KanjiNotebookRepository>((

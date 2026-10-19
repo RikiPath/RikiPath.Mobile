@@ -186,13 +186,6 @@ class AppLocalizationsVi extends AppLocalizations {
       'Đang kết nối an toàn với tài khoản của bạn...';
 
   @override
-  String get loginTipTitle => 'Mẹo đăng nhập';
-
-  @override
-  String get loginTipMessage =>
-      'Sử dụng tài khoản đã đăng ký khóa học để đồng bộ chuỗi streak và lộ trình AI.';
-
-  @override
   String get loginFailedTitle => 'Không thể đăng nhập';
 
   @override
@@ -1846,6 +1839,15 @@ class AppLocalizationsVi extends AppLocalizations {
       'Không thể tải thêm ngữ pháp. Vui lòng thử lại.';
 
   @override
+  String get grammarBookmark => 'Đánh dấu ngữ pháp';
+
+  @override
+  String get grammarBookmarked => 'Đã đánh dấu ngữ pháp';
+
+  @override
+  String get grammarSaveFailed => 'Không thể đánh dấu ngữ pháp.';
+
+  @override
   String get notebookEntriesLoadFailed =>
       'Không thể tải nội dung danh sách. Vui lòng thử lại.';
 
@@ -3102,9 +3104,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String writingProgress(int current, int total) {
     return '$current/$total';
   }
-
-  @override
-  String get orDivider => 'hoặc';
 
   @override
   String get meetingTitle => 'Phòng họp';

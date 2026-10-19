@@ -176,12 +176,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get loginSecureConnection => 'アカウントへ安全に接続しています...';
 
   @override
-  String get loginTipTitle => 'ログインのヒント';
-
-  @override
-  String get loginTipMessage => '受講登録済みのアカウントでログインすると、学習記録とAI学習プランを同期できます。';
-
-  @override
   String get loginFailedTitle => 'ログインできません';
 
   @override
@@ -1774,6 +1768,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get grammarLoadMoreFailed => '文法を追加で読み込めませんでした。もう一度お試しください。';
 
   @override
+  String get grammarBookmark => '文法をブックマーク';
+
+  @override
+  String get grammarBookmarked => '文法をブックマークしました';
+
+  @override
+  String get grammarSaveFailed => '文法をブックマークできませんでした。';
+
+  @override
   String get notebookEntriesLoadFailed => 'リストの内容を読み込めませんでした。もう一度お試しください。';
 
   @override
@@ -2948,9 +2951,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String writingProgress(int current, int total) {
     return '$current/$total';
   }
-
-  @override
-  String get orDivider => 'または';
 
   @override
   String get meetingTitle => 'ミーティングルーム';

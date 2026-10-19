@@ -54,6 +54,7 @@ import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dar
 import 'package:rikipath_mobile/features/profile/presentation/edit_profile_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/jlpt_goal_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/notification_settings_screen.dart';
+import 'package:rikipath_mobile/features/shared_bank/presentation/shared_bank_screen.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/vocabulary_detail_screen.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/vocabulary_library_screen.dart';
 import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
@@ -261,6 +262,10 @@ GoRouter createAppRouter({
                   GoRoute(
                     path: AppRoutes.learnProgressSegment,
                     builder: (context, state) => const JlptProgressScreen(),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.sharedBankSegment,
+                    builder: (context, state) => const SharedBankScreen(),
                   ),
                   GoRoute(
                     path: AppRoutes.vocabularySegment,

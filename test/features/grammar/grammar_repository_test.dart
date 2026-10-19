@@ -80,6 +80,10 @@ void main() {
         'page': 2,
         'pageSize': 10,
       });
+      expect(
+        client.lastData! as Map<String, Object?>,
+        isNot(contains('status')),
+      );
       expect(page.page, 2);
       expect(page.hasNextPage, isFalse);
       expect(page.items.single.routeKey, 'remote-19');
@@ -103,6 +107,48 @@ void main() {
       expect(entry.structure, 'V(た) + り、V(た) + りする');
       expect(entry.source, GrammarDataSource.remote);
       expect(entry.enrichment, isNull);
+    });
+
+    test('bookmark sends the real Grammar ID in the verified route', () async {
+      final client = _RecordingApiClient(<String, Object?>{
+        'POST ${GrammarApiPaths.bookmark(19)}': <String, Object?>{
+          'statusCode': 201,
+          'isSuccess': true,
+          'result': <String, Object?>{
+            'reviewCardId': 811,
+            'grammarPatternId': 19,
+            'grammarTitle': '～たり～たりする',
+          },
+        },
+      });
+
+      final bookmark = await ApiGrammarBookmarkRepository(
+        client,
+      ).bookmarkGrammar(19);
+
+      expect(client.calls, <String>['POST ${GrammarApiPaths.bookmark(19)}']);
+      expect(client.lastData, isNull);
+      expect(bookmark.reviewCardId, 811);
+      expect(bookmark.grammarPatternId, 19);
+    });
+
+    test('bookmark rejects a response for a different Grammar ID', () async {
+      final client = _RecordingApiClient(<String, Object?>{
+        'POST ${GrammarApiPaths.bookmark(19)}': <String, Object?>{
+          'statusCode': 201,
+          'isSuccess': true,
+          'result': <String, Object?>{
+            'reviewCardId': 811,
+            'grammarPatternId': 20,
+            'grammarTitle': 'other',
+          },
+        },
+      });
+
+      await expectLater(
+        ApiGrammarBookmarkRepository(client).bookmarkGrammar(19),
+        throwsA(isA<UnknownError>()),
+      );
     });
 
     test('does not invent a numeric JLPT ID', () async {
@@ -189,7 +235,7 @@ void main() {
     });
 
     test(
-      'fallback uses fixture for empty first page and JLPT filters',
+      'fallback preserves remote empty results and isolates JLPT fixtures',
       () async {
         final remote = _FakeGrammarRepository(
           page: _emptyPage(GrammarDataSource.remote),
@@ -204,7 +250,8 @@ void main() {
           const GrammarQuery(level: JlptLevel.n4),
         );
 
-        expect(emptyFallback.source, GrammarDataSource.fixture);
+        expect(emptyFallback.source, GrammarDataSource.remote);
+        expect(emptyFallback.items, isEmpty);
         expect(levelFallback.source, GrammarDataSource.fixture);
         expect(remote.searchCalls, 1);
       },

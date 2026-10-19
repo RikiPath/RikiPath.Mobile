@@ -74,6 +74,43 @@ class ApiGrammarRepository implements GrammarRepository {
   }
 }
 
+class ApiGrammarBookmarkRepository implements GrammarBookmarkRepository {
+  const ApiGrammarBookmarkRepository(this._apiClient);
+
+  final ApiClient _apiClient;
+
+  @override
+  Future<GrammarBookmark> bookmarkGrammar(int grammarPatternId) async {
+    if (grammarPatternId <= 0) {
+      throw ArgumentError.value(
+        grammarPatternId,
+        'grammarPatternId',
+        'A positive LIVE Grammar ID is required.',
+      );
+    }
+    final response = await _apiClient.post<Object?>(
+      GrammarApiPaths.bookmark(grammarPatternId),
+    );
+    try {
+      final dto = readGrammarBookmark(response.data);
+      if (dto.grammarPatternId != grammarPatternId) {
+        throw const FormatException(
+          'The bookmarked Grammar ID did not match the requested ID.',
+        );
+      }
+      return GrammarBookmark(
+        reviewCardId: dto.reviewCardId,
+        grammarPatternId: dto.grammarPatternId,
+        grammarTitle: dto.grammarTitle,
+      );
+    } on FormatException {
+      throw const UnknownError(
+        message: 'The grammar bookmark response did not match the contract.',
+      );
+    }
+  }
+}
+
 class GrammarJlptMappingUnavailableException implements Exception {
   const GrammarJlptMappingUnavailableException();
 }

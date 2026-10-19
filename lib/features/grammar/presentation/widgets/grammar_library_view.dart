@@ -86,30 +86,33 @@ class _GrammarLibraryViewState extends State<GrammarLibraryView> {
             ),
           ),
         ),
-        SizedBox(
-          height: 44,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
-            children: [
-              _LevelChip(
-                key: const ValueKey<String>('grammar_filter_all'),
-                label: context.l10n.all,
-                selected: state.query.level == null,
-                onSelected: () => widget.onFilter(null),
+        if (state.page.source == GrammarDataSource.fixture)
+          SizedBox(
+            height: 44,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.space4,
               ),
-              for (final level in JlptLevel.values) ...[
-                const SizedBox(width: AppSpacing.space2),
+              children: [
                 _LevelChip(
-                  key: ValueKey<String>('grammar_filter_${level.name}'),
-                  label: 'JLPT ${level.label}',
-                  selected: state.query.level == level,
-                  onSelected: () => widget.onFilter(level),
+                  key: const ValueKey<String>('grammar_filter_all'),
+                  label: context.l10n.all,
+                  selected: state.query.level == null,
+                  onSelected: () => widget.onFilter(null),
                 ),
+                for (final level in JlptLevel.values) ...[
+                  const SizedBox(width: AppSpacing.space2),
+                  _LevelChip(
+                    key: ValueKey<String>('grammar_filter_${level.name}'),
+                    label: 'JLPT ${level.label}',
+                    selected: state.query.level == level,
+                    onSelected: () => widget.onFilter(level),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.space4,

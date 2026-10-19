@@ -15,11 +15,7 @@ class FallbackGrammarRepository implements GrammarRepository {
     // No endpoint exposes the numeric ID for an N5/N4/N3 label.
     if (query.level != null) return fixture.search(query);
 
-    final remotePage = await remote.search(query);
-    if (query.page == 1 && remotePage.totalCount == 0) {
-      return fixture.search(query);
-    }
-    return remotePage;
+    return remote.search(query);
   }
 
   @override
