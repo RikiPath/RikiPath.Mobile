@@ -283,6 +283,8 @@
   "onboardingJlptHelper": "Chọn một cấp độ JLPT để tiếp tục.",
   "jlptCatalogLoadFailed": "Không thể tải danh mục cấp độ JLPT.",
   "jlptCatalogEmpty": "Hiện chưa có cấp độ JLPT khả dụng.",
+  "learningLessonsEmptyTitle": "Chưa có bài học khả dụng",
+  "learningLessonsEmptyMessage": "Backend chưa có bài học cho cấp độ JLPT này. Hãy thử lại sau.",
   "jlptN5Description": "Nền tảng tiếng Nhật cơ bản",
   "jlptN4Description": "Củng cố kiến thức sơ – trung cấp",
   "jlptN3Description": "Hướng tới trình độ trung cấp",

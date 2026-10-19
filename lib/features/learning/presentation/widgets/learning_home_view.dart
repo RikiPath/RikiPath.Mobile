@@ -57,38 +57,49 @@ class LearningHomeView extends StatelessWidget {
           ),
         ],
         const SizedBox(height: AppSpacing.space4),
-        _ProgressSummaryCard(snapshot: snapshot, onOpenRoadmap: onOpenRoadmap),
-        const SizedBox(height: AppSpacing.space4),
-        _CurrentLessonCard(
-          lesson: snapshot.currentLesson,
-          onOpenLesson: onOpenLesson,
-        ),
-        const SizedBox(height: AppSpacing.space5),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                context.l10n.mainLearningSections,
-                style: AppTypography.sectionTitle.copyWith(
-                  color: AppColors.learnerTextPrimary,
-                ),
-              ),
-            ),
-            Text(
-              context.l10n.viewAll,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.brandPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+        if (snapshot.hasSelectedLevel && snapshot.totalLessons == 0)
+          const _LearningEmptyCard()
+        else ...[
+          _ProgressSummaryCard(
+            snapshot: snapshot,
+            onOpenRoadmap: onOpenRoadmap,
+          ),
+          if (snapshot.hasCurrentLesson) ...[
+            const SizedBox(height: AppSpacing.space4),
+            _CurrentLessonCard(
+              lesson: snapshot.currentLesson,
+              onOpenLesson: onOpenLesson,
             ),
           ],
-        ),
-        const SizedBox(height: AppSpacing.space3),
-        _LearningSections(
-          sections: snapshot.sections,
-          onOpenRoadmap: onOpenRoadmap,
-          onOpenLibrary: onOpenLibrary,
-        ),
+          if (snapshot.sections.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.space5),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.l10n.mainLearningSections,
+                    style: AppTypography.sectionTitle.copyWith(
+                      color: AppColors.learnerTextPrimary,
+                    ),
+                  ),
+                ),
+                Text(
+                  context.l10n.viewAll,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.brandPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.space3),
+            _LearningSections(
+              sections: snapshot.sections,
+              onOpenRoadmap: onOpenRoadmap,
+              onOpenLibrary: onOpenLibrary,
+            ),
+          ],
+        ],
       ],
     );
   }
@@ -306,12 +317,13 @@ class _ProgressSummaryCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
-                      context.l10n.examDateLabel(snapshot.examDateLabel),
-                      style: AppTypography.bodySmall.copyWith(
-                        fontWeight: FontWeight.w500,
+                    if (snapshot.examDateLabel.isNotEmpty)
+                      Text(
+                        context.l10n.examDateLabel(snapshot.examDateLabel),
+                        style: AppTypography.bodySmall.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -362,17 +374,20 @@ class _ProgressSummaryCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              Text(
-                context.l10n.studyStreak(snapshot.streakDays),
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.learnerTextPrimary,
-                  fontWeight: FontWeight.w600,
+              if (snapshot.streakDays > 0)
+                Text(
+                  context.l10n.studyStreak(snapshot.streakDays),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.learnerTextPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
             ],
           ),
-          const SizedBox(height: AppSpacing.space4),
-          _MetricsRow(metrics: snapshot.metrics),
+          if (snapshot.metrics.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.space4),
+            _MetricsRow(metrics: snapshot.metrics),
+          ],
           const SizedBox(height: AppSpacing.space4),
           RikiPrimaryButton(
             key: const ValueKey<String>('learning_open_roadmap_button'),
@@ -488,10 +503,12 @@ class _CurrentLessonCard extends StatelessWidget {
                 ),
               ),
               Text(
-                context.l10n.chapterAndLesson(
-                  lesson.chapterNumber,
-                  lesson.lessonNumber,
-                ),
+                lesson.chapterNumber > 0
+                    ? context.l10n.chapterAndLesson(
+                        lesson.chapterNumber,
+                        lesson.lessonNumber,
+                      )
+                    : context.l10n.lessonNumber(lesson.lessonNumber),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w600,
@@ -531,8 +548,12 @@ class _CurrentLessonCard extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.space1),
                     Text(
-                      '${lesson.category}: ${lesson.pattern} • '
-                      '${context.l10n.durationMinutes(lesson.durationMinutes)}',
+                      [
+                        lesson.category,
+                        if (lesson.pattern.isNotEmpty) lesson.pattern,
+                        if (lesson.durationMinutes > 0)
+                          context.l10n.durationMinutes(lesson.durationMinutes),
+                      ].join(' • '),
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -573,6 +594,41 @@ class _CurrentLessonCard extends StatelessWidget {
                 child: Text(context.l10n.continueLearning),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LearningEmptyCard extends StatelessWidget {
+  const _LearningEmptyCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return RikiCard(
+      key: const ValueKey<String>('learning_lessons_empty'),
+      boxShadow: const <BoxShadow>[],
+      child: Column(
+        children: [
+          const Icon(
+            Icons.menu_book_outlined,
+            size: 36,
+            color: AppColors.textMuted,
+          ),
+          const SizedBox(height: AppSpacing.space2),
+          Text(
+            context.l10n.learningLessonsEmptyTitle,
+            textAlign: TextAlign.center,
+            style: AppTypography.cardTitle,
+          ),
+          const SizedBox(height: AppSpacing.space1),
+          Text(
+            context.l10n.learningLessonsEmptyMessage,
+            textAlign: TextAlign.center,
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),

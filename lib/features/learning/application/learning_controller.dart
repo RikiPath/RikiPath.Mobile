@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
-import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
+import 'package:rikipath_mobile/features/learning/data/api_learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
 
 final learningRepositoryProvider = Provider<LearningRepository>(
-  (ref) => const FixtureLearningRepository(),
+  (ref) => ApiLearningRepository(ref.watch(apiClientProvider)),
 );
 
 final learningControllerProvider =
@@ -18,9 +20,19 @@ class LearningController extends AsyncNotifier<LearningSnapshot> {
   @override
   Future<LearningSnapshot> build() async {
     final journey = await ref.watch(learnerJourneyControllerProvider.future);
-    final fixture = await ref
-        .watch(learningRepositoryProvider)
-        .loadLearningSnapshot();
+    final repository = ref.watch(learningRepositoryProvider);
+    final levelId = journey.selectedLevelId;
+    if (repository is ApiLearningRepository &&
+        (!journey.hasSelectedLevel || levelId == null || levelId <= 0)) {
+      return _empty(journey.selectedLevel);
+    }
+    final snapshot = await repository.loadLearningSnapshot(
+      certificateLevelId: levelId ?? 1,
+    );
+    if (snapshot.certificateLevelId != null) return snapshot;
+
+    // Repositories injected by visual/widget tests keep their local fixture
+    // journey behavior. The production provider above always returns API data.
     final level = journey.selectedLevel;
     final orderedRouteIds = FixtureLessonRepository.orderedRouteIdsFor(level);
     final locallyCompleted = orderedRouteIds
@@ -34,7 +46,7 @@ class LearningController extends AsyncNotifier<LearningSnapshot> {
       displayRouteId,
     );
     final progress = journey.progressFor(displayRouteId) ?? lesson.progress;
-    final currentLesson = fixture.currentLesson.copyWith(
+    final currentLesson = snapshot.currentLesson.copyWith(
       routeId: displayRouteId,
       lessonNumber: lesson.lessonNumber,
       title: lesson.title,
@@ -42,9 +54,9 @@ class LearningController extends AsyncNotifier<LearningSnapshot> {
       durationMinutes: lesson.durationMinutes,
       progress: progress.fraction,
     );
-    final completedLessons = (fixture.completedLessons + locallyCompleted)
-        .clamp(0, fixture.totalLessons);
-    final chapters = fixture.chapters
+    final completedLessons = (snapshot.completedLessons + locallyCompleted)
+        .clamp(0, snapshot.totalLessons);
+    final chapters = snapshot.chapters
         .map(
           (chapter) => chapter.number == lesson.chapterNumber
               ? chapter.copyWith(
@@ -57,12 +69,12 @@ class LearningController extends AsyncNotifier<LearningSnapshot> {
               : chapter,
         )
         .toList(growable: false);
-    return fixture.copyWith(
+    return snapshot.copyWith(
       jlptTarget: level,
       hasSelectedLevel: journey.hasSelectedLevel,
       hasCurrentLesson: currentRouteId != null,
       completedLessons: completedLessons,
-      overallProgress: completedLessons / fixture.totalLessons,
+      overallProgress: completedLessons / snapshot.totalLessons,
       currentLesson: currentLesson,
       chapters: chapters,
     );
@@ -72,4 +84,33 @@ class LearningController extends AsyncNotifier<LearningSnapshot> {
     state = const AsyncLoading<LearningSnapshot>();
     state = await AsyncValue.guard(build);
   }
+
+  LearningSnapshot _empty(JlptLevel level) => LearningSnapshot(
+    initials: '',
+    jlptTarget: level,
+    streakDays: 0,
+    hasUnreadNotifications: false,
+    examDateLabel: '',
+    overallProgress: 0,
+    completedLessons: 0,
+    totalLessons: 0,
+    completedChapters: 0,
+    totalChapters: 0,
+    metrics: const <LearningMetric>[],
+    currentLesson: const CurrentLessonSummary(
+      routeId: '',
+      chapterNumber: 0,
+      lessonNumber: 0,
+      title: '',
+      category: '',
+      pattern: '',
+      durationMinutes: 0,
+      progress: 0,
+    ),
+    sections: const <LearningSectionSummary>[],
+    chapters: const <RoadmapChapter>[],
+    skillProgress: const <LearningSkillProgress>[],
+    hasSelectedLevel: false,
+    hasCurrentLesson: false,
+  );
 }

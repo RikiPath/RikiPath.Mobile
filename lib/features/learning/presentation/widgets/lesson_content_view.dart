@@ -234,11 +234,17 @@ class LessonArticleOnlyView extends StatelessWidget {
   const LessonArticleOnlyView({
     required this.lesson,
     required this.onOpenVideo,
+    required this.onComplete,
+    required this.isCompleting,
+    required this.completionErrorMessage,
     super.key,
   });
 
   final Lesson lesson;
   final VoidCallback onOpenVideo;
+  final VoidCallback onComplete;
+  final bool isCompleting;
+  final String? completionErrorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -278,17 +284,56 @@ class LessonArticleOnlyView extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton.filled(
-                key: const ValueKey<String>('lesson_article_open_video'),
-                tooltip: context.l10n.openLessonVideo,
-                onPressed: onOpenVideo,
-                icon: const Icon(Icons.play_arrow),
-              ),
+              if (lesson.mediaSource.type != LessonMediaSourceType.none)
+                IconButton.filled(
+                  key: const ValueKey<String>('lesson_article_open_video'),
+                  tooltip: context.l10n.openLessonVideo,
+                  onPressed: onOpenVideo,
+                  icon: const Icon(Icons.play_arrow),
+                ),
             ],
           ),
         ),
         const SizedBox(height: AppSpacing.space5),
-        LessonArticleContent(lesson: lesson),
+        if (lesson.remoteLessonId == null)
+          LessonArticleContent(lesson: lesson)
+        else ...[
+          RikiCard(
+            boxShadow: const <BoxShadow>[],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.lessonObjective,
+                  style: AppTypography.cardTitle,
+                ),
+                const SizedBox(height: AppSpacing.space2),
+                Text(
+                  lesson.objective.isEmpty ? lesson.title : lesson.objective,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.55,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (completionErrorMessage != null) ...[
+            const SizedBox(height: AppSpacing.space3),
+            Text(
+              completionErrorMessage!,
+              key: const ValueKey<String>('lesson_completion_error'),
+              style: AppTypography.validationText,
+            ),
+          ],
+          const SizedBox(height: AppSpacing.space4),
+          RikiPrimaryButton(
+            key: const ValueKey<String>('lesson_article_complete_button'),
+            label: context.l10n.completeLesson,
+            isLoading: isCompleting,
+            onPressed: isCompleting ? null : onComplete,
+          ),
+        ],
       ],
     );
   }

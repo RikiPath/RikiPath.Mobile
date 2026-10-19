@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learning_localization.dart';
 
@@ -9,12 +10,14 @@ class LearningRoadmapView extends StatelessWidget {
     required this.snapshot,
     required this.onOpenProgress,
     required this.onContinueLesson,
+    this.onOpenLesson,
     super.key,
   });
 
   final LearningSnapshot snapshot;
   final VoidCallback onOpenProgress;
   final VoidCallback onContinueLesson;
+  final ValueChanged<String>? onOpenLesson;
 
   @override
   Widget build(BuildContext context) {
@@ -29,36 +32,64 @@ class LearningRoadmapView extends StatelessWidget {
       children: [
         _RoadmapProgressSummary(snapshot: snapshot),
         const SizedBox(height: AppSpacing.space5),
-        Stack(
-          children: [
-            const Positioned(
-              left: 16,
-              top: AppSpacing.space6,
-              bottom: AppSpacing.space6,
-              child: SizedBox(
-                width: 2,
-                child: ColoredBox(color: AppColors.border),
+        if (snapshot.lessons.isNotEmpty)
+          Column(
+            children: [
+              for (var index = 0; index < snapshot.lessons.length; index++) ...[
+                _LiveLessonCard(
+                  lesson: snapshot.lessons[index],
+                  onOpen: () => (onOpenLesson ?? (_) => onContinueLesson())(
+                    snapshot.lessons[index].routeId,
+                  ),
+                ),
+                if (index != snapshot.lessons.length - 1)
+                  const SizedBox(height: AppSpacing.space3),
+              ],
+            ],
+          )
+        else if (snapshot.chapters.isNotEmpty)
+          Stack(
+            children: [
+              const Positioned(
+                left: 16,
+                top: AppSpacing.space6,
+                bottom: AppSpacing.space6,
+                child: SizedBox(
+                  width: 2,
+                  child: ColoredBox(color: AppColors.border),
+                ),
+              ),
+              Column(
+                children: [
+                  for (
+                    var index = 0;
+                    index < snapshot.chapters.length;
+                    index++
+                  ) ...[
+                    _RoadmapChapterCard(
+                      chapter: snapshot.chapters[index],
+                      onOpenProgress: onOpenProgress,
+                      onContinueLesson: onContinueLesson,
+                    ),
+                    if (index != snapshot.chapters.length - 1)
+                      const SizedBox(height: AppSpacing.space4),
+                  ],
+                ],
+              ),
+            ],
+          )
+        else
+          RikiCard(
+            key: const ValueKey<String>('learning_roadmap_empty'),
+            boxShadow: const <BoxShadow>[],
+            child: Text(
+              context.l10n.learningLessonsEmptyMessage,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
               ),
             ),
-            Column(
-              children: [
-                for (
-                  var index = 0;
-                  index < snapshot.chapters.length;
-                  index++
-                ) ...[
-                  _RoadmapChapterCard(
-                    chapter: snapshot.chapters[index],
-                    onOpenProgress: onOpenProgress,
-                    onContinueLesson: onContinueLesson,
-                  ),
-                  if (index != snapshot.chapters.length - 1)
-                    const SizedBox(height: AppSpacing.space4),
-                ],
-              ],
-            ),
-          ],
-        ),
+          ),
       ],
     );
   }
@@ -98,25 +129,26 @@ class _RoadmapProgressSummary extends StatelessWidget {
                         letterSpacing: 0.5,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.space2,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.successBackground,
-                        border: Border.all(color: AppColors.successBorder),
-                        borderRadius: BorderRadius.circular(AppRadius.pill),
-                      ),
-                      child: Text(
-                        context.l10n.onTrack,
-                        style: AppTypography.badgeText.copyWith(
-                          color: AppColors.success,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
+                    if (snapshot.certificateLevelId == null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.space2,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.successBackground,
+                          border: Border.all(color: AppColors.successBorder),
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                        child: Text(
+                          context.l10n.onTrack,
+                          style: AppTypography.badgeText.copyWith(
+                            color: AppColors.success,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -149,16 +181,17 @@ class _RoadmapProgressSummary extends StatelessWidget {
             spacing: AppSpacing.space3,
             runSpacing: AppSpacing.space1,
             children: [
-              Text(
-                context.l10n.completedChapters(
-                  snapshot.completedChapters,
-                  snapshot.totalChapters,
+              if (snapshot.certificateLevelId == null)
+                Text(
+                  context.l10n.completedChapters(
+                    snapshot.completedChapters,
+                    snapshot.totalChapters,
+                  ),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
               Text(
                 context.l10n.achievedLessons(
                   snapshot.completedLessons,
@@ -170,6 +203,73 @@ class _RoadmapProgressSummary extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LiveLessonCard extends StatelessWidget {
+  const _LiveLessonCard({required this.lesson, required this.onOpen});
+
+  final LearningLessonSummary lesson;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return RikiCard(
+      key: ValueKey<String>('roadmap_live_lesson_${lesson.lessonId}'),
+      boxShadow: const <BoxShadow>[],
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: lesson.isCompleted
+                ? AppColors.successBackground
+                : AppColors.brandTint,
+            foregroundColor: lesson.isCompleted
+                ? AppColors.success
+                : AppColors.brandPrimary,
+            child: Icon(
+              lesson.isCompleted ? Icons.check : Icons.menu_book_outlined,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.space3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.lessonNumber(lesson.sortOrder),
+                  style: AppTypography.badgeText.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                Text(lesson.title, style: AppTypography.cardTitle),
+                Text(
+                  lesson.languageSkillName,
+                  style: AppTypography.metadata.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.space2),
+                LinearProgressIndicator(
+                  value: lesson.progress,
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                  color: lesson.isCompleted
+                      ? AppColors.success
+                      : AppColors.brandPrimary,
+                  backgroundColor: AppColors.learnerSurfaceLow,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.space2),
+          IconButton(
+            tooltip: context.l10n.continueLearning,
+            onPressed: onOpen,
+            icon: const Icon(Icons.chevron_right),
           ),
         ],
       ),

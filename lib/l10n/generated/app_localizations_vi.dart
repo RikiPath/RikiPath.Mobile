@@ -904,6 +904,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get jlptCatalogEmpty => 'Hiện chưa có cấp độ JLPT khả dụng.';
 
   @override
+  String get learningLessonsEmptyTitle => 'Chưa có bài học khả dụng';
+
+  @override
+  String get learningLessonsEmptyMessage =>
+      'Backend chưa có bài học cho cấp độ JLPT này. Hãy thử lại sau.';
+
+  @override
   String get jlptN5Description => 'Nền tảng tiếng Nhật cơ bản';
 
   @override

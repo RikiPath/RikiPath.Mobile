@@ -11,6 +11,8 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_toast_host.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
+import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
 import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/data/fixture_notebook_repository.dart';
@@ -405,6 +407,9 @@ Future<GoRouter> _pumpVocabulary(
     ProviderScope(
       overrides: [
         vocabularyRepositoryProvider.overrideWithValue(repository),
+        learningRepositoryProvider.overrideWithValue(
+          const FixtureLearningRepository(),
+        ),
         jlptCatalogRepositoryProvider.overrideWithValue(
           TestJlptCatalogRepository(),
         ),

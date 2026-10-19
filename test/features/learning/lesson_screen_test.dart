@@ -11,7 +11,9 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
 import 'package:rikipath_mobile/features/learning/application/lesson_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
+import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/lesson_media_driver.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_repository.dart';
@@ -437,6 +439,11 @@ class _PendingLessonRepository implements LessonRepository {
   }) {
     throw UnsupportedError('No lesson is loaded.');
   }
+
+  @override
+  Future<LessonProgress> completeLesson({required String routeId}) {
+    throw UnsupportedError('No lesson is loaded.');
+  }
 }
 
 class _FailingLessonRepository implements LessonRepository {
@@ -453,6 +460,11 @@ class _FailingLessonRepository implements LessonRepository {
     required int positionSeconds,
     required int durationSeconds,
   }) {
+    throw UnsupportedError('No lesson is loaded.');
+  }
+
+  @override
+  Future<LessonProgress> completeLesson({required String routeId}) {
     throw UnsupportedError('No lesson is loaded.');
   }
 }
@@ -485,6 +497,11 @@ class _ProgressLessonRepository implements LessonRepository {
       positionSeconds: positionSeconds,
       durationSeconds: durationSeconds,
     );
+  }
+
+  @override
+  Future<LessonProgress> completeLesson({required String routeId}) {
+    return const FixtureLessonRepository().completeLesson(routeId: routeId);
   }
 }
 
@@ -587,6 +604,9 @@ Future<GoRouter> _pumpLesson(
     ProviderScope(
       overrides: [
         lessonRepositoryProvider.overrideWithValue(repository),
+        learningRepositoryProvider.overrideWithValue(
+          const FixtureLearningRepository(),
+        ),
         lessonMediaDriverFactoryProvider.overrideWithValue(() => mediaDriver),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),

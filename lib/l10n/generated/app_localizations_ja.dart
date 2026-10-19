@@ -851,6 +851,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get jlptCatalogEmpty => '現在利用できるJLPTレベルはありません。';
 
   @override
+  String get learningLessonsEmptyTitle => '利用できるレッスンはまだありません';
+
+  @override
+  String get learningLessonsEmptyMessage =>
+      'このJLPTレベルのレッスンはBackendにまだ登録されていません。後でもう一度お試しください。';
+
+  @override
   String get jlptN5Description => '日本語の基礎を身につける';
 
   @override

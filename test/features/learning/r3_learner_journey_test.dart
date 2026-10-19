@@ -5,6 +5,7 @@ import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/lesson_controller.dart';
+import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
 import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
@@ -102,6 +103,12 @@ ProviderContainer _container({NotebookRepository? notebookRepository}) {
   return ProviderContainer(
     overrides: [
       jsonPreferenceStoreProvider.overrideWithValue(TestJsonPreferenceStore()),
+      learningRepositoryProvider.overrideWithValue(
+        const FixtureLearningRepository(),
+      ),
+      lessonRepositoryProvider.overrideWithValue(
+        const FixtureLessonRepository(),
+      ),
       if (notebookRepository != null)
         notebookRepositoryProvider.overrideWithValue(notebookRepository),
     ],

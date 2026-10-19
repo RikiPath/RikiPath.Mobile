@@ -578,6 +578,9 @@ ProviderContainer _container(
   return ProviderContainer(
     overrides: [
       jsonPreferenceStoreProvider.overrideWithValue(store),
+      lessonRepositoryProvider.overrideWithValue(
+        const FixtureLessonRepository(),
+      ),
       notebookRepositoryProvider.overrideWithValue(live),
     ],
   );

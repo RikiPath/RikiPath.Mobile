@@ -19,6 +19,11 @@ class LearningRoadmapScreen extends ConsumerWidget {
     final levelSuffix = snapshot == null ? '' : ' ${snapshot.jlptTarget.label}';
     final subtitle = snapshot == null
         ? context.l10n.loadingRoadmap
+        : snapshot.certificateLevelId != null
+        ? context.l10n.completedLessons(
+            snapshot.completedLessons,
+            snapshot.totalLessons,
+          )
         : context.l10n.roadmapSummary(
             snapshot.totalChapters,
             snapshot.totalLessons,
@@ -43,6 +48,7 @@ class LearningRoadmapScreen extends ConsumerWidget {
             onOpenProgress: () => context.push(AppRoutes.learnProgress),
             onContinueLesson: () =>
                 context.push(AppRoutes.lesson(data.currentLesson.routeId)),
+            onOpenLesson: (routeId) => context.push(AppRoutes.lesson(routeId)),
           ),
         ),
       ),

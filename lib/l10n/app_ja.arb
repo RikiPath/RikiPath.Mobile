@@ -270,6 +270,8 @@
   "onboardingJlptHelper": "JLPTレベルを選択してください。",
   "jlptCatalogLoadFailed": "JLPTレベル一覧を読み込めませんでした。",
   "jlptCatalogEmpty": "現在利用できるJLPTレベルはありません。",
+  "learningLessonsEmptyTitle": "利用できるレッスンはまだありません",
+  "learningLessonsEmptyMessage": "このJLPTレベルのレッスンはBackendにまだ登録されていません。後でもう一度お試しください。",
   "jlptN5Description": "日本語の基礎を身につける",
   "jlptN4Description": "初級から中級の知識を強化する",
   "jlptN3Description": "中級レベルを目指す",

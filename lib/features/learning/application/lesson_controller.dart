@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
+import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
-import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
+import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
+import 'package:rikipath_mobile/features/learning/data/api_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/lesson_media_driver.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_repository.dart';
@@ -12,11 +14,11 @@ import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 typedef LessonMediaDriverFactory = LessonMediaDriver Function();
 
 final lessonRepositoryProvider = Provider<LessonRepository>(
-  (ref) => const FixtureLessonRepository(),
+  (ref) => ApiLessonRepository(ref.watch(apiClientProvider)),
 );
 
 final lessonMediaDriverFactoryProvider = Provider<LessonMediaDriverFactory>(
-  (ref) => FixtureLessonMediaDriver.new,
+  (ref) => VideoPlayerLessonMediaDriver.new,
 );
 
 final lessonMediaDriverProvider = Provider.autoDispose
@@ -46,7 +48,9 @@ class LessonController extends AsyncNotifier<LessonSession> {
         .watch(lessonRepositoryProvider)
         .loadLesson(lessonId);
     final journey = await ref.watch(learnerJourneyControllerProvider.future);
-    final storedProgress = journey.progressFor(lessonId);
+    final storedProgress = loadedLesson.remoteLessonId == null
+        ? journey.progressFor(lessonId)
+        : null;
     var lesson = storedProgress == null
         ? loadedLesson
         : loadedLesson.copyWith(progress: storedProgress);
@@ -118,6 +122,11 @@ class LessonController extends AsyncNotifier<LessonSession> {
     final current = state.value;
     if (current == null ||
         current.lesson.availability == LessonAvailability.locked) {
+      return;
+    }
+
+    if (current.lesson.mediaSource.type == LessonMediaSourceType.none) {
+      showArticle();
       return;
     }
 
@@ -299,25 +308,40 @@ class LessonController extends AsyncNotifier<LessonSession> {
 
   Future<void> completeLesson() async {
     final current = state.value;
-    if (current == null) {
+    if (current == null || current.isCompleting) {
       return;
     }
-    final progress = await _repository.updatePlaybackPosition(
-      routeId: lessonId,
-      positionSeconds: current.lesson.durationSeconds,
-      durationSeconds: current.lesson.durationSeconds,
-    );
     state = AsyncData(
-      current.copyWith(
+      current.copyWith(isCompleting: true, clearCompletionError: true),
+    );
+    try {
+      final progress = await _repository.completeLesson(routeId: lessonId);
+      final completed = state.requireValue.copyWith(
         lesson: current.lesson.copyWith(progress: progress),
         stage: LessonStage.completed,
         videoStatus: LessonVideoStatus.completed,
+        isCompleting: false,
         clearVideoError: true,
-      ),
-    );
-    await ref
-        .read(learnerJourneyControllerProvider.notifier)
-        .recordLessonProgress(lessonId, progress);
+        clearCompletionError: true,
+      );
+      state = AsyncData(completed);
+      if (current.lesson.remoteLessonId == null) {
+        await ref
+            .read(learnerJourneyControllerProvider.notifier)
+            .recordLessonProgress(lessonId, progress);
+      } else {
+        ref.invalidate(learningControllerProvider);
+      }
+    } catch (_) {
+      state = AsyncData(
+        state.requireValue.copyWith(
+          isCompleting: false,
+          completionErrorMessage: ref
+              .read(appLocalizationsProvider)
+              .checkConnectionRetry,
+        ),
+      );
+    }
   }
 
   String _vocabularyStableKey(int index, Lesson lesson) =>

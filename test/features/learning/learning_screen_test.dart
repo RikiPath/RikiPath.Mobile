@@ -213,14 +213,18 @@ class _PendingLearningRepository implements LearningRepository {
   final Completer<LearningSnapshot> _completer = Completer<LearningSnapshot>();
 
   @override
-  Future<LearningSnapshot> loadLearningSnapshot() => _completer.future;
+  Future<LearningSnapshot> loadLearningSnapshot({
+    required int certificateLevelId,
+  }) => _completer.future;
 }
 
 class _FailingLearningRepository implements LearningRepository {
   const _FailingLearningRepository();
 
   @override
-  Future<LearningSnapshot> loadLearningSnapshot() {
+  Future<LearningSnapshot> loadLearningSnapshot({
+    required int certificateLevelId,
+  }) {
     return Future<LearningSnapshot>.error(StateError('fixture failure'));
   }
 }

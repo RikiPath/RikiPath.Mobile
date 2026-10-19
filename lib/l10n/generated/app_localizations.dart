@@ -1700,6 +1700,18 @@ abstract class AppLocalizations {
   /// **'Hiện chưa có cấp độ JLPT khả dụng.'**
   String get jlptCatalogEmpty;
 
+  /// No description provided for @learningLessonsEmptyTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có bài học khả dụng'**
+  String get learningLessonsEmptyTitle;
+
+  /// No description provided for @learningLessonsEmptyMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Backend chưa có bài học cho cấp độ JLPT này. Hãy thử lại sau.'**
+  String get learningLessonsEmptyMessage;
+
   /// No description provided for @jlptN5Description.
   ///
   /// In vi, this message translates to:

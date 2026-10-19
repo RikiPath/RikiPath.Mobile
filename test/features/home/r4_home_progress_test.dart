@@ -21,6 +21,8 @@ import 'package:rikipath_mobile/features/home/presentation/widgets/home_dashboar
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/lesson_controller.dart';
+import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey_repository.dart';
@@ -898,6 +900,12 @@ _ProviderHarness _providerHarness({required LearnerJourneyState journey}) {
         learnerJourneyRepositoryProvider.overrideWithValue(
           _MemoryJourneyRepository(journey),
         ),
+        learningRepositoryProvider.overrideWithValue(
+          const FixtureLearningRepository(),
+        ),
+        lessonRepositoryProvider.overrideWithValue(
+          const FixtureLessonRepository(),
+        ),
       ],
     ),
   );
@@ -928,6 +936,12 @@ Future<_HomeHarness> _pumpHome(
       learnerJourneyRepositoryProvider.overrideWithValue(
         journeyRepository ??
             _MemoryJourneyRepository(journey ?? const LearnerJourneyState()),
+      ),
+      learningRepositoryProvider.overrideWithValue(
+        const FixtureLearningRepository(),
+      ),
+      lessonRepositoryProvider.overrideWithValue(
+        const FixtureLessonRepository(),
       ),
       analyticsRepositoryProvider.overrideWithValue(analytics),
       notificationRepositoryProvider.overrideWithValue(notificationRepository),

@@ -23,6 +23,8 @@ class LessonSession {
     this.videoStatus = LessonVideoStatus.initial,
     this.selectedTab = LessonContentTab.content,
     this.videoErrorMessage,
+    this.isCompleting = false,
+    this.completionErrorMessage,
   });
 
   final Lesson lesson;
@@ -30,6 +32,8 @@ class LessonSession {
   final LessonVideoStatus videoStatus;
   final LessonContentTab selectedTab;
   final String? videoErrorMessage;
+  final bool isCompleting;
+  final String? completionErrorMessage;
 
   int get videoProgressPercent {
     if (lesson.durationSeconds <= 0) {
@@ -50,6 +54,9 @@ class LessonSession {
     LessonContentTab? selectedTab,
     String? videoErrorMessage,
     bool clearVideoError = false,
+    bool? isCompleting,
+    String? completionErrorMessage,
+    bool clearCompletionError = false,
   }) {
     return LessonSession(
       lesson: lesson ?? this.lesson,
@@ -59,6 +66,10 @@ class LessonSession {
       videoErrorMessage: clearVideoError
           ? null
           : videoErrorMessage ?? this.videoErrorMessage,
+      isCompleting: isCompleting ?? this.isCompleting,
+      completionErrorMessage: clearCompletionError
+          ? null
+          : completionErrorMessage ?? this.completionErrorMessage,
     );
   }
 }

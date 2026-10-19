@@ -20,6 +20,8 @@ import 'package:rikipath_mobile/features/home/domain/home_dashboard.dart';
 import 'package:rikipath_mobile/features/home/domain/home_repository.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
+import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
+import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
 import 'package:rikipath_mobile/features/meeting/application/upcoming_meeting_provider.dart';
 import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_join_screen.dart';
@@ -239,6 +241,9 @@ Future<GoRouter> _pumpHome(
     ProviderScope(
       overrides: [
         homeRepositoryProvider.overrideWithValue(repository),
+        learningRepositoryProvider.overrideWithValue(
+          const FixtureLearningRepository(),
+        ),
         analyticsRepositoryProvider.overrideWithValue(
           const _AnalyticsRepository(),
         ),

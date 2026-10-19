@@ -8,4 +8,6 @@ abstract interface class LessonRepository {
     required int positionSeconds,
     required int durationSeconds,
   });
+
+  Future<LessonProgress> completeLesson({required String routeId});
 }

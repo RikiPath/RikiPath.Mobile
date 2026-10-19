@@ -19,6 +19,8 @@ class LearningSnapshot {
     required this.sections,
     required this.chapters,
     required this.skillProgress,
+    this.certificateLevelId,
+    this.lessons = const <LearningLessonSummary>[],
     this.hasSelectedLevel = true,
     this.hasCurrentLesson = true,
   });
@@ -38,6 +40,8 @@ class LearningSnapshot {
   final List<LearningSectionSummary> sections;
   final List<RoadmapChapter> chapters;
   final List<LearningSkillProgress> skillProgress;
+  final int? certificateLevelId;
+  final List<LearningLessonSummary> lessons;
   final bool hasSelectedLevel;
   final bool hasCurrentLesson;
 
@@ -68,10 +72,42 @@ class LearningSnapshot {
       sections: sections,
       chapters: chapters ?? this.chapters,
       skillProgress: skillProgress,
+      certificateLevelId: certificateLevelId,
+      lessons: lessons,
       hasSelectedLevel: hasSelectedLevel ?? this.hasSelectedLevel,
       hasCurrentLesson: hasCurrentLesson ?? this.hasCurrentLesson,
     );
   }
+}
+
+@immutable
+class LearningLessonSummary {
+  const LearningLessonSummary({
+    required this.lessonId,
+    required this.title,
+    required this.description,
+    required this.sortOrder,
+    required this.languageSkillId,
+    required this.languageSkillName,
+    required this.progressPercent,
+    required this.resumePositionSeconds,
+    required this.isCompleted,
+    this.completedAt,
+  });
+
+  final int lessonId;
+  final String title;
+  final String? description;
+  final int sortOrder;
+  final int languageSkillId;
+  final String languageSkillName;
+  final int progressPercent;
+  final int resumePositionSeconds;
+  final bool isCompleted;
+  final DateTime? completedAt;
+
+  String get routeId => '$lessonId';
+  double get progress => progressPercent.clamp(0, 100) / 100;
 }
 
 @immutable

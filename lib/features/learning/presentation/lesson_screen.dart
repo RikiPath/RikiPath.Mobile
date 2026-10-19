@@ -89,6 +89,9 @@ class LessonScreen extends ConsumerWidget {
       LessonStage.article => LessonArticleOnlyView(
         lesson: lesson,
         onOpenVideo: controller.showVideo,
+        onComplete: controller.completeLesson,
+        isCompleting: session.isCompleting,
+        completionErrorMessage: session.completionErrorMessage,
       ),
       LessonStage.completed => LessonCompletionView(
         lesson: lesson,
@@ -118,11 +121,13 @@ class LessonScreen extends ConsumerWidget {
         session.stage == LessonStage.article) {
       return '${session.lesson.curriculum} • ${session.lesson.focus}';
     }
-    return context.l10n.chapterLessonSummary(
-      session.lesson.chapterNumber,
-      session.lesson.category,
-      session.lesson.level.label,
-    );
+    return session.lesson.chapterNumber > 0
+        ? context.l10n.chapterLessonSummary(
+            session.lesson.chapterNumber,
+            session.lesson.category,
+            session.lesson.level.label,
+          )
+        : '${session.lesson.category} • ${session.lesson.level.label}';
   }
 
   void _handleBack(

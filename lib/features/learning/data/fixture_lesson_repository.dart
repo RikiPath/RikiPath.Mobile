@@ -108,6 +108,17 @@ class FixtureLessonRepository implements LessonRepository {
     );
   }
 
+  @override
+  Future<LessonProgress> completeLesson({required String routeId}) async {
+    final lesson = await loadLesson(routeId);
+    return LessonProgress(
+      progressPercent: 100,
+      resumePositionSeconds: lesson.durationSeconds,
+      isCompleted: true,
+      completedAt: DateTime.now().toUtc(),
+    );
+  }
+
   static const List<LessonFixtureDto> _lessons = [
     LessonFixtureDto(
       routeId: lesson19RouteId,

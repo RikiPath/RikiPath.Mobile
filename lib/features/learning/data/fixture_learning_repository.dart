@@ -11,7 +11,9 @@ class FixtureLearningRepository implements LearningRepository {
   const FixtureLearningRepository();
 
   @override
-  Future<LearningSnapshot> loadLearningSnapshot() {
+  Future<LearningSnapshot> loadLearningSnapshot({
+    required int certificateLevelId,
+  }) {
     return Future<LearningSnapshot>.value(snapshot);
   }
 

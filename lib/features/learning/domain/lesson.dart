@@ -5,10 +5,14 @@ enum LessonAvailability { available, locked }
 
 enum LessonPartStatus { completed, current, locked }
 
-enum LessonMediaSourceType { fixture, network }
+enum LessonMediaSourceType { none, fixture, network }
 
 @immutable
 class LessonMediaSource {
+  const LessonMediaSource.none()
+    : type = LessonMediaSourceType.none,
+      uri = null;
+
   const LessonMediaSource.fixture()
     : type = LessonMediaSourceType.fixture,
       uri = null;
