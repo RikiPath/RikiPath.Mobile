@@ -7,23 +7,32 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
 import 'package:rikipath_mobile/core/widgets/riki_buttons.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/application/onboarding_controller.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 
 import '../../support/test_auth_session.dart';
+import '../../support/test_jlpt_catalog.dart';
 
 void main() {
-  test('learner JLPT choices are typed and limited to N5, N4, and N3', () {
+  test('learner JLPT choices support N5 through N1', () {
     expect(JlptLevel.values, <JlptLevel>[
       JlptLevel.n5,
       JlptLevel.n4,
       JlptLevel.n3,
+      JlptLevel.n2,
+      JlptLevel.n1,
     ]);
     expect(JlptLevel.values.map((level) => level.label), <String>[
       'N5',
       'N4',
       'N3',
+      'N2',
+      'N1',
     ]);
   });
 
@@ -36,14 +45,16 @@ void main() {
     ]);
   });
 
-  testWidgets('target step shows only N5, N4, and N3 choices', (tester) async {
+  testWidgets('target step follows the live N5 through N1 catalog', (
+    tester,
+  ) async {
     await _pumpOnboarding(tester);
 
     expect(find.byKey(const ValueKey<String>('jlpt_n5')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('jlpt_n4')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('jlpt_n3')), findsOneWidget);
-    expect(find.text('N1'), findsNothing);
-    expect(find.text('N2'), findsNothing);
+    expect(find.byKey(const ValueKey<String>('jlpt_n2')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('jlpt_n1')), findsOneWidget);
   });
 
   testWidgets('continue is disabled before a JLPT target is selected', (
@@ -64,7 +75,10 @@ void main() {
     await tester.pump();
 
     expect(
-      harness.container.read(onboardingControllerProvider).selectedJlptLevel,
+      harness.container
+          .read(onboardingControllerProvider)
+          .selectedJlptLevel
+          ?.level,
       JlptLevel.n4,
     );
   });
@@ -114,7 +128,7 @@ void main() {
 
     final state = harness.container.read(onboardingControllerProvider);
     expect(state.currentStep, OnboardingStep.jlptTarget);
-    expect(state.selectedJlptLevel, JlptLevel.n4);
+    expect(state.selectedJlptLevel?.level, JlptLevel.n4);
     expect(state.selectedStudyTime, DailyStudyTime.fortyFive);
   });
 
@@ -161,7 +175,7 @@ void main() {
 
     final state = harness.container.read(onboardingControllerProvider);
     expect(state.currentStep, OnboardingStep.studyTime);
-    expect(state.selectedJlptLevel, JlptLevel.n3);
+    expect(state.selectedJlptLevel?.level, JlptLevel.n3);
     expect(state.selectedStudyTime, DailyStudyTime.fifteen);
   });
 
@@ -209,7 +223,16 @@ Future<_OnboardingHarness> _pumpOnboarding(WidgetTester tester) async {
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  final container = ProviderContainer();
+  final container = ProviderContainer(
+    overrides: [
+      jlptCatalogRepositoryProvider.overrideWithValue(
+        TestJlptCatalogRepository(),
+      ),
+      userProfileRepositoryProvider.overrideWithValue(
+        _OnboardingProfileRepository(),
+      ),
+    ],
+  );
   final session = createTestAuthSession();
   final router = createAppRouter(
     authSession: session,
@@ -228,6 +251,52 @@ Future<_OnboardingHarness> _pumpOnboarding(WidgetTester tester) async {
   await tester.pumpAndSettle();
 
   return _OnboardingHarness(container: container);
+}
+
+class _OnboardingProfileRepository implements UserProfileRepository {
+  @override
+  Future<UserProfile> setJlptGoal({
+    required int targetJlptLevelId,
+    required int dailyStudyMinutes,
+  }) async => _profile(
+    targetLevelId: targetJlptLevelId,
+    dailyStudyMinutes: dailyStudyMinutes,
+  );
+
+  @override
+  Future<UserProfile> loadProfile() async => _profile();
+
+  @override
+  Future<UserProfile> updateNotificationSettings({
+    required bool emailNotificationsEnabled,
+    required bool systemNotificationsEnabled,
+  }) async => _profile();
+
+  @override
+  Future<UserProfile> updateProfile({
+    required String firstName,
+    required String lastName,
+  }) async => _profile();
+
+  @override
+  Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) async =>
+      _profile();
+
+  UserProfile _profile({int? targetLevelId, int dailyStudyMinutes = 30}) =>
+      UserProfile(
+        userId: 42,
+        email: 'learner@example.com',
+        firstName: 'Learner',
+        lastName: 'QA',
+        avatarUrl: null,
+        role: 'Learner',
+        isEmailVerified: true,
+        targetJlptLevelId: targetLevelId,
+        targetJlptLevelName: targetLevelId == null ? null : 'N4',
+        dailyStudyMinutes: dailyStudyMinutes,
+        emailNotificationsEnabled: true,
+        systemNotificationsEnabled: true,
+      );
 }
 
 Future<void> _reachStudyTime(WidgetTester tester, JlptLevel level) async {

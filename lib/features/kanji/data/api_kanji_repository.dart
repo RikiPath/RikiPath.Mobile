@@ -13,12 +13,8 @@ class ApiKanjiRepository implements KanjiRepository {
 
   @override
   Future<KanjiPage> search(KanjiQuery query) async {
-    if (query.level != null) {
-      throw const KanjiJlptMappingUnavailableException();
-    }
-
     final request = KanjiSearchFilterDto(
-      jlptLevelId: null,
+      jlptLevelId: query.level?.id,
       keyword: query.keyword.trim().isEmpty ? null : query.keyword.trim(),
       page: query.page,
       pageSize: query.pageSize,
@@ -123,8 +119,4 @@ class ApiKanjiNotebookRepository implements KanjiNotebookRepository {
       );
     }
   }
-}
-
-class KanjiJlptMappingUnavailableException implements Exception {
-  const KanjiJlptMappingUnavailableException();
 }

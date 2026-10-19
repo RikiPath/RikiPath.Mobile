@@ -4,6 +4,7 @@ import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/errors/api_error_mapper.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/grammar/data/api_grammar_repository.dart';
 import 'package:rikipath_mobile/features/grammar/data/fallback_grammar_repository.dart';
 import 'package:rikipath_mobile/features/grammar/data/fixture_grammar_repository.dart';
@@ -50,9 +51,9 @@ void main() {
       expect(() => GrammarCardDto.fromJson(json), throwsFormatException);
     });
 
-    test('rejects JLPT levels outside mobile N5/N4/N3 scope', () {
-      expect(() => GrammarMapper.parseLevel('N2'), throwsFormatException);
-      expect(() => GrammarMapper.parseLevel('N1'), throwsFormatException);
+    test('supports the complete live JLPT catalog scope', () {
+      expect(GrammarMapper.parseLevel('N2'), JlptLevel.n2);
+      expect(GrammarMapper.parseLevel('N1'), JlptLevel.n1);
     });
   });
 
@@ -151,15 +152,20 @@ void main() {
       );
     });
 
-    test('does not invent a numeric JLPT ID', () async {
-      final client = _RecordingApiClient(const <String, Object?>{});
+    test('sends the real JLPT level ID from the live catalog', () async {
+      final client = _RecordingApiClient(<String, Object?>{
+        'POST ${GrammarApiPaths.search}': _searchEnvelope(
+          items: const <Object?>[],
+          page: 1,
+          pageSize: 20,
+          totalCount: 0,
+          totalPages: 0,
+        ),
+      });
       final repository = ApiGrammarRepository(client);
 
-      await expectLater(
-        repository.search(const GrammarQuery(level: JlptLevel.n4)),
-        throwsA(isA<GrammarJlptMappingUnavailableException>()),
-      );
-      expect(client.calls, isEmpty);
+      await repository.search(GrammarQuery(level: _level(42, JlptLevel.n4)));
+      expect(client.lastData, containsPair('jlptLevelId', 42));
     });
 
     test('maps a malformed live response to a typed unknown error', () async {
@@ -200,19 +206,16 @@ void main() {
       },
     );
 
-    test('fixture supports exactly N5/N4/N3 level filtering', () async {
+    test('fixture keeps its existing N5/N4/N3 level data isolated', () async {
       const repository = FixtureGrammarRepository();
 
-      for (final level in JlptLevel.values) {
-        final page = await repository.search(GrammarQuery(level: level));
+      for (final level in const [JlptLevel.n5, JlptLevel.n4, JlptLevel.n3]) {
+        final page = await repository.search(
+          GrammarQuery(level: _level(level.index + 1, level)),
+        );
         expect(page.items, isNotEmpty);
         expect(page.items.every((entry) => entry.level == level), isTrue);
       }
-      expect(JlptLevel.values, <JlptLevel>[
-        JlptLevel.n5,
-        JlptLevel.n4,
-        JlptLevel.n3,
-      ]);
     });
 
     test('fixture paginates without reusing backend IDs', () async {
@@ -235,7 +238,7 @@ void main() {
     });
 
     test(
-      'fallback preserves remote empty results and isolates JLPT fixtures',
+      'fallback preserves remote results for catalog-backed filters',
       () async {
         final remote = _FakeGrammarRepository(
           page: _emptyPage(GrammarDataSource.remote),
@@ -247,17 +250,24 @@ void main() {
 
         final emptyFallback = await repository.search(const GrammarQuery());
         final levelFallback = await repository.search(
-          const GrammarQuery(level: JlptLevel.n4),
+          GrammarQuery(level: _level(42, JlptLevel.n4)),
         );
 
         expect(emptyFallback.source, GrammarDataSource.remote);
         expect(emptyFallback.items, isEmpty);
-        expect(levelFallback.source, GrammarDataSource.fixture);
-        expect(remote.searchCalls, 1);
+        expect(levelFallback.source, GrammarDataSource.remote);
+        expect(remote.searchCalls, 2);
       },
     );
   });
 }
+
+JlptLevelCatalogItem _level(int id, JlptLevel level) => JlptLevelCatalogItem(
+  id: id,
+  code: level.label,
+  level: level,
+  sortOrder: id,
+);
 
 Map<String, Object?> _searchEnvelope({
   required List<Object?> items,

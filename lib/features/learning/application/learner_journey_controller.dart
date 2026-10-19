@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/storage/json_preference_store.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/learning/data/persistent_learner_journey_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey_repository.dart';
@@ -35,7 +36,21 @@ class LearnerJourneyController extends AsyncNotifier<LearnerJourneyState> {
   Future<void> selectLevel(JlptLevel level) async {
     final current = state.value ?? await future;
     if (current.hasSelectedLevel && current.selectedLevel == level) return;
-    await _save(current.copyWith(selectedLevel: level));
+    await _save(
+      current.copyWith(selectedLevel: level, clearSelectedLevelId: true),
+    );
+  }
+
+  Future<void> selectCatalogLevel(JlptLevelCatalogItem item) async {
+    final current = state.value ?? await future;
+    if (current.hasSelectedLevel &&
+        current.selectedLevel == item.level &&
+        current.selectedLevelId == item.id) {
+      return;
+    }
+    await _save(
+      current.copyWith(selectedLevel: item.level, selectedLevelId: item.id),
+    );
   }
 
   Future<void> setPreferences({
@@ -46,6 +61,20 @@ class LearnerJourneyController extends AsyncNotifier<LearnerJourneyState> {
     return _save(
       current.copyWith(
         selectedLevel: level,
+        dailyStudyMinutes: dailyStudyMinutes,
+      ),
+    );
+  }
+
+  Future<void> setCatalogPreferences({
+    required JlptLevelCatalogItem item,
+    required int dailyStudyMinutes,
+  }) async {
+    final current = state.value ?? await future;
+    return _save(
+      current.copyWith(
+        selectedLevel: item.level,
+        selectedLevelId: item.id,
         dailyStudyMinutes: dailyStudyMinutes,
       ),
     );

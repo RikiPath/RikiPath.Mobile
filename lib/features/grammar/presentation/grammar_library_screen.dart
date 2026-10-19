@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/grammar/application/grammar_controller.dart';
 import 'package:rikipath_mobile/features/grammar/presentation/widgets/grammar_library_view.dart';
 import 'package:rikipath_mobile/features/grammar/presentation/widgets/grammar_state_views.dart';
@@ -16,6 +17,7 @@ class GrammarLibraryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(grammarLibraryControllerProvider);
     final controller = ref.read(grammarLibraryControllerProvider.notifier);
+    final catalog = ref.watch(jlptCatalogControllerProvider);
 
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
@@ -31,8 +33,12 @@ class GrammarLibraryScreen extends ConsumerWidget {
           error: (_, _) => GrammarErrorView(onRetry: controller.retry),
           data: (data) => GrammarLibraryView(
             state: data,
+            catalog: catalog,
             onSearch: controller.search,
             onFilter: controller.filterByLevel,
+            onRetryCatalog: ref
+                .read(jlptCatalogControllerProvider.notifier)
+                .retry,
             onClear: controller.clear,
             onOpenDetail: (entry) =>
                 context.push(AppRoutes.grammarDetail(entry.routeKey)),

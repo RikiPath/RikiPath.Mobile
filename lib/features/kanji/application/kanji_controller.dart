@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/utils/stable_merge.dart';
-import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/kanji/data/api_kanji_repository.dart';
 import 'package:rikipath_mobile/features/kanji/data/kanji_audio_player.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
@@ -52,7 +52,7 @@ class KanjiLibraryController extends AsyncNotifier<KanjiLibraryState> {
     );
   }
 
-  Future<void> filterByLevel(JlptLevel? level) {
+  Future<void> filterByLevel(JlptLevelCatalogItem? level) {
     final current = state.value;
     return _replace(
       KanjiQuery(

@@ -9,6 +9,7 @@ import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/kanji/application/kanji_controller.dart';
 import 'package:rikipath_mobile/features/kanji/data/fixture_kanji_repository.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
@@ -19,6 +20,7 @@ import 'package:rikipath_mobile/features/notebook/application/demo_notebook_cont
 import 'package:rikipath_mobile/features/notebook/data/session_demo_notebook_repository.dart';
 
 import '../../support/test_auth_session.dart';
+import '../../support/test_jlpt_catalog.dart';
 
 void main() {
   test('Kanji routes are nested Learn-branch paths', () {
@@ -29,7 +31,7 @@ void main() {
     );
   });
 
-  testWidgets('library renders search, N5/N4/N3 filters, fixture label', (
+  testWidgets('library renders live N5-N1 filters and fixture label', (
     tester,
   ) async {
     await _pumpKanji(tester);
@@ -41,23 +43,34 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey<String>('kanji_level_N5')),
+      find.byKey(const ValueKey<String>('kanji_filter_n5')),
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey<String>('kanji_level_N4')),
+      find.byKey(const ValueKey<String>('kanji_filter_n4')),
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey<String>('kanji_level_N3')),
+      find.byKey(const ValueKey<String>('kanji_filter_n3')),
       findsOneWidget,
     );
     expect(
       find.byKey(const ValueKey<String>('kanji_fixture_label')),
       findsOneWidget,
     );
-    expect(find.text('N2'), findsNothing);
-    expect(find.text('N1'), findsNothing);
+    await tester.drag(
+      find.byKey(const ValueKey<String>('kanji_filter_loaded')),
+      const Offset(-500, 0),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('kanji_filter_n2')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('kanji_filter_n1')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('search submits a character-or-meaning query', (tester) async {
@@ -79,7 +92,7 @@ void main() {
     await _pumpKanji(tester);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey<String>('kanji_level_N4')));
+    await tester.tap(find.byKey(const ValueKey<String>('kanji_filter_n4')));
     await tester.pumpAndSettle();
 
     expect(find.text('会'), findsOneWidget);
@@ -387,6 +400,9 @@ Future<GoRouter> _pumpKanji(
     ProviderScope(
       overrides: [
         kanjiRepositoryProvider.overrideWithValue(repository),
+        jlptCatalogRepositoryProvider.overrideWithValue(
+          TestJlptCatalogRepository(),
+        ),
         demoNotebookRepositoryProvider.overrideWithValue(
           demoNotebookRepository,
         ),

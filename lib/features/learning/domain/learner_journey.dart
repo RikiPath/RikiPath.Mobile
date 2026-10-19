@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 class LearnerJourneyState {
   const LearnerJourneyState({
     this.selectedLevel = JlptLevel.n4,
+    this.selectedLevelId,
     this.hasSelectedLevel = false,
     this.dailyStudyMinutes = 30,
     this.lessonProgress = const <String, LessonProgress>{},
@@ -14,6 +15,7 @@ class LearnerJourneyState {
   });
 
   final JlptLevel selectedLevel;
+  final int? selectedLevelId;
   final bool hasSelectedLevel;
   final int dailyStudyMinutes;
   final Map<String, LessonProgress> lessonProgress;
@@ -26,6 +28,8 @@ class LearnerJourneyState {
 
   LearnerJourneyState copyWith({
     JlptLevel? selectedLevel,
+    int? selectedLevelId,
+    bool clearSelectedLevelId = false,
     bool? hasSelectedLevel,
     int? dailyStudyMinutes,
     Map<String, LessonProgress>? lessonProgress,
@@ -33,6 +37,9 @@ class LearnerJourneyState {
   }) {
     return LearnerJourneyState(
       selectedLevel: selectedLevel ?? this.selectedLevel,
+      selectedLevelId: clearSelectedLevelId
+          ? null
+          : selectedLevelId ?? this.selectedLevelId,
       hasSelectedLevel:
           hasSelectedLevel ??
           (selectedLevel != null ? true : this.hasSelectedLevel),

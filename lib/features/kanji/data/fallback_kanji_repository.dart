@@ -8,12 +8,7 @@ class FallbackKanjiRepository implements KanjiRepository {
   final KanjiRepository fixture;
 
   @override
-  Future<KanjiPage> search(KanjiQuery query) async {
-    // The backend exposes only numeric JLPT IDs and no learner-facing mapping.
-    if (query.level != null) return fixture.search(query);
-
-    return remote.search(query);
-  }
+  Future<KanjiPage> search(KanjiQuery query) => remote.search(query);
 
   @override
   Future<KanjiEntry> loadDetail(String routeKey) {

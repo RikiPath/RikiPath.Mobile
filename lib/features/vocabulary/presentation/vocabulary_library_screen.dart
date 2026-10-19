@@ -5,6 +5,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_header.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
@@ -20,6 +21,7 @@ class VocabularyLibraryScreen extends ConsumerWidget {
     final state = ref.watch(vocabularyLibraryControllerProvider);
     final controller = ref.read(vocabularyLibraryControllerProvider.notifier);
     final savedKeys = ref.watch(savedVocabularyKeysProvider).value;
+    final catalog = ref.watch(jlptCatalogControllerProvider);
 
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
@@ -35,9 +37,13 @@ class VocabularyLibraryScreen extends ConsumerWidget {
           error: (_, _) => VocabularyErrorView(onRetry: controller.retry),
           data: (data) => VocabularyLibraryView(
             state: data,
+            catalog: catalog,
             savedVocabularyKeys: savedKeys ?? const <String>{},
             onSearch: controller.search,
             onFilter: controller.filterByLevel,
+            onRetryCatalog: ref
+                .read(jlptCatalogControllerProvider.notifier)
+                .retry,
             onClear: controller.clear,
             onOpenDetail: (entry) =>
                 context.push(AppRoutes.vocabularyDetail(entry.routeKey)),

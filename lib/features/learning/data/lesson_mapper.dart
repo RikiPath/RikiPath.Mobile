@@ -130,12 +130,9 @@ abstract final class LessonMapper {
     return LessonMasteryItem(title: dto.title, description: dto.description);
   }
 
-  static JlptLevel _level(String value) => switch (value) {
-    'N5' => JlptLevel.n5,
-    'N4' => JlptLevel.n4,
-    'N3' => JlptLevel.n3,
-    _ => throw FormatException('Unsupported learner JLPT level: $value'),
-  };
+  static JlptLevel _level(String value) =>
+      JlptLevel.tryParse(value) ??
+      (throw FormatException('Unsupported learner JLPT level: $value'));
 
   static LessonAvailability _availability(String value) => switch (value) {
     'available' => LessonAvailability.available,

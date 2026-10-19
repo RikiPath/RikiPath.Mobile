@@ -5,6 +5,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/kanji/application/kanji_controller.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
 import 'package:rikipath_mobile/features/kanji/presentation/widgets/kanji_library_view.dart';
@@ -31,6 +32,7 @@ class _KanjiLibraryScreenState extends ConsumerState<KanjiLibraryScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(kanjiLibraryControllerProvider);
     final controller = ref.read(kanjiLibraryControllerProvider.notifier);
+    final catalog = ref.watch(jlptCatalogControllerProvider);
 
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
@@ -46,9 +48,13 @@ class _KanjiLibraryScreenState extends ConsumerState<KanjiLibraryScreen> {
           error: (_, _) => KanjiErrorView(onRetry: controller.retry),
           data: (data) => KanjiLibraryView(
             state: data,
+            catalog: catalog,
             searchController: _searchController,
             onSearch: controller.search,
             onFilter: controller.filterByLevel,
+            onRetryCatalog: ref
+                .read(jlptCatalogControllerProvider.notifier)
+                .retry,
             onClear: () {
               _searchController.clear();
               controller.clear();

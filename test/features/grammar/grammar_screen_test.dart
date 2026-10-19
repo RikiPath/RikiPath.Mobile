@@ -10,6 +10,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/grammar/application/grammar_controller.dart';
 import 'package:rikipath_mobile/features/grammar/data/fixture_grammar_repository.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar.dart';
@@ -18,6 +19,7 @@ import 'package:rikipath_mobile/features/grammar/presentation/grammar_detail_scr
 import 'package:rikipath_mobile/features/grammar/presentation/grammar_library_screen.dart';
 
 import '../../support/test_auth_session.dart';
+import '../../support/test_jlpt_catalog.dart';
 
 void main() {
   test('Grammar routes are nested Learn-branch paths', () {
@@ -28,7 +30,7 @@ void main() {
     );
   });
 
-  testWidgets('library renders search, N5/N4/N3 filters, and fixture label', (
+  testWidgets('library renders the live N5-N1 filters and fixture label', (
     tester,
   ) async {
     await _pumpGrammar(tester);
@@ -55,8 +57,19 @@ void main() {
       find.byKey(const ValueKey<String>('grammar_fixture_label')),
       findsOneWidget,
     );
-    expect(find.text('N2'), findsNothing);
-    expect(find.text('N1'), findsNothing);
+    await tester.drag(
+      find.byKey(const ValueKey<String>('grammar_filter_loaded')),
+      const Offset(-500, 0),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('grammar_filter_n2')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('grammar_filter_n1')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('search submits a backend-compatible keyword query', (
@@ -521,6 +534,9 @@ Future<GoRouter> _pumpGrammar(
     ProviderScope(
       overrides: [
         grammarRepositoryProvider.overrideWithValue(repository),
+        jlptCatalogRepositoryProvider.overrideWithValue(
+          TestJlptCatalogRepository(),
+        ),
         if (bookmarkRepository != null)
           grammarBookmarkRepositoryProvider.overrideWithValue(
             bookmarkRepository,

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
 
 class LearningHomeView extends StatelessWidget {
   const LearningHomeView({
     required this.snapshot,
+    required this.catalog,
     required this.onSelectLevel,
+    required this.onRetryCatalog,
     required this.onOpenRoadmap,
     required this.onOpenLibrary,
     required this.onOpenLesson,
@@ -15,7 +19,9 @@ class LearningHomeView extends StatelessWidget {
   });
 
   final LearningSnapshot snapshot;
-  final ValueChanged<JlptLevel> onSelectLevel;
+  final AsyncValue<List<JlptLevelCatalogItem>> catalog;
+  final ValueChanged<JlptLevelCatalogItem> onSelectLevel;
+  final VoidCallback onRetryCatalog;
   final VoidCallback onOpenRoadmap;
   final VoidCallback onOpenLibrary;
   final VoidCallback onOpenLesson;
@@ -34,8 +40,10 @@ class LearningHomeView extends StatelessWidget {
         const _LearningSectionTabs(),
         const SizedBox(height: AppSpacing.space3),
         _JlptLevelSelector(
+          catalog: catalog,
           selected: snapshot.hasSelectedLevel ? snapshot.jlptTarget : null,
           onSelected: onSelectLevel,
+          onRetry: onRetryCatalog,
         ),
         if (!snapshot.hasSelectedLevel) ...[
           const SizedBox(height: AppSpacing.space3),
@@ -87,10 +95,17 @@ class LearningHomeView extends StatelessWidget {
 }
 
 class _JlptLevelSelector extends StatelessWidget {
-  const _JlptLevelSelector({required this.selected, required this.onSelected});
+  const _JlptLevelSelector({
+    required this.catalog,
+    required this.selected,
+    required this.onSelected,
+    required this.onRetry,
+  });
 
+  final AsyncValue<List<JlptLevelCatalogItem>> catalog;
   final JlptLevel? selected;
-  final ValueChanged<JlptLevel> onSelected;
+  final ValueChanged<JlptLevelCatalogItem> onSelected;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -109,18 +124,44 @@ class _JlptLevelSelector extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.space2),
-          Wrap(
-            spacing: AppSpacing.space2,
-            runSpacing: AppSpacing.space1,
-            children: [
-              for (final level in JlptLevel.values)
-                ChoiceChip(
-                  key: ValueKey<String>('learning_level_${level.name}'),
-                  label: Text(level.label),
-                  selected: selected == level,
-                  onSelected: (_) => onSelected(level),
+          catalog.when(
+            loading: () => const Center(
+              child: SizedBox.square(
+                dimension: 22,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+            error: (_, _) => Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.l10n.jlptCatalogLoadFailed,
+                    style: AppTypography.validationText,
+                  ),
                 ),
-            ],
+                TextButton(onPressed: onRetry, child: Text(context.l10n.retry)),
+              ],
+            ),
+            data: (levels) => levels.isEmpty
+                ? Text(
+                    context.l10n.jlptCatalogEmpty,
+                    style: AppTypography.metadata,
+                  )
+                : Wrap(
+                    spacing: AppSpacing.space2,
+                    runSpacing: AppSpacing.space1,
+                    children: [
+                      for (final item in levels)
+                        ChoiceChip(
+                          key: ValueKey<String>(
+                            'learning_level_${item.level.name}',
+                          ),
+                          label: Text(item.code),
+                          selected: selected == item.level,
+                          onSelected: (_) => onSelected(item),
+                        ),
+                    ],
+                  ),
           ),
         ],
       ),

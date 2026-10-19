@@ -10,6 +10,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_toast_host.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/data/fixture_notebook_repository.dart';
@@ -23,6 +24,7 @@ import 'package:rikipath_mobile/features/vocabulary/presentation/vocabulary_deta
 import 'package:rikipath_mobile/features/vocabulary/presentation/vocabulary_library_screen.dart';
 
 import '../../support/test_auth_session.dart';
+import '../../support/test_jlpt_catalog.dart';
 
 void main() {
   test('vocabulary routes are nested Learn-branch paths', () {
@@ -47,9 +49,14 @@ void main() {
     expect(find.text('JLPT N5'), findsOneWidget);
     expect(find.text('JLPT N4'), findsOneWidget);
     expect(find.text('JLPT N3'), findsOneWidget);
+    await tester.drag(
+      find.byKey(const ValueKey<String>('vocabulary_filter_loaded')),
+      const Offset(-500, 0),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('JLPT N2'), findsOneWidget);
+    expect(find.text('JLPT N1'), findsOneWidget);
     expect(find.text('Nội dung bổ sung'), findsOneWidget);
-    expect(find.text('N1'), findsNothing);
-    expect(find.text('N2'), findsNothing);
 
     final navigation = tester.widget<RikiBottomNavigationBar>(
       find.byType(RikiBottomNavigationBar),
@@ -398,6 +405,9 @@ Future<GoRouter> _pumpVocabulary(
     ProviderScope(
       overrides: [
         vocabularyRepositoryProvider.overrideWithValue(repository),
+        jlptCatalogRepositoryProvider.overrideWithValue(
+          TestJlptCatalogRepository(),
+        ),
         notebookRepositoryProvider.overrideWithValue(
           FixtureNotebookRepository(entries: const {}),
         ),

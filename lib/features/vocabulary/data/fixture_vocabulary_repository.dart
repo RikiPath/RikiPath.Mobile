@@ -19,7 +19,7 @@ class FixtureVocabularyRepository implements VocabularyRepository {
     final filtered = entries
         .where((entry) {
           final matchesLevel =
-              query.level == null || entry.level == query.level;
+              query.level == null || entry.level == query.level!.level;
           final matchesKeyword =
               keyword.isEmpty ||
               entry.word.toLowerCase().contains(keyword) ||

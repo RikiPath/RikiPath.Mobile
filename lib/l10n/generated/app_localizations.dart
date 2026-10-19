@@ -1685,8 +1685,20 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingJlptHelper.
   ///
   /// In vi, this message translates to:
-  /// **'Chọn N5, N4 hoặc N3 để tiếp tục.'**
+  /// **'Chọn một cấp độ JLPT để tiếp tục.'**
   String get onboardingJlptHelper;
+
+  /// No description provided for @jlptCatalogLoadFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể tải danh mục cấp độ JLPT.'**
+  String get jlptCatalogLoadFailed;
+
+  /// No description provided for @jlptCatalogEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hiện chưa có cấp độ JLPT khả dụng.'**
+  String get jlptCatalogEmpty;
 
   /// No description provided for @jlptN5Description.
   ///
@@ -1705,6 +1717,18 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Hướng tới trình độ trung cấp'**
   String get jlptN3Description;
+
+  /// No description provided for @jlptN2Description.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phát triển năng lực tiếng Nhật nâng cao'**
+  String get jlptN2Description;
+
+  /// No description provided for @jlptN1Description.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hướng tới năng lực tiếng Nhật chuyên sâu'**
+  String get jlptN1Description;
 
   /// No description provided for @backToGoalSelection.
   ///
@@ -4028,6 +4052,18 @@ abstract class AppLocalizations {
   /// **'Đề thi thử này hiện không khả dụng.'**
   String get mockTestUnavailable;
 
+  /// No description provided for @mockTargetLevelRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hãy chọn cấp độ mục tiêu trong hồ sơ để xem đề thi phù hợp.'**
+  String get mockTargetLevelRequired;
+
+  /// No description provided for @mockNoTestsAvailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hiện chưa có đề thi thử được phát hành cho cấp độ mục tiêu của bạn.'**
+  String get mockNoTestsAvailable;
+
   /// No description provided for @leaveMockTitle.
   ///
   /// In vi, this message translates to:
@@ -4061,7 +4097,7 @@ abstract class AppLocalizations {
   /// No description provided for @submitMockMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Bạn có thể nộp dù vẫn còn câu chưa trả lời. Điểm được tính cục bộ trên thiết bị.'**
+  /// **'Bạn có thể nộp dù vẫn còn câu chưa trả lời. Backend sẽ chấm điểm và hoàn tất lượt thi.'**
   String get submitMockMessage;
 
   /// No description provided for @submitAction.
@@ -4069,6 +4105,18 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Nộp bài'**
   String get submitAction;
+
+  /// No description provided for @mockStarting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang bắt đầu...'**
+  String get mockStarting;
+
+  /// No description provided for @mockSubmitting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang nộp bài...'**
+  String get mockSubmitting;
 
   /// No description provided for @mockMinutes.
   ///
@@ -4087,6 +4135,60 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đề luyện tập được chấm trên thiết bị và không phải kết quả JLPT chính thức.'**
   String get mockLocalScoringNotice;
+
+  /// No description provided for @mockBackendScoringNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thời gian và điểm số được xác định bởi hệ thống RikiPath.'**
+  String get mockBackendScoringNotice;
+
+  /// No description provided for @mockMediaAvailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu hỏi này có nội dung media từ đề thi.'**
+  String get mockMediaAvailable;
+
+  /// No description provided for @mockActionFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể hoàn tất thao tác'**
+  String get mockActionFailed;
+
+  /// No description provided for @mockExpired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lượt thi đã hết thời gian theo đồng hồ của hệ thống.'**
+  String get mockExpired;
+
+  /// No description provided for @mockAlreadyCompleted.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lượt thi này đã được nộp trước đó.'**
+  String get mockAlreadyCompleted;
+
+  /// No description provided for @mockNetworkUncertain.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết nối bị gián đoạn nên chưa thể xác nhận trạng thái nộp bài. Hãy thử tải lại kết quả.'**
+  String get mockNetworkUncertain;
+
+  /// No description provided for @mockAttemptConflict.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dữ liệu lượt thi không còn hợp lệ. Hãy quay lại và bắt đầu một lượt mới.'**
+  String get mockAttemptConflict;
+
+  /// No description provided for @mockValidationFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hệ thống không chấp nhận dữ liệu bài làm. Vui lòng kiểm tra và thử lại.'**
+  String get mockValidationFailed;
+
+  /// No description provided for @mockSubmitFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xảy ra lỗi khi xử lý lượt thi. Vui lòng thử lại.'**
+  String get mockSubmitFailed;
 
   /// No description provided for @startMockTest.
   ///
@@ -4136,6 +4238,12 @@ abstract class AppLocalizations {
   /// **'Kết quả này dùng để luyện tập và không phải điểm JLPT chính thức.'**
   String get mockLocalResultNotice;
 
+  /// No description provided for @mockBackendResultNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả này được chấm và trả về từ hệ thống RikiPath.'**
+  String get mockBackendResultNotice;
+
   /// No description provided for @sectionBreakdown.
   ///
   /// In vi, this message translates to:
@@ -4183,6 +4291,12 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Chưa trả lời'**
   String get notAnswered;
+
+  /// No description provided for @mockAnswerUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không có dữ liệu'**
+  String get mockAnswerUnavailable;
 
   /// No description provided for @practiceLoadingTitle.
   ///

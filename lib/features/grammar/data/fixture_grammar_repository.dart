@@ -16,7 +16,7 @@ class FixtureGrammarRepository implements GrammarRepository {
     final filtered = entries
         .where((entry) {
           final matchesLevel =
-              query.level == null || entry.level == query.level;
+              query.level == null || entry.level == query.level!.level;
           final matchesKeyword =
               keyword.isEmpty ||
               entry.title.toLowerCase().contains(keyword) ||

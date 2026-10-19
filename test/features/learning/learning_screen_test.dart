@@ -10,6 +10,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_repository.dart';
@@ -19,6 +20,7 @@ import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart
 import 'package:rikipath_mobile/features/learning/presentation/learning_roadmap_screen.dart';
 
 import '../../support/test_auth_session.dart';
+import '../../support/test_jlpt_catalog.dart';
 
 void main() {
   testWidgets('/learn renders the approved Learning Home hierarchy', (
@@ -41,11 +43,13 @@ void main() {
     expect(find.text('Thư viện'), findsWidgets);
   });
 
-  test('learning scope remains typed as N5, N4, and N3 only', () {
+  test('learning scope supports the complete JLPT catalog', () {
     expect(JlptLevel.values, <JlptLevel>[
       JlptLevel.n5,
       JlptLevel.n4,
       JlptLevel.n3,
+      JlptLevel.n2,
+      JlptLevel.n1,
     ]);
     expect(FixtureLearningRepository.snapshot.jlptTarget, JlptLevel.n4);
     expect(AppRoutes.learnRoadmap, '/learn/roadmap');
@@ -242,7 +246,12 @@ Future<GoRouter> _pumpLearning(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [learningRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        learningRepositoryProvider.overrideWithValue(repository),
+        jlptCatalogRepositoryProvider.overrideWithValue(
+          TestJlptCatalogRepository(),
+        ),
+      ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );

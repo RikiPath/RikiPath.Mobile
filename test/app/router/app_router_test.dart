@@ -19,6 +19,7 @@ import 'package:rikipath_mobile/features/auth/presentation/register_screen.dart'
 import 'package:rikipath_mobile/features/auth/presentation/splash_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/update_email_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/verify_email_screen.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
@@ -38,6 +39,7 @@ import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 
 import '../../support/test_auth_session.dart';
+import '../../support/test_jlpt_catalog.dart';
 import '../../support/test_jwt.dart';
 
 void main() {
@@ -576,6 +578,9 @@ Future<GoRouter> _pumpRouter(
     ProviderScope(
       overrides: [
         authSessionControllerProvider.overrideWithValue(session),
+        jlptCatalogRepositoryProvider.overrideWithValue(
+          TestJlptCatalogRepository(),
+        ),
         userProfileRepositoryProvider.overrideWithValue(profileRepository),
         mentorRepositoryProvider.overrideWithValue(mentorRepository),
       ],

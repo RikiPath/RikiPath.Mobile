@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/core/errors/api_error_mapper.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/api_vocabulary_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/fallback_vocabulary_repository.dart';
 import 'package:rikipath_mobile/features/vocabulary/data/fixture_vocabulary_repository.dart';
@@ -73,15 +74,18 @@ void main() {
       },
     );
 
-    test('does not invent a numeric JLPT level ID', () async {
-      final client = _RecordingApiClient(const <String, Object?>{});
+    test('sends the real JLPT level ID from the live catalog', () async {
+      final client = _RecordingApiClient(<String, Object?>{
+        'POST ${VocabularyApiPaths.search}': _searchEnvelope(
+          items: const <Object?>[],
+          totalCount: 0,
+          totalPages: 0,
+        ),
+      });
       final repository = ApiVocabularyRepository(client);
 
-      await expectLater(
-        repository.search(const VocabularyQuery(level: JlptLevel.n4)),
-        throwsA(isA<VocabularyJlptMappingUnavailableException>()),
-      );
-      expect(client.calls, isEmpty);
+      await repository.search(VocabularyQuery(level: _level(42, JlptLevel.n4)));
+      expect(client.lastData, containsPair('jlptLevelId', 42));
     });
   });
 
@@ -105,22 +109,19 @@ void main() {
       expect(search.items.single.word, '改善');
     });
 
-    test('fixture filtering remains limited to N5, N4, and N3', () async {
+    test('fixture filtering remains isolated to its N5/N4/N3 data', () async {
       const repository = FixtureVocabularyRepository();
       final levels = <JlptLevel>{};
 
-      for (final level in JlptLevel.values) {
-        final page = await repository.search(VocabularyQuery(level: level));
+      for (final level in const [JlptLevel.n5, JlptLevel.n4, JlptLevel.n3]) {
+        final page = await repository.search(
+          VocabularyQuery(level: _level(level.index + 1, level)),
+        );
         expect(page.items, isNotEmpty);
         levels.addAll(page.items.map((entry) => entry.level));
         expect(page.items.every((entry) => entry.level == level), isTrue);
       }
 
-      expect(JlptLevel.values, <JlptLevel>[
-        JlptLevel.n5,
-        JlptLevel.n4,
-        JlptLevel.n3,
-      ]);
       expect(levels, <JlptLevel>{JlptLevel.n5, JlptLevel.n4, JlptLevel.n3});
       expect(
         FixtureVocabularyRepository.entries.every(
@@ -181,6 +182,13 @@ void main() {
     });
   });
 }
+
+JlptLevelCatalogItem _level(int id, JlptLevel level) => JlptLevelCatalogItem(
+  id: id,
+  code: level.label,
+  level: level,
+  sortOrder: id,
+);
 
 Map<String, Object?> _searchEnvelope({
   required List<Object?> items,

@@ -11,12 +11,7 @@ class FallbackGrammarRepository implements GrammarRepository {
   final GrammarRepository fixture;
 
   @override
-  Future<GrammarPage> search(GrammarQuery query) async {
-    // No endpoint exposes the numeric ID for an N5/N4/N3 label.
-    if (query.level != null) return fixture.search(query);
-
-    return remote.search(query);
-  }
+  Future<GrammarPage> search(GrammarQuery query) => remote.search(query);
 
   @override
   Future<GrammarEntry> loadDetail(String routeKey) {

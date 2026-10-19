@@ -895,7 +895,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mostPopular => 'Phổ biến nhất';
 
   @override
-  String get onboardingJlptHelper => 'Chọn N5, N4 hoặc N3 để tiếp tục.';
+  String get onboardingJlptHelper => 'Chọn một cấp độ JLPT để tiếp tục.';
+
+  @override
+  String get jlptCatalogLoadFailed => 'Không thể tải danh mục cấp độ JLPT.';
+
+  @override
+  String get jlptCatalogEmpty => 'Hiện chưa có cấp độ JLPT khả dụng.';
 
   @override
   String get jlptN5Description => 'Nền tảng tiếng Nhật cơ bản';
@@ -905,6 +911,12 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get jlptN3Description => 'Hướng tới trình độ trung cấp';
+
+  @override
+  String get jlptN2Description => 'Phát triển năng lực tiếng Nhật nâng cao';
+
+  @override
+  String get jlptN1Description => 'Hướng tới năng lực tiếng Nhật chuyên sâu';
 
   @override
   String get backToGoalSelection => 'Quay lại bước chọn mục tiêu';
@@ -2269,6 +2281,14 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mockTestUnavailable => 'Đề thi thử này hiện không khả dụng.';
 
   @override
+  String get mockTargetLevelRequired =>
+      'Hãy chọn cấp độ mục tiêu trong hồ sơ để xem đề thi phù hợp.';
+
+  @override
+  String get mockNoTestsAvailable =>
+      'Hiện chưa có đề thi thử được phát hành cho cấp độ mục tiêu của bạn.';
+
+  @override
   String get leaveMockTitle => 'Rời khỏi bài thi?';
 
   @override
@@ -2286,10 +2306,16 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get submitMockMessage =>
-      'Bạn có thể nộp dù vẫn còn câu chưa trả lời. Điểm được tính cục bộ trên thiết bị.';
+      'Bạn có thể nộp dù vẫn còn câu chưa trả lời. Backend sẽ chấm điểm và hoàn tất lượt thi.';
 
   @override
   String get submitAction => 'Nộp bài';
+
+  @override
+  String get mockStarting => 'Đang bắt đầu...';
+
+  @override
+  String get mockSubmitting => 'Đang nộp bài...';
 
   @override
   String mockMinutes(int minutes) {
@@ -2304,6 +2330,39 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get mockLocalScoringNotice =>
       'Đề luyện tập được chấm trên thiết bị và không phải kết quả JLPT chính thức.';
+
+  @override
+  String get mockBackendScoringNotice =>
+      'Thời gian và điểm số được xác định bởi hệ thống RikiPath.';
+
+  @override
+  String get mockMediaAvailable => 'Câu hỏi này có nội dung media từ đề thi.';
+
+  @override
+  String get mockActionFailed => 'Chưa thể hoàn tất thao tác';
+
+  @override
+  String get mockExpired =>
+      'Lượt thi đã hết thời gian theo đồng hồ của hệ thống.';
+
+  @override
+  String get mockAlreadyCompleted => 'Lượt thi này đã được nộp trước đó.';
+
+  @override
+  String get mockNetworkUncertain =>
+      'Kết nối bị gián đoạn nên chưa thể xác nhận trạng thái nộp bài. Hãy thử tải lại kết quả.';
+
+  @override
+  String get mockAttemptConflict =>
+      'Dữ liệu lượt thi không còn hợp lệ. Hãy quay lại và bắt đầu một lượt mới.';
+
+  @override
+  String get mockValidationFailed =>
+      'Hệ thống không chấp nhận dữ liệu bài làm. Vui lòng kiểm tra và thử lại.';
+
+  @override
+  String get mockSubmitFailed =>
+      'Đã xảy ra lỗi khi xử lý lượt thi. Vui lòng thử lại.';
 
   @override
   String get startMockTest => 'Bắt đầu làm bài';
@@ -2333,6 +2392,10 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get mockLocalResultNotice =>
       'Kết quả này dùng để luyện tập và không phải điểm JLPT chính thức.';
+
+  @override
+  String get mockBackendResultNotice =>
+      'Kết quả này được chấm và trả về từ hệ thống RikiPath.';
 
   @override
   String get sectionBreakdown => 'Kết quả theo phần';
@@ -2365,6 +2428,9 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get notAnswered => 'Chưa trả lời';
+
+  @override
+  String get mockAnswerUnavailable => 'Không có dữ liệu';
 
   @override
   String get practiceLoadingTitle =>

@@ -3,7 +3,7 @@ import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/utils/stable_merge.dart';
-import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/grammar/data/api_grammar_repository.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar_repository.dart';
@@ -43,7 +43,7 @@ class GrammarLibraryController extends AsyncNotifier<GrammarLibraryState> {
     );
   }
 
-  Future<void> filterByLevel(JlptLevel? level) {
+  Future<void> filterByLevel(JlptLevelCatalogItem? level) {
     final current = state.value;
     return _replace(
       GrammarQuery(

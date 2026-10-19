@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/core/errors/api_error_mapper.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/kanji/data/api_kanji_repository.dart';
 import 'package:rikipath_mobile/features/kanji/data/fallback_kanji_repository.dart';
 import 'package:rikipath_mobile/features/kanji/data/fixture_kanji_repository.dart';
@@ -54,8 +55,9 @@ void main() {
       expect(() => KanjiCardDto.fromJson(json), throwsFormatException);
     });
 
-    test('rejects JLPT levels outside the mobile N5/N4/N3 scope', () {
-      expect(() => KanjiMapper.parseLevel('N2'), throwsFormatException);
+    test('supports the complete live JLPT catalog scope', () {
+      expect(KanjiMapper.parseLevel('N2'), JlptLevel.n2);
+      expect(KanjiMapper.parseLevel('N1'), JlptLevel.n1);
     });
 
     test('accepts only absolute HTTP(S) media URLs', () {
@@ -128,15 +130,20 @@ void main() {
       expect(entry.source, KanjiDataSource.remote);
     });
 
-    test('does not invent numeric JLPT IDs', () async {
-      final client = _RecordingApiClient(const <String, Object?>{});
+    test('sends the real JLPT level ID from the live catalog', () async {
+      final client = _RecordingApiClient(<String, Object?>{
+        'POST ${KanjiApiPaths.search}': _searchEnvelope(
+          items: const <Object?>[],
+          page: 1,
+          pageSize: 20,
+          totalCount: 0,
+          totalPages: 0,
+        ),
+      });
       final repository = ApiKanjiRepository(client);
 
-      await expectLater(
-        repository.search(const KanjiQuery(level: JlptLevel.n4)),
-        throwsA(isA<KanjiJlptMappingUnavailableException>()),
-      );
-      expect(client.calls, isEmpty);
+      await repository.search(KanjiQuery(level: _level(42, JlptLevel.n4)));
+      expect(client.lastData, containsPair('jlptLevelId', 42));
     });
 
     test('uses exact notebook list and bookmark contracts', () async {
@@ -202,24 +209,24 @@ void main() {
       expect(readingOnly.items, isEmpty);
     });
 
-    test('fixture supports N5/N4/N3 filtering and stroke ranges', () async {
-      const repository = FixtureKanjiRepository();
+    test(
+      'fixture keeps its N5/N4/N3 data and stroke ranges isolated',
+      () async {
+        const repository = FixtureKanjiRepository();
 
-      for (final level in JlptLevel.values) {
-        final page = await repository.search(KanjiQuery(level: level));
-        expect(page.items, isNotEmpty);
-        expect(page.items.every((entry) => entry.level == level), isTrue);
-      }
-      final range = await repository.search(
-        const KanjiQuery(minStrokeCount: 18, maxStrokeCount: 18),
-      );
-      expect(range.items.single.character, '験');
-      expect(JlptLevel.values, <JlptLevel>[
-        JlptLevel.n5,
-        JlptLevel.n4,
-        JlptLevel.n3,
-      ]);
-    });
+        for (final level in const [JlptLevel.n5, JlptLevel.n4, JlptLevel.n3]) {
+          final page = await repository.search(
+            KanjiQuery(level: _level(level.index + 1, level)),
+          );
+          expect(page.items, isNotEmpty);
+          expect(page.items.every((entry) => entry.level == level), isTrue);
+        }
+        final range = await repository.search(
+          const KanjiQuery(minStrokeCount: 18, maxStrokeCount: 18),
+        );
+        expect(range.items.single.character, '験');
+      },
+    );
 
     test('fixture paginates and never reuses backend IDs', () async {
       const repository = FixtureKanjiRepository();
@@ -241,7 +248,7 @@ void main() {
     });
 
     test(
-      'fallback preserves remote empty results and isolates JLPT fixtures',
+      'fallback preserves remote results for catalog-backed filters',
       () async {
         final remote = _FakeKanjiRepository(
           page: _emptyPage(KanjiDataSource.remote),
@@ -253,17 +260,24 @@ void main() {
 
         final emptyFallback = await repository.search(const KanjiQuery());
         final levelFallback = await repository.search(
-          const KanjiQuery(level: JlptLevel.n4),
+          KanjiQuery(level: _level(42, JlptLevel.n4)),
         );
 
         expect(emptyFallback.source, KanjiDataSource.remote);
         expect(emptyFallback.items, isEmpty);
-        expect(levelFallback.source, KanjiDataSource.fixture);
-        expect(remote.searchCalls, 1);
+        expect(levelFallback.source, KanjiDataSource.remote);
+        expect(remote.searchCalls, 2);
       },
     );
   });
 }
+
+JlptLevelCatalogItem _level(int id, JlptLevel level) => JlptLevelCatalogItem(
+  id: id,
+  code: level.label,
+  level: level,
+  sortOrder: id,
+);
 
 Map<String, Object?> _searchEnvelope({
   required List<Object?> items,

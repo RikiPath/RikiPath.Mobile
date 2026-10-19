@@ -28,7 +28,7 @@ void main() {
     );
   });
 
-  test('lesson fixtures remain within the N5, N4, and N3 scope', () async {
+  test('lesson presentation supports the complete JLPT catalog', () async {
     const repository = FixtureLessonRepository();
     final current = await repository.loadLesson(
       FixtureLessonRepository.lesson19RouteId,
@@ -41,6 +41,8 @@ void main() {
       JlptLevel.n5,
       JlptLevel.n4,
       JlptLevel.n3,
+      JlptLevel.n2,
+      JlptLevel.n1,
     ]);
     expect(<JlptLevel>{current.level, locked.level}, {JlptLevel.n4});
   });

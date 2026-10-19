@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
+import 'package:rikipath_mobile/features/catalog/presentation/jlpt_catalog_filter_chips.dart';
 import 'package:rikipath_mobile/features/kanji/application/kanji_controller.dart';
 import 'package:rikipath_mobile/features/kanji/domain/kanji.dart';
 import 'package:rikipath_mobile/features/kanji/presentation/widgets/kanji_state_views.dart';
@@ -9,9 +12,11 @@ import 'package:rikipath_mobile/features/kanji/presentation/widgets/kanji_state_
 class KanjiLibraryView extends StatelessWidget {
   const KanjiLibraryView({
     required this.state,
+    required this.catalog,
     required this.searchController,
     required this.onSearch,
     required this.onFilter,
+    required this.onRetryCatalog,
     required this.onClear,
     required this.onOpenDetail,
     required this.onPlayAudio,
@@ -20,9 +25,11 @@ class KanjiLibraryView extends StatelessWidget {
   });
 
   final KanjiLibraryState state;
+  final AsyncValue<List<JlptLevelCatalogItem>> catalog;
   final TextEditingController searchController;
   final ValueChanged<String> onSearch;
-  final ValueChanged<JlptLevel?> onFilter;
+  final ValueChanged<JlptLevelCatalogItem?> onFilter;
+  final VoidCallback onRetryCatalog;
   final VoidCallback onClear;
   final ValueChanged<KanjiEntry> onOpenDetail;
   final ValueChanged<KanjiEntry> onPlayAudio;
@@ -56,29 +63,15 @@ class KanjiLibraryView extends StatelessWidget {
             ),
           ),
         ),
-        if (state.page.source == KanjiDataSource.fixture) ...[
-          const SizedBox(height: AppSpacing.space3),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _LevelChip(
-                  label: context.l10n.all,
-                  selected: state.query.level == null,
-                  onSelected: () => onFilter(null),
-                ),
-                for (final level in JlptLevel.values) ...[
-                  const SizedBox(width: AppSpacing.space2),
-                  _LevelChip(
-                    label: level.label,
-                    selected: state.query.level == level,
-                    onSelected: () => onFilter(level),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
+        const SizedBox(height: AppSpacing.space3),
+        JlptCatalogFilterChips(
+          catalog: catalog,
+          selected: state.query.level,
+          onSelected: onFilter,
+          onRetry: onRetryCatalog,
+          keyPrefix: 'kanji_filter',
+          includeJlptPrefix: false,
+        ),
         const SizedBox(height: AppSpacing.space4),
         Row(
           children: [
@@ -145,40 +138,6 @@ class KanjiLibraryView extends StatelessWidget {
                   ),
           ),
       ],
-    );
-  }
-}
-
-class _LevelChip extends StatelessWidget {
-  const _LevelChip({
-    required this.label,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilterChip(
-      key: ValueKey<String>('kanji_level_$label'),
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onSelected(),
-      showCheckmark: false,
-      selectedColor: AppColors.brandTint,
-      backgroundColor: AppColors.surface,
-      side: BorderSide(
-        color: selected ? AppColors.brandPrimary : AppColors.border,
-      ),
-      labelStyle: AppTypography.badgeText.copyWith(
-        color: selected
-            ? AppColors.brandPrimary
-            : AppColors.learnerTextSecondary,
-        fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-      ),
     );
   }
 }

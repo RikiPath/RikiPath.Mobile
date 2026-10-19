@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
+import 'package:rikipath_mobile/features/catalog/presentation/jlpt_catalog_filter_chips.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/widgets/vocabulary_state_views.dart';
@@ -9,9 +12,11 @@ import 'package:rikipath_mobile/features/vocabulary/presentation/widgets/vocabul
 class VocabularyLibraryView extends StatefulWidget {
   const VocabularyLibraryView({
     required this.state,
+    required this.catalog,
     required this.savedVocabularyKeys,
     required this.onSearch,
     required this.onFilter,
+    required this.onRetryCatalog,
     required this.onClear,
     required this.onOpenDetail,
     required this.onPlayAudio,
@@ -20,9 +25,11 @@ class VocabularyLibraryView extends StatefulWidget {
   });
 
   final VocabularyLibraryState state;
+  final AsyncValue<List<JlptLevelCatalogItem>> catalog;
   final Set<String> savedVocabularyKeys;
   final ValueChanged<String> onSearch;
-  final ValueChanged<JlptLevel?> onFilter;
+  final ValueChanged<JlptLevelCatalogItem?> onFilter;
+  final VoidCallback onRetryCatalog;
   final VoidCallback onClear;
   final ValueChanged<VocabularyEntry> onOpenDetail;
   final ValueChanged<VocabularyEntry> onPlayAudio;
@@ -90,33 +97,13 @@ class _VocabularyLibraryViewState extends State<VocabularyLibraryView> {
             ),
           ),
         ),
-        if (state.page.source == VocabularyDataSource.fixture)
-          SizedBox(
-            height: 44,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.space4,
-              ),
-              children: [
-                _LevelFilterChip(
-                  key: const ValueKey<String>('vocabulary_filter_all'),
-                  label: context.l10n.all,
-                  selected: state.query.level == null,
-                  onSelected: () => widget.onFilter(null),
-                ),
-                for (final level in JlptLevel.values) ...[
-                  const SizedBox(width: AppSpacing.space2),
-                  _LevelFilterChip(
-                    key: ValueKey<String>('vocabulary_filter_${level.name}'),
-                    label: 'JLPT ${level.label}',
-                    selected: state.query.level == level,
-                    onSelected: () => widget.onFilter(level),
-                  ),
-                ],
-              ],
-            ),
-          ),
+        JlptCatalogFilterChips(
+          catalog: widget.catalog,
+          selected: state.query.level,
+          onSelected: widget.onFilter,
+          onRetry: widget.onRetryCatalog,
+          keyPrefix: 'vocabulary_filter',
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.space4,
@@ -194,39 +181,6 @@ class _VocabularyLibraryViewState extends State<VocabularyLibraryView> {
                 ),
         ),
       ],
-    );
-  }
-}
-
-class _LevelFilterChip extends StatelessWidget {
-  const _LevelFilterChip({
-    required this.label,
-    required this.selected,
-    required this.onSelected,
-    super.key,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      showCheckmark: false,
-      onSelected: (_) => onSelected(),
-      selectedColor: AppColors.brandTint,
-      backgroundColor: AppColors.surface,
-      side: BorderSide(
-        color: selected ? AppColors.brandPrimary : AppColors.border,
-      ),
-      labelStyle: AppTypography.badgeText.copyWith(
-        color: selected ? AppColors.brandPrimary : AppColors.learnerTextPrimary,
-        fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-        fontSize: 12,
-      ),
     );
   }
 }

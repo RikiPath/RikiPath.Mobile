@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 
 final onboardingControllerProvider =
     NotifierProvider<OnboardingController, OnboardingState>(
@@ -27,11 +27,15 @@ class OnboardingState {
     this.currentStep = OnboardingStep.jlptTarget,
     this.selectedJlptLevel,
     this.selectedStudyTime,
+    this.isSubmitting = false,
+    this.submissionFailed = false,
   });
 
   final OnboardingStep currentStep;
-  final JlptLevel? selectedJlptLevel;
+  final JlptLevelCatalogItem? selectedJlptLevel;
   final DailyStudyTime? selectedStudyTime;
+  final bool isSubmitting;
+  final bool submissionFailed;
 
   bool get canContinue => selectedJlptLevel != null;
   bool get canComplete =>
@@ -39,13 +43,17 @@ class OnboardingState {
 
   OnboardingState copyWith({
     OnboardingStep? currentStep,
-    JlptLevel? selectedJlptLevel,
+    JlptLevelCatalogItem? selectedJlptLevel,
     DailyStudyTime? selectedStudyTime,
+    bool? isSubmitting,
+    bool? submissionFailed,
   }) {
     return OnboardingState(
       currentStep: currentStep ?? this.currentStep,
       selectedJlptLevel: selectedJlptLevel ?? this.selectedJlptLevel,
       selectedStudyTime: selectedStudyTime ?? this.selectedStudyTime,
+      isSubmitting: isSubmitting ?? this.isSubmitting,
+      submissionFailed: submissionFailed ?? this.submissionFailed,
     );
   }
 }
@@ -54,7 +62,7 @@ class OnboardingController extends Notifier<OnboardingState> {
   @override
   OnboardingState build() => const OnboardingState();
 
-  void selectJlptLevel(JlptLevel level) {
+  void selectJlptLevel(JlptLevelCatalogItem level) {
     state = state.copyWith(selectedJlptLevel: level);
   }
 
@@ -69,7 +77,20 @@ class OnboardingController extends Notifier<OnboardingState> {
 
   void completeLocally() {
     if (!state.canComplete) return;
-    state = state.copyWith(currentStep: OnboardingStep.complete);
+    state = state.copyWith(
+      currentStep: OnboardingStep.complete,
+      isSubmitting: false,
+      submissionFailed: false,
+    );
+  }
+
+  void startSubmission() {
+    if (!state.canComplete || state.isSubmitting) return;
+    state = state.copyWith(isSubmitting: true, submissionFailed: false);
+  }
+
+  void failSubmission() {
+    state = state.copyWith(isSubmitting: false, submissionFailed: true);
   }
 
   void goBack() {

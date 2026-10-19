@@ -339,14 +339,15 @@ class FixtureLessonRepository implements LessonRepository {
 
   static String _routeForLevel(String routeId, JlptLevel level) {
     return routeId.replaceFirst(
-      RegExp(r'^fixture-n[345]-'),
+      RegExp(r'^fixture-n[1-5]-'),
       'fixture-${level.name}-',
     );
   }
 
   static JlptLevel _levelFromRoute(String routeId) {
-    if (routeId.startsWith('fixture-n5-')) return JlptLevel.n5;
-    if (routeId.startsWith('fixture-n3-')) return JlptLevel.n3;
+    for (final level in JlptLevel.values) {
+      if (routeId.startsWith('fixture-${level.name}-')) return level;
+    }
     return JlptLevel.n4;
   }
 }

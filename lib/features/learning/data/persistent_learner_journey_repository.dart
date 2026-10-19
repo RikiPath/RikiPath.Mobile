@@ -23,6 +23,7 @@ class PersistentLearnerJourneyRepository implements LearnerJourneyRepository {
       throw const FormatException('Learner journey must be a JSON object.');
     }
     final levelName = decoded['selectedLevel'];
+    final selectedLevelIdValue = decoded['selectedLevelId'];
     final selectedLevel = JlptLevel.values
         .where((level) => level.name == levelName)
         .firstOrNull;
@@ -33,6 +34,8 @@ class PersistentLearnerJourneyRepository implements LearnerJourneyRepository {
     final dailyStudyMinutes = decoded['dailyStudyMinutes'];
     final encodedProgress = decoded['lessonProgress'];
     if (selectedLevel == null ||
+        (selectedLevelIdValue != null &&
+            (selectedLevelIdValue is! int || selectedLevelIdValue <= 0)) ||
         dailyStudyMinutes is! int ||
         dailyStudyMinutes <= 0 ||
         encodedProgress is! Map<String, dynamic>) {
@@ -48,6 +51,7 @@ class PersistentLearnerJourneyRepository implements LearnerJourneyRepository {
     }
     return LearnerJourneyState(
       selectedLevel: selectedLevel,
+      selectedLevelId: selectedLevelIdValue as int?,
       hasSelectedLevel: hasSelectedLevel,
       dailyStudyMinutes: dailyStudyMinutes,
       lessonProgress: progress,
@@ -56,8 +60,9 @@ class PersistentLearnerJourneyRepository implements LearnerJourneyRepository {
 
   @override
   Future<void> save(LearnerJourneyState state) {
-    final encoded = jsonEncode(<String, Object>{
+    final encoded = jsonEncode(<String, Object?>{
       'selectedLevel': state.selectedLevel.name,
+      'selectedLevelId': state.selectedLevelId,
       'hasSelectedLevel': state.hasSelectedLevel,
       'dailyStudyMinutes': state.dailyStudyMinutes,
       'lessonProgress': <String, Object>{

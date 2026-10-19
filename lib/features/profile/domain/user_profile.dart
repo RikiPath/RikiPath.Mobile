@@ -37,12 +37,8 @@ class UserProfile {
   ].where((part) => part.isNotEmpty).join(' ');
 
   JlptLevel? get supportedJlptLevel {
-    return switch (targetJlptLevelName?.trim().toUpperCase()) {
-      'N5' => JlptLevel.n5,
-      'N4' => JlptLevel.n4,
-      'N3' => JlptLevel.n3,
-      _ => null,
-    };
+    final name = targetJlptLevelName;
+    return name == null ? null : JlptLevel.tryParse(name);
   }
 }
 

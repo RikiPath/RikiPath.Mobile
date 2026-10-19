@@ -93,6 +93,8 @@ void main() {
       JlptLevel.n5,
       JlptLevel.n4,
       JlptLevel.n3,
+      JlptLevel.n2,
+      JlptLevel.n1,
     ]);
   });
 

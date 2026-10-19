@@ -17,14 +17,11 @@ abstract final class GrammarMapper {
   }
 
   static JlptLevel parseLevel(String value) {
-    return switch (value.trim().toUpperCase()) {
-      'N5' => JlptLevel.n5,
-      'N4' => JlptLevel.n4,
-      'N3' => JlptLevel.n3,
-      _ => throw FormatException(
-        'Unsupported learner JLPT level returned by the API: $value',
-      ),
-    };
+    final level = JlptLevel.tryParse(value);
+    if (level != null) return level;
+    throw FormatException(
+      'Unsupported learner JLPT level returned by the API: $value',
+    );
   }
 
   static String? nonEmpty(String? value) {

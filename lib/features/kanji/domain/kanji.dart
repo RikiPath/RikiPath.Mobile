@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 
 enum KanjiDataSource { remote, fixture }
 
@@ -121,7 +122,7 @@ class KanjiQuery {
   });
 
   final String keyword;
-  final JlptLevel? level;
+  final JlptLevelCatalogItem? level;
   final int page;
   final int pageSize;
   final int? minStrokeCount;

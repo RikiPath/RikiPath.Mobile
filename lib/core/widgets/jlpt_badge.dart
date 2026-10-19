@@ -5,11 +5,20 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 enum JlptLevel {
   n5('N5'),
   n4('N4'),
-  n3('N3');
+  n3('N3'),
+  n2('N2'),
+  n1('N1');
 
   const JlptLevel(this.label);
 
   final String label;
+
+  static JlptLevel? tryParse(String value) {
+    final normalized = value.trim().toUpperCase();
+    return JlptLevel.values
+        .where((level) => level.label == normalized)
+        .firstOrNull;
+  }
 }
 
 class JlptBadge extends StatelessWidget {
@@ -54,6 +63,16 @@ class JlptBadge extends StatelessWidget {
         border: AppColors.brandPrimary,
       ),
       JlptLevel.n3 => const _JlptBadgeColors(
+        foreground: AppColors.jlptN3Foreground,
+        background: AppColors.jlptN3Background,
+        border: AppColors.borderStrong,
+      ),
+      JlptLevel.n2 => const _JlptBadgeColors(
+        foreground: AppColors.jlptN4Foreground,
+        background: AppColors.jlptN4Background,
+        border: AppColors.brandPrimary,
+      ),
+      JlptLevel.n1 => const _JlptBadgeColors(
         foreground: AppColors.jlptN3Foreground,
         background: AppColors.jlptN3Background,
         border: AppColors.borderStrong,

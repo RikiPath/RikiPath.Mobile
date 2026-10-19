@@ -13,13 +13,9 @@ class ApiVocabularyRepository implements VocabularyRepository {
 
   @override
   Future<VocabularyPage> search(VocabularyQuery query) async {
-    if (query.level != null) {
-      throw const VocabularyJlptMappingUnavailableException();
-    }
-
     final request = VocabularySearchFilterDto(
       keyword: query.keyword.trim().isEmpty ? null : query.keyword.trim(),
-      jlptLevelId: null,
+      jlptLevelId: query.level?.id,
       page: query.page,
       pageSize: query.pageSize,
     );
@@ -75,8 +71,4 @@ class ApiVocabularyRepository implements VocabularyRepository {
     }
     return id;
   }
-}
-
-class VocabularyJlptMappingUnavailableException implements Exception {
-  const VocabularyJlptMappingUnavailableException();
 }

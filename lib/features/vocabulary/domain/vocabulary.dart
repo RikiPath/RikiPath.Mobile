@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 
 enum VocabularyDataSource { remote, fixture }
 
@@ -113,7 +114,7 @@ class VocabularyQuery {
   });
 
   final String keyword;
-  final JlptLevel? level;
+  final JlptLevelCatalogItem? level;
   final int page;
   final int pageSize;
 }

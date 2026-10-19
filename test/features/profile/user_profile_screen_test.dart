@@ -11,6 +11,7 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/account_settings_screen.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/data/profile_avatar_picker.dart';
@@ -24,6 +25,8 @@ import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_co
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations_ja.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations_vi.dart';
+
+import '../../support/test_jlpt_catalog.dart';
 
 void main() {
   group('ProfileScreen', () {
@@ -517,22 +520,19 @@ void main() {
   });
 
   group('JlptGoalScreen', () {
-    testWidgets('offers only N5 N4 N3 and never submits guessed IDs', (
+    testWidgets('offers N5 through N1 and submits the selected Backend ID', (
       tester,
     ) async {
       final repository = _ProfileRepository();
       await _pump(tester, const JlptGoalScreen(), repository: repository);
       await tester.pumpAndSettle();
 
-      for (final level in <String>['N5', 'N4', 'N3']) {
+      for (final level in <String>['N5', 'N4', 'N3', 'N2', 'N1']) {
         expect(
           find.byKey(ValueKey<String>('jlpt_goal_choice_$level')),
           findsOneWidget,
         );
       }
-      expect(find.text('N2'), findsNothing);
-      expect(find.text('N1'), findsNothing);
-
       await tester.tap(
         find.byKey(const ValueKey<String>('jlpt_goal_choice_N4')),
       );
@@ -565,7 +565,9 @@ void main() {
         find.byKey(const ValueKey<String>('jlpt_goal_save_button')),
       );
       await tester.pumpAndSettle();
-      expect(repository.jlptCalls, 0);
+      expect(repository.jlptCalls, 1);
+      expect(repository.lastJlptLevelId, 204);
+      expect(repository.lastDailyStudyMinutes, 30);
     });
 
     testWidgets('Japanese selectors do not overflow at 320px', (tester) async {
@@ -578,7 +580,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.byKey(const ValueKey<String>('jlpt_mapping_blocker')),
+        find.byKey(const ValueKey<String>('jlpt_goal_save_button')),
         220,
         scrollable: find.byType(Scrollable).first,
       );
@@ -647,6 +649,9 @@ Future<void> _pump(
     ProviderScope(
       overrides: [
         userProfileRepositoryProvider.overrideWithValue(repository),
+        jlptCatalogRepositoryProvider.overrideWithValue(
+          TestJlptCatalogRepository(),
+        ),
         if (picker != null)
           profileAvatarPickerProvider.overrideWithValue(picker),
       ],
@@ -722,7 +727,7 @@ UserProfile _profile({
   String firstName = 'Minh Anh',
   String lastName = 'Nguyễn',
   bool isEmailVerified = true,
-  int? targetJlptLevelId = 73,
+  int? targetJlptLevelId = 309,
   String? targetJlptLevelName = 'N3',
   int dailyStudyMinutes = 30,
   bool emailNotifications = true,
@@ -786,6 +791,8 @@ class _ProfileRepository implements UserProfileRepository {
   int uploadCalls = 0;
   int notificationCalls = 0;
   int jlptCalls = 0;
+  int? lastJlptLevelId;
+  int? lastDailyStudyMinutes;
   String? lastFirstName;
   String? lastLastName;
   ProfileAvatarUpload? lastUpload;
@@ -827,7 +834,16 @@ class _ProfileRepository implements UserProfileRepository {
     required int dailyStudyMinutes,
   }) async {
     jlptCalls += 1;
-    return _profile();
+    lastJlptLevelId = targetJlptLevelId;
+    lastDailyStudyMinutes = dailyStudyMinutes;
+    final level = testJlptCatalog
+        .where((item) => item.id == targetJlptLevelId)
+        .firstOrNull;
+    return _profile(
+      targetJlptLevelId: targetJlptLevelId,
+      targetJlptLevelName: level?.code,
+      dailyStudyMinutes: dailyStudyMinutes,
+    );
   }
 
   @override

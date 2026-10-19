@@ -5,7 +5,11 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
+import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
+import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/onboarding/application/onboarding_controller.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 
 class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({super.key});
@@ -14,6 +18,7 @@ class OnboardingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
+    final catalog = ref.watch(jlptCatalogControllerProvider);
 
     return PopScope(
       canPop: state.currentStep == OnboardingStep.jlptTarget,
@@ -25,15 +30,17 @@ class OnboardingScreen extends ConsumerWidget {
           child: switch (state.currentStep) {
             OnboardingStep.jlptTarget => _JlptTargetStep(
               state: state,
+              catalog: catalog,
               onBack: () => _leaveOnboarding(context),
               onSelect: controller.selectJlptLevel,
+              onRetry: ref.read(jlptCatalogControllerProvider.notifier).retry,
               onContinue: controller.continueToStudyTime,
             ),
             OnboardingStep.studyTime => _StudyTimeStep(
               state: state,
               onBack: controller.goBack,
               onSelect: controller.selectStudyTime,
-              onComplete: controller.completeLocally,
+              onComplete: () => _completeSetup(ref, controller),
             ),
             OnboardingStep.complete => _CompletionStep(
               state: state,
@@ -52,19 +59,53 @@ class OnboardingScreen extends ConsumerWidget {
     }
     context.go(AppRoutes.login);
   }
+
+  Future<void> _completeSetup(
+    WidgetRef ref,
+    OnboardingController controller,
+  ) async {
+    final state = ref.read(onboardingControllerProvider);
+    final level = state.selectedJlptLevel;
+    final studyTime = state.selectedStudyTime;
+    if (level == null || studyTime == null || state.isSubmitting) return;
+
+    controller.startSubmission();
+    try {
+      await ref
+          .read(userProfileRepositoryProvider)
+          .setJlptGoal(
+            targetJlptLevelId: level.id,
+            dailyStudyMinutes: studyTime.minutes,
+          );
+      await ref
+          .read(learnerJourneyControllerProvider.notifier)
+          .setCatalogPreferences(
+            item: level,
+            dailyStudyMinutes: studyTime.minutes,
+          );
+      ref.invalidate(userProfileControllerProvider);
+      controller.completeLocally();
+    } catch (_) {
+      controller.failSubmission();
+    }
+  }
 }
 
 class _JlptTargetStep extends StatelessWidget {
   const _JlptTargetStep({
     required this.state,
+    required this.catalog,
     required this.onBack,
     required this.onSelect,
+    required this.onRetry,
     required this.onContinue,
   });
 
   final OnboardingState state;
+  final AsyncValue<List<JlptLevelCatalogItem>> catalog;
   final VoidCallback onBack;
-  final ValueChanged<JlptLevel> onSelect;
+  final ValueChanged<JlptLevelCatalogItem> onSelect;
+  final VoidCallback onRetry;
   final VoidCallback onContinue;
 
   @override
@@ -78,24 +119,55 @@ class _JlptTargetStep extends StatelessWidget {
       ),
       title: l10n.onboardingJlptTitle,
       description: l10n.onboardingJlptDescription,
-      content: Column(
-        children: JlptLevel.values.map((level) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.space3),
-            child: RikiSelectionCard(
-              key: ValueKey<String>('jlpt_${level.name}'),
-              title: level.label,
-              description: _descriptionFor(level, l10n),
-              badge: level == JlptLevel.n3 ? l10n.popular : null,
-              leading: _JlptLevelTile(
-                level: level,
-                selected: state.selectedJlptLevel == level,
+      content: catalog.when(
+        loading: () => const Padding(
+          padding: EdgeInsets.all(AppSpacing.space5),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+        error: (_, _) => RikiCard(
+          key: const ValueKey<String>('onboarding_jlpt_catalog_error'),
+          child: Column(
+            children: [
+              Text(
+                l10n.jlptCatalogLoadFailed,
+                textAlign: TextAlign.center,
+                style: AppTypography.validationText,
               ),
-              selected: state.selectedJlptLevel == level,
-              onPressed: () => onSelect(level),
-            ),
-          );
-        }).toList(),
+              const SizedBox(height: AppSpacing.space2),
+              TextButton(onPressed: onRetry, child: Text(l10n.retry)),
+            ],
+          ),
+        ),
+        data: (levels) => levels.isEmpty
+            ? RikiCard(
+                key: const ValueKey<String>('onboarding_jlpt_catalog_empty'),
+                child: Text(
+                  l10n.jlptCatalogEmpty,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodySmall,
+                ),
+              )
+            : Column(
+                children: levels.map((item) {
+                  final level = item.level;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.space3),
+                    child: RikiSelectionCard(
+                      key: ValueKey<String>('jlpt_${level.name}'),
+                      title: item.code,
+                      description:
+                          item.description ?? _descriptionFor(level, l10n),
+                      badge: level == JlptLevel.n3 ? l10n.popular : null,
+                      leading: _JlptLevelTile(
+                        level: level,
+                        selected: state.selectedJlptLevel?.id == item.id,
+                      ),
+                      selected: state.selectedJlptLevel?.id == item.id,
+                      onPressed: () => onSelect(item),
+                    ),
+                  );
+                }).toList(),
+              ),
       ),
       action: RikiPrimaryButton(
         key: const ValueKey<String>('onboarding_continue_button'),
@@ -112,6 +184,8 @@ class _JlptTargetStep extends StatelessWidget {
       JlptLevel.n5 => l10n.jlptN5Description,
       JlptLevel.n4 => l10n.jlptN4Description,
       JlptLevel.n3 => l10n.jlptN3Description,
+      JlptLevel.n2 => l10n.jlptN2Description,
+      JlptLevel.n1 => l10n.jlptN1Description,
     };
   }
 }
@@ -137,7 +211,7 @@ class _StudyTimeStep extends StatelessWidget {
         step: 2,
         onBack: onBack,
         backSemanticLabel: l10n.backToGoalSelection,
-        selectedLevel: state.selectedJlptLevel,
+        selectedLevel: state.selectedJlptLevel?.level,
       ),
       title: l10n.onboardingStudyTimeTitle,
       description: l10n.onboardingStudyTimeDescription,
@@ -166,9 +240,13 @@ class _StudyTimeStep extends StatelessWidget {
         key: const ValueKey<String>('onboarding_complete_button'),
         label: l10n.finishSetup,
         trailingIcon: Icons.check,
-        onPressed: state.canComplete ? onComplete : null,
+        isLoading: state.isSubmitting,
+        loadingLabel: l10n.loading,
+        onPressed: state.canComplete && !state.isSubmitting ? onComplete : null,
       ),
-      helperText: l10n.onboardingAdjustHelper,
+      helperText: state.submissionFailed
+          ? l10n.checkConnectionRetry
+          : l10n.onboardingAdjustHelper,
     );
   }
 
@@ -220,7 +298,7 @@ class _CompletionStep extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.jlptGoal(level.label),
+                    l10n.jlptGoal(level.code),
                     style: AppTypography.sectionTitle.copyWith(
                       color: AppColors.success,
                     ),

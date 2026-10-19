@@ -13,13 +13,9 @@ class ApiGrammarRepository implements GrammarRepository {
 
   @override
   Future<GrammarPage> search(GrammarQuery query) async {
-    if (query.level != null) {
-      throw const GrammarJlptMappingUnavailableException();
-    }
-
     final keyword = query.keyword.trim();
     final request = GrammarSearchFilterDto(
-      jlptLevelId: null,
+      jlptLevelId: query.level?.id,
       keyword: keyword.isEmpty ? null : keyword,
       page: query.page,
       pageSize: query.pageSize,
@@ -109,8 +105,4 @@ class ApiGrammarBookmarkRepository implements GrammarBookmarkRepository {
       );
     }
   }
-}
-
-class GrammarJlptMappingUnavailableException implements Exception {
-  const GrammarJlptMappingUnavailableException();
 }

@@ -11,15 +11,7 @@ class FallbackVocabularyRepository implements VocabularyRepository {
   final VocabularyRepository fixture;
 
   @override
-  Future<VocabularyPage> search(VocabularyQuery query) async {
-    // A name-to-ID mapping is not published, so a JLPT filter cannot be sent
-    // to the remote API without inventing IDs.
-    if (query.level != null) {
-      return fixture.search(query);
-    }
-
-    return remote.search(query);
-  }
+  Future<VocabularyPage> search(VocabularyQuery query) => remote.search(query);
 
   @override
   Future<VocabularyEntry> loadDetail(String routeKey) {

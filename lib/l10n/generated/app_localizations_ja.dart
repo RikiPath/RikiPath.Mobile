@@ -842,7 +842,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mostPopular => '一番人気';
 
   @override
-  String get onboardingJlptHelper => 'N5、N4、N3から選択してください。';
+  String get onboardingJlptHelper => 'JLPTレベルを選択してください。';
+
+  @override
+  String get jlptCatalogLoadFailed => 'JLPTレベル一覧を読み込めませんでした。';
+
+  @override
+  String get jlptCatalogEmpty => '現在利用できるJLPTレベルはありません。';
 
   @override
   String get jlptN5Description => '日本語の基礎を身につける';
@@ -852,6 +858,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get jlptN3Description => '中級レベルを目指す';
+
+  @override
+  String get jlptN2Description => '上級レベルの日本語力を伸ばす';
+
+  @override
+  String get jlptN1Description => '高度な日本語運用力を目指す';
 
   @override
   String get backToGoalSelection => '目標選択に戻る';
@@ -2171,6 +2183,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mockTestUnavailable => 'この模擬試験は現在利用できません。';
 
   @override
+  String get mockTargetLevelRequired => 'プロフィールで目標レベルを選択すると、対象の模擬試験を確認できます。';
+
+  @override
+  String get mockNoTestsAvailable => '目標レベル向けに公開されている模擬試験はまだありません。';
+
+  @override
   String get leaveMockTitle => '試験を終了しますか？';
 
   @override
@@ -2186,10 +2204,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get submitMockTitle => '模擬試験を提出しますか？';
 
   @override
-  String get submitMockMessage => '未回答の問題があっても提出できます。採点は端末内で行われます。';
+  String get submitMockMessage =>
+      '未回答の問題があっても提出できます。採点と試験の完了はRikiPathシステムで行われます。';
 
   @override
   String get submitAction => '提出する';
+
+  @override
+  String get mockStarting => '開始しています…';
+
+  @override
+  String get mockSubmitting => '提出しています…';
 
   @override
   String mockMinutes(int minutes) {
@@ -2203,6 +2228,33 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mockLocalScoringNotice => 'この練習問題は端末内で採点され、公式JLPT結果ではありません。';
+
+  @override
+  String get mockBackendScoringNotice => '制限時間とスコアはRikiPathシステムによって決定されます。';
+
+  @override
+  String get mockMediaAvailable => 'この問題には試験のメディア内容があります。';
+
+  @override
+  String get mockActionFailed => '操作を完了できませんでした';
+
+  @override
+  String get mockExpired => 'システムの時刻により、この受験は制限時間を過ぎています。';
+
+  @override
+  String get mockAlreadyCompleted => 'この受験はすでに提出されています。';
+
+  @override
+  String get mockNetworkUncertain => '通信が中断されたため提出状態を確認できません。結果を再読み込みしてください。';
+
+  @override
+  String get mockAttemptConflict => '受験データが無効になりました。戻って新しい受験を開始してください。';
+
+  @override
+  String get mockValidationFailed => '解答データを受け付けられませんでした。確認してもう一度お試しください。';
+
+  @override
+  String get mockSubmitFailed => '受験の処理中にエラーが発生しました。もう一度お試しください。';
 
   @override
   String get startMockTest => '試験を始める';
@@ -2231,6 +2283,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mockLocalResultNotice => 'この結果は練習用で、公式JLPTスコアではありません。';
+
+  @override
+  String get mockBackendResultNotice => 'この結果はRikiPathシステムで採点され、返されたものです。';
 
   @override
   String get sectionBreakdown => 'セクション別結果';
@@ -2263,6 +2318,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notAnswered => '未回答';
+
+  @override
+  String get mockAnswerUnavailable => 'データがありません';
 
   @override
   String get practiceLoadingTitle => '練習内容を準備しています…';
