@@ -16,6 +16,7 @@ import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_
 import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
+import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
 import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
@@ -30,6 +31,7 @@ class HomeScreen extends ConsumerWidget {
     final learningState = ref.watch(learningControllerProvider);
     final analyticsState = ref.watch(learnerAnalyticsControllerProvider);
     final practiceState = ref.watch(demoPracticeControllerProvider);
+    final dailyReviewState = ref.watch(dailyReviewControllerProvider);
     final notificationState = ref.watch(notificationControllerProvider);
     final upcomingMeetingState = ref.watch(upcomingMeetingProvider);
     final analytics = analyticsState.value;
@@ -53,6 +55,7 @@ class HomeScreen extends ConsumerWidget {
           learningState: learningState,
           analyticsState: analyticsState,
           practiceState: practiceState,
+          dailyReviewState: dailyReviewState,
           upcomingMeetingState: upcomingMeetingState,
           onRefreshLive: () => _refreshLiveData(ref),
           onRetryHome: ref.read(homeControllerProvider.notifier).retry,
@@ -85,14 +88,7 @@ class HomeScreen extends ConsumerWidget {
           },
           onOpenNotebook: () => context.go(AppRoutes.notebook),
           onOpenPractice: () {
-            final practice = practiceState.value;
-            if (practice?.hasActiveMockAttempt == true) {
-              context.go(AppRoutes.mockTest(practice!.mockTest.id));
-            } else if (practice?.hasRecentMockResult == true) {
-              context.go(AppRoutes.mockTestResult(practice!.mockTest.id));
-            } else {
-              context.go(AppRoutes.practice);
-            }
+            context.go(AppRoutes.practice);
           },
           onOpenReview: () => context.go(AppRoutes.dailyReview),
           onOpenAnalytics: () => context.push(AppRoutes.analytics),
@@ -144,5 +140,6 @@ Future<void> _refreshLiveData(WidgetRef ref) async {
     settle(ref.refresh(learnerAnalyticsControllerProvider.future)),
     settle(ref.refresh(notificationControllerProvider.future)),
     settle(ref.refresh(learnerMentorBookingsControllerProvider.future)),
+    settle(ref.refresh(dailyReviewControllerProvider.future)),
   ]);
 }

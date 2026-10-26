@@ -15,6 +15,7 @@ ios/.symlinks/
 
 # Read-only backend contract reference; never part of the mobile repository.
 /RikiPath.Backend/
+/RikiPath.Web/
 
 # Local audit output that is not maintained project documentation.
 /FILE_INVENTORY.txt

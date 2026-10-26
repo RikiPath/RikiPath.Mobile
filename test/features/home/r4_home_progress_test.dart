@@ -34,8 +34,12 @@ import 'package:rikipath_mobile/features/notebook/application/demo_notebook_cont
 import 'package:rikipath_mobile/features/notebook/data/session_demo_notebook_repository.dart';
 import 'package:rikipath_mobile/features/notebook/domain/demo_notebook_repository.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
+import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
 import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
+import 'package:rikipath_mobile/features/practice/domain/daily_review.dart';
+import 'package:rikipath_mobile/features/practice/domain/daily_review_repository.dart';
 import 'package:rikipath_mobile/features/practice/domain/demo_practice.dart';
+import 'package:rikipath_mobile/features/practice/domain/review_quality.dart';
 import 'package:rikipath_mobile/features/practice/domain/practice_session_repository.dart';
 
 import '../../support/test_auth_session.dart';
@@ -386,22 +390,31 @@ void main() {
   });
 
   group('R4 Home practice and review', () {
-    testWidgets('13. Active local Mock Test displays Resume', (tester) async {
+    testWidgets('13. local Mock fixture does not leak into live Home CTA', (
+      tester,
+    ) async {
       final harness = await _pumpHome(
         tester,
         journey: _selectedJourney(),
         sessions: _sessions(active: _activeAttempt()),
       );
       await _pumpFrames(tester);
-      await _scrollTo(tester, const ValueKey<String>('home_resume_mock_card'));
+      await _scrollTo(
+        tester,
+        const ValueKey<String>('home_start_practice_card'),
+      );
+      expect(
+        find.byKey(const ValueKey<String>('home_start_practice_card')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(const ValueKey<String>('home_resume_mock_card')),
-        findsOneWidget,
+        findsNothing,
       );
       harness.dispose();
     });
 
-    testWidgets('14. Expired attempt is finalized instead of resumable', (
+    testWidgets('14. expired local fixture does not alter live Home CTA', (
       tester,
     ) async {
       final harness = await _pumpHome(
@@ -417,15 +430,18 @@ void main() {
         find.byKey(const ValueKey<String>('home_resume_mock_card')),
         findsNothing,
       );
-      await _scrollTo(tester, const ValueKey<String>('home_recent_mock_card'));
+      await _scrollTo(
+        tester,
+        const ValueKey<String>('home_start_practice_card'),
+      );
       expect(
-        find.byKey(const ValueKey<String>('home_recent_mock_card')),
+        find.byKey(const ValueKey<String>('home_start_practice_card')),
         findsOneWidget,
       );
       harness.dispose();
     });
 
-    testWidgets('15. Recent local result displays a score summary', (
+    testWidgets('15. local score is not presented as a live result', (
       tester,
     ) async {
       final submitted = _activeAttempt().copyWith(
@@ -438,25 +454,34 @@ void main() {
         sessions: _sessions(recent: submitted),
       );
       await _pumpFrames(tester);
-      await _scrollTo(tester, const ValueKey<String>('home_recent_mock_card'));
-      expect(find.textContaining('câu'), findsWidgets);
-      expect(find.textContaining('%'), findsWidgets);
+      await _scrollTo(
+        tester,
+        const ValueKey<String>('home_start_practice_card'),
+      );
+      expect(
+        find.byKey(const ValueKey<String>('home_recent_mock_card')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('home_start_practice_card')),
+        findsOneWidget,
+      );
       harness.dispose();
     });
 
-    testWidgets('16. Practice CTA opens the active local test', (tester) async {
+    testWidgets('16. Practice CTA always opens live discovery', (tester) async {
       final harness = await _pumpHome(
         tester,
         journey: _selectedJourney(),
         sessions: _sessions(active: _activeAttempt()),
       );
       await _pumpFrames(tester);
-      await _scrollToText(tester, 'Tiếp tục làm bài');
-      await tester.tap(find.text('Tiếp tục làm bài'));
+      await _scrollToText(tester, 'Bắt đầu luyện tập');
+      await tester.tap(find.text('Bắt đầu luyện tập'));
       await _pumpFrames(tester);
       expect(
         harness.router.routeInformationProvider.value.uri.path,
-        AppRoutes.mockTest('fixture-mock-n4-01'),
+        AppRoutes.practice,
       );
       harness.dispose();
     });
@@ -507,7 +532,7 @@ void main() {
       harness.dispose();
     });
 
-    testWidgets('An active local Review session displays Resume', (
+    testWidgets('An active live Review session displays Resume', (
       tester,
     ) async {
       const firstCard = DemoReviewCard(
@@ -539,7 +564,16 @@ void main() {
             ],
           ),
         ),
+        dailyReviewRepository: _HomeDailyReviewRepository(
+          cards: <DailyReviewCard>[_firstLiveReviewCard, _secondLiveReviewCard],
+        ),
       );
+      await harness.container.read(dailyReviewControllerProvider.future);
+      final liveController = harness.container.read(
+        dailyReviewControllerProvider.notifier,
+      );
+      liveController.revealAnswer();
+      await liveController.submit(ReviewRating.good);
       await _pumpFrames(tester);
       const reviewKey = ValueKey<String>('home_daily_review_card');
       await _scrollTo(tester, reviewKey);
@@ -657,7 +691,7 @@ void main() {
       harness.dispose();
     });
 
-    testWidgets('27. Local Mock submission updates recent result on Home', (
+    testWidgets('27. local Mock submission cannot masquerade as live result', (
       tester,
     ) async {
       final harness = await _pumpHome(tester, journey: _selectedJourney());
@@ -668,9 +702,16 @@ void main() {
       await controller.startMockTest();
       await controller.submitMockTest();
       await _pumpFrames(tester);
-      await _scrollTo(tester, const ValueKey<String>('home_recent_mock_card'));
+      await _scrollTo(
+        tester,
+        const ValueKey<String>('home_start_practice_card'),
+      );
       expect(
         find.byKey(const ValueKey<String>('home_recent_mock_card')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('home_start_practice_card')),
         findsOneWidget,
       );
       harness.dispose();
@@ -775,9 +816,12 @@ void main() {
       await _pumpFrames(tester);
       harness.router.go(AppRoutes.home);
       await _pumpFrames(tester);
-      await _scrollTo(tester, const ValueKey<String>('home_resume_mock_card'));
+      await _scrollTo(
+        tester,
+        const ValueKey<String>('home_start_practice_card'),
+      );
       expect(
-        find.byKey(const ValueKey<String>('home_resume_mock_card')),
+        find.byKey(const ValueKey<String>('home_start_practice_card')),
         findsOneWidget,
       );
       expect(
@@ -919,6 +963,8 @@ Future<_HomeHarness> _pumpHome(
   NotificationRepository? notifications,
   DemoPracticeSessions? sessions,
   PracticeSessionRepository? sessionRepository,
+  DailyReviewRepository dailyReviewRepository =
+      const _HomeDailyReviewRepository(),
   DemoNotebookRepository? notebookRepository,
   DateTime? now,
 }) async {
@@ -946,6 +992,7 @@ Future<_HomeHarness> _pumpHome(
       analyticsRepositoryProvider.overrideWithValue(analytics),
       notificationRepositoryProvider.overrideWithValue(notificationRepository),
       practiceSessionRepositoryProvider.overrideWithValue(practiceRepository),
+      dailyReviewRepositoryProvider.overrideWithValue(dailyReviewRepository),
       if (notebookRepository != null)
         demoNotebookRepositoryProvider.overrideWithValue(notebookRepository),
       if (now != null) practiceNowProvider.overrideWithValue(() => now),
@@ -1086,3 +1133,52 @@ class _TestPracticeSessionRepository implements PracticeSessionRepository {
     sessions = null;
   }
 }
+
+class _HomeDailyReviewRepository implements DailyReviewRepository {
+  const _HomeDailyReviewRepository({this.cards = const <DailyReviewCard>[]});
+
+  final List<DailyReviewCard> cards;
+
+  @override
+  Future<DailyReviewQueue> loadDailyQueue() async {
+    return DailyReviewQueue(totalDue: cards.length, items: cards);
+  }
+
+  @override
+  Future<DailyReviewSubmitResult> submitResult({
+    required int reviewCardId,
+    required int quality,
+  }) async {
+    return DailyReviewSubmitResult(
+      reviewCardId: reviewCardId,
+      qualitySubmitted: quality,
+      shouldRepeatInSession: false,
+      newEaseFactor: 2.5,
+      newIntervalDays: 1,
+      repetitions: 1,
+      nextReviewDate: DateTime.utc(2026, 10, 22),
+    );
+  }
+}
+
+final DailyReviewCard _firstLiveReviewCard = DailyReviewCard(
+  reviewCardId: 481,
+  contentType: DailyReviewContentType.vocabulary,
+  term: '朝',
+  reading: 'あさ',
+  meaning: 'buổi sáng',
+  note: null,
+  repetitions: 0,
+  nextReviewDate: DateTime.utc(2026, 10, 21),
+);
+
+final DailyReviewCard _secondLiveReviewCard = DailyReviewCard(
+  reviewCardId: 482,
+  contentType: DailyReviewContentType.kanji,
+  term: '学',
+  reading: 'がく',
+  meaning: 'học',
+  note: null,
+  repetitions: 0,
+  nextReviewDate: DateTime.utc(2026, 10, 21),
+);

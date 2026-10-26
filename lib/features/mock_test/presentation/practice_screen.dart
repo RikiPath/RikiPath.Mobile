@@ -9,6 +9,8 @@ import 'package:rikipath_mobile/features/analytics/application/analytics_control
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
+import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
+import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
 import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
 import 'package:rikipath_mobile/features/practice/domain/demo_practice.dart';
 
@@ -33,6 +35,8 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
   @override
   Widget build(BuildContext context) {
     final practice = ref.watch(demoPracticeControllerProvider);
+    final dailyReviews = ref.watch(dailyReviewControllerProvider);
+    final mockTests = ref.watch(mockTestControllerProvider);
     final analyticsState = ref.watch(learnerAnalyticsControllerProvider);
     final notificationState = ref.watch(notificationControllerProvider);
     final analytics = analyticsState.value;
@@ -74,38 +78,9 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.space5),
-            _PracticeEntryCard(
-              key: const ValueKey<String>('practice_daily_review_card'),
-              icon: Icons.style_outlined,
-              title: context.l10n.dailyReviewTitle,
-              description: state.isReviewComplete
-                  ? context.l10n.reviewCompleteCount(state.reviewAnswers.length)
-                  : context.l10n.reviewDueCount(state.reviewQueue.length),
-              tone: AppFeatureTones.review,
-              status: context.l10n.reviewProgress(
-                state.reviewIndex.clamp(0, state.reviewQueue.length),
-                state.reviewQueue.length,
-              ),
-              onPressed: () => context.push(AppRoutes.dailyReview),
-            ),
+            _LiveDailyReviewCard(state: dailyReviews),
             const SizedBox(height: AppSpacing.space3),
-            _PracticeEntryCard(
-              key: const ValueKey<String>('practice_mock_test_card'),
-              icon: Icons.assignment_outlined,
-              title: state.mockTest.title,
-              description: context.l10n.mockSummary(
-                state.mockTest.level,
-                state.mockTest.timeLimitMinutes,
-                state.mockTest.questions.length,
-              ),
-              tone: AppFeatureTones.practice,
-              status: _mockStatus(context, state),
-              onPressed: () => context.push(
-                state.hasActiveMockAttempt || !state.hasRecentMockResult
-                    ? AppRoutes.mockTest(state.mockTest.id)
-                    : AppRoutes.mockTestResult(state.mockTest.id),
-              ),
-            ),
+            _LiveMockCatalog(state: mockTests),
             const SizedBox(height: AppSpacing.space5),
             Text(
               context.l10n.practiceStudioTitle,
@@ -168,18 +143,136 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
       ),
     );
   }
+}
 
-  String _mockStatus(BuildContext context, DemoPracticeState state) {
-    return switch (state.mockSessionStatus) {
-      DemoMockSessionStatus.notStarted => context.l10n.notStarted,
-      DemoMockSessionStatus.inProgress => context.l10n.mockInProgress(
-        state.answeredQuestionCount,
-        state.mockTest.questions.length,
+class _LiveDailyReviewCard extends StatelessWidget {
+  const _LiveDailyReviewCard({required this.state});
+
+  final AsyncValue<DailyReviewState> state;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = state.value;
+    final description = state.isLoading
+        ? context.l10n.reviewLoadingTitle
+        : state.hasError
+        ? context.l10n.reviewLoadFailed
+        : value!.isComplete
+        ? context.l10n.reviewCompleteCount(value.reviewedCount)
+        : context.l10n.reviewDueCount(value.cards.length - value.currentIndex);
+    final status = value == null
+        ? (state.isLoading ? context.l10n.loading : context.l10n.retry)
+        : context.l10n.reviewProgress(
+            value.currentIndex.clamp(0, value.cards.length),
+            value.cards.length,
+          );
+
+    return _PracticeEntryCard(
+      key: const ValueKey<String>('practice_daily_review_card'),
+      icon: Icons.style_outlined,
+      title: context.l10n.dailyReviewTitle,
+      description: description,
+      tone: AppFeatureTones.review,
+      status: status,
+      onPressed: () => context.push(AppRoutes.dailyReview),
+    );
+  }
+}
+
+class _LiveMockCatalog extends ConsumerWidget {
+  const _LiveMockCatalog({required this.state});
+
+  final AsyncValue<MockTestFlowState> state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (state.isLoading) {
+      return const RikiCard(
+        key: ValueKey<String>('mock_test_catalog_loading'),
+        child: LinearProgressIndicator(),
+      );
+    }
+    if (state.hasError) {
+      return RikiErrorState(
+        key: const ValueKey<String>('mock_test_catalog_error'),
+        title: context.l10n.mockLoadFailed,
+        message: context.l10n.checkConnectionRetry,
+        actionLabel: context.l10n.retry,
+        onAction: ref.read(mockTestControllerProvider.notifier).retryCatalog,
+      );
+    }
+
+    final value = state.requireValue;
+    if (value.catalogStatus == MockTestCatalogStatus.noTargetLevel) {
+      return RikiEmptyState(
+        key: const ValueKey<String>('mock_test_no_target_level'),
+        icon: Icons.flag_outlined,
+        title: context.l10n.mockTestTitle,
+        message: context.l10n.mockTargetLevelRequired,
+      );
+    }
+    if (value.catalogStatus == MockTestCatalogStatus.empty) {
+      return RikiEmptyState(
+        key: const ValueKey<String>('mock_test_catalog_empty'),
+        icon: Icons.assignment_outlined,
+        title: context.l10n.mockTestTitle,
+        message: context.l10n.mockNoTestsAvailable,
+      );
+    }
+
+    return Column(
+      key: const ValueKey<String>('mock_test_catalog'),
+      children: [
+        for (var index = 0; index < value.tests.length; index++) ...[
+          _MockTestCatalogCard(testId: value.tests[index].id),
+          if (index != value.tests.length - 1)
+            const SizedBox(height: AppSpacing.space3),
+        ],
+      ],
+    );
+  }
+}
+
+class _MockTestCatalogCard extends ConsumerWidget {
+  const _MockTestCatalogCard({required this.testId});
+
+  final int testId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(mockTestControllerProvider).requireValue;
+    final test = state.tests.firstWhere((candidate) => candidate.id == testId);
+    final isSelected = state.selectedTest?.id == test.id;
+    final status = isSelected && state.result != null
+        ? context.l10n.mockCompletedStatus(state.result!.totalScore.round())
+        : isSelected && state.hasActiveAttempt
+        ? context.l10n.mockInProgress(
+            state.answeredQuestionCount,
+            state.attempt!.questions.length,
+          )
+        : context.l10n.notStarted;
+
+    return _PracticeEntryCard(
+      key: ValueKey<String>('practice_mock_test_${test.id}'),
+      icon: Icons.assignment_outlined,
+      title: test.title,
+      description: context.l10n.mockDurationStatus(
+        test.timeLimitMinutes,
+        test.jlptLevelName,
       ),
-      DemoMockSessionStatus.submitted => context.l10n.mockCompletedStatus(
-        state.mockResult?.percentage ?? 0,
-      ),
-    };
+      tone: AppFeatureTones.practice,
+      status: status,
+      onPressed: () {
+        final controller = ref.read(mockTestControllerProvider.notifier);
+        controller.selectTest(test.id);
+        final updated = ref.read(mockTestControllerProvider).requireValue;
+        context.push(
+          updated.result != null
+              ? AppRoutes.mockTestResult(test.id.toString())
+              : AppRoutes.mockTest(test.id.toString()),
+        );
+      },
+    );
   }
 }
 

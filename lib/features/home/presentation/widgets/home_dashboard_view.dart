@@ -9,6 +9,7 @@ import 'package:rikipath_mobile/features/learning/domain/learner_journey.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
 import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_home_section.dart';
+import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
 import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
 
 class HomeDashboardView extends StatelessWidget {
@@ -18,6 +19,7 @@ class HomeDashboardView extends StatelessWidget {
     required this.learningState,
     required this.analyticsState,
     required this.practiceState,
+    required this.dailyReviewState,
     required this.upcomingMeetingState,
     required this.onRefreshLive,
     required this.onRetryHome,
@@ -41,6 +43,7 @@ class HomeDashboardView extends StatelessWidget {
   final AsyncValue<LearningSnapshot> learningState;
   final AsyncValue<LearnerAnalytics> analyticsState;
   final AsyncValue<DemoPracticeState> practiceState;
+  final AsyncValue<DailyReviewState> dailyReviewState;
   final AsyncValue<UpcomingMeeting?> upcomingMeetingState;
   final Future<void> Function() onRefreshLive;
   final VoidCallback onRetryHome;
@@ -97,6 +100,7 @@ class HomeDashboardView extends StatelessWidget {
           const SizedBox(height: AppSpacing.space5),
           _PracticeSections(
             state: practiceState,
+            dailyReviewState: dailyReviewState,
             onOpenReview: onOpenReview,
             onOpenPractice: onOpenPractice,
             onRetry: onRetryPractice,
@@ -479,12 +483,14 @@ class _AnalyticsSummary extends StatelessWidget {
 class _PracticeSections extends StatelessWidget {
   const _PracticeSections({
     required this.state,
+    required this.dailyReviewState,
     required this.onOpenReview,
     required this.onOpenPractice,
     required this.onRetry,
   });
 
   final AsyncValue<DemoPracticeState> state;
+  final AsyncValue<DailyReviewState> dailyReviewState;
   final VoidCallback onOpenReview;
   final VoidCallback onOpenPractice;
   final VoidCallback onRetry;
@@ -501,31 +507,13 @@ class _PracticeSections extends StatelessWidget {
         onRetry: onRetry,
       );
     }
-    final practice = state.requireValue;
-    final reviewAction = practice.reviewIndex > 0 && !practice.isReviewComplete
+    final dailyReview = dailyReviewState.value;
+    final reviewAction =
+        dailyReview != null &&
+            dailyReview.currentIndex > 0 &&
+            !dailyReview.isComplete
         ? context.l10n.homeResumeReview
         : context.l10n.homeReviewNow;
-    final result = practice.mockResult;
-    final practiceTitle = practice.hasActiveMockAttempt
-        ? context.l10n.homeResumeMock
-        : practice.hasRecentMockResult
-        ? context.l10n.homeRecentMockResult
-        : context.l10n.homePracticeTitle;
-    final practiceDescription = practice.hasActiveMockAttempt
-        ? context.l10n.homeResumeMockDescription
-        : result != null
-        ? context.l10n.homeRecentMockScore(
-            result.score,
-            result.total,
-            result.percentage,
-          )
-        : context.l10n.practiceJourneySubtitle;
-    final practiceAction = practice.hasActiveMockAttempt
-        ? context.l10n.continueAction
-        : practice.hasRecentMockResult
-        ? context.l10n.homeViewResult
-        : context.l10n.homeStartPractice;
-
     final cards = <Widget>[
       _ActionCard(
         key: const ValueKey<String>('home_daily_review_card'),
@@ -537,18 +525,12 @@ class _PracticeSections extends StatelessWidget {
         onPressed: onOpenReview,
       ),
       _ActionCard(
-        key: ValueKey<String>(
-          practice.hasActiveMockAttempt
-              ? 'home_resume_mock_card'
-              : practice.hasRecentMockResult
-              ? 'home_recent_mock_card'
-              : 'home_start_practice_card',
-        ),
+        key: const ValueKey<String>('home_start_practice_card'),
         icon: Icons.quiz_outlined,
         tone: AppFeatureTones.practice,
-        title: practiceTitle,
-        description: practiceDescription,
-        actionLabel: practiceAction,
+        title: context.l10n.homePracticeTitle,
+        description: context.l10n.practiceJourneySubtitle,
+        actionLabel: context.l10n.homeStartPractice,
         onPressed: onOpenPractice,
       ),
     ];

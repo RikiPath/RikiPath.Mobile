@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
-import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
-import 'package:rikipath_mobile/features/practice/domain/demo_practice.dart';
+import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
+import 'package:rikipath_mobile/features/practice/domain/daily_review.dart';
+import 'package:rikipath_mobile/features/practice/domain/review_quality.dart';
 
 class DailyReviewScreen extends ConsumerWidget {
   const DailyReviewScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final practice = ref.watch(demoPracticeControllerProvider);
+    final practice = ref.watch(dailyReviewControllerProvider);
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: AppBar(
@@ -26,11 +28,11 @@ class DailyReviewScreen extends ConsumerWidget {
         loading: () =>
             RikiFullScreenLoader(title: context.l10n.reviewLoadingTitle),
         error: (_, _) => _ReviewError(
-          onRetry: ref.read(demoPracticeControllerProvider.notifier).retry,
+          onRetry: ref.read(dailyReviewControllerProvider.notifier).retry,
         ),
-        data: (state) => state.reviewQueue.isEmpty
+        data: (state) => state.cards.isEmpty
             ? const _ReviewEmpty()
-            : state.isReviewComplete
+            : state.isComplete
             ? _ReviewSummary(state: state)
             : _ReviewCardView(state: state),
       ),
@@ -41,13 +43,13 @@ class DailyReviewScreen extends ConsumerWidget {
 class _ReviewCardView extends ConsumerWidget {
   const _ReviewCardView({required this.state});
 
-  final DemoPracticeState state;
+  final DailyReviewState state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final card = state.currentReviewCard!;
-    final current = state.reviewIndex + 1;
-    final total = state.reviewQueue.length;
+    final card = state.currentCard!;
+    final current = state.currentIndex + 1;
+    final total = state.cards.length;
     return ListView(
       key: const ValueKey<String>('daily_review_card_view'),
       padding: const EdgeInsets.fromLTRB(
@@ -90,7 +92,7 @@ class _ReviewCardView extends ConsumerWidget {
           child: Column(
             children: [
               Text(
-                card.contentType,
+                _contentTypeLabel(card.contentType),
                 style: AppTypography.badgeText.copyWith(
                   color: AppColors.brandPrimary,
                   fontWeight: FontWeight.w700,
@@ -104,7 +106,7 @@ class _ReviewCardView extends ConsumerWidget {
                   color: AppColors.learnerTextPrimary,
                 ),
               ),
-              if (state.isReviewAnswerVisible) ...[
+              if (state.isAnswerVisible) ...[
                 const SizedBox(height: AppSpacing.space3),
                 if (card.reading != null)
                   Text(card.reading!, style: AppTypography.cardTitle),
@@ -129,29 +131,68 @@ class _ReviewCardView extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.space5),
-        if (!state.isReviewAnswerVisible)
+        if (!state.isAnswerVisible)
           RikiPrimaryButton(
             key: const ValueKey<String>('review_reveal_button'),
             label: context.l10n.revealAnswer,
             onPressed: ref
-                .read(demoPracticeControllerProvider.notifier)
-                .revealReviewAnswer,
+                .read(dailyReviewControllerProvider.notifier)
+                .revealAnswer,
           )
-        else
+        else ...[
           _ReviewAnswerButtons(
-            onAnswer: ref
-                .read(demoPracticeControllerProvider.notifier)
-                .answerReview,
+            enabled: !state.isSubmitting && state.submitError == null,
+            onAnswer: ref.read(dailyReviewControllerProvider.notifier).submit,
           ),
+          if (state.isSubmitting) ...[
+            const SizedBox(height: AppSpacing.space3),
+            RikiInlineLoader(
+              key: const ValueKey<String>('review_submit_loading'),
+              semanticsLabel: context.l10n.loading,
+            ),
+          ],
+          if (state.submitError case final error?) ...[
+            const SizedBox(height: AppSpacing.space3),
+            RikiCard(
+              key: const ValueKey<String>('review_submit_error'),
+              borderColor: AppColors.errorBorder,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    appErrorMessage(
+                      error,
+                      context.l10n,
+                      fallback: context.l10n.checkConnectionRetry,
+                    ),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.errorText,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.space3),
+                  RikiSecondaryButton(
+                    key: const ValueKey<String>('review_submit_refresh'),
+                    label: context.l10n.retry,
+                    leadingIcon: Icons.refresh,
+                    onPressed: ref
+                        .read(dailyReviewControllerProvider.notifier)
+                        .retry,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ],
     );
   }
 }
 
 class _ReviewAnswerButtons extends StatelessWidget {
-  const _ReviewAnswerButtons({required this.onAnswer});
+  const _ReviewAnswerButtons({required this.enabled, required this.onAnswer});
 
-  final ValueChanged<DemoReviewAnswer> onAnswer;
+  final bool enabled;
+  final ValueChanged<ReviewRating> onAnswer;
 
   @override
   Widget build(BuildContext context) {
@@ -162,12 +203,12 @@ class _ReviewAnswerButtons extends StatelessWidget {
           spacing: AppSpacing.space2,
           runSpacing: AppSpacing.space2,
           children: [
-            for (final answer in DemoReviewAnswer.values)
+            for (final answer in ReviewRating.values)
               SizedBox(
                 width: itemWidth,
                 child: OutlinedButton.icon(
                   key: ValueKey<String>('review_answer_${answer.name}'),
-                  onPressed: () => onAnswer(answer),
+                  onPressed: enabled ? () => onAnswer(answer) : null,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: _foreground(answer),
                     backgroundColor: _background(answer),
@@ -183,40 +224,39 @@ class _ReviewAnswerButtons extends StatelessWidget {
     );
   }
 
-  IconData _icon(DemoReviewAnswer answer) => switch (answer) {
-    DemoReviewAnswer.again => Icons.replay,
-    DemoReviewAnswer.hard => Icons.fitness_center_outlined,
-    DemoReviewAnswer.good => Icons.thumb_up_alt_outlined,
-    DemoReviewAnswer.easy => Icons.auto_awesome_outlined,
+  IconData _icon(ReviewRating answer) => switch (answer) {
+    ReviewRating.again => Icons.replay,
+    ReviewRating.hard => Icons.fitness_center_outlined,
+    ReviewRating.good => Icons.thumb_up_alt_outlined,
+    ReviewRating.easy => Icons.auto_awesome_outlined,
   };
 
-  Color _foreground(DemoReviewAnswer answer) => switch (answer) {
-    DemoReviewAnswer.again => AppColors.errorText,
-    DemoReviewAnswer.hard => AppColors.warningText,
-    DemoReviewAnswer.good => AppColors.info,
-    DemoReviewAnswer.easy => AppColors.success,
+  Color _foreground(ReviewRating answer) => switch (answer) {
+    ReviewRating.again => AppColors.errorText,
+    ReviewRating.hard => AppColors.warningText,
+    ReviewRating.good => AppColors.info,
+    ReviewRating.easy => AppColors.success,
   };
 
-  Color _background(DemoReviewAnswer answer) => switch (answer) {
-    DemoReviewAnswer.again => AppColors.errorBackground,
-    DemoReviewAnswer.hard => AppColors.warningBackground,
-    DemoReviewAnswer.good => AppColors.infoBackground,
-    DemoReviewAnswer.easy => AppColors.successBackground,
+  Color _background(ReviewRating answer) => switch (answer) {
+    ReviewRating.again => AppColors.errorBackground,
+    ReviewRating.hard => AppColors.warningBackground,
+    ReviewRating.good => AppColors.infoBackground,
+    ReviewRating.easy => AppColors.successBackground,
   };
 
-  String _label(BuildContext context, DemoReviewAnswer answer) =>
-      switch (answer) {
-        DemoReviewAnswer.again => context.l10n.reviewAgain,
-        DemoReviewAnswer.hard => context.l10n.reviewHard,
-        DemoReviewAnswer.good => context.l10n.reviewGood,
-        DemoReviewAnswer.easy => context.l10n.reviewEasy,
-      };
+  String _label(BuildContext context, ReviewRating answer) => switch (answer) {
+    ReviewRating.again => context.l10n.reviewAgain,
+    ReviewRating.hard => context.l10n.reviewHard,
+    ReviewRating.good => context.l10n.reviewGood,
+    ReviewRating.easy => context.l10n.reviewEasy,
+  };
 }
 
 class _ReviewSummary extends ConsumerWidget {
   const _ReviewSummary({required this.state});
 
-  final DemoPracticeState state;
+  final DailyReviewState state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -243,7 +283,7 @@ class _ReviewSummary extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                context.l10n.reviewCompleteCount(state.reviewAnswers.length),
+                context.l10n.reviewCompleteCount(state.reviewedCount),
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySmall,
               ),
@@ -253,11 +293,11 @@ class _ReviewSummary extends ConsumerWidget {
                 spacing: AppSpacing.space2,
                 runSpacing: AppSpacing.space2,
                 children: [
-                  for (final answer in DemoReviewAnswer.values)
+                  for (final answer in ReviewRating.values)
                     _ReviewCountChip(
                       label: context.l10n.reviewResponseCount(
                         _answerLabel(context, answer),
-                        state.reviewSession.count(answer),
+                        state.count(answer),
                       ),
                     ),
                 ],
@@ -269,9 +309,7 @@ class _ReviewSummary extends ConsumerWidget {
         RikiSecondaryButton(
           label: context.l10n.reviewAgainAction,
           leadingIcon: Icons.replay,
-          onPressed: ref
-              .read(demoPracticeControllerProvider.notifier)
-              .restartReview,
+          onPressed: ref.read(dailyReviewControllerProvider.notifier).retry,
         ),
         const SizedBox(height: AppSpacing.space2),
         RikiPrimaryButton(
@@ -310,12 +348,19 @@ class _ReviewCountChip extends StatelessWidget {
   }
 }
 
-String _answerLabel(BuildContext context, DemoReviewAnswer answer) =>
+String _answerLabel(BuildContext context, ReviewRating answer) =>
     switch (answer) {
-      DemoReviewAnswer.again => context.l10n.reviewAgain,
-      DemoReviewAnswer.hard => context.l10n.reviewHard,
-      DemoReviewAnswer.good => context.l10n.reviewGood,
-      DemoReviewAnswer.easy => context.l10n.reviewEasy,
+      ReviewRating.again => context.l10n.reviewAgain,
+      ReviewRating.hard => context.l10n.reviewHard,
+      ReviewRating.good => context.l10n.reviewGood,
+      ReviewRating.easy => context.l10n.reviewEasy,
+    };
+
+String _contentTypeLabel(DailyReviewContentType contentType) =>
+    switch (contentType) {
+      DailyReviewContentType.vocabulary => 'Vocabulary',
+      DailyReviewContentType.kanji => 'Kanji',
+      DailyReviewContentType.grammar => 'Grammar',
     };
 
 class _ReviewEmpty extends StatelessWidget {

@@ -8,18 +8,25 @@ import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/storage/json_preference_store.dart';
+import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
+import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
 import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
 import 'package:rikipath_mobile/features/practice/data/fixture_demo_practice_repository.dart';
 import 'package:rikipath_mobile/features/practice/data/persistent_practice_session_repository.dart';
+import 'package:rikipath_mobile/features/practice/domain/daily_review.dart';
+import 'package:rikipath_mobile/features/practice/domain/daily_review_repository.dart';
 import 'package:rikipath_mobile/features/practice/domain/demo_practice.dart';
 import 'package:rikipath_mobile/features/practice/domain/demo_practice_repository.dart';
+import 'package:rikipath_mobile/features/practice/domain/review_quality.dart';
 import 'package:rikipath_mobile/features/practice/presentation/daily_review_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/mock_test_result_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/mock_test_screen.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 
 import '../../support/test_auth_session.dart';
 import '../../support/test_json_preference_store.dart';
+import '../../support/test_live_mock_data.dart';
 
 void main() {
   group('Daily Review hardening', () {
@@ -90,21 +97,17 @@ void main() {
       }
     });
 
-    test('8. no response calls Review submit-result', () {
+    test('8. live review integration uses the backend Review endpoints', () {
       final source = _practiceSource();
-      expect(source, isNot(contains('/api/Review/submit-result')));
-      expect(source, isNot(contains('submitReviewResult')));
+      expect(source, contains('/api/Review/daily-queue'));
+      expect(source, contains('/api/Review/submit-result'));
     });
 
-    test('9. no numeric Again mapping is introduced', () {
-      final source = File(
-        'lib/features/practice/application/demo_practice_controller.dart',
-      ).readAsStringSync();
-      expect(
-        RegExp(r'DemoReviewAnswer\.again\s*=>\s*[12]').hasMatch(source),
-        isFalse,
-      );
-      expect(DemoReviewAnswer.again.name, 'again');
+    test('9. semantic actions map to the confirmed backend qualities', () {
+      expect(ReviewRating.again.quality, 1);
+      expect(ReviewRating.hard.quality, 3);
+      expect(ReviewRating.good.quality, 4);
+      expect(ReviewRating.easy.quality, 5);
     });
 
     testWidgets('10. empty queue renders safely', (tester) async {
@@ -114,8 +117,8 @@ void main() {
             jsonPreferenceStoreProvider.overrideWithValue(
               TestJsonPreferenceStore(),
             ),
-            demoPracticeRepositoryProvider.overrideWithValue(
-              const _EmptyReviewRepository(),
+            dailyReviewRepositoryProvider.overrideWithValue(
+              const _DailyReviewRepository(empty: true),
             ),
           ],
           child: _localizedApp(const DailyReviewScreen()),
@@ -324,18 +327,14 @@ void main() {
     testWidgets('24. detailed review shows selected and correct answers', (
       tester,
     ) async {
-      final harness = await _startedHarness();
-      final question = harness.value.mockTest.questions.first;
-      await harness.controller.selectMockAnswer(
-        question.id,
-        question.options.first.id,
-      );
-      await harness.controller.submitMockTest();
+      final container = await _createLiveContainer(submitted: true);
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: harness.container,
+          container: container,
           child: _localizedApp(
-            MockTestDetailedReviewScreen(testId: harness.value.mockTest.id),
+            MockTestDetailedReviewScreen(
+              testId: testLiveMockSummary.id.toString(),
+            ),
           ),
         ),
       );
@@ -436,7 +435,7 @@ void main() {
       expect(controller, isNot(contains('ApiMockTestRepository')));
     });
 
-    test('32. semantic buttons never invoke Review submit endpoint', () {
+    test('32. fixture review buttons never invoke Review submit endpoint', () {
       final controller = File(
         'lib/features/practice/application/demo_practice_controller.dart',
       ).readAsStringSync();
@@ -451,7 +450,7 @@ void main() {
       expect(source, contains('localAttemptKey'));
     });
 
-    test('34. no backend quality is inferred from Again', () {
+    test('34. fixture review does not infer backend quality from Again', () {
       final controller = File(
         'lib/features/practice/application/demo_practice_controller.dart',
       ).readAsStringSync();
@@ -475,21 +474,19 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      final harness = await _startedHarness();
-      await harness.controller.showMockQuestion(
-        harness.value.mockTest.questions.length - 1,
-      );
+      final container = await _createLiveContainer();
+      container.read(mockTestControllerProvider.notifier).showQuestion(1);
       final session = createTestAuthSession();
       final router = createAppRouter(
         authSession: session,
-        initialLocation: AppRoutes.mockTest(harness.value.mockTest.id),
+        initialLocation: AppRoutes.mockTest(testLiveMockSummary.id.toString()),
       );
       addTearDown(session.dispose);
       addTearDown(router.dispose);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: harness.container,
+          container: container,
           child: MaterialApp.router(
             theme: AppTheme.light,
             routerConfig: router,
@@ -528,18 +525,26 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      final harness = await _createHarness();
-      await harness.controller.revealReviewAnswer();
+      final container = ProviderContainer(
+        overrides: [
+          dailyReviewRepositoryProvider.overrideWithValue(
+            const _DailyReviewRepository(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(dailyReviewControllerProvider.future);
+      container.read(dailyReviewControllerProvider.notifier).revealAnswer();
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: harness.container,
+          container: container,
           child: _localizedApp(const DailyReviewScreen()),
         ),
       );
       await tester.pump();
 
-      for (final answer in DemoReviewAnswer.values) {
+      for (final answer in ReviewRating.values) {
         expect(
           find.byKey(ValueKey<String>('review_answer_${answer.name}')),
           findsOneWidget,
@@ -553,14 +558,13 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      final harness = await _startedHarness();
-      await harness.controller.submitMockTest();
+      final container = await _createLiveContainer(submitted: true);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: harness.container,
+          container: container,
           child: _localizedApp(
-            MockTestResultScreen(testId: harness.value.mockTest.id),
+            MockTestResultScreen(testId: testLiveMockSummary.id.toString()),
           ),
         ),
       );
@@ -641,8 +645,7 @@ Future<_RouteHarness> _createSubmittedRouteHarness(WidgetTester tester) async {
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
-  final harness = await _startedHarness();
-  await harness.controller.submitMockTest();
+  final container = await _createLiveContainer(submitted: true);
   final session = createTestAuthSession();
   final router = createAppRouter(
     authSession: session,
@@ -652,12 +655,32 @@ Future<_RouteHarness> _createSubmittedRouteHarness(WidgetTester tester) async {
   addTearDown(router.dispose);
   await tester.pumpWidget(
     UncontrolledProviderScope(
-      container: harness.container,
+      container: container,
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );
   await tester.pumpAndSettle();
-  return _RouteHarness(router, harness.value.mockTest.id);
+  return _RouteHarness(router, testLiveMockSummary.id.toString());
+}
+
+Future<ProviderContainer> _createLiveContainer({bool submitted = false}) async {
+  final container = ProviderContainer(
+    overrides: [
+      mockTestRepositoryProvider.overrideWithValue(
+        TestLiveMockTestRepository(),
+      ),
+      userProfileRepositoryProvider.overrideWithValue(
+        const TestMockProfileRepository(),
+      ),
+    ],
+  );
+  addTearDown(container.dispose);
+  await container.read(mockTestControllerProvider.future);
+  final controller = container.read(mockTestControllerProvider.notifier);
+  controller.selectTest(testLiveMockSummary.id);
+  await controller.startSelectedTest();
+  if (submitted) await controller.submit();
+  return container;
 }
 
 Widget _localizedApp(Widget home) {
@@ -712,5 +735,49 @@ class _FailingReviewRepository extends _EmptyReviewRepository {
   @override
   Future<List<DemoReviewCard>> loadReviewQueue() {
     throw StateError('Live review queue failed.');
+  }
+}
+
+class _DailyReviewRepository implements DailyReviewRepository {
+  const _DailyReviewRepository({this.empty = false});
+
+  final bool empty;
+
+  @override
+  Future<DailyReviewQueue> loadDailyQueue() async {
+    if (empty) {
+      return const DailyReviewQueue(totalDue: 0, items: <DailyReviewCard>[]);
+    }
+    return DailyReviewQueue(
+      totalDue: 1,
+      items: <DailyReviewCard>[
+        DailyReviewCard(
+          reviewCardId: 481,
+          contentType: DailyReviewContentType.vocabulary,
+          term: '学ぶ',
+          reading: 'まなぶ',
+          meaning: 'học',
+          note: null,
+          repetitions: 0,
+          nextReviewDate: DateTime.utc(2026, 10, 21),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Future<DailyReviewSubmitResult> submitResult({
+    required int reviewCardId,
+    required int quality,
+  }) async {
+    return DailyReviewSubmitResult(
+      reviewCardId: reviewCardId,
+      qualitySubmitted: quality,
+      shouldRepeatInSession: false,
+      newEaseFactor: 2.5,
+      newIntervalDays: 1,
+      repetitions: 1,
+      nextReviewDate: DateTime.utc(2026, 10, 22),
+    );
   }
 }

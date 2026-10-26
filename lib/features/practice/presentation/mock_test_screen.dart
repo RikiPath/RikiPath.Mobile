@@ -7,8 +7,8 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
-import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
-import 'package:rikipath_mobile/features/practice/domain/demo_practice.dart';
+import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
+import 'package:rikipath_mobile/features/mock_test/domain/mock_test.dart';
 
 class MockTestScreen extends ConsumerStatefulWidget {
   const MockTestScreen({required this.testId, super.key});
@@ -21,7 +21,8 @@ class MockTestScreen extends ConsumerStatefulWidget {
 
 class _MockTestScreenState extends ConsumerState<MockTestScreen> {
   Timer? _timer;
-  bool _resultNavigationScheduled = false;
+
+  int? get _testId => int.tryParse(widget.testId);
 
   @override
   void dispose() {
@@ -31,19 +32,12 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
 
   void _ensureTimer() {
     if (_timer != null) return;
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
-      final state = ref.read(demoPracticeControllerProvider).value;
-      if (state == null || !state.hasActiveMockAttempt) {
+      final state = ref.read(mockTestControllerProvider).value;
+      if (state?.hasActiveAttempt != true) {
         _timer?.cancel();
         _timer = null;
-        return;
-      }
-      final didFinish = await ref
-          .read(demoPracticeControllerProvider.notifier)
-          .finalizeExpiredMockTest();
-      if (didFinish) {
-        _scheduleResultNavigation(state.mockTest.id);
         return;
       }
       setState(() {});
@@ -52,9 +46,10 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final practice = ref.watch(demoPracticeControllerProvider);
+    final flow = ref.watch(mockTestControllerProvider);
+    final active = flow.value;
     return PopScope(
-      canPop: practice.value?.hasActiveMockAttempt != true,
+      canPop: active?.hasActiveAttempt != true || active?.result != null,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final shouldLeave = await _confirmLeave();
@@ -66,8 +61,8 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
           title: Text(context.l10n.mockTestTitle),
           leading: IconButton(
             onPressed: () async {
-              final state = practice.value;
-              if (state?.hasActiveMockAttempt == true &&
+              if (active?.hasActiveAttempt == true &&
+                  active?.result == null &&
                   !await _confirmLeave()) {
                 return;
               }
@@ -76,53 +71,65 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
             icon: const Icon(Icons.arrow_back),
           ),
         ),
-        body: practice.when(
+        body: flow.when(
           loading: () =>
               RikiFullScreenLoader(title: context.l10n.mockLoadingTitle),
           error: (_, _) => RikiErrorState(
             title: context.l10n.mockLoadFailed,
             message: context.l10n.checkConnectionRetry,
             actionLabel: context.l10n.retry,
-            onAction: ref.read(demoPracticeControllerProvider.notifier).retry,
+            onAction: ref
+                .read(mockTestControllerProvider.notifier)
+                .retryCatalog,
           ),
           data: (state) {
-            if (state.mockTest.id != widget.testId) {
+            final testId = _testId;
+            final test = state.tests
+                .where((candidate) => candidate.id == testId)
+                .firstOrNull;
+            if (test == null) {
               return RikiEmptyState(
                 icon: Icons.assignment_late_outlined,
                 title: context.l10n.mockTestTitle,
                 message: context.l10n.mockTestUnavailable,
               );
             }
-            if (state.mockAttempt?.status == DemoMockSessionStatus.submitted) {
-              final testPath = AppRoutes.mockTest(state.mockTest.id);
-              if (GoRouterState.of(context).uri.path == testPath) {
-                _scheduleResultNavigation(state.mockTest.id);
-              }
+
+            if (state.selectedTest?.id != test.id) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  ref
+                      .read(mockTestControllerProvider.notifier)
+                      .selectTest(test.id);
+                }
+              });
+              return RikiFullScreenLoader(title: context.l10n.mockLoadingTitle);
+            }
+
+            if (state.result != null) {
               return const SizedBox.shrink();
             }
-            if (!state.hasActiveMockAttempt) {
-              return _MockInstructions(
-                state: state,
-                onStart: () async {
-                  await ref
-                      .read(demoPracticeControllerProvider.notifier)
-                      .startMockTest();
-                  _ensureTimer();
-                },
-              );
+            if (!state.hasActiveAttempt) {
+              return _MockInstructions(state: state, onStart: _start);
             }
+
             _ensureTimer();
             return _MockQuestionView(
               state: state,
-              remaining: state.remainingMockTime(
-                ref.read(practiceNowProvider)(),
-              ),
+              remaining: state.remainingAt(ref.read(mockTestNowProvider)()),
               onSubmit: _confirmSubmit,
             );
           },
         ),
       ),
     );
+  }
+
+  Future<void> _start() async {
+    final started = await ref
+        .read(mockTestControllerProvider.notifier)
+        .startSelectedTest();
+    if (started) _ensureTimer();
   }
 
   Future<bool> _confirmLeave() async {
@@ -146,34 +153,29 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
       cancelLabel: context.l10n.cancel,
       icon: Icons.task_alt_outlined,
     );
-    if (shouldSubmit != true) return;
-    await ref.read(demoPracticeControllerProvider.notifier).submitMockTest();
-    _scheduleResultNavigation(widget.testId);
-  }
+    if (shouldSubmit != true || !mounted) return;
 
-  void _scheduleResultNavigation(String testId) {
-    if (_resultNavigationScheduled || !mounted) return;
-    _resultNavigationScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _openResult(testId));
-  }
-
-  void _openResult(String testId) {
-    _timer?.cancel();
-    _timer = null;
+    final outcome = await ref
+        .read(mockTestControllerProvider.notifier)
+        .submit();
     if (!mounted) return;
-    context.pushReplacement(AppRoutes.mockTestResult(testId));
+    if (outcome != MockTestSubmitOutcome.failed) {
+      _timer?.cancel();
+      _timer = null;
+      context.pushReplacement(AppRoutes.mockTestResult(widget.testId));
+    }
   }
 }
 
 class _MockInstructions extends StatelessWidget {
   const _MockInstructions({required this.state, required this.onStart});
 
-  final DemoPracticeState state;
+  final MockTestFlowState state;
   final VoidCallback onStart;
 
   @override
   Widget build(BuildContext context) {
-    final test = state.mockTest;
+    final test = state.selectedTest!;
     return ListView(
       key: const ValueKey<String>('mock_test_instructions'),
       padding: const EdgeInsets.all(AppSpacing.space4),
@@ -183,22 +185,26 @@ class _MockInstructions extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(test.level, style: AppTypography.badgeText),
+              Text(test.jlptLevelName, style: AppTypography.badgeText),
               const SizedBox(height: AppSpacing.space2),
               Text(test.title, style: AppTypography.pageTitle),
+              if (test.description.trim().isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.space2),
+                Text(
+                  test.description,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.learnerTextSecondary,
+                  ),
+                ),
+              ],
               const SizedBox(height: AppSpacing.space4),
               _InfoRow(
                 icon: Icons.schedule_outlined,
                 label: context.l10n.mockMinutes(test.timeLimitMinutes),
               ),
-              const SizedBox(height: AppSpacing.space2),
-              _InfoRow(
-                icon: Icons.quiz_outlined,
-                label: context.l10n.mockQuestionCount(test.questions.length),
-              ),
               const SizedBox(height: AppSpacing.space4),
               Text(
-                context.l10n.mockLocalScoringNotice,
+                context.l10n.mockBackendScoringNotice,
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.learnerTextSecondary,
                 ),
@@ -206,12 +212,18 @@ class _MockInstructions extends StatelessWidget {
             ],
           ),
         ),
+        if (state.actionIssue != null) ...[
+          const SizedBox(height: AppSpacing.space3),
+          _MockActionError(issue: state.actionIssue!),
+        ],
         const SizedBox(height: AppSpacing.space4),
         RikiPrimaryButton(
           key: const ValueKey<String>('mock_test_start_button'),
           label: context.l10n.startMockTest,
+          loadingLabel: context.l10n.mockStarting,
+          isLoading: state.isStarting,
           trailingIcon: Icons.arrow_forward,
-          onPressed: onStart,
+          onPressed: state.isStarting ? null : onStart,
         ),
       ],
     );
@@ -225,16 +237,17 @@ class _MockQuestionView extends ConsumerWidget {
     required this.onSubmit,
   });
 
-  final DemoPracticeState state;
+  final MockTestFlowState state;
   final Duration remaining;
   final VoidCallback onSubmit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(demoPracticeControllerProvider.notifier);
-    final question = state.currentMockQuestion;
-    final index = state.currentMockQuestionIndex;
-    final total = state.mockTest.questions.length;
+    final controller = ref.read(mockTestControllerProvider.notifier);
+    final attempt = state.attempt!;
+    final question = state.currentQuestion!;
+    final index = attempt.currentQuestionIndex;
+    final total = attempt.questions.length;
     return ListView(
       key: const ValueKey<String>('mock_test_question_view'),
       padding: const EdgeInsets.all(AppSpacing.space4),
@@ -263,27 +276,41 @@ class _MockQuestionView extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                question.section,
+                question.sectionTitle,
                 style: AppTypography.badgeText.copyWith(
                   color: AppColors.brandPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: AppSpacing.space3),
-              Text(question.prompt, style: AppTypography.sectionTitle),
+              Text(question.content, style: AppTypography.sectionTitle),
+              if (question.imageUrl != null || question.audioUrl != null) ...[
+                const SizedBox(height: AppSpacing.space2),
+                Text(
+                  context.l10n.mockMediaAvailable,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.learnerTextSecondary,
+                  ),
+                ),
+              ],
               const SizedBox(height: AppSpacing.space4),
               for (final option in question.options) ...[
                 _MockOptionTile(
                   option: option,
-                  selected: state.mockAnswers[question.id] == option.id,
-                  onTap: () =>
-                      controller.selectMockAnswer(question.id, option.id),
+                  selected: attempt.answers[question.id] == option.id,
+                  onTap: state.isSubmitting
+                      ? null
+                      : () => controller.selectAnswer(question.id, option.id),
                 ),
                 const SizedBox(height: AppSpacing.space2),
               ],
             ],
           ),
         ),
+        if (state.actionIssue != null) ...[
+          const SizedBox(height: AppSpacing.space3),
+          _MockActionError(issue: state.actionIssue!),
+        ],
         const SizedBox(height: AppSpacing.space4),
         Row(
           children: [
@@ -291,9 +318,9 @@ class _MockQuestionView extends ConsumerWidget {
               child: RikiSecondaryButton(
                 label: context.l10n.previousQuestion,
                 leadingIcon: Icons.arrow_back,
-                onPressed: index == 0
+                onPressed: index == 0 || state.isSubmitting
                     ? null
-                    : () => controller.showMockQuestion(index - 1),
+                    : () => controller.showQuestion(index - 1),
               ),
             ),
             const SizedBox(width: AppSpacing.space3),
@@ -302,12 +329,16 @@ class _MockQuestionView extends ConsumerWidget {
                   ? RikiPrimaryButton(
                       key: const ValueKey<String>('mock_test_submit_button'),
                       label: context.l10n.submitAction,
-                      onPressed: onSubmit,
+                      loadingLabel: context.l10n.mockSubmitting,
+                      isLoading: state.isSubmitting,
+                      onPressed: state.isSubmitting ? null : onSubmit,
                     )
                   : RikiPrimaryButton(
                       label: context.l10n.nextQuestion,
                       trailingIcon: Icons.arrow_forward,
-                      onPressed: () => controller.showMockQuestion(index + 1),
+                      onPressed: state.isSubmitting
+                          ? null
+                          : () => controller.showQuestion(index + 1),
                     ),
             ),
           ],
@@ -324,9 +355,9 @@ class _MockOptionTile extends StatelessWidget {
     required this.onTap,
   });
 
-  final DemoMockOption option;
+  final LiveMockTestOption option;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -356,11 +387,37 @@ class _MockOptionTile extends StatelessWidget {
                 color: selected ? AppColors.brandPrimary : AppColors.textMuted,
               ),
               const SizedBox(width: AppSpacing.space3),
-              Expanded(child: Text(option.label)),
+              Expanded(child: Text(option.content)),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _MockActionError extends ConsumerWidget {
+  const _MockActionError({required this.issue});
+
+  final MockTestActionIssue issue;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final message = switch (issue) {
+      MockTestActionIssue.expired => context.l10n.mockExpired,
+      MockTestActionIssue.alreadyCompleted => context.l10n.mockAlreadyCompleted,
+      MockTestActionIssue.networkUncertain => context.l10n.mockNetworkUncertain,
+      MockTestActionIssue.conflict => context.l10n.mockAttemptConflict,
+      MockTestActionIssue.notFound => context.l10n.mockTestUnavailable,
+      MockTestActionIssue.validation => context.l10n.mockValidationFailed,
+      MockTestActionIssue.unknown => context.l10n.mockSubmitFailed,
+    };
+    return RikiErrorState(
+      key: ValueKey<String>('mock_action_error_${issue.name}'),
+      title: context.l10n.mockActionFailed,
+      message: message,
+      actionLabel: context.l10n.close,
+      onAction: ref.read(mockTestControllerProvider.notifier).clearActionIssue,
     );
   }
 }

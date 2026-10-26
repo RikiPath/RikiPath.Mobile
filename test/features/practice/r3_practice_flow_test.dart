@@ -7,10 +7,12 @@ import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
-import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
+import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
 import 'package:rikipath_mobile/features/practice/presentation/mock_test_result_screen.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 
 import '../../support/test_auth_session.dart';
+import '../../support/test_live_mock_data.dart';
 
 void main() {
   test(
@@ -27,7 +29,7 @@ void main() {
     },
   );
 
-  testWidgets('mock result opens detailed review and keeps local answers', (
+  testWidgets('live result opens backend detailed review and keeps IDs', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -40,23 +42,25 @@ void main() {
       authSession: session,
       initialLocation: AppRoutes.practice,
     );
-    final container = ProviderContainer();
+    final repository = TestLiveMockTestRepository();
+    final container = ProviderContainer(
+      overrides: [
+        mockTestRepositoryProvider.overrideWithValue(repository),
+        userProfileRepositoryProvider.overrideWithValue(
+          const TestMockProfileRepository(),
+        ),
+      ],
+    );
     addTearDown(session.dispose);
     addTearDown(router.dispose);
     addTearDown(container.dispose);
 
-    await container.read(demoPracticeControllerProvider.future);
-    final controller = container.read(demoPracticeControllerProvider.notifier);
-    final fixture = container
-        .read(demoPracticeControllerProvider)
-        .requireValue
-        .mockTest;
-    controller.startMockTest();
-    controller.selectMockAnswer(
-      fixture.questions.first.id,
-      fixture.questions.first.correctOptionId,
-    );
-    controller.submitMockTest();
+    await container.read(mockTestControllerProvider.future);
+    final controller = container.read(mockTestControllerProvider.notifier);
+    controller.selectTest(testLiveMockSummary.id);
+    await controller.startSelectedTest();
+    controller.selectAnswer(1201, 4402);
+    await controller.submit();
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -64,7 +68,7 @@ void main() {
         child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
       ),
     );
-    router.go(AppRoutes.mockTestResult(fixture.id));
+    router.go(AppRoutes.mockTestResult(testLiveMockSummary.id.toString()));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -88,10 +92,11 @@ void main() {
     );
     expect(
       container
-          .read(demoPracticeControllerProvider)
+          .read(mockTestControllerProvider)
           .requireValue
-          .mockAnswers[fixture.questions.first.id],
-      fixture.questions.first.correctOptionId,
+          .attempt!
+          .answers[1201],
+      4402,
     );
 
     router.pop();

@@ -1,5 +1,14 @@
 enum ReviewRating { again, hard, good, easy }
 
+extension ReviewRatingSubmission on ReviewRating {
+  int get quality => switch (this) {
+    ReviewRating.again => 1,
+    ReviewRating.hard => 3,
+    ReviewRating.good => 4,
+    ReviewRating.easy => 5,
+  };
+}
+
 /// Maps the backend's five numeric quality values to its persisted four-value
 /// rating label. This is deliberately not an inverse UI-button mapping:
 /// qualities 1 and 2 both persist as `Again` but change ease factor differently.
