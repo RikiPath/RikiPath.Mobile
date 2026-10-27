@@ -7,6 +7,8 @@ import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/login_controller.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_page.dart';
 import 'package:rikipath_mobile/features/meeting/application/meeting_join_intent_controller.dart';
 
@@ -43,7 +45,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final hasPendingMeeting = ref
           .read(meetingJoinIntentControllerProvider)
           .hasPendingTarget;
-      context.go(hasPendingMeeting ? AppRoutes.meetingJoin : AppRoutes.home);
+      final role = ref.read(authSessionControllerProvider).currentRole;
+      context.go(
+        hasPendingMeeting
+            ? AppRoutes.meetingJoin
+            : role == BackendUserRole.learner
+            ? AppRoutes.learnerStartup
+            : AppRoutes.home,
+      );
     }
   }
 

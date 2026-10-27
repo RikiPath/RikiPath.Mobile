@@ -175,6 +175,8 @@ class NotebookEntry {
     this.reading,
     this.note,
     this.vocabularyRouteKey,
+    this.sourceVocabularyId,
+    this.sourceKanjiId,
   });
 
   final NotebookEntryKey key;
@@ -190,6 +192,8 @@ class NotebookEntry {
   /// Present only when a data source can prove the corresponding vocabulary
   /// route identity. The current Notebook API response does not expose it.
   final String? vocabularyRouteKey;
+  final int? sourceVocabularyId;
+  final int? sourceKanjiId;
 
   String get routeKey => key.encoded;
 
@@ -199,7 +203,11 @@ class NotebookEntry {
       ? NotebookDataSource.remote
       : NotebookDataSource.fixture;
 
-  NotebookEntry copyWith({String? vocabularyRouteKey}) {
+  NotebookEntry copyWith({
+    String? vocabularyRouteKey,
+    int? sourceVocabularyId,
+    int? sourceKanjiId,
+  }) {
     return NotebookEntry(
       key: key,
       remoteNoteEntryId: remoteNoteEntryId,
@@ -211,6 +219,8 @@ class NotebookEntry {
       note: note,
       addedAt: addedAt,
       vocabularyRouteKey: vocabularyRouteKey ?? this.vocabularyRouteKey,
+      sourceVocabularyId: sourceVocabularyId ?? this.sourceVocabularyId,
+      sourceKanjiId: sourceKanjiId ?? this.sourceKanjiId,
     );
   }
 }
@@ -249,6 +259,21 @@ class NotebookVocabularyDraft {
   final String meaning;
   final String? jlptLevel;
   final String? exampleSentence;
+}
+
+@immutable
+class NotebookKanjiDraft {
+  const NotebookKanjiDraft({
+    required this.remoteId,
+    required this.character,
+    required this.meaning,
+    this.reading,
+  });
+
+  final int remoteId;
+  final String character;
+  final String meaning;
+  final String? reading;
 }
 
 @immutable

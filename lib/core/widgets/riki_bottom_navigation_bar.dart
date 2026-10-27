@@ -47,7 +47,7 @@ class RikiBottomNavigationBar extends StatelessWidget {
     return DecoratedBox(
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.border)),
+        border: Border(top: BorderSide(color: AppColors.cardBorderSubtle)),
         boxShadow: AppShadows.learnerBottomNavigation,
       ),
       child: Material(

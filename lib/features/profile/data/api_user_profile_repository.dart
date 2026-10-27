@@ -7,7 +7,11 @@ import 'package:rikipath_mobile/features/profile/data/user_profile_mapper.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 
-class ApiUserProfileRepository implements UserProfileRepository {
+class ApiUserProfileRepository
+    implements
+        UserProfileRepository,
+        TargetExamDateProfileRepository,
+        StudyLevelProfileRepository {
   const ApiUserProfileRepository(this._apiClient);
 
   final ApiClient _apiClient;
@@ -62,6 +66,38 @@ class ApiUserProfileRepository implements UserProfileRepository {
     final response = await _apiClient.post<Object?>(
       UserProfileApiPaths.jlptGoal,
       data: request.toJson(),
+    );
+    return _readProfile(response.data);
+  }
+
+  @override
+  Future<UserProfile> setJlptGoalWithExamDate({
+    required int targetJlptLevelId,
+    required int dailyStudyMinutes,
+    required DateTime targetExamDate,
+  }) async {
+    final request = SetJlptGoalRequestDto(
+      targetJlptLevelId: targetJlptLevelId,
+      dailyStudyMinutes: dailyStudyMinutes,
+      targetExamDate: targetExamDate,
+    );
+    final response = await _apiClient.post<Object?>(
+      UserProfileApiPaths.jlptGoal,
+      data: request.toJson(),
+    );
+    return _readProfile(response.data);
+  }
+
+  @override
+  Future<UserProfile> switchStudyLevel({
+    required int currentStudyLevelId,
+  }) async {
+    final response = await _apiClient.put<Object?>(
+      UserProfileApiPaths.studyLevel,
+      data: <String, Object?>{
+        'currentStudyLevelId': currentStudyLevelId,
+        'confirmed': true,
+      },
     );
     return _readProfile(response.data);
   }

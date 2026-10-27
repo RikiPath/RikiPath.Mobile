@@ -4,12 +4,14 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_shared_widgets.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LessonDetailView extends StatelessWidget {
   const LessonDetailView({
     required this.lesson,
     required this.onStart,
     required this.onToggleBookmark,
+    required this.onToggleKanji,
     required this.onToggleGrammar,
     super.key,
   });
@@ -17,6 +19,7 @@ class LessonDetailView extends StatelessWidget {
   final Lesson lesson;
   final VoidCallback onStart;
   final ValueChanged<int> onToggleBookmark;
+  final ValueChanged<int> onToggleKanji;
   final ValueChanged<int> onToggleGrammar;
 
   @override
@@ -35,45 +38,78 @@ class LessonDetailView extends StatelessWidget {
         _ObjectiveCard(objective: lesson.objective),
         const SizedBox(height: AppSpacing.space4),
         _StreakCard(lesson: lesson),
-        const SizedBox(height: AppSpacing.space5),
-        _SectionHeader(
-          title: context.l10n.lessonContentCount(lesson.parts.length),
-          trailing: context.l10n.totalDuration(lesson.durationMinutes),
-        ),
-        const SizedBox(height: AppSpacing.space3),
-        for (var index = 0; index < lesson.parts.length; index++) ...[
-          _LessonPartTile(part: lesson.parts[index]),
-          if (index != lesson.parts.length - 1)
-            const SizedBox(height: AppSpacing.space2),
-        ],
-        const SizedBox(height: AppSpacing.space5),
-        _SectionHeader(
-          title: context.l10n.focusVocabulary,
-          trailing: context.l10n.vocabularyCount(lesson.detailVocabularyCount),
-        ),
-        const SizedBox(height: AppSpacing.space3),
-        for (
-          var index = 0;
-          index < lesson.vocabulary.take(2).length;
-          index++
-        ) ...[
-          LessonVocabularyTile(
-            item: lesson.vocabulary[index],
-            onBookmark: () => onToggleBookmark(index),
+        if (lesson.parts.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.space5),
+          _SectionHeader(
+            title: context.l10n.lessonContentCount(lesson.parts.length),
+            trailing: context.l10n.totalDuration(lesson.durationMinutes),
           ),
-          if (index != lesson.vocabulary.take(2).length - 1)
-            const SizedBox(height: AppSpacing.space2),
+          const SizedBox(height: AppSpacing.space3),
+          for (var index = 0; index < lesson.parts.length; index++) ...[
+            _LessonPartTile(part: lesson.parts[index]),
+            if (index != lesson.parts.length - 1)
+              const SizedBox(height: AppSpacing.space2),
+          ],
         ],
-        const SizedBox(height: AppSpacing.space5),
-        _SectionHeader(title: context.l10n.relatedGrammarShort),
-        const SizedBox(height: AppSpacing.space3),
-        for (var index = 0; index < lesson.relatedGrammar.length; index++) ...[
-          _RelatedGrammarCard(
-            grammar: lesson.relatedGrammar[index],
-            onBookmark: () => onToggleGrammar(index),
+        if (lesson.vocabulary.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.space5),
+          _SectionHeader(
+            title: context.l10n.focusVocabulary,
+            trailing: context.l10n.vocabularyCount(
+              lesson.detailVocabularyCount,
+            ),
           ),
-          if (index != lesson.relatedGrammar.length - 1)
-            const SizedBox(height: AppSpacing.space2),
+          const SizedBox(height: AppSpacing.space3),
+          for (var index = 0; index < lesson.vocabulary.length; index++) ...[
+            LessonVocabularyTile(
+              item: lesson.vocabulary[index],
+              onBookmark: () => onToggleBookmark(index),
+            ),
+            if (index != lesson.vocabulary.length - 1)
+              const SizedBox(height: AppSpacing.space2),
+          ],
+        ],
+        if (lesson.kanji.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.space5),
+          _SectionHeader(
+            title: context.l10n.notebookKanjiLabel,
+            trailing: context.l10n.kanjiCount(lesson.kanji.length),
+          ),
+          const SizedBox(height: AppSpacing.space3),
+          for (var index = 0; index < lesson.kanji.length; index++) ...[
+            _LessonKanjiCard(
+              item: lesson.kanji[index],
+              onBookmark: () => onToggleKanji(index),
+            ),
+            if (index != lesson.kanji.length - 1)
+              const SizedBox(height: AppSpacing.space2),
+          ],
+        ],
+        if (lesson.relatedGrammar.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.space5),
+          _SectionHeader(title: context.l10n.relatedGrammarShort),
+          const SizedBox(height: AppSpacing.space3),
+          for (
+            var index = 0;
+            index < lesson.relatedGrammar.length;
+            index++
+          ) ...[
+            _RelatedGrammarCard(
+              grammar: lesson.relatedGrammar[index],
+              onBookmark: () => onToggleGrammar(index),
+            ),
+            if (index != lesson.relatedGrammar.length - 1)
+              const SizedBox(height: AppSpacing.space2),
+          ],
+        ],
+        if (lesson.attachmentUrl != null) ...[
+          const SizedBox(height: AppSpacing.space4),
+          OutlinedButton.icon(
+            key: const ValueKey<String>('lesson_attachment_button'),
+            onPressed: () => _openAttachment(context, lesson.attachmentUrl!),
+            icon: const Icon(Icons.attach_file),
+            label: Text(context.l10n.lessonAttachment),
+          ),
         ],
         const SizedBox(height: AppSpacing.space5),
         RikiPrimaryButton(
@@ -88,6 +124,15 @@ class LessonDetailView extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _openAttachment(BuildContext context, Uri uri) async {
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.openAttachmentFailed)),
+      );
+    }
   }
 }
 
@@ -396,6 +441,64 @@ class _RelatedGrammarCard extends StatelessWidget {
             color: AppColors.brandPrimary,
             icon: Icon(
               grammar.isSaved
+                  ? Icons.bookmark_added_outlined
+                  : Icons.bookmark_add_outlined,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LessonKanjiCard extends StatelessWidget {
+  const _LessonKanjiCard({required this.item, required this.onBookmark});
+
+  final LessonKanjiItem item;
+  final VoidCallback onBookmark;
+
+  @override
+  Widget build(BuildContext context) {
+    final readings = <String>[
+      if (item.onYomi?.trim().isNotEmpty == true) item.onYomi!.trim(),
+      if (item.kunYomi?.trim().isNotEmpty == true) item.kunYomi!.trim(),
+    ].join(' • ');
+    return RikiCard(
+      padding: const EdgeInsets.all(AppSpacing.space3),
+      boxShadow: const <BoxShadow>[],
+      child: Row(
+        children: [
+          Text(
+            item.character,
+            style: AppTypography.pageTitle.copyWith(
+              color: AppColors.brandPrimary,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.space3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.meaning, style: AppTypography.cardTitle),
+                if (readings.isNotEmpty)
+                  Text(
+                    readings,
+                    style: AppTypography.metadata.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          IconButton(
+            key: ValueKey<String>('lesson_kanji_bookmark_${item.kanjiId}'),
+            tooltip: item.isSaved
+                ? context.l10n.saved
+                : context.l10n.saveToNotebook,
+            onPressed: item.isSaved ? null : onBookmark,
+            color: AppColors.brandPrimary,
+            icon: Icon(
+              item.isSaved
                   ? Icons.bookmark_added_outlined
                   : Icons.bookmark_add_outlined,
             ),

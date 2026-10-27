@@ -58,7 +58,7 @@ void main() {
           role: BackendUserRole.learner,
           matchedLocation: AppRoutes.mentorMeetings,
         ),
-        AppRoutes.home,
+        AppRoutes.learnerStartup,
       );
     });
 

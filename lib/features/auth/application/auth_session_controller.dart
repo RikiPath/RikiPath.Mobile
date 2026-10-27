@@ -85,9 +85,15 @@ class AuthSessionController extends ValueNotifier<AuthSessionState> {
 
   void markAuthenticated({required int userId, required BackendUserRole role}) {
     _operation += 1;
+    final identityChanged =
+        _currentUserId != userId || _currentRole != role;
     _currentUserId = userId;
     _currentRole = role;
-    value = AuthSessionState.authenticated;
+    if (value == AuthSessionState.authenticated) {
+      if (identityChanged) notifyListeners();
+    } else {
+      value = AuthSessionState.authenticated;
+    }
   }
 
   Future<void> signOut() async {

@@ -260,6 +260,12 @@ abstract class AppLocalizations {
   /// **'Hủy'**
   String get cancel;
 
+  /// No description provided for @confirm.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận'**
+  String get confirm;
+
   /// No description provided for @save.
   ///
   /// In vi, this message translates to:
@@ -1658,6 +1664,114 @@ abstract class AppLocalizations {
   /// **'Rời thiết lập'**
   String get leaveSetup;
 
+  /// No description provided for @onboardingPlacementChoiceTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn cách bắt đầu học'**
+  String get onboardingPlacementChoiceTitle;
+
+  /// No description provided for @onboardingPlacementChoiceDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bài đánh giá là tùy chọn. Bạn có thể bỏ qua và tự chọn cấp độ đang học.'**
+  String get onboardingPlacementChoiceDescription;
+
+  /// No description provided for @onboardingSkipPlacement.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bỏ qua bài đánh giá'**
+  String get onboardingSkipPlacement;
+
+  /// No description provided for @onboardingStudyLevelsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn cấp độ học và mục tiêu'**
+  String get onboardingStudyLevelsTitle;
+
+  /// No description provided for @onboardingStudyLevelsDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn cấp độ bạn đang học trước, sau đó chọn mục tiêu JLPT riêng.'**
+  String get onboardingStudyLevelsDescription;
+
+  /// No description provided for @onboardingCurrentStudyLevelTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cấp độ bạn đang học'**
+  String get onboardingCurrentStudyLevelTitle;
+
+  /// No description provided for @onboardingCurrentStudyLevelDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lộ trình chuẩn hiện hỗ trợ từ N5 đến N3.'**
+  String get onboardingCurrentStudyLevelDescription;
+
+  /// No description provided for @onboardingTargetJlptTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu JLPT'**
+  String get onboardingTargetJlptTitle;
+
+  /// No description provided for @onboardingTargetJlptDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu thi độc lập với cấp độ bạn đang học.'**
+  String get onboardingTargetJlptDescription;
+
+  /// No description provided for @onboardingPlacementCanTakeLater.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn vẫn có thể làm bài đánh giá sau trong Hồ sơ.'**
+  String get onboardingPlacementCanTakeLater;
+
+  /// No description provided for @standardRoadmapTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lộ trình học chuẩn'**
+  String get standardRoadmapTitle;
+
+  /// No description provided for @standardRoadmapProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiến độ chuẩn: {completed}/{total} bài'**
+  String standardRoadmapProgress(int completed, int total);
+
+  /// No description provided for @standardRoadmapNextLesson.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bài tiếp theo'**
+  String get standardRoadmapNextLesson;
+
+  /// No description provided for @aiPersonalizedPathTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lộ trình cá nhân hóa bằng AI'**
+  String get aiPersonalizedPathTitle;
+
+  /// No description provided for @aiPlacementRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hoàn thành bài Placement để mở khóa tạo lộ trình AI. Bạn vẫn có thể tiếp tục học theo lộ trình chuẩn.'**
+  String get aiPlacementRequired;
+
+  /// No description provided for @aiLearningGoalRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Placement đã hoàn tất. Hãy lưu mục tiêu JLPT và thông tin học tập hợp lệ để tạo lộ trình AI.'**
+  String get aiLearningGoalRequired;
+
+  /// No description provided for @changeStudyLevelTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi cấp độ đang học?'**
+  String get changeStudyLevelTitle;
+
+  /// No description provided for @changeStudyLevelConfirmation.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cấp độ lộ trình chuẩn sẽ được cập nhật. Mục tiêu JLPT, ngày thi, thời lượng học, tiến độ và lịch sử vẫn được giữ nguyên.'**
+  String get changeStudyLevelConfirmation;
+
   /// No description provided for @onboardingJlptTitle.
   ///
   /// In vi, this message translates to:
@@ -2623,6 +2737,72 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đang tải lộ trình'**
   String get loadingRoadmap;
+
+  /// No description provided for @generateLearningPath.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tạo lộ trình cá nhân hóa'**
+  String get generateLearningPath;
+
+  /// No description provided for @regenerateLearningPath.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tạo lại lộ trình'**
+  String get regenerateLearningPath;
+
+  /// No description provided for @generatingLearningPath.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tạo lộ trình cá nhân hóa…'**
+  String get generatingLearningPath;
+
+  /// No description provided for @recommendedLearningPathTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lộ trình đề xuất'**
+  String get recommendedLearningPathTitle;
+
+  /// No description provided for @learningPathRequirements.
+  ///
+  /// In vi, this message translates to:
+  /// **'Để tạo lộ trình cá nhân hóa bằng AI, hãy hoàn thành bài đánh giá đầu vào và thiết lập mục tiêu JLPT. Bạn vẫn có thể học theo lộ trình chuẩn mà không cần đánh giá.'**
+  String get learningPathRequirements;
+
+  /// No description provided for @learningPathGenerateFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa thể tạo lộ trình cá nhân hóa. Vui lòng thử lại.'**
+  String get learningPathGenerateFailed;
+
+  /// No description provided for @learningPathDay.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày {day}'**
+  String learningPathDay(int day);
+
+  /// No description provided for @learningPathLessonCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} bài học'**
+  String learningPathLessonCount(int count);
+
+  /// No description provided for @recommendedNextLessonAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học bài được đề xuất tiếp theo'**
+  String get recommendedNextLessonAction;
+
+  /// No description provided for @lessonAttachment.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mở tài liệu đính kèm'**
+  String get lessonAttachment;
+
+  /// No description provided for @openAttachmentFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể mở tài liệu đính kèm.'**
+  String get openAttachmentFailed;
 
   /// No description provided for @roadmapSummary.
   ///
@@ -4664,6 +4844,78 @@ abstract class AppLocalizations {
   /// **'Làm mới thống kê và thông báo'**
   String get homeRefreshSemantics;
 
+  /// No description provided for @homeAlphabetShortcutTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bảng chữ cái'**
+  String get homeAlphabetShortcutTitle;
+
+  /// No description provided for @homeAlphabetShortcutSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hiragana • Katakana'**
+  String get homeAlphabetShortcutSubtitle;
+
+  /// No description provided for @homeGrammarShortcutTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngữ pháp'**
+  String get homeGrammarShortcutTitle;
+
+  /// No description provided for @homeGrammarShortcutSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ cơ bản đến nâng cao'**
+  String get homeGrammarShortcutSubtitle;
+
+  /// No description provided for @homeLearningCategories.
+  ///
+  /// In vi, this message translates to:
+  /// **'Danh mục học tập'**
+  String get homeLearningCategories;
+
+  /// No description provided for @homeQuickStudy.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học tập'**
+  String get homeQuickStudy;
+
+  /// No description provided for @homeQuickVocabulary.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ vựng'**
+  String get homeQuickVocabulary;
+
+  /// No description provided for @homeQuickGrammar.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngữ pháp'**
+  String get homeQuickGrammar;
+
+  /// No description provided for @homeQuickListening.
+  ///
+  /// In vi, this message translates to:
+  /// **'Luyện nghe'**
+  String get homeQuickListening;
+
+  /// No description provided for @homeDailyMotivation.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học mỗi ngày'**
+  String get homeDailyMotivation;
+
+  /// No description provided for @homeDailyMotivationSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiến bộ hơn mỗi ngày! がんばろう! 🌸'**
+  String get homeDailyMotivationSubtitle;
+
+  /// No description provided for @homeTargetGoalTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu JLPT'**
+  String get homeTargetGoalTitle;
+
   /// No description provided for @commonErrorNetwork.
   ///
   /// In vi, this message translates to:
@@ -5959,6 +6211,420 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'{date} • {time}'**
   String homeMeetingSchedule(String date, String time);
+
+  /// No description provided for @placementTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đánh giá năng lực JLPT'**
+  String get placementTitle;
+
+  /// No description provided for @placementLoading.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tải thông tin bài kiểm tra năng lực...'**
+  String get placementLoading;
+
+  /// No description provided for @placementLoadErrorTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể tải bài kiểm tra năng lực'**
+  String get placementLoadErrorTitle;
+
+  /// No description provided for @placementLoadErrorDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng kiểm tra kết nối và thử lại.'**
+  String get placementLoadErrorDescription;
+
+  /// No description provided for @placementIntroTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kiểm tra trình độ đầu vào'**
+  String get placementIntroTitle;
+
+  /// No description provided for @placementIntroDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đánh giá nhanh năng lực từ N5 đến N3 để hệ thống đề xuất mục tiêu JLPT và mở khóa lộ trình học cá nhân hóa.'**
+  String get placementIntroDescription;
+
+  /// No description provided for @placementLatestScore.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả đánh giá gần nhất: {score}%'**
+  String placementLatestScore(String score);
+
+  /// No description provided for @placementLatestLevels.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình độ hiện tại: {assessed} · Đề xuất mục tiêu: {recommended}'**
+  String placementLatestLevels(String assessed, String recommended);
+
+  /// No description provided for @placementStarting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang khởi tạo đề kiểm tra...'**
+  String get placementStarting;
+
+  /// No description provided for @placementRecoverResult.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử khôi phục kết quả'**
+  String get placementRecoverResult;
+
+  /// No description provided for @placementRetake.
+  ///
+  /// In vi, this message translates to:
+  /// **'Làm lại bài đánh giá'**
+  String get placementRetake;
+
+  /// No description provided for @placementStart.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bắt đầu kiểm tra ngay'**
+  String get placementStart;
+
+  /// No description provided for @placementQuestionProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu {current}/{total} · Đã chọn {answered}/{total}'**
+  String placementQuestionProgress(int current, int total, int answered);
+
+  /// No description provided for @placementPreviousQuestion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu trước'**
+  String get placementPreviousQuestion;
+
+  /// No description provided for @placementNextQuestion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu tiếp theo'**
+  String get placementNextQuestion;
+
+  /// No description provided for @placementGrading.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang chấm điểm...'**
+  String get placementGrading;
+
+  /// No description provided for @placementSubmit.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nộp bài đánh giá'**
+  String get placementSubmit;
+
+  /// No description provided for @placementQuestionImageSemantics.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hình minh họa cho câu hỏi'**
+  String get placementQuestionImageSemantics;
+
+  /// No description provided for @placementQuestionImageUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể tải hình ảnh câu hỏi.'**
+  String get placementQuestionImageUnavailable;
+
+  /// No description provided for @placementAudioUnavailableSemantics.
+  ///
+  /// In vi, this message translates to:
+  /// **'Âm thanh câu hỏi hiện không được hỗ trợ hoặc không khả dụng'**
+  String get placementAudioUnavailableSemantics;
+
+  /// No description provided for @placementAudioUnavailableDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Âm thanh của câu hỏi này chưa được hỗ trợ hoặc hiện không khả dụng.'**
+  String get placementAudioUnavailableDescription;
+
+  /// No description provided for @placementResultTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả đánh giá năng lực'**
+  String get placementResultTitle;
+
+  /// No description provided for @placementResultScore.
+  ///
+  /// In vi, this message translates to:
+  /// **'Điểm tổng: {score}% ({correct}/{total} câu đúng)'**
+  String placementResultScore(String score, int correct, int total);
+
+  /// No description provided for @placementAssessedLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình độ hiện tại'**
+  String get placementAssessedLevel;
+
+  /// No description provided for @placementRecommendedLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu đề xuất'**
+  String get placementRecommendedLevel;
+
+  /// No description provided for @placementBreakdownTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiết theo cấp độ JLPT'**
+  String get placementBreakdownTitle;
+
+  /// No description provided for @placementApplyingGoal.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang áp dụng mục tiêu JLPT...'**
+  String get placementApplyingGoal;
+
+  /// No description provided for @placementGeneratingPath.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tạo lộ trình học...'**
+  String get placementGeneratingPath;
+
+  /// No description provided for @placementRefreshingPath.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang làm mới lộ trình...'**
+  String get placementRefreshingPath;
+
+  /// No description provided for @placementApplyGoalAndPath.
+  ///
+  /// In vi, this message translates to:
+  /// **'Áp dụng JLPT {level} và tạo lộ trình'**
+  String placementApplyGoalAndPath(String level);
+
+  /// No description provided for @placementIssueValidation.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dữ liệu bài kiểm tra chưa hợp lệ. Vui lòng kiểm tra lại.'**
+  String get placementIssueValidation;
+
+  /// No description provided for @placementIssueExpired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thời gian làm bài đã kết thúc. Vui lòng bắt đầu lượt đánh giá mới.'**
+  String get placementIssueExpired;
+
+  /// No description provided for @placementIssueBankNotReady.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngân hàng câu hỏi N5–N3 chưa sẵn sàng. Vui lòng thử lại sau.'**
+  String get placementIssueBankNotReady;
+
+  /// No description provided for @placementIssueInvalidAnswer.
+  ///
+  /// In vi, this message translates to:
+  /// **'Một đáp án không còn hợp lệ. Vui lòng kiểm tra lựa chọn và nộp lại.'**
+  String get placementIssueInvalidAnswer;
+
+  /// No description provided for @placementIssueNotCompleted.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lượt đánh giá chưa hoàn tất. Vui lòng tiếp tục hoặc thử đồng bộ lại.'**
+  String get placementIssueNotCompleted;
+
+  /// No description provided for @placementIssueAlreadyCompleted.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bài đánh giá này đã được nộp trước đó.'**
+  String get placementIssueAlreadyCompleted;
+
+  /// No description provided for @placementIssueConflict.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể đồng bộ bộ câu hỏi. Vui lòng bắt đầu lại.'**
+  String get placementIssueConflict;
+
+  /// No description provided for @placementIssueNotFound.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tìm thấy lượt làm bài đánh giá.'**
+  String get placementIssueNotFound;
+
+  /// No description provided for @placementIssueNetwork.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết nối mạng không ổn định. Vui lòng thử lại.'**
+  String get placementIssueNetwork;
+
+  /// No description provided for @placementIssuePersistence.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể lưu tạm câu trả lời trên thiết bị. Vui lòng thử lại.'**
+  String get placementIssuePersistence;
+
+  /// No description provided for @placementIssueUnknown.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xảy ra lỗi khi xử lý bài đánh giá năng lực.'**
+  String get placementIssueUnknown;
+
+  /// No description provided for @onboardingPlacementTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa rõ trình độ hiện tại?'**
+  String get onboardingPlacementTitle;
+
+  /// No description provided for @onboardingPlacementDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Làm bài kiểm tra đánh giá năng lực đầu vào để nhận đề xuất cấp độ JLPT phù hợp.'**
+  String get onboardingPlacementDescription;
+
+  /// No description provided for @onboardingPlacementAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kiểm tra trình độ đầu vào'**
+  String get onboardingPlacementAction;
+
+  /// No description provided for @onboardingStartingLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình độ bắt đầu'**
+  String get onboardingStartingLevel;
+
+  /// No description provided for @onboardingSkipComplete.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã bỏ qua. Bạn vẫn có thể làm bài đánh giá sau trong Hồ sơ.'**
+  String get onboardingSkipComplete;
+
+  /// No description provided for @onboardingSkipRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn làm bài đánh giá hoặc bỏ qua để tiếp tục.'**
+  String get onboardingSkipRequired;
+
+  /// No description provided for @onboardingSupportedLevels.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lộ trình tự động hiện hỗ trợ N5–N3.'**
+  String get onboardingSupportedLevels;
+
+  /// No description provided for @pathAdjustTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Điều chỉnh lộ trình'**
+  String get pathAdjustTitle;
+
+  /// No description provided for @pathAdjustIntro.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn trình độ bắt đầu và mục tiêu mới. Xem trước trước khi thay đổi lộ trình đang học.'**
+  String get pathAdjustIntro;
+
+  /// No description provided for @pathStartingLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình độ bắt đầu'**
+  String get pathStartingLevel;
+
+  /// No description provided for @pathTargetLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu JLPT'**
+  String get pathTargetLevel;
+
+  /// No description provided for @pathPreviewAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem trước lộ trình'**
+  String get pathPreviewAction;
+
+  /// No description provided for @pathPreviewTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bản xem trước'**
+  String get pathPreviewTitle;
+
+  /// No description provided for @pathConfirmAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận lộ trình mới'**
+  String get pathConfirmAction;
+
+  /// No description provided for @pathCancelPreviewAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hủy bản xem trước'**
+  String get pathCancelPreviewAction;
+
+  /// No description provided for @pathKeepsProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bài đã hoàn thành, Sổ từ và lịch sử học vẫn được giữ nguyên khi đổi lộ trình.'**
+  String get pathKeepsProgress;
+
+  /// No description provided for @pathHistoryTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lịch sử lộ trình'**
+  String get pathHistoryTitle;
+
+  /// No description provided for @pathNoHistory.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có lộ trình đã xác nhận.'**
+  String get pathNoHistory;
+
+  /// No description provided for @pathVersionLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phiên bản {version}'**
+  String pathVersionLabel(int version);
+
+  /// No description provided for @pathStatusActive.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang dùng'**
+  String get pathStatusActive;
+
+  /// No description provided for @pathStatusSuperseded.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trước đây'**
+  String get pathStatusSuperseded;
+
+  /// No description provided for @pathPreviewError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể xem trước lộ trình. Kiểm tra cấp độ và nội dung học rồi thử lại.'**
+  String get pathPreviewError;
+
+  /// No description provided for @pathConfirmError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể xác nhận bản xem trước. Lộ trình hiện tại vẫn được giữ nguyên.'**
+  String get pathConfirmError;
+
+  /// No description provided for @pathCancelError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể hủy bản xem trước. Vui lòng thử lại.'**
+  String get pathCancelError;
+
+  /// No description provided for @pathChooseDifferentLevels.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn trình độ hoặc mục tiêu khác với lộ trình hiện tại.'**
+  String get pathChooseDifferentLevels;
+
+  /// No description provided for @pathInitialRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hãy hoàn tất thiết lập ban đầu trước khi điều chỉnh lộ trình.'**
+  String get pathInitialRequired;
+
+  /// No description provided for @placementSectionBreakdownTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả theo phần'**
+  String get placementSectionBreakdownTitle;
+
+  /// No description provided for @placementWrongQuestionsSummary.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu cần ôn lại ({count}): {questions}'**
+  String placementWrongQuestionsSummary(int count, String questions);
 }
 
 class _AppLocalizationsDelegate

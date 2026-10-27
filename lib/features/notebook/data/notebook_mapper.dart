@@ -29,9 +29,11 @@ abstract final class NotebookMapper {
       meaning: dto.meaning,
       note: _nonEmpty(dto.note),
       addedAt: dto.addedAt,
-      // The backend response omits VocabularyEntryId, so no detail route can
-      // be derived safely here.
-      vocabularyRouteKey: null,
+      vocabularyRouteKey: dto.vocabularyId == null
+          ? null
+          : 'remote-${dto.vocabularyId}',
+      sourceVocabularyId: dto.vocabularyId,
+      sourceKanjiId: dto.kanjiId,
     );
   }
 

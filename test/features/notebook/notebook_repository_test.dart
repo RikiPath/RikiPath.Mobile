@@ -63,7 +63,7 @@ void main() {
     });
 
     test(
-      'does not invent a vocabulary detail ID from Notebook response',
+      'maps the backend vocabulary source ID to stable saved state',
       () async {
         final client = _RecordingApiClient(<String, Object?>{
           'GET ${NotebookApiPaths.collections}': _envelope(<Object?>[
@@ -77,7 +77,8 @@ void main() {
         final collection = (await repository.loadCollections()).single;
         final entry = (await repository.loadEntries(collection)).single;
 
-        expect(entry.vocabularyRouteKey, isNull);
+        expect(entry.vocabularyRouteKey, 'remote-7');
+        expect(entry.sourceVocabularyId, 7);
         expect(entry.source, NotebookDataSource.remote);
       },
     );
@@ -163,31 +164,55 @@ void main() {
       expect(bookmark.collectionName, 'JLPT N3');
     });
 
-    test(
-      'does not claim duplicate-save protection the backend lacks',
-      () async {
-        final client = _RecordingApiClient(<String, Object?>{
-          'POST ${NotebookApiPaths.bookmarkVocabulary}': _envelope(
-            _entryJson(),
-          ),
-        });
-        final repository = ApiNotebookRepository(client);
+    test('leaves retry idempotency to the backend mutation contract', () async {
+      final client = _RecordingApiClient(<String, Object?>{
+        'POST ${NotebookApiPaths.bookmarkVocabulary}': _envelope(_entryJson()),
+      });
+      final repository = ApiNotebookRepository(client);
 
-        await repository.bookmarkVocabulary(
-          vocabularyEntryId: 7,
-          collection: _remoteCollection(),
-        );
-        await repository.bookmarkVocabulary(
-          vocabularyEntryId: 7,
-          collection: _remoteCollection(),
-        );
+      await repository.bookmarkVocabulary(
+        vocabularyEntryId: 7,
+        collection: _remoteCollection(),
+      );
+      await repository.bookmarkVocabulary(
+        vocabularyEntryId: 7,
+        collection: _remoteCollection(),
+      );
 
-        expect(client.calls, <String>[
-          'POST ${NotebookApiPaths.bookmarkVocabulary}',
-          'POST ${NotebookApiPaths.bookmarkVocabulary}',
-        ]);
-      },
-    );
+      expect(client.calls, <String>[
+        'POST ${NotebookApiPaths.bookmarkVocabulary}',
+        'POST ${NotebookApiPaths.bookmarkVocabulary}',
+      ]);
+    });
+
+    test('uses exact Kanji and Grammar bookmark contracts', () async {
+      final client = _RecordingApiClient(<String, Object?>{
+        'POST ${NotebookApiPaths.bookmarkKanji}': _envelope(
+          _entryJson(contentType: 'kanji', vocabularyId: null, kanjiId: 8),
+        ),
+        'POST ${NotebookApiPaths.bookmarkGrammar(9)}': _envelope(
+          <String, Object?>{
+            'reviewCardId': 71,
+            'grammarPatternId': 9,
+            'grammarTitle': '〜たい',
+          },
+        ),
+      });
+      final repository = ApiNotebookRepository(client);
+
+      final bookmark = await repository.bookmarkKanji(
+        kanjiId: 8,
+        collection: _remoteCollection(),
+      );
+      await repository.bookmarkGrammar(9);
+
+      expect(client.lastData, isNull);
+      expect(bookmark.noteEntryId, 41);
+      expect(client.calls, <String>[
+        'POST ${NotebookApiPaths.bookmarkKanji}',
+        'POST ${NotebookApiPaths.bookmarkGrammar(9)}',
+      ]);
+    });
 
     test('rejects local keys before issuing a remote mutation', () async {
       final client = _RecordingApiClient(const <String, Object?>{});
@@ -270,9 +295,13 @@ Map<String, Object?> _entryJson({
   String contentType = 'vocabulary',
   String? reading = 'けいけん',
   String? note,
+  int? vocabularyId = 7,
+  int? kanjiId,
 }) => <String, Object?>{
   'noteEntryId': 41,
   'reviewCardId': 52,
+  'vocabularyId': vocabularyId,
+  'kanjiId': kanjiId,
   'contentType': contentType,
   'term': '経験',
   'reading': reading,

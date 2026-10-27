@@ -3,6 +3,7 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
+import 'package:rikipath_mobile/features/learning/domain/recommended_learning_path.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learning_localization.dart';
 
 class LearningRoadmapView extends StatelessWidget {
@@ -10,87 +11,297 @@ class LearningRoadmapView extends StatelessWidget {
     required this.snapshot,
     required this.onOpenProgress,
     required this.onContinueLesson,
+    required this.onRefresh,
+    required this.onGeneratePath,
+    required this.isGeneratingPath,
     this.onOpenLesson,
+    this.recommendedPath,
+    this.learningPathError,
     super.key,
   });
 
   final LearningSnapshot snapshot;
   final VoidCallback onOpenProgress;
   final VoidCallback onContinueLesson;
+  final Future<void> Function() onRefresh;
+  final VoidCallback onGeneratePath;
+  final bool isGeneratingPath;
   final ValueChanged<String>? onOpenLesson;
+  final RecommendedLearningPath? recommendedPath;
+  final String? learningPathError;
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      key: const ValueKey<String>('learning_roadmap_success_view'),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.space4,
-        AppSpacing.space3,
-        AppSpacing.space4,
-        AppSpacing.space8,
-      ),
-      children: [
-        _RoadmapProgressSummary(snapshot: snapshot),
-        const SizedBox(height: AppSpacing.space5),
-        if (snapshot.lessons.isNotEmpty)
-          Column(
-            children: [
-              for (var index = 0; index < snapshot.lessons.length; index++) ...[
-                _LiveLessonCard(
-                  lesson: snapshot.lessons[index],
-                  onOpen: () => (onOpenLesson ?? (_) => onContinueLesson())(
-                    snapshot.lessons[index].routeId,
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: ListView(
+        key: const ValueKey<String>('learning_roadmap_success_view'),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.space4,
+          AppSpacing.space3,
+          AppSpacing.space4,
+          AppSpacing.space8,
+        ),
+        children: [
+          _RoadmapProgressSummary(snapshot: snapshot),
+          const SizedBox(height: AppSpacing.space4),
+          _RecommendedPathSection(
+            path: recommendedPath,
+            isLoading: isGeneratingPath,
+            errorMessage: learningPathError,
+            onGenerate: onGeneratePath,
+            onOpenLesson: (lesson) =>
+                (onOpenLesson ?? (_) => onContinueLesson())(lesson.routeId),
+          ),
+          const SizedBox(height: AppSpacing.space5),
+          if (snapshot.lessons.isNotEmpty)
+            Column(
+              children: [
+                for (
+                  var index = 0;
+                  index < snapshot.lessons.length;
+                  index++
+                ) ...[
+                  _LiveLessonCard(
+                    lesson: snapshot.lessons[index],
+                    onOpen: () => (onOpenLesson ?? (_) => onContinueLesson())(
+                      snapshot.lessons[index].routeId,
+                    ),
+                  ),
+                  if (index != snapshot.lessons.length - 1)
+                    const SizedBox(height: AppSpacing.space3),
+                ],
+              ],
+            )
+          else if (snapshot.chapters.isNotEmpty)
+            Stack(
+              children: [
+                const Positioned(
+                  left: 16,
+                  top: AppSpacing.space6,
+                  bottom: AppSpacing.space6,
+                  child: SizedBox(
+                    width: 2,
+                    child: ColoredBox(color: AppColors.border),
                   ),
                 ),
-                if (index != snapshot.lessons.length - 1)
-                  const SizedBox(height: AppSpacing.space3),
+                Column(
+                  children: [
+                    for (
+                      var index = 0;
+                      index < snapshot.chapters.length;
+                      index++
+                    ) ...[
+                      _RoadmapChapterCard(
+                        chapter: snapshot.chapters[index],
+                        onOpenProgress: onOpenProgress,
+                        onContinueLesson: onContinueLesson,
+                      ),
+                      if (index != snapshot.chapters.length - 1)
+                        const SizedBox(height: AppSpacing.space4),
+                    ],
+                  ],
+                ),
               ],
-            ],
-          )
-        else if (snapshot.chapters.isNotEmpty)
-          Stack(
-            children: [
-              const Positioned(
-                left: 16,
-                top: AppSpacing.space6,
-                bottom: AppSpacing.space6,
-                child: SizedBox(
-                  width: 2,
-                  child: ColoredBox(color: AppColors.border),
+            )
+          else
+            RikiCard(
+              key: const ValueKey<String>('learning_roadmap_empty'),
+              boxShadow: const <BoxShadow>[],
+              child: Text(
+                context.l10n.learningLessonsEmptyMessage,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
-              Column(
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecommendedPathSection extends StatelessWidget {
+  const _RecommendedPathSection({
+    required this.path,
+    required this.isLoading,
+    required this.errorMessage,
+    required this.onGenerate,
+    required this.onOpenLesson,
+  });
+
+  final RecommendedLearningPath? path;
+  final bool isLoading;
+  final String? errorMessage;
+  final VoidCallback onGenerate;
+  final ValueChanged<RecommendedLesson> onOpenLesson;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return RikiCard(
+        key: const ValueKey<String>('learning_path_loading'),
+        boxShadow: const <BoxShadow>[],
+        child: Row(
+          children: [
+            const RikiInlineLoader(size: 22),
+            const SizedBox(width: AppSpacing.space3),
+            Expanded(child: Text(context.l10n.generatingLearningPath)),
+          ],
+        ),
+      );
+    }
+
+    if (path == null) {
+      return RikiCard(
+        key: const ValueKey<String>('learning_path_empty'),
+        boxShadow: const <BoxShadow>[],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              context.l10n.recommendedLearningPathTitle,
+              style: AppTypography.sectionTitle,
+            ),
+            const SizedBox(height: AppSpacing.space2),
+            Text(
+              errorMessage ?? context.l10n.learningPathRequirements,
+              style: AppTypography.bodySmall.copyWith(
+                color: errorMessage == null
+                    ? AppColors.textSecondary
+                    : AppColors.error,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space3),
+            FilledButton.icon(
+              key: const ValueKey<String>('learning_path_generate_button'),
+              onPressed: onGenerate,
+              icon: const Icon(Icons.auto_awesome_outlined),
+              label: Text(context.l10n.generateLearningPath),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      key: const ValueKey<String>('learning_path_success'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        RikiCard(
+          borderColor: AppColors.brandBorder,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
                 children: [
-                  for (
-                    var index = 0;
-                    index < snapshot.chapters.length;
-                    index++
-                  ) ...[
-                    _RoadmapChapterCard(
-                      chapter: snapshot.chapters[index],
-                      onOpenProgress: onOpenProgress,
-                      onContinueLesson: onContinueLesson,
+                  const Icon(
+                    Icons.auto_awesome_outlined,
+                    color: AppColors.brandPrimary,
+                  ),
+                  const SizedBox(width: AppSpacing.space2),
+                  Expanded(
+                    child: Text(
+                      context.l10n.recommendedLearningPathTitle,
+                      style: AppTypography.sectionTitle,
                     ),
-                    if (index != snapshot.chapters.length - 1)
-                      const SizedBox(height: AppSpacing.space4),
-                  ],
+                  ),
                 ],
               ),
+              const SizedBox(height: AppSpacing.space2),
+              Text(path!.summary, style: AppTypography.bodySmall),
+              if (path!.feasibility.trim().isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.space2),
+                Text(
+                  path!.feasibility,
+                  style: AppTypography.metadata.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+              if (path!.focusTopics.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.space3),
+                Wrap(
+                  spacing: AppSpacing.space2,
+                  runSpacing: AppSpacing.space2,
+                  children: [
+                    for (final topic in path!.focusTopics)
+                      Chip(label: Text(topic)),
+                  ],
+                ),
+              ],
+              const SizedBox(height: AppSpacing.space3),
+              OutlinedButton.icon(
+                key: const ValueKey<String>('learning_path_regenerate_button'),
+                onPressed: onGenerate,
+                icon: const Icon(Icons.refresh),
+                label: Text(context.l10n.regenerateLearningPath),
+              ),
             ],
-          )
-        else
-          RikiCard(
-            key: const ValueKey<String>('learning_roadmap_empty'),
-            boxShadow: const <BoxShadow>[],
-            child: Text(
-              context.l10n.learningLessonsEmptyMessage,
-              textAlign: TextAlign.center,
+          ),
+        ),
+        for (final schedule in path!.dailySchedules) ...[
+          const SizedBox(height: AppSpacing.space3),
+          _RecommendedDayCard(schedule: schedule, onOpenLesson: onOpenLesson),
+        ],
+      ],
+    );
+  }
+}
+
+class _RecommendedDayCard extends StatelessWidget {
+  const _RecommendedDayCard({
+    required this.schedule,
+    required this.onOpenLesson,
+  });
+
+  final RecommendedLearningDay schedule;
+  final ValueChanged<RecommendedLesson> onOpenLesson;
+
+  @override
+  Widget build(BuildContext context) {
+    return RikiCard(
+      key: ValueKey<String>('learning_path_day_${schedule.day}'),
+      boxShadow: const <BoxShadow>[],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${context.l10n.learningPathDay(schedule.day)} • ${schedule.title}',
+                  style: AppTypography.cardTitle,
+                ),
+              ),
+              Text(
+                context.l10n.learningPathLessonCount(schedule.lessons.length),
+                style: AppTypography.metadata,
+              ),
+            ],
+          ),
+          if (schedule.focus.trim().isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.space1),
+            Text(
+              schedule.focus,
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
-          ),
-      ],
+          ],
+          for (final lesson in schedule.lessons) ...[
+            const SizedBox(height: AppSpacing.space2),
+            OutlinedButton.icon(
+              key: ValueKey<String>('learning_path_lesson_${lesson.lessonId}'),
+              onPressed: () => onOpenLesson(lesson),
+              icon: const Icon(Icons.menu_book_outlined),
+              label: Text(lesson.title),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

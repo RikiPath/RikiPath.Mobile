@@ -106,6 +106,52 @@ abstract final class AppTypography {
     fontWeight: FontWeight.w600,
   );
 
+  // ---------------------------------------------------------------------------
+  // Sakura Typography Expansion (Vietnamese & Japanese learning)
+  // ---------------------------------------------------------------------------
+  static const TextStyle statValue = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 22,
+    height: 1.2,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.5,
+  );
+
+  static const TextStyle statLabel = TextStyle(
+    color: AppColors.textSecondary,
+    fontSize: 12,
+    height: 1.35,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle japaneseGlyph = TextStyle(
+    color: AppColors.brandPrimary,
+    fontSize: 32,
+    height: 1.1,
+    fontWeight: FontWeight.w700,
+  );
+
+  static const TextStyle japanesePhrase = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 15,
+    height: 1.4,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle motivationalTitle = TextStyle(
+    color: AppColors.sakuraDeep,
+    fontSize: 15,
+    height: 1.35,
+    fontWeight: FontWeight.w700,
+  );
+
+  static const TextStyle motivationalBody = TextStyle(
+    color: AppColors.textSecondary,
+    fontSize: 12,
+    height: 1.45,
+    fontWeight: FontWeight.w500,
+  );
+
   static const TextTheme textTheme = TextTheme(
     displaySmall: heroTitle,
     headlineMedium: heroTitle,

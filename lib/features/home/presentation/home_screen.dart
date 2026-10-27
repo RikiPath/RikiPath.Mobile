@@ -96,6 +96,9 @@ class HomeScreen extends ConsumerWidget {
           onOpenMeetingDetail: (bookingId) =>
               context.push(AppRoutes.learnerMentorBookingDetail(bookingId)),
           onJoinMeeting: (uri) => _openMeeting(ref, context, uri),
+          onOpenVocabulary: () => context.go(AppRoutes.vocabulary),
+          onOpenGrammar: () => context.go(AppRoutes.grammar),
+          onOpenWriting: () => context.go(AppRoutes.writing),
         ),
       ),
     );

@@ -8,8 +8,12 @@ import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
 import 'package:rikipath_mobile/features/onboarding/application/onboarding_controller.dart';
+import 'package:rikipath_mobile/features/placement_test/application/placement_test_controller.dart';
+import 'package:rikipath_mobile/features/placement_test/domain/placement_test_repository.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 
 class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({super.key});
@@ -21,18 +25,25 @@ class OnboardingScreen extends ConsumerWidget {
     final catalog = ref.watch(jlptCatalogControllerProvider);
 
     return PopScope(
-      canPop: state.currentStep == OnboardingStep.jlptTarget,
+      canPop: state.currentStep == OnboardingStep.placementChoice,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) controller.goBack();
       },
       child: Scaffold(
         body: SafeArea(
           child: switch (state.currentStep) {
-            OnboardingStep.jlptTarget => _JlptTargetStep(
+            OnboardingStep.placementChoice => _PlacementChoiceStep(
+              isSkipping: state.isSubmitting,
+              failed: state.placementSkipFailed,
+              onTakePlacement: () => context.push(AppRoutes.placementTest),
+              onSkipPlacement: () => _skipPlacement(ref, controller),
+            ),
+            OnboardingStep.studyLevels => _StudyLevelsStep(
               state: state,
               catalog: catalog,
-              onBack: () => _leaveOnboarding(context),
-              onSelect: controller.selectJlptLevel,
+              onBack: controller.goBack,
+              onSelectCurrent: controller.selectCurrentStudyLevel,
+              onSelectTarget: controller.selectJlptLevel,
               onRetry: ref.read(jlptCatalogControllerProvider.notifier).retry,
               onContinue: controller.continueToStudyTime,
             ),
@@ -40,11 +51,13 @@ class OnboardingScreen extends ConsumerWidget {
               state: state,
               onBack: controller.goBack,
               onSelect: controller.selectStudyTime,
+              onSelectExamDate: () =>
+                  _selectExamDate(context, controller, state.targetExamDate),
               onComplete: () => _completeSetup(ref, controller),
             ),
             OnboardingStep.complete => _CompletionStep(
               state: state,
-              onStart: () => context.go(AppRoutes.home),
+              onStart: () => context.go(AppRoutes.learnRoadmap),
             ),
           },
         ),
@@ -52,51 +65,162 @@ class OnboardingScreen extends ConsumerWidget {
     );
   }
 
-  void _leaveOnboarding(BuildContext context) {
-    if (context.canPop()) {
-      context.pop();
-      return;
-    }
-    context.go(AppRoutes.login);
-  }
-
   Future<void> _completeSetup(
     WidgetRef ref,
     OnboardingController controller,
   ) async {
     final state = ref.read(onboardingControllerProvider);
+    final currentLevel = state.selectedCurrentStudyLevel;
     final level = state.selectedJlptLevel;
-    final studyTime = state.selectedStudyTime;
-    if (level == null || studyTime == null || state.isSubmitting) return;
+    final targetExamDate = state.targetExamDate;
+    final dailyMinutes =
+        state.selectedStudyTime?.minutes ?? state.dailyStudyMinutes ?? 30;
+    if (currentLevel == null || level == null || state.isSubmitting) {
+      return;
+    }
 
     controller.startSubmission();
     try {
-      await ref
-          .read(userProfileRepositoryProvider)
-          .setJlptGoal(
-            targetJlptLevelId: level.id,
-            dailyStudyMinutes: studyTime.minutes,
-          );
+      final repository = ref.read(userProfileRepositoryProvider);
+      if (repository is! StudyLevelProfileRepository) {
+        throw UnsupportedError('Current study level cannot be persisted.');
+      }
+      await (repository as StudyLevelProfileRepository).switchStudyLevel(
+        currentStudyLevelId: currentLevel.id,
+      );
+      if (targetExamDate != null &&
+          repository is TargetExamDateProfileRepository) {
+        await (repository as TargetExamDateProfileRepository)
+            .setJlptGoalWithExamDate(
+              targetJlptLevelId: level.id,
+              dailyStudyMinutes: dailyMinutes,
+              targetExamDate: targetExamDate,
+            );
+      } else {
+        await repository.setJlptGoal(
+          targetJlptLevelId: level.id,
+          dailyStudyMinutes: dailyMinutes,
+        );
+      }
       await ref
           .read(learnerJourneyControllerProvider.notifier)
           .setCatalogPreferences(
-            item: level,
-            dailyStudyMinutes: studyTime.minutes,
+            item: currentLevel,
+            dailyStudyMinutes: dailyMinutes,
           );
       ref.invalidate(userProfileControllerProvider);
+      ref.invalidate(placementTestControllerProvider);
+      ref.invalidate(standardRoadmapProvider);
       controller.completeLocally();
     } catch (_) {
       controller.failSubmission();
     }
   }
+
+  Future<void> _skipPlacement(
+    WidgetRef ref,
+    OnboardingController controller,
+  ) async {
+    controller.startPlacementSkip();
+    try {
+      final repository = ref.read(placementTestRepositoryProvider);
+      if (repository is! PlacementSkipRepository) {
+        throw UnsupportedError('Placement skip is not supported.');
+      }
+      await (repository as PlacementSkipRepository).skip();
+      ref.invalidate(placementTestControllerProvider);
+      controller.continueAfterPlacementChoice();
+    } catch (_) {
+      controller.failSubmission();
+      controller.placementSkipFailed();
+    }
+  }
+
+  Future<void> _selectExamDate(
+    BuildContext context,
+    OnboardingController controller,
+    DateTime? current,
+  ) async {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final firstDate = today.add(const Duration(days: 1));
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: current == null || current.isBefore(firstDate)
+          ? firstDate.add(const Duration(days: 179))
+          : current,
+      firstDate: firstDate,
+      lastDate: DateTime(today.year + 5, 12, 31),
+    );
+    if (selected != null) controller.selectTargetExamDate(selected);
+  }
 }
 
-class _JlptTargetStep extends StatelessWidget {
-  const _JlptTargetStep({
+class _PlacementChoiceStep extends StatelessWidget {
+  const _PlacementChoiceStep({
+    required this.isSkipping,
+    required this.failed,
+    required this.onTakePlacement,
+    required this.onSkipPlacement,
+  });
+
+  final bool isSkipping;
+  final bool failed;
+  final VoidCallback onTakePlacement;
+  final VoidCallback onSkipPlacement;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return _OnboardingPage(
+      header: const RikiAuthHeader(),
+      centered: true,
+      title: l10n.onboardingPlacementChoiceTitle,
+      description: l10n.onboardingPlacementChoiceDescription,
+      content: RikiCard(
+        key: const ValueKey<String>('onboarding_placement_choice_card'),
+        borderColor: AppColors.brandBorder,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l10n.onboardingPlacementTitle, style: AppTypography.cardTitle),
+            const SizedBox(height: AppSpacing.space2),
+            Text(
+              l10n.onboardingPlacementDescription,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.space3),
+            RikiSecondaryButton(
+              key: const ValueKey<String>('onboarding_placement_test_button'),
+              label: l10n.onboardingPlacementAction,
+              leadingIcon: Icons.analytics_outlined,
+              onPressed: isSkipping ? null : onTakePlacement,
+            ),
+          ],
+        ),
+      ),
+      action: RikiPrimaryButton(
+        key: const ValueKey<String>('onboarding_skip_placement_button'),
+        label: l10n.onboardingSkipPlacement,
+        trailingIcon: Icons.arrow_forward,
+        isLoading: isSkipping,
+        loadingLabel: l10n.loading,
+        onPressed: isSkipping ? null : onSkipPlacement,
+      ),
+      helperText: failed ? l10n.checkConnectionRetry : null,
+    );
+  }
+}
+
+class _StudyLevelsStep extends StatelessWidget {
+  const _StudyLevelsStep({
     required this.state,
     required this.catalog,
     required this.onBack,
-    required this.onSelect,
+    required this.onSelectCurrent,
+    required this.onSelectTarget,
     required this.onRetry,
     required this.onContinue,
   });
@@ -104,7 +228,8 @@ class _JlptTargetStep extends StatelessWidget {
   final OnboardingState state;
   final AsyncValue<List<JlptLevelCatalogItem>> catalog;
   final VoidCallback onBack;
-  final ValueChanged<JlptLevelCatalogItem> onSelect;
+  final ValueChanged<JlptLevelCatalogItem> onSelectCurrent;
+  final ValueChanged<JlptLevelCatalogItem> onSelectTarget;
   final VoidCallback onRetry;
   final VoidCallback onContinue;
 
@@ -117,8 +242,8 @@ class _JlptTargetStep extends StatelessWidget {
         onBack: onBack,
         backSemanticLabel: l10n.leaveSetup,
       ),
-      title: l10n.onboardingJlptTitle,
-      description: l10n.onboardingJlptDescription,
+      title: l10n.onboardingStudyLevelsTitle,
+      description: l10n.onboardingStudyLevelsDescription,
       content: catalog.when(
         loading: () => const Padding(
           padding: EdgeInsets.all(AppSpacing.space5),
@@ -148,25 +273,74 @@ class _JlptTargetStep extends StatelessWidget {
                 ),
               )
             : Column(
-                children: levels.map((item) {
-                  final level = item.level;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.space3),
-                    child: RikiSelectionCard(
-                      key: ValueKey<String>('jlpt_${level.name}'),
-                      title: item.code,
-                      description:
-                          item.description ?? _descriptionFor(level, l10n),
-                      badge: level == JlptLevel.n3 ? l10n.popular : null,
-                      leading: _JlptLevelTile(
-                        level: level,
-                        selected: state.selectedJlptLevel?.id == item.id,
-                      ),
-                      selected: state.selectedJlptLevel?.id == item.id,
-                      onPressed: () => onSelect(item),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.onboardingCurrentStudyLevelTitle,
+                    style: AppTypography.sectionTitle,
+                  ),
+                  const SizedBox(height: AppSpacing.space1),
+                  Text(
+                    l10n.onboardingCurrentStudyLevelDescription,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
                     ),
-                  );
-                }).toList(),
+                  ),
+                  const SizedBox(height: AppSpacing.space3),
+                  ...levels
+                      .where(
+                        (item) => const <String>{
+                          'N5',
+                          'N4',
+                          'N3',
+                        }.contains(item.code.toUpperCase()),
+                      )
+                      .map(
+                        (item) => _levelCard(
+                          item: item,
+                          selected:
+                              state.selectedCurrentStudyLevel?.id == item.id,
+                          keyPrefix: 'current_level',
+                          onPressed: () => onSelectCurrent(item),
+                          l10n: l10n,
+                        ),
+                      ),
+                  const SizedBox(height: AppSpacing.space4),
+                  Text(
+                    l10n.onboardingTargetJlptTitle,
+                    style: AppTypography.sectionTitle,
+                  ),
+                  const SizedBox(height: AppSpacing.space1),
+                  Text(
+                    l10n.onboardingTargetJlptDescription,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.space3),
+                  ...levels.map(
+                    (item) => _levelCard(
+                      item: item,
+                      selected: state.selectedJlptLevel?.id == item.id,
+                      keyPrefix: 'jlpt',
+                      onPressed: state.selectedCurrentStudyLevel == null
+                          ? null
+                          : () => onSelectTarget(item),
+                      l10n: l10n,
+                    ),
+                  ),
+                  RikiCard(
+                    key: const ValueKey<String>(
+                      'onboarding_placement_test_card',
+                    ),
+                    borderColor: AppColors.brandBorder,
+                    boxShadow: const <BoxShadow>[],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [Text(l10n.onboardingPlacementCanTakeLater)],
+                    ),
+                  ),
+                ],
               ),
       ),
       action: RikiPrimaryButton(
@@ -176,6 +350,28 @@ class _JlptTargetStep extends StatelessWidget {
         onPressed: state.canContinue ? onContinue : null,
       ),
       helperText: l10n.onboardingJlptHelper,
+    );
+  }
+
+  Widget _levelCard({
+    required JlptLevelCatalogItem item,
+    required bool selected,
+    required String keyPrefix,
+    required VoidCallback? onPressed,
+    required AppLocalizations l10n,
+  }) {
+    final level = item.level;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.space3),
+      child: RikiSelectionCard(
+        key: ValueKey<String>('${keyPrefix}_${level.name}'),
+        title: item.code,
+        description: item.description ?? _descriptionFor(level, l10n),
+        badge: level == JlptLevel.n3 ? l10n.popular : null,
+        leading: _JlptLevelTile(level: level, selected: selected),
+        selected: selected,
+        onPressed: onPressed,
+      ),
     );
   }
 
@@ -195,12 +391,14 @@ class _StudyTimeStep extends StatelessWidget {
     required this.state,
     required this.onBack,
     required this.onSelect,
+    required this.onSelectExamDate,
     required this.onComplete,
   });
 
   final OnboardingState state;
   final VoidCallback onBack;
   final ValueChanged<DailyStudyTime> onSelect;
+  final VoidCallback onSelectExamDate;
   final VoidCallback onComplete;
 
   @override
@@ -216,25 +414,52 @@ class _StudyTimeStep extends StatelessWidget {
       title: l10n.onboardingStudyTimeTitle,
       description: l10n.onboardingStudyTimeDescription,
       content: Column(
-        children: DailyStudyTime.values.map((studyTime) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.space3),
-            child: RikiSelectionCard(
-              key: ValueKey<String>('study_time_${studyTime.minutes}'),
-              title: l10n.studyMinutesPerDay(studyTime.minutes),
-              description: _studyPaceDescription(studyTime, l10n),
-              badge: studyTime == DailyStudyTime.thirty
-                  ? l10n.mostPopular
-                  : null,
-              leading: _StudyTimeTile(
-                studyTime: studyTime,
+        children: [
+          ...DailyStudyTime.values.map((studyTime) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.space3),
+              child: RikiSelectionCard(
+                key: ValueKey<String>('study_time_${studyTime.minutes}'),
+                title: l10n.studyMinutesPerDay(studyTime.minutes),
+                description: _studyPaceDescription(studyTime, l10n),
+                badge: studyTime == DailyStudyTime.thirty
+                    ? l10n.mostPopular
+                    : null,
+                leading: _StudyTimeTile(
+                  studyTime: studyTime,
+                  selected: state.selectedStudyTime == studyTime,
+                ),
                 selected: state.selectedStudyTime == studyTime,
+                onPressed: () => onSelect(studyTime),
               ),
-              selected: state.selectedStudyTime == studyTime,
-              onPressed: () => onSelect(studyTime),
+            );
+          }),
+          const SizedBox(height: AppSpacing.space2),
+          RikiCard(
+            child: Material(
+              type: MaterialType.transparency,
+              child: ListTile(
+                key: const ValueKey<String>('onboarding_exam_date_button'),
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(
+                  Icons.event_outlined,
+                  color: AppColors.brandPrimary,
+                ),
+                title: Text(
+                  l10n.expectedExam(
+                    state.targetExamDate == null
+                        ? l10n.notConfigured
+                        : MaterialLocalizations.of(
+                            context,
+                          ).formatMediumDate(state.targetExamDate!),
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: onSelectExamDate,
+              ),
             ),
-          );
-        }).toList(),
+          ),
+        ],
       ),
       action: RikiPrimaryButton(
         key: const ValueKey<String>('onboarding_complete_button'),
@@ -259,6 +484,7 @@ class _StudyTimeStep extends StatelessWidget {
       DailyStudyTime.thirty => l10n.studyPaceBalanced,
       DailyStudyTime.fortyFive => l10n.studyPaceActive,
       DailyStudyTime.sixty => l10n.studyPaceIntensive,
+      DailyStudyTime.ninety => l10n.studyPaceIntensive,
     };
   }
 }
@@ -273,7 +499,9 @@ class _CompletionStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final level = state.selectedJlptLevel!;
-    final studyTime = state.selectedStudyTime!;
+    final studyMinutes =
+        state.selectedStudyTime?.minutes ?? state.dailyStudyMinutes ?? 30;
+    final targetExamDate = state.targetExamDate;
 
     return _OnboardingPage(
       header: RikiAuthHeader(statusLabel: l10n.setupCompleteStatus),
@@ -306,11 +534,29 @@ class _CompletionStep extends StatelessWidget {
                   const SizedBox(height: AppSpacing.space1),
                   Text(
                     l10n.studySummary(
-                      studyTime.minutes,
-                      _studyPaceDescription(studyTime, l10n),
+                      studyMinutes,
+                      state.selectedStudyTime == null
+                          ? l10n.studyPaceBalanced
+                          : _studyPaceDescription(
+                              state.selectedStudyTime!,
+                              l10n,
+                            ),
                     ),
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.textBody,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.space1),
+                  Text(
+                    l10n.expectedExam(
+                      targetExamDate == null
+                          ? l10n.notConfigured
+                          : MaterialLocalizations.of(
+                              context,
+                            ).formatMediumDate(targetExamDate),
+                    ),
+                    style: AppTypography.metadata.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -337,6 +583,7 @@ class _CompletionStep extends StatelessWidget {
       DailyStudyTime.thirty => l10n.studyPaceBalanced,
       DailyStudyTime.fortyFive => l10n.studyPaceActive,
       DailyStudyTime.sixty => l10n.studyPaceIntensive,
+      DailyStudyTime.ninety => l10n.studyPaceIntensive,
     };
   }
 }
@@ -574,6 +821,7 @@ class _StudyTimeTile extends StatelessWidget {
       DailyStudyTime.thirty => Icons.balance_outlined,
       DailyStudyTime.fortyFive => Icons.local_fire_department_outlined,
       DailyStudyTime.sixty => Icons.workspace_premium_outlined,
+      DailyStudyTime.ninety => Icons.bolt_outlined,
     };
   }
 }

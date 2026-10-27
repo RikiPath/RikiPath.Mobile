@@ -164,11 +164,28 @@ class NotebookLocalStore {
     return row == null ? null : _entryFromRow(ownerUserId, row);
   }
 
+  Future<NotebookEntry?> findByKanjiId(int ownerUserId, int kanjiId) async {
+    final prefix = _ownerPrefix(ownerUserId);
+    final row =
+        await (_database.select(_database.personalVocabularyEntries)..where(
+              (candidate) =>
+                  candidate.id.like('$prefix%') &
+                  candidate.sourceVocabularyId.equals(
+                    _kanjiStorageKey(kanjiId),
+                  ),
+            ))
+            .getSingleOrNull();
+    return row == null ? null : _entryFromRow(ownerUserId, row);
+  }
+
   Stream<Set<String>> watchSavedVocabularyKeys(int ownerUserId) {
     final prefix = _ownerPrefix(ownerUserId);
     final query = _database.select(_database.personalVocabularyEntries)
       ..where(
-        (row) => row.id.like('$prefix%') & row.sourceVocabularyId.isNotNull(),
+        (row) =>
+            row.id.like('$prefix%') &
+            row.contentType.equals(NotebookContentType.vocabulary.name) &
+            row.sourceVocabularyId.isNotNull(),
       );
     return query.watch().map(
       (rows) =>
@@ -188,7 +205,7 @@ class NotebookLocalStore {
             id: Value(_storageKey(ownerUserId, entry.routeKey)),
             remoteNoteEntryId: Value(entry.remoteNoteEntryId),
             reviewItemId: Value(entry.reviewCardId),
-            sourceVocabularyId: Value(entry.vocabularyRouteKey),
+            sourceVocabularyId: Value(_sourceStorageKey(entry)),
             listId: Value(_storageKey(ownerUserId, collectionRouteKey)),
             contentType: Value(entry.contentType.name),
             source: Value(entry.source.name),
@@ -269,7 +286,15 @@ class NotebookLocalStore {
       meaning: row.meaning,
       note: row.note,
       addedAt: row.addedAt ?? row.updatedAt,
-      vocabularyRouteKey: row.sourceVocabularyId,
+      vocabularyRouteKey: contentType == NotebookContentType.vocabulary
+          ? row.sourceVocabularyId
+          : null,
+      sourceVocabularyId: contentType == NotebookContentType.vocabulary
+          ? _remoteId(row.sourceVocabularyId)
+          : null,
+      sourceKanjiId: contentType == NotebookContentType.kanji
+          ? _kanjiId(row.sourceVocabularyId)
+          : null,
     );
   }
 
@@ -295,6 +320,25 @@ class NotebookLocalStore {
   }
 
   String _ownerPrefix(int ownerUserId) => 'user-$ownerUserId::';
+
+  String? _sourceStorageKey(NotebookEntry entry) =>
+      entry.vocabularyRouteKey ??
+      (entry.sourceKanjiId == null
+          ? null
+          : _kanjiStorageKey(entry.sourceKanjiId!));
+
+  String _kanjiStorageKey(int kanjiId) => 'kanji-remote-$kanjiId';
+
+  int? _remoteId(String? value) {
+    if (value == null || !value.startsWith('remote-')) return null;
+    return int.tryParse(value.substring('remote-'.length));
+  }
+
+  int? _kanjiId(String? value) {
+    const prefix = 'kanji-remote-';
+    if (value == null || !value.startsWith(prefix)) return null;
+    return int.tryParse(value.substring(prefix.length));
+  }
 
   String _storageKey(int ownerUserId, String routeKey) =>
       '${_ownerPrefix(ownerUserId)}$routeKey';

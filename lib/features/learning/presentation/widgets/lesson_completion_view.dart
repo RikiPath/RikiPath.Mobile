@@ -176,9 +176,9 @@ class LessonCompletionView extends StatelessWidget {
           const SizedBox(height: AppSpacing.space4),
           RikiPrimaryButton(
             key: const ValueKey<String>('lesson_next_button'),
-            label: context.l10n.nextLessonAction(
-              lesson.nextLesson!.lessonNumber,
-            ),
+            label: lesson.nextLesson!.lessonNumber > 0
+                ? context.l10n.nextLessonAction(lesson.nextLesson!.lessonNumber)
+                : context.l10n.recommendedNextLessonAction,
             trailingIcon: Icons.arrow_forward,
             onPressed: onNextLesson,
           ),
@@ -271,12 +271,14 @@ class _NextLessonCard extends StatelessWidget {
                 radius: 21,
                 backgroundColor: AppColors.brandTint,
                 foregroundColor: AppColors.brandPrimary,
-                child: Text(
-                  '${nextLesson.lessonNumber}',
-                  style: AppTypography.cardTitle.copyWith(
-                    color: AppColors.brandPrimary,
-                  ),
-                ),
+                child: nextLesson.lessonNumber > 0
+                    ? Text(
+                        '${nextLesson.lessonNumber}',
+                        style: AppTypography.cardTitle.copyWith(
+                          color: AppColors.brandPrimary,
+                        ),
+                      )
+                    : const Icon(Icons.auto_awesome_outlined),
               ),
               const SizedBox(width: AppSpacing.space3),
               Expanded(
@@ -291,8 +293,11 @@ class _NextLessonCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '~${context.l10n.durationMinutes(nextLesson.durationMinutes)} • '
-                      '${nextLesson.level.label}',
+                      [
+                        if (nextLesson.durationMinutes > 0)
+                          '~${context.l10n.durationMinutes(nextLesson.durationMinutes)}',
+                        nextLesson.level.label,
+                      ].join(' • '),
                       style: AppTypography.metadata.copyWith(
                         color: AppColors.textSecondary,
                       ),

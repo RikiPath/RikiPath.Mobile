@@ -57,3 +57,23 @@ abstract interface class NotebookRemoteDataSource {
 
   Future<void> removeEntry(NotebookEntry entry);
 }
+
+/// Optional live capabilities used by structured Lesson content. Kept separate
+/// so fixture repositories do not pretend they can persist backend identities.
+abstract interface class LessonNotebookRepository {
+  Future<NotebookBookmark> bookmarkKanji({
+    required NotebookKanjiDraft kanji,
+    required NotebookCollection collection,
+  });
+
+  Future<void> bookmarkGrammar(int grammarPatternId);
+}
+
+abstract interface class LessonNotebookRemoteDataSource {
+  Future<NotebookBookmark> bookmarkKanji({
+    required int kanjiId,
+    required NotebookCollection collection,
+  });
+
+  Future<void> bookmarkGrammar(int grammarPatternId);
+}

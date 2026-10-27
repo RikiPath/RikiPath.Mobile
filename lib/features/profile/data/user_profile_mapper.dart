@@ -13,7 +13,30 @@ abstract final class UserProfileMapper {
       isEmailVerified: dto.isEmailVerified,
       targetJlptLevelId: dto.targetJlptLevelId,
       targetJlptLevelName: _nonEmpty(dto.targetJlptLevelName),
+      startingJlptLevelId: dto.startingJlptLevelId ?? dto.targetJlptLevelId,
+      startingJlptLevelName:
+          _nonEmpty(dto.startingJlptLevelName) ??
+          _nonEmpty(dto.targetJlptLevelName),
+      currentStudyLevelId:
+          dto.currentStudyLevelId ??
+          dto.startingJlptLevelId ??
+          dto.targetJlptLevelId,
+      currentStudyLevelName:
+          _nonEmpty(dto.currentStudyLevelName) ??
+          _nonEmpty(dto.startingJlptLevelName) ??
+          _nonEmpty(dto.targetJlptLevelName),
+      learningMode: dto.learningMode.toUpperCase() == 'AI_PERSONALIZED'
+          ? LearningMode.aiPersonalized
+          : LearningMode.standard,
+      assessedJlptLevelId: dto.assessedJlptLevelId,
+      assessedJlptLevelName: _nonEmpty(dto.assessedJlptLevelName),
+      placementDecision: switch (dto.placementDecision.toUpperCase()) {
+        'SKIPPED' => PlacementDecision.skipped,
+        'COMPLETED' => PlacementDecision.completed,
+        _ => PlacementDecision.notTaken,
+      },
       dailyStudyMinutes: dto.dailyStudyMinutes,
+      targetExamDate: dto.targetExamDate,
       emailNotificationsEnabled: dto.emailNotificationsEnabled,
       systemNotificationsEnabled: dto.systemNotificationsEnabled,
     );
