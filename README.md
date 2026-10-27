@@ -215,6 +215,32 @@ flutter build apk --debug
 flutter run
 ```
 
+## API Environment Profiles
+
+Every app run/build must explicitly select `API_PROFILE`; there is no implicit
+remote or tunnel fallback.
+
+For the Android Emulator connected to a backend on the developer's host:
+
+```powershell
+flutter run --dart-define=API_PROFILE=local-emulator
+```
+
+For a verified remote server, supply its approved HTTPS origins explicitly:
+
+```powershell
+flutter run `
+  --dart-define=APP_ENV=development `
+  --dart-define=API_PROFILE=remote `
+  --dart-define=API_BASE_URL=<approved-https-origin> `
+  --dart-define=SWAGGER_URL=<approved-swagger-url>
+```
+
+The remote profile requires API and Swagger URLs and disables API metadata
+logging by default. Production additionally requires HTTPS and logging off.
+The team Test Server URL is intentionally not embedded; request the current
+approved endpoint from the project operator before using the remote profile.
+
 ## Troubleshooting
 
 ### `flutter` is not recognized

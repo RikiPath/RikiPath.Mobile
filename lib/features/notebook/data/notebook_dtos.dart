@@ -28,6 +28,8 @@ class NotebookEntryDto {
   const NotebookEntryDto({
     required this.noteEntryId,
     required this.reviewCardId,
+    required this.vocabularyId,
+    required this.kanjiId,
     required this.contentType,
     required this.term,
     required this.reading,
@@ -40,6 +42,8 @@ class NotebookEntryDto {
     return NotebookEntryDto(
       noteEntryId: _requiredInt(json, 'noteEntryId'),
       reviewCardId: _optionalInt(json, 'reviewCardId'),
+      vocabularyId: _optionalInt(json, 'vocabularyId'),
+      kanjiId: _optionalInt(json, 'kanjiId'),
       contentType: _requiredString(json, 'contentType'),
       term: _requiredString(json, 'term'),
       reading: _optionalString(json, 'reading'),
@@ -51,6 +55,8 @@ class NotebookEntryDto {
 
   final int noteEntryId;
   final int? reviewCardId;
+  final int? vocabularyId;
+  final int? kanjiId;
   final String contentType;
   final String term;
   final String? reading;
@@ -110,6 +116,21 @@ class BookmarkVocabularyRequestDto {
   Map<String, Object?> toJson() => <String, Object?>{
     'learnerNoteId': learnerNoteId,
     'vocabularyId': vocabularyId,
+  };
+}
+
+class BookmarkKanjiRequestDto {
+  const BookmarkKanjiRequestDto({
+    required this.learnerNoteId,
+    required this.kanjiId,
+  });
+
+  final int learnerNoteId;
+  final int kanjiId;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'learnerNoteId': learnerNoteId,
+    'kanjiId': kanjiId,
   };
 }
 

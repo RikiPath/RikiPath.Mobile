@@ -128,6 +128,76 @@ abstract final class AppColors {
   static const Color skillListening = Color(0xFF9333EA);
   static const Color skillListeningBackground = Color(0xFFFAF5FF);
 
-  /// Compatibility alias for pre-design-system frontend code.
+  // Compatibility alias for pre-design-system frontend code.
   static const Color danger = errorText;
+
+  // ---------------------------------------------------------------------------
+  // Sakura System Expansion
+  // ---------------------------------------------------------------------------
+  // Rich Sakura tonal scale for modern Japanese learning aesthetic.
+  // Preserves existing canonical tokens above for full regression safety.
+  static const Color sakura50 = Color(0xFFFFF5F7);
+  static const Color sakura100 = Color(0xFFFFE8ED);
+  static const Color sakura200 = Color(0xFFFDC8D3);
+  static const Color sakura300 = Color(0xFFF99CB0);
+  static const Color sakura400 = Color(0xFFEE6F8E);
+  static const Color sakura500 = brandPrimary; // 0xFFE05A7A
+  static const Color sakura600 = brandPrimaryPressed; // 0xFFC24362
+  static const Color sakura700 = Color(0xFFA1334E);
+  static const Color sakura800 = Color(0xFF82273D);
+  static const Color sakura900 = Color(0xFF651E2F);
+  static const Color sakuraDeep = Color(0xFF8C2340);
+
+  // Surfaces: Warm white, porcelain & subtle Sakura borders
+  static const Color cardWarmWhite = Color(0xFFFFFFFF);
+  static const Color cardWarmPorcelain = Color(0xFFFCFBFB);
+  static const Color cardBorderSubtle = Color(0xFFF3E7EA);
+  static const Color cardBorderMuted = Color(0xFFEFE8EA);
+  static const Color borderSubtlePink = Color(0xFFF7DDE3);
+
+  // Category Pastel Tones (Học tập, Từ vựng, Ngữ pháp, Luyện nghe)
+  static const Color pastelGreenBg = Color(0xFFE8F7EE);
+  static const Color pastelGreenFg = Color(0xFF1E824C);
+  static const Color pastelGreenBorder = Color(0xFFC7EBD4);
+
+  static const Color pastelBlueBg = Color(0xFFEAF2FD);
+  static const Color pastelBlueFg = Color(0xFF206AC0);
+  static const Color pastelBlueBorder = Color(0xFFCBE0FA);
+
+  static const Color pastelOrangeBg = Color(0xFFFFF2E6);
+  static const Color pastelOrangeFg = Color(0xFFD46B08);
+  static const Color pastelOrangeBorder = Color(0xFFFFDAB8);
+
+  static const Color pastelPurpleBg = Color(0xFFF4ECFB);
+  static const Color pastelPurpleFg = Color(0xFF8338EC);
+  static const Color pastelPurpleBorder = Color(0xFFE0C9F7);
+
+  // Gradients for Hero surfaces and banners
+  static const LinearGradient sakuraHeroGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: <Color>[
+      Color(0xFFFFF3F5),
+      Color(0xFFFFECF0),
+      Color(0xFFFFF8F9),
+    ],
+  );
+
+  static const LinearGradient sakuraCardGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      Color(0xFFFFFFFF),
+      Color(0xFFFFFBFB),
+    ],
+  );
+
+  static const LinearGradient sakuraAccentGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: <Color>[
+      Color(0xFFE05A7A),
+      Color(0xFFD64468),
+    ],
+  );
 }

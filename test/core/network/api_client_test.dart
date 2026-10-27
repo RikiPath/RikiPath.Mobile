@@ -17,8 +17,9 @@ void main() {
   test('API client is instantiated from environment configuration', () {
     final config = AppConfig.fromValues(const {
       'APP_ENV': 'development',
-      'API_BASE_URL': 'http://140.245.43.97',
-      'SWAGGER_URL': 'http://140.245.43.97/swagger/index.html',
+      'API_PROFILE': 'remote',
+      'API_BASE_URL': 'https://test.example.invalid',
+      'SWAGGER_URL': 'https://test.example.invalid/swagger/index.html',
       'ENABLE_API_LOGGING': 'false',
     });
     final container = ProviderContainer(
@@ -28,7 +29,7 @@ void main() {
 
     final client = container.read(apiClientProvider);
 
-    expect(client.baseUrl, Uri.parse('http://140.245.43.97'));
+    expect(client.baseUrl, Uri.parse('https://test.example.invalid'));
     expect(client.connectTimeout, const Duration(seconds: 15));
   });
 

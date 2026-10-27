@@ -8,6 +8,10 @@ abstract final class AppRadius {
   static const double buttonLarge = 16;
   static const double card = 16;
   static const double banner = 16;
+  static const double cardLarge = 20;
+  static const double cardSmooth = 18;
+  static const double tile = 14;
+  static const double bubble = 24;
   static const double pill = 999;
 
   // Compatibility aliases used by existing shared/frontend widgets.

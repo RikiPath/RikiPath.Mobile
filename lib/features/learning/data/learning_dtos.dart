@@ -71,6 +71,101 @@ class LearningLessonSummaryDto {
   final DateTime? completedAt;
 }
 
+class LessonVocabularyDto {
+  const LessonVocabularyDto({
+    required this.vocabularyId,
+    required this.word,
+    required this.reading,
+    required this.meaning,
+    required this.exampleSentence,
+    required this.exampleSentenceMeaning,
+    required this.audioUrl,
+  });
+
+  factory LessonVocabularyDto.fromJson(Map<String, Object?> json) =>
+      LessonVocabularyDto(
+        vocabularyId: _requiredInt(json, 'vocabularyId'),
+        word: _requiredString(json, 'word'),
+        reading: _requiredString(json, 'reading'),
+        meaning: _requiredString(json, 'meaning'),
+        exampleSentence: _optionalString(json, 'exampleSentence'),
+        exampleSentenceMeaning: _optionalString(json, 'exampleSentenceMeaning'),
+        audioUrl: _optionalUri(json, 'audioUrl'),
+      );
+
+  final int vocabularyId;
+  final String word;
+  final String reading;
+  final String meaning;
+  final String? exampleSentence;
+  final String? exampleSentenceMeaning;
+  final Uri? audioUrl;
+}
+
+class LessonKanjiDto {
+  const LessonKanjiDto({
+    required this.kanjiId,
+    required this.character,
+    required this.meaning,
+    required this.sinoVietnamese,
+    required this.onYomi,
+    required this.kunYomi,
+    required this.strokeCount,
+    required this.strokeOrderImageUrl,
+    required this.audioUrl,
+  });
+
+  factory LessonKanjiDto.fromJson(Map<String, Object?> json) => LessonKanjiDto(
+    kanjiId: _requiredInt(json, 'kanjiId'),
+    character: _requiredString(json, 'character'),
+    meaning: _requiredString(json, 'meaning'),
+    sinoVietnamese: _optionalString(json, 'sinoVietnamese'),
+    onYomi: _optionalString(json, 'onYomi'),
+    kunYomi: _optionalString(json, 'kunYomi'),
+    strokeCount: _requiredInt(json, 'strokeCount'),
+    strokeOrderImageUrl: _optionalUri(json, 'strokeOrderImageUrl'),
+    audioUrl: _optionalUri(json, 'audioUrl'),
+  );
+
+  final int kanjiId;
+  final String character;
+  final String meaning;
+  final String? sinoVietnamese;
+  final String? onYomi;
+  final String? kunYomi;
+  final int strokeCount;
+  final Uri? strokeOrderImageUrl;
+  final Uri? audioUrl;
+}
+
+class LessonGrammarDto {
+  const LessonGrammarDto({
+    required this.grammarPatternId,
+    required this.title,
+    required this.structure,
+    required this.usageNotes,
+    required this.exampleSentence,
+    required this.exampleSentenceMeaning,
+  });
+
+  factory LessonGrammarDto.fromJson(Map<String, Object?> json) =>
+      LessonGrammarDto(
+        grammarPatternId: _requiredInt(json, 'grammarPatternId'),
+        title: _requiredString(json, 'title'),
+        structure: _requiredString(json, 'structure'),
+        usageNotes: _optionalString(json, 'usageNotes'),
+        exampleSentence: _optionalString(json, 'exampleSentence'),
+        exampleSentenceMeaning: _optionalString(json, 'exampleSentenceMeaning'),
+      );
+
+  final int grammarPatternId;
+  final String title;
+  final String structure;
+  final String? usageNotes;
+  final String? exampleSentence;
+  final String? exampleSentenceMeaning;
+}
+
 class LessonDetailDto {
   const LessonDetailDto({
     required this.lessonId,
@@ -80,11 +175,16 @@ class LessonDetailDto {
     required this.languageSkillName,
     required this.title,
     required this.content,
+    required this.videoUrl,
+    required this.attachmentUrl,
     required this.orderIndex,
     required this.progressPercent,
     required this.resumePositionSeconds,
     required this.isCompleted,
     required this.completedAt,
+    this.vocabularies = const <LessonVocabularyDto>[],
+    this.kanjis = const <LessonKanjiDto>[],
+    this.grammars = const <LessonGrammarDto>[],
   });
 
   factory LessonDetailDto.fromJson(Map<String, Object?> json) {
@@ -96,11 +196,25 @@ class LessonDetailDto {
       languageSkillName: _requiredString(json, 'languageSkillName'),
       title: _requiredString(json, 'title'),
       content: _requiredString(json, 'content'),
+      videoUrl: _optionalUri(json, 'videoUrl'),
+      attachmentUrl: _optionalUri(json, 'attachmentUrl'),
       orderIndex: _requiredInt(json, 'orderIndex'),
       progressPercent: _requiredInt(json, 'progressPercent'),
       resumePositionSeconds: _requiredInt(json, 'resumePositionSeconds'),
       isCompleted: _requiredBool(json, 'isCompleted'),
       completedAt: _optionalDateTime(json, 'completedAt'),
+      vocabularies: _optionalObjectList(
+        json['vocabularies'],
+        'vocabularies',
+      ).map(LessonVocabularyDto.fromJson).toList(growable: false),
+      kanjis: _optionalObjectList(
+        json['kanjis'],
+        'kanjis',
+      ).map(LessonKanjiDto.fromJson).toList(growable: false),
+      grammars: _optionalObjectList(
+        json['grammars'],
+        'grammars',
+      ).map(LessonGrammarDto.fromJson).toList(growable: false),
     );
   }
 
@@ -111,11 +225,16 @@ class LessonDetailDto {
   final String languageSkillName;
   final String title;
   final String content;
+  final Uri? videoUrl;
+  final Uri? attachmentUrl;
   final int orderIndex;
   final int progressPercent;
   final int resumePositionSeconds;
   final bool isCompleted;
   final DateTime? completedAt;
+  final List<LessonVocabularyDto> vocabularies;
+  final List<LessonKanjiDto> kanjis;
+  final List<LessonGrammarDto> grammars;
 }
 
 LearningDiscoveryDto readLearningDiscovery(Object? body) =>
@@ -147,6 +266,11 @@ List<Map<String, Object?>> _objectList(Object? value, String field) {
     throw FormatException('Expected a list field named $field.');
   }
   return value.map(_stringKeyedMap).toList(growable: false);
+}
+
+List<Map<String, Object?>> _optionalObjectList(Object? value, String field) {
+  if (value == null) return const <Map<String, Object?>>[];
+  return _objectList(value, field);
 }
 
 int _requiredInt(Map<String, Object?> json, String field) {
@@ -181,4 +305,18 @@ DateTime? _optionalDateTime(Map<String, Object?> json, String field) {
     if (parsed != null) return parsed.toUtc();
   }
   throw FormatException('Expected a nullable timestamp field named $field.');
+}
+
+Uri? _optionalUri(Map<String, Object?> json, String field) {
+  final value = json[field];
+  if (value == null) return null;
+  if (value is String) {
+    final uri = Uri.tryParse(value.trim());
+    if (uri != null &&
+        uri.hasAuthority &&
+        (uri.scheme == 'https' || uri.scheme == 'http')) {
+      return uri;
+    }
+  }
+  throw FormatException('Expected a nullable HTTP URL field named $field.');
 }

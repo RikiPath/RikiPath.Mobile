@@ -4,68 +4,91 @@ import 'package:rikipath_mobile/core/config/app_env.dart';
 
 void main() {
   group('AppConfig', () {
-    test('plain development uses the verified public backend', () {
-      expect(
-        AppConfig.defaultDevelopmentApiBaseUrl,
-        'https://fact-like-tracy-displays.trycloudflare.com',
-      );
-      expect(
-        AppConfig.defaultDevelopmentSwaggerUrl,
-        'https://fact-like-tracy-displays.trycloudflare.com/swagger/index.html',
-      );
-    });
-
-    test('uses compile-time overrides or safe development defaults', () {
-      const expectedEnvironment = String.fromEnvironment(
-        'APP_ENV',
-        defaultValue: AppConfig.defaultDevelopmentEnvironment,
-      );
-      const expectedApiBaseUrl = String.fromEnvironment(
-        'API_BASE_URL',
-        defaultValue: AppConfig.defaultDevelopmentApiBaseUrl,
-      );
-      const expectedSwaggerUrl = String.fromEnvironment(
-        'SWAGGER_URL',
-        defaultValue: AppConfig.defaultDevelopmentSwaggerUrl,
-      );
-      const expectedApiLogging = String.fromEnvironment(
-        'ENABLE_API_LOGGING',
-        defaultValue: AppConfig.defaultDevelopmentApiLogging,
-      );
-
-      final config = AppConfig.fromEnvironment();
-
-      expect(config.environment, AppEnv.parse(expectedEnvironment));
-      expect(config.apiBaseUrl, Uri.parse(expectedApiBaseUrl));
-      expect(config.swaggerUrl, Uri.parse(expectedSwaggerUrl));
-      expect(config.enableApiLogging, expectedApiLogging == 'true');
-    });
-
-    test('accepts an explicit non-development configuration', () {
+    test('local emulator endpoint requires an explicit local profile', () {
       final config = AppConfig.fromValues(const {
-        'APP_ENV': 'staging',
-        'API_BASE_URL': 'https://staging.example.com',
-        'SWAGGER_URL': 'https://staging.example.com/swagger/index.html',
-        'ENABLE_API_LOGGING': 'false',
+        'APP_ENV': 'development',
+        'API_PROFILE': 'local-emulator',
       });
 
-      expect(config.environment, AppEnv.staging);
-      expect(config.apiBaseUrl, Uri.parse('https://staging.example.com'));
+      expect(config.apiProfile, ApiProfile.localEmulator);
+      expect(config.apiBaseUrl, Uri.parse('http://10.0.2.2:5265'));
       expect(
         config.swaggerUrl,
-        Uri.parse('https://staging.example.com/swagger/index.html'),
+        Uri.parse('http://10.0.2.2:5265/swagger/index.html'),
+      );
+      expect(config.enableApiLogging, isTrue);
+      expect(config.shouldLogApi, isTrue);
+    });
+
+    test('remote profile requires explicit HTTPS endpoints and disables logging', () {
+      final config = AppConfig.fromValues(const {
+        'APP_ENV': 'development',
+        'API_PROFILE': 'remote',
+        'API_BASE_URL': 'https://test.example.invalid',
+        'SWAGGER_URL': 'https://test.example.invalid/swagger/index.html',
+      });
+
+      expect(config.environment, AppEnv.development);
+      expect(config.apiProfile, ApiProfile.remote);
+      expect(config.apiBaseUrl, Uri.parse('https://test.example.invalid'));
+      expect(
+        config.swaggerUrl,
+        Uri.parse('https://test.example.invalid/swagger/index.html'),
       );
       expect(config.enableApiLogging, isFalse);
       expect(config.shouldLogApi, isFalse);
     });
 
-    test('keeps strict validation for explicitly supplied values', () {
+    test('remote profile rejects missing endpoint values', () {
+      expect(
+        () => AppConfig.fromValues(const {
+          'APP_ENV': 'development',
+          'API_PROFILE': 'remote',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('remote profile rejects emulator and loopback URLs', () {
+      expect(
+        () => AppConfig.fromValues(const {
+          'APP_ENV': 'development',
+          'API_PROFILE': 'remote',
+          'API_BASE_URL': 'https://10.0.2.2:5265',
+          'SWAGGER_URL': 'https://10.0.2.2:5265/swagger/index.html',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('local emulator profile is unavailable outside development', () {
       expect(
         () => AppConfig.fromValues(const {
           'APP_ENV': 'production',
-          'API_BASE_URL': 'http://production.example.com',
-          'SWAGGER_URL': 'https://production.example.com/swagger/index.html',
-          'ENABLE_API_LOGGING': 'false',
+          'API_PROFILE': 'local-emulator',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('production requires HTTPS and API logging disabled', () {
+      expect(
+        () => AppConfig.fromValues(const {
+          'APP_ENV': 'production',
+          'API_PROFILE': 'remote',
+          'API_BASE_URL': 'https://api.example.invalid',
+          'SWAGGER_URL': 'https://api.example.invalid/swagger/index.html',
+          'ENABLE_API_LOGGING': 'true',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('requires a recognized API profile', () {
+      expect(
+        () => AppConfig.fromValues(const {
+          'APP_ENV': 'development',
+          'API_PROFILE': 'stale-tunnel',
         }),
         throwsA(isA<FormatException>()),
       );
