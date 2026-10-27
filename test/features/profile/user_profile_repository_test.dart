@@ -26,7 +26,6 @@ void main() {
       expect(dto.targetJlptLevelId, 73);
       expect(dto.targetJlptLevelName, 'N3');
       expect(dto.dailyStudyMinutes, 30);
-      expect(dto.targetExamDate, DateTime(2030, 12, 1));
       expect(dto.emailNotificationsEnabled, isTrue);
       expect(dto.systemNotificationsEnabled, isFalse);
     });
@@ -123,36 +122,6 @@ void main() {
       },
     );
 
-    test('study-level switch sends confirmed current-level request', () async {
-      final client = _RecordingApiClient();
-      final repository = ApiUserProfileRepository(client);
-
-      await repository.switchStudyLevel(currentStudyLevelId: 101);
-
-      expect(client.calls, <String>['PUT ${UserProfileApiPaths.studyLevel}']);
-      expect(client.lastData, <String, Object?>{
-        'currentStudyLevelId': 101,
-        'confirmed': true,
-      });
-    });
-
-    test('JLPT goal sends the existing target exam date field', () async {
-      final client = _RecordingApiClient();
-      final repository = ApiUserProfileRepository(client);
-
-      await repository.setJlptGoalWithExamDate(
-        targetJlptLevelId: 73,
-        dailyStudyMinutes: 45,
-        targetExamDate: DateTime(2030, 12, 1),
-      );
-
-      expect(client.lastData, <String, Object?>{
-        'targetJlptLevelId': 73,
-        'dailyStudyMinutes': 45,
-        'targetExamDate': '2030-12-01T00:00:00',
-      });
-    });
-
     test('notification update uses only the two supported booleans', () async {
       final client = _RecordingApiClient();
       final repository = ApiUserProfileRepository(client);
@@ -244,7 +213,6 @@ Map<String, Object?> _profileEnvelope({
       'targetJlptLevelId': targetId,
       'targetJlptLevelName': targetName,
       'dailyStudyMinutes': 30,
-      'targetExamDate': '2030-12-01T00:00:00',
       'emailNotificationsEnabled': true,
       'systemNotificationsEnabled': false,
     },

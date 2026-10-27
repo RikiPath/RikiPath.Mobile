@@ -13,16 +13,7 @@ class UserProfile {
     required this.isEmailVerified,
     required this.targetJlptLevelId,
     required this.targetJlptLevelName,
-    this.startingJlptLevelId,
-    this.startingJlptLevelName,
-    this.currentStudyLevelId,
-    this.currentStudyLevelName,
-    this.learningMode = LearningMode.standard,
-    this.assessedJlptLevelId,
-    this.assessedJlptLevelName,
-    this.placementDecision = PlacementDecision.notTaken,
     required this.dailyStudyMinutes,
-    this.targetExamDate,
     required this.emailNotificationsEnabled,
     required this.systemNotificationsEnabled,
   });
@@ -36,16 +27,7 @@ class UserProfile {
   final bool isEmailVerified;
   final int? targetJlptLevelId;
   final String? targetJlptLevelName;
-  final int? startingJlptLevelId;
-  final String? startingJlptLevelName;
-  final int? currentStudyLevelId;
-  final String? currentStudyLevelName;
-  final LearningMode learningMode;
-  final int? assessedJlptLevelId;
-  final String? assessedJlptLevelName;
-  final PlacementDecision placementDecision;
   final int dailyStudyMinutes;
-  final DateTime? targetExamDate;
   final bool emailNotificationsEnabled;
   final bool systemNotificationsEnabled;
 
@@ -59,10 +41,6 @@ class UserProfile {
     return name == null ? null : JlptLevel.tryParse(name);
   }
 }
-
-enum PlacementDecision { notTaken, skipped, completed }
-
-enum LearningMode { standard, aiPersonalized }
 
 @immutable
 class ProfileAvatarUpload {

@@ -291,7 +291,6 @@ class KanjiDetailController extends AsyncNotifier<KanjiDetailState> {
       state = AsyncData(
         state.requireValue.copyWith(isSaving: false, bookmark: bookmark),
       );
-      ref.invalidate(notebookControllerProvider);
       return true;
     } catch (_) {
       state = AsyncData(

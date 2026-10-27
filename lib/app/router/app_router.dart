@@ -50,8 +50,6 @@ import 'package:rikipath_mobile/features/notifications/presentation/notification
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_entry_detail_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
-import 'package:rikipath_mobile/features/onboarding/presentation/learner_startup_screen.dart';
-import 'package:rikipath_mobile/features/placement_test/presentation/placement_test_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/edit_profile_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/jlpt_goal_screen.dart';
@@ -227,16 +225,8 @@ GoRouter createAppRouter({
         ],
       ),
       GoRoute(
-        path: AppRoutes.learnerStartup,
-        builder: (context, state) => const LearnerStartupScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.onboarding,
         builder: (context, state) => const OnboardingScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.placementTest,
-        builder: (context, state) => const PlacementTestScreen(),
       ),
       GoRoute(
         path: AppRoutes.notifications,
@@ -571,7 +561,7 @@ String? _authenticatedRoleRedirect({
         isAuthRoute ||
         isMentorRoute ||
         matchedLocation == AppRoutes.unsupportedRole) {
-      return AppRoutes.learnerStartup;
+      return AppRoutes.home;
     }
     return null;
   }

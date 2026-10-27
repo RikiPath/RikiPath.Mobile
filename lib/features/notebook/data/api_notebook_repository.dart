@@ -6,8 +6,7 @@ import 'package:rikipath_mobile/features/notebook/data/notebook_mapper.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook_repository.dart';
 
-class ApiNotebookRepository
-    implements NotebookRemoteDataSource, LessonNotebookRemoteDataSource {
+class ApiNotebookRepository implements NotebookRemoteDataSource {
   const ApiNotebookRepository(this._apiClient);
 
   final ApiClient _apiClient;
@@ -122,43 +121,6 @@ class ApiNotebookRepository
         message: 'The vocabulary bookmark response did not match the contract.',
       );
     }
-  }
-
-  @override
-  Future<NotebookBookmark> bookmarkKanji({
-    required int kanjiId,
-    required NotebookCollection collection,
-  }) async {
-    final request = BookmarkKanjiRequestDto(
-      learnerNoteId: _remoteCollectionId(collection),
-      kanjiId: kanjiId,
-    );
-    final response = await _apiClient.post<Object?>(
-      NotebookApiPaths.bookmarkKanji,
-      data: request.toJson(),
-    );
-    try {
-      final entry = readNotebookEntry(response.data);
-      return NotebookBookmark(
-        noteEntryId: entry.noteEntryId,
-        collectionRouteKey: collection.routeKey,
-        collectionName: collection.name,
-      );
-    } on FormatException {
-      throw const UnknownError(
-        message: 'The Kanji bookmark response did not match the contract.',
-      );
-    }
-  }
-
-  @override
-  Future<void> bookmarkGrammar(int grammarPatternId) async {
-    if (grammarPatternId <= 0) {
-      throw ArgumentError.value(grammarPatternId, 'grammarPatternId');
-    }
-    await _apiClient.post<Object?>(
-      NotebookApiPaths.bookmarkGrammar(grammarPatternId),
-    );
   }
 
   @override

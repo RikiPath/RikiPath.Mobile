@@ -30,10 +30,6 @@ import 'package:rikipath_mobile/features/mentor/domain/mentor_repository.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
-import 'package:rikipath_mobile/features/onboarding/presentation/learner_startup_screen.dart';
-import 'package:rikipath_mobile/features/placement_test/application/placement_test_controller.dart';
-import 'package:rikipath_mobile/features/placement_test/domain/placement_test.dart';
-import 'package:rikipath_mobile/features/placement_test/domain/placement_test_repository.dart';
 import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/edit_profile_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/jlpt_goal_screen.dart';
@@ -46,8 +42,6 @@ import '../../support/test_auth_session.dart';
 import '../../support/test_jlpt_catalog.dart';
 import '../../support/test_jwt.dart';
 
-final _futureExamDate = DateTime.utc(2030, 12, 7);
-
 void main() {
   test('route constants expose the supported navigation paths', () {
     expect(AppRoutes.splash, '/splash');
@@ -56,7 +50,6 @@ void main() {
     expect(AppRoutes.forgotPassword, '/auth/forgot-password');
     expect(AppRoutes.verifyEmail, '/auth/verify-email');
     expect(AppRoutes.unsupportedRole, '/auth/unsupported-role');
-    expect(AppRoutes.learnerStartup, '/learner-startup');
     expect(AppRoutes.onboarding, '/onboarding');
     expect(AppRoutes.meeting, '/meeting');
     expect(AppRoutes.meetingJoin, '/meeting/join');
@@ -128,59 +121,6 @@ void main() {
     expect(find.byType(VerifyEmailScreen), findsOneWidget);
     expect(find.text('Chưa thể tiếp tục từ đăng ký'), findsOneWidget);
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
-  });
-
-  testWidgets('restored first-time learner is sent to onboarding', (
-    tester,
-  ) async {
-    await _pumpRouter(
-      tester,
-      initialLocation: AppRoutes.splash,
-      authSession: createTestAuthSession(),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.byType(OnboardingScreen), findsOneWidget);
-    expect(find.byType(RikiBottomNavigationBar), findsNothing);
-  });
-
-  testWidgets('restored returning learner is sent to home', (tester) async {
-    await _pumpRouter(
-      tester,
-      initialLocation: AppRoutes.splash,
-      authSession: createTestAuthSession(),
-      profileRepository: _RouterProfileRepository(
-        targetJlptLevelId: 101,
-        targetJlptLevelName: 'N5',
-        targetExamDate: _futureExamDate,
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.byType(HomeScreen), findsOneWidget);
-    expect(find.byType(RikiBottomNavigationBar), findsOneWidget);
-  });
-
-  testWidgets('startup profile failure remains controlled and retryable', (
-    tester,
-  ) async {
-    await _pumpRouter(
-      tester,
-      initialLocation: AppRoutes.splash,
-      authSession: createTestAuthSession(),
-      profileRepository: const _FailingStartupProfileRepository(),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.byType(LearnerStartupScreen), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey<String>('learner_startup_error')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('learner_startup_retry')),
-      findsOneWidget,
-    );
   });
 
   testWidgets('unauthenticated learner route redirects to login', (
@@ -358,18 +298,10 @@ void main() {
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
   });
 
-  testWidgets('authenticated auth route resolves returning learner home', (
+  testWidgets('authenticated auth route redirects once to learner home', (
     tester,
   ) async {
-    await _pumpRouter(
-      tester,
-      initialLocation: AppRoutes.login,
-      profileRepository: _RouterProfileRepository(
-        targetJlptLevelId: 101,
-        targetJlptLevelName: 'N5',
-        targetExamDate: _futureExamDate,
-      ),
-    );
+    await _pumpRouter(tester, initialLocation: AppRoutes.login);
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeScreen), findsOneWidget);
@@ -380,15 +312,7 @@ void main() {
   testWidgets('authenticated learner cannot remain on verify-email', (
     tester,
   ) async {
-    await _pumpRouter(
-      tester,
-      initialLocation: AppRoutes.verifyEmail,
-      profileRepository: _RouterProfileRepository(
-        targetJlptLevelId: 101,
-        targetJlptLevelName: 'N5',
-        targetExamDate: _futureExamDate,
-      ),
-    );
+    await _pumpRouter(tester, initialLocation: AppRoutes.verifyEmail);
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeScreen), findsOneWidget);
@@ -534,7 +458,7 @@ void main() {
         role: BackendUserRole.learner,
         matchedLocation: AppRoutes.verifyEmail,
       ),
-      AppRoutes.learnerStartup,
+      AppRoutes.home,
     );
     expect(
       authRouteRedirect(
@@ -658,9 +582,6 @@ Future<GoRouter> _pumpRouter(
           TestJlptCatalogRepository(),
         ),
         userProfileRepositoryProvider.overrideWithValue(profileRepository),
-        placementTestRepositoryProvider.overrideWithValue(
-          const _RouterPlacementRepository(),
-        ),
         mentorRepositoryProvider.overrideWithValue(mentorRepository),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
@@ -668,30 +589,6 @@ Future<GoRouter> _pumpRouter(
   );
   await tester.pump();
   return router;
-}
-
-class _RouterPlacementRepository implements PlacementTestRepository {
-  const _RouterPlacementRepository();
-
-  @override
-  Future<PlacementTestStatus> loadStatus() async =>
-      const PlacementTestStatus(hasCompletedPlacementTest: false);
-
-  @override
-  Future<PlacementTestAttempt?> loadActiveAttempt() async => null;
-
-  @override
-  Future<PlacementTestResult> loadResult(int attemptId) =>
-      throw UnimplementedError();
-
-  @override
-  Future<PlacementTestAttempt> start() => throw UnimplementedError();
-
-  @override
-  Future<PlacementTestResult> submit(
-    int attemptId,
-    List<PlacementTestAnswerSubmission> answers,
-  ) => throw UnimplementedError();
 }
 
 class _RouterMentorRepository implements MentorRepository {
@@ -705,17 +602,9 @@ class _RouterMentorRepository implements MentorRepository {
 }
 
 class _RouterProfileRepository implements UserProfileRepository {
-  const _RouterProfileRepository({
-    this.targetJlptLevelId,
-    this.targetJlptLevelName,
-    this.targetExamDate,
-  });
+  const _RouterProfileRepository();
 
-  final int? targetJlptLevelId;
-  final String? targetJlptLevelName;
-  final DateTime? targetExamDate;
-
-  UserProfile get _profile => UserProfile(
+  UserProfile get _profile => const UserProfile(
     userId: 42,
     email: 'learner@example.com',
     firstName: 'Minh Anh',
@@ -723,10 +612,9 @@ class _RouterProfileRepository implements UserProfileRepository {
     avatarUrl: null,
     role: 'Learner',
     isEmailVerified: true,
-    targetJlptLevelId: targetJlptLevelId,
-    targetJlptLevelName: targetJlptLevelName,
+    targetJlptLevelId: null,
+    targetJlptLevelName: null,
     dailyStudyMinutes: 30,
-    targetExamDate: targetExamDate,
     emailNotificationsEnabled: true,
     systemNotificationsEnabled: true,
   );
@@ -755,13 +643,6 @@ class _RouterProfileRepository implements UserProfileRepository {
     required bool emailNotificationsEnabled,
     required bool systemNotificationsEnabled,
   }) async => _profile;
-}
-
-class _FailingStartupProfileRepository extends _RouterProfileRepository {
-  const _FailingStartupProfileRepository();
-
-  @override
-  Future<UserProfile> loadProfile() async => throw const UnknownError();
 }
 
 class _UnauthorizedProfileRepository extends _RouterProfileRepository {

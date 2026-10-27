@@ -6,9 +6,7 @@ abstract final class AppRoutes {
   static const String forgotPassword = '/auth/forgot-password';
   static const String verifyEmail = '/auth/verify-email';
   static const String unsupportedRole = '/auth/unsupported-role';
-  static const String learnerStartup = '/learner-startup';
   static const String onboarding = '/onboarding';
-  static const String placementTest = '/placement-test';
 
   static const String meeting = '/meeting';
   static const String meetingJoinSegment = 'join';

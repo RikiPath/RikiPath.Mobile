@@ -185,13 +185,6 @@ class _ProfileSuccessViewState extends State<_ProfileSuccessView>
                 onTap: () => context.push(AppRoutes.profileJlptGoal),
               ),
               ProfileActionTile(
-                key: const ValueKey<String>('profile_placement_test_action'),
-                icon: Icons.assignment_turned_in_outlined,
-                title: l10n.onboardingPlacementAction,
-                subtitle: l10n.onboardingPlacementDescription,
-                onTap: () => context.push(AppRoutes.placementTest),
-              ),
-              ProfileActionTile(
                 key: const ValueKey<String>('profile_progress_action'),
                 icon: Icons.insights_outlined,
                 title: l10n.progressAndHistory,

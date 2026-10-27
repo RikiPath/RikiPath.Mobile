@@ -72,26 +72,13 @@ class UserProfileController extends AsyncNotifier<UserProfileState> {
   Future<bool> setJlptGoal({
     required int targetJlptLevelId,
     required int dailyStudyMinutes,
-    DateTime? targetExamDate,
   }) {
     return _mutate(
       flag: ProfileMutation.jlptGoal,
-      request: () {
-        final repository = _repository;
-        if (targetExamDate != null &&
-            repository is TargetExamDateProfileRepository) {
-          return (repository as TargetExamDateProfileRepository)
-              .setJlptGoalWithExamDate(
-                targetJlptLevelId: targetJlptLevelId,
-                dailyStudyMinutes: dailyStudyMinutes,
-                targetExamDate: targetExamDate,
-              );
-        }
-        return repository.setJlptGoal(
-          targetJlptLevelId: targetJlptLevelId,
-          dailyStudyMinutes: dailyStudyMinutes,
-        );
-      },
+      request: () => _repository.setJlptGoal(
+        targetJlptLevelId: targetJlptLevelId,
+        dailyStudyMinutes: dailyStudyMinutes,
+      ),
     );
   }
 

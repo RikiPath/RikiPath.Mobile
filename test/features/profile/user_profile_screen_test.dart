@@ -151,7 +151,6 @@ void main() {
 
       for (final key in <String>[
         'profile_jlpt_goal_action',
-        'profile_placement_test_action',
         'profile_progress_action',
         'profile_edit_action',
         'profile_settings_action',
@@ -264,19 +263,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('profile-edit-route'), findsOneWidget);
-    });
-
-    testWidgets('Placement remains reachable after onboarding', (tester) async {
-      await _pumpProfileRouter(tester, repository: _ProfileRepository());
-      await tester.pumpAndSettle();
-      final placementAction = find.byKey(
-        const ValueKey<String>('profile_placement_test_action'),
-      );
-      await tester.ensureVisible(placementAction);
-      await tester.tap(placementAction);
-      await tester.pumpAndSettle();
-
-      expect(find.text('placement-test-route'), findsOneWidget);
     });
   });
 
@@ -547,10 +533,6 @@ void main() {
           findsOneWidget,
         );
       }
-      expect(
-        find.byKey(const ValueKey<String>('daily_study_choice_90')),
-        findsOneWidget,
-      );
       await tester.tap(
         find.byKey(const ValueKey<String>('jlpt_goal_choice_N4')),
       );
@@ -711,11 +693,6 @@ Future<void> _pumpProfileRouter(
         ],
       ),
       GoRoute(
-        path: AppRoutes.placementTest,
-        builder: (context, state) =>
-            const Scaffold(body: Center(child: Text('placement-test-route'))),
-      ),
-      GoRoute(
         path: AppRoutes.learnProgress,
         builder: (context, state) =>
             const Scaffold(body: Center(child: Text('learn-progress-route'))),
@@ -753,7 +730,6 @@ UserProfile _profile({
   int? targetJlptLevelId = 309,
   String? targetJlptLevelName = 'N3',
   int dailyStudyMinutes = 30,
-  DateTime? targetExamDate,
   bool emailNotifications = true,
   bool systemNotifications = false,
   String? avatarUrl,
@@ -769,7 +745,6 @@ UserProfile _profile({
     targetJlptLevelId: targetJlptLevelId,
     targetJlptLevelName: targetJlptLevelName,
     dailyStudyMinutes: dailyStudyMinutes,
-    targetExamDate: targetExamDate ?? DateTime(2030, 12, 1),
     emailNotificationsEnabled: emailNotifications,
     systemNotificationsEnabled: systemNotifications,
   );

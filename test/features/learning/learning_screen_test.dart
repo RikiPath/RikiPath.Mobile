@@ -10,27 +10,14 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
-import 'package:rikipath_mobile/core/widgets/riki_card.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
-import 'package:rikipath_mobile/features/learning/application/learning_path_controller.dart';
-import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_repository.dart';
-import 'package:rikipath_mobile/features/learning/domain/learning_path_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
-import 'package:rikipath_mobile/features/learning/domain/recommended_learning_path.dart';
-import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
-import 'package:rikipath_mobile/features/learning/domain/standard_roadmap_repository.dart';
+import 'package:rikipath_mobile/features/learning/presentation/jlpt_progress_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learning_roadmap_screen.dart';
-import 'package:rikipath_mobile/features/learning/presentation/lesson_screen.dart';
-import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
-import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
-import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
-import 'package:rikipath_mobile/features/placement_test/application/placement_test_controller.dart';
-import 'package:rikipath_mobile/features/placement_test/domain/placement_test.dart';
-import 'package:rikipath_mobile/features/placement_test/domain/placement_test_repository.dart';
 
 import '../../support/test_auth_session.dart';
 import '../../support/test_jlpt_catalog.dart';
@@ -54,57 +41,6 @@ void main() {
     expect(find.text('Lộ trình'), findsWidgets);
     expect(find.text('Bài học'), findsWidgets);
     expect(find.text('Thư viện'), findsWidgets);
-  });
-
-  testWidgets('changing Learn level confirms and preserves the target goal', (
-    tester,
-  ) async {
-    final repository = _DatePreservingProfileRepository();
-    await _pumpLearning(
-      tester,
-      initialLocation: AppRoutes.learn,
-      profileRepository: repository,
-    );
-    await tester.pumpAndSettle();
-
-    final level = find.byKey(const ValueKey<String>('learning_level_n5'));
-    await tester.ensureVisible(level);
-    await tester.tap(level);
-    await tester.pumpAndSettle();
-    expect(find.text('Đổi cấp độ đang học?'), findsOneWidget);
-    await tester.tap(
-      find.byKey(const ValueKey<String>('confirm_current_study_level_change')),
-    );
-    await tester.pumpAndSettle();
-
-    expect(repository.loadedProfileCount, 0);
-    expect(repository.currentStudyLevelId, 101);
-    expect(repository.targetJlptLevelId, 204);
-    expect(repository.targetExamDate, DateTime(2030, 12, 1));
-    expect(repository.dailyStudyMinutes, 30);
-    expect(repository.goalCalls, 0);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('canceling current level confirmation makes no request', (
-    tester,
-  ) async {
-    final repository = _DatePreservingProfileRepository();
-    await _pumpLearning(
-      tester,
-      initialLocation: AppRoutes.learn,
-      profileRepository: repository,
-    );
-    await tester.pumpAndSettle();
-    final level = find.byKey(const ValueKey<String>('learning_level_n5'));
-    await tester.ensureVisible(level);
-    await tester.tap(level);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Hủy'));
-    await tester.pumpAndSettle();
-    expect(repository.currentStudyLevelId, 204);
-    expect(repository.goalCalls, 0);
-    expect(tester.takeException(), isNull);
   });
 
   test('learning scope supports the complete JLPT catalog', () {
@@ -132,159 +68,50 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LearningRoadmapScreen), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey<String>('standard_roadmap_summary')),
-      findsOneWidget,
-    );
-    expect(find.text('Bài tiếp theo'), findsNWidgets(2));
+    expect(find.text('TIẾN ĐỘ TỔNG THỂ'), findsOneWidget);
     _expectLearnTabSelected(tester);
   });
 
-  testWidgets(
-    'roadmap keeps Standard available and enables AI only after Placement',
-    (tester) async {
-      final pathRepository = _TestLearningPathRepository();
-      await _pumpLearning(
-        tester,
-        initialLocation: AppRoutes.learnRoadmap,
-        placementStatus: const PlacementTestStatus(
-          hasCompletedPlacementTest: true,
-          isReadyForLearningPath: true,
-        ),
-        pathRepository: pathRepository,
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(RefreshIndicator), findsOneWidget);
-      await tester.tap(
-        find.byKey(const ValueKey<String>('ai_learning_path_generate_button')),
-      );
-      await tester.pumpAndSettle();
-
-      expect(pathRepository.generateCalls, 1);
-      expect(
-        find.byKey(const ValueKey<String>('standard_lesson_501')),
-        findsOneWidget,
-      );
-      expect(find.text('Ưu tiên phần kiến thức còn yếu.'), findsOneWidget);
-    },
-  );
-
-  testWidgets('AI generation failure leaves the Standard Roadmap usable', (
-    tester,
-  ) async {
-    final pathRepository = _TestLearningPathRepository(
-      generationError: StateError('AI unavailable'),
-    );
-    await _pumpLearning(
-      tester,
-      initialLocation: AppRoutes.learnRoadmap,
-      placementStatus: const PlacementTestStatus(
-        hasCompletedPlacementTest: true,
-        isReadyForLearningPath: true,
-      ),
-      pathRepository: pathRepository,
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(
-      find.byKey(const ValueKey<String>('ai_learning_path_generate_button')),
-    );
-    await tester.pumpAndSettle();
-
-    expect(pathRepository.generateCalls, 1);
-    expect(
-      find.byKey(const ValueKey<String>('standard_roadmap_success_view')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('standard_lesson_501')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('ai_learning_path_generate_button')),
-      findsOneWidget,
-    );
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('roadmap renders server lesson IDs, progress, and disabled AI', (
+  testWidgets('roadmap renders completed, current, and locked states', (
     tester,
   ) async {
     await _pumpLearning(tester, initialLocation: AppRoutes.learnRoadmap);
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const ValueKey<String>('standard_lesson_501')),
+      find.byKey(const ValueKey<String>('roadmap_chapter_completed')),
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey<String>('standard_lesson_502')),
+      find.byKey(const ValueKey<String>('roadmap_chapter_current')),
       findsOneWidget,
     );
-    expect(find.text('Tiến độ chuẩn: 1/2 bài'), findsNWidgets(2));
-    expect(find.textContaining('Placement để mở khóa'), findsOneWidget);
     expect(
-      find.byKey(const ValueKey<String>('ai_learning_path_generate_button')),
-      findsNothing,
+      find.byKey(const ValueKey<String>('roadmap_chapter_locked')),
+      findsOneWidget,
     );
+    expect(find.text('Hoàn thành'), findsOneWidget);
+    expect(find.text('Đang học'), findsOneWidget);
+    expect(find.text('Chưa bắt đầu'), findsOneWidget);
     _expectLearnTabSelected(tester);
   });
 
-  testWidgets('next standard lesson navigates using the real backend ID', (
+  testWidgets('completed roadmap chapter opens JLPT level progress', (
     tester,
   ) async {
     await _pumpLearning(tester, initialLocation: AppRoutes.learnRoadmap);
     await tester.pumpAndSettle();
 
-    final lessonCard = tester.widget<RikiCard>(
-      find.byKey(const ValueKey<String>('standard_lesson_502')),
+    final progressButton = find.byKey(
+      const ValueKey<String>('roadmap_open_progress_button'),
     );
-    expect(lessonCard.onTap, isNotNull);
-    lessonCard.onTap!();
+    await tester.scrollUntilVisible(progressButton, 200);
+    await tester.tap(progressButton);
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
-    expect(
-      tester.widget<LessonScreen>(find.byType(LessonScreen)).lessonId,
-      '502',
-    );
-  });
-
-  testWidgets('Standard Roadmap displays the backend empty state', (
-    tester,
-  ) async {
-    await _pumpLearning(
-      tester,
-      initialLocation: AppRoutes.learnRoadmap,
-      standardRoadmapRepository: _TestStandardRoadmapRepository(empty: true),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(const ValueKey<String>('standard_roadmap_empty')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('ai_personalized_path_section')),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('Standard Roadmap failure is retryable without an AI request', (
-    tester,
-  ) async {
-    await _pumpLearning(
-      tester,
-      initialLocation: AppRoutes.learnRoadmap,
-      standardRoadmapRepository: _TestStandardRoadmapRepository(
-        error: StateError('offline'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(const ValueKey<String>('learning_error_view')),
-      findsOneWidget,
-    );
+    expect(find.byType(JlptProgressScreen), findsOneWidget);
+    expect(find.text('Chi tiết tiến độ kỹ năng'), findsOneWidget);
+    _expectLearnTabSelected(tester);
   });
 
   testWidgets('progress screen renders all five approved skill categories', (
@@ -406,12 +233,6 @@ Future<GoRouter> _pumpLearning(
   WidgetTester tester, {
   required String initialLocation,
   LearningRepository repository = const FixtureLearningRepository(),
-  UserProfileRepository? profileRepository,
-  PlacementTestStatus placementStatus = const PlacementTestStatus(
-    hasCompletedPlacementTest: false,
-  ),
-  LearningPathRepository? pathRepository,
-  StandardRoadmapRepository? standardRoadmapRepository,
   Size viewportSize = const Size(390, 844),
 }) async {
   tester.view.physicalSize = viewportSize;
@@ -431,188 +252,14 @@ Future<GoRouter> _pumpLearning(
     ProviderScope(
       overrides: [
         learningRepositoryProvider.overrideWithValue(repository),
-        learningPathRepositoryProvider.overrideWithValue(
-          pathRepository ?? _TestLearningPathRepository(),
-        ),
-        standardRoadmapRepositoryProvider.overrideWithValue(
-          standardRoadmapRepository ?? _TestStandardRoadmapRepository(),
-        ),
-        placementTestRepositoryProvider.overrideWithValue(
-          _TestPlacementRepository(placementStatus),
-        ),
         jlptCatalogRepositoryProvider.overrideWithValue(
           TestJlptCatalogRepository(),
         ),
-        if (profileRepository != null)
-          userProfileRepositoryProvider.overrideWithValue(profileRepository),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );
   return router;
-}
-
-class _DatePreservingProfileRepository extends Fake
-    implements UserProfileRepository, StudyLevelProfileRepository {
-  int loadedProfileCount = 0;
-  int goalCalls = 0;
-  int? currentStudyLevelId = 204;
-  final int targetJlptLevelId = 204;
-  final int dailyStudyMinutes = 30;
-  final DateTime targetExamDate = DateTime(2030, 12, 1);
-
-  UserProfile get _profile => UserProfile(
-    userId: 42,
-    email: 'learner@example.test',
-    firstName: 'Learner',
-    lastName: 'QA',
-    avatarUrl: null,
-    role: 'Learner',
-    isEmailVerified: true,
-    targetJlptLevelId: 204,
-    targetJlptLevelName: 'N4',
-    currentStudyLevelId: currentStudyLevelId,
-    currentStudyLevelName: currentStudyLevelId == 204 ? 'N4' : 'N5',
-    dailyStudyMinutes: 30,
-    targetExamDate: DateTime(2030, 12, 1),
-    emailNotificationsEnabled: true,
-    systemNotificationsEnabled: true,
-  );
-
-  @override
-  Future<UserProfile> loadProfile() async {
-    loadedProfileCount++;
-    return _profile;
-  }
-
-  @override
-  Future<UserProfile> setJlptGoal({
-    required int targetJlptLevelId,
-    required int dailyStudyMinutes,
-  }) async {
-    goalCalls++;
-    return _profile;
-  }
-
-  @override
-  Future<UserProfile> switchStudyLevel({
-    required int currentStudyLevelId,
-  }) async {
-    this.currentStudyLevelId = currentStudyLevelId;
-    return _profile;
-  }
-}
-
-class _TestLearningPathRepository implements LearningPathRepository {
-  _TestLearningPathRepository({this.generationError});
-
-  final Object? generationError;
-  int generateCalls = 0;
-
-  @override
-  Future<RecommendedLearningPath?> loadLatest() async => null;
-
-  @override
-  Future<RecommendedLearningPath> generate() async {
-    generateCalls++;
-    if (generationError case final error?) throw error;
-    return RecommendedLearningPath(
-      userId: 42,
-      generatedAt: DateTime.utc(2026, 10, 26),
-      summary: 'Ưu tiên phần kiến thức còn yếu.',
-      strengths: const <String>['Từ vựng'],
-      weaknesses: const <String>['Ngữ pháp'],
-      feasibility: 'Khả thi nếu học đều.',
-      isExamDateRealistic: true,
-      recommendedStudyDays: 1,
-      focusTopics: const <String>['Ngữ pháp'],
-      dailySchedules: const <RecommendedLearningDay>[
-        RecommendedLearningDay(
-          day: 1,
-          title: 'Củng cố kiến thức',
-          focus: 'Hoàn thành bài được đề xuất.',
-          lessons: <RecommendedLesson>[
-            RecommendedLesson(lessonId: 709, title: 'Bài ngữ pháp thật'),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _TestStandardRoadmapRepository implements StandardRoadmapRepository {
-  _TestStandardRoadmapRepository({this.error, this.empty = false});
-
-  final Object? error;
-  final bool empty;
-  int calls = 0;
-
-  @override
-  Future<StandardRoadmap> load() async {
-    calls++;
-    if (error != null) throw error!;
-    final lessons = empty
-        ? const <StandardRoadmapLesson>[]
-        : const <StandardRoadmapLesson>[
-            StandardRoadmapLesson(
-              lessonId: 501,
-              title: 'Bài đã hoàn thành',
-              sortOrder: 1,
-              progressPercent: 100,
-              isCompleted: true,
-            ),
-            StandardRoadmapLesson(
-              lessonId: 502,
-              title: 'Bài tiếp theo',
-              sortOrder: 2,
-              progressPercent: 35,
-              isCompleted: false,
-            ),
-          ];
-    return StandardRoadmap(
-      currentStudyLevelId: 101,
-      currentStudyLevelName: 'N5',
-      targetJlptLevelId: 204,
-      targetJlptLevelName: 'N4',
-      learningMode: LearningMode.standard,
-      totalLessons: lessons.length,
-      completedLessons: lessons.where((lesson) => lesson.isCompleted).length,
-      nextLessonId: lessons
-          .where((lesson) => !lesson.isCompleted)
-          .firstOrNull
-          ?.lessonId,
-      lessons: lessons,
-    );
-  }
-}
-
-class _TestPlacementRepository
-    implements PlacementTestRepository, PlacementSkipRepository {
-  const _TestPlacementRepository(this.status);
-
-  final PlacementTestStatus status;
-
-  @override
-  Future<PlacementTestStatus> loadStatus() async => status;
-
-  @override
-  Future<PlacementTestStatus> skip() async => status;
-
-  @override
-  Future<PlacementTestAttempt?> loadActiveAttempt() async => null;
-
-  @override
-  Future<PlacementTestAttempt> start() => throw UnimplementedError();
-
-  @override
-  Future<PlacementTestResult> submit(
-    int attemptId,
-    List<PlacementTestAnswerSubmission> answers,
-  ) => throw UnimplementedError();
-
-  @override
-  Future<PlacementTestResult> loadResult(int attemptId) =>
-      throw UnimplementedError();
 }
 
 void _expectLearnTabSelected(WidgetTester tester) {

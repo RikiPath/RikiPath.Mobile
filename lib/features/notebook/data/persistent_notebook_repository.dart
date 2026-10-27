@@ -5,8 +5,7 @@ import 'package:rikipath_mobile/features/notebook/domain/notebook_repository.dar
 
 typedef NotebookOwnerIdLoader = Future<int?> Function();
 
-class PersistentNotebookRepository
-    implements NotebookRepository, LessonNotebookRepository {
+class PersistentNotebookRepository implements NotebookRepository {
   const PersistentNotebookRepository(
     this._remote,
     this._local,
@@ -158,75 +157,9 @@ class PersistentNotebookRepository
       meaning: vocabulary.meaning,
       addedAt: DateTime.now().toUtc(),
       vocabularyRouteKey: vocabulary.routeKey,
-      sourceVocabularyId: vocabularyId,
     );
     await _local.saveEntry(ownerUserId, collection, entry);
     return bookmark;
-  }
-
-  @override
-  Future<NotebookBookmark> bookmarkKanji({
-    required NotebookKanjiDraft kanji,
-    required NotebookCollection collection,
-  }) async {
-    if (collection.source != NotebookDataSource.remote ||
-        collection.remoteId == null ||
-        collection.remoteId! <= 0 ||
-        kanji.remoteId <= 0) {
-      throw ArgumentError(
-        'A LIVE collection and positive backend Kanji ID are required.',
-      );
-    }
-    final remote = _remote;
-    if (remote is! LessonNotebookRemoteDataSource) {
-      throw StateError('The Notebook data source cannot bookmark Kanji.');
-    }
-    final ownerUserId = await _ownerUserId();
-    final existing = await _local.findByKanjiId(ownerUserId, kanji.remoteId);
-    if (existing != null) {
-      return NotebookBookmark(
-        noteEntryId: existing.remoteNoteEntryId,
-        collectionRouteKey: collection.routeKey,
-        collectionName: collection.name,
-      );
-    }
-
-    final bookmark = await (remote as LessonNotebookRemoteDataSource)
-        .bookmarkKanji(kanjiId: kanji.remoteId, collection: collection);
-    final noteEntryId = bookmark.noteEntryId;
-    if (noteEntryId == null || noteEntryId <= 0) {
-      throw StateError('LIVE Kanji bookmark response omitted a note-entry ID.');
-    }
-    await _local.saveEntry(
-      ownerUserId,
-      collection,
-      NotebookEntry(
-        key: NotebookEntryKey.live(
-          contentType: NotebookContentType.kanji,
-          noteEntryId: noteEntryId,
-        ),
-        remoteNoteEntryId: noteEntryId,
-        contentType: NotebookContentType.kanji,
-        term: kanji.character,
-        reading: _optionalText(kanji.reading),
-        meaning: kanji.meaning,
-        addedAt: DateTime.now().toUtc(),
-        sourceKanjiId: kanji.remoteId,
-      ),
-    );
-    return bookmark;
-  }
-
-  @override
-  Future<void> bookmarkGrammar(int grammarPatternId) async {
-    final remote = _remote;
-    if (remote is! LessonNotebookRemoteDataSource) {
-      throw StateError('The Notebook data source cannot bookmark Grammar.');
-    }
-    await _ownerUserId();
-    await (remote as LessonNotebookRemoteDataSource).bookmarkGrammar(
-      grammarPatternId,
-    );
   }
 
   @override

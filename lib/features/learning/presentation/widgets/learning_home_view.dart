@@ -12,7 +12,6 @@ class LearningHomeView extends StatelessWidget {
     required this.catalog,
     required this.onSelectLevel,
     required this.onRetryCatalog,
-    required this.onRefresh,
     required this.onOpenRoadmap,
     required this.onOpenLibrary,
     required this.onOpenLesson,
@@ -23,90 +22,85 @@ class LearningHomeView extends StatelessWidget {
   final AsyncValue<List<JlptLevelCatalogItem>> catalog;
   final ValueChanged<JlptLevelCatalogItem> onSelectLevel;
   final VoidCallback onRetryCatalog;
-  final Future<void> Function() onRefresh;
   final VoidCallback onOpenRoadmap;
   final VoidCallback onOpenLibrary;
   final VoidCallback onOpenLesson;
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      child: ListView(
-        key: const ValueKey<String>('learning_home_success_view'),
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.space4,
-          AppSpacing.space3,
-          AppSpacing.space4,
-          AppSpacing.space8,
+    return ListView(
+      key: const ValueKey<String>('learning_home_success_view'),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.space4,
+        AppSpacing.space3,
+        AppSpacing.space4,
+        AppSpacing.space8,
+      ),
+      children: [
+        const _LearningSectionTabs(),
+        const SizedBox(height: AppSpacing.space3),
+        _JlptLevelSelector(
+          catalog: catalog,
+          selected: snapshot.hasSelectedLevel ? snapshot.jlptTarget : null,
+          onSelected: onSelectLevel,
+          onRetry: onRetryCatalog,
         ),
-        children: [
-          const _LearningSectionTabs(),
+        if (!snapshot.hasSelectedLevel) ...[
           const SizedBox(height: AppSpacing.space3),
-          _JlptLevelSelector(
-            catalog: catalog,
-            selected: snapshot.hasSelectedLevel ? snapshot.jlptTarget : null,
-            onSelected: onSelectLevel,
-            onRetry: onRetryCatalog,
+          RikiCard(
+            backgroundColor: AppColors.learnerSurface,
+            boxShadow: const <BoxShadow>[],
+            child: Text(
+              context.l10n.jlptSelectionSafeHint,
+              style: AppTypography.bodySmall,
+            ),
           ),
-          if (!snapshot.hasSelectedLevel) ...[
-            const SizedBox(height: AppSpacing.space3),
-            RikiCard(
-              backgroundColor: AppColors.learnerSurface,
-              boxShadow: const <BoxShadow>[],
-              child: Text(
-                context.l10n.jlptSelectionSafeHint,
-                style: AppTypography.bodySmall,
-              ),
+        ],
+        const SizedBox(height: AppSpacing.space4),
+        if (snapshot.hasSelectedLevel && snapshot.totalLessons == 0)
+          const _LearningEmptyCard()
+        else ...[
+          _ProgressSummaryCard(
+            snapshot: snapshot,
+            onOpenRoadmap: onOpenRoadmap,
+          ),
+          if (snapshot.hasCurrentLesson) ...[
+            const SizedBox(height: AppSpacing.space4),
+            _CurrentLessonCard(
+              lesson: snapshot.currentLesson,
+              onOpenLesson: onOpenLesson,
             ),
           ],
-          const SizedBox(height: AppSpacing.space4),
-          if (snapshot.hasSelectedLevel && snapshot.totalLessons == 0)
-            const _LearningEmptyCard()
-          else ...[
-            _ProgressSummaryCard(
-              snapshot: snapshot,
-              onOpenRoadmap: onOpenRoadmap,
+          if (snapshot.sections.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.space5),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.l10n.mainLearningSections,
+                    style: AppTypography.sectionTitle.copyWith(
+                      color: AppColors.learnerTextPrimary,
+                    ),
+                  ),
+                ),
+                Text(
+                  context.l10n.viewAll,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.brandPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-            if (snapshot.hasCurrentLesson) ...[
-              const SizedBox(height: AppSpacing.space4),
-              _CurrentLessonCard(
-                lesson: snapshot.currentLesson,
-                onOpenLesson: onOpenLesson,
-              ),
-            ],
-            if (snapshot.sections.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.space5),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      context.l10n.mainLearningSections,
-                      style: AppTypography.sectionTitle.copyWith(
-                        color: AppColors.learnerTextPrimary,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    context.l10n.viewAll,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.brandPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.space3),
-              _LearningSections(
-                sections: snapshot.sections,
-                onOpenRoadmap: onOpenRoadmap,
-                onOpenLibrary: onOpenLibrary,
-              ),
-            ],
+            const SizedBox(height: AppSpacing.space3),
+            _LearningSections(
+              sections: snapshot.sections,
+              onOpenRoadmap: onOpenRoadmap,
+              onOpenLibrary: onOpenLibrary,
+            ),
           ],
         ],
-      ),
+      ],
     );
   }
 }
@@ -134,7 +128,7 @@ class _JlptLevelSelector extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            context.l10n.onboardingCurrentStudyLevelTitle,
+            context.l10n.jlptSelectionTitle,
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.learnerTextSecondary,
               fontWeight: FontWeight.w700,

@@ -40,7 +40,6 @@ class Lesson {
     required this.objective,
     required this.parts,
     required this.vocabulary,
-    this.kanji = const <LessonKanjiItem>[],
     required this.detailVocabularyCount,
     required this.videoVocabularyCount,
     required this.relatedGrammar,
@@ -53,7 +52,6 @@ class Lesson {
     required this.completionXp,
     required this.masteryItems,
     required this.mediaSource,
-    this.attachmentUrl,
     this.lockedReason,
     this.prerequisite,
     this.nextLesson,
@@ -74,7 +72,6 @@ class Lesson {
   final String objective;
   final List<LessonPart> parts;
   final List<LessonVocabularyItem> vocabulary;
-  final List<LessonKanjiItem> kanji;
   final int detailVocabularyCount;
   final int videoVocabularyCount;
   final List<LessonRelatedGrammar> relatedGrammar;
@@ -87,7 +84,6 @@ class Lesson {
   final int completionXp;
   final List<LessonMasteryItem> masteryItems;
   final LessonMediaSource mediaSource;
-  final Uri? attachmentUrl;
   final String? lockedReason;
   final LessonPrerequisite? prerequisite;
   final LessonLink? nextLesson;
@@ -109,9 +105,7 @@ class Lesson {
     List<LessonPart>? parts,
     JlptLevel? level,
     List<LessonVocabularyItem>? vocabulary,
-    List<LessonKanjiItem>? kanji,
     List<LessonRelatedGrammar>? relatedGrammar,
-    int? durationSeconds,
     LessonProgress? progress,
     LessonAvailability? availability,
     LessonLink? nextLesson,
@@ -129,11 +123,10 @@ class Lesson {
       curriculum: curriculum,
       chapterNumber: chapterNumber,
       lessonNumber: lessonNumber,
-      durationSeconds: durationSeconds ?? this.durationSeconds,
+      durationSeconds: durationSeconds,
       objective: objective ?? this.objective,
       parts: parts ?? this.parts,
       vocabulary: vocabulary ?? this.vocabulary,
-      kanji: kanji ?? this.kanji,
       detailVocabularyCount: detailVocabularyCount,
       videoVocabularyCount: videoVocabularyCount,
       relatedGrammar: relatedGrammar ?? this.relatedGrammar,
@@ -146,7 +139,6 @@ class Lesson {
       completionXp: completionXp,
       masteryItems: masteryItems,
       mediaSource: mediaSource,
-      attachmentUrl: attachmentUrl,
       lockedReason: clearLockedReason ? null : lockedReason,
       prerequisite: clearPrerequisite
           ? null
@@ -193,108 +185,47 @@ class LessonPart {
 @immutable
 class LessonVocabularyItem {
   const LessonVocabularyItem({
-    this.vocabularyId,
     required this.word,
     required this.reading,
     required this.meaning,
     required this.isSaved,
-    this.exampleSentence,
-    this.exampleSentenceMeaning,
-    this.audioUrl,
   });
 
-  final int? vocabularyId;
   final String word;
   final String reading;
   final String meaning;
   final bool isSaved;
-  final String? exampleSentence;
-  final String? exampleSentenceMeaning;
-  final Uri? audioUrl;
 
   LessonVocabularyItem copyWith({bool? isSaved}) {
     return LessonVocabularyItem(
-      vocabularyId: vocabularyId,
       word: word,
       reading: reading,
       meaning: meaning,
       isSaved: isSaved ?? this.isSaved,
-      exampleSentence: exampleSentence,
-      exampleSentenceMeaning: exampleSentenceMeaning,
-      audioUrl: audioUrl,
     );
   }
 }
 
 @immutable
-class LessonKanjiItem {
-  const LessonKanjiItem({
-    required this.kanjiId,
-    required this.character,
-    required this.meaning,
-    required this.isSaved,
-    this.sinoVietnamese,
-    this.onYomi,
-    this.kunYomi,
-    this.strokeCount = 0,
-    this.strokeOrderImageUrl,
-    this.audioUrl,
-  });
-
-  final int kanjiId;
-  final String character;
-  final String meaning;
-  final bool isSaved;
-  final String? sinoVietnamese;
-  final String? onYomi;
-  final String? kunYomi;
-  final int strokeCount;
-  final Uri? strokeOrderImageUrl;
-  final Uri? audioUrl;
-
-  LessonKanjiItem copyWith({bool? isSaved}) => LessonKanjiItem(
-    kanjiId: kanjiId,
-    character: character,
-    meaning: meaning,
-    isSaved: isSaved ?? this.isSaved,
-    sinoVietnamese: sinoVietnamese,
-    onYomi: onYomi,
-    kunYomi: kunYomi,
-    strokeCount: strokeCount,
-    strokeOrderImageUrl: strokeOrderImageUrl,
-    audioUrl: audioUrl,
-  );
-}
-
-@immutable
 class LessonRelatedGrammar {
   const LessonRelatedGrammar({
-    this.grammarPatternId,
     required this.number,
     required this.title,
     required this.description,
     this.isSaved = false,
-    this.exampleSentence,
-    this.exampleSentenceMeaning,
   });
 
-  final int? grammarPatternId;
   final int number;
   final String title;
   final String description;
   final bool isSaved;
-  final String? exampleSentence;
-  final String? exampleSentenceMeaning;
 
   LessonRelatedGrammar copyWith({bool? isSaved}) {
     return LessonRelatedGrammar(
-      grammarPatternId: grammarPatternId,
       number: number,
       title: title,
       description: description,
       isSaved: isSaved ?? this.isSaved,
-      exampleSentence: exampleSentence,
-      exampleSentenceMeaning: exampleSentenceMeaning,
     );
   }
 }

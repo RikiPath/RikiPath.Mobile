@@ -16,11 +16,7 @@ abstract final class LearningMapper {
       throw const FormatException('Invalid learning discovery payload.');
     }
 
-    final lessons = dto.lessons.map(summary).toList()
-      ..sort((left, right) {
-        final order = left.sortOrder.compareTo(right.sortOrder);
-        return order != 0 ? order : left.lessonId.compareTo(right.lessonId);
-      });
+    final lessons = dto.lessons.map(summary).toList(growable: false);
     for (final lesson in lessons) {
       if (lesson.lessonId <= 0 ||
           lesson.languageSkillId <= 0 ||
@@ -128,52 +124,10 @@ abstract final class LearningMapper {
       durationSeconds: 0,
       objective: content,
       parts: const <LessonPart>[],
-      vocabulary: dto.vocabularies
-          .map(
-            (item) => LessonVocabularyItem(
-              vocabularyId: item.vocabularyId,
-              word: item.word,
-              reading: item.reading,
-              meaning: item.meaning,
-              isSaved: false,
-              exampleSentence: item.exampleSentence,
-              exampleSentenceMeaning: item.exampleSentenceMeaning,
-              audioUrl: item.audioUrl,
-            ),
-          )
-          .toList(growable: false),
-      kanji: dto.kanjis
-          .map(
-            (item) => LessonKanjiItem(
-              kanjiId: item.kanjiId,
-              character: item.character,
-              meaning: item.meaning,
-              isSaved: false,
-              sinoVietnamese: item.sinoVietnamese,
-              onYomi: item.onYomi,
-              kunYomi: item.kunYomi,
-              strokeCount: item.strokeCount,
-              strokeOrderImageUrl: item.strokeOrderImageUrl,
-              audioUrl: item.audioUrl,
-            ),
-          )
-          .toList(growable: false),
-      detailVocabularyCount: dto.vocabularies.length,
+      vocabulary: const <LessonVocabularyItem>[],
+      detailVocabularyCount: 0,
       videoVocabularyCount: 0,
-      relatedGrammar: [
-        for (var index = 0; index < dto.grammars.length; index++)
-          LessonRelatedGrammar(
-            grammarPatternId: dto.grammars[index].grammarPatternId,
-            number: index + 1,
-            title: dto.grammars[index].title,
-            description:
-                dto.grammars[index].usageNotes?.trim().isNotEmpty == true
-                ? dto.grammars[index].usageNotes!.trim()
-                : dto.grammars[index].structure,
-            exampleSentence: dto.grammars[index].exampleSentence,
-            exampleSentenceMeaning: dto.grammars[index].exampleSentenceMeaning,
-          ),
-      ],
+      relatedGrammar: const <LessonRelatedGrammar>[],
       article: LessonArticle(
         formulas: const <String>[],
         meaning: content,
@@ -188,10 +142,7 @@ abstract final class LearningMapper {
       detailXp: 0,
       completionXp: 0,
       masteryItems: const <LessonMasteryItem>[],
-      mediaSource: dto.videoUrl == null
-          ? const LessonMediaSource.none()
-          : LessonMediaSource.network(dto.videoUrl!),
-      attachmentUrl: dto.attachmentUrl,
+      mediaSource: const LessonMediaSource.none(),
     );
   }
 

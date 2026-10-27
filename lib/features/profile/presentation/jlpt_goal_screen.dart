@@ -20,18 +20,12 @@ class JlptGoalScreen extends ConsumerStatefulWidget {
 class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
   JlptLevelCatalogItem? _selectedLevel;
   int? _selectedMinutes;
-  DateTime? _selectedExamDate;
   bool _initialized = false;
 
-  void _initialize(
-    JlptLevelCatalogItem level,
-    int minutes,
-    DateTime? targetExamDate,
-  ) {
+  void _initialize(JlptLevelCatalogItem level, int minutes) {
     if (_initialized) return;
     _selectedLevel = level;
     _selectedMinutes = minutes > 0 ? minutes : null;
-    _selectedExamDate = targetExamDate;
     _initialized = true;
   }
 
@@ -67,9 +61,9 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
               rowsPerGroup: 1,
             );
           }
-          final profile = profileState.profile;
           final levels = catalogValue.value;
           if (levels != null && levels.isNotEmpty) {
+            final profile = profileState.profile;
             final selected = levels
                 .where(
                   (item) =>
@@ -82,11 +76,7 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
                 )
                 .firstOrNull;
             if (selected != null) {
-              _initialize(
-                selected,
-                localJourney.dailyStudyMinutes,
-                profile.targetExamDate,
-              );
+              _initialize(selected, localJourney.dailyStudyMinutes);
             }
           }
           return ProfileAnimatedEntrance(
@@ -117,22 +107,6 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
                       trailing: localJourney.hasSelectedLevel
                           ? JlptBadge(localJourney.selectedLevel)
                           : null,
-                    ),
-                    ProfileSettingsTile(
-                      icon: Icons.event_outlined,
-                      title: context.l10n.expectedExam(
-                        profile.targetExamDate == null
-                            ? context.l10n.notConfigured
-                            : MaterialLocalizations.of(
-                                context,
-                              ).formatMediumDate(profile.targetExamDate!),
-                      ),
-                      subtitle: profile.targetExamDate == null
-                          ? context.l10n.notConfigured
-                          : MaterialLocalizations.of(
-                              context,
-                            ).formatMediumDate(profile.targetExamDate!),
-                      onTap: null,
                     ),
                     ProfileSettingsTile(
                       icon: Icons.schedule_outlined,
@@ -198,7 +172,7 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
                     spacing: AppSpacing.space2,
                     runSpacing: AppSpacing.space2,
                     children: [
-                      for (final minutes in const [15, 30, 45, 60, 90])
+                      for (final minutes in const [15, 30, 45, 60])
                         ChoiceChip(
                           key: ValueKey<String>('daily_study_choice_$minutes'),
                           label: Text(context.l10n.studyMinutesPerDay(minutes)),
@@ -209,36 +183,11 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: AppSpacing.space6),
-                ProfileFormSection(
-                  title: context.l10n.expectedExam(
-                    _selectedExamDate == null
-                        ? context.l10n.notConfigured
-                        : MaterialLocalizations.of(
-                            context,
-                          ).formatMediumDate(_selectedExamDate!),
-                  ),
-                  child: OutlinedButton.icon(
-                    key: const ValueKey<String>('jlpt_goal_exam_date_button'),
-                    onPressed: _selectExamDate,
-                    icon: const Icon(Icons.calendar_month_outlined),
-                    label: Text(
-                      _selectedExamDate == null
-                          ? context.l10n.notConfigured
-                          : MaterialLocalizations.of(
-                              context,
-                            ).formatMediumDate(_selectedExamDate!),
-                    ),
-                  ),
-                ),
                 const SizedBox(height: AppSpacing.space5),
                 RikiPrimaryButton(
                   key: const ValueKey<String>('jlpt_goal_save_button'),
                   label: context.l10n.saveChanges,
-                  onPressed:
-                      _selectedLevel == null ||
-                          _selectedMinutes == null ||
-                          _selectedExamDate == null
+                  onPressed: _selectedLevel == null || _selectedMinutes == null
                       ? null
                       : () async {
                           final updated = await ref
@@ -246,7 +195,6 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
                               .setJlptGoal(
                                 targetJlptLevelId: _selectedLevel!.id,
                                 dailyStudyMinutes: _selectedMinutes!,
-                                targetExamDate: _selectedExamDate,
                               );
                           if (!updated) return;
                           await ref
@@ -263,22 +211,5 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
         },
       ),
     );
-  }
-
-  Future<void> _selectExamDate() async {
-    final today = DateUtils.dateOnly(DateTime.now());
-    final firstDate = today.add(const Duration(days: 1));
-    final selected = await showDatePicker(
-      context: context,
-      initialDate:
-          _selectedExamDate == null || _selectedExamDate!.isBefore(firstDate)
-          ? firstDate.add(const Duration(days: 179))
-          : _selectedExamDate!,
-      firstDate: firstDate,
-      lastDate: DateTime(today.year + 5, 12, 31),
-    );
-    if (selected != null) {
-      setState(() => _selectedExamDate = DateUtils.dateOnly(selected));
-    }
   }
 }

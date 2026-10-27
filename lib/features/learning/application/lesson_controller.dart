@@ -3,16 +3,13 @@ import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
-import 'package:rikipath_mobile/features/learning/application/learning_path_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/api_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/lesson_media_driver.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_session.dart';
 import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
-import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
-import 'package:rikipath_mobile/features/notebook/domain/notebook_repository.dart';
 
 typedef LessonMediaDriverFactory = LessonMediaDriver Function();
 
@@ -79,39 +76,32 @@ class LessonController extends AsyncNotifier<LessonSession> {
         clearPrerequisite: true,
       );
     }
-    if (lesson.remoteLessonId == null) {
-      final demoNotebook = await ref.watch(
-        demoNotebookControllerProvider.future,
-      );
-      lesson = lesson.copyWith(
-        vocabulary: [
-          for (var index = 0; index < lesson.vocabulary.length; index++)
-            lesson.vocabulary[index].copyWith(
-              isSaved: demoNotebook.entries.any(
-                (entry) =>
-                    entry.vocabularyRouteKey ==
-                    _vocabularyStableKey(index, lesson),
-              ),
+    final demoNotebook = await ref.watch(demoNotebookControllerProvider.future);
+    lesson = lesson.copyWith(
+      vocabulary: [
+        for (var index = 0; index < lesson.vocabulary.length; index++)
+          lesson.vocabulary[index].copyWith(
+            isSaved: demoNotebook.entries.any(
+              (entry) =>
+                  entry.vocabularyRouteKey ==
+                  _vocabularyStableKey(index, lesson),
             ),
-        ],
-        relatedGrammar: [
-          for (var index = 0; index < lesson.relatedGrammar.length; index++)
-            lesson.relatedGrammar[index].copyWith(
-              isSaved: demoNotebook.entries.any(
-                (entry) =>
-                    entry.key ==
-                    NotebookEntryKey.fixture(
-                      contentType: NotebookContentType.grammar,
-                      stableKey: _grammarStableKey(index, lesson),
-                    ),
-              ),
+          ),
+      ],
+      relatedGrammar: [
+        for (var index = 0; index < lesson.relatedGrammar.length; index++)
+          lesson.relatedGrammar[index].copyWith(
+            isSaved: demoNotebook.entries.any(
+              (entry) =>
+                  entry.key ==
+                  NotebookEntryKey.fixture(
+                    contentType: NotebookContentType.grammar,
+                    stableKey: _grammarStableKey(index, lesson),
+                  ),
             ),
-        ],
-      );
-    } else {
-      lesson = await _withLiveSavedState(lesson);
-      lesson = _withNextLiveLesson(lesson);
-    }
+          ),
+      ],
+    );
     return LessonSession(
       lesson: lesson,
       stage: lesson.progress.isCompleted
@@ -155,17 +145,6 @@ class LessonController extends AsyncNotifier<LessonSession> {
           seconds: current.lesson.progress.resumePositionSeconds,
         ),
       );
-      final mediaDurationSeconds =
-          _mediaDriver.videoController?.value.duration.inSeconds ?? 0;
-      if (mediaDurationSeconds > 0) {
-        state = AsyncData(
-          state.requireValue.copyWith(
-            lesson: state.requireValue.lesson.copyWith(
-              durationSeconds: mediaDurationSeconds,
-            ),
-          ),
-        );
-      }
       final ready = state.requireValue.copyWith(
         videoStatus: LessonVideoStatus.ready,
       );
@@ -257,7 +236,6 @@ class LessonController extends AsyncNotifier<LessonSession> {
   Future<void> toggleFixtureVocabulary(int index) async {
     final current = state.value;
     if (current == null ||
-        current.lesson.remoteLessonId != null ||
         index < 0 ||
         index >= current.lesson.vocabulary.length) {
       return;
@@ -285,7 +263,6 @@ class LessonController extends AsyncNotifier<LessonSession> {
   Future<void> toggleFixtureGrammar(int index) async {
     final current = state.value;
     if (current == null ||
-        current.lesson.remoteLessonId != null ||
         index < 0 ||
         index >= current.lesson.relatedGrammar.length) {
       return;
@@ -309,108 +286,6 @@ class LessonController extends AsyncNotifier<LessonSession> {
         lesson: current.lesson.copyWith(relatedGrammar: grammar),
       ),
     );
-  }
-
-  Future<bool> saveLiveVocabulary(
-    int index,
-    NotebookCollection collection,
-  ) async {
-    final current = state.value;
-    if (current == null ||
-        current.lesson.remoteLessonId == null ||
-        index < 0 ||
-        index >= current.lesson.vocabulary.length) {
-      return false;
-    }
-    final item = current.lesson.vocabulary[index];
-    final id = item.vocabularyId;
-    final repository = ref.read(notebookRepositoryProvider);
-    if (id == null || id <= 0) return false;
-    try {
-      await repository.bookmarkVocabulary(
-        vocabulary: NotebookVocabularyDraft(
-          routeKey: 'remote-$id',
-          remoteId: id,
-          term: item.word,
-          reading: item.reading,
-          meaning: item.meaning,
-          jlptLevel: current.lesson.level.label,
-          exampleSentence: item.exampleSentence,
-        ),
-        collection: collection,
-      );
-      final vocabulary = [...current.lesson.vocabulary];
-      vocabulary[index] = item.copyWith(isSaved: true);
-      state = AsyncData(
-        current.copyWith(
-          lesson: current.lesson.copyWith(vocabulary: vocabulary),
-        ),
-      );
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  Future<bool> saveLiveKanji(int index, NotebookCollection collection) async {
-    final current = state.value;
-    if (current == null ||
-        current.lesson.remoteLessonId == null ||
-        index < 0 ||
-        index >= current.lesson.kanji.length) {
-      return false;
-    }
-    final item = current.lesson.kanji[index];
-    final repository = ref.read(notebookRepositoryProvider);
-    if (repository is! LessonNotebookRepository) return false;
-    try {
-      await (repository as LessonNotebookRepository).bookmarkKanji(
-        kanji: NotebookKanjiDraft(
-          remoteId: item.kanjiId,
-          character: item.character,
-          meaning: item.meaning,
-          reading: item.onYomi ?? item.kunYomi,
-        ),
-        collection: collection,
-      );
-      final kanji = [...current.lesson.kanji];
-      kanji[index] = item.copyWith(isSaved: true);
-      state = AsyncData(
-        current.copyWith(lesson: current.lesson.copyWith(kanji: kanji)),
-      );
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  Future<bool> saveLiveGrammar(int index) async {
-    final current = state.value;
-    if (current == null ||
-        current.lesson.remoteLessonId == null ||
-        index < 0 ||
-        index >= current.lesson.relatedGrammar.length) {
-      return false;
-    }
-    final item = current.lesson.relatedGrammar[index];
-    final id = item.grammarPatternId;
-    final repository = ref.read(notebookRepositoryProvider);
-    if (id == null || id <= 0 || repository is! LessonNotebookRepository) {
-      return false;
-    }
-    try {
-      await (repository as LessonNotebookRepository).bookmarkGrammar(id);
-      final grammar = [...current.lesson.relatedGrammar];
-      grammar[index] = item.copyWith(isSaved: true);
-      state = AsyncData(
-        current.copyWith(
-          lesson: current.lesson.copyWith(relatedGrammar: grammar),
-        ),
-      );
-      return true;
-    } catch (_) {
-      return false;
-    }
   }
 
   Future<void> savePlaybackPosition(int positionSeconds) async {
@@ -466,73 +341,6 @@ class LessonController extends AsyncNotifier<LessonSession> {
               .checkConnectionRetry,
         ),
       );
-    }
-  }
-
-  Lesson _withNextLiveLesson(Lesson lesson) {
-    final currentId = lesson.remoteLessonId;
-    if (currentId == null) return lesson;
-
-    final snapshot = ref.read(learningControllerProvider).value;
-    final recommended = ref
-        .watch(learningPathControllerProvider)
-        .value
-        ?.recommendationAfter(currentId);
-
-    final nextId = recommended?.lessonId;
-    final nextTitle = recommended?.title;
-
-    if (nextId == null || nextId <= 0 || nextId == currentId) return lesson;
-    final summary = snapshot?.lessons
-        .where((item) => item.lessonId == nextId)
-        .firstOrNull;
-    return lesson.copyWith(
-      nextLesson: LessonLink(
-        routeId: '$nextId',
-        lessonNumber: summary?.sortOrder ?? 0,
-        title: nextTitle?.trim().isNotEmpty == true
-            ? nextTitle!.trim()
-            : summary?.title ?? '',
-        subtitle: summary?.languageSkillName ?? '',
-        durationMinutes: 0,
-        level: lesson.level,
-      ),
-    );
-  }
-
-  Future<Lesson> _withLiveSavedState(Lesson lesson) async {
-    try {
-      final repository = ref.read(notebookRepositoryProvider);
-      final collections = await repository.loadCollections();
-      final entries = <NotebookEntry>[];
-      for (final collection in collections.where((item) => item.isLive)) {
-        entries.addAll(await repository.loadEntries(collection));
-      }
-      final vocabularyIds = entries
-          .map((entry) => entry.sourceVocabularyId)
-          .whereType<int>()
-          .toSet();
-      final kanjiIds = entries
-          .map((entry) => entry.sourceKanjiId)
-          .whereType<int>()
-          .toSet();
-      return lesson.copyWith(
-        vocabulary: [
-          for (final item in lesson.vocabulary)
-            item.copyWith(
-              isSaved:
-                  item.vocabularyId != null &&
-                  vocabularyIds.contains(item.vocabularyId),
-            ),
-        ],
-        kanji: [
-          for (final item in lesson.kanji)
-            item.copyWith(isSaved: kanjiIds.contains(item.kanjiId)),
-        ],
-      );
-    } catch (_) {
-      // Notebook availability must not block opening an otherwise valid lesson.
-      return lesson;
     }
   }
 

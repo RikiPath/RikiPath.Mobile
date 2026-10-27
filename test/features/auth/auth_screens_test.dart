@@ -23,20 +23,10 @@ import 'package:rikipath_mobile/features/auth/presentation/forgot_password_scree
 import 'package:rikipath_mobile/features/auth/presentation/login_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/register_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/verify_email_screen.dart';
-import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/home/presentation/home_screen.dart';
-import 'package:rikipath_mobile/features/placement_test/application/placement_test_controller.dart';
-import 'package:rikipath_mobile/features/placement_test/domain/placement_test.dart';
-import 'package:rikipath_mobile/features/placement_test/domain/placement_test_repository.dart';
-import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
-import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
-import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 
 import '../../support/test_auth_session.dart';
-import '../../support/test_jlpt_catalog.dart';
-
-final _futureExamDate = DateTime.utc(2030, 12, 7);
 
 void main() {
   group('LoginScreen', () {
@@ -387,7 +377,6 @@ void main() {
       completer.complete(_loginResponse);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 220));
-      await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
       expect(find.text('Đăng nhập thành công'), findsOneWidget);
       expect(find.text('Chào mừng bạn trở lại với RikiPath.'), findsOneWidget);
@@ -1046,15 +1035,6 @@ Future<GoRouter> _pumpAuthRoute(
       overrides: [
         authRepositoryProvider.overrideWithValue(repository),
         authSessionControllerProvider.overrideWithValue(session),
-        userProfileRepositoryProvider.overrideWithValue(
-          const _ReturningLearnerProfileRepository(),
-        ),
-        placementTestRepositoryProvider.overrideWithValue(
-          const _NoPlacementRepository(),
-        ),
-        jlptCatalogRepositoryProvider.overrideWithValue(
-          TestJlptCatalogRepository(),
-        ),
         if (now != null) verifyEmailClockProvider.overrideWithValue(now),
         localeControllerProvider.overrideWith(
           () => _TestLocaleController(locale),
@@ -1075,74 +1055,6 @@ Future<GoRouter> _pumpAuthRoute(
   );
   await tester.pump();
   return router;
-}
-
-class _NoPlacementRepository implements PlacementTestRepository {
-  const _NoPlacementRepository();
-
-  @override
-  Future<PlacementTestStatus> loadStatus() async =>
-      const PlacementTestStatus(hasCompletedPlacementTest: false);
-
-  @override
-  Future<PlacementTestAttempt?> loadActiveAttempt() async => null;
-
-  @override
-  Future<PlacementTestResult> loadResult(int attemptId) =>
-      throw UnimplementedError();
-
-  @override
-  Future<PlacementTestAttempt> start() => throw UnimplementedError();
-
-  @override
-  Future<PlacementTestResult> submit(
-    int attemptId,
-    List<PlacementTestAnswerSubmission> answers,
-  ) => throw UnimplementedError();
-}
-
-class _ReturningLearnerProfileRepository implements UserProfileRepository {
-  const _ReturningLearnerProfileRepository();
-
-  static final profile = UserProfile(
-    userId: 42,
-    email: 'learner@example.com',
-    firstName: 'Minh Anh',
-    lastName: 'Nguyễn',
-    avatarUrl: null,
-    role: 'Learner',
-    isEmailVerified: true,
-    targetJlptLevelId: 101,
-    targetJlptLevelName: 'N5',
-    dailyStudyMinutes: 30,
-    targetExamDate: _futureExamDate,
-    emailNotificationsEnabled: true,
-    systemNotificationsEnabled: true,
-  );
-
-  @override
-  Future<UserProfile> loadProfile() async => profile;
-
-  @override
-  Future<UserProfile> setJlptGoal({
-    required int targetJlptLevelId,
-    required int dailyStudyMinutes,
-  }) async => profile;
-
-  @override
-  Future<UserProfile> updateNotificationSettings({
-    required bool emailNotificationsEnabled,
-    required bool systemNotificationsEnabled,
-  }) async => profile;
-
-  @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) async => profile;
-
-  @override
-  Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) async => profile;
 }
 
 class _MutableClock {

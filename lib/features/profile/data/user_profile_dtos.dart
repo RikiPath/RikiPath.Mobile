@@ -9,16 +9,7 @@ class UserProfileDto {
     required this.isEmailVerified,
     required this.targetJlptLevelId,
     required this.targetJlptLevelName,
-    this.startingJlptLevelId,
-    this.startingJlptLevelName,
-    this.currentStudyLevelId,
-    this.currentStudyLevelName,
-    this.learningMode = 'STANDARD',
-    this.assessedJlptLevelId,
-    this.assessedJlptLevelName,
-    this.placementDecision = 'NOT_TAKEN',
     required this.dailyStudyMinutes,
-    this.targetExamDate,
     required this.emailNotificationsEnabled,
     required this.systemNotificationsEnabled,
   });
@@ -42,17 +33,7 @@ class UserProfileDto {
       isEmailVerified: _requiredBool(json, 'isEmailVerified'),
       targetJlptLevelId: _optionalInt(json, 'targetJlptLevelId'),
       targetJlptLevelName: _optionalString(json, 'targetJlptLevelName'),
-      startingJlptLevelId: _optionalInt(json, 'startingJlptLevelId'),
-      startingJlptLevelName: _optionalString(json, 'startingJlptLevelName'),
-      currentStudyLevelId: _optionalInt(json, 'currentStudyLevelId'),
-      currentStudyLevelName: _optionalString(json, 'currentStudyLevelName'),
-      learningMode: _optionalString(json, 'learningMode') ?? 'STANDARD',
-      assessedJlptLevelId: _optionalInt(json, 'assessedJlptLevelId'),
-      assessedJlptLevelName: _optionalString(json, 'assessedJlptLevelName'),
-      placementDecision:
-          _optionalString(json, 'placementDecision') ?? 'NOT_TAKEN',
       dailyStudyMinutes: _requiredInt(json, 'dailyStudyMinutes'),
-      targetExamDate: _optionalDateTime(json, 'targetExamDate'),
       emailNotificationsEnabled: _requiredBool(
         json,
         'emailNotificationsEnabled',
@@ -73,16 +54,7 @@ class UserProfileDto {
   final bool isEmailVerified;
   final int? targetJlptLevelId;
   final String? targetJlptLevelName;
-  final int? startingJlptLevelId;
-  final String? startingJlptLevelName;
-  final int? currentStudyLevelId;
-  final String? currentStudyLevelName;
-  final String learningMode;
-  final int? assessedJlptLevelId;
-  final String? assessedJlptLevelName;
-  final String placementDecision;
   final int dailyStudyMinutes;
-  final DateTime? targetExamDate;
   final bool emailNotificationsEnabled;
   final bool systemNotificationsEnabled;
 }
@@ -106,17 +78,14 @@ class SetJlptGoalRequestDto {
   const SetJlptGoalRequestDto({
     required this.targetJlptLevelId,
     required this.dailyStudyMinutes,
-    this.targetExamDate,
   });
 
   final int targetJlptLevelId;
   final int dailyStudyMinutes;
-  final DateTime? targetExamDate;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'targetJlptLevelId': targetJlptLevelId,
     'dailyStudyMinutes': dailyStudyMinutes,
-    if (targetExamDate != null) 'targetExamDate': _dateOnlyIso(targetExamDate!),
   };
 }
 
@@ -179,21 +148,4 @@ bool _requiredBool(Map<String, Object?> json, String field) {
   final value = json[field];
   if (value is bool) return value;
   throw FormatException('Expected a boolean field named $field.');
-}
-
-DateTime? _optionalDateTime(Map<String, Object?> json, String field) {
-  final value = json[field];
-  if (value == null) return null;
-  if (value is String) {
-    final parsed = DateTime.tryParse(value);
-    if (parsed != null) return parsed.toLocal();
-  }
-  throw FormatException('Expected a nullable ISO-8601 field named $field.');
-}
-
-String _dateOnlyIso(DateTime value) {
-  final year = value.year.toString().padLeft(4, '0');
-  final month = value.month.toString().padLeft(2, '0');
-  final day = value.day.toString().padLeft(2, '0');
-  return '$year-$month-${day}T00:00:00';
 }

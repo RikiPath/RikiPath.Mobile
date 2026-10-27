@@ -44,23 +44,17 @@ class ApiErrorMapper {
     );
     final details = payload?.errors ?? const <String>[];
     final message = payload?.errorMessage;
-    final errorCode = payload?.errorCode;
-    final retryable = payload?.retryable;
 
     if (statusCode == 400 || statusCode == 422) {
       return ValidationError(
         message: message ?? 'The request contains invalid data.',
         statusCode: statusCode!,
-        errorCode: errorCode,
-        retryable: retryable,
         details: details,
       );
     }
     if (statusCode == 401) {
       return UnauthorizedError(
         message: message ?? 'Authentication is required or has expired.',
-        errorCode: errorCode,
-        retryable: retryable,
         details: details,
       );
     }
@@ -68,16 +62,12 @@ class ApiErrorMapper {
       return ForbiddenError(
         message:
             message ?? 'You do not have permission to perform this action.',
-        errorCode: errorCode,
-        retryable: retryable,
         details: details,
       );
     }
     if (statusCode == 404) {
       return NotFoundError(
         message: message ?? 'The requested resource was not found.',
-        errorCode: errorCode,
-        retryable: retryable,
         details: details,
       );
     }
@@ -85,8 +75,6 @@ class ApiErrorMapper {
       return ConflictError(
         message:
             message ?? 'The request conflicts with the current resource state.',
-        errorCode: errorCode,
-        retryable: retryable,
         details: details,
       );
     }
@@ -94,16 +82,12 @@ class ApiErrorMapper {
       return ServerError(
         message: message ?? 'The server could not complete the request.',
         statusCode: statusCode,
-        errorCode: errorCode,
-        retryable: retryable,
         details: details,
       );
     }
     return UnknownError(
       message: message ?? 'The API request failed.',
       statusCode: statusCode,
-      errorCode: errorCode,
-      retryable: retryable,
       details: details,
     );
   }
@@ -122,8 +106,6 @@ class _BackendErrorPayload {
     required this.isSuccess,
     required this.statusCode,
     required this.errorMessage,
-    required this.errorCode,
-    required this.retryable,
     required this.errors,
   });
 
@@ -143,12 +125,6 @@ class _BackendErrorPayload {
           rawErrorMessage is String && rawErrorMessage.trim().isNotEmpty
           ? rawErrorMessage.trim()
           : null,
-      errorCode: data['errorCode'] is String
-          ? (data['errorCode'] as String).trim().isEmpty
-                ? null
-                : (data['errorCode'] as String).trim()
-          : null,
-      retryable: data['retryable'] is bool ? data['retryable'] as bool : null,
       errors: _readErrors(rawErrors),
     );
   }
@@ -156,8 +132,6 @@ class _BackendErrorPayload {
   final bool? isSuccess;
   final int? statusCode;
   final String? errorMessage;
-  final String? errorCode;
-  final bool? retryable;
   final List<String> errors;
 }
 

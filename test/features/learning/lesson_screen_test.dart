@@ -10,18 +10,14 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
-import 'package:rikipath_mobile/core/widgets/riki_card.dart';
 import 'package:rikipath_mobile/features/learning/application/lesson_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
-import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/lesson_media_driver.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_repository.dart';
-import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
 import 'package:rikipath_mobile/features/learning/presentation/lesson_screen.dart';
-import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 
 import '../../support/test_auth_session.dart';
 import 'package:video_player/video_player.dart';
@@ -129,41 +125,22 @@ void main() {
   testWidgets('roadmap current lesson action opens lesson detail', (
     tester,
   ) async {
-    await _pumpLesson(
+    await _pumpLesson(tester, initialLocation: AppRoutes.learnRoadmap);
+    await tester.pumpAndSettle();
+
+    final continueButton = find.byKey(
+      const ValueKey<String>('roadmap_continue_lesson_button'),
+    );
+    await _scrollWithin(
       tester,
-      initialLocation: AppRoutes.learnRoadmap,
-      standardRoadmap: const StandardRoadmap(
-        currentStudyLevelId: 101,
-        currentStudyLevelName: 'N5',
-        targetJlptLevelId: 204,
-        targetJlptLevelName: 'N4',
-        learningMode: LearningMode.standard,
-        totalLessons: 1,
-        completedLessons: 0,
-        nextLessonId: 502,
-        lessons: <StandardRoadmapLesson>[
-          StandardRoadmapLesson(
-            lessonId: 502,
-            title: 'Bài 19',
-            sortOrder: 1,
-            progressPercent: 0,
-            isCompleted: false,
-          ),
-        ],
-      ),
+      viewKey: 'learning_roadmap_success_view',
+      target: continueButton,
     );
+    await tester.tap(continueButton);
     await tester.pumpAndSettle();
 
-    final lessonCard = tester.widget<RikiCard>(
-      find.byKey(const ValueKey<String>('standard_lesson_502')),
-    );
-    lessonCard.onTap!();
-    await tester.pumpAndSettle();
-
-    expect(
-      tester.widget<LessonScreen>(find.byType(LessonScreen)).lessonId,
-      '502',
-    );
+    expect(find.byType(LessonScreen), findsOneWidget);
+    expect(find.text('Bài 19'), findsOneWidget);
   });
 
   testWidgets('lesson route remains inside the selected Learn tab', (
@@ -607,7 +584,6 @@ Future<GoRouter> _pumpLesson(
   String initialLocation =
       '/learn/lesson/${FixtureLessonRepository.lesson19RouteId}',
   LessonRepository repository = const FixtureLessonRepository(),
-  StandardRoadmap? standardRoadmap,
   LessonMediaDriver mediaDriver = const FixtureLessonMediaDriver(),
   Size viewportSize = const Size(390, 844),
 }) async {
@@ -631,8 +607,6 @@ Future<GoRouter> _pumpLesson(
         learningRepositoryProvider.overrideWithValue(
           const FixtureLearningRepository(),
         ),
-        if (standardRoadmap != null)
-          standardRoadmapProvider.overrideWith((ref) async => standardRoadmap),
         lessonMediaDriverFactoryProvider.overrideWithValue(() => mediaDriver),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),

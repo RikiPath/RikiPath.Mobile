@@ -8,7 +8,6 @@ class RikiCard extends StatefulWidget {
     this.backgroundColor = AppColors.surface,
     this.borderColor = AppColors.border,
     this.boxShadow = AppShadows.cardSoft,
-    this.borderRadius = AppRadius.card,
     this.onTap,
     super.key,
   });
@@ -18,7 +17,6 @@ class RikiCard extends StatefulWidget {
   final Color backgroundColor;
   final Color borderColor;
   final List<BoxShadow> boxShadow;
-  final double borderRadius;
   final VoidCallback? onTap;
 
   @override
@@ -35,7 +33,7 @@ class _RikiCardState extends State<RikiCard> {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(widget.borderRadius);
+    final radius = BorderRadius.circular(AppRadius.card);
     final content = Padding(padding: widget.padding, child: widget.child);
     final card = DecoratedBox(
       decoration: BoxDecoration(

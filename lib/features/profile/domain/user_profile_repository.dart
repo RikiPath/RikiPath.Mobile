@@ -20,15 +20,3 @@ abstract interface class UserProfileRepository {
     required bool systemNotificationsEnabled,
   });
 }
-
-abstract interface class TargetExamDateProfileRepository {
-  Future<UserProfile> setJlptGoalWithExamDate({
-    required int targetJlptLevelId,
-    required int dailyStudyMinutes,
-    required DateTime targetExamDate,
-  });
-}
-
-abstract interface class StudyLevelProfileRepository {
-  Future<UserProfile> switchStudyLevel({required int currentStudyLevelId});
-}
