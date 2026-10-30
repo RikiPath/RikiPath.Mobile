@@ -6,27 +6,27 @@ class HomeDashboard {
   const HomeDashboard({
     required this.learnerName,
     required this.initials,
-    required this.jlptTarget,
-    required this.streakDays,
-    required this.hasUnreadNotifications,
-    required this.journeyStatus,
-    required this.goalStatus,
-    required this.firstLesson,
-    required this.roadmap,
-    required this.setup,
-    required this.tools,
+    this.jlptTarget,
+    this.streakDays,
+    this.hasUnreadNotifications,
+    this.journeyStatus,
+    this.goalStatus,
+    this.firstLesson,
+    this.roadmap,
+    this.setup,
+    this.tools = const <HomeToolSummary>[],
   });
 
   final String learnerName;
   final String initials;
-  final JlptLevel jlptTarget;
-  final int streakDays;
-  final bool hasUnreadNotifications;
-  final String journeyStatus;
-  final String goalStatus;
-  final HomeLessonSummary firstLesson;
-  final HomeRoadmapSummary roadmap;
-  final HomeSetupSummary setup;
+  final JlptLevel? jlptTarget;
+  final int? streakDays;
+  final bool? hasUnreadNotifications;
+  final String? journeyStatus;
+  final String? goalStatus;
+  final HomeLessonSummary? firstLesson;
+  final HomeRoadmapSummary? roadmap;
+  final HomeSetupSummary? setup;
   final List<HomeToolSummary> tools;
 }
 

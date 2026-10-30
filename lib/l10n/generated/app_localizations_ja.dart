@@ -661,7 +661,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get progressAndHistory => '進捗と学習履歴';
 
   @override
-  String get consultation => '相談';
+  String get consultation => 'メンターと学ぶ';
 
   @override
   String get settings => '設定';
@@ -2216,7 +2216,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get jlptSelectionSafeHint => '選択内容はこの端末に保存され、あとから変更できます。';
 
   @override
-  String get profileConsultationSubtitle => '相談プランと予約状況を確認できます。';
+  String get profileConsultationSubtitle => '1対1の学習プランと授業予定を確認できます。';
 
   @override
   String get savedFromLessons => 'レッスンで保存した単語';
@@ -2564,7 +2564,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeRoadmapProgressTitle => '学習プランの進捗';
 
   @override
-  String get homeRoadmapProgressDescription => 'レッスン進捗はこの端末に保存されています。';
+  String get homeRoadmapProgressDescription => '現在の学習ロードマップの進捗です。';
 
   @override
   String homeRoadmapProgressValue(int completed, int total, int percentage) {
@@ -2827,6 +2827,61 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get learnerMentorBookingReadOnly => '予約情報はBackendから直接同期されています。';
+
+  @override
+  String get learnerMentorConfirmBookingTitle => 'メンター1対1予約確認';
+
+  @override
+  String get learnerMentorConfirmPackage => '学習プラン';
+
+  @override
+  String get learnerMentorConfirmMentor => '担当メンター';
+
+  @override
+  String get learnerMentorConfirmTime => '予約希望日時';
+
+  @override
+  String get learnerMentorConfirmPrice => '受講料';
+
+  @override
+  String get learnerMentorConfirmNote => '選択した時間帯は仮選択です。決済完了後に自動で本予約が行われます。';
+
+  @override
+  String get learnerMentorPayWithPayOs => 'PayOSで支払う';
+
+  @override
+  String get learnerMentorOpenPayOs => 'PayOS決済ページを開く';
+
+  @override
+  String get learnerMentorBookingSuccess => '予約が完了しました！';
+
+  @override
+  String get learnerMentorBookingSuccessDesc => 'メンターとの1対1レッスンが正常に予約されました。';
+
+  @override
+  String get learnerMentorSlotConflict =>
+      'この時間枠は先ほど他の受講生に予約されました。プランの購入は完了しており、受講枠は保持されています。別の時間帯をお選びください。';
+
+  @override
+  String get learnerMentorChooseAnotherSlot => '別の時間帯を選択';
+
+  @override
+  String get learnerMentorViewBookingDetail => '予約詳細を見る';
+
+  @override
+  String get learnerMentorBookNow => '今すぐ予約する';
+
+  @override
+  String get learnerMentorIncludedSession => 'プラン内の受講枠を利用';
+
+  @override
+  String get learnerMentorConfirmBooking => '予約を確定する';
+
+  @override
+  String get learnerMentorSelectedSlot => '選択された時間枠';
+
+  @override
+  String get learnerMentorPleaseSelectSlot => '希望する時間枠を選択してください';
 
   @override
   String get practiceSpeechTitle => '日本語スピーキング練習';
@@ -3571,4 +3626,35 @@ class AppLocalizationsJa extends AppLocalizations {
   String placementWrongQuestionsSummary(int count, String questions) {
     return '復習が必要な問題（$count問）：$questions';
   }
+
+  @override
+  String get learningPathPreviewTitle => 'AI学習計画のプレビュー';
+
+  @override
+  String learningPathPreviewVersion(int version) {
+    return 'バージョン$versionは確認後にのみ現在の計画と置き換わります。学習履歴は保持されます。';
+  }
+
+  @override
+  String get learningPathPreviewFailed =>
+      '学習計画をプレビューまたは確定できませんでした。現在の計画は保持されます。';
+
+  @override
+  String get lessonMaterialsUnavailable =>
+      'このレッスンにはまだ詳しい学習内容がありません。内容の更新後にもう一度確認してください。';
+
+  @override
+  String homeCurrentLessonLabel(int lesson) {
+    return 'レッスン$lesson';
+  }
+
+  @override
+  String get placementIssueExamDateRequired =>
+      '診断結果は保存されました。AI学習計画を作成する前に、プロフィールのJLPT目標で受験予定日を選択してください。';
+
+  @override
+  String get placementSetExamDate => 'プロフィールで受験予定日を選択';
+
+  @override
+  String get placementOpenStandardRoadmap => '標準学習ロードマップを続ける';
 }

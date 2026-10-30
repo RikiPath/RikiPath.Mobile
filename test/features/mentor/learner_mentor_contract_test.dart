@@ -80,6 +80,13 @@ void main() {
   });
 
   group('Learner Mentor Meeting DTO and repository contract', () {
+    test('mentor metadata absent from Backend remains unknown', () {
+      const mentor = BookableMentor(id: 42, name: 'QA Mentor');
+      expect(mentor.jlptLevels, isEmpty);
+      expect(mentor.headline, isNull);
+      expect(mentor.bio, isNull);
+      expect(mentor.teachingMethod, isNull);
+    });
     test('plans map only exact Backend response fields', () async {
       final client = _RecordingApiClient({
         'GET ${LearnerMentorApiPaths.plans}': _envelope([
@@ -138,7 +145,7 @@ void main() {
       },
     );
 
-    test('purchase request uses the exact two verified JSON fields', () async {
+    test('purchase request uses the exact verified JSON fields', () async {
       final client = _RecordingApiClient({
         'POST ${LearnerMentorApiPaths.purchase}': _envelope(
           _purchaseJson(subscriptionId: 21, bookingId: 34),
@@ -147,12 +154,9 @@ void main() {
 
       final purchase = await ApiLearnerMentorRepository(
         client,
-      ).purchase(subscriptionPlanId: 3, mentorAvailabilityId: 12);
+      ).purchase(subscriptionPlanId: 3);
 
-      expect(client.calls.single.data, {
-        'subscriptionPlanId': 3,
-        'mentorAvailabilityId': 12,
-      });
+      expect(client.calls.single.data, {'subscriptionPlanId': 3});
       expect(purchase.subscriptionId, 21);
       expect(purchase.bookingId, 34);
       expect(purchase.safeCheckoutUri?.scheme, 'https');
@@ -506,7 +510,7 @@ void main() {
       await tester.tap(slot);
       await tester.pump();
       expect(
-        find.byKey(const Key('learner_mentor_purchase_blocked')),
+        find.byKey(const Key('learner_mentor_selected_slot_card')),
         findsOneWidget,
       );
       final button = tester.widget<FilledButton>(
@@ -515,7 +519,7 @@ void main() {
           matching: find.byType(FilledButton),
         ),
       );
-      expect(button.onPressed, isNull);
+      expect(button.onPressed, isNotNull);
     });
 
     testWidgets('bookings render empty, success, and error states', (
@@ -585,8 +589,8 @@ void main() {
         find.byKey(const Key('learner_mentor_booking_detail_content')),
         findsOneWidget,
       );
-      expect(find.text('Chi tiết buổi tư vấn'), findsOneWidget);
-      expect(find.text('Tham gia buổi tư vấn'), findsOneWidget);
+      expect(find.text('Chi tiết buổi học'), findsOneWidget);
+      expect(find.text('Vào phòng học'), findsOneWidget);
       expect(find.text('Mã lịch hẹn'), findsNothing);
       expect(find.text('44'), findsNothing);
       expect(
@@ -683,6 +687,33 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('QA pending payment is clearly demo-only and has no checkout action', (
+      tester,
+    ) async {
+      expect(
+        _purchaseStatus(MentorPaymentStatus.pending, isQaSimulated: true)
+            .isQaSimulated,
+        isTrue,
+      );
+      await _pumpLearnerMentor(
+        tester,
+        const LearnerMentorPurchaseStatusScreen(subscriptionId: 21),
+        repository: _TestLearnerMentorRepository(
+          purchaseStatusResults: [
+            _purchaseStatus(MentorPaymentStatus.pending, isQaSimulated: true),
+          ],
+        ),
+      );
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('learner_mentor_qa_payment_demo')),
+        250,
+      );
+      expect(find.byKey(const Key('learner_mentor_qa_payment_demo')), findsOneWidget);
+      expect(find.text('CHẾ ĐỘ DEMO — KHÔNG CHUYỂN TIỀN'), findsOneWidget);
+      expect(find.byKey(const Key('learner_mentor_open_checkout_button')), findsNothing);
+    });
+
     testWidgets('learner routes resolve without entering Mentor shell', (
       tester,
     ) async {
@@ -739,6 +770,53 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  group('LearnerBookingIntent persistence and restoration', () {
+    test(
+      'LearnerBookingIntent roundtrip serializes and restores correctly',
+      () {
+        final slot = _slot(id: 15);
+        final intent = LearnerBookingIntent(
+          planId: 2,
+          subscriptionId: 991,
+          mentorAvailabilityId: 15,
+          slot: slot,
+          question: 'Muốn học luyện đề N3',
+        );
+
+        final json = intent.toJson();
+        expect(json['planId'], 2);
+        expect(json['subscriptionId'], 991);
+        expect(json['mentorAvailabilityId'], 15);
+        expect(json['question'], 'Muốn học luyện đề N3');
+        expect(json['slot'], isA<Map<String, dynamic>>());
+
+        final restored = LearnerBookingIntent.fromJson(json);
+        expect(restored.planId, intent.planId);
+        expect(restored.subscriptionId, intent.subscriptionId);
+        expect(restored.mentorAvailabilityId, intent.mentorAvailabilityId);
+        expect(restored.question, intent.question);
+        expect(restored.slot?.id, slot.id);
+        expect(restored.slot?.mentorName, slot.mentorName);
+        expect(restored.slot?.startTime.rawValue, slot.startTime.rawValue);
+      },
+    );
+
+    test('LearnerBookingIntent handles null slot and optional fields', () {
+      const intent = LearnerBookingIntent(planId: 1, subscriptionId: 55);
+
+      final json = intent.toJson();
+      expect(json.containsKey('slot'), isFalse);
+      expect(json['planId'], 1);
+      expect(json['subscriptionId'], 55);
+
+      final restored = LearnerBookingIntent.fromJson(json);
+      expect(restored.planId, 1);
+      expect(restored.subscriptionId, 55);
+      expect(restored.slot, isNull);
+      expect(restored.question, isNull);
+    });
+  });
 }
 
 Map<String, Object?> _envelope(Object? result) => {
@@ -766,7 +844,7 @@ Map<String, Object?> _bookingJson({required int id}) => {
 
 Map<String, Object?> _purchaseJson({
   required int subscriptionId,
-  required int bookingId,
+  int? bookingId,
 }) => {
   'subscriptionId': subscriptionId,
   'bookingId': bookingId,
@@ -826,7 +904,10 @@ MentorMeetingPurchase _purchase() => MentorMeetingPurchase(
   qrCode: 'qr-value',
 );
 
-MentorMeetingPurchaseStatus _purchaseStatus(MentorPaymentStatus status) =>
+MentorMeetingPurchaseStatus _purchaseStatus(
+  MentorPaymentStatus status, {
+  bool isQaSimulated = false,
+}) =>
     MentorMeetingPurchaseStatus(
       subscriptionId: 21,
       planName: 'Starter',
@@ -836,6 +917,7 @@ MentorMeetingPurchaseStatus _purchaseStatus(MentorPaymentStatus status) =>
       meetingSessionsIncluded: 2,
       meetingSessionsUsed: 1,
       bookings: [_booking()],
+      isQaSimulated: isQaSimulated,
     );
 
 Future<void> _pumpLearnerMentor(
@@ -895,7 +977,12 @@ Future<void> _pumpLearnerMentorRouter(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        appConfigProvider.overrideWithValue(AppConfig.fromEnvironment()),
+        appConfigProvider.overrideWithValue(
+          AppConfig.fromValues(const {
+            'APP_ENV': 'development',
+            'API_PROFILE': 'local-emulator',
+          }),
+        ),
         authSessionControllerProvider.overrideWithValue(session),
         learnerMentorRepositoryProvider.overrideWithValue(repository),
         if (launcher != null)
@@ -999,6 +1086,9 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
       _next(planResults, planCalls++);
 
   @override
+  Future<List<BookableMentor>> loadMentors() async => const <BookableMentor>[];
+
+  @override
   Future<List<LearnerMentorAvailability>> loadAvailability({
     required DateTime from,
     required DateTime to,
@@ -1008,13 +1098,15 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
   @override
   Future<MentorMeetingPurchase> purchase({
     required int subscriptionPlanId,
-    required int mentorAvailabilityId,
+    int? mentorAvailabilityId,
+    String? idempotencyKey,
   }) => _next(purchaseResults, purchaseCalls++);
 
   @override
   Future<LearnerMentorBooking> bookIncludedSession({
     required int subscriptionId,
     required int mentorAvailabilityId,
+    String? question,
   }) => _next(bookingMutationResults, bookingMutationCalls++);
 
   @override
@@ -1023,6 +1115,10 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
 
   @override
   Future<MentorMeetingPurchaseStatus> loadPurchaseStatus(int subscriptionId) =>
+      _next(purchaseStatusResults, purchaseStatusCalls++);
+
+  @override
+  Future<MentorMeetingPurchaseStatus> syncPurchaseStatus(int subscriptionId) =>
       _next(purchaseStatusResults, purchaseStatusCalls++);
 
   Future<T> _next<T>(List<Object> results, int callIndex) async {

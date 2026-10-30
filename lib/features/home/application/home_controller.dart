@@ -1,10 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rikipath_mobile/features/home/data/fixture_home_repository.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/home/data/profile_home_repository.dart';
 import 'package:rikipath_mobile/features/home/domain/home_dashboard.dart';
 import 'package:rikipath_mobile/features/home/domain/home_repository.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 
 final homeRepositoryProvider = Provider<HomeRepository>(
-  (ref) => const FixtureHomeRepository(),
+  (ref) => ProfileHomeRepository(
+    ref.watch(userProfileRepositoryProvider).loadProfile,
+  ),
 );
 
 final homeControllerProvider =
@@ -13,6 +17,9 @@ final homeControllerProvider =
 class HomeController extends AsyncNotifier<HomeDashboard> {
   @override
   Future<HomeDashboard> build() {
+    // A new learner can sign in without restarting the app. Drop the previous
+    // learner's cached greeting as soon as the authenticated identity changes.
+    ref.watch(authenticatedUserIdProvider);
     return ref.watch(homeRepositoryProvider).loadDashboard();
   }
 

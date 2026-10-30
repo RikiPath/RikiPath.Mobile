@@ -23,10 +23,12 @@ import 'package:rikipath_mobile/features/learning/application/learner_journey_co
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/lesson_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
+import 'package:rikipath_mobile/features/learning/domain/learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
+import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/notifications/domain/app_notification.dart';
 import 'package:rikipath_mobile/features/notifications/domain/notification_repository.dart';
@@ -72,6 +74,24 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('19/30'), findsOneWidget);
+      harness.dispose();
+    });
+
+    testWidgets('Home does not invent a zero-minute lesson duration', (
+      tester,
+    ) async {
+      final harness = await _pumpHome(
+        tester,
+        journey: _selectedJourney(),
+        learningRepository: const _ZeroDurationLearningRepository(),
+      );
+      await _pumpFrames(tester);
+
+      expect(find.textContaining('0 phút'), findsNothing);
+      expect(
+        find.text('Tiến độ bài học được lưu trên thiết bị này.'),
+        findsOneWidget,
+      );
       harness.dispose();
     });
 
@@ -959,6 +979,7 @@ Future<_HomeHarness> _pumpHome(
   WidgetTester tester, {
   LearnerJourneyState? journey,
   LearnerJourneyRepository? journeyRepository,
+  LearningRepository? learningRepository,
   AnalyticsRepository analytics = const _TestAnalyticsRepository(),
   NotificationRepository? notifications,
   DemoPracticeSessions? sessions,
@@ -984,7 +1005,7 @@ Future<_HomeHarness> _pumpHome(
             _MemoryJourneyRepository(journey ?? const LearnerJourneyState()),
       ),
       learningRepositoryProvider.overrideWithValue(
-        const FixtureLearningRepository(),
+        learningRepository ?? const FixtureLearningRepository(),
       ),
       lessonRepositoryProvider.overrideWithValue(
         const FixtureLessonRepository(),
@@ -1010,6 +1031,21 @@ Future<_HomeHarness> _pumpHome(
     ),
   );
   return _HomeHarness(container, router, session);
+}
+
+class _ZeroDurationLearningRepository implements LearningRepository {
+  const _ZeroDurationLearningRepository();
+
+  @override
+  Future<LearningSnapshot> loadLearningSnapshot({
+    required int certificateLevelId,
+  }) async {
+    final snapshot = await const FixtureLearningRepository()
+        .loadLearningSnapshot(certificateLevelId: certificateLevelId);
+    return snapshot.copyWith(
+      currentLesson: snapshot.currentLesson.copyWith(durationMinutes: 0),
+    );
+  }
 }
 
 class _MemoryJourneyRepository implements LearnerJourneyRepository {

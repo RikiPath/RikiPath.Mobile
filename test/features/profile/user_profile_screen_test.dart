@@ -22,6 +22,7 @@ import 'package:rikipath_mobile/features/profile/presentation/jlpt_goal_screen.d
 import 'package:rikipath_mobile/features/profile/presentation/notification_settings_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_components.dart';
+import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations_ja.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations_vi.dart';
@@ -168,9 +169,9 @@ void main() {
       expect(find.textContaining('XP'), findsNothing);
       expect(find.textContaining('xếp hạng'), findsNothing);
       expect(find.textContaining('chuỗi học'), findsNothing);
-      expect(find.text('Tư vấn'), findsOneWidget);
+      expect(find.text('Học cùng Mentor'), findsOneWidget);
       expect(
-        find.text('Khám phá gói tư vấn và lịch hẹn của bạn.'),
+        find.text('Khám phá gói học 1-1 và lịch học của bạn.'),
         findsOneWidget,
       );
       final consultationTile = tester.widget<ProfileActionTile>(
@@ -540,6 +541,16 @@ void main() {
       final repository = _ProfileRepository();
       await _pump(tester, const JlptGoalScreen(), repository: repository);
       await tester.pumpAndSettle();
+
+      // The profile target is N3; the independent current study level may be N5.
+      final currentGoal = find.ancestor(
+        of: find.text('Mục tiêu hiện tại'),
+        matching: find.byType(ProfileSettingsTile),
+      );
+      expect(
+        find.descendant(of: currentGoal, matching: find.text('N3')),
+        findsWidgets,
+      );
 
       for (final level in <String>['N5', 'N4', 'N3', 'N2', 'N1']) {
         expect(

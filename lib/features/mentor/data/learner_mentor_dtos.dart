@@ -4,26 +4,60 @@ import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 class PurchaseMentorPlanRequestDto {
   const PurchaseMentorPlanRequestDto({
     required this.subscriptionPlanId,
-    required this.mentorAvailabilityId,
+    this.mentorAvailabilityId,
+    this.idempotencyKey,
   });
 
   final int subscriptionPlanId;
-  final int mentorAvailabilityId;
+  final int? mentorAvailabilityId;
+  final String? idempotencyKey;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'subscriptionPlanId': subscriptionPlanId,
-    'mentorAvailabilityId': mentorAvailabilityId,
+    if (idempotencyKey != null) 'idempotencyKey': idempotencyKey,
   };
 }
 
 class BookIncludedMeetingRequestDto {
-  const BookIncludedMeetingRequestDto({required this.mentorAvailabilityId});
+  const BookIncludedMeetingRequestDto({
+    required this.mentorAvailabilityId,
+    this.question,
+  });
 
   final int mentorAvailabilityId;
+  final String? question;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'mentorAvailabilityId': mentorAvailabilityId,
+    if (question != null && question!.trim().isNotEmpty)
+      'question': question!.trim(),
   };
+}
+
+class BookableMentorDto {
+  const BookableMentorDto({
+    required this.id,
+    required this.name,
+    this.avatarUrl,
+  });
+
+  factory BookableMentorDto.fromJson(Map<String, Object?> json) {
+    return BookableMentorDto(
+      id: _requiredPositiveInt(json, 'id'),
+      name: _requiredString(json, 'name'),
+      avatarUrl: _optionalString(json, 'avatarUrl'),
+    );
+  }
+
+  final int id;
+  final String name;
+  final String? avatarUrl;
+
+  BookableMentor toDomain() => BookableMentor(
+        id: id,
+        name: name,
+        avatarUrl: avatarUrl,
+      );
 }
 
 class MentorMeetingFeatureDto {
@@ -205,7 +239,7 @@ class LearnerMentorBookingDto {
 class MentorMeetingPurchaseDto {
   const MentorMeetingPurchaseDto({
     required this.subscriptionId,
-    required this.bookingId,
+    this.bookingId,
     required this.orderCode,
     required this.planName,
     required this.meetingSessionCount,
@@ -215,12 +249,13 @@ class MentorMeetingPurchaseDto {
     required this.paymentLinkId,
     required this.qrCode,
     this.paymentExpiresAt,
+    this.isQaSimulated = false,
   });
 
   factory MentorMeetingPurchaseDto.fromJson(Map<String, Object?> json) {
     return MentorMeetingPurchaseDto(
       subscriptionId: _requiredPositiveInt(json, 'subscriptionId'),
-      bookingId: _requiredPositiveInt(json, 'bookingId'),
+      bookingId: _optionalPositiveInt(json, 'bookingId'),
       orderCode: _requiredPositiveInt(json, 'orderCode'),
       planName: _requiredString(json, 'planName'),
       meetingSessionCount: _requiredNonNegativeInt(json, 'meetingSessionCount'),
@@ -236,11 +271,12 @@ class MentorMeetingPurchaseDto {
         final value? => MentorTimestamp.parse(value),
         null => null,
       },
+      isQaSimulated: json['isQaSimulated'] == true,
     );
   }
 
   final int subscriptionId;
-  final int bookingId;
+  final int? bookingId;
   final int orderCode;
   final String planName;
   final int meetingSessionCount;
@@ -250,6 +286,7 @@ class MentorMeetingPurchaseDto {
   final String paymentLinkId;
   final String qrCode;
   final MentorTimestamp? paymentExpiresAt;
+  final bool isQaSimulated;
 
   MentorMeetingPurchase toDomain() => MentorMeetingPurchase(
     subscriptionId: subscriptionId,
@@ -265,6 +302,7 @@ class MentorMeetingPurchaseDto {
     paymentLinkId: paymentLinkId,
     qrCode: qrCode,
     paymentExpiresAt: paymentExpiresAt,
+    isQaSimulated: isQaSimulated,
   );
 }
 
@@ -279,6 +317,7 @@ class MentorMeetingPurchaseStatusDto {
     required this.meetingSessionsUsed,
     required this.bookings,
     this.paymentExpiresAt,
+    this.isQaSimulated = false,
   });
 
   factory MentorMeetingPurchaseStatusDto.fromJson(Map<String, Object?> json) {
@@ -303,6 +342,7 @@ class MentorMeetingPurchaseStatusDto {
         json,
         'bookings',
       ).map(LearnerMentorBookingDto.fromJson).toList(growable: false),
+      isQaSimulated: json['isQaSimulated'] == true,
     );
   }
 
@@ -315,6 +355,7 @@ class MentorMeetingPurchaseStatusDto {
   final int meetingSessionsIncluded;
   final int meetingSessionsUsed;
   final List<LearnerMentorBookingDto> bookings;
+  final bool isQaSimulated;
 
   MentorMeetingPurchaseStatus toDomain() => MentorMeetingPurchaseStatus(
     subscriptionId: subscriptionId,
@@ -328,6 +369,7 @@ class MentorMeetingPurchaseStatusDto {
     bookings: bookings
         .map((booking) => booking.toDomain())
         .toList(growable: false),
+    isQaSimulated: isQaSimulated,
   );
 }
 

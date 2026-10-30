@@ -234,6 +234,9 @@ class LessonArticleOnlyView extends StatelessWidget {
   const LessonArticleOnlyView({
     required this.lesson,
     required this.onOpenVideo,
+    required this.onToggleBookmark,
+    required this.onToggleKanji,
+    required this.onToggleGrammar,
     required this.onComplete,
     required this.isCompleting,
     required this.completionErrorMessage,
@@ -242,6 +245,9 @@ class LessonArticleOnlyView extends StatelessWidget {
 
   final Lesson lesson;
   final VoidCallback onOpenVideo;
+  final ValueChanged<int> onToggleBookmark;
+  final ValueChanged<int> onToggleKanji;
+  final ValueChanged<int> onToggleGrammar;
   final VoidCallback onComplete;
   final bool isCompleting;
   final String? completionErrorMessage;
@@ -318,6 +324,112 @@ class LessonArticleOnlyView extends StatelessWidget {
               ],
             ),
           ),
+          if (lesson.vocabulary.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.space3),
+            Text(context.l10n.focusVocabulary, style: AppTypography.cardTitle),
+            const SizedBox(height: AppSpacing.space2),
+            for (var i = 0; i < lesson.vocabulary.length; i++) ...[
+              LessonVocabularyTile(
+                item: lesson.vocabulary[i],
+                onBookmark: () => onToggleBookmark(i),
+              ),
+              if (i != lesson.vocabulary.length - 1)
+                const SizedBox(height: AppSpacing.space2),
+            ],
+          ],
+          if (lesson.kanji.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.space3),
+            Text(
+              context.l10n.notebookKanjiLabel,
+              style: AppTypography.cardTitle,
+            ),
+            const SizedBox(height: AppSpacing.space2),
+            for (var i = 0; i < lesson.kanji.length; i++) ...[
+              RikiCard(
+                boxShadow: const <BoxShadow>[],
+                child: Row(
+                  children: [
+                    Text(
+                      lesson.kanji[i].character,
+                      style: AppTypography.pageTitle.copyWith(
+                        color: AppColors.brandPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.space3),
+                    Expanded(
+                      child: Text(
+                        lesson.kanji[i].meaning,
+                        style: AppTypography.cardTitle,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: context.l10n.saveToNotebook,
+                      onPressed: () => onToggleKanji(i),
+                      icon: Icon(
+                        lesson.kanji[i].isSaved
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (i != lesson.kanji.length - 1)
+                const SizedBox(height: AppSpacing.space2),
+            ],
+          ],
+          if (lesson.relatedGrammar.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.space3),
+            Text(
+              context.l10n.relatedGrammarShort,
+              style: AppTypography.cardTitle,
+            ),
+            const SizedBox(height: AppSpacing.space2),
+            for (var i = 0; i < lesson.relatedGrammar.length; i++) ...[
+              RikiCard(
+                boxShadow: const <BoxShadow>[],
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            lesson.relatedGrammar[i].title,
+                            style: AppTypography.cardTitle,
+                          ),
+                          Text(
+                            lesson.relatedGrammar[i].description,
+                            style: AppTypography.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: context.l10n.saveToNotebook,
+                      onPressed: () => onToggleGrammar(i),
+                      icon: Icon(
+                        lesson.relatedGrammar[i].isSaved
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (i != lesson.relatedGrammar.length - 1)
+                const SizedBox(height: AppSpacing.space2),
+            ],
+          ],
+          if (lesson.vocabulary.isEmpty &&
+              lesson.kanji.isEmpty &&
+              lesson.relatedGrammar.isEmpty) ...[
+            const SizedBox(height: AppSpacing.space3),
+            Text(
+              context.l10n.lessonMaterialsUnavailable,
+              key: const ValueKey<String>('lesson_materials_unavailable'),
+            ),
+          ],
           if (completionErrorMessage != null) ...[
             const SizedBox(height: AppSpacing.space3),
             Text(

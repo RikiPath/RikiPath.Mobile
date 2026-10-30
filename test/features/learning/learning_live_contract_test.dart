@@ -9,16 +9,58 @@ import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/storage/json_preference_store.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/learning/application/lesson_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/api_learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/api_learning_path_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/api_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_session.dart';
+import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 
 import '../../support/test_json_preference_store.dart';
 
 void main() {
+  test(
+    'live discovery uses server study level, not stale local target',
+    () async {
+      final client = _LearningApiClient(<String, Object?>{
+        'GET /api/LessonProgress/lessons': _discoveryEnvelope(),
+      });
+      final container = ProviderContainer(
+        overrides: [
+          jsonPreferenceStoreProvider.overrideWithValue(
+            TestJsonPreferenceStore(),
+          ),
+          learningRepositoryProvider.overrideWithValue(
+            ApiLearningRepository(client),
+          ),
+          userProfileRepositoryProvider.overrideWithValue(
+            _CurrentStudyProfileRepository(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container
+          .read(learnerJourneyControllerProvider.notifier)
+          .selectLevel(JlptLevel.n3);
+
+      final snapshot = await container.read(learningControllerProvider.future);
+
+      expect(client.lastQuery, <String, dynamic>{'certificateLevelId': 84});
+      expect(snapshot.certificateLevelId, 84);
+      expect(snapshot.lessons.map((lesson) => lesson.lessonId), <int>[
+        701,
+        709,
+      ]);
+    },
+  );
+
   test(
     'discovery sends the real level ID and preserves backend lesson IDs',
     () async {
@@ -250,6 +292,50 @@ void main() {
     expect(state.lesson.progress.isCompleted, isTrue);
   });
 
+  test('live completion refreshes the standard roadmap cache', () async {
+    final repository = _ControlledLessonRepository();
+    var roadmapLoads = 0;
+    final container = ProviderContainer(
+      overrides: [
+        jsonPreferenceStoreProvider.overrideWithValue(
+          TestJsonPreferenceStore(),
+        ),
+        lessonRepositoryProvider.overrideWithValue(repository),
+        standardRoadmapProvider.overrideWith((ref) async {
+          roadmapLoads++;
+          return const StandardRoadmap(
+            currentStudyLevelId: 1,
+            currentStudyLevelName: 'N5',
+            targetJlptLevelId: 2,
+            targetJlptLevelName: 'N4',
+            learningMode: LearningMode.standard,
+            totalLessons: 1,
+            completedLessons: 0,
+            nextLessonId: 709,
+            lessons: <StandardRoadmapLesson>[],
+          );
+        }),
+      ],
+    );
+    addTearDown(container.dispose);
+    final roadmapSubscription = container.listen(
+      standardRoadmapProvider,
+      (_, _) {},
+    );
+    addTearDown(roadmapSubscription.close);
+    await container.read(standardRoadmapProvider.future);
+    expect(roadmapLoads, 1);
+
+    final controller = container.read(lessonControllerProvider('709').notifier);
+    await container.read(lessonControllerProvider('709').future);
+    final completion = controller.completeLesson();
+    repository.completeResult.complete(_completedProgress);
+    await completion;
+    await container.read(standardRoadmapProvider.future);
+
+    expect(roadmapLoads, 2);
+  });
+
   test(
     'completion failure preserves lesson data and exposes retry state',
     () async {
@@ -331,6 +417,48 @@ class _LearningApiClient extends ApiClient {
       data: responses[key] as T,
     );
   }
+}
+
+class _CurrentStudyProfileRepository implements UserProfileRepository {
+  @override
+  Future<UserProfile> loadProfile() async => const UserProfile(
+    userId: 42,
+    email: 'learner@example.com',
+    firstName: 'Learner',
+    lastName: 'QA',
+    avatarUrl: null,
+    role: 'Learner',
+    isEmailVerified: true,
+    currentStudyLevelId: 84,
+    currentStudyLevelName: 'N4',
+    targetJlptLevelId: 3,
+    targetJlptLevelName: 'N3',
+    dailyStudyMinutes: 30,
+    emailNotificationsEnabled: true,
+    systemNotificationsEnabled: true,
+  );
+
+  @override
+  Future<UserProfile> setJlptGoal({
+    required int targetJlptLevelId,
+    required int dailyStudyMinutes,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<UserProfile> updateProfile({
+    required String firstName,
+    required String lastName,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<UserProfile> updateNotificationSettings({
+    required bool emailNotificationsEnabled,
+    required bool systemNotificationsEnabled,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) =>
+      throw UnimplementedError();
 }
 
 class _ControlledLessonRepository implements LessonRepository {

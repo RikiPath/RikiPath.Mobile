@@ -32,20 +32,60 @@ abstract final class AppRoutes {
   }
 
   static const String learnerMentorMeetings = '/mentor-meetings';
+  static const String learnerMentorDiscoverySegment = 'plans/:planId/mentors';
+  static const String learnerMentorProfileSegment =
+      'plans/:planId/mentors/:mentorId';
   static const String learnerMentorAvailabilitySegment =
       'plans/:planId/availability';
   static const String learnerMentorBookingsSegment = 'bookings';
   static const String learnerMentorBookingDetailSegment = ':bookingId';
   static const String learnerMentorPurchaseStatusSegment =
       'purchases/:subscriptionId';
+  static const String learnerSessionCompletedSegment = 'completed/:bookingId';
   static const String learnerMentorBookings =
       '$learnerMentorMeetings/$learnerMentorBookingsSegment';
 
-  static String learnerMentorAvailability(int planId) {
+  static String learnerMentorDiscovery(int planId) {
     if (planId <= 0) {
       throw ArgumentError.value(planId, 'planId', 'Must be positive');
     }
-    return '$learnerMentorMeetings/plans/$planId/availability';
+    return '$learnerMentorMeetings/plans/$planId/mentors';
+  }
+
+  static String learnerMentorProfile(int planId, int mentorId) {
+    if (planId <= 0 || mentorId <= 0) {
+      throw ArgumentError('planId and mentorId must be positive');
+    }
+    return '$learnerMentorMeetings/plans/$planId/mentors/$mentorId';
+  }
+
+  static String learnerMentorAvailability(
+    int planId, {
+    int? subscriptionId,
+    int? mentorId,
+  }) {
+    if (planId <= 0) {
+      throw ArgumentError.value(planId, 'planId', 'Must be positive');
+    }
+    final base = '$learnerMentorMeetings/plans/$planId/availability';
+    final params = <String, String>{};
+    if (subscriptionId != null && subscriptionId > 0) {
+      params['subscriptionId'] = subscriptionId.toString();
+    }
+    if (mentorId != null && mentorId > 0) {
+      params['mentorId'] = mentorId.toString();
+    }
+    if (params.isNotEmpty) {
+      return '$base?${Uri(queryParameters: params).query}';
+    }
+    return base;
+  }
+
+  static String learnerSessionCompleted(int bookingId) {
+    if (bookingId <= 0) {
+      throw ArgumentError.value(bookingId, 'bookingId', 'Must be positive');
+    }
+    return '$learnerMentorMeetings/completed/$bookingId';
   }
 
   static String learnerMentorBookingDetail(int bookingId) {

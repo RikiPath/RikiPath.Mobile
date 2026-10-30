@@ -315,7 +315,7 @@ class _ProgressSummaryCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                       child: Text(
-                        context.l10n.jlptGoal(snapshot.jlptTarget.label),
+                        '${context.l10n.onboardingCurrentStudyLevelTitle} ${snapshot.jlptTarget.label}',
                         style: AppTypography.badgeText.copyWith(
                           color: Colors.white,
                           fontSize: 12,

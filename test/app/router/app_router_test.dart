@@ -702,6 +702,20 @@ class _RouterMentorRepository implements MentorRepository {
 
   @override
   Future<List<MentorMeetingSummary>> loadMeetings() async => const [];
+
+  @override
+  Future<void> acceptMeeting(int bookingId) async {}
+
+  @override
+  Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(
+    DateTime weekStart,
+  ) async => const [];
+
+  @override
+  Future<bool> saveWeeklySchedule({
+    required DateTime weekStart,
+    required List<WeeklyPeriodItem> periods,
+  }) async => true;
 }
 
 class _RouterProfileRepository implements UserProfileRepository {

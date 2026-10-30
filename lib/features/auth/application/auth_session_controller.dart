@@ -13,6 +13,16 @@ final authSessionControllerProvider = Provider<AuthSessionController>((ref) {
   return controller;
 });
 
+/// Reactive identity key for owner-scoped providers without changing the
+/// existing session controller's public provider contract.
+final authenticatedUserIdProvider = Provider<int?>((ref) {
+  final session = ref.watch(authSessionControllerProvider);
+  void onSessionChanged() => ref.invalidateSelf();
+  session.addListener(onSessionChanged);
+  ref.onDispose(() => session.removeListener(onSessionChanged));
+  return session.currentUserId;
+});
+
 enum AuthSessionState { unknown, unauthenticated, authenticated }
 
 class AuthSessionController extends ValueNotifier<AuthSessionState> {
@@ -85,8 +95,7 @@ class AuthSessionController extends ValueNotifier<AuthSessionState> {
 
   void markAuthenticated({required int userId, required BackendUserRole role}) {
     _operation += 1;
-    final identityChanged =
-        _currentUserId != userId || _currentRole != role;
+    final identityChanged = _currentUserId != userId || _currentRole != role;
     _currentUserId = userId;
     _currentRole = role;
     if (value == AuthSessionState.authenticated) {

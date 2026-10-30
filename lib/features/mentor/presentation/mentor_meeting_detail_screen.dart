@@ -45,6 +45,25 @@ class MentorMeetingDetailScreen extends ConsumerWidget {
                 .where((meeting) => meeting.id == meetingId)
                 .firstOrNull,
             onJoin: (uri) => _openMeeting(ref, context, uri),
+            onAccept: meetingId == null
+                ? null
+                : () async {
+                    final success = await ref
+                        .read(mentorMeetingsControllerProvider.notifier)
+                        .acceptMeeting(meetingId!);
+                    if (!context.mounted) return;
+                    if (success) {
+                      ref.read(rikiToastServiceProvider.notifier).success(
+                            title: 'Xác nhận thành công',
+                            description: 'Buổi học đã được xác nhận thành công.',
+                          );
+                    } else {
+                      ref.read(rikiToastServiceProvider.notifier).error(
+                            title: 'Xác nhận thất bại',
+                            description: 'Không thể xác nhận lịch học. Vui lòng thử lại.',
+                          );
+                    }
+                  },
           ),
         },
       ),
@@ -82,10 +101,15 @@ class MentorMeetingDetailScreen extends ConsumerWidget {
 }
 
 class _DetailData extends StatelessWidget {
-  const _DetailData({required this.meeting, required this.onJoin});
+  const _DetailData({
+    required this.meeting,
+    required this.onJoin,
+    this.onAccept,
+  });
 
   final MentorMeetingSummary? meeting;
   final Future<void> Function(Uri uri) onJoin;
+  final VoidCallback? onAccept;
 
   @override
   Widget build(BuildContext context) {
@@ -109,15 +133,79 @@ class _DetailData extends StatelessWidget {
     final canJoin = MeetingNativeRollout.isEnabled
         ? nativeRoom != null
         : meetingUri != null;
+    final isAssigned = value.status == MentorMeetingStatus.assigned;
+    final isAccepted = value.status == MentorMeetingStatus.accepted;
+
     return ListView(
       key: const Key('mentor_meeting_detail_content'),
       padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
       children: [
+        // Hero Card trạng thái yêu cầu
+        RikiCard(
+          borderColor: isAccepted
+              ? AppColors.brandPrimary.withValues(alpha: 0.35)
+              : AppColors.warning.withValues(alpha: 0.4),
+          backgroundColor: isAccepted
+              ? AppColors.brandPrimary.withValues(alpha: 0.04)
+              : AppColors.warning.withValues(alpha: 0.05),
+          padding: const EdgeInsets.all(AppSpacing.space4),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: isAccepted
+                      ? AppColors.brandTint
+                      : AppColors.warning.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isAccepted
+                      ? Icons.check_circle_outline
+                      : Icons.assignment_ind_outlined,
+                  color: isAccepted ? AppColors.brandPrimary : AppColors.warning,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isAccepted
+                          ? 'Đã xác nhận buổi học'
+                          : (isAssigned
+                              ? 'Yêu cầu học mới'
+                              : mentorStatusLabel(value.status, context)),
+                      style: AppTypography.cardTitle.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isAccepted
+                          ? 'Buổi học đã được lên lịch. Vui lòng vào phòng đúng giờ.'
+                          : 'Học viên đã đăng ký khung giờ dạy của bạn. Vui lòng kiểm tra và xác nhận.',
+                      style: AppTypography.metadata.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.space4),
+
         MentorPageHeader(
           title: context.l10n.mentorMeetingDetailTitle,
           subtitle: value.learnerName ?? context.l10n.mentorLearnerUnknown,
         ),
-        const SizedBox(height: AppSpacing.space5),
+        const SizedBox(height: AppSpacing.space4),
         RikiCard(
           borderColor: AppColors.border,
           child: Column(
@@ -144,6 +232,16 @@ class _DetailData extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.space4),
+
+        if (value.status == MentorMeetingStatus.assigned && onAccept != null) ...[
+          RikiPrimaryButton(
+            key: const Key('mentor_accept_meeting_button'),
+            label: 'Xác nhận buổi học',
+            leadingIcon: Icons.check_circle_outline,
+            onPressed: onAccept,
+          ),
+          const SizedBox(height: AppSpacing.space3),
+        ],
         if (!canJoin)
           RikiInfoBanner(
             key: const Key('mentor_meeting_link_unavailable'),
@@ -156,6 +254,40 @@ class _DetailData extends StatelessWidget {
             leadingIcon: Icons.videocam_outlined,
             onPressed: () => onJoin(meetingUri!),
           ),
+        const SizedBox(height: AppSpacing.space4),
+
+        // Ghi chú & mục tiêu học tập của học viên
+        RikiCard(
+          borderColor: AppColors.border,
+          padding: const EdgeInsets.all(AppSpacing.space3),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.school_outlined, size: 18, color: AppColors.brandPrimary),
+                  const SizedBox(width: AppSpacing.space2),
+                  Text(
+                    'Mục tiêu học viên cần hỗ trợ',
+                    style: AppTypography.cardTitle.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.space2),
+              Text(
+                'Ôn tập lộ trình học JLPT, giải thích các dạng bài đọc hiểu N3-N2 và luyện nói giao tiếp tiếng Nhật.',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: AppSpacing.space3),
         RikiTextButton(
           label: MaterialLocalizations.of(context).backButtonTooltip,

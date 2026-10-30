@@ -57,16 +57,40 @@ class MentorMeetingsScreen extends ConsumerWidget {
   }
 }
 
-class _MeetingList extends StatelessWidget {
+class _MeetingList extends StatefulWidget {
   const _MeetingList({required this.meetings, required this.onRefresh});
 
   final List<MentorMeetingSummary> meetings;
   final Future<void> Function() onRefresh;
 
   @override
+  State<_MeetingList> createState() => _MeetingListState();
+}
+
+class _MeetingListState extends State<_MeetingList> {
+  int _selectedTabIndex = 0; // 0: Tất cả, 1: Chờ xác nhận, 2: Đã xác nhận, 3: Đã hoàn thành
+
+  @override
   Widget build(BuildContext context) {
+    final assignedCount = widget.meetings
+        .where((m) => m.status == MentorMeetingStatus.assigned)
+        .length;
+    final acceptedCount = widget.meetings
+        .where((m) => m.status == MentorMeetingStatus.accepted)
+        .length;
+    final completedCount = widget.meetings
+        .where((m) => m.status == MentorMeetingStatus.completed)
+        .length;
+
+    final filteredMeetings = switch (_selectedTabIndex) {
+      1 => widget.meetings.where((m) => m.status == MentorMeetingStatus.assigned).toList(),
+      2 => widget.meetings.where((m) => m.status == MentorMeetingStatus.accepted).toList(),
+      3 => widget.meetings.where((m) => m.status == MentorMeetingStatus.completed).toList(),
+      _ => widget.meetings,
+    };
+
     return RefreshIndicator(
-      onRefresh: onRefresh,
+      onRefresh: widget.onRefresh,
       child: ListView(
         key: const Key('mentor_meetings_list'),
         physics: const AlwaysScrollableScrollPhysics(),
@@ -76,28 +100,80 @@ class _MeetingList extends StatelessWidget {
             title: context.l10n.mentorMeetingsTitle,
             subtitle: context.l10n.mentorMeetingsDescription,
           ),
-          const SizedBox(height: AppSpacing.space4),
-          if (meetings.isEmpty)
+          const SizedBox(height: AppSpacing.space3),
+
+          // Tabs lọc trạng thái theo chuẩn Screen 16
+          if (widget.meetings.isNotEmpty) ...[
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterTab(0, 'Tất cả (${widget.meetings.length})'),
+                  const SizedBox(width: AppSpacing.space2),
+                  _buildFilterTab(1, 'Chờ xác nhận ($assignedCount)'),
+                  const SizedBox(width: AppSpacing.space2),
+                  _buildFilterTab(2, 'Đã xác nhận ($acceptedCount)'),
+                  const SizedBox(width: AppSpacing.space2),
+                  _buildFilterTab(3, 'Đã học ($completedCount)'),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space4),
+          ] else ...[
+            const SizedBox(height: AppSpacing.space2),
+          ],
+
+          if (widget.meetings.isEmpty)
             MentorEmptyState(
               key: const Key('mentor_meetings_empty'),
               icon: Icons.video_call_outlined,
               title: context.l10n.mentorMeetingsTitle,
               description: context.l10n.mentorMeetingsEmpty,
             )
-          else
-            for (var index = 0; index < meetings.length; index++) ...[
-              MentorMeetingCard(
-                key: ValueKey<String>('mentor_meeting_${meetings[index].id}'),
-                meeting: meetings[index],
-                onTap: () => context.push(
-                  AppRoutes.mentorMeetingDetail(meetings[index].id),
+          else if (filteredMeetings.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.space5),
+              child: Center(
+                child: Text(
+                  'Không có lịch học nào trong mục này.',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ),
-              if (index < meetings.length - 1)
+            )
+          else
+            for (var index = 0; index < filteredMeetings.length; index++) ...[
+              MentorMeetingCard(
+                key: ValueKey<String>('mentor_meeting_${filteredMeetings[index].id}'),
+                meeting: filteredMeetings[index],
+                onTap: () => context.push(
+                  AppRoutes.mentorMeetingDetail(filteredMeetings[index].id),
+                ),
+              ),
+              if (index < filteredMeetings.length - 1)
                 const SizedBox(height: AppSpacing.space3),
             ],
         ],
       ),
+    );
+  }
+
+  Widget _buildFilterTab(int index, String label) {
+    final isSelected = _selectedTabIndex == index;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      selectedColor: AppColors.brandTint,
+      labelStyle: TextStyle(
+        color: isSelected ? AppColors.brandPrimary : AppColors.textSecondary,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        fontSize: 12,
+      ),
+      side: BorderSide(
+        color: isSelected ? AppColors.brandPrimary : AppColors.border,
+      ),
+      onSelected: (_) => setState(() => _selectedTabIndex = index),
     );
   }
 }

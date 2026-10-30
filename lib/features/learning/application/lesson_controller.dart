@@ -4,6 +4,7 @@ import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_path_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/api_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/lesson_media_driver.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
@@ -456,6 +457,7 @@ class LessonController extends AsyncNotifier<LessonSession> {
             .recordLessonProgress(lessonId, progress);
       } else {
         ref.invalidate(learningControllerProvider);
+        ref.invalidate(standardRoadmapProvider);
       }
     } catch (_) {
       state = AsyncData(

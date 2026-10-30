@@ -19,6 +19,15 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
   }
 
   @override
+  Future<List<BookableMentor>> loadMentors() async {
+    final response = await _apiClient.get<Object?>(LearnerMentorApiPaths.mentors);
+    return readLearnerMentorResultList(response.data)
+        .map(BookableMentorDto.fromJson)
+        .map((dto) => dto.toDomain())
+        .toList(growable: false);
+  }
+
+  @override
   Future<List<LearnerMentorAvailability>> loadAvailability({
     required DateTime from,
     required DateTime to,
@@ -41,13 +50,15 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
   @override
   Future<MentorMeetingPurchase> purchase({
     required int subscriptionPlanId,
-    required int mentorAvailabilityId,
+    int? mentorAvailabilityId,
+    String? idempotencyKey,
   }) async {
     final response = await _apiClient.post<Object?>(
       LearnerMentorApiPaths.purchase,
       data: PurchaseMentorPlanRequestDto(
         subscriptionPlanId: subscriptionPlanId,
         mentorAvailabilityId: mentorAvailabilityId,
+        idempotencyKey: idempotencyKey,
       ).toJson(),
     );
     return MentorMeetingPurchaseDto.fromJson(
@@ -59,11 +70,13 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
   Future<LearnerMentorBooking> bookIncludedSession({
     required int subscriptionId,
     required int mentorAvailabilityId,
+    String? question,
   }) async {
     final response = await _apiClient.post<Object?>(
       LearnerMentorApiPaths.subscriptionBookings(subscriptionId),
       data: BookIncludedMeetingRequestDto(
         mentorAvailabilityId: mentorAvailabilityId,
+        question: question,
       ).toJson(),
     );
     return LearnerMentorBookingDto.fromJson(
@@ -88,6 +101,18 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
   ) async {
     final response = await _apiClient.get<Object?>(
       LearnerMentorApiPaths.purchaseStatus(subscriptionId),
+    );
+    return MentorMeetingPurchaseStatusDto.fromJson(
+      readLearnerMentorResultObject(response.data),
+    ).toDomain();
+  }
+
+  @override
+  Future<MentorMeetingPurchaseStatus> syncPurchaseStatus(
+    int subscriptionId,
+  ) async {
+    final response = await _apiClient.post<Object?>(
+      LearnerMentorApiPaths.syncPurchase(subscriptionId),
     );
     return MentorMeetingPurchaseStatusDto.fromJson(
       readLearnerMentorResultObject(response.data),

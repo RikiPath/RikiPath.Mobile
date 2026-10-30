@@ -6,6 +6,7 @@ import 'package:rikipath_mobile/features/learning/data/api_learning_repository.d
 import 'package:rikipath_mobile/features/learning/data/fixture_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 
 final learningRepositoryProvider = Provider<LearningRepository>(
   (ref) => ApiLearningRepository(ref.watch(apiClientProvider)),
@@ -19,13 +20,21 @@ final learningControllerProvider =
 class LearningController extends AsyncNotifier<LearningSnapshot> {
   @override
   Future<LearningSnapshot> build() async {
-    final journey = await ref.watch(learnerJourneyControllerProvider.future);
     final repository = ref.watch(learningRepositoryProvider);
-    final levelId = journey.selectedLevelId;
-    if (repository is ApiLearningRepository &&
-        (!journey.hasSelectedLevel || levelId == null || levelId <= 0)) {
-      return _empty(journey.selectedLevel);
+    final journey = await ref.watch(learnerJourneyControllerProvider.future);
+    if (repository is ApiLearningRepository) {
+      // The Backend owns CurrentStudyLevel. The locally persisted journey may
+      // predate a goal change or belong to an earlier session.
+      final profile = await ref
+          .watch(userProfileRepositoryProvider)
+          .loadProfile();
+      final serverLevelId = profile.currentStudyLevelId;
+      if (serverLevelId == null || serverLevelId <= 0) {
+        return _empty(journey.selectedLevel);
+      }
+      return repository.loadLearningSnapshot(certificateLevelId: serverLevelId);
     }
+    final levelId = journey.selectedLevelId;
     final snapshot = await repository.loadLearningSnapshot(
       certificateLevelId: levelId ?? 1,
     );

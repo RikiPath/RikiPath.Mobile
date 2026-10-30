@@ -242,24 +242,21 @@ void main() {
       expect(BackendUserRole.fromApiValue('Consultant'), isNull);
     });
 
-    test('14. offset-aware timestamps use device-local display conversion', () {
+    test('14. offset-aware timestamps display in Vietnam time', () {
       final timestamp = MentorTimestamp.parse('2026-10-03T09:00:00+07:00');
       expect(timestamp.hasExplicitOffset, isTrue);
-      expect(timestamp.displayValue, timestamp.value.toLocal());
+      expect(timestamp.displayValue.hour, 9);
     });
 
-    test(
-      '15. offset-less timestamps preserve server wall-clock components',
-      () {
-        final timestamp = MentorTimestamp.parse('2026-10-03T09:30:00');
-        expect(timestamp.hasExplicitOffset, isFalse);
-        expect(timestamp.displayValue.year, 2026);
-        expect(timestamp.displayValue.month, 10);
-        expect(timestamp.displayValue.day, 3);
-        expect(timestamp.displayValue.hour, 9);
-        expect(timestamp.displayValue.minute, 30);
-      },
-    );
+    test('15. offset-less Backend UTC timestamps display in Vietnam time', () {
+      final timestamp = MentorTimestamp.parse('2026-10-03T09:30:00');
+      expect(timestamp.hasExplicitOffset, isFalse);
+      expect(timestamp.displayValue.year, 2026);
+      expect(timestamp.displayValue.month, 10);
+      expect(timestamp.displayValue.day, 3);
+      expect(timestamp.displayValue.hour, 16);
+      expect(timestamp.displayValue.minute, 30);
+    });
 
     test('16. join URLs allow only returned absolute HTTP(S) values', () {
       expect(
@@ -562,7 +559,7 @@ void main() {
       );
       expect(find.text('Hana'), findsOneWidget);
       expect(find.text('Ken'), findsOneWidget);
-      expect(find.text('Lịch tư vấn của tôi'), findsWidgets);
+      expect(find.text('Lịch học của tôi'), findsWidgets);
       expect(find.text('Meeting của tôi'), findsNothing);
     });
 
@@ -799,7 +796,7 @@ void main() {
       );
 
       expect(find.text('自分の空き時間'), findsWidgets);
-      expect(find.text('閲覧のみ'), findsOneWidget);
+      expect(find.text('閲覧のみ'), findsNothing);
 
       await _pumpMentor(
         tester,
@@ -939,7 +936,12 @@ Future<GoRouter> _pumpMentorRouter(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        appConfigProvider.overrideWithValue(AppConfig.fromEnvironment()),
+        appConfigProvider.overrideWithValue(
+          AppConfig.fromValues(const {
+            'APP_ENV': 'development',
+            'API_PROFILE': 'local-emulator',
+          }),
+        ),
         authSessionControllerProvider.overrideWithValue(session),
         mentorRepositoryProvider.overrideWithValue(repository),
         if (launcher != null)
@@ -990,6 +992,32 @@ class _TestMentorRepository implements MentorRepository {
         meetingResults[meetingCalls.clamp(0, meetingResults.length - 1)];
     meetingCalls++;
     return _resolve<List<MentorMeetingSummary>>(result);
+  }
+
+  int acceptMeetingCalls = 0;
+  int weeklyScheduleCalls = 0;
+  int saveWeeklyScheduleCalls = 0;
+
+  @override
+  Future<void> acceptMeeting(int bookingId) async {
+    acceptMeetingCalls++;
+  }
+
+  @override
+  Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(
+    DateTime weekStart,
+  ) async {
+    weeklyScheduleCalls++;
+    return const <WeeklyAvailabilityItem>[];
+  }
+
+  @override
+  Future<bool> saveWeeklySchedule({
+    required DateTime weekStart,
+    required List<WeeklyPeriodItem> periods,
+  }) async {
+    saveWeeklyScheduleCalls++;
+    return true;
   }
 
   Future<T> _resolve<T>(Object result) async {

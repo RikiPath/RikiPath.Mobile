@@ -69,8 +69,9 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
           }
           final profile = profileState.profile;
           final levels = catalogValue.value;
+          JlptLevelCatalogItem? selected;
           if (levels != null && levels.isNotEmpty) {
-            final selected = levels
+            selected = levels
                 .where(
                   (item) =>
                       item.id == profile.targetJlptLevelId ||
@@ -110,12 +111,12 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
                     ProfileSettingsTile(
                       icon: Icons.flag_outlined,
                       title: context.l10n.currentJlptGoal,
-                      subtitle: localJourney.hasSelectedLevel
-                          ? localJourney.selectedLevel.label
+                      subtitle: selected != null
+                          ? selected.level.label
                           : context.l10n.notConfigured,
                       onTap: null,
-                      trailing: localJourney.hasSelectedLevel
-                          ? JlptBadge(localJourney.selectedLevel)
+                      trailing: selected != null
+                          ? JlptBadge(selected.level)
                           : null,
                     ),
                     ProfileSettingsTile(

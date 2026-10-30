@@ -126,9 +126,8 @@ void main() {
         }),
         throwsFormatException,
       );
-      final attemptWithoutType = Map<String, Object?>.of(
-        _activeSnapshotJson,
-      )..remove('attemptType');
+      final attemptWithoutType = Map<String, Object?>.of(_activeSnapshotJson)
+        ..remove('attemptType');
       expect(
         () => readStartPlacementTest(<String, Object?>{
           'isSuccess': true,
@@ -926,7 +925,115 @@ void main() {
     });
 
     test(
-      'recommendation synchronizes the journey before lessons reload',
+      'missing exam date preserves Placement result and does not generate AI path',
+      () async {
+        final profile = _ProfileRepository();
+        final learning = _LearningPathRepository();
+        final scope = _container(
+          placement: _PlacementRepository(
+            status: const PlacementTestStatus(
+              hasCompletedPlacementTest: true,
+              latestCompletedAttemptId: 81,
+              recommendedTargetJlptLevelId: 3,
+              recommendedTargetJlptLevelName: 'N3',
+              dailyStudyMinutes: 45,
+            ),
+            result: _completedResult,
+          ),
+          profile: profile,
+          learning: learning,
+        );
+        await scope.container.read(placementTestControllerProvider.future);
+
+        final applied = await scope.container
+            .read(placementTestControllerProvider.notifier)
+            .applyRecommendation();
+        final state = scope.container
+            .read(placementTestControllerProvider)
+            .requireValue;
+
+        expect(applied, isFalse);
+        expect(state.result?.attemptId, 81);
+        expect(state.actionIssue, PlacementTestActionIssue.examDateRequired);
+        expect(profile.goalCalls, 0);
+        expect(learning.generateCalls, 0);
+        scope.dispose();
+      },
+    );
+
+    test(
+      'saved exam date resumes the retained Placement recommendation',
+      () async {
+        final initialStatus = PlacementTestStatus(
+          hasCompletedPlacementTest: true,
+          latestCompletedAttemptId: 81,
+          recommendedTargetJlptLevelId: 3,
+          recommendedTargetJlptLevelName: 'N3',
+          dailyStudyMinutes: 45,
+        );
+        final placement = _PlacementRepository(
+          status: initialStatus,
+          result: _completedResult,
+        );
+        final learning = _LearningPathRepository(
+          latestOutcomes: <Object?>[_latestPath],
+        );
+        final scope = _container(
+          placement: placement,
+          profile: _ProfileRepository(targetExamDate: DateTime.utc(2027, 7, 4)),
+          learning: learning,
+        );
+        await scope.container.read(placementTestControllerProvider.future);
+        final controller = scope.container.read(
+          placementTestControllerProvider.notifier,
+        );
+
+        expect(await controller.applyRecommendation(), isFalse);
+        placement.status = initialStatus.copyWith(
+          targetExamDate: DateTime.utc(2027, 7, 4),
+        );
+        expect(await controller.applyRecommendation(), isTrue);
+        expect(learning.generateCalls, 1);
+        expect(
+          scope.container
+              .read(placementTestControllerProvider)
+              .requireValue
+              .result,
+          same(_completedResult),
+        );
+        scope.dispose();
+      },
+    );
+
+    test(
+      'exam date alone does not claim an AI path was already applied',
+      () async {
+        final status = _completedStatus.copyWith(
+          targetJlptLevelId: 3,
+          targetJlptLevelName: 'N3',
+          isReadyForLearningPath: true,
+        );
+        final placement = _PlacementRepository(
+          status: status,
+          result: _completedResult,
+        );
+        final learning = _LearningPathRepository(
+          latestOutcomes: <Object?>[null],
+        );
+        final scope = _container(placement: placement, learning: learning);
+
+        final restored = await scope.container.read(
+          placementTestControllerProvider.future,
+        );
+
+        expect(restored.result, same(_completedResult));
+        expect(restored.hasAppliedCompletedResult, isFalse);
+        scope.dispose();
+      },
+    );
+
+    test(
+      'recommended target preserves the server current study level',
       () async {
         final lessons = _RecordingLearningRepository();
         final scope = _container(
@@ -953,11 +1060,11 @@ void main() {
         );
 
         expect(applied, isTrue);
-        expect(journey.selectedLevelId, 3);
-        expect(journey.selectedLevel, JlptLevel.n3);
+        expect(journey.selectedLevelId, 101);
+        expect(journey.selectedLevel, JlptLevel.n5);
         expect(journey.dailyStudyMinutes, 45);
-        expect(lessons.loadedLevelIds.last, 3);
-        expect(learning.jlptTarget, JlptLevel.n3);
+        expect(lessons.loadedLevelIds.last, 101);
+        expect(learning.jlptTarget, JlptLevel.n5);
         scope.dispose();
       },
     );
@@ -1166,6 +1273,7 @@ final _completedStatus = PlacementTestStatus(
   recommendedTargetJlptLevelId: 3,
   recommendedTargetJlptLevelName: 'N3',
   dailyStudyMinutes: 45,
+  targetExamDate: DateTime.utc(2027, 7, 4),
 );
 
 PlacementTestAttempt _activeAttempt({
@@ -1317,7 +1425,7 @@ class _PlacementRepository implements PlacementTestRepository {
   }) : startOutcomes = <Object>[...?startOutcomes],
        submitOutcomes = <Object>[...?submitOutcomes];
 
-  final PlacementTestStatus status;
+  PlacementTestStatus status;
   final PlacementTestAttempt? activeAttempt;
   final Object? activeAttemptFailure;
   final PlacementTestResult? result;
@@ -1392,6 +1500,8 @@ class _ProfileRepository implements UserProfileRepository {
       204 => 'N4',
       _ => 'N3',
     },
+    currentStudyLevelId: 101,
+    currentStudyLevelName: 'N5',
     dailyStudyMinutes: dailyMinutes,
     targetExamDate: targetExamDate,
     emailNotificationsEnabled: true,
@@ -1444,7 +1554,11 @@ class _RecordingLearningRepository implements LearningRepository {
     loadedLevelIds.add(certificateLevelId);
     return LearningSnapshot(
       initials: 'L',
-      jlptTarget: certificateLevelId == 204 ? JlptLevel.n4 : JlptLevel.n3,
+      jlptTarget: switch (certificateLevelId) {
+        101 => JlptLevel.n5,
+        204 => JlptLevel.n4,
+        _ => JlptLevel.n3,
+      },
       streakDays: 0,
       hasUnreadNotifications: false,
       examDateLabel: '',

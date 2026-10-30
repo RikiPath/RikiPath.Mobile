@@ -133,6 +133,8 @@ class _PlacementTestScreenState extends ConsumerState<PlacementTestScreen> {
                   context.go(AppRoutes.learnRoadmap);
                 }
               },
+              onSetExamDate: () => context.go(AppRoutes.profileJlptGoal),
+              onOpenStandardRoadmap: () => context.go(AppRoutes.learnRoadmap),
             );
           }
           if (state.hasActiveAttempt) {
@@ -670,12 +672,16 @@ class _PlacementResultView extends StatelessWidget {
     required this.result,
     required this.onRetake,
     required this.onApplyRecommendation,
+    required this.onSetExamDate,
+    required this.onOpenStandardRoadmap,
   });
 
   final PlacementTestFlowState state;
   final PlacementTestResult result;
   final VoidCallback onRetake;
   final VoidCallback onApplyRecommendation;
+  final VoidCallback onSetExamDate;
+  final VoidCallback onOpenStandardRoadmap;
 
   @override
   Widget build(BuildContext context) {
@@ -862,6 +868,23 @@ class _PlacementResultView extends StatelessWidget {
                   ),
                 ),
               ],
+              if (state.actionIssue ==
+                  PlacementTestActionIssue.examDateRequired) ...[
+                const SizedBox(height: AppSpacing.space3),
+                RikiSecondaryButton(
+                  key: const ValueKey<String>('placement_set_exam_date_button'),
+                  label: context.l10n.placementSetExamDate,
+                  onPressed: onSetExamDate,
+                ),
+                const SizedBox(height: AppSpacing.space2),
+                TextButton(
+                  key: const ValueKey<String>(
+                    'placement_open_standard_roadmap_button',
+                  ),
+                  onPressed: onOpenStandardRoadmap,
+                  child: Text(context.l10n.placementOpenStandardRoadmap),
+                ),
+              ],
               const SizedBox(height: AppSpacing.space3),
               RikiSecondaryButton(
                 key: const ValueKey<String>('placement_retake_button'),
@@ -927,6 +950,8 @@ String _issueMessage(BuildContext context, PlacementTestActionIssue issue) {
   return switch (issue) {
     PlacementTestActionIssue.validation =>
       context.l10n.placementIssueValidation,
+    PlacementTestActionIssue.examDateRequired =>
+      context.l10n.placementIssueExamDateRequired,
     PlacementTestActionIssue.expired => context.l10n.placementIssueExpired,
     PlacementTestActionIssue.bankNotReady =>
       context.l10n.placementIssueBankNotReady,

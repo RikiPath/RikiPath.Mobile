@@ -484,7 +484,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get mentorLandingDescription =>
-      'Theo dõi lịch trống và các lịch tư vấn sắp tới của bạn.';
+      'Theo dõi lịch trống và các lịch học 1-1 sắp tới của bạn.';
 
   @override
   String get mentorHomeGreeting => 'Chào mừng trở lại';
@@ -519,29 +519,28 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mentorViewAvailability => 'Xem lịch trống';
 
   @override
-  String get mentorMeetingsTitle => 'Lịch tư vấn của tôi';
+  String get mentorMeetingsTitle => 'Lịch học của tôi';
 
   @override
   String get mentorMeetingsDescription =>
-      'Các buổi tư vấn đã được xác nhận với học viên.';
+      'Các buổi học đã được xác nhận với học viên.';
 
   @override
   String mentorMeetingsCount(int count) {
-    return '$count buổi tư vấn';
+    return '$count buổi học';
   }
 
   @override
-  String get mentorMeetingsEmpty => 'Bạn chưa có lịch tư vấn nào.';
+  String get mentorMeetingsEmpty => 'Bạn chưa có lịch học nào.';
 
   @override
-  String get mentorMeetingsError =>
-      'Chưa thể tải lịch tư vấn. Vui lòng thử lại.';
+  String get mentorMeetingsError => 'Chưa thể tải lịch học. Vui lòng thử lại.';
 
   @override
-  String get mentorViewMeetings => 'Xem lịch tư vấn';
+  String get mentorViewMeetings => 'Xem lịch học';
 
   @override
-  String get mentorMeetingDetailTitle => 'Chi tiết buổi tư vấn';
+  String get mentorMeetingDetailTitle => 'Chi tiết buổi học';
 
   @override
   String get mentorLearnerLabel => 'Học viên';
@@ -571,15 +570,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mentorSlotBooked => 'Đã được đặt';
 
   @override
-  String get mentorJoinMeeting => 'Tham gia buổi tư vấn';
+  String get mentorJoinMeeting => 'Vào phòng học';
 
   @override
   String get mentorMeetingLinkUnavailable =>
-      'Phòng họp chưa sẵn sàng cho lịch tư vấn này.';
+      'Phòng học chưa sẵn sàng cho lịch học này.';
 
   @override
   String get mentorMeetingNotFound =>
-      'Không tìm thấy buổi tư vấn trong lịch của bạn.';
+      'Không tìm thấy buổi học trong lịch của bạn.';
 
   @override
   String get mentorJoinFailedTitle => 'Không thể mở phòng họp';
@@ -598,7 +597,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mentorStatusAssigned => 'Đã phân công';
 
   @override
-  String get mentorStatusAccepted => 'Đã chấp nhận';
+  String get mentorStatusAccepted => 'Đã xác nhận';
 
   @override
   String get mentorStatusCompleted => 'Đã hoàn thành';
@@ -705,7 +704,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get progressAndHistory => 'Tiến độ & lịch sử học';
 
   @override
-  String get consultation => 'Tư vấn';
+  String get consultation => 'Học cùng Mentor';
 
   @override
   String get settings => 'Cài đặt';
@@ -2317,7 +2316,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get profileConsultationSubtitle =>
-      'Khám phá gói tư vấn và lịch hẹn của bạn.';
+      'Khám phá gói học 1-1 và lịch học của bạn.';
 
   @override
   String get savedFromLessons => 'Từ đã lưu trong bài học';
@@ -2592,17 +2591,16 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get mentorConsultation => 'Tư vấn cùng Mentor';
+  String get mentorConsultation => 'Học cùng Mentor';
 
   @override
-  String get openDemoBooking => 'Xem trước lịch tư vấn';
+  String get openDemoBooking => 'Xem trước lịch học';
 
   @override
   String get confirmDemoBooking => 'Xác nhận xem trước';
 
   @override
-  String get demoBookingConfirmed =>
-      'Bạn đã hoàn tất phần xem trước lịch tư vấn.';
+  String get demoBookingConfirmed => 'Bạn đã hoàn tất phần xem trước lịch học.';
 
   @override
   String get practiceLoadFailed => 'Chưa thể tải nội dung luyện tập';
@@ -2832,7 +2830,7 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get learnerMentorTitle => 'Tư vấn cùng Mentor';
+  String get learnerMentorTitle => 'Học cùng Mentor';
 
   @override
   String get learnerMentorSubtitle =>
@@ -2842,16 +2840,16 @@ class AppLocalizationsVi extends AppLocalizations {
   String get learnerMentorExplore => 'Khám phá';
 
   @override
-  String get learnerMentorPlansTitle => 'Gói tư vấn';
+  String get learnerMentorPlansTitle => 'Gói học 1-1';
 
   @override
-  String get learnerMentorPlansEmpty => 'Hiện chưa có gói tư vấn khả dụng.';
+  String get learnerMentorPlansEmpty => 'Hiện chưa có gói học khả dụng.';
 
   @override
-  String get learnerMentorPlansError => 'Chưa thể tải các gói tư vấn.';
+  String get learnerMentorPlansError => 'Chưa thể tải các gói học.';
 
   @override
-  String get learnerMentorMyMeetings => 'Lịch tư vấn của tôi';
+  String get learnerMentorMyMeetings => 'Lịch học của tôi';
 
   @override
   String learnerMentorPlanDuration(int days) {
@@ -2860,14 +2858,14 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String learnerMentorPlanSessions(int count) {
-    return '$count buổi tư vấn';
+    return '$count buổi học';
   }
 
   @override
   String get learnerMentorChoosePlan => 'Chọn gói';
 
   @override
-  String get learnerMentorAvailabilityTitle => 'Chọn lịch tư vấn';
+  String get learnerMentorAvailabilityTitle => 'Chọn lịch học';
 
   @override
   String get learnerMentorAvailabilitySubtitle =>
@@ -2900,16 +2898,16 @@ class AppLocalizationsVi extends AppLocalizations {
       'Bạn vẫn có thể xem gói và lịch trống. RikiPath sẽ mở thanh toán khi Backend bảo đảm giữ chỗ an toàn, tránh hai người đặt cùng một khung giờ.';
 
   @override
-  String get learnerMentorBookingsEmpty => 'Bạn chưa có lịch tư vấn Mentor.';
+  String get learnerMentorBookingsEmpty => 'Bạn chưa có lịch học Mentor.';
 
   @override
-  String get learnerMentorBookingsError => 'Chưa thể tải lịch tư vấn của bạn.';
+  String get learnerMentorBookingsError => 'Chưa thể tải lịch học của bạn.';
 
   @override
-  String get learnerMentorMeetingDetailTitle => 'Chi tiết buổi tư vấn';
+  String get learnerMentorMeetingDetailTitle => 'Chi tiết buổi học';
 
   @override
-  String get learnerMentorMeetingNotFound => 'Không tìm thấy buổi tư vấn này.';
+  String get learnerMentorMeetingNotFound => 'Không tìm thấy buổi học này.';
 
   @override
   String get learnerMentorMentorLabel => 'Mentor';
@@ -2918,14 +2916,14 @@ class AppLocalizationsVi extends AppLocalizations {
   String get learnerMentorPaymentLabel => 'Thanh toán';
 
   @override
-  String get learnerMentorJoin => 'Tham gia buổi tư vấn';
+  String get learnerMentorJoin => 'Vào phòng học';
 
   @override
   String get learnerMentorJoinUnavailable =>
       'Phòng họp chưa sẵn sàng hoặc liên kết không an toàn.';
 
   @override
-  String get learnerMentorPurchaseStatus => 'Trạng thái gói tư vấn';
+  String get learnerMentorPurchaseStatus => 'Trạng thái gói học';
 
   @override
   String get learnerMentorPurchaseStatusError =>
@@ -2967,6 +2965,64 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get learnerMentorBookingReadOnly =>
       'Thông tin lịch hẹn được đồng bộ trực tiếp từ Backend.';
+
+  @override
+  String get learnerMentorConfirmBookingTitle =>
+      'Xác nhận đặt lịch học Mentor 1-1';
+
+  @override
+  String get learnerMentorConfirmPackage => 'Gói học kèm';
+
+  @override
+  String get learnerMentorConfirmMentor => 'Mentor hướng dẫn';
+
+  @override
+  String get learnerMentorConfirmTime => 'Thời gian học dự kiến';
+
+  @override
+  String get learnerMentorConfirmPrice => 'Học phí';
+
+  @override
+  String get learnerMentorConfirmNote =>
+      'Khung giờ học đã chọn là tạm thời và sẽ được xác nhận chính thức sau khi hoàn tất thanh toán.';
+
+  @override
+  String get learnerMentorPayWithPayOs => 'Tiếp tục thanh toán';
+
+  @override
+  String get learnerMentorOpenPayOs => 'Tiếp tục thanh toán';
+
+  @override
+  String get learnerMentorBookingSuccess => 'Đặt lịch thành công!';
+
+  @override
+  String get learnerMentorBookingSuccessDesc =>
+      'Buổi học 1 kèm 1 với Mentor đã được gửi thành công.';
+
+  @override
+  String get learnerMentorSlotConflict =>
+      'Khung giờ này vừa có người đặt. Lượt học của bạn vẫn được bảo lưu, vui lòng chọn khung giờ khác.';
+
+  @override
+  String get learnerMentorChooseAnotherSlot => 'Chọn khung giờ khác';
+
+  @override
+  String get learnerMentorViewBookingDetail => 'Xem chi tiết buổi học';
+
+  @override
+  String get learnerMentorBookNow => 'Đặt lịch ngay';
+
+  @override
+  String get learnerMentorIncludedSession => 'Dùng 1 lượt học trong gói';
+
+  @override
+  String get learnerMentorConfirmBooking => 'Xác nhận đặt lịch';
+
+  @override
+  String get learnerMentorSelectedSlot => 'Khung giờ đã chọn';
+
+  @override
+  String get learnerMentorPleaseSelectSlot => 'Vui lòng chọn khung giờ học';
 
   @override
   String get practiceSpeechTitle => 'Luyện nói tiếng Nhật';
@@ -3518,7 +3574,7 @@ class AppLocalizationsVi extends AppLocalizations {
       'Tham gia bằng mã phòng hoặc liên kết.';
 
   @override
-  String get homeUpcomingMeetingTitle => 'Buổi tư vấn sắp tới';
+  String get homeUpcomingMeetingTitle => 'Buổi học sắp tới';
 
   @override
   String homeMeetingSchedule(String date, String time) {
@@ -3770,4 +3826,35 @@ class AppLocalizationsVi extends AppLocalizations {
   String placementWrongQuestionsSummary(int count, String questions) {
     return 'Câu cần ôn lại ($count): $questions';
   }
+
+  @override
+  String get learningPathPreviewTitle => 'Bản xem trước lộ trình AI';
+
+  @override
+  String learningPathPreviewVersion(int version) {
+    return 'Phiên bản $version sẽ chỉ thay thế lộ trình hiện tại sau khi bạn xác nhận. Lịch sử học tập vẫn được giữ nguyên.';
+  }
+
+  @override
+  String get learningPathPreviewFailed =>
+      'Không thể xem trước hoặc xác nhận lộ trình học. Lộ trình hiện tại được giữ nguyên.';
+
+  @override
+  String get lessonMaterialsUnavailable =>
+      'Bài học này chưa có nội dung chi tiết. Vui lòng quay lại sau khi nội dung được cập nhật.';
+
+  @override
+  String homeCurrentLessonLabel(int lesson) {
+    return 'Bài học $lesson';
+  }
+
+  @override
+  String get placementIssueExamDateRequired =>
+      'Kết quả đánh giá năng lực đã được lưu. Trước khi tạo lộ trình học AI, vui lòng chọn ngày thi dự kiến trong mục Mục tiêu JLPT tại trang cá nhân.';
+
+  @override
+  String get placementSetExamDate => 'Chọn ngày thi trong trang cá nhân';
+
+  @override
+  String get placementOpenStandardRoadmap => 'Tiếp tục lộ trình học tiêu chuẩn';
 }

@@ -95,6 +95,15 @@ class LessonScreen extends ConsumerWidget {
       LessonStage.article => LessonArticleOnlyView(
         lesson: lesson,
         onOpenVideo: controller.showVideo,
+        onToggleBookmark: (index) {
+          _bookmarkVocabulary(context, ref, controller, lesson, index);
+        },
+        onToggleKanji: (index) {
+          _bookmarkKanji(context, ref, controller, lesson, index);
+        },
+        onToggleGrammar: (index) {
+          _bookmarkGrammar(context, ref, controller, lesson, index);
+        },
         onComplete: controller.completeLesson,
         isCompleting: session.isCompleting,
         completionErrorMessage: session.completionErrorMessage,

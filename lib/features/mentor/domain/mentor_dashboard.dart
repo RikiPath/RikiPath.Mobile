@@ -11,13 +11,18 @@ class MentorTimestamp {
 
   factory MentorTimestamp.parse(String rawValue) {
     final normalized = rawValue.trim();
-    final value = DateTime.tryParse(normalized);
-    if (normalized.isEmpty || value == null) {
-      throw const FormatException('Expected a valid Mentor timestamp.');
-    }
     final hasExplicitOffset = RegExp(
       r'(?:[zZ]|[+-]\d{2}:?\d{2})$',
     ).hasMatch(normalized);
+    // The Backend stores Mentor meeting instants in UTC but serializes some
+    // PostgreSQL timestamps without an offset. Treat those as UTC, never as
+    // the phone's local timezone.
+    final value = DateTime.tryParse(
+      hasExplicitOffset ? normalized : '${normalized}Z',
+    );
+    if (normalized.isEmpty || value == null) {
+      throw const FormatException('Expected a valid Mentor timestamp.');
+    }
     return MentorTimestamp._(
       rawValue: normalized,
       value: value,
@@ -29,9 +34,8 @@ class MentorTimestamp {
   final DateTime value;
   final bool hasExplicitOffset;
 
-  /// Offset-aware values are safe to render in the device timezone. Values
-  /// without an offset retain their server-provided wall-clock components.
-  DateTime get displayValue => hasExplicitOffset ? value.toLocal() : value;
+  /// Display all Mentor slots in Vietnam time, independent of device timezone.
+  DateTime get displayValue => value.toUtc().add(const Duration(hours: 7));
 }
 
 @immutable
@@ -41,12 +45,62 @@ class MentorAvailabilitySlot {
     required this.startTime,
     required this.endTime,
     required this.isBooked,
+    this.isApproved = true,
+    this.bookedCount = 0,
   });
 
   final int id;
   final MentorTimestamp startTime;
   final MentorTimestamp endTime;
   final bool isBooked;
+  final bool isApproved;
+  final int bookedCount;
+}
+
+@immutable
+class WeeklyPeriodItem {
+  const WeeklyPeriodItem({required this.date, required this.period});
+
+  final DateTime date;
+  final String period; // "Morning", "Afternoon", "Evening"
+
+  String get formattedDate =>
+      '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+  String get key => '$formattedDate#$period';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WeeklyPeriodItem &&
+          runtimeType == other.runtimeType &&
+          formattedDate == other.formattedDate &&
+          period == other.period;
+
+  @override
+  int get hashCode => Object.hash(formattedDate, period);
+}
+
+@immutable
+class WeeklyAvailabilityItem {
+  const WeeklyAvailabilityItem({
+    required this.id,
+    required this.mentorId,
+    required this.mentorName,
+    required this.date,
+    required this.period,
+  });
+
+  final int id;
+  final int mentorId;
+  final String mentorName;
+  final DateTime date;
+  final String period;
+
+  String get formattedDate =>
+      '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+  String get key => '$formattedDate#$period';
 }
 
 enum MentorMeetingStatus {

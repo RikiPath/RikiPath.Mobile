@@ -43,7 +43,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LearnScreen), findsOneWidget);
-    expect(find.text('Mục tiêu JLPT N4'), findsOneWidget);
+    expect(find.text('Cấp độ bạn đang học N4'), findsOneWidget);
     expect(find.text('Tiếp tục lộ trình'), findsOneWidget);
     expect(find.text('ĐANG HỌC DỞ'), findsOneWidget);
     await tester.scrollUntilVisible(
@@ -207,6 +207,59 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'existing AI path uses preview, cancel and confirm without direct regeneration',
+    (tester) async {
+      final pathRepository = _TestLearningPathRepository(
+        activePath: _testPath(summary: 'Lộ trình đang học', version: 1),
+      );
+      await _pumpLearning(
+        tester,
+        initialLocation: AppRoutes.learnRoadmap,
+        placementStatus: const PlacementTestStatus(
+          hasCompletedPlacementTest: true,
+          isReadyForLearningPath: true,
+        ),
+        pathRepository: pathRepository,
+      );
+      await tester.pumpAndSettle();
+
+      final regenerate = find.byKey(
+        const ValueKey<String>('ai_learning_path_generate_button'),
+      );
+      await tester.ensureVisible(regenerate);
+      await tester.tap(regenerate);
+      await tester.pumpAndSettle();
+      expect(pathRepository.previewCalls, 1);
+      expect(pathRepository.lastStartingLevelId, 101);
+      expect(pathRepository.lastTargetLevelId, 204);
+      expect(pathRepository.generateCalls, 0);
+      expect(
+        find.byKey(const ValueKey<String>('ai_learning_path_preview_dialog')),
+        findsOneWidget,
+      );
+
+      await tester.tap(
+        find.byKey(const ValueKey<String>('ai_learning_path_cancel_preview')),
+      );
+      await tester.pumpAndSettle();
+      expect(pathRepository.cancelCalls, 1);
+      expect(pathRepository.confirmCalls, 0);
+      expect(find.text('Lộ trình đang học'), findsOneWidget);
+
+      await tester.tap(regenerate);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey<String>('ai_learning_path_confirm_preview')),
+      );
+      await tester.pumpAndSettle();
+      expect(pathRepository.previewCalls, 2);
+      expect(pathRepository.confirmCalls, 1);
+      expect(pathRepository.generateCalls, 0);
+      expect(find.text('Lộ trình đã xác nhận'), findsOneWidget);
+    },
+  );
 
   testWidgets('roadmap renders server lesson IDs, progress, and disabled AI', (
     tester,
@@ -503,14 +556,60 @@ class _DatePreservingProfileRepository extends Fake
   }
 }
 
-class _TestLearningPathRepository implements LearningPathRepository {
-  _TestLearningPathRepository({this.generationError});
+class _TestLearningPathRepository
+    implements LearningPathRepository, LearningPathVersionRepository {
+  _TestLearningPathRepository({this.generationError, this.activePath});
 
   final Object? generationError;
+  RecommendedLearningPath? activePath;
   int generateCalls = 0;
+  int previewCalls = 0;
+  int confirmCalls = 0;
+  int cancelCalls = 0;
+  int? lastStartingLevelId;
+  int? lastTargetLevelId;
 
   @override
-  Future<RecommendedLearningPath?> loadLatest() async => null;
+  Future<RecommendedLearningPath?> loadLatest() async => activePath;
+
+  @override
+  Future<RecommendedLearningPath?> loadActive() async => activePath;
+
+  @override
+  Future<List<RecommendedLearningPath>> loadHistory() async =>
+      activePath == null ? [] : [activePath!];
+
+  @override
+  Future<RecommendedLearningPath> preview({
+    required int startingJlptLevelId,
+    int? targetJlptLevelId,
+  }) async {
+    previewCalls++;
+    lastStartingLevelId = startingJlptLevelId;
+    lastTargetLevelId = targetJlptLevelId;
+    return _testPath(
+      summary: 'Lộ trình xem trước',
+      version: (activePath?.version ?? 0) + 1,
+      status: LearningPathStatus.draft,
+    );
+  }
+
+  @override
+  Future<RecommendedLearningPath> confirmPreview(int pathId) async {
+    confirmCalls++;
+    activePath = _testPath(summary: 'Lộ trình đã xác nhận', version: 2);
+    return activePath!;
+  }
+
+  @override
+  Future<RecommendedLearningPath> cancelPreview(int pathId) async {
+    cancelCalls++;
+    return _testPath(
+      summary: 'Lộ trình đã hủy',
+      version: 2,
+      status: LearningPathStatus.cancelled,
+    );
+  }
 
   @override
   Future<RecommendedLearningPath> generate() async {
@@ -539,6 +638,26 @@ class _TestLearningPathRepository implements LearningPathRepository {
     );
   }
 }
+
+RecommendedLearningPath _testPath({
+  required String summary,
+  required int version,
+  LearningPathStatus status = LearningPathStatus.active,
+}) => RecommendedLearningPath(
+  userId: 42,
+  generatedAt: DateTime.utc(2026, 10, 29),
+  summary: summary,
+  strengths: const [],
+  weaknesses: const [],
+  feasibility: 'Khả thi',
+  isExamDateRealistic: true,
+  recommendedStudyDays: 10,
+  focusTopics: const [],
+  dailySchedules: const [],
+  pathId: version + 10,
+  version: version,
+  status: status,
+);
 
 class _TestStandardRoadmapRepository implements StandardRoadmapRepository {
   _TestStandardRoadmapRepository({this.error, this.empty = false});

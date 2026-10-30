@@ -293,12 +293,120 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'completed Placement without exam date can open Standard Roadmap',
+    (tester) async {
+      final session = createTestAuthSession();
+      final container = ProviderContainer(
+        overrides: [
+          jlptCatalogRepositoryProvider.overrideWithValue(
+            TestJlptCatalogRepository(),
+          ),
+          userProfileRepositoryProvider.overrideWithValue(
+            _StubProfileRepository(),
+          ),
+          placementTestRepositoryProvider.overrideWithValue(
+            _FakePlacementTestRepository(completedWithoutExamDate: true),
+          ),
+          authSessionControllerProvider.overrideWithValue(session),
+          jsonPreferenceStoreProvider.overrideWithValue(
+            TestJsonPreferenceStore(),
+          ),
+          learningPathRepositoryProvider.overrideWithValue(
+            _FakeLearningPathRepository(),
+          ),
+        ],
+      );
+      final router = createAppRouter(
+        authSession: session,
+        initialLocation: AppRoutes.placementTest,
+      );
+      addTearDown(container.dispose);
+      addTearDown(session.dispose);
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            theme: AppTheme.light,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey<String>('placement_test_result_view')),
+        findsOneWidget,
+      );
+
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('placement_apply_recommendation_button'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey<String>('placement_set_exam_date_button')),
+        findsOneWidget,
+      );
+      final standard = find.byKey(
+        const ValueKey<String>('placement_open_standard_roadmap_button'),
+      );
+      await tester.ensureVisible(standard);
+      await tester.drag(
+        find.byKey(const ValueKey<String>('placement_test_result_view')),
+        const Offset(0, -250),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(standard);
+      await tester.pumpAndSettle();
+      expect(
+        router.routeInformationProvider.value.uri.path,
+        AppRoutes.learnRoadmap,
+      );
+      router.go(AppRoutes.placementTest);
+      await tester.pumpAndSettle();
+      final examDate = find.byKey(
+        const ValueKey<String>('placement_set_exam_date_button'),
+      );
+      await tester.ensureVisible(examDate);
+      await tester.drag(
+        find.byKey(const ValueKey<String>('placement_test_result_view')),
+        const Offset(0, -250),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(examDate);
+      await tester.pumpAndSettle();
+      expect(
+        router.routeInformationProvider.value.uri.path,
+        AppRoutes.profileJlptGoal,
+      );
+    },
+  );
 }
 
 class _FakePlacementTestRepository implements PlacementTestRepository {
+  _FakePlacementTestRepository({this.completedWithoutExamDate = false});
+
+  final bool completedWithoutExamDate;
+
   @override
   Future<PlacementTestStatus> loadStatus() async {
-    return const PlacementTestStatus(hasCompletedPlacementTest: false);
+    if (completedWithoutExamDate) {
+      return const PlacementTestStatus(
+        hasCompletedPlacementTest: true,
+        latestCompletedAttemptId: 77,
+        recommendedTargetJlptLevelId: 103,
+        recommendedTargetJlptLevelName: 'N3',
+        dailyStudyMinutes: 30,
+      );
+    }
+    return PlacementTestStatus(
+      hasCompletedPlacementTest: false,
+      targetExamDate: DateTime.utc(2027, 7, 4),
+    );
   }
 
   @override

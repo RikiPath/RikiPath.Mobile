@@ -189,18 +189,19 @@ class _LessonHero extends StatelessWidget {
           const SizedBox(height: AppSpacing.space4),
           LessonProgressMeter(progress: lesson.progress),
           const SizedBox(height: AppSpacing.space2),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              context.l10n.partProgress(
-                lesson.currentPartNumber,
-                lesson.parts.length,
-              ),
-              style: AppTypography.metadata.copyWith(
-                color: AppColors.textMuted,
+          if (lesson.parts.isNotEmpty)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                context.l10n.partProgress(
+                  lesson.currentPartNumber,
+                  lesson.parts.length,
+                ),
+                style: AppTypography.metadata.copyWith(
+                  color: AppColors.textMuted,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

@@ -3,6 +3,27 @@ import 'package:rikipath_mobile/core/network/safe_external_http_uri.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 
 @immutable
+class BookableMentor {
+  const BookableMentor({
+    required this.id,
+    required this.name,
+    this.avatarUrl,
+    this.headline,
+    this.bio,
+    this.jlptLevels = const [],
+    this.teachingMethod,
+  });
+
+  final int id;
+  final String name;
+  final String? avatarUrl;
+  final String? headline;
+  final String? bio;
+  final List<String> jlptLevels;
+  final String? teachingMethod;
+}
+
+@immutable
 class MentorMeetingFeature {
   const MentorMeetingFeature({
     required this.id,
@@ -53,6 +74,25 @@ class LearnerMentorAvailability {
   final MentorTimestamp startTime;
   final MentorTimestamp endTime;
   final bool isBooked;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'mentorId': mentorId,
+    'mentorName': mentorName,
+    'startTime': startTime.rawValue,
+    'endTime': endTime.rawValue,
+    'isBooked': isBooked,
+  };
+
+  factory LearnerMentorAvailability.fromJson(Map<String, dynamic> json) =>
+      LearnerMentorAvailability(
+        id: json['id'] as int,
+        mentorId: json['mentorId'] as int,
+        mentorName: json['mentorName'] as String,
+        startTime: MentorTimestamp.parse(json['startTime'] as String),
+        endTime: MentorTimestamp.parse(json['endTime'] as String),
+        isBooked: json['isBooked'] as bool? ?? false,
+      );
 }
 
 enum MentorPaymentStatus {
@@ -111,7 +151,7 @@ class LearnerMentorBooking {
 class MentorMeetingPurchase {
   const MentorMeetingPurchase({
     required this.subscriptionId,
-    required this.bookingId,
+    this.bookingId,
     required this.orderCode,
     required this.planName,
     required this.meetingSessionCount,
@@ -121,10 +161,11 @@ class MentorMeetingPurchase {
     required this.paymentLinkId,
     required this.qrCode,
     this.paymentExpiresAt,
+    this.isQaSimulated = false,
   });
 
   final int subscriptionId;
-  final int bookingId;
+  final int? bookingId;
   final int orderCode;
   final String planName;
   final int meetingSessionCount;
@@ -134,6 +175,7 @@ class MentorMeetingPurchase {
   final String paymentLinkId;
   final String qrCode;
   final MentorTimestamp? paymentExpiresAt;
+  final bool isQaSimulated;
 
   Uri? get safeCheckoutUri => safeExternalHttpUri(checkoutUrl);
 }
@@ -150,6 +192,7 @@ class MentorMeetingPurchaseStatus {
     required this.meetingSessionsUsed,
     required this.bookings,
     this.paymentExpiresAt,
+    this.isQaSimulated = false,
   });
 
   final int subscriptionId;
@@ -158,6 +201,7 @@ class MentorMeetingPurchaseStatus {
   final bool isCheckoutExpired;
   final double amountPaid;
   final MentorTimestamp? paymentExpiresAt;
+  final bool isQaSimulated;
   final int meetingSessionsIncluded;
   final int meetingSessionsUsed;
   final List<LearnerMentorBooking> bookings;

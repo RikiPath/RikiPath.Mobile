@@ -1,5 +1,6 @@
 abstract final class LearnerMentorApiPaths {
   static const String root = '/api/mentor-meetings';
+  static const String mentors = '$root/mentors';
   static const String plans = '$root/plans';
   static const String availability = '$root/availability';
   static const String purchase = '$root/purchase';
@@ -10,4 +11,7 @@ abstract final class LearnerMentorApiPaths {
 
   static String purchaseStatus(int subscriptionId) =>
       '$root/purchases/$subscriptionId';
+
+  static String syncPurchase(int subscriptionId) =>
+      '$root/purchases/$subscriptionId/sync';
 }

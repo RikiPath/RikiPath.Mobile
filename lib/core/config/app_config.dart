@@ -45,7 +45,10 @@ class AppConfig {
       'APP_ENV',
       defaultValue: defaultDevelopmentEnvironment,
     );
-    const apiProfileValue = String.fromEnvironment('API_PROFILE');
+    const apiProfileValue = String.fromEnvironment(
+      'API_PROFILE',
+      defaultValue: 'local-emulator',
+    );
     const apiBaseUrlValue = String.fromEnvironment(
       'API_BASE_URL',
       defaultValue: _undefinedDartDefine,

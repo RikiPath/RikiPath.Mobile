@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/core/config/app_config.dart';
 import 'package:rikipath_mobile/core/config/app_env.dart';
 
@@ -92,6 +92,63 @@ void main() {
         }),
         throwsA(isA<FormatException>()),
       );
+    });
+
+    test('validates .env.local profile values correctly', () {
+      final config = AppConfig.fromValues(const {
+        'APP_ENV': 'development',
+        'API_PROFILE': 'local-emulator',
+        'API_BASE_URL': 'http://10.0.2.2:5265',
+        'SWAGGER_URL': 'http://10.0.2.2:5265/swagger/index.html',
+        'ENABLE_API_LOGGING': 'true',
+      });
+
+      expect(config.environment, AppEnv.development);
+      expect(config.apiProfile, ApiProfile.localEmulator);
+      expect(config.apiBaseUrl, Uri.parse('http://10.0.2.2:5265'));
+      expect(
+        config.swaggerUrl,
+        Uri.parse('http://10.0.2.2:5265/swagger/index.html'),
+      );
+      expect(config.enableApiLogging, isTrue);
+      expect(config.shouldLogApi, isTrue);
+    });
+
+    test('validates .env.development (Cloudflare remote) profile values correctly', () {
+      final config = AppConfig.fromValues(const {
+        'APP_ENV': 'development',
+        'API_PROFILE': 'remote',
+        'API_BASE_URL': 'https://fact-like-tracy-displays.trycloudflare.com',
+        'SWAGGER_URL': 'https://fact-like-tracy-displays.trycloudflare.com/swagger/index.html',
+        'ENABLE_API_LOGGING': 'true',
+      });
+
+      expect(config.environment, AppEnv.development);
+      expect(config.apiProfile, ApiProfile.remote);
+      expect(
+        config.apiBaseUrl,
+        Uri.parse('https://fact-like-tracy-displays.trycloudflare.com'),
+      );
+      expect(
+        config.swaggerUrl,
+        Uri.parse('https://fact-like-tracy-displays.trycloudflare.com/swagger/index.html'),
+      );
+      expect(config.enableApiLogging, isTrue);
+      expect(config.shouldLogApi, isTrue);
+    });
+
+    test('remote profile does not fallback to local emulator host', () {
+      final config = AppConfig.fromValues(const {
+        'APP_ENV': 'development',
+        'API_PROFILE': 'remote',
+        'API_BASE_URL': 'https://fact-like-tracy-displays.trycloudflare.com',
+        'SWAGGER_URL': 'https://fact-like-tracy-displays.trycloudflare.com/swagger/index.html',
+        'ENABLE_API_LOGGING': 'true',
+      });
+
+      expect(config.apiProfile, isNot(ApiProfile.localEmulator));
+      expect(config.apiBaseUrl.host, isNot('10.0.2.2'));
+      expect(config.apiBaseUrl.host, isNot('localhost'));
     });
   });
 }

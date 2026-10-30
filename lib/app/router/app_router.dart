@@ -34,8 +34,11 @@ import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_availability_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_booking_detail_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_bookings_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_discovery_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_meetings_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_profile_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_purchase_status_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/learner_session_completed_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_meeting_detail_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_meetings_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/daily_review_screen.dart';
@@ -197,9 +200,35 @@ GoRouter createAppRouter({
         builder: (context, state) => const LearnerMentorMeetingsScreen(),
         routes: [
           GoRoute(
+            path: AppRoutes.learnerMentorDiscoverySegment,
+            builder: (context, state) => LearnerMentorDiscoveryScreen(
+              planId: int.tryParse(state.pathParameters['planId'] ?? '') ?? 1,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.learnerMentorProfileSegment,
+            builder: (context, state) => LearnerMentorProfileScreen(
+              planId: int.tryParse(state.pathParameters['planId'] ?? '') ?? 1,
+              mentorId:
+                  int.tryParse(state.pathParameters['mentorId'] ?? '') ?? 1,
+            ),
+          ),
+          GoRoute(
             path: AppRoutes.learnerMentorAvailabilitySegment,
             builder: (context, state) => LearnerMentorAvailabilityScreen(
               planId: int.tryParse(state.pathParameters['planId'] ?? ''),
+              subscriptionId: int.tryParse(
+                state.uri.queryParameters['subscriptionId'] ?? '',
+              ),
+              mentorId:
+                  int.tryParse(state.uri.queryParameters['mentorId'] ?? ''),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.learnerSessionCompletedSegment,
+            builder: (context, state) => LearnerSessionCompletedScreen(
+              bookingId:
+                  int.tryParse(state.pathParameters['bookingId'] ?? '') ?? 1,
             ),
           ),
           GoRoute(

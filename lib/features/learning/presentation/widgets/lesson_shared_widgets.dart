@@ -18,10 +18,11 @@ class LessonMetadataWrap extends StatelessWidget {
       children: [
         JlptBadge(lesson.level),
         _MetadataPill(label: lesson.category),
-        _MetadataPill(
-          label: context.l10n.durationMinutes(lesson.durationMinutes),
-          icon: Icons.schedule_outlined,
-        ),
+        if (lesson.durationSeconds > 0)
+          _MetadataPill(
+            label: context.l10n.durationMinutes(lesson.durationMinutes),
+            icon: Icons.schedule_outlined,
+          ),
       ],
     );
   }

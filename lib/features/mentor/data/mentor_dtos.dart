@@ -6,6 +6,8 @@ class MentorAvailabilityDto {
     required this.startTime,
     required this.endTime,
     required this.isBooked,
+    this.isApproved = true,
+    this.bookedCount = 0,
   });
 
   factory MentorAvailabilityDto.fromJson(Map<String, Object?> json) {
@@ -14,6 +16,8 @@ class MentorAvailabilityDto {
       startTime: MentorTimestamp.parse(_requiredString(json, 'startTime')),
       endTime: MentorTimestamp.parse(_requiredString(json, 'endTime')),
       isBooked: _requiredBool(json, 'isBooked'),
+      isApproved: json['isApproved'] as bool? ?? true,
+      bookedCount: (json['bookedCount'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -21,12 +25,52 @@ class MentorAvailabilityDto {
   final MentorTimestamp startTime;
   final MentorTimestamp endTime;
   final bool isBooked;
+  final bool isApproved;
+  final int bookedCount;
 
   MentorAvailabilitySlot toDomain() => MentorAvailabilitySlot(
     id: id,
     startTime: startTime,
     endTime: endTime,
     isBooked: isBooked,
+    isApproved: isApproved,
+    bookedCount: bookedCount,
+  );
+}
+
+class WeeklyAvailabilityDto {
+  const WeeklyAvailabilityDto({
+    required this.id,
+    required this.mentorId,
+    required this.mentorName,
+    required this.date,
+    required this.period,
+  });
+
+  factory WeeklyAvailabilityDto.fromJson(Map<String, Object?> json) {
+    final dateStr = _requiredString(json, 'date');
+    final parsedDate = DateTime.parse(dateStr);
+    return WeeklyAvailabilityDto(
+      id: _requiredPositiveInt(json, 'id'),
+      mentorId: _requiredPositiveInt(json, 'mentorId'),
+      mentorName: _requiredString(json, 'mentorName'),
+      date: parsedDate,
+      period: _requiredString(json, 'period'),
+    );
+  }
+
+  final int id;
+  final int mentorId;
+  final String mentorName;
+  final DateTime date;
+  final String period;
+
+  WeeklyAvailabilityItem toDomain() => WeeklyAvailabilityItem(
+    id: id,
+    mentorId: mentorId,
+    mentorName: mentorName,
+    date: date,
+    period: period,
   );
 }
 

@@ -34,7 +34,12 @@ Thumbs.db
 *.log
 *.tmp
 *.apk
+*.mp4
+demo-videos/
 
 # Local environment configuration. All environment files stay local.
 .env
 .env.*
+!.env.example
+
+run-mobile.ps1

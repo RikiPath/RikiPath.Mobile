@@ -26,9 +26,10 @@ final placementTestRepositoryProvider = Provider<PlacementTestRepository>((
   return ApiPlacementTestRepository(ref.watch(apiClientProvider));
 });
 
-final placementTestStatusProvider = FutureProvider.autoDispose<PlacementTestStatus>(
-  (ref) => ref.watch(placementTestRepositoryProvider).loadStatus(),
-);
+final placementTestStatusProvider =
+    FutureProvider.autoDispose<PlacementTestStatus>(
+      (ref) => ref.watch(placementTestRepositoryProvider).loadStatus(),
+    );
 
 final placementTestElapsedProvider = Provider<Duration Function()>((ref) {
   final stopwatch = Stopwatch()..start();
@@ -49,6 +50,7 @@ final placementTestControllerProvider =
 
 enum PlacementTestActionIssue {
   validation,
+  examDateRequired,
   expired,
   bankNotReady,
   invalidAnswer,
@@ -215,10 +217,6 @@ class PlacementTestController extends AsyncNotifier<PlacementTestFlowState> {
           return true;
         }
       }
-    }
-    if (status.targetExamDate != null) {
-      await _clearDraftForAttempt(status.latestCompletedAttemptId);
-      return true;
     }
     return false;
   }
@@ -419,10 +417,40 @@ class PlacementTestController extends AsyncNotifier<PlacementTestFlowState> {
   }
 
   Future<bool> applyRecommendation() async {
-    final current = state.value;
+    var current = state.value;
     final result = current?.result;
     if (current == null || result == null || current.isApplyingRecommendation) {
       return false;
+    }
+
+    // The Backend requires a future exam date before AI path generation. Keep
+    // the completed Placement result intact. Re-read status so a date saved
+    // from the Profile route is visible without restarting this controller.
+    if (current.status.targetExamDate == null) {
+      try {
+        final refreshedStatus = await _repository.loadStatus();
+        if (refreshedStatus.targetExamDate == null) {
+          state = AsyncData(
+            current.copyWith(
+              actionIssue: PlacementTestActionIssue.examDateRequired,
+              actionRetryable: true,
+            ),
+          );
+          return false;
+        }
+        state = AsyncData(
+          current.copyWith(status: refreshedStatus, clearActionIssue: true),
+        );
+        current = state.requireValue;
+      } catch (error) {
+        state = AsyncData(
+          state.requireValue.copyWith(
+            actionIssue: _classify(error),
+            actionRetryable: _retryable(error),
+          ),
+        );
+        return false;
+      }
     }
 
     final wasAttempted = _transitionAttempted;
@@ -497,24 +525,26 @@ class PlacementTestController extends AsyncNotifier<PlacementTestFlowState> {
         await _draftStore.clearDismissedAttemptId(userId: userId);
       }
 
-      final appliedLevelId =
-          workingStatus.targetJlptLevelId ??
-          result.recommendedTargetJlptLevelId;
-      final appliedLevelName =
-          workingStatus.targetJlptLevelName ??
-          result.recommendedTargetJlptLevelName;
       final appliedDailyMinutes = workingStatus.dailyStudyMinutes > 0
           ? workingStatus.dailyStudyMinutes
           : 30;
-      final targetItem = await _resolveCatalogItem(
-        levelId: appliedLevelId,
-        levelName: appliedLevelName,
-      );
-      if (targetItem != null) {
+      // Applying a recommended target must not replace the independently
+      // selected current study level in the local learner journey.
+      final profile = await ref
+          .read(userProfileRepositoryProvider)
+          .loadProfile();
+      final currentStudyLevelId = profile.currentStudyLevelId;
+      final studyItem = currentStudyLevelId == null
+          ? null
+          : await _resolveCatalogItem(
+              levelId: currentStudyLevelId,
+              levelName: profile.currentStudyLevelName ?? '',
+            );
+      if (studyItem != null) {
         await ref
             .read(learnerJourneyControllerProvider.notifier)
             .setCatalogPreferences(
-              item: targetItem,
+              item: studyItem,
               dailyStudyMinutes: appliedDailyMinutes,
             );
       }

@@ -340,10 +340,12 @@ class _ContinueLearningSection extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            context.l10n.homeCurrentLessonMeta(
-              lesson.lessonNumber,
-              lesson.durationMinutes,
-            ),
+            lesson.durationMinutes > 0
+                ? context.l10n.homeCurrentLessonMeta(
+                    lesson.lessonNumber,
+                    lesson.durationMinutes,
+                  )
+                : context.l10n.homeCurrentLessonLabel(lesson.lessonNumber),
             style: AppTypography.bodySmall,
           ),
           const SizedBox(height: AppSpacing.space4),
@@ -820,10 +822,7 @@ class _AnalyticsSummary extends StatelessWidget {
 }
 
 class _StreakMetricTile extends StatelessWidget {
-  const _StreakMetricTile({
-    required this.streakDays,
-    super.key,
-  });
+  const _StreakMetricTile({required this.streakDays, super.key});
 
   final int streakDays;
 

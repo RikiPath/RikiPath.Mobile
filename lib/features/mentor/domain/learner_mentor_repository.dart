@@ -3,6 +3,8 @@ import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.da
 abstract interface class LearnerMentorRepository {
   Future<List<MentorMeetingPlan>> loadPlans();
 
+  Future<List<BookableMentor>> loadMentors();
+
   Future<List<LearnerMentorAvailability>> loadAvailability({
     required DateTime from,
     required DateTime to,
@@ -11,15 +13,19 @@ abstract interface class LearnerMentorRepository {
 
   Future<MentorMeetingPurchase> purchase({
     required int subscriptionPlanId,
-    required int mentorAvailabilityId,
+    int? mentorAvailabilityId,
+    String? idempotencyKey,
   });
 
   Future<LearnerMentorBooking> bookIncludedSession({
     required int subscriptionId,
     required int mentorAvailabilityId,
+    String? question,
   });
 
   Future<List<LearnerMentorBooking>> loadBookings();
 
   Future<MentorMeetingPurchaseStatus> loadPurchaseStatus(int subscriptionId);
+
+  Future<MentorMeetingPurchaseStatus> syncPurchaseStatus(int subscriptionId);
 }
