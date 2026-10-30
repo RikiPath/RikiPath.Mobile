@@ -10,6 +10,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
+import 'package:rikipath_mobile/features/mentor/domain/availability_conflicts.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -62,9 +63,10 @@ class _LearnerMentorOrderConfirmationSheetState
 
   String _newPurchaseIdempotencyKey() {
     final random = Random.secure();
-    final hex = List<int>.generate(16, (_) => random.nextInt(256))
-        .map((value) => value.toRadixString(16).padLeft(2, '0'))
-        .join();
+    final hex = List<int>.generate(
+      16,
+      (_) => random.nextInt(256),
+    ).map((value) => value.toRadixString(16).padLeft(2, '0')).join();
     return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-'
         '${hex.substring(12, 16)}-${hex.substring(16, 20)}-'
         '${hex.substring(20)}';
@@ -81,7 +83,37 @@ class _LearnerMentorOrderConfirmationSheetState
     setState(() => _isSubmitting = true);
 
     try {
-      final isExistingSubscription = widget.subscriptionId != null && widget.subscriptionId! > 0;
+      // Check again at the actual mutation boundary: the sheet may have stayed
+      // open while an administrator changed the published calendar.
+      final now = DateTime.now().toUtc();
+      final latest = await ref
+          .read(learnerMentorRepositoryProvider)
+          .loadAvailability(
+            from: now,
+            to: now.add(const Duration(days: 60)),
+            mentorId: widget.slot.mentorId,
+          );
+      if (!mounted) return;
+      final view = AvailabilityConflictView(latest);
+      final current = view.slots
+          .where((slot) => slot.id == widget.slot.id)
+          .firstOrNull;
+      if (current == null ||
+          !view.canBook(current) ||
+          current.startTime.value != widget.slot.startTime.value ||
+          current.endTime.value != widget.slot.endTime.value) {
+        setState(() => _isSubmitting = false);
+        ref
+            .read(rikiToastServiceProvider.notifier)
+            .error(
+              title: 'Lịch chưa khả dụng',
+              description:
+                  'Lịch đã thay đổi hoặc bị trùng. Vui lòng tải lại và chọn giờ khác.',
+            );
+        return;
+      }
+      final isExistingSubscription =
+          widget.subscriptionId != null && widget.subscriptionId! > 0;
 
       if (isExistingSubscription) {
         // Đặt lịch trực tiếp bằng lượt học đã thanh toán
@@ -98,16 +130,22 @@ class _LearnerMentorOrderConfirmationSheetState
 
         if (booking != null) {
           Navigator.of(context).pop();
-          ref.read(rikiToastServiceProvider.notifier).success(
+          ref
+              .read(rikiToastServiceProvider.notifier)
+              .success(
                 title: context.l10n.learnerMentorBookingSuccess,
                 description: context.l10n.learnerMentorBookingSuccessDesc,
               );
           context.push(AppRoutes.learnerMentorBookingDetail(booking.id));
         } else {
           final error = ref.read(learnerMentorMutationControllerProvider).error;
-          ref.read(rikiToastServiceProvider.notifier).error(
+          ref
+              .read(rikiToastServiceProvider.notifier)
+              .error(
                 title: 'Đặt lịch chưa thành công',
-                description: error?.toString() ?? 'Khung giờ có thể đã được đặt, vui lòng thử lại.',
+                description:
+                    error?.toString() ??
+                    'Khung giờ có thể đã được đặt, vui lòng thử lại.',
               );
         }
       } else {
@@ -125,7 +163,9 @@ class _LearnerMentorOrderConfirmationSheetState
 
         if (purchase != null) {
           // Lưu ý định đặt slot dự kiến vào intent để tự động book khi thanh toán xong
-          ref.read(learnerBookingIntentProvider.notifier).setIntent(
+          ref
+              .read(learnerBookingIntentProvider.notifier)
+              .setIntent(
                 LearnerBookingIntent(
                   planId: widget.planId,
                   plan: widget.plan,
@@ -142,7 +182,10 @@ class _LearnerMentorOrderConfirmationSheetState
           final checkoutUri = purchase.safeCheckoutUri;
           if (checkoutUri != null) {
             try {
-              await launchUrl(checkoutUri, mode: LaunchMode.externalApplication);
+              await launchUrl(
+                checkoutUri,
+                mode: LaunchMode.externalApplication,
+              );
             } catch (_) {
               // Bỏ qua lỗi mở URL bên ngoài, màn hình trạng thái vẫn hiển thị nút mở lại
             }
@@ -150,23 +193,27 @@ class _LearnerMentorOrderConfirmationSheetState
 
           // Điều hướng sang màn hình theo dõi trạng thái thanh toán và tự động hoàn tất slot
           if (mounted) {
-            context.push(AppRoutes.learnerMentorPurchaseStatus(purchase.subscriptionId));
+            context.push(
+              AppRoutes.learnerMentorPurchaseStatus(purchase.subscriptionId),
+            );
           }
         } else {
           final error = ref.read(learnerMentorMutationControllerProvider).error;
-          ref.read(rikiToastServiceProvider.notifier).error(
+          ref
+              .read(rikiToastServiceProvider.notifier)
+              .error(
                 title: 'Không thể tạo đơn thanh toán',
-                description: error?.toString() ?? 'Vui lòng kiểm tra lại kết nối mạng.',
+                description:
+                    error?.toString() ?? 'Vui lòng kiểm tra lại kết nối mạng.',
               );
         }
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      ref.read(rikiToastServiceProvider.notifier).error(
-            title: 'Lỗi xử lý',
-            description: e.toString(),
-          );
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .error(title: 'Lỗi xử lý', description: e.toString());
     }
   }
 
@@ -177,7 +224,8 @@ class _LearnerMentorOrderConfirmationSheetState
     final endTime = widget.slot.endTime.displayValue;
     final dateFormat = DateFormat('EEEE, dd/MM/yyyy', locale);
     final timeFormat = DateFormat('HH:mm', locale);
-    final isExistingSubscription = widget.subscriptionId != null && widget.subscriptionId! > 0;
+    final isExistingSubscription =
+        widget.subscriptionId != null && widget.subscriptionId! > 0;
 
     final planPriceFormatted = widget.plan != null
         ? NumberFormat.currency(
@@ -276,7 +324,8 @@ class _LearnerMentorOrderConfirmationSheetState
                   LearnerMentorDetailRow(
                     icon: Icons.access_time_outlined,
                     label: context.l10n.learnerMentorConfirmTime,
-                    value: '${dateFormat.format(startTime)}\n${timeFormat.format(startTime)} - ${timeFormat.format(endTime)}',
+                    value:
+                        '${dateFormat.format(startTime)}\n${timeFormat.format(startTime)} - ${timeFormat.format(endTime)}',
                   ),
                   const Divider(),
                   LearnerMentorDetailRow(
@@ -300,8 +349,11 @@ class _LearnerMentorOrderConfirmationSheetState
               controller: _questionController,
               maxLines: 2,
               decoration: InputDecoration(
-                hintText: 'Nội dung hoặc câu hỏi muốn trao đổi với Mentor (tùy chọn)',
-                hintStyle: AppTypography.body.copyWith(color: AppColors.textMuted),
+                hintText:
+                    'Nội dung hoặc câu hỏi muốn trao đổi với Mentor (tùy chọn)',
+                hintStyle: AppTypography.body.copyWith(
+                  color: AppColors.textMuted,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   borderSide: const BorderSide(color: AppColors.border),
@@ -315,15 +367,19 @@ class _LearnerMentorOrderConfirmationSheetState
               label: _isSubmitting
                   ? 'Đang xử lý...'
                   : (isExistingSubscription
-                      ? context.l10n.learnerMentorConfirmBooking
-                      : context.l10n.learnerMentorPayWithPayOs),
-              leadingIcon: isExistingSubscription ? Icons.check_circle_outline : Icons.payment,
+                        ? context.l10n.learnerMentorConfirmBooking
+                        : context.l10n.learnerMentorPayWithPayOs),
+              leadingIcon: isExistingSubscription
+                  ? Icons.check_circle_outline
+                  : Icons.payment,
               onPressed: _isSubmitting ? null : _handleConfirm,
             ),
             const SizedBox(height: AppSpacing.space2),
             RikiTextButton(
               label: MaterialLocalizations.of(context).backButtonTooltip,
-              onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+              onPressed: _isSubmitting
+                  ? null
+                  : () => Navigator.of(context).pop(),
             ),
           ],
         ),

@@ -530,6 +530,41 @@ void main() {
       expect(button.onPressed, isNotNull);
     });
 
+    testWidgets('duplicate availability IDs show one disabled time choice', (
+      tester,
+    ) async {
+      await _pumpLearnerMentor(
+        tester,
+        const LearnerMentorAvailabilityScreen(planId: 1),
+        repository: _TestLearnerMentorRepository(
+          availabilityResults: [
+            [_slot(id: 12), _slot(id: 13)],
+          ],
+        ),
+      );
+
+      expect(
+        find.byKey(const ValueKey<String>('learner_mentor_slot_12')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('learner_mentor_slot_13')),
+        findsNothing,
+      );
+      expect(
+        find.text('Lịch trùng hoặc chồng lấn; hiện chưa thể đặt.'),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('learner_mentor_slot_12')),
+      );
+      await tester.pump();
+      expect(
+        find.byKey(const Key('learner_mentor_selected_slot_card')),
+        findsNothing,
+      );
+    });
+
     testWidgets('bookings render empty, success, and error states', (
       tester,
     ) async {
@@ -695,32 +730,41 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('QA pending payment is clearly demo-only and has no checkout action', (
-      tester,
-    ) async {
-      expect(
-        _purchaseStatus(MentorPaymentStatus.pending, isQaSimulated: true)
-            .isQaSimulated,
-        isTrue,
-      );
-      await _pumpLearnerMentor(
-        tester,
-        const LearnerMentorPurchaseStatusScreen(subscriptionId: 21),
-        repository: _TestLearnerMentorRepository(
-          purchaseStatusResults: [
-            _purchaseStatus(MentorPaymentStatus.pending, isQaSimulated: true),
-          ],
-        ),
-      );
+    testWidgets(
+      'QA pending payment is clearly demo-only and has no checkout action',
+      (tester) async {
+        expect(
+          _purchaseStatus(
+            MentorPaymentStatus.pending,
+            isQaSimulated: true,
+          ).isQaSimulated,
+          isTrue,
+        );
+        await _pumpLearnerMentor(
+          tester,
+          const LearnerMentorPurchaseStatusScreen(subscriptionId: 21),
+          repository: _TestLearnerMentorRepository(
+            purchaseStatusResults: [
+              _purchaseStatus(MentorPaymentStatus.pending, isQaSimulated: true),
+            ],
+          ),
+        );
 
-      await tester.scrollUntilVisible(
-        find.byKey(const Key('learner_mentor_qa_payment_demo')),
-        250,
-      );
-      expect(find.byKey(const Key('learner_mentor_qa_payment_demo')), findsOneWidget);
-      expect(find.text('CHẾ ĐỘ DEMO — KHÔNG CHUYỂN TIỀN'), findsOneWidget);
-      expect(find.byKey(const Key('learner_mentor_open_checkout_button')), findsNothing);
-    });
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('learner_mentor_qa_payment_demo')),
+          250,
+        );
+        expect(
+          find.byKey(const Key('learner_mentor_qa_payment_demo')),
+          findsOneWidget,
+        );
+        expect(find.text('CHẾ ĐỘ DEMO — KHÔNG CHUYỂN TIỀN'), findsOneWidget);
+        expect(
+          find.byKey(const Key('learner_mentor_open_checkout_button')),
+          findsNothing,
+        );
+      },
+    );
 
     testWidgets('learner routes resolve without entering Mentor shell', (
       tester,
@@ -915,18 +959,17 @@ MentorMeetingPurchase _purchase() => MentorMeetingPurchase(
 MentorMeetingPurchaseStatus _purchaseStatus(
   MentorPaymentStatus status, {
   bool isQaSimulated = false,
-}) =>
-    MentorMeetingPurchaseStatus(
-      subscriptionId: 21,
-      planName: 'Starter',
-      paymentStatus: status,
-      isCheckoutExpired: false,
-      amountPaid: status == MentorPaymentStatus.paid ? 125000 : 0,
-      meetingSessionsIncluded: 2,
-      meetingSessionsUsed: 1,
-      bookings: [_booking()],
-      isQaSimulated: isQaSimulated,
-    );
+}) => MentorMeetingPurchaseStatus(
+  subscriptionId: 21,
+  planName: 'Starter',
+  paymentStatus: status,
+  isCheckoutExpired: false,
+  amountPaid: status == MentorPaymentStatus.paid ? 125000 : 0,
+  meetingSessionsIncluded: 2,
+  meetingSessionsUsed: 1,
+  bookings: [_booking()],
+  isQaSimulated: isQaSimulated,
+);
 
 Future<void> _pumpLearnerMentor(
   WidgetTester tester,

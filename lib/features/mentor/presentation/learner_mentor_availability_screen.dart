@@ -5,6 +5,7 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
+import 'package:rikipath_mobile/features/mentor/domain/availability_conflicts.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_order_confirmation_sheet.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
@@ -32,6 +33,7 @@ class _LearnerMentorAvailabilityScreenState
     extends ConsumerState<LearnerMentorAvailabilityScreen> {
   DateTime? _selectedDate;
   int? _selectedSlotId;
+  bool _checkingSlot = false;
   late DateTime _displayedMonth;
 
   @override
@@ -106,8 +108,9 @@ class _LearnerMentorAvailabilityScreenState
     BuildContext context,
     List<LearnerMentorAvailability> allSlots,
   ) {
-    final availableSlots = allSlots
-        .where((slot) => !slot.isBooked)
+    final conflictView = AvailabilityConflictView(allSlots);
+    final availableSlots = conflictView.slots
+        .where(conflictView.canBook)
         .toList(growable: false);
     final selectedSlot = availableSlots
         .where((slot) => slot.id == _selectedSlotId)
@@ -195,9 +198,9 @@ class _LearnerMentorAvailabilityScreenState
                   : (isExistingSubscription
                         ? Icons.calendar_month_outlined
                         : Icons.arrow_forward),
-              onPressed: selectedSlot == null
+              onPressed: selectedSlot == null || _checkingSlot
                   ? null
-                  : () => _openConfirmation(context, selectedSlot, currentPlan),
+                  : () => _openConfirmation(selectedSlot, currentPlan),
             ),
           ],
         ),
@@ -206,7 +209,8 @@ class _LearnerMentorAvailabilityScreenState
   }
 
   Widget _buildContent(List<LearnerMentorAvailability> allSlots) {
-    final availableSlots = allSlots
+    final conflictView = AvailabilityConflictView(allSlots);
+    final availableSlots = conflictView.displaySlots
         .where((slot) => !slot.isBooked)
         .toList(growable: false);
 
@@ -500,7 +504,7 @@ class _LearnerMentorAvailabilityScreenState
                 'Mentor này chưa có lịch trống trong ngày đã chọn. Vui lòng chọn một ngày khác có chấm hồng trên lịch.',
           )
         else
-          ..._buildTimeSlotGroups(visibleSlots),
+          ..._buildTimeSlotGroups(visibleSlots, conflictView.conflictingIds),
 
         const SizedBox(height: AppSpacing.space4),
       ],
@@ -623,7 +627,10 @@ class _LearnerMentorAvailabilityScreenState
     );
   }
 
-  List<Widget> _buildTimeSlotGroups(List<LearnerMentorAvailability> slots) {
+  List<Widget> _buildTimeSlotGroups(
+    List<LearnerMentorAvailability> slots,
+    Set<int> conflictingIds,
+  ) {
     final morningSlots = <LearnerMentorAvailability>[];
     final afternoonSlots = <LearnerMentorAvailability>[];
     final eveningSlots = <LearnerMentorAvailability>[];
@@ -674,15 +681,25 @@ class _LearnerMentorAvailabilityScreenState
 
       for (var i = 0; i < groupSlots.length; i++) {
         final slot = groupSlots[i];
+        final conflicting = conflictingIds.contains(slot.id);
         final isSelected = _selectedSlotId == slot.id;
         widgets.add(
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.space2),
-            child: LearnerMentorAvailabilityCard(
-              key: ValueKey<String>('learner_mentor_slot_${slot.id}'),
-              slot: slot,
-              selected: isSelected,
-              onTap: () => setState(() => _selectedSlotId = slot.id),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LearnerMentorAvailabilityCard(
+                  key: ValueKey<String>('learner_mentor_slot_${slot.id}'),
+                  slot: slot,
+                  selected: isSelected && !conflicting,
+                  onTap: conflicting
+                      ? null
+                      : () => setState(() => _selectedSlotId = slot.id),
+                ),
+                if (conflicting)
+                  const Text('Lịch trùng hoặc chồng lấn; hiện chưa thể đặt.'),
+              ],
             ),
           ),
         );
@@ -718,11 +735,48 @@ class _LearnerMentorAvailabilityScreenState
     return '$start - $end';
   }
 
-  void _openConfirmation(
-    BuildContext context,
+  Future<void> _openConfirmation(
     LearnerMentorAvailability slot,
     MentorMeetingPlan? plan,
-  ) {
+  ) async {
+    setState(() => _checkingSlot = true);
+    try {
+      final fresh = await ref
+          .read(learnerMentorRepositoryProvider)
+          .loadAvailability(
+            from: DateTime.now().toUtc(),
+            to: DateTime.now().toUtc().add(const Duration(days: 60)),
+            mentorId: widget.mentorId ?? slot.mentorId,
+          );
+      if (!mounted) return;
+      final view = AvailabilityConflictView(fresh);
+      final current = view.slots
+          .where((item) => item.id == slot.id)
+          .firstOrNull;
+      if (current == null ||
+          !view.canBook(current) ||
+          current.startTime.value != slot.startTime.value ||
+          current.endTime.value != slot.endTime.value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Lịch đã thay đổi hoặc bị trùng. Vui lòng chọn lại.'),
+          ),
+        );
+        setState(() => _selectedSlotId = null);
+        return;
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không thể kiểm tra lịch mới nhất. Vui lòng thử lại.'),
+        ),
+      );
+      return;
+    } finally {
+      if (mounted) setState(() => _checkingSlot = false);
+    }
+    if (!mounted) return;
     final effectivePlanId = widget.planId ?? plan?.id ?? 1;
     LearnerMentorOrderConfirmationSheet.show(
       context,

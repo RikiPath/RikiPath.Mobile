@@ -457,6 +457,23 @@ void main() {
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
   });
 
+  testWidgets('Mentor profile navigation never loads Learner-only profile', (
+    tester,
+  ) async {
+    final session = createTestAuthSession(role: BackendUserRole.mentor);
+    await _pumpRouter(
+      tester,
+      initialLocation: AppRoutes.profile,
+      authSession: session,
+      profileRepository: const _UnauthorizedProfileRepository(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MentorHomeScreen), findsOneWidget);
+    expect(find.byType(ProfileScreen), findsNothing);
+    expect(session.value, AuthSessionState.authenticated);
+  });
+
   testWidgets('unsupported backend role reaches only the safe logout screen', (
     tester,
   ) async {
