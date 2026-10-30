@@ -566,6 +566,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mentorStatusAssigned => '割り当て済み';
 
   @override
+  String get learnerMentorStatusAssigned => 'メンターの確認待ち';
+
+  @override
   String get mentorStatusAccepted => '承認済み';
 
   @override

@@ -182,6 +182,7 @@
   "mentorStatusAwaitingPayment": "支払い待ち",
   "mentorStatusPendingAssignment": "割り当て待ち",
   "mentorStatusAssigned": "割り当て済み",
+  "learnerMentorStatusAssigned": "メンターの確認待ち",
   "mentorStatusAccepted": "承認済み",
   "mentorStatusCompleted": "完了",
   "mentorStatusCancelled": "キャンセル済み",

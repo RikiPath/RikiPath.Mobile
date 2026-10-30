@@ -19,6 +19,13 @@ String learnerMentorPaymentStatusLabel(
   null => context.l10n.learnerMentorPaymentUnknown,
 };
 
+String learnerMentorBookingStatusLabel(
+  MentorMeetingStatus status,
+  BuildContext context,
+) => status == MentorMeetingStatus.assigned
+    ? context.l10n.learnerMentorStatusAssigned
+    : mentorStatusLabel(status, context);
+
 String learnerMentorDateLabel(MentorTimestamp timestamp, BuildContext context) {
   final locale = Localizations.localeOf(context).toLanguageTag();
   return DateFormat.yMMMMd(locale).format(timestamp.displayValue);
@@ -228,7 +235,7 @@ class LearnerMentorBookingCard extends StatelessWidget {
                       children: [
                         _MetaPill(
                           icon: Icons.verified_outlined,
-                          label: mentorStatusLabel(booking.status, context),
+                          label: learnerMentorBookingStatusLabel(booking.status, context),
                         ),
                         _MetaPill(
                           icon: Icons.payments_outlined,

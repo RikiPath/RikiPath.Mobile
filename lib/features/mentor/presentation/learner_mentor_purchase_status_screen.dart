@@ -380,7 +380,7 @@ class _PurchaseStatusBody extends ConsumerWidget {
                 LearnerMentorDetailRow(
                   icon: Icons.verified_outlined,
                   label: 'Trạng thái',
-                  value: mentorStatusLabel(activeBooking.status, context),
+                  value: learnerMentorBookingStatusLabel(activeBooking.status, context),
                 ),
                 const SizedBox(height: AppSpacing.space3),
                 RikiPrimaryButton(

@@ -28,10 +28,18 @@ import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_book
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_meetings_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_purchase_status_screen.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
+import 'package:rikipath_mobile/l10n/generated/app_localizations_vi.dart';
 
 import '../../support/test_auth_session.dart';
 
 void main() {
+  test('booking status microcopy distinguishes learner and mentor', () {
+    final l10n = AppLocalizationsVi();
+    expect(l10n.learnerMentorStatusAssigned, 'Chờ Mentor xác nhận');
+    expect(l10n.mentorStatusAssigned, 'Chờ xác nhận');
+    expect(l10n.mentorStatusAccepted, 'Đã xác nhận');
+  });
+
   group('Learner Mentor Meeting routes and role gates', () {
     test('exposes stable learner meeting routes with positive IDs', () {
       expect(AppRoutes.learnerMentorMeetings, '/mentor-meetings');

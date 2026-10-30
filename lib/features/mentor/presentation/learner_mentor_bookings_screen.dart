@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
-import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
@@ -62,8 +61,6 @@ class _BookingsBody extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
         children: [
-          RikiInfoBanner(message: context.l10n.learnerMentorBookingReadOnly),
-          const SizedBox(height: AppSpacing.space4),
           if (bookings.isEmpty)
             MentorEmptyState(
               key: const Key('learner_mentor_bookings_empty'),

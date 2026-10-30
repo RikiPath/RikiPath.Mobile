@@ -145,7 +145,7 @@ class _DetailBody extends StatelessWidget {
               LearnerMentorDetailRow(
                 icon: Icons.verified_outlined,
                 label: context.l10n.mentorStatusLabel,
-                value: mentorStatusLabel(value.status, context),
+                value: learnerMentorBookingStatusLabel(value.status, context),
               ),
               const Divider(),
               LearnerMentorDetailRow(

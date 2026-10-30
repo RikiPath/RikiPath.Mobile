@@ -1175,8 +1175,14 @@ abstract class AppLocalizations {
   /// No description provided for @mentorStatusAssigned.
   ///
   /// In vi, this message translates to:
-  /// **'Đã phân công'**
+  /// **'Chờ xác nhận'**
   String get mentorStatusAssigned;
+
+  /// No description provided for @learnerMentorStatusAssigned.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chờ Mentor xác nhận'**
+  String get learnerMentorStatusAssigned;
 
   /// No description provided for @mentorStatusAccepted.
   ///
