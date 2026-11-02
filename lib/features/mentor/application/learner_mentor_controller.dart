@@ -18,10 +18,10 @@ final learnerMentorPlansControllerProvider =
     >(LearnerMentorPlansController.new, retry: (_, _) => null);
 
 final learnerMentorListControllerProvider =
-    AsyncNotifierProvider<
-      LearnerMentorListController,
-      List<BookableMentor>
-    >(LearnerMentorListController.new, retry: (_, _) => null);
+    AsyncNotifierProvider<LearnerMentorListController, List<BookableMentor>>(
+      LearnerMentorListController.new,
+      retry: (_, _) => null,
+    );
 
 final learnerMentorAvailabilityControllerProvider =
     AsyncNotifierProvider<
@@ -29,9 +29,8 @@ final learnerMentorAvailabilityControllerProvider =
       List<LearnerMentorAvailability>
     >(LearnerMentorAvailabilityController.new, retry: (_, _) => null);
 
-final learnerMentorAvailabilityByMentorControllerProvider = AsyncNotifierProvider
-    .autoDispose
-    .family<
+final learnerMentorAvailabilityByMentorControllerProvider =
+    AsyncNotifierProvider.autoDispose.family<
       LearnerMentorAvailabilityByMentorController,
       List<LearnerMentorAvailability>,
       int?
@@ -50,6 +49,24 @@ final learnerMentorPurchaseStatusControllerProvider = AsyncNotifierProvider
       MentorMeetingPurchaseStatus,
       int
     >(LearnerMentorPurchaseStatusController.new, retry: (_, _) => null);
+
+final learnerCreditBalanceControllerProvider =
+    AsyncNotifierProvider<LearnerCreditBalanceController, LearnerCreditBalance>(
+      LearnerCreditBalanceController.new,
+      retry: (_, _) => null,
+    );
+
+final mentorRatingSummaryControllerProvider = AsyncNotifierProvider.autoDispose
+    .family<MentorRatingSummaryController, MentorRatingSummary, int>(
+      MentorRatingSummaryController.new,
+      retry: (_, _) => null,
+    );
+
+final learnerDisputesControllerProvider =
+    AsyncNotifierProvider<LearnerDisputesController, List<LearnerDisputeItem>>(
+      LearnerDisputesController.new,
+      retry: (_, _) => null,
+    );
 
 final learnerMentorMutationControllerProvider =
     NotifierProvider<
@@ -70,8 +87,7 @@ class LearnerMentorPlansController
   }
 }
 
-class LearnerMentorListController
-    extends AsyncNotifier<List<BookableMentor>> {
+class LearnerMentorListController extends AsyncNotifier<List<BookableMentor>> {
   @override
   Future<List<BookableMentor>> build() {
     return ref.watch(learnerMentorRepositoryProvider).loadMentors();
@@ -108,7 +124,9 @@ class LearnerMentorAvailabilityByMentorController
   @override
   Future<List<LearnerMentorAvailability>> build() {
     final from = DateTime.now().toUtc();
-    return ref.watch(learnerMentorRepositoryProvider).loadAvailability(
+    return ref
+        .watch(learnerMentorRepositoryProvider)
+        .loadAvailability(
           from: from,
           to: from.add(const Duration(days: 60)),
           mentorId: mentorId,
@@ -130,6 +148,50 @@ class LearnerMentorBookingsController
 
   Future<void> retry() async {
     state = const AsyncLoading<List<LearnerMentorBooking>>();
+    state = await AsyncValue.guard(build);
+  }
+}
+
+class LearnerCreditBalanceController
+    extends AsyncNotifier<LearnerCreditBalance> {
+  @override
+  Future<LearnerCreditBalance> build() {
+    return ref.watch(learnerMentorRepositoryProvider).loadCreditBalance();
+  }
+
+  Future<void> retry() async {
+    state = const AsyncLoading<LearnerCreditBalance>();
+    state = await AsyncValue.guard(build);
+  }
+}
+
+class MentorRatingSummaryController extends AsyncNotifier<MentorRatingSummary> {
+  MentorRatingSummaryController(this.mentorId);
+
+  final int mentorId;
+
+  @override
+  Future<MentorRatingSummary> build() {
+    return ref
+        .watch(learnerMentorRepositoryProvider)
+        .loadMentorReviewSummary(mentorId);
+  }
+
+  Future<void> retry() async {
+    state = const AsyncLoading<MentorRatingSummary>();
+    state = await AsyncValue.guard(build);
+  }
+}
+
+class LearnerDisputesController
+    extends AsyncNotifier<List<LearnerDisputeItem>> {
+  @override
+  Future<List<LearnerDisputeItem>> build() {
+    return ref.watch(learnerMentorRepositoryProvider).loadMyDisputes();
+  }
+
+  Future<void> retry() async {
+    state = const AsyncLoading<List<LearnerDisputeItem>>();
     state = await AsyncValue.guard(build);
   }
 }
@@ -285,7 +347,15 @@ class LearnerMentorPurchaseStatusController
   }
 }
 
-enum LearnerMentorMutationType { purchase, includedBooking }
+enum LearnerMentorMutationType {
+  purchase,
+  includedBooking,
+  creditBooking,
+  cancellation,
+  reschedule,
+  review,
+  dispute,
+}
 
 class LearnerMentorMutationState {
   const LearnerMentorMutationState._({
@@ -379,6 +449,151 @@ class LearnerMentorMutationController
     } catch (error) {
       state = LearnerMentorMutationState.failure(
         LearnerMentorMutationType.includedBooking,
+        error,
+      );
+      return null;
+    }
+  }
+
+  Future<LearnerMentorBooking?> bookWithCredit({
+    required int slotId,
+    required String operationKey,
+    String? notes,
+  }) async {
+    if (state.isLoading) return null;
+    state = const LearnerMentorMutationState.loading(
+      LearnerMentorMutationType.creditBooking,
+    );
+    try {
+      final result = await ref
+          .read(learnerMentorRepositoryProvider)
+          .bookWithCredit(
+            slotId: slotId,
+            operationKey: operationKey,
+            notes: notes,
+          );
+      state = LearnerMentorMutationState.bookingSuccess(result);
+      ref.invalidate(learnerMentorBookingsControllerProvider);
+      ref.invalidate(learnerCreditBalanceControllerProvider);
+      return result;
+    } catch (error) {
+      state = LearnerMentorMutationState.failure(
+        LearnerMentorMutationType.creditBooking,
+        error,
+      );
+      return null;
+    }
+  }
+
+  Future<bool> cancelBooking({
+    required int bookingId,
+    required String reason,
+    bool requestException = false,
+    String? exceptionReason,
+  }) async {
+    if (state.isLoading) return false;
+    state = const LearnerMentorMutationState.loading(
+      LearnerMentorMutationType.cancellation,
+    );
+    try {
+      final ok = await ref
+          .read(learnerMentorRepositoryProvider)
+          .cancelBooking(
+            bookingId: bookingId,
+            reason: reason,
+            requestException: requestException,
+            exceptionReason: exceptionReason,
+          );
+      state = const LearnerMentorMutationState.idle();
+      ref.invalidate(learnerMentorBookingsControllerProvider);
+      ref.invalidate(learnerCreditBalanceControllerProvider);
+      return ok;
+    } catch (error) {
+      state = LearnerMentorMutationState.failure(
+        LearnerMentorMutationType.cancellation,
+        error,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> rescheduleBooking({
+    required int bookingId,
+    required int newSlotId,
+  }) async {
+    if (state.isLoading) return false;
+    state = const LearnerMentorMutationState.loading(
+      LearnerMentorMutationType.reschedule,
+    );
+    try {
+      final ok = await ref
+          .read(learnerMentorRepositoryProvider)
+          .rescheduleBooking(bookingId: bookingId, newSlotId: newSlotId);
+      state = const LearnerMentorMutationState.idle();
+      ref.invalidate(learnerMentorBookingsControllerProvider);
+      return ok;
+    } catch (error) {
+      state = LearnerMentorMutationState.failure(
+        LearnerMentorMutationType.reschedule,
+        error,
+      );
+      return false;
+    }
+  }
+
+  Future<MentorReviewItem?> createReview({
+    required int bookingId,
+    required int rating,
+    String? comment,
+    int? mentorId,
+  }) async {
+    if (state.isLoading) return null;
+    state = const LearnerMentorMutationState.loading(
+      LearnerMentorMutationType.review,
+    );
+    try {
+      final result = await ref
+          .read(learnerMentorRepositoryProvider)
+          .createReview(bookingId: bookingId, rating: rating, comment: comment);
+      state = const LearnerMentorMutationState.idle();
+      if (mentorId != null) {
+        ref.invalidate(mentorRatingSummaryControllerProvider(mentorId));
+      }
+      return result;
+    } catch (error) {
+      state = LearnerMentorMutationState.failure(
+        LearnerMentorMutationType.review,
+        error,
+      );
+      return null;
+    }
+  }
+
+  Future<LearnerDisputeItem?> createDispute({
+    required int bookingId,
+    required int category,
+    required String reason,
+    String? evidenceNotes,
+  }) async {
+    if (state.isLoading) return null;
+    state = const LearnerMentorMutationState.loading(
+      LearnerMentorMutationType.dispute,
+    );
+    try {
+      final result = await ref
+          .read(learnerMentorRepositoryProvider)
+          .createDispute(
+            bookingId: bookingId,
+            category: category,
+            reason: reason,
+            evidenceNotes: evidenceNotes,
+          );
+      state = const LearnerMentorMutationState.idle();
+      ref.invalidate(learnerDisputesControllerProvider);
+      return result;
+    } catch (error) {
+      state = LearnerMentorMutationState.failure(
+        LearnerMentorMutationType.dispute,
         error,
       );
       return null;

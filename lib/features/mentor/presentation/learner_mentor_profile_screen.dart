@@ -27,7 +27,7 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
       key: const Key('learner_mentor_profile_screen'),
       backgroundColor: AppColors.learnerBackground,
       appBar: AppBar(
-        title: const Text('Thông tin Mentor'),
+        title: const Text('Hồ sơ cố vấn'),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: AppSpacing.space3),
@@ -44,7 +44,7 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
           AsyncError() => Center(
             child: MentorErrorState(
               key: const Key('learner_mentor_profile_error'),
-              message: 'Không thể tải thông tin Mentor.',
+              message: 'Không thể tải hồ sơ cố vấn.',
               onRetry: ref
                   .read(learnerMentorListControllerProvider.notifier)
                   .retry,
@@ -62,7 +62,7 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
   ) {
     final mentor = mentors.where((m) => m.id == mentorId).firstOrNull;
     if (mentor == null) {
-      return const Center(child: Text('Không tìm thấy thông tin Mentor.'));
+      return const Center(child: Text('Không tìm thấy hồ sơ cố vấn.'));
     }
     return _buildProfile(context, mentor);
   }
@@ -138,7 +138,7 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Học cùng Mentor',
+                                'Tư vấn 1-1',
                                 style: AppTypography.metadata.copyWith(
                                   color: AppColors.brandPrimary,
                                   fontWeight: FontWeight.w600,
@@ -225,7 +225,7 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
                     Text(
                       mentor.bio?.isNotEmpty == true
                           ? mentor.bio!
-                          : 'Mentor chưa cập nhật phần giới thiệu.',
+                          : 'Cố vấn chưa cập nhật phần giới thiệu.',
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.textPrimary,
                         height: 1.5,
@@ -261,7 +261,7 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
                     Text(
                       mentor.teachingMethod?.isNotEmpty == true
                           ? mentor.teachingMethod!
-                          : 'Mentor chưa cập nhật phương pháp hướng dẫn.',
+                          : 'Cố vấn chưa cập nhật phương pháp hỗ trợ.',
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.textPrimary,
                         height: 1.6,

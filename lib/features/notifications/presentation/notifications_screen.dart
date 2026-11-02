@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/notifications/domain/app_notification.dart';
+import 'package:rikipath_mobile/features/notifications/domain/push_notification_payload.dart';
+import 'package:rikipath_mobile/features/notifications/application/push_notification_service.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -66,9 +70,13 @@ class NotificationsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(AppSpacing.space4),
                   itemBuilder: (context, index) => _NotificationTile(
                     notification: data.items[index],
-                    onTap: data.isMutating || data.items[index].isRead
+                    onTap: data.isMutating
                         ? null
-                        : () => _markRead(context, ref, data.items[index]),
+                        : () => _openNotification(
+                            context,
+                            ref,
+                            data.items[index],
+                          ),
                   ),
                   separatorBuilder: (_, _) =>
                       const SizedBox(height: AppSpacing.space3),
@@ -82,18 +90,36 @@ class NotificationsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _markRead(
+  Future<void> _openNotification(
     BuildContext context,
     WidgetRef ref,
     AppNotification notification,
   ) async {
-    final success = await ref
-        .read(notificationControllerProvider.notifier)
-        .markRead(notification);
-    if (success || !context.mounted) return;
-    ref
-        .read(rikiToastServiceProvider.notifier)
-        .error(title: context.l10n.notificationsUpdateFailed);
+    if (!notification.isRead) {
+      final success = await ref
+          .read(notificationControllerProvider.notifier)
+          .markRead(notification);
+      if (!context.mounted) return;
+      if (!success) {
+        ref
+            .read(rikiToastServiceProvider.notifier)
+            .error(title: context.l10n.notificationsUpdateFailed);
+        return;
+      }
+    }
+    if (!context.mounted) return;
+    final destination = ref
+        .read(pushNotificationServiceProvider)
+        .resolveDeepLink(
+          PushNotificationPayload(
+            notificationId: notification.id.toString(),
+            title: notification.title,
+            body: notification.message,
+            type: notification.type,
+            linkUrl: notification.linkUrl,
+          ),
+        );
+    if (destination != AppRoutes.notifications) context.go(destination);
   }
 
   Future<void> _markAllRead(BuildContext context, WidgetRef ref) async {

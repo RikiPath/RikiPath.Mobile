@@ -10,6 +10,8 @@ import 'package:rikipath_mobile/core/config/app_config.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_toast_host.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/auth/application/mentor_registration_intent.dart';
+import 'package:rikipath_mobile/core/storage/json_preference_store.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
 import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
@@ -486,6 +488,9 @@ Future<_MeetingHarness> _pumpMeetingApp(
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.fromEnvironment()),
       authSessionControllerProvider.overrideWithValue(session),
+      mentorRegistrationIntentProvider.overrideWithValue(
+        MentorRegistrationIntent(_MemoryPreferenceStore()),
+      ),
       authRepositoryProvider.overrideWithValue(
         const _SuccessfulAuthRepository(),
       ),
@@ -510,6 +515,19 @@ Future<_MeetingHarness> _pumpMeetingApp(
   );
   await tester.pumpAndSettle();
   return _MeetingHarness(container, router, session);
+}
+
+class _MemoryPreferenceStore implements JsonPreferenceStore {
+  final Map<String, String> values = {};
+
+  @override
+  Future<String?> read(String key) async => values[key];
+
+  @override
+  Future<void> write(String key, String value) async => values[key] = value;
+
+  @override
+  Future<void> remove(String key) async => values.remove(key);
 }
 
 class _RecordingLauncher implements MentorMeetingLinkLauncher {

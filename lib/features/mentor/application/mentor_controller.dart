@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/features/mentor/data/api_mentor_repository.dart';
@@ -17,6 +19,12 @@ final mentorAvailabilityControllerProvider =
 final mentorMeetingsControllerProvider =
     AsyncNotifierProvider<MentorMeetingsController, List<MentorMeetingSummary>>(
       MentorMeetingsController.new,
+      retry: (_, _) => null,
+    );
+
+final mentorProfileControllerProvider =
+    AsyncNotifierProvider<MentorProfileController, MentorProfileData>(
+      MentorProfileController.new,
       retry: (_, _) => null,
     );
 
@@ -286,6 +294,107 @@ class MentorMeetingsController
     try {
       await ref.read(mentorRepositoryProvider).acceptMeeting(bookingId);
       ref.invalidateSelf();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Mentor hủy lịch hẹn tư vấn: tự động hoàn 1 lượt tín dụng cho học viên.
+  Future<bool> cancelMeeting(int bookingId, String reason) async {
+    try {
+      final ok = await ref.read(mentorRepositoryProvider).cancelMeeting(bookingId, reason);
+      if (ok) ref.invalidateSelf();
+      return ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Mentor gửi phản hồi cho đánh giá của học viên.
+  Future<bool> replyReview(int reviewId, String reply) async {
+    try {
+      final ok = await ref.read(mentorRepositoryProvider).replyReview(reviewId, reply);
+      if (ok) ref.invalidateSelf();
+      return ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Mentor gửi giải trình phản hồi khiếu nại của học viên.
+  Future<bool> respondDispute(int disputeId, String responseText) async {
+    try {
+      final ok = await ref.read(mentorRepositoryProvider).respondDispute(disputeId, responseText);
+      if (ok) ref.invalidateSelf();
+      return ok;
+    } catch (_) {
+      return false;
+    }
+  }
+}
+
+class MentorProfileController extends AsyncNotifier<MentorProfileData> {
+  @override
+  Future<MentorProfileData> build() {
+    return ref.watch(mentorRepositoryProvider).loadProfile();
+  }
+
+  Future<void> retry() async {
+    state = const AsyncLoading<MentorProfileData>();
+    state = await AsyncValue.guard(build);
+  }
+
+  Future<bool> updateProfile({
+    String? bio,
+    String? expertise,
+    String? jlptLevel,
+    int? yearsOfExperience,
+    String? workplace,
+    String? verificationDocumentUrl,
+    String? introductionVideoUrl,
+  }) async {
+    try {
+      final updated = await ref.read(mentorRepositoryProvider).updateProfile(
+        bio: bio,
+        expertise: expertise,
+        jlptLevel: jlptLevel,
+        yearsOfExperience: yearsOfExperience,
+        workplace: workplace,
+        verificationDocumentUrl: verificationDocumentUrl,
+        introductionVideoUrl: introductionVideoUrl,
+      );
+      state = AsyncData(updated);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> submitVerification({
+    String? verificationDocumentUrl,
+    String? notes,
+  }) async {
+    try {
+      final updated = await ref.read(mentorRepositoryProvider).submitVerification(
+        verificationDocumentUrl: verificationDocumentUrl,
+        notes: notes,
+      );
+      state = AsyncData(updated);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> uploadVerificationDocument({
+    required Uint8List bytes,
+    required String fileName,
+  }) async {
+    try {
+      final updated = await ref.read(mentorRepositoryProvider)
+          .uploadVerificationDocument(bytes: bytes, fileName: fileName);
+      state = AsyncData(updated);
       return true;
     } catch (_) {
       return false;

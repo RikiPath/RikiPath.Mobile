@@ -15,7 +15,7 @@ class ApiNotificationRepository implements NotificationRepository {
   }) async {
     final response = await _apiClient.get<Object?>(
       NotificationApiPaths.list,
-      queryParameters: unreadOnly ? const {'unreadOnly': true} : null,
+      queryParameters: unreadOnly ? const {'onlyUnread': true} : null,
     );
     final body = _unwrap(response.data);
     final rawItems = body is Map ? body['items'] : null;
@@ -90,6 +90,7 @@ class ApiNotificationRepository implements NotificationRepository {
       type: type,
       isRead: isRead,
       createdAt: parsedDate,
+      linkUrl: map['linkUrl'] is String ? map['linkUrl'] as String : null,
     );
   }
 

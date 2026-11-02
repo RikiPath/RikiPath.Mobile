@@ -258,7 +258,7 @@ class _LearnerMentorAvailabilityScreenState
     final mentorName =
         selectedSlot?.mentorName ??
         visibleSlots.firstOrNull?.mentorName ??
-        'Mentor RikiPath';
+        'Cố vấn RikiPath';
 
     return ListView(
       key: const Key('learner_mentor_availability_list'),
@@ -501,7 +501,7 @@ class _LearnerMentorAvailabilityScreenState
             icon: Icons.event_busy_outlined,
             title: 'Chưa có lịch trống',
             description:
-                'Mentor này chưa có lịch trống trong ngày đã chọn. Vui lòng chọn một ngày khác có chấm hồng trên lịch.',
+                'Cố vấn này chưa có khung giờ trống trong ngày đã chọn. Vui lòng chọn ngày khác trên lịch.',
           )
         else
           ..._buildTimeSlotGroups(visibleSlots, conflictView.conflictingIds),

@@ -209,6 +209,13 @@ class _ProfileSuccessViewState extends State<_ProfileSuccessView>
             title: l10n.account,
             children: [
               ProfileActionTile(
+                key: const ValueKey<String>('profile_mentor_application_action'),
+                icon: Icons.workspace_premium_outlined,
+                title: 'Đăng ký trở thành Cố vấn',
+                subtitle: 'Nộp hồ sơ chuyên môn để được xét duyệt',
+                onTap: () => context.push(AppRoutes.mentorApplication),
+              ),
+              ProfileActionTile(
                 key: const ValueKey<String>('profile_edit_action'),
                 icon: Icons.person_outline_rounded,
                 title: l10n.profileEdit,

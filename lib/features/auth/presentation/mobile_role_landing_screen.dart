@@ -18,7 +18,7 @@ class UnsupportedRoleScreen extends ConsumerWidget {
       key: const Key('unsupported_role_screen'),
       icon: Icons.shield_outlined,
       title: context.l10n.unsupportedRoleTitle,
-      description: context.l10n.unsupportedRoleDescription(role),
+      description: context.l10n.unsupportedRoleDescription,
       actionLabel: context.l10n.logout,
       onAction: () => ref.read(authSessionControllerProvider).signOut(),
     );

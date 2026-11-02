@@ -217,3 +217,126 @@ class MentorMeetingPurchaseStatus {
 Uri? safeExternalHttpUri(String? rawValue) {
   return parseSafeExternalHttpUri(rawValue);
 }
+
+@immutable
+class LearnerCreditBalance {
+  const LearnerCreditBalance({
+    required this.balance,
+    required this.availableBalance,
+    required this.pendingHoldCount,
+    this.expiresAtUtc,
+  });
+
+  final int balance;
+  final int availableBalance;
+  final int pendingHoldCount;
+  final DateTime? expiresAtUtc;
+
+  bool get hasCredits => availableBalance > 0;
+}
+
+@immutable
+class CancellationEligibility {
+  const CancellationEligibility({
+    required this.isEligible,
+    required this.tier,
+    required this.expectedRefundPercent,
+    required this.refundAmountCredits,
+    required this.canReschedule,
+    required this.cutoffHours,
+    this.message,
+  });
+
+  final bool isEligible;
+  final String tier;
+  final int expectedRefundPercent;
+  final int refundAmountCredits;
+  final bool canReschedule;
+  final int cutoffHours;
+  final String? message;
+
+  bool get isFullRefund => expectedRefundPercent >= 100;
+}
+
+@immutable
+class MentorRatingSummary {
+  const MentorRatingSummary({
+    required this.mentorId,
+    required this.averageRating,
+    required this.totalReviews,
+    required this.starCounts,
+    required this.positiveRatePercentage,
+  });
+
+  final int mentorId;
+  final double averageRating;
+  final int totalReviews;
+  final Map<int, int> starCounts;
+  final double positiveRatePercentage;
+}
+
+@immutable
+class MentorReviewItem {
+  const MentorReviewItem({
+    required this.id,
+    required this.bookingId,
+    required this.learnerName,
+    required this.rating,
+    this.comment,
+    this.createdAtUtc,
+    this.mentorReply,
+    this.mentorRepliedAtUtc,
+  });
+
+  final int id;
+  final int bookingId;
+  final String learnerName;
+  final int rating;
+  final String? comment;
+  final DateTime? createdAtUtc;
+  final String? mentorReply;
+  final DateTime? mentorRepliedAtUtc;
+}
+
+@immutable
+class LearnerDisputeItem {
+  const LearnerDisputeItem({
+    required this.id,
+    required this.bookingId,
+    required this.category,
+    required this.status,
+    required this.description,
+    this.resolutionNote,
+    this.refundApproved,
+    this.createdAtUtc,
+  });
+
+  final int id;
+  final int bookingId;
+  final int category;
+  final int status;
+  final String description;
+  final String? resolutionNote;
+  final bool? refundApproved;
+  final DateTime? createdAtUtc;
+
+  String get categoryLabel => switch (category) {
+    1 => 'Mentor vắng mặt',
+    2 => 'Buổi tư vấn không diễn ra',
+    3 => 'Sự cố phòng họp trực tuyến',
+    4 => 'Chất lượng không đạt yêu cầu',
+    5 => 'Hành vi không phù hợp',
+    6 => 'Tranh chấp chính sách',
+    _ => 'Lý do khác',
+  };
+
+  String get statusLabel => switch (status) {
+    1 => 'Đã gửi khiếu nại',
+    2 => 'Đang xem xét',
+    3 => 'Chờ Mentor giải trình',
+    4 => 'Đã giải quyết',
+    5 => 'Bị từ chối',
+    6 => 'Đã đóng',
+    _ => 'Không xác định',
+  };
+}

@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/login_controller.dart';
+import 'package:rikipath_mobile/features/auth/application/mentor_registration_intent.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_page.dart';
@@ -33,6 +34,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
+    final router = GoRouter.of(context);
     final succeeded = await ref
         .read(loginControllerProvider.notifier)
         .submit(
@@ -42,13 +44,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
     if (!mounted) return;
     if (succeeded) {
+      final applyAsMentor = await ref
+          .read(mentorRegistrationIntentProvider)
+          .consume();
       final hasPendingMeeting = ref
           .read(meetingJoinIntentControllerProvider)
           .hasPendingTarget;
       final role = ref.read(authSessionControllerProvider).currentRole;
-      context.go(
+      router.go(
         hasPendingMeeting
             ? AppRoutes.meetingJoin
+            : applyAsMentor && role == BackendUserRole.learner
+            ? AppRoutes.mentorApplication
             : role == BackendUserRole.learner
             ? AppRoutes.learnerStartup
             : AppRoutes.home,
@@ -178,6 +185,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: state.isLoading
                       ? null
                       : () => context.push(AppRoutes.register),
+                ),
+                const SizedBox(height: AppSpacing.space2),
+                TextButton.icon(
+                  key: const Key('public_mentor_registration_entry'),
+                  onPressed: state.isLoading
+                      ? null
+                      : () async {
+                          final router = GoRouter.of(context);
+                          await ref
+                              .read(mentorRegistrationIntentProvider)
+                              .mark();
+                          if (!context.mounted) return;
+                          router.push(AppRoutes.register);
+                        },
+                  icon: const Icon(Icons.volunteer_activism_outlined),
+                  label: Text(l10n.registerAsMentor),
                 ),
                 const AuthSecurityFooter(),
               ],

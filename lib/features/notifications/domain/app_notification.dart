@@ -6,6 +6,7 @@ class AppNotification {
     required this.type,
     required this.isRead,
     required this.createdAt,
+    this.linkUrl,
   });
 
   final int id;
@@ -14,6 +15,7 @@ class AppNotification {
   final String type;
   final bool isRead;
   final DateTime? createdAt;
+  final String? linkUrl;
 
   AppNotification copyWith({bool? isRead}) {
     return AppNotification(
@@ -23,6 +25,7 @@ class AppNotification {
       type: type,
       isRead: isRead ?? this.isRead,
       createdAt: createdAt,
+      linkUrl: linkUrl,
     );
   }
 }

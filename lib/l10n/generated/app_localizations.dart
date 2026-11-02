@@ -452,6 +452,12 @@ abstract class AppLocalizations {
   /// **'Đăng ký'**
   String get register;
 
+  /// No description provided for @registerAsMentor.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng ký làm Cố vấn'**
+  String get registerAsMentor;
+
   /// No description provided for @securityFooter.
   ///
   /// In vi, this message translates to:
@@ -587,7 +593,7 @@ abstract class AppLocalizations {
   /// No description provided for @verificationBackendBlocker.
   ///
   /// In vi, this message translates to:
-  /// **'Email chứa mã xác thực 6 chữ số, có hiệu lực trong 30 phút. RikiPath chưa nhận đủ thông tin tài khoản để mở bước nhập mã một cách an toàn.'**
+  /// **'Mã xác thực gồm 6 chữ số và có hiệu lực trong 30 phút. Chúng tôi chưa nhận đủ thông tin tài khoản để tiếp tục; vui lòng thử đăng ký lại.'**
   String get verificationBackendBlocker;
 
   /// No description provided for @returnToLogin.
@@ -965,19 +971,19 @@ abstract class AppLocalizations {
   /// No description provided for @authErrorUnsupportedRole.
   ///
   /// In vi, this message translates to:
-  /// **'Ứng dụng di động hiện chỉ hỗ trợ tài khoản Học viên và Mentor.'**
+  /// **'Ứng dụng di động hiện chỉ hỗ trợ tài khoản học viên và cố vấn.'**
   String get authErrorUnsupportedRole;
 
   /// No description provided for @mentorLandingTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Không gian Mentor'**
+  /// **'Không gian cố vấn'**
   String get mentorLandingTitle;
 
   /// No description provided for @mentorLandingDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Theo dõi lịch trống và các lịch học 1-1 sắp tới của bạn.'**
+  /// **'Theo dõi khung giờ trống và các buổi tư vấn sắp tới của bạn.'**
   String get mentorLandingDescription;
 
   /// No description provided for @mentorHomeGreeting.
@@ -1037,43 +1043,43 @@ abstract class AppLocalizations {
   /// No description provided for @mentorMeetingsTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Lịch học của tôi'**
+  /// **'Lịch tư vấn của tôi'**
   String get mentorMeetingsTitle;
 
   /// No description provided for @mentorMeetingsDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Các buổi học đã được xác nhận với học viên.'**
+  /// **'Các buổi tư vấn đã được xác nhận với học viên.'**
   String get mentorMeetingsDescription;
 
   /// No description provided for @mentorMeetingsCount.
   ///
   /// In vi, this message translates to:
-  /// **'{count} buổi học'**
+  /// **'{count} buổi tư vấn'**
   String mentorMeetingsCount(int count);
 
   /// No description provided for @mentorMeetingsEmpty.
   ///
   /// In vi, this message translates to:
-  /// **'Bạn chưa có lịch học nào.'**
+  /// **'Bạn chưa có lịch tư vấn nào.'**
   String get mentorMeetingsEmpty;
 
   /// No description provided for @mentorMeetingsError.
   ///
   /// In vi, this message translates to:
-  /// **'Chưa thể tải lịch học. Vui lòng thử lại.'**
+  /// **'Chưa thể tải lịch tư vấn. Vui lòng thử lại.'**
   String get mentorMeetingsError;
 
   /// No description provided for @mentorViewMeetings.
   ///
   /// In vi, this message translates to:
-  /// **'Xem lịch học'**
+  /// **'Xem lịch tư vấn'**
   String get mentorViewMeetings;
 
   /// No description provided for @mentorMeetingDetailTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Chi tiết buổi học'**
+  /// **'Chi tiết buổi tư vấn'**
   String get mentorMeetingDetailTitle;
 
   /// No description provided for @mentorLearnerLabel.
@@ -1133,31 +1139,31 @@ abstract class AppLocalizations {
   /// No description provided for @mentorJoinMeeting.
   ///
   /// In vi, this message translates to:
-  /// **'Vào phòng học'**
+  /// **'Vào phòng tư vấn'**
   String get mentorJoinMeeting;
 
   /// No description provided for @mentorMeetingLinkUnavailable.
   ///
   /// In vi, this message translates to:
-  /// **'Phòng học chưa sẵn sàng cho lịch học này.'**
+  /// **'Phòng tư vấn chưa sẵn sàng cho lịch hẹn này.'**
   String get mentorMeetingLinkUnavailable;
 
   /// No description provided for @mentorMeetingNotFound.
   ///
   /// In vi, this message translates to:
-  /// **'Không tìm thấy buổi học trong lịch của bạn.'**
+  /// **'Không tìm thấy buổi tư vấn trong lịch của bạn.'**
   String get mentorMeetingNotFound;
 
   /// No description provided for @mentorJoinFailedTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Không thể mở phòng họp'**
+  /// **'Không thể mở phòng tư vấn'**
   String get mentorJoinFailedTitle;
 
   /// No description provided for @mentorJoinFailedDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Liên kết phòng họp không thể mở trên thiết bị này.'**
+  /// **'Không thể mở phòng tư vấn trên thiết bị này.'**
   String get mentorJoinFailedDescription;
 
   /// No description provided for @mentorStatusAwaitingPayment.
@@ -1181,7 +1187,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorStatusAssigned.
   ///
   /// In vi, this message translates to:
-  /// **'Chờ Mentor xác nhận'**
+  /// **'Đang chờ xác nhận lịch'**
   String get learnerMentorStatusAssigned;
 
   /// No description provided for @mentorStatusAccepted.
@@ -1217,8 +1223,8 @@ abstract class AppLocalizations {
   /// No description provided for @unsupportedRoleDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Vai trò {role} không thuộc phạm vi ứng dụng di động. Vui lòng đăng xuất và dùng tài khoản Học viên hoặc Mentor.'**
-  String unsupportedRoleDescription(String role);
+  /// **'Tài khoản này chưa được hỗ trợ trên ứng dụng di động. Vui lòng đăng xuất và dùng tài khoản học viên hoặc cố vấn.'**
+  String get unsupportedRoleDescription;
 
   /// No description provided for @authErrorNetwork.
   ///
@@ -1367,7 +1373,7 @@ abstract class AppLocalizations {
   /// No description provided for @consultation.
   ///
   /// In vi, this message translates to:
-  /// **'Học cùng Mentor'**
+  /// **'Tư vấn 1-1'**
   String get consultation;
 
   /// No description provided for @settings.
@@ -1829,7 +1835,7 @@ abstract class AppLocalizations {
   /// No description provided for @learningLessonsEmptyMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Backend chưa có bài học cho cấp độ JLPT này. Hãy thử lại sau.'**
+  /// **'Hiện chưa có bài học cho cấp độ JLPT này. Hãy thử lại sau.'**
   String get learningLessonsEmptyMessage;
 
   /// No description provided for @jlptN5Description.
@@ -4115,7 +4121,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileConsultationSubtitle.
   ///
   /// In vi, this message translates to:
-  /// **'Khám phá gói học 1-1 và lịch học của bạn.'**
+  /// **'Khám phá các gói tư vấn và lịch hẹn của bạn.'**
   String get profileConsultationSubtitle;
 
   /// No description provided for @savedFromLessons.
@@ -4295,7 +4301,7 @@ abstract class AppLocalizations {
   /// No description provided for @submitMockMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Bạn có thể nộp dù vẫn còn câu chưa trả lời. Backend sẽ chấm điểm và hoàn tất lượt thi.'**
+  /// **'Bạn có thể nộp dù vẫn còn câu chưa trả lời. RikiPath sẽ chấm điểm và hoàn tất lượt thi.'**
   String get submitMockMessage;
 
   /// No description provided for @submitAction.
@@ -4571,7 +4577,7 @@ abstract class AppLocalizations {
   /// No description provided for @mentorConsultation.
   ///
   /// In vi, this message translates to:
-  /// **'Học cùng Mentor'**
+  /// **'Tư vấn 1-1'**
   String get mentorConsultation;
 
   /// No description provided for @openDemoBooking.
@@ -4991,7 +4997,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Học cùng Mentor'**
+  /// **'Tư vấn 1-1'**
   String get learnerMentorTitle;
 
   /// No description provided for @learnerMentorSubtitle.
@@ -5009,25 +5015,25 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorPlansTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Gói học 1-1'**
+  /// **'Gói tư vấn'**
   String get learnerMentorPlansTitle;
 
   /// No description provided for @learnerMentorPlansEmpty.
   ///
   /// In vi, this message translates to:
-  /// **'Hiện chưa có gói học khả dụng.'**
+  /// **'Hiện chưa có gói tư vấn khả dụng.'**
   String get learnerMentorPlansEmpty;
 
   /// No description provided for @learnerMentorPlansError.
   ///
   /// In vi, this message translates to:
-  /// **'Chưa thể tải các gói học.'**
+  /// **'Chưa thể tải các gói tư vấn.'**
   String get learnerMentorPlansError;
 
   /// No description provided for @learnerMentorMyMeetings.
   ///
   /// In vi, this message translates to:
-  /// **'Lịch học của tôi'**
+  /// **'Lịch tư vấn của tôi'**
   String get learnerMentorMyMeetings;
 
   /// No description provided for @learnerMentorPlanDuration.
@@ -5039,7 +5045,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorPlanSessions.
   ///
   /// In vi, this message translates to:
-  /// **'{count} buổi học'**
+  /// **'{count} vé tư vấn'**
   String learnerMentorPlanSessions(int count);
 
   /// No description provided for @learnerMentorChoosePlan.
@@ -5051,7 +5057,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorAvailabilityTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Chọn lịch học'**
+  /// **'Chọn lịch tư vấn'**
   String get learnerMentorAvailabilityTitle;
 
   /// No description provided for @learnerMentorAvailabilitySubtitle.
@@ -5069,7 +5075,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorAvailabilityError.
   ///
   /// In vi, this message translates to:
-  /// **'Chưa thể tải lịch trống của Mentor.'**
+  /// **'Chưa thể tải lịch trống của cố vấn.'**
   String get learnerMentorAvailabilityError;
 
   /// No description provided for @learnerMentorSlotTime.
@@ -5099,37 +5105,37 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorPurchaseBlocked.
   ///
   /// In vi, this message translates to:
-  /// **'Bạn vẫn có thể xem gói và lịch trống. RikiPath sẽ mở thanh toán khi Backend bảo đảm giữ chỗ an toàn, tránh hai người đặt cùng một khung giờ.'**
+  /// **'Bạn vẫn có thể xem gói và khung giờ trống. Tính năng thanh toán sẽ mở khi việc đặt lịch được bảo đảm an toàn.'**
   String get learnerMentorPurchaseBlocked;
 
   /// No description provided for @learnerMentorBookingsEmpty.
   ///
   /// In vi, this message translates to:
-  /// **'Bạn chưa có lịch học Mentor.'**
+  /// **'Bạn chưa có lịch tư vấn nào.'**
   String get learnerMentorBookingsEmpty;
 
   /// No description provided for @learnerMentorBookingsError.
   ///
   /// In vi, this message translates to:
-  /// **'Chưa thể tải lịch học của bạn.'**
+  /// **'Chưa thể tải lịch tư vấn của bạn.'**
   String get learnerMentorBookingsError;
 
   /// No description provided for @learnerMentorMeetingDetailTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Chi tiết buổi học'**
+  /// **'Chi tiết buổi tư vấn'**
   String get learnerMentorMeetingDetailTitle;
 
   /// No description provided for @learnerMentorMeetingNotFound.
   ///
   /// In vi, this message translates to:
-  /// **'Không tìm thấy buổi học này.'**
+  /// **'Không tìm thấy buổi tư vấn này.'**
   String get learnerMentorMeetingNotFound;
 
   /// No description provided for @learnerMentorMentorLabel.
   ///
   /// In vi, this message translates to:
-  /// **'Mentor'**
+  /// **'Cố vấn'**
   String get learnerMentorMentorLabel;
 
   /// No description provided for @learnerMentorPaymentLabel.
@@ -5141,19 +5147,19 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorJoin.
   ///
   /// In vi, this message translates to:
-  /// **'Vào phòng học'**
+  /// **'Vào phòng tư vấn'**
   String get learnerMentorJoin;
 
   /// No description provided for @learnerMentorJoinUnavailable.
   ///
   /// In vi, this message translates to:
-  /// **'Phòng họp chưa sẵn sàng hoặc liên kết không an toàn.'**
+  /// **'Phòng tư vấn chưa sẵn sàng hoặc liên kết không an toàn.'**
   String get learnerMentorJoinUnavailable;
 
   /// No description provided for @learnerMentorPurchaseStatus.
   ///
   /// In vi, this message translates to:
-  /// **'Trạng thái gói học'**
+  /// **'Trạng thái gói tư vấn'**
   String get learnerMentorPurchaseStatus;
 
   /// No description provided for @learnerMentorPurchaseStatusError.
@@ -5195,7 +5201,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorSessionsUsage.
   ///
   /// In vi, this message translates to:
-  /// **'Đã dùng {used}/{included} buổi'**
+  /// **'Đã dùng {used}/{included} vé tư vấn'**
   String learnerMentorSessionsUsage(int used, int included);
 
   /// No description provided for @learnerMentorRefreshStatus.
@@ -5207,13 +5213,13 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorStatusPolling.
   ///
   /// In vi, this message translates to:
-  /// **'RikiPath đang đối chiếu trạng thái với Backend. Chuyển hướng thanh toán không được xem là xác nhận thành công.'**
+  /// **'RikiPath đang kiểm tra trạng thái thanh toán. Việc quay lại ứng dụng không có nghĩa là thanh toán đã thành công.'**
   String get learnerMentorStatusPolling;
 
   /// No description provided for @learnerMentorUnknownMentor.
   ///
   /// In vi, this message translates to:
-  /// **'Mentor chưa được xác định'**
+  /// **'Chưa xác định cố vấn'**
   String get learnerMentorUnknownMentor;
 
   /// No description provided for @learnerMentorCheckoutExpired.
@@ -5225,43 +5231,43 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorBookingReadOnly.
   ///
   /// In vi, this message translates to:
-  /// **'Thông tin lịch hẹn được đồng bộ trực tiếp từ Backend.'**
+  /// **'Thông tin lịch tư vấn được cập nhật từ RikiPath.'**
   String get learnerMentorBookingReadOnly;
 
   /// No description provided for @learnerMentorConfirmBookingTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Xác nhận đặt lịch học Mentor 1-1'**
+  /// **'Xác nhận đặt lịch tư vấn 1-1'**
   String get learnerMentorConfirmBookingTitle;
 
   /// No description provided for @learnerMentorConfirmPackage.
   ///
   /// In vi, this message translates to:
-  /// **'Gói học kèm'**
+  /// **'Gói tư vấn'**
   String get learnerMentorConfirmPackage;
 
   /// No description provided for @learnerMentorConfirmMentor.
   ///
   /// In vi, this message translates to:
-  /// **'Mentor hướng dẫn'**
+  /// **'Cố vấn hỗ trợ'**
   String get learnerMentorConfirmMentor;
 
   /// No description provided for @learnerMentorConfirmTime.
   ///
   /// In vi, this message translates to:
-  /// **'Thời gian học dự kiến'**
+  /// **'Thời gian tư vấn dự kiến'**
   String get learnerMentorConfirmTime;
 
   /// No description provided for @learnerMentorConfirmPrice.
   ///
   /// In vi, this message translates to:
-  /// **'Học phí'**
+  /// **'Giá gói tư vấn'**
   String get learnerMentorConfirmPrice;
 
   /// No description provided for @learnerMentorConfirmNote.
   ///
   /// In vi, this message translates to:
-  /// **'Khung giờ học đã chọn là tạm thời và sẽ được xác nhận chính thức sau khi hoàn tất thanh toán.'**
+  /// **'Khung giờ đã chọn sẽ được xác nhận sau khi hoàn tất thanh toán.'**
   String get learnerMentorConfirmNote;
 
   /// No description provided for @learnerMentorPayWithPayOs.
@@ -5285,13 +5291,13 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorBookingSuccessDesc.
   ///
   /// In vi, this message translates to:
-  /// **'Buổi học 1 kèm 1 với Mentor đã được gửi thành công.'**
+  /// **'Buổi tư vấn 1-1 với cố vấn đã được đặt thành công.'**
   String get learnerMentorBookingSuccessDesc;
 
   /// No description provided for @learnerMentorSlotConflict.
   ///
   /// In vi, this message translates to:
-  /// **'Khung giờ này vừa có người đặt. Lượt học của bạn vẫn được bảo lưu, vui lòng chọn khung giờ khác.'**
+  /// **'Khung giờ này vừa có người đặt. Vé tư vấn của bạn vẫn được bảo lưu; vui lòng chọn khung giờ khác.'**
   String get learnerMentorSlotConflict;
 
   /// No description provided for @learnerMentorChooseAnotherSlot.
@@ -5303,7 +5309,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorViewBookingDetail.
   ///
   /// In vi, this message translates to:
-  /// **'Xem chi tiết buổi học'**
+  /// **'Xem chi tiết buổi tư vấn'**
   String get learnerMentorViewBookingDetail;
 
   /// No description provided for @learnerMentorBookNow.
@@ -5315,7 +5321,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorIncludedSession.
   ///
   /// In vi, this message translates to:
-  /// **'Dùng 1 lượt học trong gói'**
+  /// **'Dùng 1 vé tư vấn trong gói'**
   String get learnerMentorIncludedSession;
 
   /// No description provided for @learnerMentorConfirmBooking.
@@ -5333,7 +5339,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnerMentorPleaseSelectSlot.
   ///
   /// In vi, this message translates to:
-  /// **'Vui lòng chọn khung giờ học'**
+  /// **'Vui lòng chọn khung giờ tư vấn'**
   String get learnerMentorPleaseSelectSlot;
 
   /// No description provided for @practiceSpeechTitle.
@@ -5759,7 +5765,7 @@ abstract class AppLocalizations {
   /// No description provided for @writingKanaEmptyMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Backend chưa trả về ký tự {script} đã được duyệt cho tài khoản này.'**
+  /// **'Hiện chưa có ký tự {script} phù hợp cho tài khoản này.'**
   String writingKanaEmptyMessage(String script);
 
   /// No description provided for @writingKanjiEmptyMessage.
@@ -6263,7 +6269,7 @@ abstract class AppLocalizations {
   /// No description provided for @meetingNativeMentor.
   ///
   /// In vi, this message translates to:
-  /// **'Mentor'**
+  /// **'Cố vấn'**
   String get meetingNativeMentor;
 
   /// No description provided for @meetingNativeLearner.

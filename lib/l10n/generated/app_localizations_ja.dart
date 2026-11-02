@@ -188,6 +188,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get register => '新規登録';
 
   @override
+  String get registerAsMentor => 'メンターに登録する';
+
+  @override
   String get securityFooter => 'Riki Learningの暗号化セキュリティ';
 
   @override
@@ -584,9 +587,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get unsupportedRoleTitle => '未対応のロール';
 
   @override
-  String unsupportedRoleDescription(String role) {
-    return 'ロール $role はモバイルアプリの対象外です。ログアウトして学習者またはメンターのアカウントをご利用ください。';
-  }
+  String get unsupportedRoleDescription =>
+      'このアカウントはモバイルアプリに対応していません。ログアウトして学習者または相談員のアカウントをご利用ください。';
 
   @override
   String get authErrorNetwork => 'RikiPathに接続できません。通信環境を確認して再試行してください。';
@@ -923,7 +925,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get learningLessonsEmptyMessage =>
-      'このJLPTレベルのレッスンはBackendにまだ登録されていません。後でもう一度お試しください。';
+      'このJLPTレベルのレッスンはまだありません。後でもう一度お試しください。';
 
   @override
   String get jlptN5Description => '日本語の基礎を身につける';
@@ -2763,7 +2765,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get learnerMentorPurchaseBlocked =>
-      'パッケージと空き時間は確認できます。同じ時間の重複予約を防ぐ安全な枠確保がBackendで保証された後に、支払いを有効にします。';
+      '相談パッケージと空き時間は確認できます。安全に予約できるようになるまで、お支払いは利用できません。';
 
   @override
   String get learnerMentorBookingsEmpty => 'メンター相談の予定はまだありません。';
@@ -2820,7 +2822,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get learnerMentorStatusPolling =>
-      'RikiPathはBackendの状態を確認します。支払い画面から戻っただけでは支払い完了になりません。';
+      'RikiPathがお支払い状況を確認しています。アプリに戻っただけでは、お支払い完了とはなりません。';
 
   @override
   String get learnerMentorUnknownMentor => 'メンター未定';
@@ -2829,7 +2831,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get learnerMentorCheckoutExpired => '支払いリンクの有効期限が切れました';
 
   @override
-  String get learnerMentorBookingReadOnly => '予約情報はBackendから直接同期されています。';
+  String get learnerMentorBookingReadOnly => '相談予定はRikiPathから更新されます。';
 
   @override
   String get learnerMentorConfirmBookingTitle => 'メンター1対1予約確認';
@@ -3100,7 +3102,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String writingKanaEmptyMessage(String script) {
-    return 'Backendから承認済みの$script文字が返されていません。';
+    return 'このアカウントで利用できる$scriptの文字はまだありません。';
   }
 
   @override

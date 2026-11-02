@@ -169,9 +169,9 @@ void main() {
       expect(find.textContaining('XP'), findsNothing);
       expect(find.textContaining('xếp hạng'), findsNothing);
       expect(find.textContaining('chuỗi học'), findsNothing);
-      expect(find.text('Học cùng Mentor'), findsOneWidget);
+      expect(find.text('Tư vấn 1-1'), findsOneWidget);
       expect(
-        find.text('Khám phá gói học 1-1 và lịch học của bạn.'),
+        find.text('Khám phá các gói tư vấn và lịch hẹn của bạn.'),
         findsOneWidget,
       );
       final consultationTile = tester.widget<ProfileActionTile>(

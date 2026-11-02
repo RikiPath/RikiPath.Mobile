@@ -15,6 +15,7 @@ import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/widgets/riki_toast_host.dart';
 import 'package:rikipath_mobile/core/widgets/riki_buttons.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/auth/application/mentor_registration_intent.dart';
 import 'package:rikipath_mobile/features/auth/application/verify_email_controller.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_dtos.dart';
 import 'package:rikipath_mobile/features/auth/data/auth_repository.dart';
@@ -30,6 +31,7 @@ import 'package:rikipath_mobile/features/placement_test/domain/placement_test.da
 import 'package:rikipath_mobile/features/placement_test/domain/placement_test_repository.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
+import 'package:rikipath_mobile/core/storage/json_preference_store.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 
@@ -53,6 +55,8 @@ void main() {
       expect(find.text('hoặc'), findsNothing);
       expect(find.text('Chưa có tài khoản?'), findsOneWidget);
       expect(find.text('Đăng ký'), findsOneWidget);
+      expect(find.text('Đăng ký làm Cố vấn'), findsOneWidget);
+      expect(find.byKey(const Key('public_mentor_registration_entry')), findsOneWidget);
       expect(find.text('Bảo mật chuẩn mã hóa Riki Learning'), findsOneWidget);
       expect(
         tester
@@ -96,6 +100,9 @@ void main() {
       );
       final registerPrompt = tester.getRect(promptFinder);
       final registerAction = tester.getRect(actionFinder);
+      final mentorRegisterAction = tester.getRect(
+        find.byKey(const Key('public_mentor_registration_entry')),
+      );
       final securityFooter = tester.getRect(
         find.text('Bảo mật chuẩn mã hóa Riki Learning'),
       );
@@ -106,7 +113,10 @@ void main() {
       );
       expect(
         securityFooter.top -
-            math.max(registerPrompt.bottom, registerAction.bottom),
+            math.max(
+              math.max(registerPrompt.bottom, registerAction.bottom),
+              mentorRegisterAction.bottom,
+            ),
         lessThanOrEqualTo(AppSpacing.space4),
       );
       expect(
@@ -1045,6 +1055,9 @@ Future<GoRouter> _pumpAuthRoute(
     ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(repository),
+        mentorRegistrationIntentProvider.overrideWithValue(
+          MentorRegistrationIntent(_TestPreferenceStore()),
+        ),
         authSessionControllerProvider.overrideWithValue(session),
         userProfileRepositoryProvider.overrideWithValue(
           const _ReturningLearnerProfileRepository(),
@@ -1075,6 +1088,19 @@ Future<GoRouter> _pumpAuthRoute(
   );
   await tester.pump();
   return router;
+}
+
+class _TestPreferenceStore implements JsonPreferenceStore {
+  final Map<String, String> _values = {};
+
+  @override
+  Future<String?> read(String key) async => _values[key];
+
+  @override
+  Future<void> write(String key, String value) async => _values[key] = value;
+
+  @override
+  Future<void> remove(String key) async => _values.remove(key);
 }
 
 class _NoPlacementRepository implements PlacementTestRepository {

@@ -68,7 +68,8 @@ class _MeetingList extends StatefulWidget {
 }
 
 class _MeetingListState extends State<_MeetingList> {
-  int _selectedTabIndex = 0; // 0: Tất cả, 1: Chờ xác nhận, 2: Đã xác nhận, 3: Đã hoàn thành
+  int _selectedTabIndex =
+      0; // 0: Tất cả, 1: Chờ xác nhận, 2: Đã xác nhận, 3: Đã hoàn thành
 
   @override
   Widget build(BuildContext context) {
@@ -83,9 +84,18 @@ class _MeetingListState extends State<_MeetingList> {
         .length;
 
     final filteredMeetings = switch (_selectedTabIndex) {
-      1 => widget.meetings.where((m) => m.status == MentorMeetingStatus.assigned).toList(),
-      2 => widget.meetings.where((m) => m.status == MentorMeetingStatus.accepted).toList(),
-      3 => widget.meetings.where((m) => m.status == MentorMeetingStatus.completed).toList(),
+      1 =>
+        widget.meetings
+            .where((m) => m.status == MentorMeetingStatus.assigned)
+            .toList(),
+      2 =>
+        widget.meetings
+            .where((m) => m.status == MentorMeetingStatus.accepted)
+            .toList(),
+      3 =>
+        widget.meetings
+            .where((m) => m.status == MentorMeetingStatus.completed)
+            .toList(),
       _ => widget.meetings,
     };
 
@@ -145,7 +155,9 @@ class _MeetingListState extends State<_MeetingList> {
           else
             for (var index = 0; index < filteredMeetings.length; index++) ...[
               MentorMeetingCard(
-                key: ValueKey<String>('mentor_meeting_${filteredMeetings[index].id}'),
+                key: ValueKey<String>(
+                  'mentor_meeting_${filteredMeetings[index].id}',
+                ),
                 meeting: filteredMeetings[index],
                 onTap: () => context.push(
                   AppRoutes.mentorMeetingDetail(filteredMeetings[index].id),

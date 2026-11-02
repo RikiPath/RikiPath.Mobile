@@ -84,7 +84,9 @@ class _LearnerMentorPurchaseStatusScreenState
         setState(() => _confirmedBooking = booking);
         // Đặt lịch thành công, xóa intent tạm thời
         ref.read(learnerBookingIntentProvider.notifier).clear();
-        ref.read(rikiToastServiceProvider.notifier).success(
+        ref
+            .read(rikiToastServiceProvider.notifier)
+            .success(
               title: context.l10n.learnerMentorBookingSuccess,
               description: context.l10n.learnerMentorBookingSuccessDesc,
             );
@@ -92,8 +94,8 @@ class _LearnerMentorPurchaseStatusScreenState
         // Slot đã bị đặt trước hoặc hết hạn
         final error = ref.read(learnerMentorMutationControllerProvider).error;
         setState(() {
-          _slotConflictMessage = error?.toString() ??
-              context.l10n.learnerMentorSlotConflict;
+          _slotConflictMessage =
+              error?.toString() ?? context.l10n.learnerMentorSlotConflict;
         });
       }
     } catch (e) {
@@ -131,7 +133,9 @@ class _LearnerMentorPurchaseStatusScreenState
           !_autoBookingAttempted &&
           !_isAutoBooking) {
         final intent = ref.read(learnerBookingIntentProvider);
-        if (intent != null && intent.subscriptionId == id && intent.slot != null) {
+        if (intent != null &&
+            intent.subscriptionId == id &&
+            intent.slot != null) {
           _attemptAutoBooking(id, intent);
         }
       }
@@ -167,22 +171,22 @@ class _LearnerMentorPurchaseStatusScreenState
     return _PurchaseStatusScaffold(
       child: switch (state) {
         AsyncLoading() => const MentorListSkeleton(
-            key: Key('learner_mentor_purchase_status_loading'),
-          ),
+          key: Key('learner_mentor_purchase_status_loading'),
+        ),
         AsyncError() => Center(
-            child: MentorErrorState(
-              key: const Key('learner_mentor_purchase_status_error'),
-              message: context.l10n.learnerMentorPurchaseStatusError,
-              onRetry: ref.read(provider.notifier).refreshStatus,
-            ),
+          child: MentorErrorState(
+            key: const Key('learner_mentor_purchase_status_error'),
+            message: context.l10n.learnerMentorPurchaseStatusError,
+            onRetry: ref.read(provider.notifier).refreshStatus,
           ),
+        ),
         AsyncData(:final value) => _PurchaseStatusBody(
-            status: value,
-            isAutoBooking: _isAutoBooking,
-            confirmedBooking: _confirmedBooking,
-            slotConflictMessage: _slotConflictMessage,
-            onRefresh: ref.read(provider.notifier).refreshStatus,
-          ),
+          status: value,
+          isAutoBooking: _isAutoBooking,
+          confirmedBooking: _confirmedBooking,
+          slotConflictMessage: _slotConflictMessage,
+          onRefresh: ref.read(provider.notifier).refreshStatus,
+        ),
       },
     );
   }
@@ -241,7 +245,11 @@ class _PurchaseStatusBody extends ConsumerWidget {
             backgroundColor: AppColors.brandPrimary.withValues(alpha: 0.06),
             child: Row(
               children: [
-                const Icon(Icons.check_circle, color: AppColors.brandPrimary, size: 30),
+                const Icon(
+                  Icons.check_circle,
+                  color: AppColors.brandPrimary,
+                  size: 30,
+                ),
                 const SizedBox(width: AppSpacing.space3),
                 Expanded(
                   child: Column(
@@ -286,8 +294,10 @@ class _PurchaseStatusBody extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.space3),
                   Expanded(
                     child: Text(
-                      'Đang tự động xác nhận lịch học với Mentor...',
-                      style: AppTypography.body.copyWith(fontWeight: FontWeight.w600),
+                      'Đang xác nhận lịch tư vấn với cố vấn...',
+                      style: AppTypography.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -307,7 +317,11 @@ class _PurchaseStatusBody extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 28),
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      color: AppColors.warning,
+                      size: 28,
+                    ),
                     const SizedBox(width: AppSpacing.space2),
                     Expanded(
                       child: Text(
@@ -323,7 +337,9 @@ class _PurchaseStatusBody extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.space2),
                 Text(
                   slotConflictMessage ?? context.l10n.learnerMentorSlotConflict,
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.space3),
                 RikiPrimaryButton(
@@ -351,7 +367,11 @@ class _PurchaseStatusBody extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.event_available, color: AppColors.brandPrimary, size: 26),
+                    const Icon(
+                      Icons.event_available,
+                      color: AppColors.brandPrimary,
+                      size: 26,
+                    ),
                     const SizedBox(width: AppSpacing.space2),
                     Expanded(
                       child: Text(
@@ -368,7 +388,7 @@ class _PurchaseStatusBody extends ConsumerWidget {
                 LearnerMentorDetailRow(
                   icon: Icons.person_outline,
                   label: context.l10n.learnerMentorMentorLabel,
-                  value: activeBooking.mentorName ?? 'Mentor RikiPath',
+                  value: activeBooking.mentorName ?? 'Cố vấn RikiPath',
                 ),
                 const Divider(),
                 LearnerMentorDetailRow(
@@ -380,7 +400,10 @@ class _PurchaseStatusBody extends ConsumerWidget {
                 LearnerMentorDetailRow(
                   icon: Icons.verified_outlined,
                   label: 'Trạng thái',
-                  value: learnerMentorBookingStatusLabel(activeBooking.status, context),
+                  value: learnerMentorBookingStatusLabel(
+                    activeBooking.status,
+                    context,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.space3),
                 RikiPrimaryButton(
@@ -453,9 +476,9 @@ class _PurchaseStatusBody extends ConsumerWidget {
                   'CHẾ ĐỘ DEMO — KHÔNG CHUYỂN TIỀN',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.space2),
                 const Text(
@@ -481,7 +504,8 @@ class _PurchaseStatusBody extends ConsumerWidget {
                           ),
                           child: Text(
                             'DEMO',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
                                   fontWeight: FontWeight.w900,
                                   color: Theme.of(context).colorScheme.error,
                                 ),
@@ -492,7 +516,7 @@ class _PurchaseStatusBody extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.space2),
-                Text('Giao dịch QA #${status.subscriptionId}'),
+                const Text('Giao dịch thử nghiệm'),
               ],
             ),
           ),
@@ -517,7 +541,9 @@ class _PurchaseStatusBody extends ConsumerWidget {
         ],
 
         // Nút nếu gói còn lượt và chưa đặt hết
-        if (isPaid && status.remainingSessions > 0 && activeBooking == null) ...[
+        if (isPaid &&
+            status.remainingSessions > 0 &&
+            activeBooking == null) ...[
           RikiPrimaryButton(
             label: context.l10n.learnerMentorBookNow,
             leadingIcon: Icons.calendar_today_outlined,
@@ -576,7 +602,11 @@ class _QaDemoMatrixPainter extends CustomPainter {
     final stripePaint = Paint()
       ..color = Colors.white
       ..strokeWidth = cell * 1.8;
-    canvas.drawLine(Offset(0, size.height * .5), Offset(size.width, size.height * .5), stripePaint);
+    canvas.drawLine(
+      Offset(0, size.height * .5),
+      Offset(size.width, size.height * .5),
+      stripePaint,
+    );
   }
 
   @override
