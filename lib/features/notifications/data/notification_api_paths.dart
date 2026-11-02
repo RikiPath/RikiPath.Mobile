@@ -5,4 +5,9 @@ abstract final class NotificationApiPaths {
 
   static String markRead(int notificationId) =>
       '/api/Notification/$notificationId/read';
+
+  // Device token registration & unregistration (FCM / APNs)
+  static const String registerDeviceToken = '/api/v1/devices/register';
+  static const String refreshDeviceToken = '/api/v1/devices/refresh';
+  static const String unregisterDeviceToken = '/api/v1/devices/unregister';
 }

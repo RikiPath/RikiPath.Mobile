@@ -81,7 +81,7 @@ void main() {
 
     expect(
       message,
-      'Ứng dụng di động hiện chỉ hỗ trợ tài khoản Học viên và Mentor.',
+      'Ứng dụng di động hiện chỉ hỗ trợ tài khoản học viên và cố vấn.',
     );
     expect(message, isNot(contains('Admin')));
   });

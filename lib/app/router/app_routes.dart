@@ -19,11 +19,14 @@ abstract final class AppRoutes {
       '$meeting/room/${Uri.encodeComponent(roomId)}';
 
   static const String mentor = '/mentor';
+  static const String mentorApplication = '/mentor-application';
   static const String mentorAvailabilitySegment = 'availability';
   static const String mentorMeetingsSegment = 'meetings';
   static const String mentorMeetingDetailSegment = ':meetingId';
   static const String mentorAvailability = '$mentor/$mentorAvailabilitySegment';
   static const String mentorMeetings = '$mentor/$mentorMeetingsSegment';
+  static const String mentorProfileSegment = 'profile';
+  static const String mentorProfile = '$mentor/$mentorProfileSegment';
   static String mentorMeetingDetail(int meetingId) {
     if (meetingId <= 0) {
       throw ArgumentError.value(meetingId, 'meetingId', 'Must be positive');

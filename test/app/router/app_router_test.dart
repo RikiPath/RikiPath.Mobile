@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,6 +27,7 @@ import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_repository.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
@@ -531,6 +533,30 @@ void main() {
     );
     expect(
       authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.learner,
+        matchedLocation: AppRoutes.mentorApplication,
+      ),
+      isNull,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.learner,
+        matchedLocation: AppRoutes.mentorProfile,
+      ),
+      AppRoutes.learnerStartup,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.mentor,
+        matchedLocation: AppRoutes.mentorApplication,
+      ),
+      AppRoutes.mentorProfile,
+    );
+    expect(
+      authRouteRedirect(
         authState: AuthSessionState.unauthenticated,
         role: null,
         matchedLocation: AppRoutes.verifyEmail,
@@ -733,6 +759,47 @@ class _RouterMentorRepository implements MentorRepository {
     required DateTime weekStart,
     required List<WeeklyPeriodItem> periods,
   }) async => true;
+
+  @override
+  Future<bool> cancelMeeting(int bookingId, String reason) async => true;
+
+  @override
+  Future<bool> replyReview(int reviewId, String reply) async => true;
+
+  @override
+  Future<bool> respondDispute(int disputeId, String responseText) async => true;
+
+  @override
+  Future<MentorProfileData> loadProfile() async => const MentorProfileData(
+        mentorId: 1,
+        email: 'mentor@test.com',
+      );
+
+  @override
+  Future<MentorProfileData> updateProfile({
+    String? bio,
+    String? expertise,
+    String? jlptLevel,
+    int? yearsOfExperience,
+    String? workplace,
+    String? verificationDocumentUrl,
+    String? introductionVideoUrl,
+  }) async =>
+      const MentorProfileData(mentorId: 1, email: 'mentor@test.com');
+
+  @override
+  Future<MentorProfileData> submitVerification({
+    String? verificationDocumentUrl,
+    String? notes,
+  }) async =>
+      const MentorProfileData(mentorId: 1, email: 'mentor@test.com');
+
+  @override
+  Future<MentorProfileData> uploadVerificationDocument({
+    required Uint8List bytes,
+    required String fileName,
+  }) async => const MentorProfileData(
+    mentorId: 1, email: 'mentor@test.com', hasVerificationDocument: true);
 }
 
 class _RouterProfileRepository implements UserProfileRepository {

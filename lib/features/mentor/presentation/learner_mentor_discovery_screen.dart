@@ -38,7 +38,7 @@ class _LearnerMentorDiscoveryScreenState
       key: const Key('learner_mentor_discovery_screen'),
       backgroundColor: AppColors.learnerBackground,
       appBar: AppBar(
-        title: const Text('Chọn Mentor'),
+        title: const Text('Chọn cố vấn'),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: AppSpacing.space3),
@@ -55,7 +55,7 @@ class _LearnerMentorDiscoveryScreenState
           AsyncError() => Center(
             child: MentorErrorState(
               key: const Key('learner_mentor_discovery_error'),
-              message: 'Không thể tải danh sách Mentor lúc này.',
+              message: 'Không thể tải danh sách cố vấn lúc này.',
               onRetry: ref
                   .read(learnerMentorListControllerProvider.notifier)
                   .retry,
@@ -106,7 +106,7 @@ class _LearnerMentorDiscoveryScreenState
                 controller: _searchController,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'Tìm theo tên Mentor...',
+                  hintText: 'Tìm theo tên cố vấn...',
                   prefixIcon: const Icon(Icons.search, size: 22),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
@@ -154,7 +154,7 @@ class _LearnerMentorDiscoveryScreenState
                       MentorEmptyState(
                         key: const Key('learner_mentor_discovery_empty'),
                         icon: Icons.person_search_outlined,
-                        title: 'Chưa tìm thấy Mentor phù hợp',
+                        title: 'Chưa tìm thấy cố vấn phù hợp',
                         description:
                             'Hãy thử tìm kiếm với từ khóa khác hoặc bỏ chọn bộ lọc.',
                       ),
@@ -277,7 +277,7 @@ class _MentorDiscoveryCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(AppRadius.pill),
                           ),
                           child: Text(
-                            'Mentor',
+                            'Cố vấn',
                             style: AppTypography.metadata.copyWith(
                               color: AppColors.brandPrimary,
                               fontWeight: FontWeight.w600,

@@ -53,14 +53,91 @@ class MentorMeetingDetailScreen extends ConsumerWidget {
                         .acceptMeeting(meetingId!);
                     if (!context.mounted) return;
                     if (success) {
-                      ref.read(rikiToastServiceProvider.notifier).success(
+                      ref
+                          .read(rikiToastServiceProvider.notifier)
+                          .success(
                             title: 'Xác nhận thành công',
-                            description: 'Buổi học đã được xác nhận thành công.',
+                            description:
+                                'Buổi học đã được xác nhận thành công.',
                           );
                     } else {
-                      ref.read(rikiToastServiceProvider.notifier).error(
+                      ref
+                          .read(rikiToastServiceProvider.notifier)
+                          .error(
                             title: 'Xác nhận thất bại',
-                            description: 'Không thể xác nhận lịch học. Vui lòng thử lại.',
+                            description:
+                                'Không thể xác nhận lịch học. Vui lòng thử lại.',
+                          );
+                    }
+                  },
+            onCancel: meetingId == null
+                ? null
+                : (reason) async {
+                    final success = await ref
+                        .read(mentorMeetingsControllerProvider.notifier)
+                        .cancelMeeting(meetingId!, reason);
+                    if (!context.mounted) return;
+                    if (success) {
+                      ref
+                          .read(rikiToastServiceProvider.notifier)
+                          .success(
+                            title: 'Hủy lịch thành công',
+                            description:
+                                'Đã hủy buổi tư vấn và hoàn lại 1 vé cho học viên.',
+                          );
+                    } else {
+                      ref
+                          .read(rikiToastServiceProvider.notifier)
+                          .error(
+                            title: 'Hủy lịch thất bại',
+                            description:
+                                'Không thể hủy lịch hẹn. Vui lòng thử lại.',
+                          );
+                    }
+                  },
+            onReplyReview: meetingId == null
+                ? null
+                : (reply) async {
+                    final success = await ref
+                        .read(mentorMeetingsControllerProvider.notifier)
+                        .replyReview(meetingId!, reply);
+                    if (!context.mounted) return;
+                    if (success) {
+                      ref
+                          .read(rikiToastServiceProvider.notifier)
+                          .success(
+                            title: 'Gửi phản hồi thành công',
+                            description: 'Đã gửi phản hồi đánh giá của học viên.',
+                          );
+                    } else {
+                      ref
+                          .read(rikiToastServiceProvider.notifier)
+                          .error(
+                            title: 'Gửi phản hồi thất bại',
+                            description: 'Không thể gửi phản hồi. Vui lòng thử lại.',
+                          );
+                    }
+                  },
+            onRespondDispute: meetingId == null
+                ? null
+                : (responseText) async {
+                    final success = await ref
+                        .read(mentorMeetingsControllerProvider.notifier)
+                        .respondDispute(meetingId!, responseText);
+                    if (!context.mounted) return;
+                    if (success) {
+                      ref
+                          .read(rikiToastServiceProvider.notifier)
+                          .success(
+                            title: 'Gửi giải trình thành công',
+                            description: 'Bản giải trình đã được chuyển đến Quản trị viên.',
+                          );
+                    } else {
+                      ref
+                          .read(rikiToastServiceProvider.notifier)
+                          .error(
+                            title: 'Gửi giải trình thất bại',
+                            description: 'Không thể gửi giải trình. Vui lòng thử lại.',
                           );
                     }
                   },
@@ -105,11 +182,17 @@ class _DetailData extends StatelessWidget {
     required this.meeting,
     required this.onJoin,
     this.onAccept,
+    this.onCancel,
+    this.onReplyReview,
+    this.onRespondDispute,
   });
 
   final MentorMeetingSummary? meeting;
   final Future<void> Function(Uri uri) onJoin;
   final VoidCallback? onAccept;
+  final Future<void> Function(String reason)? onCancel;
+  final Future<void> Function(String reply)? onReplyReview;
+  final Future<void> Function(String responseText)? onRespondDispute;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +247,9 @@ class _DetailData extends StatelessWidget {
                   isAccepted
                       ? Icons.check_circle_outline
                       : Icons.assignment_ind_outlined,
-                  color: isAccepted ? AppColors.brandPrimary : AppColors.warning,
+                  color: isAccepted
+                      ? AppColors.brandPrimary
+                      : AppColors.warning,
                   size: 24,
                 ),
               ),
@@ -177,8 +262,8 @@ class _DetailData extends StatelessWidget {
                       isAccepted
                           ? 'Đã xác nhận buổi học'
                           : (isAssigned
-                              ? 'Yêu cầu học mới'
-                              : mentorStatusLabel(value.status, context)),
+                                ? 'Yêu cầu học mới'
+                                : mentorStatusLabel(value.status, context)),
                       style: AppTypography.cardTitle.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -233,7 +318,8 @@ class _DetailData extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.space4),
 
-        if (value.status == MentorMeetingStatus.assigned && onAccept != null) ...[
+        if (value.status == MentorMeetingStatus.assigned &&
+            onAccept != null) ...[
           RikiPrimaryButton(
             key: const Key('mentor_accept_meeting_button'),
             label: 'Xác nhận buổi học',
@@ -254,7 +340,130 @@ class _DetailData extends StatelessWidget {
             leadingIcon: Icons.videocam_outlined,
             onPressed: () => onJoin(meetingUri!),
           ),
-        const SizedBox(height: AppSpacing.space4),
+        const SizedBox(height: AppSpacing.space3),
+
+        // Mentor Cancel button for assigned or accepted meetings
+        if ((value.status == MentorMeetingStatus.assigned ||
+                value.status == MentorMeetingStatus.accepted) &&
+            onCancel != null) ...[
+          RikiSecondaryButton(
+            key: const Key('mentor_cancel_meeting_button'),
+            label: 'Hủy buổi dạy (Hoàn vé cho học viên)',
+            leadingIcon: Icons.cancel_outlined,
+            onPressed: () => _showCancelDialog(context),
+          ),
+          const SizedBox(height: AppSpacing.space3),
+        ],
+
+        // Review & Reply section
+        if (value.status == MentorMeetingStatus.completed ||
+            value.reviewRating != null) ...[
+          RikiCard(
+            borderColor: AppColors.border,
+            padding: const EdgeInsets.all(AppSpacing.space3),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.star_rate_rounded, color: AppColors.warning, size: 20),
+                    const SizedBox(width: AppSpacing.space2),
+                    Text(
+                      'Đánh giá từ học viên',
+                      style: AppTypography.cardTitle.copyWith(fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    if (value.reviewRating != null)
+                      Text(
+                        '⭐ \${value.reviewRating}/5',
+                        style: AppTypography.cardTitle.copyWith(fontWeight: FontWeight.bold, color: AppColors.warning),
+                      ),
+                  ],
+                ),
+                if (value.reviewComment != null) ...[
+                  const SizedBox(height: AppSpacing.space2),
+                  Text(
+                    value.reviewComment!,
+                    style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.space2),
+                if (value.reviewReply != null)
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.space2),
+                    decoration: BoxDecoration(
+                      color: AppColors.brandTint,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
+                    child: Text(
+                      'Phản hồi của bạn: \${value.reviewReply}',
+                      style: AppTypography.bodySmall.copyWith(color: AppColors.brandPrimary),
+                    ),
+                  )
+                else if (onReplyReview != null)
+                  RikiTextButton(
+                    key: const Key('mentor_reply_review_button'),
+                    label: 'Gửi phản hồi cho đánh giá',
+                    leadingIcon: Icons.reply,
+                    onPressed: () => _showReplyReviewDialog(context),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space3),
+        ],
+
+        // Dispute section
+        if (value.hasDispute) ...[
+          RikiCard(
+            borderColor: AppColors.error.withValues(alpha: 0.3),
+            backgroundColor: AppColors.error.withValues(alpha: 0.04),
+            padding: const EdgeInsets.all(AppSpacing.space3),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 20),
+                    const SizedBox(width: AppSpacing.space2),
+                    Text(
+                      'Khiếu nại từ học viên',
+                      style: AppTypography.cardTitle.copyWith(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.error),
+                    ),
+                  ],
+                ),
+                if (value.disputeReason != null) ...[
+                  const SizedBox(height: AppSpacing.space2),
+                  Text(
+                    'Lý do khiếu nại: \${value.disputeReason}',
+                    style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.space2),
+                if (value.disputeResponse != null)
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.space2),
+                    decoration: BoxDecoration(
+                      color: AppColors.brandTint,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
+                    child: Text(
+                      'Giải trình của bạn: \${value.disputeResponse}',
+                      style: AppTypography.bodySmall.copyWith(color: AppColors.brandPrimary),
+                    ),
+                  )
+                else if (onRespondDispute != null)
+                  RikiTextButton(
+                    key: const Key('mentor_respond_dispute_button'),
+                    label: 'Gửi bản giải trình khiếu nại',
+                    leadingIcon: Icons.description_outlined,
+                    onPressed: () => _showRespondDisputeDialog(context),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space3),
+        ],
 
         // Ghi chú & mục tiêu học tập của học viên
         RikiCard(
@@ -265,7 +474,11 @@ class _DetailData extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.school_outlined, size: 18, color: AppColors.brandPrimary),
+                  const Icon(
+                    Icons.school_outlined,
+                    size: 18,
+                    color: AppColors.brandPrimary,
+                  ),
                   const SizedBox(width: AppSpacing.space2),
                   Text(
                     'Mục tiêu học viên cần hỗ trợ',
@@ -295,6 +508,166 @@ class _DetailData extends StatelessWidget {
           onPressed: context.pop,
         ),
       ],
+    );
+  }
+
+  void _showCancelDialog(BuildContext context) {
+    final reasonController = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Hủy buổi dạy'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.space3),
+              decoration: BoxDecoration(
+                color: AppColors.warning.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppRadius.card),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: AppColors.warning),
+                  const SizedBox(width: AppSpacing.space2),
+                  Expanded(
+                    child: Text(
+                      'Khi bạn hủy buổi dạy, hệ thống sẽ tự động hoàn lại 1 vé tư vấn cho học viên và giải phóng lịch rảnh của bạn.',
+                      style: AppTypography.metadata.copyWith(
+                        color: AppColors.warning,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space3),
+            TextField(
+              key: const Key('mentor_cancellation_reason_input'),
+              controller: reasonController,
+              decoration: const InputDecoration(
+                labelText: 'Lý do hủy lịch dạy',
+                hintText: 'Nhập lý do báo bận hoặc việc đột xuất...',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('Đóng'),
+          ),
+          ElevatedButton(
+            key: const Key('mentor_confirm_cancel_button'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.of(dialogCtx).pop();
+              final reason = reasonController.text.trim();
+              onCancel?.call(reason.isEmpty ? 'Cố vấn báo bận' : reason);
+            },
+            child: const Text('Xác nhận hủy'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReplyReviewDialog(BuildContext context) {
+    final replyController = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Phản hồi đánh giá'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Gửi phản hồi cảm ơn hoặc giải đáp thắc mắc của học viên sau buổi học:',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: AppSpacing.space3),
+            TextField(
+              key: const Key('mentor_reply_review_input'),
+              controller: replyController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Nội dung phản hồi',
+                hintText: 'Cảm ơn bạn đã tham gia buổi học...',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('Đóng'),
+          ),
+          ElevatedButton(
+            key: const Key('mentor_confirm_reply_button'),
+            onPressed: () {
+              Navigator.of(dialogCtx).pop();
+              final reply = replyController.text.trim();
+              if (reply.isNotEmpty) {
+                onReplyReview?.call(reply);
+              }
+            },
+            child: const Text('Gửi phản hồi'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRespondDisputeDialog(BuildContext context) {
+    final responseController = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Giải trình khiếu nại'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Trình bày chi tiết lý do và bằng chứng từ phía bạn để Quản trị viên xem xét xử lý:',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: AppSpacing.space3),
+            TextField(
+              key: const Key('mentor_dispute_response_input'),
+              controller: responseController,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: 'Nội dung giải trình',
+                hintText: 'Tôi đã có mặt đúng giờ và hoàn thành bài giảng...',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('Đóng'),
+          ),
+          ElevatedButton(
+            key: const Key('mentor_confirm_dispute_response_button'),
+            onPressed: () {
+              Navigator.of(dialogCtx).pop();
+              final resp = responseController.text.trim();
+              if (resp.isNotEmpty) {
+                onRespondDispute?.call(resp);
+              }
+            },
+            child: const Text('Gửi giải trình'),
+          ),
+        ],
+      ),
     );
   }
 }

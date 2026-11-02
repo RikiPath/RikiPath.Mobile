@@ -112,18 +112,34 @@ class _LearnerMentorOrderConfirmationSheetState
             );
         return;
       }
+      final creditBalance =
+          ref.read(learnerCreditBalanceControllerProvider).value;
+      final hasCredit = (creditBalance?.availableBalance ?? 0) > 0;
       final isExistingSubscription =
-          widget.subscriptionId != null && widget.subscriptionId! > 0;
+          (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
+          hasCredit;
 
       if (isExistingSubscription) {
-        // Đặt lịch trực tiếp bằng lượt học đã thanh toán
-        final booking = await ref
-            .read(learnerMentorMutationControllerProvider.notifier)
-            .bookIncludedSession(
-              subscriptionId: widget.subscriptionId!,
-              mentorAvailabilityId: widget.slot.id,
-              question: _questionController.text.trim(),
-            );
+        // Đặt lịch trực tiếp bằng lượt học đã thanh toán hoặc vé khả dụng
+        final LearnerMentorBooking? booking;
+        if (widget.subscriptionId != null && widget.subscriptionId! > 0) {
+          booking = await ref
+              .read(learnerMentorMutationControllerProvider.notifier)
+              .bookIncludedSession(
+                subscriptionId: widget.subscriptionId!,
+                mentorAvailabilityId: widget.slot.id,
+                question: _questionController.text.trim(),
+              );
+        } else {
+          final opKey = 'booking_${DateTime.now().millisecondsSinceEpoch}';
+          booking = await ref
+              .read(learnerMentorMutationControllerProvider.notifier)
+              .bookWithCredit(
+                slotId: widget.slot.id,
+                operationKey: opKey,
+                notes: _questionController.text.trim(),
+              );
+        }
 
         if (!mounted) return;
         setState(() => _isSubmitting = false);
@@ -224,8 +240,12 @@ class _LearnerMentorOrderConfirmationSheetState
     final endTime = widget.slot.endTime.displayValue;
     final dateFormat = DateFormat('EEEE, dd/MM/yyyy', locale);
     final timeFormat = DateFormat('HH:mm', locale);
+    final creditBalance =
+        ref.watch(learnerCreditBalanceControllerProvider).value;
+    final hasCredit = (creditBalance?.availableBalance ?? 0) > 0;
     final isExistingSubscription =
-        widget.subscriptionId != null && widget.subscriptionId! > 0;
+        (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
+        hasCredit;
 
     final planPriceFormatted = widget.plan != null
         ? NumberFormat.currency(
@@ -312,7 +332,7 @@ class _LearnerMentorOrderConfirmationSheetState
                   LearnerMentorDetailRow(
                     icon: Icons.workspace_premium_outlined,
                     label: context.l10n.learnerMentorConfirmPackage,
-                    value: widget.plan?.name ?? 'Gói Mentor 1-1',
+                    value: widget.plan?.name ?? 'Gói tư vấn',
                   ),
                   const Divider(),
                   LearnerMentorDetailRow(
@@ -332,7 +352,9 @@ class _LearnerMentorOrderConfirmationSheetState
                     icon: Icons.payments_outlined,
                     label: context.l10n.learnerMentorConfirmPrice,
                     value: isExistingSubscription
-                        ? context.l10n.learnerMentorIncludedSession
+                        ? (hasCredit && (widget.subscriptionId == null || widget.subscriptionId! <= 0)
+                            ? '1 vé khả dụng (${creditBalance?.availableBalance ?? 1} vé còn lại)'
+                            : context.l10n.learnerMentorIncludedSession)
                         : (planPriceFormatted ?? 'Theo gói đã chọn'),
                   ),
                 ],
@@ -350,7 +372,7 @@ class _LearnerMentorOrderConfirmationSheetState
               maxLines: 2,
               decoration: InputDecoration(
                 hintText:
-                    'Nội dung hoặc câu hỏi muốn trao đổi với Mentor (tùy chọn)',
+                    'Nội dung hoặc câu hỏi muốn trao đổi với cố vấn (tùy chọn)',
                 hintStyle: AppTypography.body.copyWith(
                   color: AppColors.textMuted,
                 ),

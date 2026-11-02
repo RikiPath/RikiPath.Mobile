@@ -30,6 +30,7 @@ import 'package:rikipath_mobile/features/meeting/presentation/meeting_landing_sc
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_room_screen.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_profile_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_availability_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_booking_detail_screen.dart';
@@ -172,9 +173,17 @@ GoRouter createAppRouter({
         ],
       ),
       GoRoute(
+        path: '/meetings/:meetingId',
+        redirect: (context, state) => '/mentor/meetings/',
+      ),
+      GoRoute(
         path: AppRoutes.mentor,
         builder: (context, state) => const MentorHomeScreen(),
         routes: [
+          GoRoute(
+            path: AppRoutes.mentorProfileSegment,
+            builder: (context, state) => const MentorProfileScreen(),
+          ),
           GoRoute(
             path: AppRoutes.mentorAvailabilitySegment,
             builder: (context, state) => const MentorAvailabilityScreen(),
@@ -194,6 +203,10 @@ GoRouter createAppRouter({
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.mentorApplication,
+        builder: (context, state) => const MentorProfileScreen(),
       ),
       GoRoute(
         path: AppRoutes.learnerMentorMeetings,
@@ -606,6 +619,9 @@ String? _authenticatedRoleRedirect({
   }
 
   if (role == BackendUserRole.mentor) {
+    if (matchedLocation == AppRoutes.mentorApplication) {
+      return AppRoutes.mentorProfile;
+    }
     return isMentorRoute || isMeetingRoute ? null : AppRoutes.mentor;
   }
 

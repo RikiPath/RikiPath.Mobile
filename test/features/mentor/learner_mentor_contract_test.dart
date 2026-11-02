@@ -35,7 +35,7 @@ import '../../support/test_auth_session.dart';
 void main() {
   test('booking status microcopy distinguishes learner and mentor', () {
     final l10n = AppLocalizationsVi();
-    expect(l10n.learnerMentorStatusAssigned, 'Chờ Mentor xác nhận');
+    expect(l10n.learnerMentorStatusAssigned, 'Đang chờ xác nhận lịch');
     expect(l10n.mentorStatusAssigned, 'Chờ xác nhận');
     expect(l10n.mentorStatusAccepted, 'Đã xác nhận');
   });
@@ -632,8 +632,8 @@ void main() {
         find.byKey(const Key('learner_mentor_booking_detail_content')),
         findsOneWidget,
       );
-      expect(find.text('Chi tiết buổi học'), findsOneWidget);
-      expect(find.text('Vào phòng học'), findsOneWidget);
+      expect(find.text('Chi tiết buổi tư vấn'), findsOneWidget);
+      expect(find.text('Vào phòng tư vấn'), findsOneWidget);
       expect(find.text('Mã lịch hẹn'), findsNothing);
       expect(find.text('44'), findsNothing);
       expect(
@@ -1171,6 +1171,104 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
   @override
   Future<MentorMeetingPurchaseStatus> syncPurchaseStatus(int subscriptionId) =>
       _next(purchaseStatusResults, purchaseStatusCalls++);
+
+  @override
+  Future<LearnerCreditBalance> loadCreditBalance() async =>
+      const LearnerCreditBalance(
+        balance: 3,
+        availableBalance: 3,
+        pendingHoldCount: 0,
+      );
+
+  @override
+  Future<LearnerMentorBooking> bookWithCredit({
+    required int slotId,
+    required String operationKey,
+    String? notes,
+  }) async =>
+      _next(bookingMutationResults, bookingMutationCalls++);
+
+  @override
+  Future<CancellationEligibility> checkCancellationEligibility(
+    int bookingId,
+  ) async =>
+      const CancellationEligibility(
+        isEligible: true,
+        tier: 'Early_FullRefund',
+        expectedRefundPercent: 100,
+        refundAmountCredits: 1,
+        canReschedule: true,
+        cutoffHours: 24,
+      );
+
+  @override
+  Future<bool> cancelBooking({
+    required int bookingId,
+    required String reason,
+    bool requestException = false,
+    String? exceptionReason,
+  }) async => true;
+
+  @override
+  Future<bool> rescheduleBooking({
+    required int bookingId,
+    required int newSlotId,
+  }) async => true;
+
+  @override
+  Future<MentorReviewItem> createReview({
+    required int bookingId,
+    required int rating,
+    String? comment,
+  }) async =>
+      MentorReviewItem(
+        id: 1,
+        bookingId: bookingId,
+        learnerName: 'Học viên',
+        rating: rating,
+        comment: comment,
+      );
+
+  @override
+  Future<MentorRatingSummary> loadMentorReviewSummary(int mentorId) async =>
+      MentorRatingSummary(
+        mentorId: mentorId,
+        averageRating: 4.8,
+        totalReviews: 12,
+        starCounts: const {5: 10, 4: 2},
+        positiveRatePercentage: 100.0,
+      );
+
+  @override
+  Future<List<MentorReviewItem>> loadMentorReviews(int mentorId) async =>
+      const <MentorReviewItem>[];
+
+  @override
+  Future<LearnerDisputeItem> createDispute({
+    required int bookingId,
+    required int category,
+    required String reason,
+    String? evidenceNotes,
+  }) async =>
+      LearnerDisputeItem(
+        id: 1,
+        bookingId: bookingId,
+        category: category,
+        status: 1,
+        description: reason,
+      );
+
+  @override
+  Future<List<LearnerDisputeItem>> loadMyDisputes() async =>
+      const <LearnerDisputeItem>[];
+
+  @override
+  Future<bool> submitAbuseReport({
+    required int reportedUserId,
+    required int reason,
+    required String details,
+  }) async => true;
+
 
   Future<T> _next<T>(List<Object> results, int callIndex) async {
     if (results.isEmpty) throw StateError('Unexpected repository call.');

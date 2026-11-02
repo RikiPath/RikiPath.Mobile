@@ -198,6 +198,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get register => 'Đăng ký';
 
   @override
+  String get registerAsMentor => 'Đăng ký làm Cố vấn';
+
+  @override
   String get securityFooter => 'Bảo mật chuẩn mã hóa Riki Learning';
 
   @override
@@ -270,7 +273,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get verificationBackendBlocker =>
-      'Email chứa mã xác thực 6 chữ số, có hiệu lực trong 30 phút. RikiPath chưa nhận đủ thông tin tài khoản để mở bước nhập mã một cách an toàn.';
+      'Mã xác thực gồm 6 chữ số và có hiệu lực trong 30 phút. Chúng tôi chưa nhận đủ thông tin tài khoản để tiếp tục; vui lòng thử đăng ký lại.';
 
   @override
   String get returnToLogin => 'Quay lại đăng nhập';
@@ -477,14 +480,14 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get authErrorUnsupportedRole =>
-      'Ứng dụng di động hiện chỉ hỗ trợ tài khoản Học viên và Mentor.';
+      'Ứng dụng di động hiện chỉ hỗ trợ tài khoản học viên và cố vấn.';
 
   @override
-  String get mentorLandingTitle => 'Không gian Mentor';
+  String get mentorLandingTitle => 'Không gian cố vấn';
 
   @override
   String get mentorLandingDescription =>
-      'Theo dõi lịch trống và các lịch học 1-1 sắp tới của bạn.';
+      'Theo dõi khung giờ trống và các buổi tư vấn sắp tới của bạn.';
 
   @override
   String get mentorHomeGreeting => 'Chào mừng trở lại';
@@ -519,28 +522,29 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mentorViewAvailability => 'Xem lịch trống';
 
   @override
-  String get mentorMeetingsTitle => 'Lịch học của tôi';
+  String get mentorMeetingsTitle => 'Lịch tư vấn của tôi';
 
   @override
   String get mentorMeetingsDescription =>
-      'Các buổi học đã được xác nhận với học viên.';
+      'Các buổi tư vấn đã được xác nhận với học viên.';
 
   @override
   String mentorMeetingsCount(int count) {
-    return '$count buổi học';
+    return '$count buổi tư vấn';
   }
 
   @override
-  String get mentorMeetingsEmpty => 'Bạn chưa có lịch học nào.';
+  String get mentorMeetingsEmpty => 'Bạn chưa có lịch tư vấn nào.';
 
   @override
-  String get mentorMeetingsError => 'Chưa thể tải lịch học. Vui lòng thử lại.';
+  String get mentorMeetingsError =>
+      'Chưa thể tải lịch tư vấn. Vui lòng thử lại.';
 
   @override
-  String get mentorViewMeetings => 'Xem lịch học';
+  String get mentorViewMeetings => 'Xem lịch tư vấn';
 
   @override
-  String get mentorMeetingDetailTitle => 'Chi tiết buổi học';
+  String get mentorMeetingDetailTitle => 'Chi tiết buổi tư vấn';
 
   @override
   String get mentorLearnerLabel => 'Học viên';
@@ -570,22 +574,22 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mentorSlotBooked => 'Đã được đặt';
 
   @override
-  String get mentorJoinMeeting => 'Vào phòng học';
+  String get mentorJoinMeeting => 'Vào phòng tư vấn';
 
   @override
   String get mentorMeetingLinkUnavailable =>
-      'Phòng học chưa sẵn sàng cho lịch học này.';
+      'Phòng tư vấn chưa sẵn sàng cho lịch hẹn này.';
 
   @override
   String get mentorMeetingNotFound =>
-      'Không tìm thấy buổi học trong lịch của bạn.';
+      'Không tìm thấy buổi tư vấn trong lịch của bạn.';
 
   @override
-  String get mentorJoinFailedTitle => 'Không thể mở phòng họp';
+  String get mentorJoinFailedTitle => 'Không thể mở phòng tư vấn';
 
   @override
   String get mentorJoinFailedDescription =>
-      'Liên kết phòng họp không thể mở trên thiết bị này.';
+      'Không thể mở phòng tư vấn trên thiết bị này.';
 
   @override
   String get mentorStatusAwaitingPayment => 'Chờ thanh toán';
@@ -597,7 +601,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mentorStatusAssigned => 'Chờ xác nhận';
 
   @override
-  String get learnerMentorStatusAssigned => 'Chờ Mentor xác nhận';
+  String get learnerMentorStatusAssigned => 'Đang chờ xác nhận lịch';
 
   @override
   String get mentorStatusAccepted => 'Đã xác nhận';
@@ -615,9 +619,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get unsupportedRoleTitle => 'Vai trò chưa được hỗ trợ';
 
   @override
-  String unsupportedRoleDescription(String role) {
-    return 'Vai trò $role không thuộc phạm vi ứng dụng di động. Vui lòng đăng xuất và dùng tài khoản Học viên hoặc Mentor.';
-  }
+  String get unsupportedRoleDescription =>
+      'Tài khoản này chưa được hỗ trợ trên ứng dụng di động. Vui lòng đăng xuất và dùng tài khoản học viên hoặc cố vấn.';
 
   @override
   String get authErrorNetwork =>
@@ -707,7 +710,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get progressAndHistory => 'Tiến độ & lịch sử học';
 
   @override
-  String get consultation => 'Học cùng Mentor';
+  String get consultation => 'Tư vấn 1-1';
 
   @override
   String get settings => 'Cài đặt';
@@ -977,7 +980,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get learningLessonsEmptyMessage =>
-      'Backend chưa có bài học cho cấp độ JLPT này. Hãy thử lại sau.';
+      'Hiện chưa có bài học cho cấp độ JLPT này. Hãy thử lại sau.';
 
   @override
   String get jlptN5Description => 'Nền tảng tiếng Nhật cơ bản';
@@ -2319,7 +2322,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get profileConsultationSubtitle =>
-      'Khám phá gói học 1-1 và lịch học của bạn.';
+      'Khám phá các gói tư vấn và lịch hẹn của bạn.';
 
   @override
   String get savedFromLessons => 'Từ đã lưu trong bài học';
@@ -2421,7 +2424,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get submitMockMessage =>
-      'Bạn có thể nộp dù vẫn còn câu chưa trả lời. Backend sẽ chấm điểm và hoàn tất lượt thi.';
+      'Bạn có thể nộp dù vẫn còn câu chưa trả lời. RikiPath sẽ chấm điểm và hoàn tất lượt thi.';
 
   @override
   String get submitAction => 'Nộp bài';
@@ -2594,7 +2597,7 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get mentorConsultation => 'Học cùng Mentor';
+  String get mentorConsultation => 'Tư vấn 1-1';
 
   @override
   String get openDemoBooking => 'Xem trước lịch học';
@@ -2833,7 +2836,7 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get learnerMentorTitle => 'Học cùng Mentor';
+  String get learnerMentorTitle => 'Tư vấn 1-1';
 
   @override
   String get learnerMentorSubtitle =>
@@ -2843,16 +2846,16 @@ class AppLocalizationsVi extends AppLocalizations {
   String get learnerMentorExplore => 'Khám phá';
 
   @override
-  String get learnerMentorPlansTitle => 'Gói học 1-1';
+  String get learnerMentorPlansTitle => 'Gói tư vấn';
 
   @override
-  String get learnerMentorPlansEmpty => 'Hiện chưa có gói học khả dụng.';
+  String get learnerMentorPlansEmpty => 'Hiện chưa có gói tư vấn khả dụng.';
 
   @override
-  String get learnerMentorPlansError => 'Chưa thể tải các gói học.';
+  String get learnerMentorPlansError => 'Chưa thể tải các gói tư vấn.';
 
   @override
-  String get learnerMentorMyMeetings => 'Lịch học của tôi';
+  String get learnerMentorMyMeetings => 'Lịch tư vấn của tôi';
 
   @override
   String learnerMentorPlanDuration(int days) {
@@ -2861,14 +2864,14 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String learnerMentorPlanSessions(int count) {
-    return '$count buổi học';
+    return '$count vé tư vấn';
   }
 
   @override
   String get learnerMentorChoosePlan => 'Chọn gói';
 
   @override
-  String get learnerMentorAvailabilityTitle => 'Chọn lịch học';
+  String get learnerMentorAvailabilityTitle => 'Chọn lịch tư vấn';
 
   @override
   String get learnerMentorAvailabilitySubtitle =>
@@ -2880,7 +2883,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get learnerMentorAvailabilityError =>
-      'Chưa thể tải lịch trống của Mentor.';
+      'Chưa thể tải lịch trống của cố vấn.';
 
   @override
   String learnerMentorSlotTime(String start, String end) {
@@ -2898,35 +2901,35 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get learnerMentorPurchaseBlocked =>
-      'Bạn vẫn có thể xem gói và lịch trống. RikiPath sẽ mở thanh toán khi Backend bảo đảm giữ chỗ an toàn, tránh hai người đặt cùng một khung giờ.';
+      'Bạn vẫn có thể xem gói và khung giờ trống. Tính năng thanh toán sẽ mở khi việc đặt lịch được bảo đảm an toàn.';
 
   @override
-  String get learnerMentorBookingsEmpty => 'Bạn chưa có lịch học Mentor.';
+  String get learnerMentorBookingsEmpty => 'Bạn chưa có lịch tư vấn nào.';
 
   @override
-  String get learnerMentorBookingsError => 'Chưa thể tải lịch học của bạn.';
+  String get learnerMentorBookingsError => 'Chưa thể tải lịch tư vấn của bạn.';
 
   @override
-  String get learnerMentorMeetingDetailTitle => 'Chi tiết buổi học';
+  String get learnerMentorMeetingDetailTitle => 'Chi tiết buổi tư vấn';
 
   @override
-  String get learnerMentorMeetingNotFound => 'Không tìm thấy buổi học này.';
+  String get learnerMentorMeetingNotFound => 'Không tìm thấy buổi tư vấn này.';
 
   @override
-  String get learnerMentorMentorLabel => 'Mentor';
+  String get learnerMentorMentorLabel => 'Cố vấn';
 
   @override
   String get learnerMentorPaymentLabel => 'Thanh toán';
 
   @override
-  String get learnerMentorJoin => 'Vào phòng học';
+  String get learnerMentorJoin => 'Vào phòng tư vấn';
 
   @override
   String get learnerMentorJoinUnavailable =>
-      'Phòng họp chưa sẵn sàng hoặc liên kết không an toàn.';
+      'Phòng tư vấn chưa sẵn sàng hoặc liên kết không an toàn.';
 
   @override
-  String get learnerMentorPurchaseStatus => 'Trạng thái gói học';
+  String get learnerMentorPurchaseStatus => 'Trạng thái gói tư vấn';
 
   @override
   String get learnerMentorPurchaseStatusError =>
@@ -2949,7 +2952,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String learnerMentorSessionsUsage(int used, int included) {
-    return 'Đã dùng $used/$included buổi';
+    return 'Đã dùng $used/$included vé tư vấn';
   }
 
   @override
@@ -2957,37 +2960,36 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get learnerMentorStatusPolling =>
-      'RikiPath đang đối chiếu trạng thái với Backend. Chuyển hướng thanh toán không được xem là xác nhận thành công.';
+      'RikiPath đang kiểm tra trạng thái thanh toán. Việc quay lại ứng dụng không có nghĩa là thanh toán đã thành công.';
 
   @override
-  String get learnerMentorUnknownMentor => 'Mentor chưa được xác định';
+  String get learnerMentorUnknownMentor => 'Chưa xác định cố vấn';
 
   @override
   String get learnerMentorCheckoutExpired => 'Liên kết thanh toán đã hết hạn';
 
   @override
   String get learnerMentorBookingReadOnly =>
-      'Thông tin lịch hẹn được đồng bộ trực tiếp từ Backend.';
+      'Thông tin lịch tư vấn được cập nhật từ RikiPath.';
 
   @override
-  String get learnerMentorConfirmBookingTitle =>
-      'Xác nhận đặt lịch học Mentor 1-1';
+  String get learnerMentorConfirmBookingTitle => 'Xác nhận đặt lịch tư vấn 1-1';
 
   @override
-  String get learnerMentorConfirmPackage => 'Gói học kèm';
+  String get learnerMentorConfirmPackage => 'Gói tư vấn';
 
   @override
-  String get learnerMentorConfirmMentor => 'Mentor hướng dẫn';
+  String get learnerMentorConfirmMentor => 'Cố vấn hỗ trợ';
 
   @override
-  String get learnerMentorConfirmTime => 'Thời gian học dự kiến';
+  String get learnerMentorConfirmTime => 'Thời gian tư vấn dự kiến';
 
   @override
-  String get learnerMentorConfirmPrice => 'Học phí';
+  String get learnerMentorConfirmPrice => 'Giá gói tư vấn';
 
   @override
   String get learnerMentorConfirmNote =>
-      'Khung giờ học đã chọn là tạm thời và sẽ được xác nhận chính thức sau khi hoàn tất thanh toán.';
+      'Khung giờ đã chọn sẽ được xác nhận sau khi hoàn tất thanh toán.';
 
   @override
   String get learnerMentorPayWithPayOs => 'Tiếp tục thanh toán';
@@ -3000,23 +3002,23 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get learnerMentorBookingSuccessDesc =>
-      'Buổi học 1 kèm 1 với Mentor đã được gửi thành công.';
+      'Buổi tư vấn 1-1 với cố vấn đã được đặt thành công.';
 
   @override
   String get learnerMentorSlotConflict =>
-      'Khung giờ này vừa có người đặt. Lượt học của bạn vẫn được bảo lưu, vui lòng chọn khung giờ khác.';
+      'Khung giờ này vừa có người đặt. Vé tư vấn của bạn vẫn được bảo lưu; vui lòng chọn khung giờ khác.';
 
   @override
   String get learnerMentorChooseAnotherSlot => 'Chọn khung giờ khác';
 
   @override
-  String get learnerMentorViewBookingDetail => 'Xem chi tiết buổi học';
+  String get learnerMentorViewBookingDetail => 'Xem chi tiết buổi tư vấn';
 
   @override
   String get learnerMentorBookNow => 'Đặt lịch ngay';
 
   @override
-  String get learnerMentorIncludedSession => 'Dùng 1 lượt học trong gói';
+  String get learnerMentorIncludedSession => 'Dùng 1 vé tư vấn trong gói';
 
   @override
   String get learnerMentorConfirmBooking => 'Xác nhận đặt lịch';
@@ -3025,7 +3027,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get learnerMentorSelectedSlot => 'Khung giờ đã chọn';
 
   @override
-  String get learnerMentorPleaseSelectSlot => 'Vui lòng chọn khung giờ học';
+  String get learnerMentorPleaseSelectSlot => 'Vui lòng chọn khung giờ tư vấn';
 
   @override
   String get practiceSpeechTitle => 'Luyện nói tiếng Nhật';
@@ -3260,7 +3262,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String writingKanaEmptyMessage(String script) {
-    return 'Backend chưa trả về ký tự $script đã được duyệt cho tài khoản này.';
+    return 'Hiện chưa có ký tự $script phù hợp cho tài khoản này.';
   }
 
   @override
@@ -3544,7 +3546,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get meetingNativeYou => 'Bạn';
 
   @override
-  String get meetingNativeMentor => 'Mentor';
+  String get meetingNativeMentor => 'Cố vấn';
 
   @override
   String get meetingNativeLearner => 'Học viên';

@@ -39,25 +39,56 @@ class BookableMentorDto {
     required this.id,
     required this.name,
     this.avatarUrl,
+    this.headline,
+    this.bio,
+    this.jlptLevels = const [],
+    this.teachingMethod,
   });
 
   factory BookableMentorDto.fromJson(Map<String, Object?> json) {
+    final rawJlpt = json['jlptLevel'] ?? json['jlptLevels'];
+    final jlptList = <String>[];
+    if (rawJlpt is String && rawJlpt.trim().isNotEmpty) {
+      jlptList.add(rawJlpt.trim());
+    } else if (rawJlpt is List) {
+      jlptList.addAll(
+        rawJlpt.map((e) => e.toString().trim()).where((e) => e.isNotEmpty),
+      );
+    }
     return BookableMentorDto(
-      id: _requiredPositiveInt(json, 'id'),
+      id:
+          _optionalPositiveInt(json, 'mentorId') ??
+          _requiredPositiveInt(json, 'id'),
       name: _requiredString(json, 'name'),
       avatarUrl: _optionalString(json, 'avatarUrl'),
+      headline:
+          _optionalString(json, 'expertise') ??
+          _optionalString(json, 'headline'),
+      bio: _optionalString(json, 'bio'),
+      jlptLevels: jlptList,
+      teachingMethod:
+          _optionalString(json, 'workplace') ??
+          _optionalString(json, 'teachingMethod'),
     );
   }
 
   final int id;
   final String name;
   final String? avatarUrl;
+  final String? headline;
+  final String? bio;
+  final List<String> jlptLevels;
+  final String? teachingMethod;
 
   BookableMentor toDomain() => BookableMentor(
-        id: id,
-        name: name,
-        avatarUrl: avatarUrl,
-      );
+    id: id,
+    name: name,
+    avatarUrl: avatarUrl,
+    headline: headline,
+    bio: bio,
+    jlptLevels: jlptLevels,
+    teachingMethod: teachingMethod,
+  );
 }
 
 class MentorMeetingFeatureDto {
@@ -375,7 +406,7 @@ class MentorMeetingPurchaseStatusDto {
 
 Map<String, Object?> readLearnerMentorResultObject(Object? body) {
   final envelope = _readEnvelope(body);
-  final result = envelope['result'];
+  final result = envelope['result'] ?? envelope['data'];
   if (result is! Map<Object?, Object?>) {
     throw const FormatException('Expected a Mentor Meeting result object.');
   }
@@ -384,7 +415,10 @@ Map<String, Object?> readLearnerMentorResultObject(Object? body) {
 
 List<Map<String, Object?>> readLearnerMentorResultList(Object? body) {
   final envelope = _readEnvelope(body);
-  final result = envelope['result'];
+  var result = envelope['result'] ?? envelope['data'];
+  if (result is Map<Object?, Object?> && result['items'] is List<Object?>) {
+    result = result['items'];
+  }
   if (result is! List<Object?>) {
     throw const FormatException('Expected a Mentor Meeting result list.');
   }
@@ -483,4 +517,361 @@ bool _requiredBool(Map<String, Object?> json, String key) {
   final value = json[key];
   if (value is! bool) throw FormatException('Expected a boolean field: $key.');
   return value;
+}
+
+class BookWithCreditRequestDto {
+  const BookWithCreditRequestDto({
+    required this.mentorAvailabilityId,
+    required this.operationKey,
+    this.notes,
+  });
+
+  final int mentorAvailabilityId;
+  final String operationKey;
+  final String? notes;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'mentorAvailabilityId': mentorAvailabilityId,
+    'operationKey': operationKey,
+    if (notes != null && notes!.trim().isNotEmpty) 'notes': notes!.trim(),
+  };
+}
+
+class LearnerCreditBalanceDto {
+  const LearnerCreditBalanceDto({
+    required this.balance,
+    required this.availableBalance,
+    required this.pendingHoldCount,
+    this.expiresAtUtc,
+  });
+
+  factory LearnerCreditBalanceDto.fromJson(Map<String, Object?> json) {
+    final totalCredits = _readInt(json['balance']) ??
+        _readInt(json['totalAvailableCredits']) ??
+        _readInt(json['availableBalance']) ??
+        0;
+    final available = _readInt(json['availableBalance']) ??
+        _readInt(json['totalAvailableCredits']) ??
+        _readInt(json['balance']) ??
+        0;
+    return LearnerCreditBalanceDto(
+      balance: totalCredits,
+      availableBalance: available,
+      pendingHoldCount: _readInt(json['pendingHoldCount']) ?? 0,
+      expiresAtUtc: switch (_optionalString(json, 'expiringSoonestAtUtc') ??
+          _optionalString(json, 'expiresAtUtc')) {
+        final value? => DateTime.tryParse(value),
+        null => null,
+      },
+    );
+  }
+
+  final int balance;
+  final int availableBalance;
+  final int pendingHoldCount;
+  final DateTime? expiresAtUtc;
+
+  LearnerCreditBalance toDomain() => LearnerCreditBalance(
+    balance: balance,
+    availableBalance: availableBalance,
+    pendingHoldCount: pendingHoldCount,
+    expiresAtUtc: expiresAtUtc,
+  );
+}
+
+class CancellationEligibilityDto {
+  const CancellationEligibilityDto({
+    required this.isEligible,
+    required this.tier,
+    required this.expectedRefundPercent,
+    required this.refundAmountCredits,
+    required this.canReschedule,
+    required this.cutoffHours,
+    this.message,
+  });
+
+  factory CancellationEligibilityDto.fromJson(Map<String, Object?> json) {
+    final canCancel = json['canCancel'] == true || json['isEligible'] == true;
+    final isFullRefund =
+        json['eligibleForFullRefund'] == true ||
+        json['isFullRefund'] == true ||
+        ((_readInt(json['expectedRefundPercent']) ?? 0) >= 100);
+    final refundCredits = isFullRefund ? 1 : 0;
+    final refundPercent = isFullRefund ? 100 : 0;
+    final rawTier = _optionalString(json, 'tier');
+    final tier = (rawTier != null && rawTier.isNotEmpty)
+        ? rawTier
+        : (isFullRefund ? 'Early_FullRefund' : 'Late_NoRefund');
+    final canReschedule = json['canReschedule'] == true;
+    final cutoffHours = _readInt(json['cutoffHours']) ?? 24;
+    final message =
+        _optionalString(json, 'message') ??
+        (isFullRefund
+            ? 'Đủ điều kiện hủy được hoàn 1 Ticket (từ 24 giờ trở lên).'
+            : 'Hủy muộn (dưới 24 giờ): không được tự động hoàn Ticket.');
+
+    return CancellationEligibilityDto(
+      isEligible: canCancel,
+      tier: tier,
+      expectedRefundPercent: refundPercent,
+      refundAmountCredits: refundCredits,
+      canReschedule: canReschedule,
+      cutoffHours: cutoffHours,
+      message: message,
+    );
+  }
+
+  final bool isEligible;
+  final String tier;
+  final int expectedRefundPercent;
+  final int refundAmountCredits;
+  final bool canReschedule;
+  final int cutoffHours;
+  final String? message;
+
+  CancellationEligibility toDomain() => CancellationEligibility(
+    isEligible: isEligible,
+    tier: tier,
+    expectedRefundPercent: expectedRefundPercent,
+    refundAmountCredits: refundAmountCredits,
+    canReschedule: canReschedule,
+    cutoffHours: cutoffHours,
+    message: message,
+  );
+}
+
+class CancelMentorBookingRequestDto {
+  const CancelMentorBookingRequestDto({
+    required this.reason,
+    this.requestException = false,
+    this.exceptionReason,
+  });
+
+  final String reason;
+  final bool requestException;
+  final String? exceptionReason;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'reason': reason.trim(),
+    'requestException': requestException,
+    if (exceptionReason != null && exceptionReason!.trim().isNotEmpty)
+      'exceptionReason': exceptionReason!.trim(),
+  };
+}
+
+class RescheduleMentorBookingRequestDto {
+  const RescheduleMentorBookingRequestDto({
+    required this.newMentorAvailabilityId,
+  });
+
+  final int newMentorAvailabilityId;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'newMentorAvailabilityId': newMentorAvailabilityId,
+  };
+}
+
+class CreateMentorReviewRequestDto {
+  const CreateMentorReviewRequestDto({
+    required this.mentorBookingId,
+    required this.rating,
+    this.comment,
+  });
+
+  final int mentorBookingId;
+  final int rating;
+  final String? comment;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'mentorBookingId': mentorBookingId,
+    'rating': rating,
+    if (comment != null && comment!.trim().isNotEmpty)
+      'comment': comment!.trim(),
+  };
+}
+
+class MentorRatingSummaryDto {
+  const MentorRatingSummaryDto({
+    required this.mentorId,
+    required this.averageRating,
+    required this.totalReviews,
+    required this.starCounts,
+    required this.positiveRatePercentage,
+  });
+
+  factory MentorRatingSummaryDto.fromJson(Map<String, Object?> json) {
+    final rawStars = json['starCounts'];
+    final stars = <int, int>{};
+    if (rawStars is Map) {
+      for (final entry in rawStars.entries) {
+        final k = int.tryParse(entry.key.toString());
+        final v = int.tryParse(entry.value.toString());
+        if (k != null && v != null) stars[k] = v;
+      }
+    }
+    return MentorRatingSummaryDto(
+      mentorId: _requiredPositiveInt(json, 'mentorId'),
+      averageRating: _requiredNumber(json, 'averageRating'),
+      totalReviews: _readInt(json['totalReviews']) ?? 0,
+      starCounts: stars,
+      positiveRatePercentage: _requiredNumber(json, 'positiveRatePercentage'),
+    );
+  }
+
+  final int mentorId;
+  final double averageRating;
+  final int totalReviews;
+  final Map<int, int> starCounts;
+  final double positiveRatePercentage;
+
+  MentorRatingSummary toDomain() => MentorRatingSummary(
+    mentorId: mentorId,
+    averageRating: averageRating,
+    totalReviews: totalReviews,
+    starCounts: starCounts,
+    positiveRatePercentage: positiveRatePercentage,
+  );
+}
+
+class MentorReviewDto {
+  const MentorReviewDto({
+    required this.id,
+    required this.bookingId,
+    required this.learnerName,
+    required this.rating,
+    this.comment,
+    this.createdAtUtc,
+    this.mentorReply,
+    this.mentorRepliedAtUtc,
+  });
+
+  factory MentorReviewDto.fromJson(Map<String, Object?> json) {
+    return MentorReviewDto(
+      id: _requiredPositiveInt(json, 'id'),
+      bookingId:
+          _readInt(json['mentorBookingId']) ?? _readInt(json['bookingId']) ?? 0,
+      learnerName: _optionalString(json, 'learnerName') ?? 'Học viên',
+      rating: _readInt(json['rating']) ?? 5,
+      comment: _optionalString(json, 'comment'),
+      createdAtUtc: switch (_optionalString(json, 'createdAtUtc')) {
+        final value? => DateTime.tryParse(value),
+        null => null,
+      },
+      mentorReply: _optionalString(json, 'mentorReply'),
+      mentorRepliedAtUtc: switch (_optionalString(json, 'mentorRepliedAtUtc')) {
+        final value? => DateTime.tryParse(value),
+        null => null,
+      },
+    );
+  }
+
+  final int id;
+  final int bookingId;
+  final String learnerName;
+  final int rating;
+  final String? comment;
+  final DateTime? createdAtUtc;
+  final String? mentorReply;
+  final DateTime? mentorRepliedAtUtc;
+
+  MentorReviewItem toDomain() => MentorReviewItem(
+    id: id,
+    bookingId: bookingId,
+    learnerName: learnerName,
+    rating: rating,
+    comment: comment,
+    createdAtUtc: createdAtUtc,
+    mentorReply: mentorReply,
+    mentorRepliedAtUtc: mentorRepliedAtUtc,
+  );
+}
+
+class CreateMentorDisputeRequestDto {
+  const CreateMentorDisputeRequestDto({
+    required this.mentorBookingId,
+    required this.category,
+    required this.description,
+    this.evidenceNotes,
+  });
+
+  final int mentorBookingId;
+  final int category;
+  final String description;
+  final String? evidenceNotes;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'mentorBookingId': mentorBookingId,
+    'category': category,
+    'description': description.trim(),
+    if (evidenceNotes != null && evidenceNotes!.trim().isNotEmpty)
+      'evidenceNotes': evidenceNotes!.trim(),
+  };
+}
+
+class LearnerDisputeDto {
+  const LearnerDisputeDto({
+    required this.id,
+    required this.bookingId,
+    required this.category,
+    required this.status,
+    required this.description,
+    this.resolutionNote,
+    this.refundApproved,
+    this.createdAtUtc,
+  });
+
+  factory LearnerDisputeDto.fromJson(Map<String, Object?> json) {
+    return LearnerDisputeDto(
+      id: _requiredPositiveInt(json, 'id'),
+      bookingId:
+          _readInt(json['mentorBookingId']) ?? _readInt(json['bookingId']) ?? 0,
+      category: _readInt(json['category']) ?? 7,
+      status: _readInt(json['status']) ?? 1,
+      description: _requiredString(json, 'description'),
+      resolutionNote: _optionalString(json, 'resolutionNote'),
+      refundApproved: json['refundApproved'] as bool?,
+      createdAtUtc: switch (_optionalString(json, 'createdAtUtc')) {
+        final value? => DateTime.tryParse(value),
+        null => null,
+      },
+    );
+  }
+
+  final int id;
+  final int bookingId;
+  final int category;
+  final int status;
+  final String description;
+  final String? resolutionNote;
+  final bool? refundApproved;
+  final DateTime? createdAtUtc;
+
+  LearnerDisputeItem toDomain() => LearnerDisputeItem(
+    id: id,
+    bookingId: bookingId,
+    category: category,
+    status: status,
+    description: description,
+    resolutionNote: resolutionNote,
+    refundApproved: refundApproved,
+    createdAtUtc: createdAtUtc,
+  );
+}
+
+class SubmitAbuseReportRequestDto {
+  const SubmitAbuseReportRequestDto({
+    required this.reportedUserId,
+    required this.reason,
+    required this.details,
+  });
+
+  final int reportedUserId;
+  final int reason;
+  final String details;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'reportedUserId': reportedUserId,
+    'reason': reason,
+    'details': details.trim(),
+  };
 }

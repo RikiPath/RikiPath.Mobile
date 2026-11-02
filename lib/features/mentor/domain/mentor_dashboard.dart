@@ -132,6 +132,12 @@ class MentorMeetingSummary {
     this.learnerName,
     this.scheduledAt,
     this.meetingLink,
+    this.reviewRating,
+    this.reviewComment,
+    this.reviewReply,
+    this.hasDispute = false,
+    this.disputeReason,
+    this.disputeResponse,
   });
 
   final int id;
@@ -139,6 +145,12 @@ class MentorMeetingSummary {
   final MentorTimestamp? scheduledAt;
   final MentorMeetingStatus status;
   final String? meetingLink;
+  final int? reviewRating;
+  final String? reviewComment;
+  final String? reviewReply;
+  final bool hasDispute;
+  final String? disputeReason;
+  final String? disputeResponse;
 
   Uri? get safeMeetingUri {
     return parseSafeExternalHttpUri(meetingLink);

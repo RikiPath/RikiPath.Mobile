@@ -23,8 +23,14 @@ class MentorHomeScreen extends ConsumerWidget {
       backgroundColor: AppColors.learnerBackground,
       appBar: AppBar(
         title: Text(context.l10n.mentorLandingTitle),
-        actions: const [
-          Padding(
+        actions: [
+          IconButton(
+            key: const Key('mentor_home_profile_button'),
+            icon: const Icon(Icons.account_circle_outlined),
+            tooltip: 'Hồ sơ chuyên gia',
+            onPressed: () => context.push(AppRoutes.mentorProfile),
+          ),
+          const Padding(
             padding: EdgeInsets.only(right: AppSpacing.space3),
             child: RikiLanguageSwitcher(),
           ),

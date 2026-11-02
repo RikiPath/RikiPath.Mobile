@@ -20,7 +20,9 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
 
   @override
   Future<List<BookableMentor>> loadMentors() async {
-    final response = await _apiClient.get<Object?>(LearnerMentorApiPaths.mentors);
+    final response = await _apiClient.get<Object?>(
+      LearnerMentorApiPaths.mentors,
+    );
     return readLearnerMentorResultList(response.data)
         .map(BookableMentorDto.fromJson)
         .map((dto) => dto.toDomain())
@@ -117,5 +119,167 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
     return MentorMeetingPurchaseStatusDto.fromJson(
       readLearnerMentorResultObject(response.data),
     ).toDomain();
+  }
+
+  @override
+  Future<LearnerCreditBalance> loadCreditBalance() async {
+    final response = await _apiClient.get<Object?>(
+      LearnerMentorApiPaths.creditBalance,
+    );
+    return LearnerCreditBalanceDto.fromJson(
+      readLearnerMentorResultObject(response.data),
+    ).toDomain();
+  }
+
+  @override
+  Future<LearnerMentorBooking> bookWithCredit({
+    required int slotId,
+    required String operationKey,
+    String? notes,
+  }) async {
+    final response = await _apiClient.post<Object?>(
+      LearnerMentorApiPaths.bookWithCredit,
+      data: BookWithCreditRequestDto(
+        mentorAvailabilityId: slotId,
+        operationKey: operationKey,
+        notes: notes,
+      ).toJson(),
+    );
+    return LearnerMentorBookingDto.fromJson(
+      readLearnerMentorResultObject(response.data),
+    ).toDomain();
+  }
+
+  @override
+  Future<CancellationEligibility> checkCancellationEligibility(
+    int bookingId,
+  ) async {
+    final response = await _apiClient.get<Object?>(
+      LearnerMentorApiPaths.cancellationEligibility(bookingId),
+    );
+    return CancellationEligibilityDto.fromJson(
+      readLearnerMentorResultObject(response.data),
+    ).toDomain();
+  }
+
+  @override
+  Future<bool> cancelBooking({
+    required int bookingId,
+    required String reason,
+    bool requestException = false,
+    String? exceptionReason,
+  }) async {
+    final response = await _apiClient.post<Object?>(
+      LearnerMentorApiPaths.cancelBooking(bookingId),
+      data: CancelMentorBookingRequestDto(
+        reason: reason,
+        requestException: requestException,
+        exceptionReason: exceptionReason,
+      ).toJson(),
+    );
+    return response.data != null;
+  }
+
+  @override
+  Future<bool> rescheduleBooking({
+    required int bookingId,
+    required int newSlotId,
+  }) async {
+    final response = await _apiClient.post<Object?>(
+      LearnerMentorApiPaths.rescheduleBooking(bookingId),
+      data: RescheduleMentorBookingRequestDto(
+        newMentorAvailabilityId: newSlotId,
+      ).toJson(),
+    );
+    return response.data != null;
+  }
+
+  @override
+  Future<MentorReviewItem> createReview({
+    required int bookingId,
+    required int rating,
+    String? comment,
+  }) async {
+    final response = await _apiClient.post<Object?>(
+      LearnerMentorApiPaths.reviews,
+      data: CreateMentorReviewRequestDto(
+        mentorBookingId: bookingId,
+        rating: rating,
+        comment: comment,
+      ).toJson(),
+    );
+    return MentorReviewDto.fromJson(
+      readLearnerMentorResultObject(response.data),
+    ).toDomain();
+  }
+
+  @override
+  Future<MentorRatingSummary> loadMentorReviewSummary(int mentorId) async {
+    final response = await _apiClient.get<Object?>(
+      LearnerMentorApiPaths.mentorReviewSummary(mentorId),
+    );
+    return MentorRatingSummaryDto.fromJson(
+      readLearnerMentorResultObject(response.data),
+    ).toDomain();
+  }
+
+  @override
+  Future<List<MentorReviewItem>> loadMentorReviews(int mentorId) async {
+    final response = await _apiClient.get<Object?>(
+      LearnerMentorApiPaths.mentorReviews(mentorId),
+    );
+    return readLearnerMentorResultList(response.data)
+        .map(MentorReviewDto.fromJson)
+        .map((dto) => dto.toDomain())
+        .toList(growable: false);
+  }
+
+  @override
+  Future<LearnerDisputeItem> createDispute({
+    required int bookingId,
+    required int category,
+    required String reason,
+    String? evidenceNotes,
+  }) async {
+    final response = await _apiClient.post<Object?>(
+      LearnerMentorApiPaths.disputes,
+      data: CreateMentorDisputeRequestDto(
+        mentorBookingId: bookingId,
+        category: category,
+        description: reason,
+        evidenceNotes: evidenceNotes,
+      ).toJson(),
+    );
+    return LearnerDisputeDto.fromJson(
+      readLearnerMentorResultObject(response.data),
+    ).toDomain();
+  }
+
+  @override
+  Future<List<LearnerDisputeItem>> loadMyDisputes() async {
+    final response = await _apiClient.get<Object?>(
+      LearnerMentorApiPaths.myDisputes,
+    );
+    return readLearnerMentorResultList(response.data)
+        .map(LearnerDisputeDto.fromJson)
+        .map((dto) => dto.toDomain())
+        .toList(growable: false);
+  }
+
+  @override
+  Future<bool> submitAbuseReport({
+    required int reportedUserId,
+    required int reason,
+    required String details,
+  }) async {
+    final response = await _apiClient.post<Object?>(
+      LearnerMentorApiPaths.reportAbuse,
+      data: SubmitAbuseReportRequestDto(
+        reportedUserId: reportedUserId,
+        reason: reason,
+        details: details,
+      ).toJson(),
+    );
+    return response.data != null;
   }
 }

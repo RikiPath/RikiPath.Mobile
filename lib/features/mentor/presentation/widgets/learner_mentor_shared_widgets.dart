@@ -235,7 +235,10 @@ class LearnerMentorBookingCard extends StatelessWidget {
                       children: [
                         _MetaPill(
                           icon: Icons.verified_outlined,
-                          label: learnerMentorBookingStatusLabel(booking.status, context),
+                          label: learnerMentorBookingStatusLabel(
+                            booking.status,
+                            context,
+                          ),
                         ),
                         _MetaPill(
                           icon: Icons.payments_outlined,

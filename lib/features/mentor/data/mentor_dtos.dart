@@ -1,3 +1,4 @@
+import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 
 class MentorAvailabilityDto {
@@ -81,6 +82,12 @@ class MentorMeetingDto {
     this.learnerName,
     this.scheduledAt,
     this.meetingLink,
+    this.reviewRating,
+    this.reviewComment,
+    this.reviewReply,
+    this.hasDispute = false,
+    this.disputeReason,
+    this.disputeResponse,
   });
 
   factory MentorMeetingDto.fromJson(Map<String, Object?> json) {
@@ -93,6 +100,12 @@ class MentorMeetingDto {
       },
       status: MentorMeetingStatus.fromApiValue(_requiredString(json, 'status')),
       meetingLink: _optionalString(json, 'meetingLink'),
+      reviewRating: (json['reviewRating'] as num?)?.toInt(),
+      reviewComment: _optionalString(json, 'reviewComment'),
+      reviewReply: _optionalString(json, 'reviewReply'),
+      hasDispute: json['hasDispute'] as bool? ?? false,
+      disputeReason: _optionalString(json, 'disputeReason'),
+      disputeResponse: _optionalString(json, 'disputeResponse'),
     );
   }
 
@@ -101,6 +114,12 @@ class MentorMeetingDto {
   final MentorTimestamp? scheduledAt;
   final MentorMeetingStatus status;
   final String? meetingLink;
+  final int? reviewRating;
+  final String? reviewComment;
+  final String? reviewReply;
+  final bool hasDispute;
+  final String? disputeReason;
+  final String? disputeResponse;
 
   MentorMeetingSummary toDomain() => MentorMeetingSummary(
     id: id,
@@ -108,7 +127,128 @@ class MentorMeetingDto {
     scheduledAt: scheduledAt,
     status: status,
     meetingLink: meetingLink,
+    reviewRating: reviewRating,
+    reviewComment: reviewComment,
+    reviewReply: reviewReply,
+    hasDispute: hasDispute,
+    disputeReason: disputeReason,
+    disputeResponse: disputeResponse,
   );
+}
+
+class MentorProfileDto {
+  const MentorProfileDto({
+    required this.mentorId,
+    required this.email,
+    this.firstName,
+    this.lastName,
+    this.phoneNumber,
+    this.avatarUrl,
+    this.bio,
+    this.expertise,
+    this.jlptLevel,
+    this.yearsOfExperience,
+    this.workplace,
+    this.verificationDocumentUrl,
+    this.hasVerificationDocument = false,
+    this.introductionVideoUrl,
+    this.verificationStatus = 'Unverified',
+    this.verificationStatusDescription = '',
+    this.isBookable = false,
+    this.submittedAt,
+    this.reviewedAt,
+    this.rejectionReason,
+    this.reviewNotes,
+  });
+
+  factory MentorProfileDto.fromJson(Map<String, Object?> json) {
+    return MentorProfileDto(
+      mentorId: (json['mentorId'] as num?)?.toInt() ?? 0,
+      email: _requiredString(json, 'email'),
+      firstName: _optionalString(json, 'firstName'),
+      lastName: _optionalString(json, 'lastName'),
+      phoneNumber: _optionalString(json, 'phoneNumber'),
+      avatarUrl: _optionalString(json, 'avatarUrl'),
+      bio: _optionalString(json, 'bio'),
+      expertise: _optionalString(json, 'expertise'),
+      jlptLevel: _optionalString(json, 'jlptLevel'),
+      yearsOfExperience: (json['yearsOfExperience'] as num?)?.toInt(),
+      workplace: _optionalString(json, 'workplace'),
+      verificationDocumentUrl: _optionalString(json, 'verificationDocumentUrl'),
+      hasVerificationDocument: json['hasVerificationDocument'] as bool? ?? false,
+      introductionVideoUrl: _optionalString(json, 'introductionVideoUrl'),
+      verificationStatus: (json['verificationStatus']?.toString()) ?? 'Unverified',
+      verificationStatusDescription: json['verificationStatusDescription']?.toString() ?? '',
+      isBookable: json['isBookable'] as bool? ?? false,
+      submittedAt: switch (_optionalString(json, 'submittedAt')) {
+        final val? => DateTime.tryParse(val),
+        null => null,
+      },
+      reviewedAt: switch (_optionalString(json, 'reviewedAt')) {
+        final val? => DateTime.tryParse(val),
+        null => null,
+      },
+      rejectionReason: _optionalString(json, 'rejectionReason'),
+      reviewNotes: _optionalString(json, 'reviewNotes'),
+    );
+  }
+
+  final int mentorId;
+  final String email;
+  final String? firstName;
+  final String? lastName;
+  final String? phoneNumber;
+  final String? avatarUrl;
+  final String? bio;
+  final String? expertise;
+  final String? jlptLevel;
+  final int? yearsOfExperience;
+  final String? workplace;
+  final String? verificationDocumentUrl;
+  final bool hasVerificationDocument;
+  final String? introductionVideoUrl;
+  final String verificationStatus;
+  final String verificationStatusDescription;
+  final bool isBookable;
+  final DateTime? submittedAt;
+  final DateTime? reviewedAt;
+  final String? rejectionReason;
+  final String? reviewNotes;
+
+  MentorProfileData toDomain() => MentorProfileData(
+    mentorId: mentorId,
+    email: email,
+    firstName: firstName,
+    lastName: lastName,
+    phoneNumber: phoneNumber,
+    avatarUrl: avatarUrl,
+    bio: bio,
+    expertise: expertise,
+    jlptLevel: jlptLevel,
+    yearsOfExperience: yearsOfExperience,
+    workplace: workplace,
+    verificationDocumentUrl: verificationDocumentUrl,
+    hasVerificationDocument: hasVerificationDocument,
+    introductionVideoUrl: introductionVideoUrl,
+    verificationStatus: verificationStatus,
+    verificationStatusDescription: verificationStatusDescription,
+    isBookable: isBookable,
+    submittedAt: submittedAt,
+    reviewedAt: reviewedAt,
+    rejectionReason: rejectionReason,
+    reviewNotes: reviewNotes,
+  );
+}
+
+Map<String, Object?> readMentorResultObject(Object? body) {
+  if (body is! Map<Object?, Object?>) {
+    throw const FormatException('Expected a Mentor API response envelope.');
+  }
+  final result = body['result'];
+  if (result is! Map<Object?, Object?>) {
+    throw const FormatException('Expected a Mentor API result object.');
+  }
+  return result.map((key, value) => MapEntry(key.toString(), value));
 }
 
 List<Map<String, Object?>> readMentorResultList(Object? body) {

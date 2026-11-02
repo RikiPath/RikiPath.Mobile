@@ -105,11 +105,19 @@ class AuthSessionController extends ValueNotifier<AuthSessionState> {
     }
   }
 
-  Future<void> signOut() async {
+  Future<void> signOut({Future<void> Function()? onBeforeClear}) async {
     final operation = ++_operation;
     _currentUserId = null;
     _currentRole = null;
     value = AuthSessionState.unknown;
+
+    if (onBeforeClear != null) {
+      try {
+        await onBeforeClear();
+      } catch (_) {
+        // Ignored to guarantee sign out succeeds
+      }
+    }
 
     try {
       await _tokenStorage.clear();

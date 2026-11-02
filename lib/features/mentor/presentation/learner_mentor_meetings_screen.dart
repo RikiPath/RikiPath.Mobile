@@ -21,7 +21,7 @@ class LearnerMentorMeetingsScreen extends ConsumerWidget {
       key: const Key('learner_mentor_meetings_screen'),
       backgroundColor: AppColors.learnerBackground,
       appBar: AppBar(
-        title: const Text('Học cùng Mentor'),
+        title: const Text('Tư vấn 1-1'),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: AppSpacing.space3),
@@ -33,23 +33,23 @@ class LearnerMentorMeetingsScreen extends ConsumerWidget {
         top: false,
         child: switch (state) {
           AsyncLoading() => const MentorListSkeleton(
-              key: Key('learner_mentor_plans_loading'),
-            ),
+            key: Key('learner_mentor_plans_loading'),
+          ),
           AsyncError() => Center(
-              child: MentorErrorState(
-                key: const Key('learner_mentor_plans_error'),
-                message: context.l10n.learnerMentorPlansError,
-                onRetry: ref
-                    .read(learnerMentorPlansControllerProvider.notifier)
-                    .retry,
-              ),
-            ),
-          AsyncData(:final value) => _PlansBody(
-              plans: value,
-              onRefresh: ref
+            child: MentorErrorState(
+              key: const Key('learner_mentor_plans_error'),
+              message: context.l10n.learnerMentorPlansError,
+              onRetry: ref
                   .read(learnerMentorPlansControllerProvider.notifier)
                   .retry,
             ),
+          ),
+          AsyncData(:final value) => _PlansBody(
+            plans: value,
+            onRefresh: ref
+                .read(learnerMentorPlansControllerProvider.notifier)
+                .retry,
+          ),
         },
       ),
     );
@@ -77,9 +77,8 @@ class _PlansBodyState extends State<_PlansBody> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedPlan = widget.plans
-            .where((p) => p.id == _selectedPlanId)
-            .firstOrNull ??
+    final selectedPlan =
+        widget.plans.where((p) => p.id == _selectedPlanId).firstOrNull ??
         widget.plans.firstOrNull;
 
     return Column(
@@ -147,7 +146,7 @@ class _PlansBodyState extends State<_PlansBody> {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              'Được hướng dẫn trực tiếp bởi Mentor giàu kinh nghiệm luyện thi JLPT.',
+                              'Được cố vấn hỗ trợ ôn luyện và giải đáp thắc mắc JLPT.',
                               style: AppTypography.bodySmall.copyWith(
                                 color: AppColors.textPrimary,
                                 height: 1.3,
@@ -181,7 +180,9 @@ class _PlansBodyState extends State<_PlansBody> {
                   for (var index = 0; index < widget.plans.length; index++) ...[
                     GestureDetector(
                       onTap: () {
-                        setState(() => _selectedPlanId = widget.plans[index].id);
+                        setState(
+                          () => _selectedPlanId = widget.plans[index].id,
+                        );
                       },
                       child: Stack(
                         children: [
@@ -191,8 +192,9 @@ class _PlansBodyState extends State<_PlansBody> {
                             ),
                             plan: widget.plans[index],
                             onTap: () {
-                              setState(() =>
-                                  _selectedPlanId = widget.plans[index].id);
+                              setState(
+                                () => _selectedPlanId = widget.plans[index].id,
+                              );
                               context.push(
                                 AppRoutes.learnerMentorDiscovery(
                                   widget.plans[index].id,
@@ -213,7 +215,8 @@ class _PlansBodyState extends State<_PlansBody> {
                                     ? AppColors.brandPrimary
                                     : AppColors.surfaceContainer,
                                 border: Border.all(
-                                  color: _selectedPlanId == widget.plans[index].id
+                                  color:
+                                      _selectedPlanId == widget.plans[index].id
                                       ? AppColors.brandPrimary
                                       : AppColors.border,
                                   width: 1.5,
@@ -246,9 +249,7 @@ class _PlansBodyState extends State<_PlansBody> {
             decoration: BoxDecoration(
               color: AppColors.surface,
               boxShadow: AppShadows.cardSoft,
-              border: const Border(
-                top: BorderSide(color: AppColors.border),
-              ),
+              border: const Border(top: BorderSide(color: AppColors.border)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -280,7 +281,7 @@ class _PlansBodyState extends State<_PlansBody> {
                 const SizedBox(height: AppSpacing.space2),
                 RikiPrimaryButton(
                   key: const Key('learner_mentor_continue_to_mentor_button'),
-                  label: 'Tiếp tục chọn Mentor',
+                  label: 'Tiếp tục chọn cố vấn',
                   trailingIcon: Icons.arrow_forward,
                   onPressed: () => context.push(
                     AppRoutes.learnerMentorDiscovery(selectedPlan.id),
