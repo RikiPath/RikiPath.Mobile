@@ -349,7 +349,6 @@ class LearnerMentorPurchaseStatusController
 
 enum LearnerMentorMutationType {
   purchase,
-  includedBooking,
   creditBooking,
   cancellation,
   reschedule,
@@ -417,38 +416,6 @@ class LearnerMentorMutationController
     } catch (error) {
       state = LearnerMentorMutationState.failure(
         LearnerMentorMutationType.purchase,
-        error,
-      );
-      return null;
-    }
-  }
-
-  Future<LearnerMentorBooking?> bookIncludedSession({
-    required int subscriptionId,
-    required int mentorAvailabilityId,
-    String? question,
-  }) async {
-    if (state.isLoading) return null;
-    state = const LearnerMentorMutationState.loading(
-      LearnerMentorMutationType.includedBooking,
-    );
-    try {
-      final result = await ref
-          .read(learnerMentorRepositoryProvider)
-          .bookIncludedSession(
-            subscriptionId: subscriptionId,
-            mentorAvailabilityId: mentorAvailabilityId,
-            question: question,
-          );
-      state = LearnerMentorMutationState.bookingSuccess(result);
-      ref.invalidate(learnerMentorBookingsControllerProvider);
-      ref.invalidate(
-        learnerMentorPurchaseStatusControllerProvider(subscriptionId),
-      );
-      return result;
-    } catch (error) {
-      state = LearnerMentorMutationState.failure(
-        LearnerMentorMutationType.includedBooking,
         error,
       );
       return null;

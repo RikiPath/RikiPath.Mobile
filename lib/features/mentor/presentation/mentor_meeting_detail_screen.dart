@@ -45,31 +45,6 @@ class MentorMeetingDetailScreen extends ConsumerWidget {
                 .where((meeting) => meeting.id == meetingId)
                 .firstOrNull,
             onJoin: (uri) => _openMeeting(ref, context, uri),
-            onAccept: meetingId == null
-                ? null
-                : () async {
-                    final success = await ref
-                        .read(mentorMeetingsControllerProvider.notifier)
-                        .acceptMeeting(meetingId!);
-                    if (!context.mounted) return;
-                    if (success) {
-                      ref
-                          .read(rikiToastServiceProvider.notifier)
-                          .success(
-                            title: 'Xác nhận thành công',
-                            description:
-                                'Buổi học đã được xác nhận thành công.',
-                          );
-                    } else {
-                      ref
-                          .read(rikiToastServiceProvider.notifier)
-                          .error(
-                            title: 'Xác nhận thất bại',
-                            description:
-                                'Không thể xác nhận lịch học. Vui lòng thử lại.',
-                          );
-                    }
-                  },
             onCancel: meetingId == null
                 ? null
                 : (reason) async {
@@ -181,7 +156,6 @@ class _DetailData extends StatelessWidget {
   const _DetailData({
     required this.meeting,
     required this.onJoin,
-    this.onAccept,
     this.onCancel,
     this.onReplyReview,
     this.onRespondDispute,
@@ -189,7 +163,6 @@ class _DetailData extends StatelessWidget {
 
   final MentorMeetingSummary? meeting;
   final Future<void> Function(Uri uri) onJoin;
-  final VoidCallback? onAccept;
   final Future<void> Function(String reason)? onCancel;
   final Future<void> Function(String reply)? onReplyReview;
   final Future<void> Function(String responseText)? onRespondDispute;
@@ -216,8 +189,8 @@ class _DetailData extends StatelessWidget {
     final canJoin = MeetingNativeRollout.isEnabled
         ? nativeRoom != null
         : meetingUri != null;
-    final isAssigned = value.status == MentorMeetingStatus.assigned;
-    final isAccepted = value.status == MentorMeetingStatus.accepted;
+    final isConfirmed = value.status == MentorMeetingStatus.assigned ||
+        value.status == MentorMeetingStatus.accepted;
 
     return ListView(
       key: const Key('mentor_meeting_detail_content'),
@@ -225,10 +198,10 @@ class _DetailData extends StatelessWidget {
       children: [
         // Hero Card trạng thái yêu cầu
         RikiCard(
-          borderColor: isAccepted
+            borderColor: isConfirmed
               ? AppColors.brandPrimary.withValues(alpha: 0.35)
               : AppColors.warning.withValues(alpha: 0.4),
-          backgroundColor: isAccepted
+            backgroundColor: isConfirmed
               ? AppColors.brandPrimary.withValues(alpha: 0.04)
               : AppColors.warning.withValues(alpha: 0.05),
           padding: const EdgeInsets.all(AppSpacing.space4),
@@ -238,16 +211,16 @@ class _DetailData extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: isAccepted
+                  color: isConfirmed
                       ? AppColors.brandTint
                       : AppColors.warning.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  isAccepted
+                  isConfirmed
                       ? Icons.check_circle_outline
                       : Icons.assignment_ind_outlined,
-                  color: isAccepted
+                  color: isConfirmed
                       ? AppColors.brandPrimary
                       : AppColors.warning,
                   size: 24,
@@ -259,11 +232,9 @@ class _DetailData extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isAccepted
+                      isConfirmed
                           ? 'Đã xác nhận buổi học'
-                          : (isAssigned
-                                ? 'Yêu cầu học mới'
-                                : mentorStatusLabel(value.status, context)),
+                          : mentorStatusLabel(value.status, context),
                       style: AppTypography.cardTitle.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -271,9 +242,9 @@ class _DetailData extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      isAccepted
+                      isConfirmed
                           ? 'Buổi học đã được lên lịch. Vui lòng vào phòng đúng giờ.'
-                          : 'Học viên đã đăng ký khung giờ dạy của bạn. Vui lòng kiểm tra và xác nhận.',
+                          : mentorStatusLabel(value.status, context),
                       style: AppTypography.metadata.copyWith(
                         color: AppColors.textMuted,
                       ),
@@ -318,16 +289,6 @@ class _DetailData extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.space4),
 
-        if (value.status == MentorMeetingStatus.assigned &&
-            onAccept != null) ...[
-          RikiPrimaryButton(
-            key: const Key('mentor_accept_meeting_button'),
-            label: 'Xác nhận buổi học',
-            leadingIcon: Icons.check_circle_outline,
-            onPressed: onAccept,
-          ),
-          const SizedBox(height: AppSpacing.space3),
-        ],
         if (!canJoin)
           RikiInfoBanner(
             key: const Key('mentor_meeting_link_unavailable'),

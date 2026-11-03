@@ -289,17 +289,6 @@ class MentorMeetingsController
     state = await AsyncValue.guard(build);
   }
 
-  /// Tiếp nhận lịch hẹn của học viên từ phía Mentor.
-  Future<bool> acceptMeeting(int bookingId) async {
-    try {
-      await ref.read(mentorRepositoryProvider).acceptMeeting(bookingId);
-      ref.invalidateSelf();
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
   /// Mentor hủy lịch hẹn tư vấn: tự động hoàn 1 lượt tín dụng cho học viên.
   Future<bool> cancelMeeting(int bookingId, String reason) async {
     try {

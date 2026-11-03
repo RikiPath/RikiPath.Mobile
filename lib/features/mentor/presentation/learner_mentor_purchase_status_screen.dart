@@ -57,10 +57,7 @@ class _LearnerMentorPurchaseStatusScreenState
     });
   }
 
-  Future<void> _attemptAutoBooking(
-    int subscriptionId,
-    LearnerBookingIntent intent,
-  ) async {
+  Future<void> _attemptAutoBooking(LearnerBookingIntent intent) async {
     if (_autoBookingAttempted || _isAutoBooking || intent.slot == null) return;
     _autoBookingAttempted = true;
     setState(() {
@@ -71,10 +68,10 @@ class _LearnerMentorPurchaseStatusScreenState
     try {
       final booking = await ref
           .read(learnerMentorMutationControllerProvider.notifier)
-          .bookIncludedSession(
-            subscriptionId: subscriptionId,
-            mentorAvailabilityId: intent.slot!.id,
-            question: intent.question,
+          .bookWithCredit(
+            slotId: intent.slot!.id,
+            operationKey: 'booking_${DateTime.now().millisecondsSinceEpoch}',
+            notes: intent.question,
           );
 
       if (!mounted) return;
@@ -136,7 +133,7 @@ class _LearnerMentorPurchaseStatusScreenState
         if (intent != null &&
             intent.subscriptionId == id &&
             intent.slot != null) {
-          _attemptAutoBooking(id, intent);
+          _attemptAutoBooking(intent);
         }
       }
     });
@@ -150,7 +147,7 @@ class _LearnerMentorPurchaseStatusScreenState
           nextIntent != null &&
           nextIntent.subscriptionId == id &&
           nextIntent.slot != null) {
-        _attemptAutoBooking(id, nextIntent);
+        _attemptAutoBooking(nextIntent);
       }
     });
 
@@ -164,7 +161,7 @@ class _LearnerMentorPurchaseStatusScreenState
           intent != null &&
           intent.subscriptionId == id &&
           intent.slot != null) {
-        _attemptAutoBooking(id, intent);
+        _attemptAutoBooking(intent);
       }
     });
 

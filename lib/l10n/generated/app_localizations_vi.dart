@@ -598,10 +598,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mentorStatusPendingAssignment => 'Chờ phân công';
 
   @override
-  String get mentorStatusAssigned => 'Chờ xác nhận';
+  String get mentorStatusAssigned => 'Đã xác nhận';
 
   @override
-  String get learnerMentorStatusAssigned => 'Đang chờ xác nhận lịch';
+  String get learnerMentorStatusAssigned => 'Đã xác nhận lịch';
 
   @override
   String get mentorStatusAccepted => 'Đã xác nhận';

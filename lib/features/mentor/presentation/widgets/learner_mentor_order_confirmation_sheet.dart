@@ -112,8 +112,9 @@ class _LearnerMentorOrderConfirmationSheetState
             );
         return;
       }
-      final creditBalance =
-          ref.read(learnerCreditBalanceControllerProvider).value;
+      final creditBalance = ref
+          .read(learnerCreditBalanceControllerProvider)
+          .value;
       final hasCredit = (creditBalance?.availableBalance ?? 0) > 0;
       final isExistingSubscription =
           (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
@@ -121,25 +122,14 @@ class _LearnerMentorOrderConfirmationSheetState
 
       if (isExistingSubscription) {
         // Đặt lịch trực tiếp bằng lượt học đã thanh toán hoặc vé khả dụng
-        final LearnerMentorBooking? booking;
-        if (widget.subscriptionId != null && widget.subscriptionId! > 0) {
-          booking = await ref
-              .read(learnerMentorMutationControllerProvider.notifier)
-              .bookIncludedSession(
-                subscriptionId: widget.subscriptionId!,
-                mentorAvailabilityId: widget.slot.id,
-                question: _questionController.text.trim(),
-              );
-        } else {
-          final opKey = 'booking_${DateTime.now().millisecondsSinceEpoch}';
-          booking = await ref
-              .read(learnerMentorMutationControllerProvider.notifier)
-              .bookWithCredit(
-                slotId: widget.slot.id,
-                operationKey: opKey,
-                notes: _questionController.text.trim(),
-              );
-        }
+        final opKey = 'booking_${DateTime.now().millisecondsSinceEpoch}';
+        final booking = await ref
+            .read(learnerMentorMutationControllerProvider.notifier)
+            .bookWithCredit(
+              slotId: widget.slot.id,
+              operationKey: opKey,
+              notes: _questionController.text.trim(),
+            );
 
         if (!mounted) return;
         setState(() => _isSubmitting = false);
@@ -240,8 +230,9 @@ class _LearnerMentorOrderConfirmationSheetState
     final endTime = widget.slot.endTime.displayValue;
     final dateFormat = DateFormat('EEEE, dd/MM/yyyy', locale);
     final timeFormat = DateFormat('HH:mm', locale);
-    final creditBalance =
-        ref.watch(learnerCreditBalanceControllerProvider).value;
+    final creditBalance = ref
+        .watch(learnerCreditBalanceControllerProvider)
+        .value;
     final hasCredit = (creditBalance?.availableBalance ?? 0) > 0;
     final isExistingSubscription =
         (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
@@ -352,9 +343,11 @@ class _LearnerMentorOrderConfirmationSheetState
                     icon: Icons.payments_outlined,
                     label: context.l10n.learnerMentorConfirmPrice,
                     value: isExistingSubscription
-                        ? (hasCredit && (widget.subscriptionId == null || widget.subscriptionId! <= 0)
-                            ? '1 vé khả dụng (${creditBalance?.availableBalance ?? 1} vé còn lại)'
-                            : context.l10n.learnerMentorIncludedSession)
+                        ? (hasCredit &&
+                                  (widget.subscriptionId == null ||
+                                      widget.subscriptionId! <= 0)
+                              ? '1 vé khả dụng (${creditBalance?.availableBalance ?? 1} vé còn lại)'
+                              : context.l10n.learnerMentorIncludedSession)
                         : (planPriceFormatted ?? 'Theo gói đã chọn'),
                   ),
                 ],

@@ -17,12 +17,6 @@ abstract interface class LearnerMentorRepository {
     String? idempotencyKey,
   });
 
-  Future<LearnerMentorBooking> bookIncludedSession({
-    required int subscriptionId,
-    required int mentorAvailabilityId,
-    String? question,
-  });
-
   Future<List<LearnerMentorBooking>> loadBookings();
 
   Future<MentorMeetingPurchaseStatus> loadPurchaseStatus(int subscriptionId);
@@ -73,10 +67,4 @@ abstract interface class LearnerMentorRepository {
   });
 
   Future<List<LearnerDisputeItem>> loadMyDisputes();
-
-  Future<bool> submitAbuseReport({
-    required int reportedUserId,
-    required int reason,
-    required String details,
-  });
 }

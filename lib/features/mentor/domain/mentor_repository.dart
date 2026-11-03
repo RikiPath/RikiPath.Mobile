@@ -7,8 +7,6 @@ abstract interface class MentorRepository {
 
   Future<List<MentorMeetingSummary>> loadMeetings();
 
-  Future<void> acceptMeeting(int bookingId);
-
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(DateTime weekStart);
 
   Future<bool> saveWeeklySchedule({

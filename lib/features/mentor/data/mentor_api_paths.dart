@@ -1,11 +1,11 @@
 abstract final class MentorApiPaths {
   static const String availability = '/api/mentor/availability';
-  static const String meetings = '/api/mentor/meetings';
+  static const String meetings = '/api/mentor-bookings';
   static const String weeklySchedule = '/api/mentor-schedule/weekly';
   static const String profile = '/api/mentor/profile';
   static const String submitVerification = '/api/mentor/profile/submit-verification';
   static const String verificationDocument = '/api/mentor/profile/verification-document';
-  static const String mentorDisputes = '/api/v1/mentor/mentor-disputes';
+  static const String mentorDisputes = '/api/mentor/mentor-disputes';
 
   static String weeklyScheduleUrl(DateTime weekStart) {
     final d =
@@ -13,8 +13,7 @@ abstract final class MentorApiPaths {
     return '$weeklySchedule?weekStart=$d';
   }
 
-  static String acceptMeeting(int bookingId) => '$meetings/$bookingId/accept';
-  static String cancelBooking(int bookingId) => '/api/v1/mentor-bookings/$bookingId/cancel';
-  static String replyReview(int reviewId) => '/api/v1/mentor-reviews/$reviewId/reply';
-  static String respondDispute(int disputeId) => '/api/v1/mentor-disputes/$disputeId/respond';
+  static String cancelBooking(int bookingId) => '/api/mentor-bookings/$bookingId/cancel';
+  static String replyReview(int reviewId) => '/api/mentor-reviews/$reviewId/reply';
+  static String respondDispute(int disputeId) => '/api/mentor-disputes/$disputeId/respond';
 }

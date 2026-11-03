@@ -566,10 +566,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mentorStatusPendingAssignment => '割り当て待ち';
 
   @override
-  String get mentorStatusAssigned => '割り当て済み';
+  String get mentorStatusAssigned => '予約確定';
 
   @override
-  String get learnerMentorStatusAssigned => 'メンターの確認待ち';
+  String get learnerMentorStatusAssigned => '予約が確定しました';
 
   @override
   String get mentorStatusAccepted => '承認済み';

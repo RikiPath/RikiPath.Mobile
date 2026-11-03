@@ -17,23 +17,6 @@ class PurchaseMentorPlanRequestDto {
     if (idempotencyKey != null) 'idempotencyKey': idempotencyKey,
   };
 }
-
-class BookIncludedMeetingRequestDto {
-  const BookIncludedMeetingRequestDto({
-    required this.mentorAvailabilityId,
-    this.question,
-  });
-
-  final int mentorAvailabilityId;
-  final String? question;
-
-  Map<String, Object?> toJson() => <String, Object?>{
-    'mentorAvailabilityId': mentorAvailabilityId,
-    if (question != null && question!.trim().isNotEmpty)
-      'question': question!.trim(),
-  };
-}
-
 class BookableMentorDto {
   const BookableMentorDto({
     required this.id,
@@ -90,7 +73,6 @@ class BookableMentorDto {
     teachingMethod: teachingMethod,
   );
 }
-
 class MentorMeetingFeatureDto {
   const MentorMeetingFeatureDto({
     required this.id,
@@ -856,22 +838,4 @@ class LearnerDisputeDto {
     refundApproved: refundApproved,
     createdAtUtc: createdAtUtc,
   );
-}
-
-class SubmitAbuseReportRequestDto {
-  const SubmitAbuseReportRequestDto({
-    required this.reportedUserId,
-    required this.reason,
-    required this.details,
-  });
-
-  final int reportedUserId;
-  final int reason;
-  final String details;
-
-  Map<String, Object?> toJson() => <String, Object?>{
-    'reportedUserId': reportedUserId,
-    'reason': reason,
-    'details': details.trim(),
-  };
 }
