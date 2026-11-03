@@ -124,7 +124,9 @@ GoRouter createAppRouter({
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (context, state) => const RegisterScreen(),
+        builder: (context, state) => RegisterScreen(
+          mentorRegistration: state.uri.queryParameters['intent'] == 'mentor',
+        ),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
@@ -206,7 +208,8 @@ GoRouter createAppRouter({
       ),
       GoRoute(
         path: AppRoutes.mentorApplication,
-        builder: (context, state) => const MentorProfileScreen(),
+        builder: (context, state) =>
+            const MentorProfileScreen(applicationMode: true),
       ),
       GoRoute(
         path: AppRoutes.learnerMentorMeetings,
@@ -233,8 +236,9 @@ GoRouter createAppRouter({
               subscriptionId: int.tryParse(
                 state.uri.queryParameters['subscriptionId'] ?? '',
               ),
-              mentorId:
-                  int.tryParse(state.uri.queryParameters['mentorId'] ?? ''),
+              mentorId: int.tryParse(
+                state.uri.queryParameters['mentorId'] ?? '',
+              ),
             ),
           ),
           GoRoute(

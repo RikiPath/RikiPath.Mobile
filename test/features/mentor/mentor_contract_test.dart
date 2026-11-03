@@ -28,11 +28,76 @@ import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_meeting_detail_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_meetings_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_profile_screen.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 
 import '../../support/test_auth_session.dart';
 
 void main() {
+  testWidgets('Learner application submits once and remains pending', (
+    tester,
+  ) async {
+    final session = createTestAuthSession(role: BackendUserRole.learner);
+    addTearDown(session.dispose);
+    final repository = _TestMentorRepository.empty(
+      profile: const MentorProfileData(
+        mentorId: 42,
+        email: 'applicant@example.com',
+        bio: 'Đồng hành cùng học viên',
+        expertise: 'Ôn luyện JLPT',
+        jlptLevel: 'N2',
+        hasVerificationDocument: true,
+      ),
+    );
+    await _pumpMentor(
+      tester,
+      const MentorProfileScreen(applicationMode: true),
+      repository: repository,
+      session: session,
+    );
+    expect(find.text('Hồ sơ ứng tuyển Cố vấn'), findsOneWidget);
+    expect(find.text('Gửi hồ sơ xét duyệt'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('mentor_submit_verification_button')),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const Key('mentor_submit_verification_button')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const Key('confirm_submit_verification_button')),
+    );
+    await tester.pumpAndSettle();
+    expect(repository.submitCalls, 1);
+    expect(find.text('Đang chờ xét duyệt'), findsWidgets);
+    expect(session.currentRole, BackendUserRole.learner);
+  });
+
+  testWidgets('Mentor application labels are localized in Japanese', (
+    tester,
+  ) async {
+    final repository = _TestMentorRepository.empty(
+      profile: const MentorProfileData(
+        mentorId: 42,
+        email: 'applicant@example.com',
+      ),
+    );
+    await _pumpMentor(
+      tester,
+      const MentorProfileScreen(applicationMode: true),
+      repository: repository,
+      locale: const Locale('ja'),
+    );
+    expect(find.text('メンター応募書類'), findsOneWidget);
+    expect(find.text('審査状況'), findsOneWidget);
+    expect(find.text('個人情報'), findsOneWidget);
+    expect(find.text('資格証明書をアップロード'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   group('role and routing', () {
     test('1. exposes the dedicated Mentor route family', () {
       expect(AppRoutes.mentor, '/mentor');
@@ -645,25 +710,29 @@ void main() {
       );
     });
 
-    testWidgets('historical assigned booking is shown as confirmed without acceptance', (
-      tester,
-    ) async {
-      final repository = _TestMentorRepository(
-        availabilityResults: const [[]],
-        meetingResults: [
-          [_meeting(id: 75, status: MentorMeetingStatus.assigned)],
-        ],
-      );
+    testWidgets(
+      'historical assigned booking is shown as confirmed without acceptance',
+      (tester) async {
+        final repository = _TestMentorRepository(
+          availabilityResults: const [[]],
+          meetingResults: [
+            [_meeting(id: 75, status: MentorMeetingStatus.assigned)],
+          ],
+        );
 
-      await _pumpMentorRouter(
-        tester,
-        initialLocation: AppRoutes.mentorMeetingDetail(75),
-        repository: repository,
-      );
+        await _pumpMentorRouter(
+          tester,
+          initialLocation: AppRoutes.mentorMeetingDetail(75),
+          repository: repository,
+        );
 
-      expect(find.text('Đã xác nhận buổi học'), findsOneWidget);
-      expect(find.byKey(const Key('mentor_accept_meeting_button')), findsNothing);
-    });
+        expect(find.text('Đã xác nhận buổi học'), findsOneWidget);
+        expect(
+          find.byKey(const Key('mentor_accept_meeting_button')),
+          findsNothing,
+        );
+      },
+    );
 
     testWidgets('32. missing meeting detail fails safely', (tester) async {
       await _pumpMentorRouter(
@@ -1018,15 +1087,20 @@ class _TestMentorRepository implements MentorRepository {
   _TestMentorRepository({
     required this.availabilityResults,
     required this.meetingResults,
+    this.profile,
   });
 
-  factory _TestMentorRepository.empty() => _TestMentorRepository(
-    availabilityResults: const [<MentorAvailabilitySlot>[]],
-    meetingResults: const [<MentorMeetingSummary>[]],
-  );
+  factory _TestMentorRepository.empty({MentorProfileData? profile}) =>
+      _TestMentorRepository(
+        availabilityResults: const [<MentorAvailabilitySlot>[]],
+        meetingResults: const [<MentorMeetingSummary>[]],
+        profile: profile,
+      );
 
   final List<Object> availabilityResults;
   final List<Object> meetingResults;
+  final MentorProfileData? profile;
+  int submitCalls = 0;
   int availabilityCalls = 0;
   int meetingCalls = 0;
 
@@ -1079,7 +1153,9 @@ class _TestMentorRepository implements MentorRepository {
   Future<bool> respondDispute(int disputeId, String responseText) async => true;
 
   @override
-  Future<MentorProfileData> loadProfile() async => const MentorProfileData(
+  Future<MentorProfileData> loadProfile() async =>
+      profile ??
+      const MentorProfileData(
         mentorId: 1,
         email: 'mentor@test.com',
         verificationStatus: 'Approved',
@@ -1095,30 +1171,34 @@ class _TestMentorRepository implements MentorRepository {
     String? workplace,
     String? verificationDocumentUrl,
     String? introductionVideoUrl,
-  }) async =>
-      const MentorProfileData(
-        mentorId: 1,
-        email: 'mentor@test.com',
-        verificationStatus: 'Approved',
-      );
+  }) async => const MentorProfileData(
+    mentorId: 1,
+    email: 'mentor@test.com',
+    verificationStatus: 'Approved',
+  );
 
   @override
   Future<MentorProfileData> submitVerification({
     String? verificationDocumentUrl,
     String? notes,
-  }) async =>
-      const MentorProfileData(
-        mentorId: 1,
-        email: 'mentor@test.com',
-        verificationStatus: 'Pending',
-      );
+  }) async {
+    submitCalls++;
+    return const MentorProfileData(
+      mentorId: 1,
+      email: 'mentor@test.com',
+      verificationStatus: 'Pending',
+    );
+  }
 
   @override
   Future<MentorProfileData> uploadVerificationDocument({
     required Uint8List bytes,
     required String fileName,
   }) async => const MentorProfileData(
-    mentorId: 1, email: 'mentor@test.com', hasVerificationDocument: true);
+    mentorId: 1,
+    email: 'mentor@test.com',
+    hasVerificationDocument: true,
+  );
 
   Future<T> _resolve<T>(Object result) async {
     if (result is Exception) throw result;

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 abstract final class AppColors {
   static const Color brandPrimary = Color(0xFFE05A7A);
   static const Color brandPrimaryPressed = Color(0xFFC24362);
+  // Web brand primary (#A62E4F) and its deeper gradient endpoint (#9E2A4B).
+  static const Color mentorAction = Color(0xFFA62E4F);
+  static const Color mentorActionPressed = Color(0xFF9E2A4B);
   static const Color brandPrimaryDisabled = Color(0xFFEAE0E2);
   static const Color brandSecondary = Color(0xFFF8BBD0);
   static const Color brandSecondaryPressed = Color(0xFFF8DBE2);
@@ -176,28 +179,18 @@ abstract final class AppColors {
   static const LinearGradient sakuraHeroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: <Color>[
-      Color(0xFFFFF3F5),
-      Color(0xFFFFECF0),
-      Color(0xFFFFF8F9),
-    ],
+    colors: <Color>[Color(0xFFFFF3F5), Color(0xFFFFECF0), Color(0xFFFFF8F9)],
   );
 
   static const LinearGradient sakuraCardGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: <Color>[
-      Color(0xFFFFFFFF),
-      Color(0xFFFFFBFB),
-    ],
+    colors: <Color>[Color(0xFFFFFFFF), Color(0xFFFFFBFB)],
   );
 
   static const LinearGradient sakuraAccentGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: <Color>[
-      Color(0xFFE05A7A),
-      Color(0xFFD64468),
-    ],
+    colors: <Color>[Color(0xFFE05A7A), Color(0xFFD64468)],
   );
 }

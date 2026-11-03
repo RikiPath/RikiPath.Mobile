@@ -458,6 +458,156 @@ abstract class AppLocalizations {
   /// **'Đăng ký làm Cố vấn'**
   String get registerAsMentor;
 
+  /// No description provided for @mentorRegistrationPromotion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chia sẻ kiến thức, đồng hành cùng học viên JLPT'**
+  String get mentorRegistrationPromotion;
+
+  /// No description provided for @mentorRegistrationTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng ký trở thành Cố vấn'**
+  String get mentorRegistrationTitle;
+
+  /// No description provided for @mentorRegistrationSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tạo tài khoản để hoàn thiện hồ sơ và tham gia xét duyệt Cố vấn tại RikiPath.'**
+  String get mentorRegistrationSubtitle;
+
+  /// No description provided for @mentorRegistrationEmail.
+  ///
+  /// In vi, this message translates to:
+  /// **'Email liên hệ'**
+  String get mentorRegistrationEmail;
+
+  /// No description provided for @mentorRegistrationEmailHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'covan@example.com'**
+  String get mentorRegistrationEmailHint;
+
+  /// No description provided for @mentorRegistrationSubmit.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tạo tài khoản và tiếp tục'**
+  String get mentorRegistrationSubmit;
+
+  /// No description provided for @mentorRegistrationLoginPrompt.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã có tài khoản? Đăng nhập để tiếp tục ứng tuyển'**
+  String get mentorRegistrationLoginPrompt;
+
+  /// No description provided for @mentorCreatingAccountMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tạo tài khoản và gửi email xác thực...'**
+  String get mentorCreatingAccountMessage;
+
+  /// No description provided for @mentorRegistrationCreatedMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'RikiPath đã gửi mã xác thực tới\n{email}. Xác thực email rồi đăng nhập để hoàn thiện hồ sơ ứng tuyển Cố vấn.'**
+  String mentorRegistrationCreatedMessage(String email);
+
+  /// No description provided for @mentorApplicationTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ ứng tuyển Cố vấn'**
+  String get mentorApplicationTitle;
+
+  /// No description provided for @mentorApplicationIntro.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hoàn thiện hồ sơ và tải chứng chỉ để Quản trị viên xét duyệt. Bạn chỉ có quyền Cố vấn sau khi được phê duyệt.'**
+  String get mentorApplicationIntro;
+
+  /// No description provided for @mentorApplicationPersonal.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thông tin cá nhân'**
+  String get mentorApplicationPersonal;
+
+  /// No description provided for @mentorApplicationExpertise.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chuyên môn và kinh nghiệm'**
+  String get mentorApplicationExpertise;
+
+  /// No description provided for @mentorApplicationBioRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giới thiệu bản thân *'**
+  String get mentorApplicationBioRequired;
+
+  /// No description provided for @mentorApplicationExpertiseRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lĩnh vực chuyên môn *'**
+  String get mentorApplicationExpertiseRequired;
+
+  /// No description provided for @mentorApplicationJlptRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình độ tiếng Nhật *'**
+  String get mentorApplicationJlptRequired;
+
+  /// No description provided for @mentorApplicationDocumentRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bắt buộc: tải chứng chỉ PDF, JPEG hoặc PNG (tối đa 5 MB) trước khi gửi.'**
+  String get mentorApplicationDocumentRequired;
+
+  /// No description provided for @mentorApplicationDocumentUploaded.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã tải chứng chỉ xác minh lên kho riêng tư.'**
+  String get mentorApplicationDocumentUploaded;
+
+  /// No description provided for @mentorApplicationIncomplete.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng lưu giới thiệu, chuyên môn và trình độ tiếng Nhật trước khi gửi hồ sơ.'**
+  String get mentorApplicationIncomplete;
+
+  /// No description provided for @mentorApplicationSubmit.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi hồ sơ xét duyệt'**
+  String get mentorApplicationSubmit;
+
+  /// No description provided for @mentorApplicationSubmitting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang gửi hồ sơ...'**
+  String get mentorApplicationSubmitting;
+
+  /// No description provided for @mentorApplicationPending.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang chờ xét duyệt'**
+  String get mentorApplicationPending;
+
+  /// No description provided for @mentorApplicationStatusLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trạng thái xét duyệt'**
+  String get mentorApplicationStatusLabel;
+
+  /// No description provided for @mentorApplicationUpload.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn và tải chứng chỉ'**
+  String get mentorApplicationUpload;
+
+  /// No description provided for @mentorApplicationUploading.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tải chứng chỉ...'**
+  String get mentorApplicationUploading;
+
   /// No description provided for @securityFooter.
   ///
   /// In vi, this message translates to:

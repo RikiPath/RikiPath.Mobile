@@ -11,12 +11,15 @@ import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/register_controller.dart';
+import 'package:rikipath_mobile/features/auth/application/mentor_registration_intent.dart';
 import 'package:rikipath_mobile/features/auth/domain/verify_email_arguments.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_page.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/register_success_celebration.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({this.mentorRegistration = false, super.key});
+
+  final bool mentorRegistration;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -40,6 +43,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
+    final intent = ref.read(mentorRegistrationIntentProvider);
+    if (widget.mentorRegistration) {
+      await intent.mark();
+    } else {
+      await intent.clear();
+    }
     await ref
         .read(registerControllerProvider.notifier)
         .submit(
@@ -66,6 +75,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final state = ref.watch(registerControllerProvider);
     if (state.succeeded) {
       return _RegisterSuccess(
+        mentorRegistration: widget.mentorRegistration,
         email: state.registeredAccount!.email,
         userId: state.registeredAccount!.userId,
         onVerifyEmail: () {
@@ -86,193 +96,236 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       );
     }
 
-    return AuthPage(
-      compact: true,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const RikiAuthHeader(),
-              const SizedBox(height: AppSpacing.space6),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: RikiPromotionalPill(message: l10n.authPromotion),
-              ),
-              const SizedBox(height: AppSpacing.space4),
-              Text(l10n.registerTitle, style: AppTypography.pageTitle),
-              const SizedBox(height: AppSpacing.space1),
-              Text(
-                l10n.registerSubtitle,
-                style: AppTypography.body.copyWith(
-                  color: AppColors.textSecondary,
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop && widget.mentorRegistration) {
+          unawaited(ref.read(mentorRegistrationIntentProvider).clear());
+        }
+      },
+      child: AuthPage(
+        compact: true,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const RikiAuthHeader(),
+                const SizedBox(height: AppSpacing.space6),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: RikiPromotionalPill(
+                    message: widget.mentorRegistration
+                        ? l10n.mentorRegistrationPromotion
+                        : l10n.authPromotion,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.space6),
-              RikiTextField(
-                key: const Key('register_full_name_field'),
-                label: l10n.fullName,
-                hintText: l10n.fullNameHint,
-                controller: _fullNameController,
-                prefixIcon: Icons.person_outline,
-                enabled: !state.isLoading,
-                textInputAction: TextInputAction.next,
-                textCapitalization: TextCapitalization.words,
-                autofillHints: const [AutofillHints.name],
-                onChanged: (_) => _clearFeedback(),
-              ),
-              const SizedBox(height: AppSpacing.fieldGap),
-              RikiTextField(
-                key: const Key('register_email_field'),
-                label: l10n.studentEmail,
-                hintText: l10n.emailHint,
-                controller: _emailController,
-                prefixIcon: Icons.mail_outline,
-                suffixIcon: state.isLoading
-                    ? const Icon(Icons.check, color: AppColors.success)
-                    : null,
-                errorText: state.emailError,
-                enabled: !state.isLoading,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.email],
-                autocorrect: false,
-                onChanged: (_) => _clearFeedback(),
-              ),
-              const SizedBox(height: AppSpacing.fieldGap),
-              RikiPasswordField(
-                key: const Key('register_password_field'),
-                label: l10n.password,
-                hintText: l10n.passwordHint,
-                controller: _passwordController,
-                errorText: state.passwordError,
-                enabled: !state.isLoading,
-                textInputAction: TextInputAction.next,
-                onChanged: (_) => _clearFeedback(),
-              ),
-              if (state.passwordError == null) ...[
-                const SizedBox(height: AppSpacing.space2),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.info_outline,
-                      size: 15,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: AppSpacing.space1),
-                    Expanded(
-                      child: Text(
-                        l10n.minimumSixCharacters,
-                        style: AppTypography.metadata,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: AppSpacing.space4),
+                Text(
+                  widget.mentorRegistration
+                      ? l10n.mentorRegistrationTitle
+                      : l10n.registerTitle,
+                  style: AppTypography.pageTitle,
                 ),
-              ],
-              const SizedBox(height: AppSpacing.fieldGap),
-              RikiPasswordField(
-                key: const Key('register_confirm_password_field'),
-                label: l10n.confirmPassword,
-                hintText: l10n.confirmPasswordHint,
-                controller: _confirmPasswordController,
-                errorText: state.confirmPasswordError,
-                enabled: !state.isLoading,
-                textInputAction: TextInputAction.done,
-                onChanged: (_) => _clearFeedback(),
-                onSubmitted: (_) {
-                  if (!state.isLoading) _submit();
-                },
-              ),
-              const SizedBox(height: AppSpacing.space3),
-              RikiCheckboxRow(
-                value: _acceptedTerms,
-                compact: true,
-                onChanged: state.isLoading
-                    ? null
-                    : (value) {
-                        setState(() => _acceptedTerms = value ?? false);
-                        _clearFeedback();
-                      },
-                child: Text.rich(
-                  TextSpan(
+                const SizedBox(height: AppSpacing.space1),
+                Text(
+                  widget.mentorRegistration
+                      ? l10n.mentorRegistrationSubtitle
+                      : l10n.registerSubtitle,
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.space6),
+                RikiTextField(
+                  key: const Key('register_full_name_field'),
+                  label: l10n.fullName,
+                  hintText: l10n.fullNameHint,
+                  controller: _fullNameController,
+                  prefixIcon: Icons.person_outline,
+                  enabled: !state.isLoading,
+                  textInputAction: TextInputAction.next,
+                  textCapitalization: TextCapitalization.words,
+                  autofillHints: const [AutofillHints.name],
+                  onChanged: (_) => _clearFeedback(),
+                ),
+                const SizedBox(height: AppSpacing.fieldGap),
+                RikiTextField(
+                  key: const Key('register_email_field'),
+                  label: widget.mentorRegistration
+                      ? l10n.mentorRegistrationEmail
+                      : l10n.studentEmail,
+                  hintText: widget.mentorRegistration
+                      ? l10n.mentorRegistrationEmailHint
+                      : l10n.emailHint,
+                  controller: _emailController,
+                  prefixIcon: Icons.mail_outline,
+                  suffixIcon: state.isLoading
+                      ? const Icon(Icons.check, color: AppColors.success)
+                      : null,
+                  errorText: state.emailError,
+                  enabled: !state.isLoading,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.email],
+                  autocorrect: false,
+                  onChanged: (_) => _clearFeedback(),
+                ),
+                const SizedBox(height: AppSpacing.fieldGap),
+                RikiPasswordField(
+                  key: const Key('register_password_field'),
+                  label: l10n.password,
+                  hintText: l10n.passwordHint,
+                  controller: _passwordController,
+                  errorText: state.passwordError,
+                  enabled: !state.isLoading,
+                  textInputAction: TextInputAction.next,
+                  onChanged: (_) => _clearFeedback(),
+                ),
+                if (state.passwordError == null) ...[
+                  const SizedBox(height: AppSpacing.space2),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextSpan(text: l10n.termsPrefix),
-                      TextSpan(
-                        text: l10n.termsOfService,
-                        style: AppTypography.metadata.copyWith(
-                          color: AppColors.textPrimary,
-                          decoration: TextDecoration.underline,
+                      const Icon(
+                        Icons.info_outline,
+                        size: 15,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: AppSpacing.space1),
+                      Expanded(
+                        child: Text(
+                          l10n.minimumSixCharacters,
+                          style: AppTypography.metadata,
                         ),
                       ),
-                      TextSpan(text: l10n.termsJoiner),
-                      TextSpan(
-                        text: l10n.privacyPolicy,
-                        style: AppTypography.metadata.copyWith(
-                          color: AppColors.textPrimary,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                      TextSpan(text: l10n.termsSuffix),
                     ],
                   ),
+                ],
+                const SizedBox(height: AppSpacing.fieldGap),
+                RikiPasswordField(
+                  key: const Key('register_confirm_password_field'),
+                  label: l10n.confirmPassword,
+                  hintText: l10n.confirmPasswordHint,
+                  controller: _confirmPasswordController,
+                  errorText: state.confirmPasswordError,
+                  enabled: !state.isLoading,
+                  textInputAction: TextInputAction.done,
+                  onChanged: (_) => _clearFeedback(),
+                  onSubmitted: (_) {
+                    if (!state.isLoading) _submit();
+                  },
                 ),
-              ),
-              if (state.agreementError != null)
-                Padding(
-                  padding: const EdgeInsets.only(left: AppSpacing.space6),
-                  child: Text(
-                    state.agreementError!,
-                    style: AppTypography.validationText,
+                const SizedBox(height: AppSpacing.space3),
+                RikiCheckboxRow(
+                  value: _acceptedTerms,
+                  compact: true,
+                  onChanged: state.isLoading
+                      ? null
+                      : (value) {
+                          setState(() => _acceptedTerms = value ?? false);
+                          _clearFeedback();
+                        },
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: l10n.termsPrefix),
+                        TextSpan(
+                          text: l10n.termsOfService,
+                          style: AppTypography.metadata.copyWith(
+                            color: AppColors.textPrimary,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        TextSpan(text: l10n.termsJoiner),
+                        TextSpan(
+                          text: l10n.privacyPolicy,
+                          style: AppTypography.metadata.copyWith(
+                            color: AppColors.textPrimary,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        TextSpan(text: l10n.termsSuffix),
+                      ],
+                    ),
                   ),
                 ),
-              if (state.serverError != null) ...[
-                const SizedBox(height: AppSpacing.space3),
-                RikiErrorBanner(
-                  title: l10n.registerFailedTitle,
-                  message: state.serverError!,
-                ),
-              ],
-              const SizedBox(height: AppSpacing.space4),
-              RikiPrimaryButton(
-                key: const Key('register_submit_button'),
-                label: l10n.register,
-                loadingLabel: l10n.creatingAccount,
-                trailingIcon: Icons.arrow_forward,
-                isLoading: state.isLoading,
-                onPressed: _submit,
-              ),
-              if (state.isLoading) ...[
+                if (state.agreementError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: AppSpacing.space6),
+                    child: Text(
+                      state.agreementError!,
+                      style: AppTypography.validationText,
+                    ),
+                  ),
+                if (state.serverError != null) ...[
+                  const SizedBox(height: AppSpacing.space3),
+                  RikiErrorBanner(
+                    title: l10n.registerFailedTitle,
+                    message: state.serverError!,
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.space4),
-                RikiWarningBanner(
-                  icon: Icons.hourglass_bottom,
-                  message: l10n.creatingAccountMessage,
+                RikiPrimaryButton(
+                  key: const Key('register_submit_button'),
+                  label: widget.mentorRegistration
+                      ? l10n.mentorRegistrationSubmit
+                      : l10n.register,
+                  loadingLabel: l10n.creatingAccount,
+                  trailingIcon: Icons.arrow_forward,
+                  isLoading: state.isLoading,
+                  onPressed: _submit,
                 ),
-                const SizedBox(height: AppSpacing.space3),
-                RikiProgressIndicator(
-                  semanticsLabel: l10n.creatingAccountSemantics,
-                ),
-              ],
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.space8),
-            child: Column(
-              children: [
-                AuthNavigationPrompt(
-                  message: l10n.alreadyHaveAccount,
-                  actionLabel: l10n.login,
-                  onPressed: state.isLoading
-                      ? null
-                      : () => context.go(AppRoutes.login),
-                ),
-                const AuthSecurityFooter(),
+                if (state.isLoading) ...[
+                  const SizedBox(height: AppSpacing.space4),
+                  RikiWarningBanner(
+                    icon: Icons.hourglass_bottom,
+                    message: widget.mentorRegistration
+                        ? l10n.mentorCreatingAccountMessage
+                        : l10n.creatingAccountMessage,
+                  ),
+                  const SizedBox(height: AppSpacing.space3),
+                  RikiProgressIndicator(
+                    semanticsLabel: l10n.creatingAccountSemantics,
+                  ),
+                ],
               ],
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.space8),
+              child: Column(
+                children: [
+                  if (widget.mentorRegistration)
+                    TextButton(
+                      key: const Key('mentor_registration_login_prompt'),
+                      onPressed: state.isLoading
+                          ? null
+                          : () async {
+                              await ref
+                                  .read(mentorRegistrationIntentProvider)
+                                  .mark();
+                              if (context.mounted) context.go(AppRoutes.login);
+                            },
+                      child: Text(
+                        l10n.mentorRegistrationLoginPrompt,
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  else
+                    AuthNavigationPrompt(
+                      message: l10n.alreadyHaveAccount,
+                      actionLabel: l10n.login,
+                      onPressed: state.isLoading
+                          ? null
+                          : () => context.go(AppRoutes.login),
+                    ),
+                  const AuthSecurityFooter(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -280,6 +333,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
 class _RegisterSuccess extends StatefulWidget {
   const _RegisterSuccess({
+    required this.mentorRegistration,
     required this.email,
     required this.userId,
     required this.onVerifyEmail,
@@ -287,6 +341,7 @@ class _RegisterSuccess extends StatefulWidget {
   });
 
   final String email;
+  final bool mentorRegistration;
   final int userId;
   final VoidCallback onVerifyEmail;
   final VoidCallback onReturnToLogin;
@@ -386,7 +441,9 @@ class _RegisterSuccessState extends State<_RegisterSuccess>
                 start: 0.22,
                 end: 0.42,
                 child: Text(
-                  l10n.accountCreatedMessage(widget.email),
+                  widget.mentorRegistration
+                      ? l10n.mentorRegistrationCreatedMessage(widget.email)
+                      : l10n.accountCreatedMessage(widget.email),
                   textAlign: TextAlign.center,
                   style: AppTypography.body.copyWith(
                     color: AppColors.textSecondary,

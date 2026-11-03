@@ -3,6 +3,7 @@ abstract final class AppRoutes {
 
   static const String login = '/auth/login';
   static const String register = '/auth/register';
+  static const String mentorRegister = '$register?intent=mentor';
   static const String forgotPassword = '/auth/forgot-password';
   static const String verifyEmail = '/auth/verify-email';
   static const String unsupportedRole = '/auth/unsupported-role';
