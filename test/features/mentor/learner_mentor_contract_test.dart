@@ -35,8 +35,8 @@ import '../../support/test_auth_session.dart';
 void main() {
   test('booking status microcopy distinguishes learner and mentor', () {
     final l10n = AppLocalizationsVi();
-    expect(l10n.learnerMentorStatusAssigned, 'Đang chờ xác nhận lịch');
-    expect(l10n.mentorStatusAssigned, 'Chờ xác nhận');
+    expect(l10n.learnerMentorStatusAssigned, 'Đã xác nhận lịch');
+    expect(l10n.mentorStatusAssigned, 'Đã xác nhận');
     expect(l10n.mentorStatusAccepted, 'Đã xác nhận');
   });
 
@@ -47,7 +47,7 @@ void main() {
         AppRoutes.learnerMentorAvailability(4),
         '/mentor-meetings/plans/4/availability',
       );
-      expect(AppRoutes.learnerMentorBookings, '/mentor-meetings/bookings');
+      expect(LearnerMentorApiPaths.bookings, '/api/learner/mentor-bookings');
       expect(
         AppRoutes.learnerMentorBookingDetail(7),
         '/mentor-meetings/bookings/7',
@@ -170,18 +170,22 @@ void main() {
       expect(purchase.safeCheckoutUri?.scheme, 'https');
     });
 
-    test('included booking request uses only mentorAvailabilityId', () async {
-      final path = LearnerMentorApiPaths.subscriptionBookings(21);
+    test('booking request uses the canonical learner booking route', () async {
+      final path = LearnerMentorApiPaths.bookWithCredit;
       final client = _RecordingApiClient({
         'POST $path': _envelope(_bookingJson(id: 44)),
       });
 
       final booking = await ApiLearnerMentorRepository(
         client,
-      ).bookIncludedSession(subscriptionId: 21, mentorAvailabilityId: 15);
+      ).bookWithCredit(slotId: 15, operationKey: 'op-1', notes: 'grammar');
 
       expect(client.calls.single.path, path);
-      expect(client.calls.single.data, {'mentorAvailabilityId': 15});
+      expect(client.calls.single.data, {
+        'mentorAvailabilityId': 15,
+        'operationKey': 'op-1',
+        'notes': 'grammar',
+      });
       expect(booking.id, 44);
     });
 
@@ -386,7 +390,7 @@ void main() {
       await first;
     });
 
-    test('double-tap included booking protection sends one request', () async {
+    test('double-tap booking protection sends one request', () async {
       final completer = Completer<LearnerMentorBooking>();
       final repository = _TestLearnerMentorRepository(
         bookingMutationResults: [completer.future],
@@ -401,13 +405,10 @@ void main() {
         learnerMentorMutationControllerProvider.notifier,
       );
 
-      final first = controller.bookIncludedSession(
-        subscriptionId: 21,
-        mentorAvailabilityId: 2,
-      );
-      final second = await controller.bookIncludedSession(
-        subscriptionId: 21,
-        mentorAvailabilityId: 2,
+      final first = controller.bookWithCredit(slotId: 2, operationKey: 'op-1');
+      final second = await controller.bookWithCredit(
+        slotId: 2,
+        operationKey: 'op-1',
       );
       expect(second, isNull);
       expect(repository.bookingMutationCalls, 1);
@@ -1154,12 +1155,6 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
   }) => _next(purchaseResults, purchaseCalls++);
 
   @override
-  Future<LearnerMentorBooking> bookIncludedSession({
-    required int subscriptionId,
-    required int mentorAvailabilityId,
-    String? question,
-  }) => _next(bookingMutationResults, bookingMutationCalls++);
-
   @override
   Future<List<LearnerMentorBooking>> loadBookings() =>
       _next(bookingResults, bookingCalls++);
@@ -1185,21 +1180,19 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
     required int slotId,
     required String operationKey,
     String? notes,
-  }) async =>
-      _next(bookingMutationResults, bookingMutationCalls++);
+  }) async => _next(bookingMutationResults, bookingMutationCalls++);
 
   @override
   Future<CancellationEligibility> checkCancellationEligibility(
     int bookingId,
-  ) async =>
-      const CancellationEligibility(
-        isEligible: true,
-        tier: 'Early_FullRefund',
-        expectedRefundPercent: 100,
-        refundAmountCredits: 1,
-        canReschedule: true,
-        cutoffHours: 24,
-      );
+  ) async => const CancellationEligibility(
+    isEligible: true,
+    tier: 'Early_FullRefund',
+    expectedRefundPercent: 100,
+    refundAmountCredits: 1,
+    canReschedule: true,
+    cutoffHours: 24,
+  );
 
   @override
   Future<bool> cancelBooking({
@@ -1220,14 +1213,13 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
     required int bookingId,
     required int rating,
     String? comment,
-  }) async =>
-      MentorReviewItem(
-        id: 1,
-        bookingId: bookingId,
-        learnerName: 'Học viên',
-        rating: rating,
-        comment: comment,
-      );
+  }) async => MentorReviewItem(
+    id: 1,
+    bookingId: bookingId,
+    learnerName: 'Học viên',
+    rating: rating,
+    comment: comment,
+  );
 
   @override
   Future<MentorRatingSummary> loadMentorReviewSummary(int mentorId) async =>
@@ -1249,26 +1241,17 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
     required int category,
     required String reason,
     String? evidenceNotes,
-  }) async =>
-      LearnerDisputeItem(
-        id: 1,
-        bookingId: bookingId,
-        category: category,
-        status: 1,
-        description: reason,
-      );
+  }) async => LearnerDisputeItem(
+    id: 1,
+    bookingId: bookingId,
+    category: category,
+    status: 1,
+    description: reason,
+  );
 
   @override
   Future<List<LearnerDisputeItem>> loadMyDisputes() async =>
       const <LearnerDisputeItem>[];
-
-  @override
-  Future<bool> submitAbuseReport({
-    required int reportedUserId,
-    required int reason,
-    required String details,
-  }) async => true;
-
 
   Future<T> _next<T>(List<Object> results, int callIndex) async {
     if (results.isEmpty) throw StateError('Unexpected repository call.');

@@ -69,24 +69,6 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
   }
 
   @override
-  Future<LearnerMentorBooking> bookIncludedSession({
-    required int subscriptionId,
-    required int mentorAvailabilityId,
-    String? question,
-  }) async {
-    final response = await _apiClient.post<Object?>(
-      LearnerMentorApiPaths.subscriptionBookings(subscriptionId),
-      data: BookIncludedMeetingRequestDto(
-        mentorAvailabilityId: mentorAvailabilityId,
-        question: question,
-      ).toJson(),
-    );
-    return LearnerMentorBookingDto.fromJson(
-      readLearnerMentorResultObject(response.data),
-    ).toDomain();
-  }
-
-  @override
   Future<List<LearnerMentorBooking>> loadBookings() async {
     final response = await _apiClient.get<Object?>(
       LearnerMentorApiPaths.bookings,
@@ -266,20 +248,4 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
         .toList(growable: false);
   }
 
-  @override
-  Future<bool> submitAbuseReport({
-    required int reportedUserId,
-    required int reason,
-    required String details,
-  }) async {
-    final response = await _apiClient.post<Object?>(
-      LearnerMentorApiPaths.reportAbuse,
-      data: SubmitAbuseReportRequestDto(
-        reportedUserId: reportedUserId,
-        reason: reason,
-        details: details,
-      ).toJson(),
-    );
-    return response.data != null;
-  }
 }

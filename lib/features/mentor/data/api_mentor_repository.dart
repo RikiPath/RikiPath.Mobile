@@ -31,11 +31,6 @@ class ApiMentorRepository implements MentorRepository {
   }
 
   @override
-  Future<void> acceptMeeting(int bookingId) async {
-    await _apiClient.post<Object?>(MentorApiPaths.acceptMeeting(bookingId));
-  }
-
-  @override
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(
     DateTime weekStart,
   ) async {

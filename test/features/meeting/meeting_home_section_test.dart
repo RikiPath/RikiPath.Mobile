@@ -11,7 +11,7 @@ import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 
 void main() {
   test(
-    'upcoming selection requires a paid assigned/accepted future booking',
+    'upcoming selection includes confirmed historical assigned bookings',
     () {
       final now = DateTime(2026, 10, 10, 8);
       LearnerMentorBooking booking({

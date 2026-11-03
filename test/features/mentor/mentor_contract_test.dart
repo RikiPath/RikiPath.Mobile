@@ -117,7 +117,7 @@ void main() {
   group('verified Mentor contract', () {
     test('7. uses only the verified read endpoints', () {
       expect(MentorApiPaths.availability, '/api/mentor/availability');
-      expect(MentorApiPaths.meetings, '/api/mentor/meetings');
+      expect(MentorApiPaths.meetings, '/api/mentor-bookings');
     });
 
     test('8. availability maps exact fields from the live envelope', () async {
@@ -643,10 +643,9 @@ void main() {
         find.byKey(const Key('mentor_accept_meeting_button')),
         findsNothing,
       );
-      expect(repository.acceptMeetingCalls, 0);
     });
 
-    testWidgets('legacy assigned booking retains Mentor acceptance', (
+    testWidgets('historical assigned booking is shown as confirmed without acceptance', (
       tester,
     ) async {
       final repository = _TestMentorRepository(
@@ -662,10 +661,8 @@ void main() {
         repository: repository,
       );
 
-      expect(
-        find.byKey(const Key('mentor_accept_meeting_button')),
-        findsOneWidget,
-      );
+      expect(find.text('Đã xác nhận buổi học'), findsOneWidget);
+      expect(find.byKey(const Key('mentor_accept_meeting_button')), findsNothing);
     });
 
     testWidgets('32. missing meeting detail fails safely', (tester) async {
@@ -1052,14 +1049,8 @@ class _TestMentorRepository implements MentorRepository {
     return _resolve<List<MentorMeetingSummary>>(result);
   }
 
-  int acceptMeetingCalls = 0;
   int weeklyScheduleCalls = 0;
   int saveWeeklyScheduleCalls = 0;
-
-  @override
-  Future<void> acceptMeeting(int bookingId) async {
-    acceptMeetingCalls++;
-  }
 
   @override
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(

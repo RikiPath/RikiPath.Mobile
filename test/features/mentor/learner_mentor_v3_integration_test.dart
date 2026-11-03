@@ -263,7 +263,7 @@ void main() {
     'Stage 12 Mobile Integration - ApiLearnerMentorRepository with real endpoints',
     () {
       test(
-        'loadCreditBalance queries /api/v1/mentor-credits/balance',
+        'loadCreditBalance queries the canonical learner credits route',
         () async {
           String? requestedPath;
           final client = _createTestClient((options) async {
@@ -283,7 +283,7 @@ void main() {
           final repo = ApiLearnerMentorRepository(client);
           final balance = await repo.loadCreditBalance();
 
-          expect(requestedPath, '/api/v1/mentor-credits/balance');
+          expect(requestedPath, '/api/learner/credits/balance');
           expect(balance.balance, 3);
           expect(balance.availableBalance, 3);
           expect(balance.hasCredits, isTrue);
@@ -291,7 +291,7 @@ void main() {
       );
 
       test(
-        'bookWithCredit posts to /api/mentor-meetings/book with operationKey',
+        'bookWithCredit posts to the canonical learner booking route with operationKey',
         () async {
           String? requestedPath;
           Map<String, dynamic>? postedData;
@@ -323,7 +323,7 @@ void main() {
             notes: 'Chuẩn bị ôn Dokkai N2',
           );
 
-          expect(requestedPath, '/api/mentor-meetings/book');
+          expect(requestedPath, '/api/learner/mentor-bookings');
           expect(postedData?['mentorAvailabilityId'], 77);
           expect(postedData?['operationKey'], 'op-key-123');
           expect(postedData?['notes'], 'Chuẩn bị ôn Dokkai N2');
@@ -333,7 +333,7 @@ void main() {
       );
 
       test(
-        'checkCancellationEligibility queries /api/v1/mentor-bookings/{id}/cancellation-eligibility',
+        'checkCancellationEligibility queries the canonical cancellation route',
         () async {
           String? requestedPath;
           final client = _createTestClient((options) async {
@@ -357,7 +357,7 @@ void main() {
 
           expect(
             requestedPath,
-            '/api/v1/mentor-bookings/501/cancellation-eligibility',
+            '/api/mentor-bookings/501/cancellation-eligibility',
           );
           expect(elig.isEligible, isTrue);
           expect(elig.expectedRefundPercent, 100);
@@ -366,7 +366,7 @@ void main() {
       );
 
       test(
-        'cancelBooking posts to /api/v1/mentor-bookings/{id}/cancel',
+        'cancelBooking posts to the canonical cancellation route',
         () async {
           String? requestedPath;
           Map<String, dynamic>? postedData;
@@ -390,7 +390,7 @@ void main() {
           );
 
           expect(ok, isTrue);
-          expect(requestedPath, '/api/v1/mentor-bookings/501/cancel');
+          expect(requestedPath, '/api/mentor-bookings/501/cancel');
           expect(postedData?['reason'], 'Bận việc đột xuất');
           expect(postedData?['requestException'], isTrue);
           expect(postedData?['exceptionReason'], 'Đi công tác khẩn');
@@ -398,7 +398,7 @@ void main() {
       );
 
       test(
-        'rescheduleBooking posts to /api/v1/mentor-bookings/{id}/reschedule',
+        'rescheduleBooking posts to the canonical rescheduling route',
         () async {
           String? requestedPath;
           Map<String, dynamic>? postedData;
@@ -420,13 +420,13 @@ void main() {
           );
 
           expect(ok, isTrue);
-          expect(requestedPath, '/api/v1/mentor-bookings/501/reschedule');
+          expect(requestedPath, '/api/mentor-bookings/501/reschedule');
           expect(postedData?['newMentorAvailabilityId'], 88);
         },
       );
 
       test(
-        'createReview posts to /api/v1/mentor-reviews with 1-5 rating',
+        'createReview posts to the canonical mentor reviews route with 1-5 rating',
         () async {
           String? requestedPath;
           Map<String, dynamic>? postedData;
@@ -455,7 +455,7 @@ void main() {
             comment: 'Sensei hướng dẫn rất tận tình và chi tiết!',
           );
 
-          expect(requestedPath, '/api/v1/mentor-reviews');
+          expect(requestedPath, '/api/mentor-reviews');
           expect(postedData?['mentorBookingId'], 501);
           expect(postedData?['rating'], 5);
           expect(review.id, 19);
@@ -465,7 +465,7 @@ void main() {
       );
 
       test(
-        'createDispute posts to /api/v1/mentor-disputes within 48h deadline',
+        'createDispute posts to the canonical mentor disputes route within 48h deadline',
         () async {
           String? requestedPath;
           Map<String, dynamic>? postedData;
@@ -494,7 +494,7 @@ void main() {
             reason: 'Mất kết nối âm thanh trong suốt 30 phút đầu',
           );
 
-          expect(requestedPath, '/api/v1/mentor-disputes');
+          expect(requestedPath, '/api/mentor-disputes');
           expect(postedData?['mentorBookingId'], 501);
           expect(postedData?['category'], 3);
           expect(dispute.id, 8);
@@ -503,35 +503,6 @@ void main() {
         },
       );
 
-      test(
-        'submitAbuseReport posts violation report to /api/v1/mentor-disputes/report-abuse',
-        () async {
-          String? requestedPath;
-          Map<String, dynamic>? postedData;
-
-          final client = _createTestClient((options) async {
-            requestedPath = options.path;
-            postedData = options.data as Map<String, dynamic>?;
-            return _jsonResponse({
-              'isSuccess': true,
-              'statusCode': 200,
-              'result': {'reportId': 2, 'status': 'Received'},
-            });
-          });
-
-          final repo = ApiLearnerMentorRepository(client);
-          final ok = await repo.submitAbuseReport(
-            reportedUserId: 99,
-            reason: 5,
-            details: 'Gạ gẫm chuyển tiền ngoài hệ thống',
-          );
-
-          expect(ok, isTrue);
-          expect(requestedPath, '/api/v1/mentor-disputes/report-abuse');
-          expect(postedData?['reportedUserId'], 99);
-          expect(postedData?['details'], 'Gạ gẫm chuyển tiền ngoài hệ thống');
-        },
-      );
     },
   );
 }
