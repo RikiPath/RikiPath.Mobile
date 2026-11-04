@@ -30,6 +30,8 @@ import 'package:rikipath_mobile/features/meeting/presentation/meeting_landing_sc
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_room_screen.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_bank_account_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_compensation_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_profile_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_availability_screen.dart';
@@ -189,6 +191,14 @@ GoRouter createAppRouter({
           GoRoute(
             path: AppRoutes.mentorAvailabilitySegment,
             builder: (context, state) => const MentorAvailabilityScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.mentorCompensationSegment,
+            builder: (context, state) => const MentorCompensationScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.mentorBankAccountSegment,
+            builder: (context, state) => const MentorBankAccountScreen(),
           ),
           GoRoute(
             path: AppRoutes.mentorMeetingsSegment,

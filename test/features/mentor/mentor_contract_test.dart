@@ -872,6 +872,11 @@ void main() {
         repository: _TestMentorRepository.empty(),
         session: session,
       );
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('mentor_logout_button')),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.byKey(const Key('mentor_logout_button')));
       await tester.pumpAndSettle();
 

@@ -82,10 +82,8 @@ class _LearnerMentorDiscoveryScreenState
         );
       } else if (_selectedFilter == 'n3') {
         return mentor.jlptLevels.any((l) => l.contains('N3'));
-      } else if (_selectedFilter == 'n2_n1') {
-        return mentor.jlptLevels.any(
-          (l) => l.contains('N2') || l.contains('N1'),
-        );
+      } else if (_selectedFilter == 'n2') {
+        return mentor.jlptLevels.any((l) => l.contains('N2'));
       }
       return true;
     }).toList();
@@ -131,7 +129,7 @@ class _LearnerMentorDiscoveryScreenState
                       const SizedBox(width: AppSpacing.space2),
                       _buildFilterChip('n3', 'JLPT N3'),
                       const SizedBox(width: AppSpacing.space2),
-                      _buildFilterChip('n2_n1', 'JLPT N2–N1'),
+                      _buildFilterChip('n2', 'JLPT N2'),
                     ],
                   ),
                 ),
@@ -301,7 +299,7 @@ class _MentorDiscoveryCard extends StatelessWidget {
                         spacing: AppSpacing.space2,
                         runSpacing: AppSpacing.space1,
                         children: [
-                          for (final level in mentor.jlptLevels)
+                          for (final level in mentor.jlptLevels.where((l) => !l.toUpperCase().contains('N1')))
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.space2,

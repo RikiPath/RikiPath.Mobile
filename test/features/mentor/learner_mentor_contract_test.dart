@@ -1152,6 +1152,7 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
     required int subscriptionPlanId,
     int? mentorAvailabilityId,
     String? idempotencyKey,
+    String? jlptLevel,
   }) => _next(purchaseResults, purchaseCalls++);
 
   @override
@@ -1180,6 +1181,7 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
     required int slotId,
     required String operationKey,
     String? notes,
+    String? jlptLevel,
   }) async => _next(bookingMutationResults, bookingMutationCalls++);
 
   @override

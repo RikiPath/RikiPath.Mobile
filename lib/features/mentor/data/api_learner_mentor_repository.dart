@@ -54,6 +54,7 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
     required int subscriptionPlanId,
     int? mentorAvailabilityId,
     String? idempotencyKey,
+    String? jlptLevel,
   }) async {
     final response = await _apiClient.post<Object?>(
       LearnerMentorApiPaths.purchase,
@@ -61,6 +62,7 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
         subscriptionPlanId: subscriptionPlanId,
         mentorAvailabilityId: mentorAvailabilityId,
         idempotencyKey: idempotencyKey,
+        jlptLevel: jlptLevel,
       ).toJson(),
     );
     return MentorMeetingPurchaseDto.fromJson(
@@ -118,6 +120,7 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
     required int slotId,
     required String operationKey,
     String? notes,
+    String? jlptLevel,
   }) async {
     final response = await _apiClient.post<Object?>(
       LearnerMentorApiPaths.bookWithCredit,
@@ -125,6 +128,7 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
         mentorAvailabilityId: slotId,
         operationKey: operationKey,
         notes: notes,
+        jlptLevel: jlptLevel,
       ).toJson(),
     );
     return LearnerMentorBookingDto.fromJson(

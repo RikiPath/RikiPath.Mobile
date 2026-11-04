@@ -12,6 +12,7 @@ import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/availability_conflicts.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -115,20 +116,48 @@ class _LearnerMentorOrderConfirmationSheetState
       final creditBalance = ref
           .read(learnerCreditBalanceControllerProvider)
           .value;
+      final planJlptLevel = widget.plan?.jlptLevel;
       final hasCredit = (creditBalance?.availableBalance ?? 0) > 0;
       final isExistingSubscription =
           (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
           hasCredit;
 
+      if (planJlptLevel != null && !isSupportedConsultationJlptLevel(planJlptLevel)) {
+        setState(() => _isSubmitting = false);
+        ref.read(rikiToastServiceProvider.notifier).error(
+          title: 'Trình độ chưa được hỗ trợ',
+          description: 'Hệ thống tư vấn 1-1 chỉ hỗ trợ trình độ JLPT N5, N4, N3 và N2 (không hỗ trợ N1).',
+        );
+        return;
+      }
+
       if (isExistingSubscription) {
+        if (hasCredit && planJlptLevel != null) {
+          final availForLevel = creditBalance?.availableForLevel(planJlptLevel) ?? 0;
+          final errorMsg = validateBookingJlptEligibility(
+            selectedJlptLevel: planJlptLevel,
+            mentorQualifiedLevels: const [],
+            availableTicketsForLevel: availForLevel,
+            requireTicketNow: true,
+          );
+          if (errorMsg != null) {
+            setState(() => _isSubmitting = false);
+            ref.read(rikiToastServiceProvider.notifier).error(
+              title: 'Vé không phù hợp',
+              description: errorMsg,
+            );
+            return;
+          }
+        }
         // Đặt lịch trực tiếp bằng lượt học đã thanh toán hoặc vé khả dụng
-        final opKey = 'booking_${DateTime.now().millisecondsSinceEpoch}';
+        final opKey = 'booking_';
         final booking = await ref
             .read(learnerMentorMutationControllerProvider.notifier)
             .bookWithCredit(
               slotId: widget.slot.id,
               operationKey: opKey,
               notes: _questionController.text.trim(),
+              jlptLevel: planJlptLevel,
             );
 
         if (!mounted) return;
@@ -162,6 +191,7 @@ class _LearnerMentorOrderConfirmationSheetState
               subscriptionPlanId: widget.planId,
               mentorAvailabilityId: widget.slot.id,
               idempotencyKey: _purchaseIdempotencyKey,
+              jlptLevel: planJlptLevel,
             );
 
         if (!mounted) return;
@@ -179,6 +209,7 @@ class _LearnerMentorOrderConfirmationSheetState
                   mentorAvailabilityId: widget.slot.id,
                   subscriptionId: purchase.subscriptionId,
                   question: _questionController.text.trim(),
+                  jlptLevel: planJlptLevel,
                 ),
               );
 
@@ -326,6 +357,14 @@ class _LearnerMentorOrderConfirmationSheetState
                     value: widget.plan?.name ?? 'Gói tư vấn',
                   ),
                   const Divider(),
+                  if (widget.plan?.jlptLevel != null && widget.plan!.jlptLevel!.isNotEmpty) ...[
+                    LearnerMentorDetailRow(
+                      icon: Icons.school_outlined,
+                      label: 'Trình độ JLPT',
+                      value: 'JLPT ',
+                    ),
+                    const Divider(),
+                  ],
                   LearnerMentorDetailRow(
                     icon: Icons.person_outline,
                     label: context.l10n.learnerMentorConfirmMentor,

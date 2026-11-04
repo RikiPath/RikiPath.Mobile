@@ -28,6 +28,10 @@ abstract final class AppRoutes {
   static const String mentorMeetings = '$mentor/$mentorMeetingsSegment';
   static const String mentorProfileSegment = 'profile';
   static const String mentorProfile = '$mentor/$mentorProfileSegment';
+  static const String mentorCompensationSegment = 'compensation';
+  static const String mentorCompensation = '$mentor/$mentorCompensationSegment';
+  static const String mentorBankAccountSegment = 'bank-account';
+  static const String mentorBankAccount = '$mentor/$mentorBankAccountSegment';
   static String mentorMeetingDetail(int meetingId) {
     if (meetingId <= 0) {
       throw ArgumentError.value(meetingId, 'meetingId', 'Must be positive');
