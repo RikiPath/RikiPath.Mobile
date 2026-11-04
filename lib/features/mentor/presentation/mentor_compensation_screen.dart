@@ -65,12 +65,18 @@ String bankVerificationLabel(String status) => switch (status) {
 };
 
 class MentorCompensationScreen extends ConsumerWidget {
-  const MentorCompensationScreen({super.key});
+  const MentorCompensationScreen({
+    super.key,
+    this.initialTabIndex = 0,
+  });
+
+  final int initialTabIndex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
       length: 4,
+      initialIndex: initialTabIndex,
       child: Scaffold(
         key: const Key('mentor_compensation_screen'),
         backgroundColor: AppColors.learnerBackground,
