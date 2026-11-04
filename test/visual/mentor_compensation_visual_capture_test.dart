@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_compensation_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_bank_account_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_compensation_screen.dart';
 
 void main() {
@@ -185,9 +184,10 @@ void main() {
     final bytes = byteData!.buffer.asUint8List();
 
     outputDir.createSync(recursive: true);
-    final file = File('${outputDir.path}${Platform.pathSeparator}' + fileName + '.png');
+    final file = File('${outputDir.path}${Platform.pathSeparator}\$fileName.png');
     file.writeAsBytesSync(bytes);
-    print('Captured: ' + file.path + ' (' + bytes.length.toString() + ' bytes)');
+    // ignore: avoid_print
+    print('Captured: \${file.path} (\${bytes.length} bytes)');
   }
 
   testWidgets('Capture Tab 3 Payrolls', (tester) async {
