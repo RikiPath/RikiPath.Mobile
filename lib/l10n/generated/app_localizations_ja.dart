@@ -191,6 +191,86 @@ class AppLocalizationsJa extends AppLocalizations {
   String get registerAsMentor => 'メンターに登録する';
 
   @override
+  String get mentorRegistrationPromotion => '知識を分かち合い、JLPT学習者をサポート';
+
+  @override
+  String get mentorRegistrationTitle => 'メンターに応募する';
+
+  @override
+  String get mentorRegistrationSubtitle =>
+      'アカウントを作成し、応募書類を完成させてRikiPathの審査を受けましょう。';
+
+  @override
+  String get mentorRegistrationEmail => '連絡先メールアドレス';
+
+  @override
+  String get mentorRegistrationEmailHint => 'mentor@example.com';
+
+  @override
+  String get mentorRegistrationSubmit => 'アカウントを作成して続ける';
+
+  @override
+  String get mentorRegistrationLoginPrompt => 'アカウントをお持ちですか？ログインして応募を続ける';
+
+  @override
+  String get mentorCreatingAccountMessage => 'アカウントを作成し、確認メールを送信しています...';
+
+  @override
+  String mentorRegistrationCreatedMessage(String email) {
+    return '確認コードを$emailに送信しました。メール認証後にログインして応募書類を完成させてください。';
+  }
+
+  @override
+  String get mentorApplicationTitle => 'メンター応募書類';
+
+  @override
+  String get mentorApplicationIntro =>
+      'プロフィールと資格証明書を提出し、管理者の審査を受けてください。承認後にメンター権限が付与されます。';
+
+  @override
+  String get mentorApplicationPersonal => '個人情報';
+
+  @override
+  String get mentorApplicationExpertise => '専門分野と経験';
+
+  @override
+  String get mentorApplicationBioRequired => '自己紹介 *';
+
+  @override
+  String get mentorApplicationExpertiseRequired => '専門分野 *';
+
+  @override
+  String get mentorApplicationJlptRequired => '日本語レベル *';
+
+  @override
+  String get mentorApplicationDocumentRequired =>
+      '必須：資格証明書（PDF・JPEG・PNG、最大5 MB）を提出前にアップロードしてください。';
+
+  @override
+  String get mentorApplicationDocumentUploaded => '資格証明書を非公開ストレージに保存しました。';
+
+  @override
+  String get mentorApplicationIncomplete => '提出前に自己紹介、専門分野、日本語レベルを保存してください。';
+
+  @override
+  String get mentorApplicationSubmit => '審査に提出する';
+
+  @override
+  String get mentorApplicationSubmitting => '提出中...';
+
+  @override
+  String get mentorApplicationPending => '審査待ち';
+
+  @override
+  String get mentorApplicationStatusLabel => '審査状況';
+
+  @override
+  String get mentorApplicationUpload => '資格証明書をアップロード';
+
+  @override
+  String get mentorApplicationUploading => 'アップロード中...';
+
+  @override
   String get securityFooter => 'Riki Learningの暗号化セキュリティ';
 
   @override

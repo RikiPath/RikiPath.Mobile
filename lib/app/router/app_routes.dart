@@ -3,6 +3,7 @@ abstract final class AppRoutes {
 
   static const String login = '/auth/login';
   static const String register = '/auth/register';
+  static const String mentorRegister = '$register?intent=mentor';
   static const String forgotPassword = '/auth/forgot-password';
   static const String verifyEmail = '/auth/verify-email';
   static const String unsupportedRole = '/auth/unsupported-role';
@@ -27,6 +28,10 @@ abstract final class AppRoutes {
   static const String mentorMeetings = '$mentor/$mentorMeetingsSegment';
   static const String mentorProfileSegment = 'profile';
   static const String mentorProfile = '$mentor/$mentorProfileSegment';
+  static const String mentorCompensationSegment = 'compensation';
+  static const String mentorCompensation = '$mentor/$mentorCompensationSegment';
+  static const String mentorBankAccountSegment = 'bank-account';
+  static const String mentorBankAccount = '$mentor/$mentorBankAccountSegment';
   static String mentorMeetingDetail(int meetingId) {
     if (meetingId <= 0) {
       throw ArgumentError.value(meetingId, 'meetingId', 'Must be positive');

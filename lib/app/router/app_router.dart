@@ -30,6 +30,8 @@ import 'package:rikipath_mobile/features/meeting/presentation/meeting_landing_sc
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_room_screen.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_bank_account_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_compensation_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_profile_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_availability_screen.dart';
@@ -124,7 +126,9 @@ GoRouter createAppRouter({
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (context, state) => const RegisterScreen(),
+        builder: (context, state) => RegisterScreen(
+          mentorRegistration: state.uri.queryParameters['intent'] == 'mentor',
+        ),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
@@ -189,6 +193,14 @@ GoRouter createAppRouter({
             builder: (context, state) => const MentorAvailabilityScreen(),
           ),
           GoRoute(
+            path: AppRoutes.mentorCompensationSegment,
+            builder: (context, state) => const MentorCompensationScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.mentorBankAccountSegment,
+            builder: (context, state) => const MentorBankAccountScreen(),
+          ),
+          GoRoute(
             path: AppRoutes.mentorMeetingsSegment,
             builder: (context, state) => const MentorMeetingsScreen(),
             routes: [
@@ -206,7 +218,8 @@ GoRouter createAppRouter({
       ),
       GoRoute(
         path: AppRoutes.mentorApplication,
-        builder: (context, state) => const MentorProfileScreen(),
+        builder: (context, state) =>
+            const MentorProfileScreen(applicationMode: true),
       ),
       GoRoute(
         path: AppRoutes.learnerMentorMeetings,
@@ -233,8 +246,9 @@ GoRouter createAppRouter({
               subscriptionId: int.tryParse(
                 state.uri.queryParameters['subscriptionId'] ?? '',
               ),
-              mentorId:
-                  int.tryParse(state.uri.queryParameters['mentorId'] ?? ''),
+              mentorId: int.tryParse(
+                state.uri.queryParameters['mentorId'] ?? '',
+              ),
             ),
           ),
           GoRoute(

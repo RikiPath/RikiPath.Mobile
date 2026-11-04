@@ -24,6 +24,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberSession = true;
+  bool _openingMentorRegistration = false;
+
+  Future<void> _openMentorRegistration() async {
+    if (_openingMentorRegistration) return;
+    setState(() => _openingMentorRegistration = true);
+    try {
+      await ref.read(mentorRegistrationIntentProvider).mark();
+      if (mounted) context.push(AppRoutes.mentorRegister);
+    } finally {
+      if (mounted) setState(() => _openingMentorRegistration = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -184,24 +196,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   actionLabel: l10n.register,
                   onPressed: state.isLoading
                       ? null
-                      : () => context.push(AppRoutes.register),
-                ),
-                const SizedBox(height: AppSpacing.space2),
-                TextButton.icon(
-                  key: const Key('public_mentor_registration_entry'),
-                  onPressed: state.isLoading
-                      ? null
                       : () async {
-                          final router = GoRouter.of(context);
                           await ref
                               .read(mentorRegistrationIntentProvider)
-                              .mark();
-                          if (!context.mounted) return;
-                          router.push(AppRoutes.register);
+                              .clear();
+                          if (context.mounted) context.push(AppRoutes.register);
                         },
-                  icon: const Icon(Icons.volunteer_activism_outlined),
-                  label: Text(l10n.registerAsMentor),
                 ),
+                const SizedBox(height: AppSpacing.space3),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: RikiPrimaryButton(
+                    key: const Key('public_mentor_registration_entry'),
+                    label: l10n.registerAsMentor,
+                    loadingLabel: l10n.registerAsMentor,
+                    leadingIcon: Icons.volunteer_activism_outlined,
+                    backgroundColor: AppColors.mentorAction,
+                    pressedColor: AppColors.mentorActionPressed,
+                    isLoading: _openingMentorRegistration,
+                    onPressed: state.isLoading ? null : _openMentorRegistration,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.space2),
                 const AuthSecurityFooter(),
               ],
             ),

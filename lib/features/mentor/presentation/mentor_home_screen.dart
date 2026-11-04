@@ -67,6 +67,16 @@ class MentorHomeScreen extends ConsumerWidget {
                     .retry,
                 onOpen: () => context.push(AppRoutes.mentorMeetings),
               ),
+              const SizedBox(height: AppSpacing.space4),
+              _MentorSummaryCard(
+                key: const Key('mentor_home_compensation_summary'),
+                icon: Icons.payments_outlined,
+                title: 'Thu nhập của tôi',
+                count: '',
+                detail: 'Thù lao từng buổi, kỳ lương tháng và lịch sử chi trả.',
+                actionLabel: 'Xem thu nhập',
+                onPressed: () => context.push(AppRoutes.mentorCompensation),
+              ),
               const SizedBox(height: AppSpacing.space6),
               RikiSecondaryButton(
                 key: const Key('mentor_logout_button'),

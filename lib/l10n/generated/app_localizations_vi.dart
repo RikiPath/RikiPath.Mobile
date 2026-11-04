@@ -201,6 +201,91 @@ class AppLocalizationsVi extends AppLocalizations {
   String get registerAsMentor => 'Đăng ký làm Cố vấn';
 
   @override
+  String get mentorRegistrationPromotion =>
+      'Chia sẻ kiến thức, đồng hành cùng học viên JLPT';
+
+  @override
+  String get mentorRegistrationTitle => 'Đăng ký trở thành Cố vấn';
+
+  @override
+  String get mentorRegistrationSubtitle =>
+      'Tạo tài khoản để hoàn thiện hồ sơ và tham gia xét duyệt Cố vấn tại RikiPath.';
+
+  @override
+  String get mentorRegistrationEmail => 'Email liên hệ';
+
+  @override
+  String get mentorRegistrationEmailHint => 'covan@example.com';
+
+  @override
+  String get mentorRegistrationSubmit => 'Tạo tài khoản và tiếp tục';
+
+  @override
+  String get mentorRegistrationLoginPrompt =>
+      'Đã có tài khoản? Đăng nhập để tiếp tục ứng tuyển';
+
+  @override
+  String get mentorCreatingAccountMessage =>
+      'Đang tạo tài khoản và gửi email xác thực...';
+
+  @override
+  String mentorRegistrationCreatedMessage(String email) {
+    return 'RikiPath đã gửi mã xác thực tới\n$email. Xác thực email rồi đăng nhập để hoàn thiện hồ sơ ứng tuyển Cố vấn.';
+  }
+
+  @override
+  String get mentorApplicationTitle => 'Hồ sơ ứng tuyển Cố vấn';
+
+  @override
+  String get mentorApplicationIntro =>
+      'Hoàn thiện hồ sơ và tải chứng chỉ để Quản trị viên xét duyệt. Bạn chỉ có quyền Cố vấn sau khi được phê duyệt.';
+
+  @override
+  String get mentorApplicationPersonal => 'Thông tin cá nhân';
+
+  @override
+  String get mentorApplicationExpertise => 'Chuyên môn và kinh nghiệm';
+
+  @override
+  String get mentorApplicationBioRequired => 'Giới thiệu bản thân *';
+
+  @override
+  String get mentorApplicationExpertiseRequired => 'Lĩnh vực chuyên môn *';
+
+  @override
+  String get mentorApplicationJlptRequired => 'Trình độ tiếng Nhật *';
+
+  @override
+  String get mentorApplicationDocumentRequired =>
+      'Bắt buộc: tải chứng chỉ PDF, JPEG hoặc PNG (tối đa 5 MB) trước khi gửi.';
+
+  @override
+  String get mentorApplicationDocumentUploaded =>
+      'Đã tải chứng chỉ xác minh lên kho riêng tư.';
+
+  @override
+  String get mentorApplicationIncomplete =>
+      'Vui lòng lưu giới thiệu, chuyên môn và trình độ tiếng Nhật trước khi gửi hồ sơ.';
+
+  @override
+  String get mentorApplicationSubmit => 'Gửi hồ sơ xét duyệt';
+
+  @override
+  String get mentorApplicationSubmitting => 'Đang gửi hồ sơ...';
+
+  @override
+  String get mentorApplicationPending => 'Đang chờ xét duyệt';
+
+  @override
+  String get mentorApplicationStatusLabel => 'Trạng thái xét duyệt';
+
+  @override
+  String get mentorApplicationUpload => 'Chọn và tải chứng chỉ';
+
+  @override
+  String get mentorApplicationUploading => 'Đang tải chứng chỉ...';
+
+  @override
   String get securityFooter => 'Bảo mật chuẩn mã hóa Riki Learning';
 
   @override

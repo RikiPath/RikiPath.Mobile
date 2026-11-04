@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
@@ -9,7 +10,9 @@ import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
 
 class MentorProfileScreen extends ConsumerWidget {
-  const MentorProfileScreen({super.key});
+  const MentorProfileScreen({this.applicationMode = false, super.key});
+
+  final bool applicationMode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,7 +21,13 @@ class MentorProfileScreen extends ConsumerWidget {
     return Scaffold(
       key: const Key('mentor_profile_screen'),
       backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(title: const Text('Hồ sơ cố vấn')),
+      appBar: AppBar(
+        title: Text(
+          applicationMode
+              ? context.l10n.mentorApplicationTitle
+              : 'Hồ sơ Cố vấn',
+        ),
+      ),
       body: SafeArea(
         top: false,
         child: switch (state) {
@@ -32,7 +41,10 @@ class MentorProfileScreen extends ConsumerWidget {
               onRetry: ref.read(mentorProfileControllerProvider.notifier).retry,
             ),
           ),
-          AsyncData(:final value) => _MentorProfileForm(profile: value),
+          AsyncData(:final value) => _MentorProfileForm(
+            profile: value,
+            applicationMode: applicationMode,
+          ),
         },
       ),
     );
@@ -40,9 +52,13 @@ class MentorProfileScreen extends ConsumerWidget {
 }
 
 class _MentorProfileForm extends StatefulWidget {
-  const _MentorProfileForm({required this.profile});
+  const _MentorProfileForm({
+    required this.profile,
+    required this.applicationMode,
+  });
 
   final MentorProfileData profile;
+  final bool applicationMode;
 
   @override
   State<_MentorProfileForm> createState() => _MentorProfileFormState();
@@ -57,6 +73,7 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
   String? _selectedJlpt;
   bool _isSaving = false;
   bool _isUploadingDocument = false;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -87,6 +104,7 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
   @override
   Widget build(BuildContext context) {
     final p = widget.profile;
+    final l10n = context.l10n;
 
     return Consumer(
       builder: (context, ref, _) {
@@ -94,55 +112,76 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
           key: const Key('mentor_profile_scroll'),
           padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
           children: [
-            // Header card
+            if (widget.applicationMode) ...[
+              Text(
+                l10n.mentorApplicationIntro,
+                style: AppTypography.body.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.space4),
+            ],
             RikiCard(
               borderColor: AppColors.border,
               padding: const EdgeInsets.all(AppSpacing.space4),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: AppColors.brandPrimary.withValues(
-                      alpha: 0.12,
-                    ),
-                    backgroundImage: p.avatarUrl?.isNotEmpty == true
-                        ? NetworkImage(p.avatarUrl!)
-                        : null,
-                    child: p.avatarUrl?.isNotEmpty == true
-                        ? null
-                        : const Icon(
-                            Icons.person,
-                            color: AppColors.brandPrimary,
-                            size: 32,
-                          ),
+                  Text(
+                    widget.applicationMode
+                        ? l10n.mentorApplicationPersonal
+                        : 'Thông tin cá nhân',
+                    style: AppTypography.cardTitle,
                   ),
-                  const SizedBox(width: AppSpacing.space3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          p.fullName,
-                          style: AppTypography.cardTitle.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                  const SizedBox(height: AppSpacing.space3),
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 28,
+                        backgroundColor: AppColors.brandPrimary.withValues(
+                          alpha: 0.12,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          p.email,
-                          style: AppTypography.metadata.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                        if (p.phoneNumber != null && p.phoneNumber!.isNotEmpty)
-                          Text(
-                            p.phoneNumber!,
-                            style: AppTypography.metadata.copyWith(
-                              color: AppColors.textMuted,
+                        backgroundImage: p.avatarUrl?.isNotEmpty == true
+                            ? NetworkImage(p.avatarUrl!)
+                            : null,
+                        child: p.avatarUrl?.isNotEmpty == true
+                            ? null
+                            : const Icon(
+                                Icons.person,
+                                color: AppColors.brandPrimary,
+                                size: 32,
+                              ),
+                      ),
+                      const SizedBox(width: AppSpacing.space3),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              p.fullName,
+                              style: AppTypography.cardTitle.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                      ],
-                    ),
+                            const SizedBox(height: 2),
+                            Text(
+                              p.email,
+                              style: AppTypography.metadata.copyWith(
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                            if (p.phoneNumber != null &&
+                                p.phoneNumber!.isNotEmpty)
+                              Text(
+                                p.phoneNumber!,
+                                style: AppTypography.metadata.copyWith(
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -161,7 +200,9 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Thông tin chuyên môn',
+                    widget.applicationMode
+                        ? l10n.mentorApplicationExpertise
+                        : 'Chuyên môn và kinh nghiệm',
                     style: AppTypography.cardTitle.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -173,8 +214,10 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
                     key: const Key('mentor_profile_bio_input'),
                     controller: _bioController,
                     maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Giới thiệu bản thân (Bio)',
+                    decoration: InputDecoration(
+                      labelText: widget.applicationMode
+                          ? l10n.mentorApplicationBioRequired
+                          : 'Giới thiệu bản thân',
                       hintText:
                           'Kinh nghiệm giảng dạy, phương pháp hướng dẫn...',
                     ),
@@ -185,8 +228,10 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
                   TextField(
                     key: const Key('mentor_profile_expertise_input'),
                     controller: _expertiseController,
-                    decoration: const InputDecoration(
-                      labelText: 'Lĩnh vực chuyên môn',
+                    decoration: InputDecoration(
+                      labelText: widget.applicationMode
+                          ? l10n.mentorApplicationExpertiseRequired
+                          : 'Lĩnh vực chuyên môn',
                       hintText: 'JLPT N1, N2, Giao tiếp thương mại...',
                     ),
                   ),
@@ -195,9 +240,12 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
                   // JLPT Level
                   DropdownButtonFormField<String>(
                     key: const Key('mentor_profile_jlpt_input'),
+                    isExpanded: true,
                     initialValue: _selectedJlpt,
-                    decoration: const InputDecoration(
-                      labelText: 'Trình độ tiếng Nhật',
+                    decoration: InputDecoration(
+                      labelText: widget.applicationMode
+                          ? l10n.mentorApplicationJlptRequired
+                          : 'Trình độ tiếng Nhật',
                     ),
                     items: const [
                       DropdownMenuItem(value: 'N1', child: Text('JLPT N1')),
@@ -314,7 +362,9 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
     final statusText = p.isApproved
         ? 'Đã xác minh (Hoạt động)'
         : (p.isPending
-              ? 'Đang chờ xét duyệt'
+              ? (widget.applicationMode
+                    ? context.l10n.mentorApplicationPending
+                    : 'Đang chờ xét duyệt')
               : (p.isRejected
                     ? 'Hồ sơ bị từ chối'
                     : (p.isChangesRequested
@@ -336,19 +386,24 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
                 size: 24,
               ),
               const SizedBox(width: AppSpacing.space2),
-              Text(
-                'Trạng thái xét duyệt: ',
-                style: AppTypography.cardTitle.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               Expanded(
-                child: Text(
-                  statusText,
-                  style: AppTypography.cardTitle.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.applicationMode
+                          ? context.l10n.mentorApplicationStatusLabel
+                          : 'Trạng thái xét duyệt',
+                      style: AppTypography.cardTitle,
+                    ),
+                    Text(
+                      statusText,
+                      style: AppTypography.cardTitle.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -371,16 +426,24 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
             const SizedBox(height: AppSpacing.space3),
             Text(
               p.hasVerificationDocument
-                  ? 'Chứng chỉ đã được tải lên kho bảo vệ.'
-                  : 'Vui lòng tải chứng chỉ PDF, JPEG hoặc PNG (tối đa 5 MB).',
+                  ? (widget.applicationMode
+                        ? context.l10n.mentorApplicationDocumentUploaded
+                        : 'Đã tải chứng chỉ xác minh lên kho riêng tư.')
+                  : (widget.applicationMode
+                        ? context.l10n.mentorApplicationDocumentRequired
+                        : 'Vui lòng tải chứng chỉ PDF, JPEG hoặc PNG (tối đa 5 MB).'),
             ),
             if (!p.isPending) ...[
               const SizedBox(height: AppSpacing.space2),
               RikiSecondaryButton(
                 key: const Key('mentor_upload_verification_document_button'),
                 label: _isUploadingDocument
-                    ? 'Đang tải chứng chỉ...'
-                    : 'Chọn và tải chứng chỉ',
+                    ? (widget.applicationMode
+                          ? context.l10n.mentorApplicationUploading
+                          : 'Đang tải chứng chỉ...')
+                    : (widget.applicationMode
+                          ? context.l10n.mentorApplicationUpload
+                          : 'Chọn và tải chứng chỉ'),
                 leadingIcon: Icons.upload_file_outlined,
                 onPressed: _isUploadingDocument
                     ? null
@@ -388,16 +451,44 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
               ),
             ],
             const SizedBox(height: AppSpacing.space2),
-            RikiSecondaryButton(
-              key: const Key('mentor_submit_verification_button'),
-              label: p.isPending
-                  ? 'Đang chờ xét duyệt'
-                  : 'Nộp hồ sơ xin xét duyệt',
-              leadingIcon: Icons.upload_file_outlined,
-              onPressed: p.isPending || !p.hasVerificationDocument
-                  ? null
-                  : () => _showSubmitVerificationDialog(context, ref),
-            ),
+            if (widget.applicationMode &&
+                (p.bio?.trim().isNotEmpty != true ||
+                    p.expertise?.trim().isNotEmpty != true ||
+                    p.jlptLevel?.trim().isNotEmpty != true)) ...[
+              Text(context.l10n.mentorApplicationIncomplete),
+              const SizedBox(height: AppSpacing.space2),
+            ],
+            if (widget.applicationMode)
+              RikiPrimaryButton(
+                key: const Key('mentor_submit_verification_button'),
+                label: p.isPending
+                    ? context.l10n.mentorApplicationPending
+                    : context.l10n.mentorApplicationSubmit,
+                loadingLabel: context.l10n.mentorApplicationSubmitting,
+                leadingIcon: Icons.send_outlined,
+                isLoading: _isSubmitting,
+                onPressed:
+                    p.isPending ||
+                        !p.hasVerificationDocument ||
+                        p.bio?.trim().isNotEmpty != true ||
+                        p.expertise?.trim().isNotEmpty != true ||
+                        p.jlptLevel?.trim().isNotEmpty != true ||
+                        _isSubmitting
+                    ? null
+                    : () => _showSubmitVerificationDialog(context, ref),
+              )
+            else
+              RikiSecondaryButton(
+                key: const Key('mentor_submit_verification_button'),
+                label: p.isPending
+                    ? 'Đang chờ xét duyệt'
+                    : 'Gửi hồ sơ xét duyệt',
+                leadingIcon: Icons.upload_file_outlined,
+                onPressed:
+                    p.isPending || !p.hasVerificationDocument || _isSubmitting
+                    ? null
+                    : () => _showSubmitVerificationDialog(context, ref),
+              ),
           ],
         ],
       ),
@@ -440,11 +531,14 @@ class _MentorProfileFormState extends State<_MentorProfileForm> {
           ElevatedButton(
             key: const Key('confirm_submit_verification_button'),
             onPressed: () async {
+              if (_isSubmitting) return;
               Navigator.of(dialogCtx).pop();
+              setState(() => _isSubmitting = true);
               final ok = await ref
                   .read(mentorProfileControllerProvider.notifier)
                   .submitVerification(notes: notesController.text.trim());
               if (!mounted) return;
+              setState(() => _isSubmitting = false);
               if (ok) {
                 ref
                     .read(rikiToastServiceProvider.notifier)

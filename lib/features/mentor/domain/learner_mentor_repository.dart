@@ -15,6 +15,7 @@ abstract interface class LearnerMentorRepository {
     required int subscriptionPlanId,
     int? mentorAvailabilityId,
     String? idempotencyKey,
+    String? jlptLevel,
   });
 
   Future<List<LearnerMentorBooking>> loadBookings();
@@ -31,6 +32,7 @@ abstract interface class LearnerMentorRepository {
     required int slotId,
     required String operationKey,
     String? notes,
+    String? jlptLevel,
   });
 
   // Cancellation & Reschedule (Stage 10)

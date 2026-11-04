@@ -204,6 +204,7 @@ class LearnerBookingIntent {
     this.mentorAvailabilityId,
     this.slot,
     this.question,
+    this.jlptLevel,
   });
 
   final int? planId;
@@ -212,6 +213,7 @@ class LearnerBookingIntent {
   final int? mentorAvailabilityId;
   final LearnerMentorAvailability? slot;
   final String? question;
+  final String? jlptLevel;
 
   Map<String, dynamic> toJson() => {
     'planId': planId,
@@ -219,6 +221,7 @@ class LearnerBookingIntent {
     'mentorAvailabilityId': mentorAvailabilityId,
     if (slot != null) 'slot': slot!.toJson(),
     'question': question,
+    'jlptLevel': jlptLevel,
   };
 
   factory LearnerBookingIntent.fromJson(Map<String, dynamic> json) =>
@@ -232,6 +235,7 @@ class LearnerBookingIntent {
               )
             : null,
         question: json['question'] as String?,
+        jlptLevel: json['jlptLevel'] as String?,
       );
 
   LearnerBookingIntent copyWith({
@@ -241,6 +245,7 @@ class LearnerBookingIntent {
     int? mentorAvailabilityId,
     LearnerMentorAvailability? slot,
     String? question,
+    String? jlptLevel,
   }) => LearnerBookingIntent(
     planId: planId ?? this.planId,
     plan: plan ?? this.plan,
@@ -248,6 +253,7 @@ class LearnerBookingIntent {
     mentorAvailabilityId: mentorAvailabilityId ?? this.mentorAvailabilityId,
     slot: slot ?? this.slot,
     question: question ?? this.question,
+    jlptLevel: jlptLevel ?? this.jlptLevel,
   );
 }
 
@@ -398,6 +404,7 @@ class LearnerMentorMutationController
     required int subscriptionPlanId,
     int? mentorAvailabilityId,
     String? idempotencyKey,
+    String? jlptLevel,
   }) async {
     if (state.isLoading) return null;
     state = const LearnerMentorMutationState.loading(
@@ -410,6 +417,7 @@ class LearnerMentorMutationController
             subscriptionPlanId: subscriptionPlanId,
             mentorAvailabilityId: mentorAvailabilityId,
             idempotencyKey: idempotencyKey,
+            jlptLevel: jlptLevel,
           );
       state = LearnerMentorMutationState.purchaseSuccess(result);
       return result;
@@ -426,6 +434,7 @@ class LearnerMentorMutationController
     required int slotId,
     required String operationKey,
     String? notes,
+    String? jlptLevel,
   }) async {
     if (state.isLoading) return null;
     state = const LearnerMentorMutationState.loading(
@@ -438,6 +447,7 @@ class LearnerMentorMutationController
             slotId: slotId,
             operationKey: operationKey,
             notes: notes,
+            jlptLevel: jlptLevel,
           );
       state = LearnerMentorMutationState.bookingSuccess(result);
       ref.invalidate(learnerMentorBookingsControllerProvider);

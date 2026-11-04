@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:rikipath_mobile/core/network/safe_external_http_uri.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 
 @immutable
@@ -21,6 +22,8 @@ class BookableMentor {
   final String? bio;
   final List<String> jlptLevels;
   final String? teachingMethod;
+
+  List<String> get teachingJlptLevels => jlptLevels;
 }
 
 @immutable
@@ -46,6 +49,8 @@ class MentorMeetingPlan {
     required this.meetingSessionCount,
     required this.features,
     this.description,
+    this.jlptLevel,
+    this.certificateLevelId,
   });
 
   final int id;
@@ -55,6 +60,8 @@ class MentorMeetingPlan {
   final double price;
   final int meetingSessionCount;
   final List<MentorMeetingFeature> features;
+  final String? jlptLevel;
+  final int? certificateLevelId;
 }
 
 @immutable
@@ -129,6 +136,7 @@ class LearnerMentorBooking {
     this.scheduledAt,
     this.meetingLink,
     this.roomId,
+    this.jlptLevel,
   });
 
   final int id;
@@ -143,6 +151,7 @@ class LearnerMentorBooking {
   final MentorTimestamp? scheduledAt;
   final String? meetingLink;
   final String? roomId;
+  final String? jlptLevel;
 
   Uri? get safeMeetingUri => safeExternalHttpUri(meetingLink);
 }
@@ -219,20 +228,49 @@ Uri? safeExternalHttpUri(String? rawValue) {
 }
 
 @immutable
+class LearnerCreditGrant {
+  const LearnerCreditGrant({
+    required this.grantId,
+    required this.userSubscriptionId,
+    this.certificateLevelId,
+    this.jlptLevel,
+    required this.availableQuantity,
+    this.expiresAtUtc,
+  });
+
+  final int grantId;
+  final int userSubscriptionId;
+  final int? certificateLevelId;
+  final String? jlptLevel;
+  final int availableQuantity;
+  final DateTime? expiresAtUtc;
+}
+
+@immutable
 class LearnerCreditBalance {
   const LearnerCreditBalance({
     required this.balance,
     required this.availableBalance,
     required this.pendingHoldCount,
     this.expiresAtUtc,
+    this.activeGrants = const [],
   });
 
   final int balance;
   final int availableBalance;
   final int pendingHoldCount;
   final DateTime? expiresAtUtc;
+  final List<LearnerCreditGrant> activeGrants;
 
   bool get hasCredits => availableBalance > 0;
+
+  int availableForLevel(String? level) {
+    if (level == null || level.trim().isEmpty) return availableBalance;
+    final normalized = normalizeConsultationJlptLevel(level);
+    return activeGrants
+        .where((g) => normalizeConsultationJlptLevel(g.jlptLevel) == normalized)
+        .fold<int>(0, (sum, g) => sum + g.availableQuantity);
+  }
 }
 
 @immutable

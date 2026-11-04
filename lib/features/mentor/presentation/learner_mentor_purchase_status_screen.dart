@@ -70,8 +70,9 @@ class _LearnerMentorPurchaseStatusScreenState
           .read(learnerMentorMutationControllerProvider.notifier)
           .bookWithCredit(
             slotId: intent.slot!.id,
-            operationKey: 'booking_${DateTime.now().millisecondsSinceEpoch}',
+            operationKey: 'booking_',
             notes: intent.question,
+            jlptLevel: intent.jlptLevel ?? intent.plan?.jlptLevel,
           );
 
       if (!mounted) return;

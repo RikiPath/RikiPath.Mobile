@@ -118,6 +118,11 @@ class LearnerMentorPlanCard extends StatelessWidget {
                   plan.meetingSessionCount,
                 ),
               ),
+              if (plan.jlptLevel != null && plan.jlptLevel!.isNotEmpty)
+                _MetaPill(
+                  icon: Icons.school_outlined,
+                  label: 'JLPT ',
+                ),
             ],
           ),
           if (plan.features.isNotEmpty) ...[

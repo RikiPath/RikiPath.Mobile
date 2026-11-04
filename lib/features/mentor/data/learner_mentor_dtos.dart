@@ -6,15 +6,19 @@ class PurchaseMentorPlanRequestDto {
     required this.subscriptionPlanId,
     this.mentorAvailabilityId,
     this.idempotencyKey,
+    this.jlptLevel,
   });
 
   final int subscriptionPlanId;
   final int? mentorAvailabilityId;
   final String? idempotencyKey;
+  final String? jlptLevel;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'subscriptionPlanId': subscriptionPlanId,
     if (idempotencyKey != null) 'idempotencyKey': idempotencyKey,
+    if (jlptLevel != null && jlptLevel!.trim().isNotEmpty)
+      'jlptLevel': jlptLevel!.trim().toUpperCase(),
   };
 }
 class BookableMentorDto {
@@ -29,7 +33,7 @@ class BookableMentorDto {
   });
 
   factory BookableMentorDto.fromJson(Map<String, Object?> json) {
-    final rawJlpt = json['jlptLevel'] ?? json['jlptLevels'];
+    final rawJlpt = json['teachingJlptLevels'] ?? json['jlptLevel'] ?? json['jlptLevels'];
     final jlptList = <String>[];
     if (rawJlpt is String && rawJlpt.trim().isNotEmpty) {
       jlptList.add(rawJlpt.trim());
@@ -105,6 +109,8 @@ class MentorMeetingPlanDto {
     required this.meetingSessionCount,
     required this.features,
     this.description,
+    this.jlptLevel,
+    this.certificateLevelId,
   });
 
   factory MentorMeetingPlanDto.fromJson(Map<String, Object?> json) {
@@ -115,6 +121,8 @@ class MentorMeetingPlanDto {
       durationDays: _requiredNonNegativeInt(json, 'durationDays'),
       price: _requiredNumber(json, 'price'),
       meetingSessionCount: _requiredNonNegativeInt(json, 'meetingSessionCount'),
+      jlptLevel: _optionalString(json, 'jlptLevel'),
+      certificateLevelId: _optionalPositiveInt(json, 'certificateLevelId'),
       features: _requiredObjectList(
         json,
         'features',
@@ -128,6 +136,8 @@ class MentorMeetingPlanDto {
   final int durationDays;
   final double price;
   final int meetingSessionCount;
+  final String? jlptLevel;
+  final int? certificateLevelId;
   final List<MentorMeetingFeatureDto> features;
 
   MentorMeetingPlan toDomain() => MentorMeetingPlan(
@@ -137,6 +147,8 @@ class MentorMeetingPlanDto {
     durationDays: durationDays,
     price: price,
     meetingSessionCount: meetingSessionCount,
+    jlptLevel: jlptLevel,
+    certificateLevelId: certificateLevelId,
     features: features
         .map((feature) => feature.toDomain())
         .toList(growable: false),
@@ -195,6 +207,7 @@ class LearnerMentorBookingDto {
     this.scheduledAt,
     this.meetingLink,
     this.roomId,
+    this.jlptLevel,
   });
 
   factory LearnerMentorBookingDto.fromJson(Map<String, Object?> json) {
@@ -217,6 +230,7 @@ class LearnerMentorBookingDto {
       },
       meetingLink: _optionalString(json, 'meetingLink'),
       roomId: _optionalString(json, 'roomId'),
+      jlptLevel: _optionalString(json, 'jlptLevel'),
     );
   }
 
@@ -232,6 +246,7 @@ class LearnerMentorBookingDto {
   final MentorTimestamp? scheduledAt;
   final String? meetingLink;
   final String? roomId;
+  final String? jlptLevel;
 
   LearnerMentorBooking toDomain() => LearnerMentorBooking(
     id: id,
@@ -246,6 +261,7 @@ class LearnerMentorBookingDto {
     scheduledAt: scheduledAt,
     meetingLink: meetingLink,
     roomId: roomId,
+    jlptLevel: jlptLevel,
   );
 }
 
@@ -506,17 +522,62 @@ class BookWithCreditRequestDto {
     required this.mentorAvailabilityId,
     required this.operationKey,
     this.notes,
+    this.jlptLevel,
   });
 
   final int mentorAvailabilityId;
   final String operationKey;
   final String? notes;
+  final String? jlptLevel;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'mentorAvailabilityId': mentorAvailabilityId,
     'operationKey': operationKey,
     if (notes != null && notes!.trim().isNotEmpty) 'notes': notes!.trim(),
+    if (jlptLevel != null && jlptLevel!.trim().isNotEmpty)
+      'jlptLevel': jlptLevel!.trim().toUpperCase(),
   };
+}
+
+class LearnerCreditGrantDto {
+  const LearnerCreditGrantDto({
+    required this.grantId,
+    required this.userSubscriptionId,
+    this.certificateLevelId,
+    this.jlptLevel,
+    required this.availableQuantity,
+    this.expiresAtUtc,
+  });
+
+  factory LearnerCreditGrantDto.fromJson(Map<String, Object?> json) {
+    return LearnerCreditGrantDto(
+      grantId: _requiredPositiveInt(json, 'grantId'),
+      userSubscriptionId: _readInt(json['userSubscriptionId']) ?? 0,
+      certificateLevelId: _readInt(json['certificateLevelId']),
+      jlptLevel: _optionalString(json, 'jlptLevel'),
+      availableQuantity: _readInt(json['availableQuantity']) ?? 0,
+      expiresAtUtc: switch (_optionalString(json, 'expiresAtUtc')) {
+        final value? => DateTime.tryParse(value),
+        null => null,
+      },
+    );
+  }
+
+  final int grantId;
+  final int userSubscriptionId;
+  final int? certificateLevelId;
+  final String? jlptLevel;
+  final int availableQuantity;
+  final DateTime? expiresAtUtc;
+
+  LearnerCreditGrant toDomain() => LearnerCreditGrant(
+    grantId: grantId,
+    userSubscriptionId: userSubscriptionId,
+    certificateLevelId: certificateLevelId,
+    jlptLevel: jlptLevel,
+    availableQuantity: availableQuantity,
+    expiresAtUtc: expiresAtUtc,
+  );
 }
 
 class LearnerCreditBalanceDto {
@@ -525,6 +586,7 @@ class LearnerCreditBalanceDto {
     required this.availableBalance,
     required this.pendingHoldCount,
     this.expiresAtUtc,
+    this.activeGrants = const [],
   });
 
   factory LearnerCreditBalanceDto.fromJson(Map<String, Object?> json) {
@@ -536,6 +598,17 @@ class LearnerCreditBalanceDto {
         _readInt(json['totalAvailableCredits']) ??
         _readInt(json['balance']) ??
         0;
+    final rawGrants = json['activeGrants'];
+    final grants = <LearnerCreditGrantDto>[];
+    if (rawGrants is List) {
+      for (final item in rawGrants) {
+        if (item is Map<String, Object?>) {
+          grants.add(LearnerCreditGrantDto.fromJson(item));
+        } else if (item is Map) {
+          grants.add(LearnerCreditGrantDto.fromJson(Map<String, Object?>.from(item)));
+        }
+      }
+    }
     return LearnerCreditBalanceDto(
       balance: totalCredits,
       availableBalance: available,
@@ -545,6 +618,7 @@ class LearnerCreditBalanceDto {
         final value? => DateTime.tryParse(value),
         null => null,
       },
+      activeGrants: grants,
     );
   }
 
@@ -552,12 +626,14 @@ class LearnerCreditBalanceDto {
   final int availableBalance;
   final int pendingHoldCount;
   final DateTime? expiresAtUtc;
+  final List<LearnerCreditGrantDto> activeGrants;
 
   LearnerCreditBalance toDomain() => LearnerCreditBalance(
     balance: balance,
     availableBalance: availableBalance,
     pendingHoldCount: pendingHoldCount,
     expiresAtUtc: expiresAtUtc,
+    activeGrants: activeGrants.map((g) => g.toDomain()).toList(growable: false),
   );
 }
 

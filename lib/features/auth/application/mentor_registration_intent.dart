@@ -3,7 +3,9 @@ import 'package:rikipath_mobile/core/storage/json_preference_store.dart';
 
 const _mentorRegistrationIntentKey = 'auth.mentor_application_intent';
 
-final mentorRegistrationIntentProvider = Provider<MentorRegistrationIntent>((ref) {
+final mentorRegistrationIntentProvider = Provider<MentorRegistrationIntent>((
+  ref,
+) {
   return MentorRegistrationIntent(ref.watch(jsonPreferenceStoreProvider));
 });
 
@@ -14,6 +16,8 @@ class MentorRegistrationIntent {
   final JsonPreferenceStore _store;
 
   Future<void> mark() => _store.write(_mentorRegistrationIntentKey, '1');
+
+  Future<void> clear() => _store.remove(_mentorRegistrationIntentKey);
 
   Future<bool> consume() async {
     final pending = await _store.read(_mentorRegistrationIntentKey) == '1';

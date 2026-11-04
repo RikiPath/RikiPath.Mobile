@@ -56,7 +56,10 @@ void main() {
       expect(find.text('Chưa có tài khoản?'), findsOneWidget);
       expect(find.text('Đăng ký'), findsOneWidget);
       expect(find.text('Đăng ký làm Cố vấn'), findsOneWidget);
-      expect(find.byKey(const Key('public_mentor_registration_entry')), findsOneWidget);
+      expect(
+        find.byKey(const Key('public_mentor_registration_entry')),
+        findsOneWidget,
+      );
       expect(find.text('Bảo mật chuẩn mã hóa Riki Learning'), findsOneWidget);
       expect(
         tester
@@ -386,11 +389,15 @@ void main() {
       await tester.pump();
 
       expect(find.text('Đang đăng nhập...'), findsOneWidget);
-      final button = tester.widget<FilledButton>(find.byType(FilledButton));
+      final loginButton = find.descendant(
+        of: find.byKey(const Key('login_submit_button')),
+        matching: find.byType(FilledButton),
+      );
+      final button = tester.widget<FilledButton>(loginButton);
       expect(button.onPressed, isNull);
       expect(repository.loginCalls, 1);
 
-      await tester.tap(find.byType(FilledButton), warnIfMissed: false);
+      await tester.tap(loginButton, warnIfMissed: false);
       await tester.pump();
       expect(repository.loginCalls, 1);
 
@@ -453,6 +460,77 @@ void main() {
       expect(find.byType(LoginScreen), findsOneWidget);
     });
 
+    testWidgets('Mentor CTA is filled and opens Mentor registration context', (
+      tester,
+    ) async {
+      final store = _TestPreferenceStore();
+      await _pumpAuthRoute(
+        tester,
+        AppRoutes.login,
+        _FakeAuthRepository(),
+        preferenceStore: store,
+      );
+
+      final entry = find.byKey(const Key('public_mentor_registration_entry'));
+      final button = tester.widget<RikiPrimaryButton>(entry);
+      expect(button.backgroundColor, AppColors.mentorAction);
+      expect(tester.getSize(entry).height, 54);
+      expect(
+        tester.getSize(entry).width,
+        tester.getSize(find.byKey(const Key('login_submit_button'))).width,
+      );
+      await _tapVisible(tester, entry);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RegisterScreen), findsOneWidget);
+      expect(find.text('Đăng ký trở thành Cố vấn'), findsOneWidget);
+      expect(find.text('Email liên hệ'), findsOneWidget);
+      expect(find.text('Email học viên'), findsNothing);
+      expect(find.text('Tạo tài khoản và tiếp tục'), findsOneWidget);
+      expect(await store.read('auth.mentor_application_intent'), '1');
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('normal registration clears abandoned Mentor intent', (
+      tester,
+    ) async {
+      final store = _TestPreferenceStore();
+      await store.write('auth.mentor_application_intent', '1');
+      await _pumpAuthRoute(
+        tester,
+        AppRoutes.login,
+        _FakeAuthRepository(),
+        preferenceStore: store,
+      );
+      await _tapVisible(tester, find.text('Đăng ký'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tạo tài khoản RikiPath'), findsOneWidget);
+      expect(find.text('Email học viên'), findsOneWidget);
+      expect(await store.read('auth.mentor_application_intent'), isNull);
+    });
+
+    testWidgets('Android Back abandons Mentor registration context', (
+      tester,
+    ) async {
+      final store = _TestPreferenceStore();
+      await _pumpAuthRoute(
+        tester,
+        AppRoutes.login,
+        _FakeAuthRepository(),
+        preferenceStore: store,
+      );
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('public_mentor_registration_entry')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Đăng ký trở thành Cố vấn'), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(await store.read('auth.mentor_application_intent'), isNull);
+    });
+
     testWidgets('invalid credentials render mapped server feedback', (
       tester,
     ) async {
@@ -478,6 +556,52 @@ void main() {
   });
 
   group('RegisterScreen', () {
+    testWidgets('Mentor registration reuses account API and retains intent', (
+      tester,
+    ) async {
+      final repository = _FakeAuthRepository();
+      await _pumpAuthRoute(tester, AppRoutes.mentorRegister, repository);
+      expect(find.text('Đăng ký trở thành Cố vấn'), findsOneWidget);
+      expect(find.text('Email liên hệ'), findsOneWidget);
+      expect(find.text('Email học viên'), findsNothing);
+      await _registerSuccessfully(tester);
+      expect(repository.registerCalls, 1);
+      expect(
+        find.textContaining('hoàn thiện hồ sơ ứng tuyển Cố vấn'),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('register_open_verify_email_button')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('existing account can return to Login without registration', (
+      tester,
+    ) async {
+      final repository = _FakeAuthRepository();
+      await _pumpAuthRoute(tester, AppRoutes.mentorRegister, repository);
+      await _tapVisible(
+        tester,
+        find.byKey(const Key('mentor_registration_login_prompt')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(repository.registerCalls, 0);
+    });
+
+    testWidgets('Mentor context localizes to Japanese', (tester) async {
+      await _pumpAuthRoute(
+        tester,
+        AppRoutes.mentorRegister,
+        _FakeAuthRepository(),
+        locale: const Locale('ja'),
+      );
+      expect(find.text('メンターに応募する'), findsOneWidget);
+      expect(find.text('連絡先メールアドレス'), findsOneWidget);
+      expect(find.text('アカウントを作成して続ける'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
     testWidgets('required transport fields validate before submission', (
       tester,
     ) async {
@@ -1036,6 +1160,7 @@ Future<GoRouter> _pumpAuthRoute(
   Locale locale = const Locale('vi'),
   DateTime Function()? now,
   Size physicalSize = const Size(390, 844),
+  _TestPreferenceStore? preferenceStore,
 }) async {
   tester.view.physicalSize = physicalSize;
   tester.view.devicePixelRatio = 1;
@@ -1056,7 +1181,7 @@ Future<GoRouter> _pumpAuthRoute(
       overrides: [
         authRepositoryProvider.overrideWithValue(repository),
         mentorRegistrationIntentProvider.overrideWithValue(
-          MentorRegistrationIntent(_TestPreferenceStore()),
+          MentorRegistrationIntent(preferenceStore ?? _TestPreferenceStore()),
         ),
         authSessionControllerProvider.overrideWithValue(session),
         userProfileRepositoryProvider.overrideWithValue(
