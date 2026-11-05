@@ -76,6 +76,14 @@ class LearningHomeView extends StatelessWidget {
                 onOpenLesson: onOpenLesson,
               ),
             ],
+            const SizedBox(height: AppSpacing.space4),
+            SakuraEducationalBanner(
+              tag: context.l10n.roadmapEduBannerTag,
+              title: context.l10n.roadmapEduBannerTitle,
+              message: context.l10n.roadmapEduBannerMessage,
+              mascotPose: SakuraMascotPose.guiding,
+              onTap: onOpenRoadmap,
+            ),
             if (snapshot.sections.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.space5),
               Row(
@@ -128,8 +136,10 @@ class _JlptLevelSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return RikiCard(
       key: const ValueKey<String>('learning_jlpt_selector'),
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.borderSubtlePink,
+      boxShadow: AppShadows.sakuraSubtle,
       padding: const EdgeInsets.all(AppSpacing.space3),
-      boxShadow: const <BoxShadow>[],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -291,7 +301,9 @@ class _ProgressSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RikiCard(
-      borderColor: AppColors.border,
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.borderSubtlePink,
+      boxShadow: AppShadows.sakuraSubtle,
       padding: const EdgeInsets.all(AppSpacing.space4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -481,7 +493,9 @@ class _CurrentLessonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RikiCard(
-      borderColor: AppColors.border,
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.borderSubtlePink,
+      boxShadow: AppShadows.sakuraSubtle,
       padding: const EdgeInsets.all(AppSpacing.space4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -117,6 +117,13 @@ class LearningRoadmapView extends StatelessWidget {
                 ),
               ),
             ),
+          const SizedBox(height: AppSpacing.space4),
+          SakuraEducationalBanner(
+            tag: context.l10n.roadmapEduBannerTag,
+            title: context.l10n.roadmapEduBannerTitle,
+            message: context.l10n.roadmapEduBannerMessage,
+            mascotPose: SakuraMascotPose.studying,
+          ),
         ],
       ),
     );
@@ -157,7 +164,9 @@ class _RecommendedPathSection extends StatelessWidget {
     if (path == null) {
       return RikiCard(
         key: const ValueKey<String>('learning_path_empty'),
-        boxShadow: const <BoxShadow>[],
+        backgroundColor: AppColors.cardWarmWhite,
+        borderColor: AppColors.borderSubtlePink,
+        boxShadow: AppShadows.sakuraSubtle,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
