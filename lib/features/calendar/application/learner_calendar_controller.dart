@@ -13,10 +13,13 @@ final learnerCalendarEventsProvider =
   for (final booking in bookingsAsync) {
     if (booking.scheduledAt == null) continue;
 
-    final start = booking.scheduledAt!.displayValue;
+    // Strictly convert UTC timestamp to user device local timezone (no hardcoded offset)
+    final start = booking.scheduledAt!.value.toLocal();
     // Authoritative JLPT 1-1 booking session is exactly 90 minutes
     final end = start.add(const Duration(minutes: 90));
 
+    // Enforce N5, N4, N3, N2 only (disallow N1)
+    final validatedJlpt = SakuraCalendarEvent.normalizeConsultationLevel(booking.jlptLevel) ?? 'N3';
     final title = booking.mentorName != null
         ? 'Tư vấn JLPT với ${booking.mentorName}'
         : 'Buổi tư vấn JLPT';
@@ -43,7 +46,7 @@ final learnerCalendarEventsProvider =
         statusLabel: statusText,
         participantName: booking.mentorName,
         participantRole: 'Cố vấn chuyên môn',
-        jlptLevel: booking.jlptLevel ?? 'JLPT N3',
+        jlptLevel: 'JLPT $validatedJlpt',
         meetingLink: booking.meetingLink,
         roomId: booking.roomId,
         bookingId: booking.id,

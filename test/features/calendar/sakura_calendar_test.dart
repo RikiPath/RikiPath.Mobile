@@ -381,5 +381,106 @@ void main() {
       expect(find.text('Tham gia phòng học'), findsOneWidget);
       expect(find.text('Chuẩn bị từ vựng Choukai bài 5'), findsOneWidget);
     });
+    test('SakuraCalendarEvent validates supported consultation levels strictly', () {
+      expect(SakuraCalendarEvent.isSupportedConsultationLevel('N5'), isTrue);
+      expect(SakuraCalendarEvent.isSupportedConsultationLevel('N4'), isTrue);
+      expect(SakuraCalendarEvent.isSupportedConsultationLevel('N3'), isTrue);
+      expect(SakuraCalendarEvent.isSupportedConsultationLevel('N2'), isTrue);
+      // N1 is strictly disallowed for 1-1 mentor consultations
+      expect(SakuraCalendarEvent.isSupportedConsultationLevel('N1'), isFalse);
+      expect(SakuraCalendarEvent.isSupportedConsultationLevel('JLPT N1'), isFalse);
+
+      expect(SakuraCalendarEvent.normalizeConsultationLevel('JLPT N2'), 'N2');
+      expect(SakuraCalendarEvent.normalizeConsultationLevel('N1'), isNull);
+    });
+
+    testWidgets('SakuraTimelineView covers full 24h range (00:00 - 24:00) without clipping', (tester) async {
+      final earlyMorningEvent = SakuraCalendarEvent(
+        id: 'early-1',
+        title: 'Buổi học sớm 05:00',
+        startTime: DateTime(2026, 11, 5, 5, 0),
+        endTime: DateTime(2026, 11, 5, 6, 30),
+        type: SakuraCalendarEventType.studySession,
+      );
+      final lateNightEvent = SakuraCalendarEvent(
+        id: 'late-1',
+        title: 'Luyện đề đêm 23:00',
+        startTime: DateTime(2026, 11, 5, 23, 0),
+        endTime: DateTime(2026, 11, 5, 23, 45),
+        type: SakuraCalendarEventType.studySession,
+      );
+
+      await tester.pumpWidget(
+        createTestApp(
+          SakuraTimelineView(
+            selectedDate: DateTime(2026, 11, 5),
+            viewMode: SakuraCalendarViewMode.day,
+            events: [earlyMorningEvent, lateNightEvent],
+            onSelectDate: (_) {},
+            onSelectEvent: (_) {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Buổi học sớm 05:00'), findsOneWidget);
+      expect(find.text('Luyện đề đêm 23:00'), findsOneWidget);
+      expect(find.text('00:00'), findsOneWidget);
+      expect(find.text('23:00'), findsOneWidget);
+    });
+
+    testWidgets('SakuraEventDetailSheet displays cancellation button and opens confirmation dialog', (tester) async {
+      final activeBooking = SakuraCalendarEvent(
+        id: 'active-1',
+        bookingId: 9901,
+        title: 'Tư vấn JLPT N2 với Sensei',
+        startTime: DateTime(2026, 11, 10, 14, 0),
+        endTime: DateTime(2026, 11, 10, 15, 30),
+        type: SakuraCalendarEventType.consultation,
+        status: MentorMeetingStatus.accepted,
+        participantName: 'Sensei Tanaka',
+        meetingLink: 'https://meet.google.com/test-room',
+      );
+
+      await tester.pumpWidget(
+        createTestApp(
+          SakuraEventDetailSheet(event: activeBooking),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hủy buổi tư vấn này'), findsOneWidget);
+
+      await tester.tap(find.text('Hủy buổi tư vấn này'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Xác nhận hủy buổi tư vấn?'), findsOneWidget);
+      expect(find.text('Quay lại'), findsOneWidget);
+      expect(find.text('Xác nhận hủy'), findsOneWidget);
+    });
+
+    testWidgets('SakuraEventDetailSheet renders cancelled state when meeting is cancelled', (tester) async {
+      final cancelledEvent = SakuraCalendarEvent(
+        id: 'canc-1',
+        bookingId: 9902,
+        title: 'Tư vấn JLPT N3 đã hủy',
+        startTime: DateTime(2026, 11, 10, 14, 0),
+        endTime: DateTime(2026, 11, 10, 15, 30),
+        type: SakuraCalendarEventType.consultation,
+        status: MentorMeetingStatus.cancelled,
+        meetingLink: 'https://meet.google.com/test-room',
+      );
+
+      await tester.pumpWidget(
+        createTestApp(
+          SakuraEventDetailSheet(event: cancelledEvent),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Buổi tư vấn đã bị hủy'), findsOneWidget);
+      expect(find.text('Tham gia phòng học'), findsNothing);
+      expect(find.text('Hủy buổi tư vấn này'), findsNothing);
+    });
   });
 }

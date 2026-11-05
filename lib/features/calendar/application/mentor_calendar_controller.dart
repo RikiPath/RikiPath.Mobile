@@ -16,7 +16,8 @@ final mentorCalendarEventsProvider =
   for (final meeting in meetingsAsync) {
     if (meeting.scheduledAt == null) continue;
 
-    final start = meeting.scheduledAt!.displayValue;
+    // Strictly convert UTC timestamp to user device local timezone
+    final start = meeting.scheduledAt!.value.toLocal();
     // 90 minutes authoritative JLPT booking duration
     final end = start.add(const Duration(minutes: 90));
 
@@ -57,8 +58,8 @@ final mentorCalendarEventsProvider =
   for (final slot in availabilityAsync) {
     if (slot.isBooked) continue; // Booked slots will appear via meetings
 
-    final start = slot.startTime.displayValue;
-    final end = slot.endTime.displayValue;
+    final start = slot.startTime.value.toLocal();
+    final end = slot.endTime.value.toLocal();
 
     events.add(
       SakuraCalendarEvent(

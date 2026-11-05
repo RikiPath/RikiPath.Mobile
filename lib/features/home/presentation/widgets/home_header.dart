@@ -12,6 +12,7 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
     required this.isStreakLoading,
     required this.unreadNotificationCount,
     required this.onNotificationsPressed,
+    this.onCalendarPressed,
     super.key,
   });
 
@@ -19,6 +20,7 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool isStreakLoading;
   final int? unreadNotificationCount;
   final VoidCallback onNotificationsPressed;
+  final VoidCallback? onCalendarPressed;
 
   @override
   Size get preferredSize => const Size.fromHeight(RikiLearnerHeader.height);
@@ -116,6 +118,17 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
         ),
+        if (onCalendarPressed != null)
+          IconButton(
+            key: const ValueKey<String>('home_calendar_button'),
+            icon: const Icon(
+              Icons.calendar_month_outlined,
+              size: 24,
+              color: AppColors.learnerTextSecondary,
+            ),
+            tooltip: 'Lịch học',
+            onPressed: onCalendarPressed,
+          ),
         const RikiLanguageSwitcher(),
         const SizedBox(width: AppSpacing.space2),
       ],

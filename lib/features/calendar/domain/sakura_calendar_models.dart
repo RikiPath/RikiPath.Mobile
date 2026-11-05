@@ -146,6 +146,24 @@ class SakuraCalendarEvent {
     return startTime.isBefore(end) && endTime.isAfter(start);
   }
 
+  /// Authoritative supported JLPT levels for 1-on-1 mentor consultations (N5, N4, N3, N2 only; N1 disallowed).
+  static const supportedConsultationLevels = {'N5', 'N4', 'N3', 'N2'};
+
+  static bool isSupportedConsultationLevel(String? level) {
+    if (level == null) return false;
+    final normalized = level.replaceAll('JLPT', '').replaceAll(' ', '').toUpperCase();
+    return supportedConsultationLevels.contains(normalized);
+  }
+
+  static String? normalizeConsultationLevel(String? level) {
+    if (level == null) return null;
+    final normalized = level.replaceAll('JLPT', '').replaceAll(' ', '').toUpperCase();
+    if (supportedConsultationLevels.contains(normalized)) {
+      return normalized;
+    }
+    return null;
+  }
+
   SakuraCalendarEvent copyWith({
     String? id,
     String? title,

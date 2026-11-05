@@ -46,6 +46,7 @@ class HomeScreen extends ConsumerWidget {
         isStreakLoading: analyticsState.isLoading,
         unreadNotificationCount: notificationState.value?.unreadCount,
         onNotificationsPressed: () => context.push(AppRoutes.notifications),
+        onCalendarPressed: () => context.push(AppRoutes.calendar),
       ),
       body: SafeArea(
         top: false,

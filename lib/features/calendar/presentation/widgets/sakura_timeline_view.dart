@@ -13,8 +13,8 @@ class SakuraTimelineView extends StatefulWidget {
     required this.onSelectEvent,
     this.onPrevious,
     this.onNext,
-    this.startHour = 6,
-    this.endHour = 23,
+    this.startHour = 0,
+    this.endHour = 24,
     this.hourHeight = 64.0,
   });
 

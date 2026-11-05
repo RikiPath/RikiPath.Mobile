@@ -87,8 +87,10 @@ class SakuraCalendarHeader extends StatelessWidget {
 
           // 2. Month & Year Title with dropdown arrow
           Flexible(
-            child: InkWell(
-              key: const Key('calendar_month_picker_button'),
+            child: Tooltip(
+              message: 'Chọn tháng và năm',
+              child: InkWell(
+                key: const Key('calendar_month_picker_button'),
               onTap: () => _pickMonthYear(context),
               borderRadius: BorderRadius.circular(8),
               child: Padding(
@@ -119,6 +121,7 @@ class SakuraCalendarHeader extends StatelessWidget {
                 ),
               ),
             ),
+          ),
           ),
 
           const SizedBox(width: AppSpacing.space1),
