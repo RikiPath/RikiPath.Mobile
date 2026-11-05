@@ -147,14 +147,14 @@ class _NotificationTile extends StatelessWidget {
       excludeSemantics: true,
       child: RikiCard(
         backgroundColor: notification.isRead
-            ? AppColors.surface
+            ? AppColors.cardWarmWhite
             : AppColors.brandTint,
         borderColor: notification.isRead
-            ? AppColors.learnerOutline
+            ? AppColors.borderSubtlePink
             : AppColors.brandSelectedBorder,
         boxShadow: notification.isRead
             ? const <BoxShadow>[]
-            : AppShadows.cardSoft,
+            : AppShadows.sakuraSubtle,
         child: Material(
           color: Colors.transparent,
           child: ListTile(

@@ -77,8 +77,9 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen>
             ),
             const SizedBox(height: AppSpacing.space5),
             RikiCard(
-              backgroundColor: AppColors.surface,
-              borderColor: AppColors.border,
+              backgroundColor: AppColors.cardWarmWhite,
+              borderColor: AppColors.borderSubtlePink,
+              boxShadow: AppShadows.sakuraSubtle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -100,6 +101,9 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen>
             _SpeechStatusBanner(status: state.status),
             const SizedBox(height: AppSpacing.space4),
             RikiCard(
+              backgroundColor: AppColors.cardWarmWhite,
+              borderColor: AppColors.borderSubtlePink,
+              boxShadow: AppShadows.sakuraSubtle,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 170),
                 child: Column(

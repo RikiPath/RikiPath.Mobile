@@ -71,6 +71,9 @@ class _TextScanScreenState extends ConsumerState<TextScanScreen> {
             if (state.status == TextScanStatus.completed) ...[
               const SizedBox(height: AppSpacing.space4),
               RikiCard(
+                backgroundColor: AppColors.cardWarmWhite,
+                borderColor: AppColors.borderSubtlePink,
+                boxShadow: AppShadows.sakuraSubtle,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -182,6 +185,9 @@ class _ImagePickerCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.card),
         child: RikiCard(
           padding: EdgeInsets.zero,
+          backgroundColor: AppColors.cardWarmWhite,
+          borderColor: AppColors.borderSubtlePink,
+          boxShadow: AppShadows.sakuraSubtle,
           child: image == null
               ? SizedBox(
                   height: 210,
