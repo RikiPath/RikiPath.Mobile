@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
@@ -91,12 +93,37 @@ class StandardRoadmapView extends StatelessWidget {
           if (roadmap.lessons.isEmpty)
             RikiCard(
               key: const ValueKey<String>('standard_roadmap_empty'),
-              child: Text(
-                l10n.learningLessonsEmptyMessage,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+              padding: const EdgeInsets.all(AppSpacing.space6),
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.school_outlined,
+                    size: 48,
+                    color: AppColors.brandPrimary,
+                  ),
+                  const SizedBox(height: AppSpacing.space3),
+                  Text(
+                    l10n.learningLessonsEmptyMessage,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.space4),
+                  RikiPrimaryButton(
+                    key: const ValueKey<String>('standard_roadmap_change_goal_button'),
+                    label: 'Đổi mục tiêu JLPT',
+                    leadingIcon: Icons.flag_outlined,
+                    onPressed: () => context.push(AppRoutes.profileJlptGoal),
+                  ),
+                  const SizedBox(height: AppSpacing.space2),
+                  RikiSecondaryButton(
+                    key: const ValueKey<String>('standard_roadmap_placement_test_button'),
+                    label: 'Đánh giá đầu vào',
+                    leadingIcon: Icons.quiz_outlined,
+                    onPressed: () => context.push(AppRoutes.placementTest),
+                  ),
+                ],
               ),
             )
           else

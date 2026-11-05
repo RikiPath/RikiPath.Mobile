@@ -310,7 +310,7 @@ class _LearnerMentorAvailabilityScreenState
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          '50 phút/buổi',
+                          '90 phút/buổi',
                           style: AppTypography.metadata.copyWith(
                             color: AppColors.textSecondary,
                           ),

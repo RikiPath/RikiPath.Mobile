@@ -176,7 +176,7 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
                   Expanded(
                     child: _BentoMetricTile(
                       icon: Icons.timer_outlined,
-                      title: '50 phút',
+                      title: '90 phút',
                       subtitle: 'Thời lượng buổi học',
                     ),
                   ),

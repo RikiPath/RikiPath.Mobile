@@ -23,6 +23,8 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
   bool _rememberSession = true;
   bool _openingMentorRegistration = false;
 
@@ -41,6 +43,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -115,6 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 label: l10n.studentEmail,
                 hintText: l10n.emailHint,
                 controller: _emailController,
+                focusNode: _emailFocusNode,
                 prefixIcon: Icons.mail_outline,
                 suffixIcon: state.isLoading
                     ? const Icon(Icons.check, color: AppColors.success)
@@ -123,6 +128,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 enabled: !state.isLoading,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
+                onSubmitted: (_) => _passwordFocusNode.requestFocus(),
                 autofillHints: const [AutofillHints.email],
                 autocorrect: false,
                 onChanged: (_) =>
