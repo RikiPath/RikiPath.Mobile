@@ -95,16 +95,10 @@ class ProfileHeroCard extends StatelessWidget {
         key: const ValueKey<String>('profile_hero_card'),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.cardWarmWhite,
           borderRadius: BorderRadius.circular(AppRadius.card),
-          boxShadow: const <BoxShadow>[
-            BoxShadow(
-              color: AppColors.neutralShadow,
-              offset: Offset(0, 8),
-              blurRadius: 28,
-              spreadRadius: -9,
-            ),
-          ],
+          border: Border.all(color: AppColors.borderSubtlePink),
+          boxShadow: AppShadows.sakuraSubtle,
         ),
         child: Stack(
           children: [
@@ -301,9 +295,10 @@ class ProfileSection extends StatelessWidget {
         const SizedBox(height: AppSpacing.space3),
         DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: AppColors.cardWarmWhite,
             borderRadius: BorderRadius.circular(AppRadius.card),
-            boxShadow: AppShadows.cardSoft,
+            border: Border.all(color: AppColors.borderSubtlePink),
+            boxShadow: AppShadows.sakuraSubtle,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.card),
@@ -317,7 +312,7 @@ class ProfileSection extends StatelessWidget {
                       thickness: 0.5,
                       indent: 70,
                       endIndent: AppSpacing.space4,
-                      color: AppColors.border,
+                      color: AppColors.borderSubtlePink,
                     ),
                 ],
               ],

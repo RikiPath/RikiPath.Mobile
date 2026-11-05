@@ -178,11 +178,26 @@ class _PlacementChoiceStep extends StatelessWidget {
       description: l10n.onboardingPlacementChoiceDescription,
       content: RikiCard(
         key: const ValueKey<String>('onboarding_placement_choice_card'),
-        borderColor: AppColors.brandBorder,
+        backgroundColor: AppColors.cardWarmWhite,
+        borderColor: AppColors.borderSubtlePink,
+        boxShadow: AppShadows.sakuraSubtle,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l10n.onboardingPlacementTitle, style: AppTypography.cardTitle),
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.space3),
+                child: SakuraMascot(
+                  pose: SakuraMascotPose.guiding,
+                  size: 76,
+                ),
+              ),
+            ),
+            Text(
+              l10n.onboardingPlacementTitle,
+              style: AppTypography.cardTitle,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: AppSpacing.space2),
             Text(
               l10n.onboardingPlacementDescription,
@@ -510,9 +525,9 @@ class _CompletionStep extends StatelessWidget {
       description: l10n.learningPlanReady,
       beforeTitle: const _OnboardingSuccessIllustration(),
       content: RikiCard(
-        backgroundColor: AppColors.successBackground,
-        borderColor: AppColors.successBorder,
-        boxShadow: const <BoxShadow>[],
+        backgroundColor: AppColors.cardWarmWhite,
+        borderColor: AppColors.borderSubtlePink,
+        boxShadow: AppShadows.sakuraSubtle,
         child: Row(
           children: [
             const Icon(
@@ -834,8 +849,8 @@ class _OnboardingSuccessIllustration extends StatelessWidget {
     return Center(
       child: Semantics(
         label: context.l10n.setupCompleteSemantics,
-        child: SizedBox.square(
-          dimension: 112,
+        child: SizedBox(
+          height: 112,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -843,26 +858,17 @@ class _OnboardingSuccessIllustration extends StatelessWidget {
                 width: 104,
                 height: 104,
                 decoration: const BoxDecoration(
-                  color: AppColors.successBackgroundSoft,
+                  color: AppColors.brandTint,
                   shape: BoxShape.circle,
                 ),
               ),
-              Container(
-                width: 76,
-                height: 76,
-                decoration: const BoxDecoration(
-                  color: AppColors.success,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.school_outlined,
-                  color: Colors.white,
-                  size: 38,
-                ),
+              const SakuraMascot(
+                pose: SakuraMascotPose.celebrating,
+                size: 88,
               ),
               const Positioned(
-                right: 8,
-                bottom: 12,
+                right: 12,
+                bottom: 4,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -871,7 +877,7 @@ class _OnboardingSuccessIllustration extends StatelessWidget {
                   child: Icon(
                     Icons.check_circle,
                     color: AppColors.successAccent,
-                    size: 30,
+                    size: 28,
                   ),
                 ),
               ),
