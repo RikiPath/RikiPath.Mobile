@@ -146,6 +146,13 @@ class StandardRoadmapView extends StatelessWidget {
             path: aiPath,
             onGenerate: onGenerateAiPath,
           ),
+          const SizedBox(height: AppSpacing.space4),
+          SakuraEducationalBanner(
+            tag: l10n.roadmapEduBannerTag,
+            title: l10n.roadmapEduBannerTitle,
+            message: l10n.roadmapEduBannerMessage,
+            mascotPose: SakuraMascotPose.studying,
+          ),
         ],
       ),
     );

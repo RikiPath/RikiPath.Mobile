@@ -81,6 +81,7 @@ class _NotebookViewState extends State<NotebookView> {
                   (total, item) => total + item.entryCount,
                 ),
               ),
+
               const SizedBox(height: AppSpacing.space5),
               Text(
                 context.l10n.yourCollections,
@@ -161,6 +162,13 @@ class _NotebookViewState extends State<NotebookView> {
                     );
                   },
                 ),
+              const SizedBox(height: AppSpacing.space5),
+              SakuraEducationalBanner(
+                tag: context.l10n.notebookEduBannerTag,
+                title: context.l10n.notebookEduBannerTitle,
+                message: context.l10n.notebookEduBannerMessage,
+                mascotPose: SakuraMascotPose.studying,
+              ),
             ],
           ),
         ),

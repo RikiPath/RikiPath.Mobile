@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" fill="none">
+  <!-- Joyful Burst Background Glow -->
+  <circle cx="120" cy="115" r="95" fill="#FFF2E6" opacity="0.6"/>
+  <circle cx="120" cy="115" r="80" fill="#FFF5F7" opacity="0.7"/>
+
+  <!-- Fluttering Sakura Petals and Sparkles -->
+  <g transform="translate(45, 60) rotate(-15)">
+    <path d="M0 0 C4 -6 12 -4 10 2 C8 8 0 10 -2 6 Z" fill="#E05A7A" opacity="0.9"/>
+  </g>
+  <g transform="translate(195, 65) rotate(25)">
+    <path d="M0 0 C4 -6 12 -4 10 2 C8 8 0 10 -2 6 Z" fill="#E05A7A" opacity="0.9"/>
+  </g>
+  <g transform="translate(50, 130) rotate(40)">
+    <path d="M0 0 C3 -5 9 -3 7 1 C5 5 0 7 -2 4 Z" fill="#F8BBD0" opacity="0.85"/>
+  </g>
+  <g transform="translate(190, 140) rotate(-35)">
+    <path d="M0 0 C3 -5 9 -3 7 1 C5 5 0 7 -2 4 Z" fill="#F8BBD0" opacity="0.85"/>
+  </g>
+  <!-- Sparkles -->
+  <polygon points="65,95 68,90 71,95 76,98 71,101 68,106 65,101 60,98" fill="#F59E0B"/>
+  <polygon points="175,90 178,85 181,90 186,93 181,96 178,101 175,96 170,93" fill="#F59E0B"/>
+
+  <!-- Fluffy Tail Swished Upward in Excitement -->
+  <path d="M165 155 C200 140 220 105 210 80 C202 65 180 72 172 90 C162 110 155 140 165 155 Z" fill="#FCFBFB" stroke="#2D282A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M195 95 C208 82 208 72 198 68 C188 64 180 72 176 82 C184 90 190 93 195 95 Z" fill="#E05A7A" opacity="0.85"/>
+
+  <!-- Body (Elevated Leap Pose) -->
+  <ellipse cx="120" cy="155" rx="44" ry="38" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+  <ellipse cx="120" cy="160" rx="28" ry="24" fill="#FFF0F3"/>
+
+  <!-- Joyful Raised Paws -->
+  <g transform="translate(85,128) rotate(-30)">
+    <ellipse cx="0" cy="0" rx="9" ry="14" fill="#FCFBFB" stroke="#2D282A" stroke-width="2.5"/>
+    <circle cx="0" cy="-6" r="4" fill="#F8BBD0"/>
+  </g>
+  <g transform="translate(155,128) rotate(30)">
+    <ellipse cx="0" cy="0" rx="9" ry="14" fill="#FCFBFB" stroke="#2D282A" stroke-width="2.5"/>
+    <circle cx="0" cy="-6" r="4" fill="#F8BBD0"/>
+  </g>
+
+  <!-- Feet (tucked in playful hop) -->
+  <ellipse cx="96" cy="188" rx="14" ry="9" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+  <ellipse cx="144" cy="188" rx="14" ry="9" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+
+  <!-- Left & Right Ears (Perky) -->
+  <path d="M78 88 L58 40 C56 35 64 31 70 35 L100 70 Z" fill="#FCFBFB" stroke="#2D282A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M76 78 L66 48 L92 68 Z" fill="#FFE8ED"/>
+  <path d="M66 48 L58 40 L70 35 Z" fill="#E05A7A"/>
+
+  <path d="M162 88 L182 40 C184 35 176 31 170 35 L140 70 Z" fill="#FCFBFB" stroke="#2D282A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M164 78 L174 48 L148 68 Z" fill="#FFE8ED"/>
+  <path d="M174 48 L182 40 L170 35 Z" fill="#E05A7A"/>
+
+  <!-- Head -->
+  <ellipse cx="120" cy="100" rx="52" ry="46" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+
+  <!-- Forehead Sakura Crest -->
+  <g transform="translate(120,73) scale(0.7)">
+    <circle cx="0" cy="-10" r="6" fill="#E05A7A"/>
+    <circle cx="9.5" cy="-3.1" r="6" fill="#E05A7A"/>
+    <circle cx="5.9" cy="8.1" r="6" fill="#E05A7A"/>
+    <circle cx="-5.9" cy="8.1" r="6" fill="#E05A7A"/>
+    <circle cx="-9.5" cy="-3.1" r="6" fill="#E05A7A"/>
+    <circle cx="0" cy="0" r="4" fill="#F59E0B"/>
+  </g>
+
+  <!-- Rosy Cheeks -->
+  <ellipse cx="88" cy="110" rx="9.5" ry="6" fill="#F8BBD0" opacity="0.85"/>
+  <ellipse cx="152" cy="110" rx="9.5" ry="6" fill="#F8BBD0" opacity="0.85"/>
+
+  <!-- Ecstatic Curved Eyes (^ _ ^) -->
+  <path d="M90 98 Q98 90 106 98" stroke="#2D282A" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <path d="M134 98 Q142 90 150 98" stroke="#2D282A" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Open Cheerful Mouth -->
+  <polygon points="120,107 117,104 123,104" fill="#2D282A"/>
+  <path d="M114 110 Q120 122 126 110 Z" fill="#E05A7A" stroke="#2D282A" stroke-width="1.5"/>
+</svg>

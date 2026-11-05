@@ -359,7 +359,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginWelcome.
   ///
   /// In vi, this message translates to:
-  /// **'Chào mừng trở lại! 👋'**
+  /// **'Chào mừng trở lại!'**
   String get loginWelcome;
 
   /// No description provided for @loginSubtitle.
@@ -1751,7 +1751,7 @@ abstract class AppLocalizations {
   /// No description provided for @greetingName.
   ///
   /// In vi, this message translates to:
-  /// **'Xin chào, {name}! 👋'**
+  /// **'Xin chào, {name}!'**
   String greetingName(String name);
 
   /// No description provided for @jlptGoal.
@@ -2087,7 +2087,7 @@ abstract class AppLocalizations {
   /// No description provided for @readyToStart.
   ///
   /// In vi, this message translates to:
-  /// **'Sẵn sàng bắt đầu! 🎉'**
+  /// **'Sẵn sàng bắt đầu!'**
   String get readyToStart;
 
   /// No description provided for @learningPlanReady.
@@ -3071,7 +3071,7 @@ abstract class AppLocalizations {
   /// No description provided for @studyStreak.
   ///
   /// In vi, this message translates to:
-  /// **'Chuỗi học: {days} ngày 🔥'**
+  /// **'Chuỗi học: {days} ngày'**
   String studyStreak(int days);
 
   /// No description provided for @continueRoadmap.
@@ -5069,7 +5069,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeDailyMotivationSubtitle.
   ///
   /// In vi, this message translates to:
-  /// **'Tiến bộ hơn mỗi ngày! がんばろう! 🌸'**
+  /// **'Tiến bộ hơn mỗi ngày! がんばろう!'**
   String get homeDailyMotivationSubtitle;
 
   /// No description provided for @homeTargetGoalTitle.
@@ -6943,6 +6943,102 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Tiếp tục lộ trình học tiêu chuẩn'**
   String get placementOpenStandardRoadmap;
+
+  /// No description provided for @greetingGeneric.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xin chào bạn!'**
+  String get greetingGeneric;
+
+  /// No description provided for @homeEduBannerTag.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thói quen học'**
+  String get homeEduBannerTag;
+
+  /// No description provided for @homeEduBannerTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Duy trì nhịp học đều đặn'**
+  String get homeEduBannerTitle;
+
+  /// No description provided for @homeEduBannerMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chỉ 15–20 phút mỗi ngày sẽ hiệu quả gấp 5 lần so với học dồn vào cuối tuần. Hãy bắt đầu bài học hôm nay!'**
+  String get homeEduBannerMessage;
+
+  /// No description provided for @roadmapEduBannerTag.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bí quyết JLPT'**
+  String get roadmapEduBannerTag;
+
+  /// No description provided for @roadmapEduBannerTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học theo chặng kiến thức'**
+  String get roadmapEduBannerTitle;
+
+  /// No description provided for @roadmapEduBannerMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nắm vững ngữ pháp và từ vựng cốt lõi từng chặng trước khi bước sang chặng tiếp theo để giữ kiến thức lâu dài.'**
+  String get roadmapEduBannerMessage;
+
+  /// No description provided for @kanaEduBannerTag.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kỹ thuật viết'**
+  String get kanaEduBannerTag;
+
+  /// No description provided for @kanaEduBannerTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quy tắc thuận bút tiếng Nhật'**
+  String get kanaEduBannerTitle;
+
+  /// No description provided for @kanaEduBannerMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Viết nét từ trên xuống dưới, từ trái sang phải để hình thành nét chữ cân đối và kích hoạt trí nhớ cơ bắp.'**
+  String get kanaEduBannerMessage;
+
+  /// No description provided for @grammarEduBannerTag.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngữ cảnh'**
+  String get grammarEduBannerTag;
+
+  /// No description provided for @grammarEduBannerTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học ngữ pháp qua ví dụ thực tế'**
+  String get grammarEduBannerTitle;
+
+  /// No description provided for @grammarEduBannerMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đặt câu với ngữ cảnh hội thoại hàng ngày thay vì chỉ ghi nhớ công thức khô khan.'**
+  String get grammarEduBannerMessage;
+
+  /// No description provided for @notebookEduBannerTag.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phương pháp SRS'**
+  String get notebookEduBannerTag;
+
+  /// No description provided for @notebookEduBannerTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lặp lại ngắt quãng thông minh'**
+  String get notebookEduBannerTitle;
+
+  /// No description provided for @notebookEduBannerMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu các từ khó vào sổ từ và ôn lại sau 1, 3, và 7 ngày để chuyển hóa vào trí nhớ dài hạn.'**
+  String get notebookEduBannerMessage;
 }
 
 class _AppLocalizationsDelegate

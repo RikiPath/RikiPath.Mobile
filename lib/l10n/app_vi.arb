@@ -36,7 +36,13 @@
   "preparingLearningSubtext": "Nội dung và lộ trình học tập sẽ sẵn sàng trong giây lát.",
   "notAvailable": "Chưa khả dụng",
   "pageNotFound": "Không tìm thấy trang: {uri}",
-  "@pageNotFound": {"placeholders": {"uri": {"type": "String"}}},
+  "@pageNotFound": {
+    "placeholders": {
+      "uri": {
+        "type": "String"
+      }
+    }
+  },
   "navigationHome": "Trang chủ",
   "navigationLearn": "Học tập",
   "navigationPractice": "Luyện tập",
@@ -44,7 +50,7 @@
   "navigationProfile": "Cá nhân",
   "splashTagline": "Học tiếng Nhật • Luyện thi JLPT",
   "authPromotion": "Học tiếng Nhật cá nhân hoá cùng AI",
-  "loginWelcome": "Chào mừng trở lại! 👋",
+  "loginWelcome": "Chào mừng trở lại!",
   "loginSubtitle": "Tiếp tục hành trình chinh phục JLPT cùng RikiPath.",
   "studentEmail": "Email học viên",
   "emailAddress": "Email",
@@ -70,7 +76,13 @@
   "mentorRegistrationLoginPrompt": "Đã có tài khoản? Đăng nhập để tiếp tục ứng tuyển",
   "mentorCreatingAccountMessage": "Đang tạo tài khoản và gửi email xác thực...",
   "mentorRegistrationCreatedMessage": "RikiPath đã gửi mã xác thực tới\n{email}. Xác thực email rồi đăng nhập để hoàn thiện hồ sơ ứng tuyển Cố vấn.",
-  "@mentorRegistrationCreatedMessage": {"placeholders": {"email": {"type": "String"}}},
+  "@mentorRegistrationCreatedMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "mentorApplicationTitle": "Hồ sơ ứng tuyển Cố vấn",
   "mentorApplicationIntro": "Hoàn thiện hồ sơ và tải chứng chỉ để Quản trị viên xét duyệt. Bạn chỉ có quyền Cố vấn sau khi được phê duyệt.",
   "mentorApplicationPersonal": "Thông tin cá nhân",
@@ -108,7 +120,13 @@
   "accountCreatedStatus": "Đã tạo tài khoản",
   "accountCreatedTitle": "Tạo tài khoản thành công",
   "accountCreatedMessage": "RikiPath đã gửi mã xác thực tới\n{email}.",
-  "@accountCreatedMessage": {"placeholders": {"email": {"type": "String"}}},
+  "@accountCreatedMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "checkEmailVerification": "Vui lòng kiểm tra email để xác thực tài khoản.",
   "verificationBackendBlocker": "Mã xác thực gồm 6 chữ số và có hiệu lực trong 30 phút. Chúng tôi chưa nhận đủ thông tin tài khoản để tiếp tục; vui lòng thử đăng ký lại.",
   "returnToLogin": "Quay lại đăng nhập",
@@ -123,7 +141,13 @@
   "didNotReceiveVerificationCode": "Không nhận được mã?",
   "resendVerificationCode": "Gửi lại mã",
   "resendVerificationCodeIn": "Gửi lại mã sau {time}",
-  "@resendVerificationCodeIn": {"placeholders": {"time": {"type": "String"}}},
+  "@resendVerificationCodeIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "resendingVerificationCode": "Đang gửi lại...",
   "verificationCodeResentMessage": "RikiPath đã gửi một mã xác thực mới tới email của bạn.",
   "resendVerificationFailedTitle": "Không thể gửi lại mã",
@@ -139,9 +163,21 @@
   "requestSentStatus": "Đã gửi email",
   "requestSentTitle": "Yêu cầu đã được gửi",
   "requestSentMessage": "Kiểm tra hộp thư {email} để tiếp tục đặt lại mật khẩu.",
-  "@requestSentMessage": {"placeholders": {"email": {"type": "String"}}},
+  "@requestSentMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "resendCountdown": "Gửi lại ({seconds}s)",
-  "@resendCountdown": {"placeholders": {"seconds": {"type": "int"}}},
+  "@resendCountdown": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "passwordRecoveryUnavailableTitle": "Chưa thể gửi yêu cầu",
   "account": "Tài khoản",
   "accountSecurity": "Bảo mật tài khoản",
@@ -183,7 +219,13 @@
   "mentorAvailabilityTitle": "Lịch trống của tôi",
   "mentorAvailabilityDescription": "Các khung giờ đang được hiển thị cho học viên.",
   "mentorAvailabilityCount": "{count} khung giờ",
-  "@mentorAvailabilityCount": {"placeholders": {"count": {"type": "int"}}},
+  "@mentorAvailabilityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mentorAvailabilityEmpty": "Bạn chưa có khung giờ trống nào.",
   "mentorAvailabilityError": "Chưa thể tải lịch trống. Vui lòng thử lại.",
   "mentorAvailabilityReadOnlyTitle": "Chế độ chỉ đọc",
@@ -192,7 +234,13 @@
   "mentorMeetingsTitle": "Lịch tư vấn của tôi",
   "mentorMeetingsDescription": "Các buổi tư vấn đã được xác nhận với học viên.",
   "mentorMeetingsCount": "{count} buổi tư vấn",
-  "@mentorMeetingsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@mentorMeetingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mentorMeetingsEmpty": "Bạn chưa có lịch tư vấn nào.",
   "mentorMeetingsError": "Chưa thể tải lịch tư vấn. Vui lòng thử lại.",
   "mentorViewMeetings": "Xem lịch tư vấn",
@@ -256,7 +304,13 @@
   "verifyEmailFailedTitle": "Không thể xác thực email",
   "verifiedPrompt": "Đã xác thực?",
   "forgotPasswordSentBody": "Chúng tôi đã gửi hướng dẫn lấy lại mật khẩu tới {email}.",
-  "@forgotPasswordSentBody": {"placeholders": {"email": {"type": "String"}}},
+  "@forgotPasswordSentBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "forgotPasswordCheckEmail": "Vui lòng kiểm tra email để tiếp tục đặt lại mật khẩu.",
   "forgotPasswordSpamHint": "Nếu không thấy email trong Hộp thư đến, vui lòng kiểm tra Thư rác hoặc Spam.",
   "forgotPasswordResend": "Không nhận được thư? Gửi lại (58s)",
@@ -279,34 +333,82 @@
   "changePasswordFailedTitle": "Không thể đổi mật khẩu",
   "passwordUpdatedSessionMessage": "Mật khẩu đã được cập nhật. Phiên đăng nhập hiện tại vẫn được giữ.",
   "dayCount": "Ngày {count}",
-  "@dayCount": {"placeholders": {"count": {"type": "int"}}},
+  "@dayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "notifications": "Thông báo",
   "openProfile": "Mở trang cá nhân",
   "homeToolsTitle": "Làm quen với công cụ học tập",
   "homeLoadFailed": "Chưa thể tải Trang chủ",
   "checkConnectionRetry": "Vui lòng kiểm tra kết nối và thử lại.",
-  "greetingName": "Xin chào, {name}! 👋",
-  "@greetingName": {"placeholders": {"name": {"type": "String"}}},
+  "greetingName": "Xin chào, {name}!",
+  "@greetingName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "jlptGoal": "Mục tiêu JLPT {level}",
-  "@jlptGoal": {"placeholders": {"level": {"type": "String"}}},
+  "@jlptGoal": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "notStarted": "Chưa bắt đầu",
   "lessonPartsCompleted": " • {completed}/{total} phần hoàn thành",
-  "@lessonPartsCompleted": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@lessonPartsCompleted": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "lessonProgressSemantics": "Tiến độ bài học {percentage} phần trăm",
-  "@lessonProgressSemantics": {"placeholders": {"percentage": {"type": "int"}}},
+  "@lessonProgressSemantics": {
+    "placeholders": {
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "startLearning": "Bắt đầu học",
   "stageCount": "{count} chặng",
-  "@stageCount": {"placeholders": {"count": {"type": "int"}}},
+  "@stageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "personalizedByAbility": "Được cá nhân hóa theo năng lực",
   "viewRoadmap": "Xem lộ trình",
   "initialSetup": "Thiết lập ban đầu",
   "initialSetupSubtitle": "Các bước khởi đầu cho người mới",
   "completedCount": "{completed}/{total} hoàn tất",
-  "@completedCount": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@completedCount": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "leaveSetup": "Rời thiết lập",
   "onboardingPlacementChoiceTitle": "Chọn cách bắt đầu học",
   "onboardingPlacementChoiceDescription": "Bài đánh giá là tùy chọn. Bạn có thể bỏ qua và tự chọn cấp độ đang học.",
-  "onboardingSkipPlacement": "Bỏ qua đánh giá và tiếp tục",
+  "onboardingSkipPlacement": "Bỏ qua bài đánh giá",
   "onboardingStudyLevelsTitle": "Chọn cấp độ học và mục tiêu",
   "onboardingStudyLevelsDescription": "Chọn cấp độ bạn đang học trước, sau đó chọn mục tiêu JLPT riêng.",
   "onboardingCurrentStudyLevelTitle": "Cấp độ bạn đang học",
@@ -316,7 +418,16 @@
   "onboardingPlacementCanTakeLater": "Bạn vẫn có thể làm bài đánh giá sau trong Hồ sơ.",
   "standardRoadmapTitle": "Lộ trình học chuẩn",
   "standardRoadmapProgress": "Tiến độ chuẩn: {completed}/{total} bài",
-  "@standardRoadmapProgress": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@standardRoadmapProgress": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "standardRoadmapNextLesson": "Bài tiếp theo",
   "aiPersonalizedPathTitle": "Lộ trình cá nhân hóa bằng AI",
   "aiPlacementRequired": "Hoàn thành bài Placement để mở khóa tạo lộ trình AI. Bạn vẫn có thể tiếp tục học theo lộ trình chuẩn.",
@@ -341,7 +452,13 @@
   "onboardingStudyTimeTitle": "Bạn muốn học bao lâu mỗi ngày?",
   "onboardingStudyTimeDescription": "Chọn nhịp học phù hợp với lịch sinh hoạt của bạn. Sự đều đặn quan trọng hơn tốc độ.",
   "studyMinutesPerDay": "{minutes} phút/ngày",
-  "@studyMinutesPerDay": {"placeholders": {"minutes": {"type": "int"}}},
+  "@studyMinutesPerDay": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "studyPaceGentle": "Nhẹ nhàng",
   "studyPaceBalanced": "Cân bằng",
   "studyPaceActive": "Tích cực",
@@ -349,15 +466,36 @@
   "finishSetup": "Hoàn tất thiết lập",
   "onboardingAdjustHelper": "Bạn có thể quay lại để điều chỉnh các lựa chọn.",
   "setupCompleteStatus": "Thiết lập hoàn tất",
-  "readyToStart": "Sẵn sàng bắt đầu! 🎉",
+  "readyToStart": "Sẵn sàng bắt đầu!",
   "learningPlanReady": "Lộ trình học của bạn đã được thiết lập.",
   "studySummary": "{minutes} phút/ngày · {description}",
-  "@studySummary": {"placeholders": {"minutes": {"type": "int"}, "description": {"type": "String"}}},
+  "@studySummary": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "description": {
+        "type": "String"
+      }
+    }
+  },
   "goalPrefix": "Mục tiêu:",
   "stepOfTwo": "Bước {step} / 2",
-  "@stepOfTwo": {"placeholders": {"step": {"type": "int"}}},
+  "@stepOfTwo": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
   "setupProgressSemantics": "Tiến độ thiết lập: bước {step} trên 2",
-  "@setupProgressSemantics": {"placeholders": {"step": {"type": "int"}}},
+  "@setupProgressSemantics": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
   "setupCompleteSemantics": "Thiết lập lộ trình hoàn tất",
   "mockTestTitle": "Thi thử JLPT",
   "mockTestSubtitle": "Mô phỏng cấu trúc từ vựng/ngữ pháp, đọc và nghe",
@@ -372,9 +510,21 @@
   "vocabularyAudioFailed": "Không thể phát âm thanh từ vựng.",
   "chooseNotebook": "Chọn Sổ từ",
   "wordCount": "{count} từ",
-  "@wordCount": {"placeholders": {"count": {"type": "int"}}},
+  "@wordCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "savedToCollection": "Đã lưu vào {name}.",
-  "@savedToCollection": {"placeholders": {"name": {"type": "String"}}},
+  "@savedToCollection": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "vocabularySearchHint": "Tìm từ tiếng Nhật, cách đọc hoặc nghĩa...",
   "clearSearch": "Xóa tìm kiếm",
   "illustrationData": "Nội dung bổ sung",
@@ -401,15 +551,33 @@
   "strokeOrder": "Thứ tự nét viết",
   "kanjiAudioFailed": "Không thể phát âm thanh Kanji.",
   "itemCount": "{count} mục",
-  "@itemCount": {"placeholders": {"count": {"type": "int"}}},
+  "@itemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "kanjiSearchHint": "Tìm theo Kanji hoặc ý nghĩa",
   "search": "Tìm kiếm",
   "kanjiCount": "{count} Kanji",
-  "@kanjiCount": {"placeholders": {"count": {"type": "int"}}},
+  "@kanjiCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "sampleData": "Nội dung bổ sung",
   "showMore": "Xem thêm",
   "strokeCount": "{count} nét",
-  "@strokeCount": {"placeholders": {"count": {"type": "int"}}},
+  "@strokeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "onReading": "Âm On",
   "kunReading": "Âm Kun",
   "listenReading": "Nghe cách đọc",
@@ -419,32 +587,71 @@
   "commonCompounds": "Từ ghép thường gặp",
   "savedToNotebook": "Đã lưu vào Sổ từ",
   "radicalLabel": "Bộ {radical}",
-  "@radicalLabel": {"placeholders": {"radical": {"type": "String"}}},
+  "@radicalLabel": {
+    "placeholders": {
+      "radical": {
+        "type": "String"
+      }
+    }
+  },
   "stitchFixtureNotice": "Nội dung bổ sung được lưu sẵn trên thiết bị.",
   "reading": "Cách đọc",
   "noData": "Chưa có dữ liệu",
   "viewStrokeOrder": "Xem chi tiết thứ tự nét",
   "sampleBadge": "BỔ SUNG",
   "strokeProgress": "Nét {current}/{total}",
-  "@strokeProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@strokeProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "restartStroke": "Phát lại từ đầu",
   "previousStroke": "Nét trước",
   "nextStroke": "Nét tiếp theo",
   "strokeProgressTitle": "Tiến trình từng nét",
   "strokeNumber": "Nét {number}",
-  "@strokeNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@strokeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "strokeRules": "Quy tắc bút thuận",
   "strokeFixtureWarning": "Phần minh họa nét viết này được cung cấp để bạn tham khảo.",
   "strokeImageOnlyWarning": "Hiện chỉ có ảnh thứ tự nét; chưa hỗ trợ phát từng nét.",
   "backToKanjiDetail": "Quay lại chi tiết chữ {character}",
-  "@backToKanjiDetail": {"placeholders": {"character": {"type": "String"}}},
+  "@backToKanjiDetail": {
+    "placeholders": {
+      "character": {
+        "type": "String"
+      }
+    }
+  },
   "grammar": "Ngữ pháp",
   "grammarDetail": "Chi tiết ngữ pháp",
   "grammarSearchHint": "Tìm cấu trúc ngữ pháp hoặc ý nghĩa…",
   "grammarPatternCount": "{count} cấu trúc",
-  "@grammarPatternCount": {"placeholders": {"count": {"type": "int"}}},
+  "@grammarPatternCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "grammarStructureInline": "Cấu trúc: {structure}",
-  "@grammarStructureInline": {"placeholders": {"structure": {"type": "String"}}},
+  "@grammarStructureInline": {
+    "placeholders": {
+      "structure": {
+        "type": "String"
+      }
+    }
+  },
   "grammarEmptyTitle": "Không tìm thấy ngữ pháp",
   "grammarLoadFailed": "Chưa thể tải thư viện ngữ pháp",
   "grammarMeaningNature": "Ý nghĩa & bản chất",
@@ -458,7 +665,13 @@
   "wordAddedToNotebook": "Đã thêm từ vào Sổ từ.",
   "removeFromNotebookQuestion": "Xóa khỏi Sổ từ?",
   "removeEntryMessage": "“{term}” sẽ bị xóa khỏi danh sách và hàng đợi ôn tập liên kết.",
-  "@removeEntryMessage": {"placeholders": {"term": {"type": "String"}}},
+  "@removeEntryMessage": {
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
   "delete": "Xóa",
   "removedFromNotebook": "Đã xóa khỏi Sổ từ.",
   "createCollection": "Tạo danh sách mới",
@@ -479,16 +692,40 @@
   "noMatchingCollection": "Không tìm thấy bộ sưu tập phù hợp",
   "collectionSearchEmptyMessage": "Thử từ khóa khác hoặc xóa tìm kiếm hiện tại.",
   "openCollection": "Mở bộ sưu tập {name}",
-  "@openCollection": {"placeholders": {"name": {"type": "String"}}},
+  "@openCollection": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notebookCollectionUnavailable": "Bộ sưu tập này không còn khả dụng.",
   "notebookSearchHint": "Tìm Kanji, Kana hoặc nghĩa…",
   "savedWords": "Từ đã lưu",
   "savedItemCount": "{count} mục đã lưu",
-  "@savedItemCount": {"placeholders": {"count": {"type": "int"}}},
+  "@savedItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "personalCollectionCount": "{count} danh sách cá nhân",
-  "@personalCollectionCount": {"placeholders": {"count": {"type": "int"}}},
+  "@personalCollectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "openWordDetail": "Mở chi tiết từ {term}",
-  "@openWordDetail": {"placeholders": {"term": {"type": "String"}}},
+  "@openWordDetail": {
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
   "removeFromNotebook": "Xóa khỏi Sổ từ",
   "detail": "Chi tiết",
   "personalWord": "Từ cá nhân",
@@ -511,100 +748,316 @@
   "learningPathRequirements": "Để tạo lộ trình cá nhân hóa bằng AI, hãy hoàn thành bài đánh giá đầu vào và thiết lập mục tiêu JLPT. Bạn vẫn có thể học theo lộ trình chuẩn mà không cần đánh giá.",
   "learningPathGenerateFailed": "Chưa thể tạo lộ trình cá nhân hóa. Vui lòng thử lại.",
   "learningPathDay": "Ngày {day}",
-  "@learningPathDay": {"placeholders": {"day": {"type": "int"}}},
+  "@learningPathDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
   "learningPathLessonCount": "{count} bài học",
-  "@learningPathLessonCount": {"placeholders": {"count": {"type": "int"}}},
+  "@learningPathLessonCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "recommendedNextLessonAction": "Học bài được đề xuất tiếp theo",
   "lessonAttachment": "Mở tài liệu đính kèm",
   "openAttachmentFailed": "Không thể mở tài liệu đính kèm.",
   "roadmapSummary": "{chapters} chương • {lessons} bài học",
-  "@roadmapSummary": {"placeholders": {"chapters": {"type": "int"}, "lessons": {"type": "int"}}},
+  "@roadmapSummary": {
+    "placeholders": {
+      "chapters": {
+        "type": "int"
+      },
+      "lessons": {
+        "type": "int"
+      }
+    }
+  },
   "jlptRoadmap": "Lộ trình JLPT{level}",
-  "@jlptRoadmap": {"placeholders": {"level": {"type": "String"}}},
+  "@jlptRoadmap": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "jlptProgress": "Tiến độ JLPT{level}",
-  "@jlptProgress": {"placeholders": {"level": {"type": "String"}}},
+  "@jlptProgress": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "fiveSkillBreakdown": "Chi tiết phân bổ 5 kỹ năng",
   "lesson": "Bài học",
   "completeLesson": "Hoàn thành bài học",
   "lessonNumber": "Bài {number}",
-  "@lessonNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@lessonNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "loadingContent": "Đang tải nội dung",
   "chapterLessonSummary": "Chương {chapter} • {category} {level}",
-  "@chapterLessonSummary": {"placeholders": {"chapter": {"type": "int"}, "category": {"type": "String"}, "level": {"type": "String"}}},
+  "@chapterLessonSummary": {
+    "placeholders": {
+      "chapter": {
+        "type": "int"
+      },
+      "category": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "dayShort": "{count} ngày",
-  "@dayShort": {"placeholders": {"count": {"type": "int"}}},
+  "@dayShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mainLearningSections": "Các phần học chính",
   "viewAll": "Xem tất cả",
   "roadmap": "Lộ trình",
   "lessonPlural": "Bài học",
   "overallProgressUpper": "TIẾN ĐỘ TỔNG",
   "overallProgressSemantics": "Tiến độ tổng {percentage} phần trăm",
-  "@overallProgressSemantics": {"placeholders": {"percentage": {"type": "int"}}},
+  "@overallProgressSemantics": {
+    "placeholders": {
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "completedLessons": "Đã hoàn thành {completed}/{total} bài học",
-  "@completedLessons": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
-  "studyStreak": "Chuỗi học: {days} ngày 🔥",
-  "@studyStreak": {"placeholders": {"days": {"type": "int"}}},
+  "@completedLessons": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "studyStreak": "Chuỗi học: {days} ngày",
+  "@studyStreak": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "continueRoadmap": "Tiếp tục lộ trình",
   "inProgressUpper": "ĐANG HỌC DỞ",
   "chapterAndLesson": "Chương {chapter} • Bài {lesson}",
-  "@chapterAndLesson": {"placeholders": {"chapter": {"type": "int"}, "lesson": {"type": "int"}}},
+  "@chapterAndLesson": {
+    "placeholders": {
+      "chapter": {
+        "type": "int"
+      },
+      "lesson": {
+        "type": "int"
+      }
+    }
+  },
   "durationMinutes": "{minutes} phút",
-  "@durationMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "@durationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "continueLearning": "Học tiếp",
   "learningLoadFailed": "Chưa thể tải nội dung học tập",
   "continueStudy": "Tiếp tục học",
   "viewDetailedRoadmap": "Xem lộ trình chi tiết",
   "targetLevel": "Cấp độ mục tiêu: {level}",
-  "@targetLevel": {"placeholders": {"level": {"type": "String"}}},
+  "@targetLevel": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "courseOverallProgress": "Tổng tiến độ toàn khóa",
   "courseProgressSemantics": "Tổng tiến độ toàn khóa {percentage} phần trăm",
-  "@courseProgressSemantics": {"placeholders": {"percentage": {"type": "int"}}},
+  "@courseProgressSemantics": {
+    "placeholders": {
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "completedOverallLessons": "Đã hoàn thành {completed}/{total} bài học tổng thể",
-  "@completedOverallLessons": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@completedOverallLessons": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "expectedExam": "Kỳ thi dự kiến: {date}",
-  "@expectedExam": {"placeholders": {"date": {"type": "String"}}},
+  "@expectedExam": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "skillProgressDetail": "Chi tiết tiến độ kỹ năng",
   "skillCount": "{count}/5 kỹ năng",
-  "@skillCount": {"placeholders": {"count": {"type": "int"}}},
+  "@skillCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "progressSemantics": "Tiến độ {category} {percentage} phần trăm",
-  "@progressSemantics": {"placeholders": {"category": {"type": "String"}, "percentage": {"type": "int"}}},
+  "@progressSemantics": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "overallProgressTitle": "TIẾN ĐỘ TỔNG THỂ",
   "onTrack": "Đang đúng tiến độ",
   "completedChapters": "Đã hoàn thành {completed}/{total} chương học",
-  "@completedChapters": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@completedChapters": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "achievedLessons": "{completed} / {total} bài đã đạt",
-  "@achievedLessons": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@achievedLessons": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "reviewResults": "Xem lại kết quả",
   "continueLessonNineteen": "Học tiếp: Bài 19 – 〜たり〜たりする",
   "chapterNumberUpper": "CHƯƠNG {number}",
-  "@chapterNumberUpper": {"placeholders": {"number": {"type": "int"}}},
+  "@chapterNumberUpper": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "lessonRange": "• Bài {first} – Bài {last}",
-  "@lessonRange": {"placeholders": {"first": {"type": "int"}, "last": {"type": "int"}}},
+  "@lessonRange": {
+    "placeholders": {
+      "first": {
+        "type": "int"
+      },
+      "last": {
+        "type": "int"
+      }
+    }
+  },
   "skillsAchievedUpper": "KỸ NĂNG ĐẠT CHUẨN:",
   "fiveSkillProgressUpper": "TIẾN ĐỘ 5 KỸ NĂNG:",
   "lessonCountUpper": "{completed}/{total} BÀI HỌC",
-  "@lessonCountUpper": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@lessonCountUpper": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "statusCompleted": "Hoàn thành",
   "statusLearning": "Đang học",
   "statusReady": "Sẵn sàng",
   "statusNotStarted": "Chưa bắt đầu",
   "lessonContentCount": "Nội dung bài học ({count} phần)",
-  "@lessonContentCount": {"placeholders": {"count": {"type": "int"}}},
+  "@lessonContentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "totalDuration": "Tổng thời lượng ~{minutes}m",
-  "@totalDuration": {"placeholders": {"minutes": {"type": "int"}}},
+  "@totalDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "focusVocabulary": "Từ vựng trọng tâm trong bài",
   "vocabularyCount": "{count} từ vựng",
-  "@vocabularyCount": {"placeholders": {"count": {"type": "int"}}},
+  "@vocabularyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "relatedGrammarShort": "Ngữ pháp liên quan",
   "continueLessonProgress": "Tiếp tục bài học ({percentage}%)",
-  "@continueLessonProgress": {"placeholders": {"percentage": {"type": "int"}}},
+  "@continueLessonProgress": {
+    "placeholders": {
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "startLesson": "Bắt đầu bài học",
   "focusLabel": "Trọng tâm:",
   "partProgress": "Phần {current} / {total}",
-  "@partProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@partProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "lessonObjective": "Mục tiêu bài học",
   "streakMotivation": "Chuỗi {days} ngày bền bỉ",
-  "@streakMotivation": {"placeholders": {"days": {"type": "int"}}},
+  "@streakMotivation": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "keepStreakMessage": "Hoàn thành bài này để giữ lửa streak!",
   "done": "Đã xong",
   "videoLoadFailed": "Không thể tải video bài giảng",
@@ -612,62 +1065,173 @@
   "hdLecture": "Bài giảng HD",
   "pauseVideo": "Tạm dừng video",
   "resumeVideoFrom": "Tiếp tục video từ {time}",
-  "@resumeVideoFrom": {"placeholders": {"time": {"type": "String"}}},
+  "@resumeVideoFrom": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "articleFallbackMessage": "Bạn vẫn có thể học tiếp bằng phần tóm tắt bên dưới.",
   "viewArticle": "Xem bản chữ",
   "contentTab": "Nội dung",
   "notesTab": "Ghi chú ({count})",
-  "@notesTab": {"placeholders": {"count": {"type": "int"}}},
+  "@notesTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "vocabularyTab": "Từ vựng ({count})",
-  "@vocabularyTab": {"placeholders": {"count": {"type": "int"}}},
+  "@vocabularyTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "coreStructure": "Cấu trúc cốt lõi",
   "usageAndContext": "Cách sử dụng & Ngữ cảnh",
   "practicalExamplesTitle": "Các ví dụ thực tế tiêu biểu",
   "importantGrammarNotes": "Lưu ý ngữ pháp quan trọng",
   "importantVocabulary": "Từ vựng quan trọng trong bài",
   "wordsAppearing": "{count} từ xuất hiện",
-  "@wordsAppearing": {"placeholders": {"count": {"type": "int"}}},
+  "@wordsAppearing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "topicUpper": "CHUYÊN ĐỀ {category}",
-  "@topicUpper": {"placeholders": {"category": {"type": "String"}}},
+  "@topicUpper": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
   "topicSubtitle": "Liệt kê hành động và trạng thái tiêu biểu",
   "openLessonVideo": "Mở video bài học",
   "excellentCompletion": "Xuất sắc hoàn thành",
   "completionCongratulations": "Chúc mừng bạn đã hoàn thành!",
   "lessonUpper": "BÀI {number}",
-  "@lessonUpper": {"placeholders": {"number": {"type": "int"}}},
+  "@lessonUpper": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "streakConsecutive": "Chuỗi học tập: {days} ngày liên tiếp",
-  "@streakConsecutive": {"placeholders": {"days": {"type": "int"}}},
+  "@streakConsecutive": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "masteredContent": "Nội dung bạn đã nắm vững",
   "masteredItemCount": "{count}/{count} mục",
-  "@masteredItemCount": {"placeholders": {"count": {"type": "int"}}},
+  "@masteredItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nextLessonAction": "Học bài tiếp theo (Bài {number})",
-  "@nextLessonAction": {"placeholders": {"number": {"type": "int"}}},
+  "@nextLessonAction": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "backToLevelRoadmap": "Quay lại Lộ trình học {level}",
-  "@backToLevelRoadmap": {"placeholders": {"level": {"type": "String"}}},
+  "@backToLevelRoadmap": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "nextLessonInRoadmap": "Bài học tiếp theo trong lộ trình",
   "lockedContentUpper": "NỘI DUNG CÓ KHÓA TIẾN TRÌNH",
   "lessonLockedDefault": "Bài học này chưa được mở.",
   "unlockConditionUpper": "ĐIỀU KIỆN MỞ KHÓA",
   "prerequisiteProgress": "Tiến độ: {completed}/{total} phần",
-  "@prerequisiteProgress": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@prerequisiteProgress": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "remainingMinutes": "Còn ~{minutes} phút",
-  "@remainingMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "@remainingMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "previewLesson": "Xem trước nội dung Bài {number}",
-  "@previewLesson": {"placeholders": {"number": {"type": "int"}}},
+  "@previewLesson": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "lessonPartsDuration": "{parts} phần học • ~{minutes} phút",
-  "@lessonPartsDuration": {"placeholders": {"parts": {"type": "int"}, "minutes": {"type": "int"}}},
+  "@lessonPartsDuration": {
+    "placeholders": {
+      "parts": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "continuePrerequisite": "Tiếp tục Bài {number} (còn {remaining}%)",
-  "@continuePrerequisite": {"placeholders": {"number": {"type": "int"}, "remaining": {"type": "int"}}},
+  "@continuePrerequisite": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
   "backToLearningRoadmap": "Quay lại lộ trình học tập",
   "lessonLoadFailed": "Chưa thể tải bài học",
   "lessonProgressTitle": "Tiến độ bài học",
   "completedUpper": "100% HOÀN THÀNH",
   "learningProgressValue": "{percentage}% • Đang học",
-  "@learningProgressValue": {"placeholders": {"percentage": {"type": "int"}}},
+  "@learningProgressValue": {
+    "placeholders": {
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "notebookShort": "Sổ từ",
   "processingSemantics": "Đang xử lý",
   "jlptLevelSemantics": "Trình độ JLPT {level}",
-  "@jlptLevelSemantics": {"placeholders": {"level": {"type": "String"}}},
+  "@jlptLevelSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "vocabularyLoadMoreFailed": "Không thể tải thêm từ vựng. Vui lòng thử lại.",
   "fixtureDefaultNotebookName": "Đã lưu từ bài học",
   "notebookListsLoadFailed": "Không thể tải danh sách Sổ từ.",
@@ -689,16 +1253,55 @@
   "notebookKanjiLabel": "Kanji",
   "wordAndMeaningRequired": "Từ tiếng Nhật và nghĩa tiếng Việt là bắt buộc.",
   "grammarDetailSemantics": "Mở chi tiết ngữ pháp {title}",
-  "@grammarDetailSemantics": {"placeholders": {"title": {"type": "String"}}},
+  "@grammarDetailSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "kanjiDetailSemantics": "Mở chi tiết Kanji {character}",
-  "@kanjiDetailSemantics": {"placeholders": {"character": {"type": "String"}}},
+  "@kanjiDetailSemantics": {
+    "placeholders": {
+      "character": {
+        "type": "String"
+      }
+    }
+  },
   "lessonDetailsComingSoon": "Chi tiết bài học đang được hoàn thiện",
   "examDateLabel": "Kỳ thi {date}",
-  "@examDateLabel": {"placeholders": {"date": {"type": "String"}}},
+  "@examDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "mockDurationStatus": "{minutes} phút • {status}",
-  "@mockDurationStatus": {"placeholders": {"minutes": {"type": "int"}, "status": {"type": "String"}}},
+  "@mockDurationStatus": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "mockScoreReading": "{score} / {total} • Đọc hiểu: {percentage}%",
-  "@mockScoreReading": {"placeholders": {"score": {"type": "int"}, "total": {"type": "int"}, "percentage": {"type": "int"}}},
+  "@mockScoreReading": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "successSemantics": "Thành công",
   "skillVocabulary": "Từ vựng",
   "skillKanji": "Kanji",
@@ -710,9 +1313,24 @@
   "unitLessons": "bài",
   "writing": "Viết",
   "mockTestName": "Đề thi thử {level} #{number}",
-  "@mockTestName": {"placeholders": {"level": {"type": "String"}, "number": {"type": "String"}}},
+  "@mockTestName": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
   "levelProgress": "Tiến độ {level}",
-  "@levelProgress": {"placeholders": {"level": {"type": "String"}}},
+  "@levelProgress": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "streakMetric": "Chuỗi học",
   "authErrorEmailNotVerified": "Vui lòng xác thực email trước khi đăng nhập.",
   "profileLoading": "Đang tải hồ sơ...",
@@ -792,7 +1410,16 @@
   "dailyReviewTitle": "Ôn tập hôm nay",
   "reviewLoadingTitle": "RikiPath đang chuẩn bị thẻ ôn tập...",
   "reviewProgress": "{current} / {total} thẻ",
-  "@reviewProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@reviewProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "reviewRecallPrompt": "Bạn còn nhớ nội dung này không?",
   "revealAnswer": "Hiện đáp án",
   "reviewAgain": "Học lại",
@@ -801,15 +1428,36 @@
   "reviewEasy": "Dễ",
   "reviewCompleteTitle": "Hoàn thành phiên ôn tập",
   "reviewCompleteCount": "Bạn đã ôn {count} thẻ trong phiên này.",
-  "@reviewCompleteCount": {"placeholders": {"count": {"type": "int"}}},
+  "@reviewCompleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reviewResponseCount": "{label}: {count}",
-  "@reviewResponseCount": {"placeholders": {"label": {"type": "String"}, "count": {"type": "int"}}},
+  "@reviewResponseCount": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reviewAgainAction": "Ôn lại phiên này",
   "backToPractice": "Quay lại Luyện tập",
   "reviewQueueEmpty": "Hôm nay chưa có thẻ cần ôn.",
   "reviewLoadFailed": "Chưa thể tải phiên ôn tập",
   "reviewDueCount": "{count} thẻ đang chờ bạn ôn lại",
-  "@reviewDueCount": {"placeholders": {"count": {"type": "int"}}},
+  "@reviewDueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mockLoadingTitle": "RikiPath đang chuẩn bị đề thi...",
   "mockLoadFailed": "Chưa thể tải đề thi thử.",
   "mockTestUnavailable": "Đề thi thử này hiện không khả dụng.",
@@ -825,9 +1473,21 @@
   "mockStarting": "Đang bắt đầu...",
   "mockSubmitting": "Đang nộp bài...",
   "mockMinutes": "Thời gian: {minutes} phút",
-  "@mockMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "@mockMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "mockQuestionCount": "Số câu: {count}",
-  "@mockQuestionCount": {"placeholders": {"count": {"type": "int"}}},
+  "@mockQuestionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mockLocalScoringNotice": "Đề luyện tập được chấm trên thiết bị và không phải kết quả JLPT chính thức.",
   "mockBackendScoringNotice": "Thời gian và điểm số được xác định bởi hệ thống RikiPath.",
   "mockMediaAvailable": "Câu hỏi này có nội dung media từ đề thi.",
@@ -840,44 +1500,128 @@
   "mockSubmitFailed": "Đã xảy ra lỗi khi xử lý lượt thi. Vui lòng thử lại.",
   "startMockTest": "Bắt đầu làm bài",
   "questionProgress": "Câu {current} / {total}",
-  "@questionProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@questionProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "previousQuestion": "Câu trước",
   "nextQuestion": "Câu tiếp",
   "mockResultTitle": "Kết quả thi thử",
   "mockResultUnavailable": "Chưa có kết quả cho đề thi này.",
   "mockCorrectCount": "Đúng {correct} / {total} câu",
-  "@mockCorrectCount": {"placeholders": {"correct": {"type": "int"}, "total": {"type": "int"}}},
+  "@mockCorrectCount": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "mockLocalResultNotice": "Kết quả này dùng để luyện tập và không phải điểm JLPT chính thức.",
   "mockBackendResultNotice": "Kết quả này được chấm và trả về từ hệ thống RikiPath.",
   "sectionBreakdown": "Kết quả theo phần",
   "mockSectionResult": "{correct}/{total} đúng • {percentage}%",
-  "@mockSectionResult": {"placeholders": {"correct": {"type": "int"}, "total": {"type": "int"}, "percentage": {"type": "int"}}},
+  "@mockSectionResult": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "detailedReview": "Xem chi tiết đáp án",
   "retakeMockTest": "Làm lại đề",
   "questionNumber": "Câu {number}",
-  "@questionNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@questionNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "selectedAnswer": "Bạn chọn: {answer}",
-  "@selectedAnswer": {"placeholders": {"answer": {"type": "String"}}},
+  "@selectedAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
   "correctAnswer": "Đáp án đúng: {answer}",
-  "@correctAnswer": {"placeholders": {"answer": {"type": "String"}}},
+  "@correctAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
   "notAnswered": "Chưa trả lời",
   "mockAnswerUnavailable": "Không có dữ liệu",
   "practiceLoadingTitle": "RikiPath đang chuẩn bị nội dung luyện tập...",
   "practiceJourneyTitle": "Luyện tập theo nhịp của bạn",
   "practiceJourneySubtitle": "Ôn lại kiến thức, thử sức với đề JLPT và theo dõi từng bước tiến bộ.",
   "mockSummary": "{level} • {minutes} phút • {count} câu",
-  "@mockSummary": {"placeholders": {"level": {"type": "String"}, "minutes": {"type": "int"}, "count": {"type": "int"}}},
+  "@mockSummary": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mockInProgress": "Đang làm {answered}/{total} câu",
-  "@mockInProgress": {"placeholders": {"answered": {"type": "int"}, "total": {"type": "int"}}},
+  "@mockInProgress": {
+    "placeholders": {
+      "answered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "mockCompletedStatus": "Đã hoàn thành • {percentage}%",
-  "@mockCompletedStatus": {"placeholders": {"percentage": {"type": "int"}}},
+  "@mockCompletedStatus": {
+    "placeholders": {
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "additionalPractice": "Luyện tập bổ sung",
   "aiWritingPractice": "Luyện viết cùng AI",
   "practiceAnswerLabel": "Câu trả lời luyện tập",
   "gradePractice": "Chấm bài luyện tập",
   "gradingPractice": "Đang chấm...",
   "aiGradingResult": "Điểm {score}/100 • {feedback}",
-  "@aiGradingResult": {"placeholders": {"score": {"type": "int"}, "feedback": {"type": "String"}}},
+  "@aiGradingResult": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "feedback": {
+        "type": "String"
+      }
+    }
+  },
   "mentorConsultation": "Tư vấn 1-1",
   "openDemoBooking": "Xem trước lịch học",
   "confirmDemoBooking": "Xác nhận xem trước",
@@ -888,10 +1632,25 @@
   "analyticsEmpty": "Chưa có dữ liệu học tập để hiển thị.",
   "studyStreakLabel": "Chuỗi ngày học",
   "streakDaysValue": "{days} ngày",
-  "@streakDaysValue": {"placeholders": {"days": {"type": "int"}}},
+  "@streakDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "completedLessonsLabel": "Bài học đã hoàn thành",
   "analyticsCompletedLessons": "{completed} / {total} bài",
-  "@analyticsCompletedLessons": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@analyticsCompletedLessons": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "skillBreakdown": "Tiến độ theo kỹ năng",
   "analyticsSkillsEmpty": "Chưa có dữ liệu kỹ năng.",
   "analyticsSectionUnavailable": "Phần dữ liệu này tạm thời chưa tải được.",
@@ -906,11 +1665,32 @@
   "homeChooseJlptAction": "Chọn mục tiêu",
   "homeContinueLearningTitle": "Tiếp tục học",
   "homeCurrentLessonMeta": "Bài {lesson} • {minutes} phút",
-  "@homeCurrentLessonMeta": {"placeholders": {"lesson": {"type": "int"}, "minutes": {"type": "int"}}},
+  "@homeCurrentLessonMeta": {
+    "placeholders": {
+      "lesson": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "homeRoadmapProgressTitle": "Tiến độ lộ trình",
   "homeRoadmapProgressDescription": "Tiến độ bài học được lưu trên thiết bị này.",
   "homeRoadmapProgressValue": "{completed}/{total} bài • {percentage}%",
-  "@homeRoadmapProgressValue": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}, "percentage": {"type": "int"}}},
+  "@homeRoadmapProgressValue": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "homeLiveProgressTitle": "Thống kê học tập",
   "homeLiveProgressDescription": "Dữ liệu tổng hợp từ tài khoản RikiPath của bạn.",
   "homeViewProgress": "Xem tiến độ",
@@ -924,7 +1704,19 @@
   "homeResumeMockDescription": "Bài làm trên thiết bị vẫn đang được lưu.",
   "homeRecentMockResult": "Kết quả gần đây",
   "homeRecentMockScore": "Đúng {score}/{total} câu • {percentage}%",
-  "@homeRecentMockScore": {"placeholders": {"score": {"type": "int"}, "total": {"type": "int"}, "percentage": {"type": "int"}}},
+  "@homeRecentMockScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "homeViewResult": "Xem kết quả",
   "homeNotebookShortcutTitle": "Sổ từ cá nhân",
   "homeNotebookShortcutDescription": "Xem lại từ vựng và nội dung bạn đã lưu.",
@@ -940,7 +1732,7 @@
   "homeQuickGrammar": "Ngữ pháp",
   "homeQuickListening": "Luyện nghe",
   "homeDailyMotivation": "Học mỗi ngày",
-  "homeDailyMotivationSubtitle": "Tiến bộ hơn mỗi ngày! がんばろう! 🌸",
+  "homeDailyMotivationSubtitle": "Tiến bộ hơn mỗi ngày! がんばろう!",
   "homeTargetGoalTitle": "Mục tiêu JLPT",
   "commonErrorNetwork": "Không thể kết nối tới RikiPath. Vui lòng kiểm tra mạng và thử lại.",
   "commonErrorUnauthorized": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
@@ -953,7 +1745,16 @@
   "notificationsUpdateFailed": "Chưa thể cập nhật thông báo",
   "notificationsCountUnavailable": "Số thông báo chưa đọc tạm thời chưa cập nhật.",
   "analyticsSkillScore": "{score}% • {attempts} lượt",
-  "@analyticsSkillScore": {"placeholders": {"score": {"type": "String"}, "attempts": {"type": "int"}}},
+  "@analyticsSkillScore": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "attempts": {
+        "type": "int"
+      }
+    }
+  },
   "learnerMentorTitle": "Tư vấn 1-1",
   "learnerMentorSubtitle": "Chọn gói và khung giờ phù hợp với hành trình học của bạn.",
   "learnerMentorExplore": "Khám phá",
@@ -962,16 +1763,37 @@
   "learnerMentorPlansError": "Chưa thể tải các gói tư vấn.",
   "learnerMentorMyMeetings": "Lịch tư vấn của tôi",
   "learnerMentorPlanDuration": "Hiệu lực {days} ngày",
-  "@learnerMentorPlanDuration": {"placeholders": {"days": {"type": "int"}}},
+  "@learnerMentorPlanDuration": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "learnerMentorPlanSessions": "{count} vé tư vấn",
-  "@learnerMentorPlanSessions": {"placeholders": {"count": {"type": "int"}}},
+  "@learnerMentorPlanSessions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "learnerMentorChoosePlan": "Chọn gói",
   "learnerMentorAvailabilityTitle": "Chọn lịch tư vấn",
   "learnerMentorAvailabilitySubtitle": "Các khung giờ trống trong 30 ngày tới.",
   "learnerMentorAvailabilityEmpty": "Không có khung giờ trống trong ngày đã chọn.",
   "learnerMentorAvailabilityError": "Chưa thể tải lịch trống của cố vấn.",
   "learnerMentorSlotTime": "{start} – {end}",
-  "@learnerMentorSlotTime": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@learnerMentorSlotTime": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "learnerMentorSelectSlot": "Chọn khung giờ",
   "learnerMentorPurchase": "Tiếp tục thanh toán",
   "learnerMentorPurchaseBlockedTitle": "Đặt lịch đang tạm khóa",
@@ -992,7 +1814,16 @@
   "learnerMentorPaymentRefunded": "Đã hoàn tiền",
   "learnerMentorPaymentUnknown": "Chưa xác định",
   "learnerMentorSessionsUsage": "Đã dùng {used}/{included} vé tư vấn",
-  "@learnerMentorSessionsUsage": {"placeholders": {"used": {"type": "int"}, "included": {"type": "int"}}},
+  "@learnerMentorSessionsUsage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "included": {
+        "type": "int"
+      }
+    }
+  },
   "learnerMentorRefreshStatus": "Kiểm tra lại trạng thái",
   "learnerMentorStatusPolling": "RikiPath đang kiểm tra trạng thái thanh toán. Việc quay lại ứng dụng không có nghĩa là thanh toán đã thành công.",
   "learnerMentorUnknownMentor": "Chưa xác định cố vấn",
@@ -1087,15 +1918,33 @@
   "writingSelectCharacter": "Chọn ký tự để bắt đầu",
   "writingEmptyTitle": "Chưa có ký tự để luyện",
   "writingKanaEmptyMessage": "Hiện chưa có ký tự {script} phù hợp cho tài khoản này.",
-  "@writingKanaEmptyMessage": {"placeholders": {"script": {"type": "String"}}},
+  "@writingKanaEmptyMessage": {
+    "placeholders": {
+      "script": {
+        "type": "String"
+      }
+    }
+  },
   "writingKanjiEmptyMessage": "Hôm nay chưa có Kanji phù hợp trong danh sách này.",
   "writingLoadFailed": "Chưa thể tải danh sách luyện viết",
   "writingStrokeCount": "{count} nét",
-  "@writingStrokeCount": {"placeholders": {"count": {"type": "int"}}},
+  "@writingStrokeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "writingNewCharacter": "Mới",
   "writingReviewCharacter": "Ôn lại",
   "writingLastScore": "Điểm gần nhất {score}/100",
-  "@writingLastScore": {"placeholders": {"score": {"type": "int"}}},
+  "@writingLastScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "writingMeaningUnavailable": "Chưa cập nhật nghĩa",
   "writingTargetLabel": "Ký tự mục tiêu",
   "writingOnReading": "Âm On",
@@ -1117,15 +1966,36 @@
   "writingAnimationInProgress": "Đang trình diễn thứ tự nét...",
   "writingCompleteTitle": "Hoàn thành bài viết",
   "writingMistakeCount": "{count} nét sai",
-  "@writingMistakeCount": {"placeholders": {"count": {"type": "int"}}},
+  "@writingMistakeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "writingResultScore": "Điểm {score}/100",
-  "@writingResultScore": {"placeholders": {"score": {"type": "int"}}},
+  "@writingResultScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "writingSavingResult": "Đang lưu tiến độ...",
   "writingResultSaved": "Đã lưu lịch ôn tiếp theo",
   "writingResultSaveFailed": "Kết quả vẫn được giữ trên thiết bị nhưng chưa lưu được lên RikiPath.",
   "writingRetrySave": "Lưu lại",
   "writingProgress": "{current}/{total}",
-  "@writingProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@writingProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "meetingTitle": "Phòng họp",
   "meetingJoinTitle": "Tham gia cuộc họp",
   "meetingJoinAction": "Tham gia cuộc họp",
@@ -1151,7 +2021,13 @@
   "meetingOpenFailedDescription": "Vui lòng kiểm tra trình duyệt và kết nối mạng rồi thử lại.",
   "meetingDetailsAction": "Chi tiết",
   "meetingNativeParticipantsCount": "{count} người tham gia",
-  "@meetingNativeParticipantsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@meetingNativeParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "meetingNativeConnecting": "Đang kết nối phòng họp...",
   "meetingNativeJoining": "Đang vào phòng...",
   "meetingNativeReconnecting": "Đang kết nối lại...",
@@ -1188,7 +2064,16 @@
   "homeMeetingFallbackDescription": "Tham gia bằng mã phòng hoặc liên kết.",
   "homeUpcomingMeetingTitle": "Buổi học sắp tới",
   "homeMeetingSchedule": "{date} • {time}",
-  "@homeMeetingSchedule": {"placeholders": {"date": {"type": "String"}, "time": {"type": "String"}}},
+  "@homeMeetingSchedule": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "placementTitle": "Đánh giá năng lực JLPT",
   "placementLoading": "Đang tải thông tin bài kiểm tra năng lực...",
   "placementLoadErrorTitle": "Không thể tải bài kiểm tra năng lực",
@@ -1196,15 +2081,42 @@
   "placementIntroTitle": "Kiểm tra trình độ đầu vào",
   "placementIntroDescription": "Đánh giá nhanh năng lực từ N5 đến N3 để hệ thống đề xuất mục tiêu JLPT và mở khóa lộ trình học cá nhân hóa.",
   "placementLatestScore": "Kết quả đánh giá gần nhất: {score}%",
-  "@placementLatestScore": {"placeholders": {"score": {"type": "String"}}},
+  "@placementLatestScore": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
   "placementLatestLevels": "Trình độ hiện tại: {assessed} · Đề xuất mục tiêu: {recommended}",
-  "@placementLatestLevels": {"placeholders": {"assessed": {"type": "String"}, "recommended": {"type": "String"}}},
+  "@placementLatestLevels": {
+    "placeholders": {
+      "assessed": {
+        "type": "String"
+      },
+      "recommended": {
+        "type": "String"
+      }
+    }
+  },
   "placementStarting": "Đang khởi tạo đề kiểm tra...",
   "placementRecoverResult": "Thử khôi phục kết quả",
   "placementRetake": "Làm lại bài đánh giá",
   "placementStart": "Bắt đầu kiểm tra ngay",
   "placementQuestionProgress": "Câu {current}/{total} · Đã chọn {answered}/{total}",
-  "@placementQuestionProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}, "answered": {"type": "int"}}},
+  "@placementQuestionProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "answered": {
+        "type": "int"
+      }
+    }
+  },
   "placementPreviousQuestion": "Câu trước",
   "placementNextQuestion": "Câu tiếp theo",
   "placementGrading": "Đang chấm điểm...",
@@ -1215,7 +2127,19 @@
   "placementAudioUnavailableDescription": "Âm thanh của câu hỏi này chưa được hỗ trợ hoặc hiện không khả dụng.",
   "placementResultTitle": "Kết quả đánh giá năng lực",
   "placementResultScore": "Điểm tổng: {score}% ({correct}/{total} câu đúng)",
-  "@placementResultScore": {"placeholders": {"score": {"type": "String"}, "correct": {"type": "int"}, "total": {"type": "int"}}},
+  "@placementResultScore": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "placementAssessedLevel": "Trình độ hiện tại",
   "placementRecommendedLevel": "Mục tiêu đề xuất",
   "placementBreakdownTitle": "Chi tiết theo cấp độ JLPT",
@@ -1223,7 +2147,13 @@
   "placementGeneratingPath": "Đang tạo lộ trình học...",
   "placementRefreshingPath": "Đang làm mới lộ trình...",
   "placementApplyGoalAndPath": "Áp dụng JLPT {level} và tạo lộ trình",
-  "@placementApplyGoalAndPath": {"placeholders": {"level": {"type": "String"}}},
+  "@placementApplyGoalAndPath": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "placementIssueValidation": "Dữ liệu bài kiểm tra chưa hợp lệ. Vui lòng kiểm tra lại.",
   "placementIssueExpired": "Thời gian làm bài đã kết thúc. Vui lòng bắt đầu lượt đánh giá mới.",
   "placementIssueBankNotReady": "Ngân hàng câu hỏi N5–N3 chưa sẵn sàng. Vui lòng thử lại sau.",
@@ -1239,7 +2169,6 @@
   "onboardingPlacementDescription": "Làm bài kiểm tra đánh giá năng lực đầu vào để nhận đề xuất cấp độ JLPT phù hợp.",
   "onboardingPlacementAction": "Kiểm tra trình độ đầu vào",
   "onboardingStartingLevel": "Trình độ bắt đầu",
-  "onboardingSkipPlacement": "Bỏ qua bài đánh giá",
   "onboardingSkipComplete": "Đã bỏ qua. Bạn vẫn có thể làm bài đánh giá sau trong Hồ sơ.",
   "onboardingSkipRequired": "Chọn làm bài đánh giá hoặc bỏ qua để tiếp tục.",
   "onboardingSupportedLevels": "Lộ trình tự động hiện hỗ trợ N5–N3.",
@@ -1255,7 +2184,13 @@
   "pathHistoryTitle": "Lịch sử lộ trình",
   "pathNoHistory": "Chưa có lộ trình đã xác nhận.",
   "pathVersionLabel": "Phiên bản {version}",
-  "@pathVersionLabel": {"placeholders": {"version": {"type": "int"}}},
+  "@pathVersionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
   "pathStatusActive": "Đang dùng",
   "pathStatusSuperseded": "Trước đây",
   "pathPreviewError": "Không thể xem trước lộ trình. Kiểm tra cấp độ và nội dung học rồi thử lại.",
@@ -1265,15 +2200,52 @@
   "pathInitialRequired": "Hãy hoàn tất thiết lập ban đầu trước khi điều chỉnh lộ trình.",
   "placementSectionBreakdownTitle": "Kết quả theo phần",
   "placementWrongQuestionsSummary": "Câu cần ôn lại ({count}): {questions}",
-  "@placementWrongQuestionsSummary": {"placeholders": {"count": {"type": "int"}, "questions": {"type": "String"}}},
+  "@placementWrongQuestionsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "questions": {
+        "type": "String"
+      }
+    }
+  },
   "learningPathPreviewTitle": "Bản xem trước lộ trình AI",
   "learningPathPreviewVersion": "Phiên bản {version} sẽ chỉ thay thế lộ trình hiện tại sau khi bạn xác nhận. Lịch sử học tập vẫn được giữ nguyên.",
-  "@learningPathPreviewVersion": {"placeholders": {"version": {"type": "int"}}},
+  "@learningPathPreviewVersion": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
   "learningPathPreviewFailed": "Không thể xem trước hoặc xác nhận lộ trình học. Lộ trình hiện tại được giữ nguyên.",
   "lessonMaterialsUnavailable": "Bài học này chưa có nội dung chi tiết. Vui lòng quay lại sau khi nội dung được cập nhật.",
   "homeCurrentLessonLabel": "Bài học {lesson}",
-  "@homeCurrentLessonLabel": {"placeholders": {"lesson": {"type": "int"}}},
+  "@homeCurrentLessonLabel": {
+    "placeholders": {
+      "lesson": {
+        "type": "int"
+      }
+    }
+  },
   "placementIssueExamDateRequired": "Kết quả đánh giá năng lực đã được lưu. Trước khi tạo lộ trình học AI, vui lòng chọn ngày thi dự kiến trong mục Mục tiêu JLPT tại trang cá nhân.",
   "placementSetExamDate": "Chọn ngày thi trong trang cá nhân",
-  "placementOpenStandardRoadmap": "Tiếp tục lộ trình học tiêu chuẩn"
+  "placementOpenStandardRoadmap": "Tiếp tục lộ trình học tiêu chuẩn",
+  "greetingGeneric": "Xin chào bạn!",
+  "homeEduBannerTag": "Thói quen học",
+  "homeEduBannerTitle": "Duy trì nhịp học đều đặn",
+  "homeEduBannerMessage": "Chỉ 15–20 phút mỗi ngày sẽ hiệu quả gấp 5 lần so với học dồn vào cuối tuần. Hãy bắt đầu bài học hôm nay!",
+  "roadmapEduBannerTag": "Bí quyết JLPT",
+  "roadmapEduBannerTitle": "Học theo chặng kiến thức",
+  "roadmapEduBannerMessage": "Nắm vững ngữ pháp và từ vựng cốt lõi từng chặng trước khi bước sang chặng tiếp theo để giữ kiến thức lâu dài.",
+  "kanaEduBannerTag": "Kỹ thuật viết",
+  "kanaEduBannerTitle": "Quy tắc thuận bút tiếng Nhật",
+  "kanaEduBannerMessage": "Viết nét từ trên xuống dưới, từ trái sang phải để hình thành nét chữ cân đối và kích hoạt trí nhớ cơ bắp.",
+  "grammarEduBannerTag": "Ngữ cảnh",
+  "grammarEduBannerTitle": "Học ngữ pháp qua ví dụ thực tế",
+  "grammarEduBannerMessage": "Đặt câu với ngữ cảnh hội thoại hàng ngày thay vì chỉ ghi nhớ công thức khô khan.",
+  "notebookEduBannerTag": "Phương pháp SRS",
+  "notebookEduBannerTitle": "Lặp lại ngắt quãng thông minh",
+  "notebookEduBannerMessage": "Lưu các từ khó vào sổ từ và ôn lại sau 1, 3, và 7 ngày để chuyển hóa vào trí nhớ dài hạn."
 }

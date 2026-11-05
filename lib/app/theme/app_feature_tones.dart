@@ -34,6 +34,13 @@ abstract final class AppFeatureTones {
 
   static const RikiFeatureTone review = brand;
 
+  static const RikiFeatureTone streak = RikiFeatureTone(
+    foreground: AppColors.streakFire,
+    background: AppColors.streakFireBackground,
+    border: AppColors.streakFireBorder,
+    pressed: AppColors.streakFirePressed,
+  );
+
   static const RikiFeatureTone success = RikiFeatureTone(
     foreground: AppColors.success,
     background: AppColors.successBackgroundSoft,

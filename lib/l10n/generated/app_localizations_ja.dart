@@ -140,7 +140,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get authPromotion => 'AIで自分に合った日本語学習';
 
   @override
-  String get loginWelcome => 'おかえりなさい！ 👋';
+  String get loginWelcome => 'おかえりなさい！';
 
   @override
   String get loginSubtitle => 'RikiPathでJLPT合格への学習を続けましょう。';
@@ -867,7 +867,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String greetingName(String name) {
-    return 'こんにちは、$nameさん！ 👋';
+    return 'こんにちは、$nameさん！';
   }
 
   @override
@@ -1059,7 +1059,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get setupCompleteStatus => '設定完了';
 
   @override
-  String get readyToStart => '準備ができました！ 🎉';
+  String get readyToStart => '準備ができました！';
 
   @override
   String get learningPlanReady => '学習プランの設定が完了しました。';
@@ -1611,7 +1611,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String studyStreak(int days) {
-    return '連続学習: $days日 🔥';
+    return '連続学習: $days日';
   }
 
   @override
@@ -2743,7 +2743,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeDailyMotivation => '毎日の学習';
 
   @override
-  String get homeDailyMotivationSubtitle => '毎日コツコツ前進！がんばろう！🌸';
+  String get homeDailyMotivationSubtitle => '毎日コツコツ前進！がんばろう！';
 
   @override
   String get homeTargetGoalTitle => 'JLPT目標';
@@ -3742,4 +3742,57 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get placementOpenStandardRoadmap => '標準学習ロードマップを続ける';
+
+  @override
+  String get greetingGeneric => 'こんにちは！';
+
+  @override
+  String get homeEduBannerTag => '学習習慣';
+
+  @override
+  String get homeEduBannerTitle => '毎日の学習リズムを維持';
+
+  @override
+  String get homeEduBannerMessage =>
+      '週末にまとめて勉強するより、毎日15〜20分コツコツ進める方が定着します。今日の学習を始めましょう！';
+
+  @override
+  String get roadmapEduBannerTag => 'JLPTの秘訣';
+
+  @override
+  String get roadmapEduBannerTitle => 'ステップごとの確実な習得';
+
+  @override
+  String get roadmapEduBannerMessage =>
+      '各ステージの語彙と文法をしっかり身につけてから次のステップに進み、着実な土台を作りましょう。';
+
+  @override
+  String get kanaEduBannerTag => '筆順ルール';
+
+  @override
+  String get kanaEduBannerTitle => '日本語の正しい書き順';
+
+  @override
+  String get kanaEduBannerMessage =>
+      '上から下、左から右へと正しい筆順で書くことで、美しい文字と筋肉の記憶が身につきます。';
+
+  @override
+  String get grammarEduBannerTag => '文脈理解';
+
+  @override
+  String get grammarEduBannerTitle => '例文で身につける文法';
+
+  @override
+  String get grammarEduBannerMessage =>
+      '文法規則を暗記するだけでなく、実際の会話を想定した例文を作って自然に覚えましょう。';
+
+  @override
+  String get notebookEduBannerTag => 'SRS学習法';
+
+  @override
+  String get notebookEduBannerTitle => '間隔反復で記憶を定着';
+
+  @override
+  String get notebookEduBannerMessage =>
+      '苦手な単語や文型を単語帳に保存し、1日後・3日後・7日後に復習して長期記憶に変えましょう。';
 }

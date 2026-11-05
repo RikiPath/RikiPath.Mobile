@@ -75,6 +75,12 @@ abstract final class AppColors {
   static const Color infoBackground = Color(0xFFEAF2FD);
   static const Color infoBorder = Color(0xFFD8E7FA);
 
+  // Semantic Streak & Fire tokens: Warm vibrant orange-red
+  static const Color streakFire = Color(0xFFFF5722);
+  static const Color streakFirePressed = Color(0xFFE64A19);
+  static const Color streakFireBackground = Color(0xFFFFF0EC);
+  static const Color streakFireBorder = Color(0xFFFFCCBC);
+
   // Calm feature accents keep cards neutral while giving each learning tool
   // a stable visual meaning. These colors are intentionally desaturated so
   // Sakura remains the strongest brand and primary-action color.

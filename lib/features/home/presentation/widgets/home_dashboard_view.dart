@@ -127,6 +127,16 @@ class HomeDashboardView extends StatelessWidget {
             subtitle: context.l10n.homeDailyMotivationSubtitle,
             onTap: onOpenLearning,
           ),
+          const SizedBox(height: AppSpacing.space4),
+
+          // 7. Educational Guidance Banner
+          SakuraEducationalBanner(
+            tag: context.l10n.homeEduBannerTag,
+            title: context.l10n.homeEduBannerTitle,
+            message: context.l10n.homeEduBannerMessage,
+            mascotPose: SakuraMascotPose.guiding,
+            onTap: onOpenRoadmap,
+          ),
           const SizedBox(height: AppSpacing.space5),
 
           // 7. Study Categories (Bảng chữ cái, Ngữ pháp)
@@ -206,7 +216,9 @@ class _GreetingSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.l10n.greetingName(dashboard.learnerName),
+                  dashboard.learnerName.trim().isNotEmpty
+                      ? context.l10n.greetingName(dashboard.learnerName)
+                      : context.l10n.greetingGeneric,
                   key: const ValueKey<String>('home_greeting'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -842,7 +854,7 @@ class _StreakMetricTile extends StatelessWidget {
               _IconTile(
                 icon: Icons.local_fire_department_outlined,
                 compact: true,
-                tone: AppFeatureTones.review,
+                tone: AppFeatureTones.streak,
               ),
               const SizedBox(width: AppSpacing.space2),
               Expanded(
@@ -1039,7 +1051,7 @@ class _FeatureCard extends StatelessWidget {
             child: Text(actionLabel),
           );
 
-          if (constraints.maxWidth < 300) {
+          if (constraints.maxWidth < 360) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

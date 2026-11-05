@@ -67,7 +67,7 @@ void main() {
     await _pumpHome(tester);
     await tester.pumpAndSettle();
 
-    expect(find.text('Xin chào, Minh Anh! 👋'), findsOneWidget);
+    expect(find.text('Xin chào, Minh Anh!'), findsOneWidget);
     expect(find.text('Chọn mục tiêu JLPT để bắt đầu'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Thống kê học tập'), 300);
     expect(find.text('Thống kê học tập'), findsOneWidget);

@@ -31,12 +31,13 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
         if (streakDays != null)
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: 10,
+              horizontal: 8,
               vertical: AppSpacing.space1,
             ),
             decoration: BoxDecoration(
-              color: AppColors.learnerTertiaryBackground,
+              color: AppColors.streakFireBackground,
               borderRadius: BorderRadius.circular(AppRadius.pill),
+              border: Border.all(color: AppColors.streakFireBorder, width: 1),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -44,13 +45,13 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
                 const Icon(
                   Icons.local_fire_department,
                   size: 18,
-                  color: AppColors.learnerTertiary,
+                  color: AppColors.streakFire,
                 ),
                 const SizedBox(width: AppSpacing.space1),
                 Text(
                   context.l10n.dayCount(streakDays!),
                   style: AppTypography.badgeText.copyWith(
-                    color: AppColors.learnerTertiary,
+                    color: AppColors.streakFire,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),

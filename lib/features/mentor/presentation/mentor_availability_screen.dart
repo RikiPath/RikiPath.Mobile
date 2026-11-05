@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
@@ -219,8 +219,8 @@ class _WeeklyScheduleCard extends StatelessWidget {
                         ),
                         child: Text(
                           state.isRegistrationOpen
-                              ? '🌸 Tuần sau — Mở đăng ký'
-                              : '⚠️ Đã hết hạn đăng ký tuần sau',
+                              ? 'Tuần sau — Mở đăng ký'
+                              : 'Đã hết hạn đăng ký tuần sau',
                           style: AppTypography.metadata.copyWith(
                             color: state.isRegistrationOpen
                                 ? AppColors.brandPrimary

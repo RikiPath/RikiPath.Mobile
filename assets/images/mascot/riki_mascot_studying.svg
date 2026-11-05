@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" fill="none">
+  <!-- Background Glow -->
+  <circle cx="120" cy="120" r="100" fill="#EAF2FD" opacity="0.6"/>
+  <circle cx="120" cy="120" r="85" fill="#FFF5F7" opacity="0.5"/>
+  
+  <!-- Fluffy Tail -->
+  <path d="M165 170 C195 160 215 130 205 105 C198 88 175 92 165 110 C155 125 155 155 165 170 Z" fill="#FCFBFB" stroke="#2D282A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M190 120 C205 105 205 95 195 90 C185 85 175 92 170 102 C178 112 185 116 190 120 Z" fill="#E05A7A" opacity="0.85"/>
+
+  <!-- Body -->
+  <ellipse cx="120" cy="165" rx="46" ry="40" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+  <ellipse cx="120" cy="170" rx="30" ry="26" fill="#FFF0F3"/>
+
+  <!-- Feet -->
+  <ellipse cx="92" cy="195" rx="16" ry="10" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+  <ellipse cx="148" cy="195" rx="16" ry="10" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+
+  <!-- Left & Right Ears -->
+  <path d="M80 92 L62 45 C60 40 68 36 74 40 L102 75 Z" fill="#FCFBFB" stroke="#2D282A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M78 82 L68 52 L94 72 Z" fill="#FFE8ED"/>
+  <path d="M68 52 L62 45 L74 40 Z" fill="#E05A7A"/>
+
+  <path d="M160 92 L178 45 C180 40 172 36 166 40 L138 75 Z" fill="#FCFBFB" stroke="#2D282A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M162 82 L172 52 L146 72 Z" fill="#FFE8ED"/>
+  <path d="M172 52 L178 45 L166 40 Z" fill="#E05A7A"/>
+
+  <!-- Head with slight study tilt -->
+  <ellipse cx="120" cy="105" rx="52" ry="46" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+
+  <!-- Forehead Sakura Crest -->
+  <g transform="translate(120,78) scale(0.7)">
+    <circle cx="0" cy="-10" r="6" fill="#E05A7A"/>
+    <circle cx="9.5" cy="-3.1" r="6" fill="#E05A7A"/>
+    <circle cx="5.9" cy="8.1" r="6" fill="#E05A7A"/>
+    <circle cx="-5.9" cy="8.1" r="6" fill="#E05A7A"/>
+    <circle cx="-9.5" cy="-3.1" r="6" fill="#E05A7A"/>
+    <circle cx="0" cy="0" r="4" fill="#F59E0B"/>
+  </g>
+
+  <!-- Rosy Cheeks -->
+  <ellipse cx="88" cy="116" rx="9" ry="5.5" fill="#F8BBD0" opacity="0.8"/>
+  <ellipse cx="152" cy="116" rx="9" ry="5.5" fill="#F8BBD0" opacity="0.8"/>
+
+  <!-- Focused Inquisitive Eyes (looking down at study book) -->
+  <ellipse cx="100" cy="106" rx="5" ry="6" fill="#2D282A"/>
+  <circle cx="102" cy="104" r="1.8" fill="#FFFFFF"/>
+  <ellipse cx="140" cy="106" rx="5" ry="6" fill="#2D282A"/>
+  <circle cx="142" cy="104" r="1.8" fill="#FFFFFF"/>
+
+  <!-- Cute Nose & Smile -->
+  <polygon points="120,113 117,110 123,110" fill="#2D282A"/>
+  <path d="M117 117 C120 119 123 117 123 117" stroke="#2D282A" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+  <!-- Open Study Scroll / Japanese Notebook -->
+  <g transform="translate(85, 148)">
+    <rect x="0" y="0" width="70" height="42" rx="4" fill="#FFFFFF" stroke="#2D282A" stroke-width="2.5"/>
+    <line x1="35" y1="0" x2="35" y2="42" stroke="#E5E0E2" stroke-width="2"/>
+    <!-- Mock Kana/Kanji Characters inside notebook -->
+    <text x="14" y="24" font-family="sans-serif" font-size="14" font-weight="bold" fill="#E05A7A">あ</text>
+    <text x="48" y="24" font-family="sans-serif" font-size="14" font-weight="bold" fill="#206AC0">文</text>
+    <line x1="8" y1="32" x2="28" y2="32" stroke="#DDBFC3" stroke-width="1.5"/>
+    <line x1="42" y1="32" x2="62" y2="32" stroke="#DDBFC3" stroke-width="1.5"/>
+  </g>
+
+  <!-- Paws holding the notebook -->
+  <ellipse cx="88" cy="162" rx="7" ry="9" fill="#FCFBFB" stroke="#2D282A" stroke-width="2.5"/>
+  <ellipse cx="152" cy="162" rx="7" ry="9" fill="#FCFBFB" stroke="#2D282A" stroke-width="2.5"/>
+</svg>

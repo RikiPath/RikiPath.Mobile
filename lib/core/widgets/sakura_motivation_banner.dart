@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_motifs.dart';
 
@@ -6,7 +6,7 @@ import 'package:rikipath_mobile/core/widgets/sakura_motifs.dart';
 class SakuraMotivationBanner extends StatelessWidget {
   const SakuraMotivationBanner({
     this.title = 'Học mỗi ngày',
-    this.subtitle = 'Tiến bộ hơn mỗi ngày! がんばろう! 🌸',
+    this.subtitle = 'Tiến bộ hơn mỗi ngày! がんばろう!',
     this.japaneseCheer = 'がんばろう！',
     this.onTap,
     super.key,

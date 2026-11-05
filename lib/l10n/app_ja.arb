@@ -1,4 +1,4 @@
-﻿{
+{
   "@@locale": "ja",
   "appTitle": "RikiPath",
   "toastRegisterSuccessTitle": "アカウントを作成しました",
@@ -43,7 +43,7 @@
   "navigationProfile": "マイページ",
   "splashTagline": "日本語学習 • JLPT対策",
   "authPromotion": "AIで自分に合った日本語学習",
-  "loginWelcome": "おかえりなさい！ 👋",
+  "loginWelcome": "おかえりなさい！",
   "loginSubtitle": "RikiPathでJLPT合格への学習を続けましょう。",
   "studentEmail": "メールアドレス",
   "emailAddress": "メールアドレス",
@@ -69,7 +69,13 @@
   "mentorRegistrationLoginPrompt": "アカウントをお持ちですか？ログインして応募を続ける",
   "mentorCreatingAccountMessage": "アカウントを作成し、確認メールを送信しています...",
   "mentorRegistrationCreatedMessage": "確認コードを{email}に送信しました。メール認証後にログインして応募書類を完成させてください。",
-  "@mentorRegistrationCreatedMessage": {"placeholders": {"email": {"type": "String"}}},
+  "@mentorRegistrationCreatedMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "mentorApplicationTitle": "メンター応募書類",
   "mentorApplicationIntro": "プロフィールと資格証明書を提出し、管理者の審査を受けてください。承認後にメンター権限が付与されます。",
   "mentorApplicationPersonal": "個人情報",
@@ -178,7 +184,13 @@
   "mentorAvailabilityTitle": "自分の空き時間",
   "mentorAvailabilityDescription": "学習者に公開されている時間枠です。",
   "mentorAvailabilityCount": "{count}件の時間枠",
-  "@mentorAvailabilityCount": {"placeholders": {"count": {"type": "int"}}},
+  "@mentorAvailabilityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mentorAvailabilityEmpty": "空き時間はまだ登録されていません。",
   "mentorAvailabilityError": "空き時間を読み込めませんでした。もう一度お試しください。",
   "mentorAvailabilityReadOnlyTitle": "閲覧のみ",
@@ -187,7 +199,13 @@
   "mentorMeetingsTitle": "自分の相談予定",
   "mentorMeetingsDescription": "学習者との確定した相談予定です。",
   "mentorMeetingsCount": "{count}件の相談",
-  "@mentorMeetingsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@mentorMeetingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mentorMeetingsEmpty": "相談予定はまだありません。",
   "mentorMeetingsError": "相談予定を読み込めませんでした。もう一度お試しください。",
   "mentorViewMeetings": "相談予定を見る",
@@ -278,7 +296,7 @@
   "homeToolsTitle": "学習ツールを使ってみましょう",
   "homeLoadFailed": "ホームを読み込めません",
   "checkConnectionRetry": "通信環境を確認して再試行してください。",
-  "greetingName": "こんにちは、{name}さん！ 👋",
+  "greetingName": "こんにちは、{name}さん！",
   "jlptGoal": "JLPT {level}を目標に学習中",
   "notStarted": "未開始",
   "lessonPartsCompleted": " • {completed}/{total}項目完了",
@@ -293,7 +311,7 @@
   "leaveSetup": "設定を終了",
   "onboardingPlacementChoiceTitle": "学習の始め方を選択",
   "onboardingPlacementChoiceDescription": "レベル診断は任意です。スキップして、現在学習中のレベルを自分で選べます。",
-  "onboardingSkipPlacement": "診断をスキップして続行",
+  "onboardingSkipPlacement": "レベル診断をスキップ",
   "onboardingStudyLevelsTitle": "学習レベルと目標を選択",
   "onboardingStudyLevelsDescription": "まず現在学習中のレベルを選び、その後JLPT目標を別に設定します。",
   "onboardingCurrentStudyLevelTitle": "現在学習中のレベル",
@@ -303,7 +321,16 @@
   "onboardingPlacementCanTakeLater": "プロフィールから後でレベル診断を受けることもできます。",
   "standardRoadmapTitle": "標準学習ロードマップ",
   "standardRoadmapProgress": "標準学習の進捗: {completed}/{total}レッスン",
-  "@standardRoadmapProgress": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@standardRoadmapProgress": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "standardRoadmapNextLesson": "次のレッスン",
   "aiPersonalizedPathTitle": "AIパーソナライズ学習プラン",
   "aiPlacementRequired": "AI学習プランを有効にするにはレベル診断を完了してください。標準ロードマップで学習を続けられます。",
@@ -335,7 +362,7 @@
   "finishSetup": "設定を完了",
   "onboardingAdjustHelper": "戻って選択内容を変更することもできます。",
   "setupCompleteStatus": "設定完了",
-  "readyToStart": "準備ができました！ 🎉",
+  "readyToStart": "準備ができました！",
   "learningPlanReady": "学習プランの設定が完了しました。",
   "studySummary": "1日{minutes}分 · {description}",
   "goalPrefix": "目標:",
@@ -475,7 +502,13 @@
   "regenerateLearningPath": "学習プランを再作成",
   "learningPathPreviewTitle": "AI学習計画のプレビュー",
   "learningPathPreviewVersion": "バージョン{version}は確認後にのみ現在の計画と置き換わります。学習履歴は保持されます。",
-  "@learningPathPreviewVersion": {"placeholders": {"version": {"type": "int"}}},
+  "@learningPathPreviewVersion": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
   "learningPathPreviewFailed": "学習計画をプレビューまたは確定できませんでした。現在の計画は保持されます。",
   "generatingLearningPath": "個別学習プランを作成しています…",
   "recommendedLearningPathTitle": "おすすめ学習プラン",
@@ -503,7 +536,7 @@
   "overallProgressUpper": "全体の進捗",
   "overallProgressSemantics": "全体の進捗は{percentage}パーセントです",
   "completedLessons": "{total}レッスン中{completed}件完了",
-  "studyStreak": "連続学習: {days}日 🔥",
+  "studyStreak": "連続学習: {days}日",
   "continueRoadmap": "学習プランを続ける",
   "inProgressUpper": "学習中",
   "chapterAndLesson": "第{chapter}章 • レッスン{lesson}",
@@ -710,7 +743,16 @@
   "dailyReviewTitle": "今日の復習",
   "reviewLoadingTitle": "復習カードを準備しています…",
   "reviewProgress": "{current} / {total} 枚",
-  "@reviewProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@reviewProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "reviewRecallPrompt": "この内容を覚えていますか？",
   "revealAnswer": "答えを見る",
   "reviewAgain": "もう一度",
@@ -719,15 +761,36 @@
   "reviewEasy": "簡単",
   "reviewCompleteTitle": "復習が完了しました",
   "reviewCompleteCount": "このセッションで{count}枚を復習しました。",
-  "@reviewCompleteCount": {"placeholders": {"count": {"type": "int"}}},
+  "@reviewCompleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reviewResponseCount": "{label}：{count}",
-  "@reviewResponseCount": {"placeholders": {"label": {"type": "String"}, "count": {"type": "int"}}},
+  "@reviewResponseCount": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reviewAgainAction": "もう一度復習する",
   "backToPractice": "練習に戻る",
   "reviewQueueEmpty": "今日は復習するカードがありません。",
   "reviewLoadFailed": "復習を読み込めませんでした",
   "reviewDueCount": "{count}枚のカードが復習待ちです",
-  "@reviewDueCount": {"placeholders": {"count": {"type": "int"}}},
+  "@reviewDueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mockLoadingTitle": "模擬試験を準備しています…",
   "mockLoadFailed": "模擬試験を読み込めませんでした。",
   "mockTestUnavailable": "この模擬試験は現在利用できません。",
@@ -743,9 +806,21 @@
   "mockStarting": "開始しています…",
   "mockSubmitting": "提出しています…",
   "mockMinutes": "時間：{minutes}分",
-  "@mockMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "@mockMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "mockQuestionCount": "問題数：{count}",
-  "@mockQuestionCount": {"placeholders": {"count": {"type": "int"}}},
+  "@mockQuestionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mockLocalScoringNotice": "この練習問題は端末内で採点され、公式JLPT結果ではありません。",
   "mockBackendScoringNotice": "制限時間とスコアはRikiPathシステムによって決定されます。",
   "mockMediaAvailable": "この問題には試験のメディア内容があります。",
@@ -758,44 +833,128 @@
   "mockSubmitFailed": "受験の処理中にエラーが発生しました。もう一度お試しください。",
   "startMockTest": "試験を始める",
   "questionProgress": "問題 {current} / {total}",
-  "@questionProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@questionProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "previousQuestion": "前の問題",
   "nextQuestion": "次の問題",
   "mockResultTitle": "模擬試験の結果",
   "mockResultUnavailable": "この試験の結果はまだありません。",
   "mockCorrectCount": "{total}問中{correct}問正解",
-  "@mockCorrectCount": {"placeholders": {"correct": {"type": "int"}, "total": {"type": "int"}}},
+  "@mockCorrectCount": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "mockLocalResultNotice": "この結果は練習用で、公式JLPTスコアではありません。",
   "mockBackendResultNotice": "この結果はRikiPathシステムで採点され、返されたものです。",
   "sectionBreakdown": "セクション別結果",
   "mockSectionResult": "{total}問中{correct}問正解・{percentage}%",
-  "@mockSectionResult": {"placeholders": {"correct": {"type": "int"}, "total": {"type": "int"}, "percentage": {"type": "int"}}},
+  "@mockSectionResult": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "detailedReview": "解答を詳しく確認",
   "retakeMockTest": "もう一度受ける",
   "questionNumber": "問題 {number}",
-  "@questionNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@questionNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "selectedAnswer": "選んだ答え：{answer}",
-  "@selectedAnswer": {"placeholders": {"answer": {"type": "String"}}},
+  "@selectedAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
   "correctAnswer": "正解：{answer}",
-  "@correctAnswer": {"placeholders": {"answer": {"type": "String"}}},
+  "@correctAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
   "notAnswered": "未回答",
   "mockAnswerUnavailable": "データがありません",
   "practiceLoadingTitle": "練習内容を準備しています…",
   "practiceJourneyTitle": "自分のペースで練習",
   "practiceJourneySubtitle": "復習、JLPT模擬試験、学習の振り返りを一つの流れで進めます。",
   "mockSummary": "{level}・{minutes}分・{count}問",
-  "@mockSummary": {"placeholders": {"level": {"type": "String"}, "minutes": {"type": "int"}, "count": {"type": "int"}}},
+  "@mockSummary": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mockInProgress": "{total}問中{answered}問回答済み",
-  "@mockInProgress": {"placeholders": {"answered": {"type": "int"}, "total": {"type": "int"}}},
+  "@mockInProgress": {
+    "placeholders": {
+      "answered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "mockCompletedStatus": "完了・{percentage}%",
-  "@mockCompletedStatus": {"placeholders": {"percentage": {"type": "int"}}},
+  "@mockCompletedStatus": {
+    "placeholders": {
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
   "additionalPractice": "追加練習",
   "aiWritingPractice": "AIと作文練習",
   "practiceAnswerLabel": "練習の回答",
   "gradePractice": "練習を採点",
   "gradingPractice": "採点中…",
   "aiGradingResult": "スコア {score}/100・{feedback}",
-  "@aiGradingResult": {"placeholders": {"score": {"type": "int"}, "feedback": {"type": "String"}}},
+  "@aiGradingResult": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "feedback": {
+        "type": "String"
+      }
+    }
+  },
   "mentorConsultation": "メンター相談",
   "openDemoBooking": "相談予定をプレビュー",
   "confirmDemoBooking": "プレビューを確認",
@@ -806,10 +965,25 @@
   "analyticsEmpty": "表示できる学習データがまだありません。",
   "studyStreakLabel": "連続学習日数",
   "streakDaysValue": "{days}日",
-  "@streakDaysValue": {"placeholders": {"days": {"type": "int"}}},
+  "@streakDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "completedLessonsLabel": "完了したレッスン",
   "analyticsCompletedLessons": "{completed} / {total} レッスン",
-  "@analyticsCompletedLessons": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@analyticsCompletedLessons": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "skillBreakdown": "スキル別進捗",
   "analyticsSkillsEmpty": "スキルデータがまだありません。",
   "analyticsSectionUnavailable": "このデータは一時的に読み込めません。",
@@ -825,7 +999,13 @@
   "homeContinueLearningTitle": "学習を続ける",
   "homeCurrentLessonMeta": "レッスン{lesson}・{minutes}分",
   "homeCurrentLessonLabel": "レッスン{lesson}",
-  "@homeCurrentLessonLabel": {"placeholders": {"lesson": {"type": "int"}}},
+  "@homeCurrentLessonLabel": {
+    "placeholders": {
+      "lesson": {
+        "type": "int"
+      }
+    }
+  },
   "homeRoadmapProgressTitle": "学習プランの進捗",
   "homeRoadmapProgressDescription": "現在の学習ロードマップの進捗です。",
   "homeRoadmapProgressValue": "{completed}/{total}レッスン・{percentage}%",
@@ -857,7 +1037,7 @@
   "homeQuickGrammar": "文法",
   "homeQuickListening": "リスニング",
   "homeDailyMotivation": "毎日の学習",
-  "homeDailyMotivationSubtitle": "毎日コツコツ前進！がんばろう！🌸",
+  "homeDailyMotivationSubtitle": "毎日コツコツ前進！がんばろう！",
   "homeTargetGoalTitle": "JLPT目標",
   "commonErrorNetwork": "RikiPathに接続できません。通信環境を確認して再試行してください。",
   "commonErrorUnauthorized": "セッションの有効期限が切れました。再度ログインしてください。",
@@ -870,7 +1050,16 @@
   "notificationsUpdateFailed": "通知を更新できませんでした",
   "notificationsCountUnavailable": "未読数を一時的に更新できません。",
   "analyticsSkillScore": "{score}%・{attempts}回",
-  "@analyticsSkillScore": {"placeholders": {"score": {"type": "String"}, "attempts": {"type": "int"}}},
+  "@analyticsSkillScore": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "attempts": {
+        "type": "int"
+      }
+    }
+  },
   "learnerMentorTitle": "メンター相談",
   "learnerMentorSubtitle": "学習プランに合うパッケージと時間を選びましょう。",
   "learnerMentorExplore": "見る",
@@ -879,16 +1068,37 @@
   "learnerMentorPlansError": "相談パッケージを読み込めませんでした。",
   "learnerMentorMyMeetings": "相談予定",
   "learnerMentorPlanDuration": "有効期間 {days}日",
-  "@learnerMentorPlanDuration": {"placeholders": {"days": {"type": "int"}}},
+  "@learnerMentorPlanDuration": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "learnerMentorPlanSessions": "相談 {count}回",
-  "@learnerMentorPlanSessions": {"placeholders": {"count": {"type": "int"}}},
+  "@learnerMentorPlanSessions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "learnerMentorChoosePlan": "パッケージを選ぶ",
   "learnerMentorAvailabilityTitle": "相談日時を選ぶ",
   "learnerMentorAvailabilitySubtitle": "今後30日間の空き時間です。",
   "learnerMentorAvailabilityEmpty": "選択した日に空き時間はありません。",
   "learnerMentorAvailabilityError": "メンターの空き時間を読み込めませんでした。",
   "learnerMentorSlotTime": "{start}～{end}",
-  "@learnerMentorSlotTime": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@learnerMentorSlotTime": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "learnerMentorSelectSlot": "時間を選ぶ",
   "learnerMentorPurchase": "支払いへ進む",
   "learnerMentorPurchaseBlockedTitle": "予約は一時停止中です",
@@ -909,7 +1119,16 @@
   "learnerMentorPaymentRefunded": "返金済み",
   "learnerMentorPaymentUnknown": "不明",
   "learnerMentorSessionsUsage": "{included}回中{used}回利用",
-  "@learnerMentorSessionsUsage": {"placeholders": {"used": {"type": "int"}, "included": {"type": "int"}}},
+  "@learnerMentorSessionsUsage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "included": {
+        "type": "int"
+      }
+    }
+  },
   "learnerMentorRefreshStatus": "状態を再確認",
   "learnerMentorStatusPolling": "RikiPathがお支払い状況を確認しています。アプリに戻っただけでは、お支払い完了とはなりません。",
   "learnerMentorUnknownMentor": "メンター未定",
@@ -1004,15 +1223,33 @@
   "writingSelectCharacter": "練習する文字を選択",
   "writingEmptyTitle": "練習できる文字がありません",
   "writingKanaEmptyMessage": "このアカウントで利用できる{script}の文字はまだありません。",
-  "@writingKanaEmptyMessage": {"placeholders": {"script": {"type": "String"}}},
+  "@writingKanaEmptyMessage": {
+    "placeholders": {
+      "script": {
+        "type": "String"
+      }
+    }
+  },
   "writingKanjiEmptyMessage": "この一覧には現在練習できる漢字がありません。",
   "writingLoadFailed": "書き取り一覧を読み込めませんでした",
   "writingStrokeCount": "{count}画",
-  "@writingStrokeCount": {"placeholders": {"count": {"type": "int"}}},
+  "@writingStrokeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "writingNewCharacter": "新規",
   "writingReviewCharacter": "復習",
   "writingLastScore": "前回 {score}/100",
-  "@writingLastScore": {"placeholders": {"score": {"type": "int"}}},
+  "@writingLastScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "writingMeaningUnavailable": "意味は未登録です",
   "writingTargetLabel": "練習する文字",
   "writingOnReading": "音読み",
@@ -1034,15 +1271,36 @@
   "writingAnimationInProgress": "書き順を表示中...",
   "writingCompleteTitle": "書き取り完了",
   "writingMistakeCount": "間違い {count}回",
-  "@writingMistakeCount": {"placeholders": {"count": {"type": "int"}}},
+  "@writingMistakeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "writingResultScore": "スコア {score}/100",
-  "@writingResultScore": {"placeholders": {"score": {"type": "int"}}},
+  "@writingResultScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "writingSavingResult": "学習記録を保存中...",
   "writingResultSaved": "次の復習予定を保存しました",
   "writingResultSaveFailed": "結果は端末に保持されていますが、RikiPathにはまだ保存できていません。",
   "writingRetrySave": "もう一度保存",
   "writingProgress": "{current}/{total}",
-  "@writingProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@writingProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "meetingTitle": "ミーティングルーム",
   "meetingJoinTitle": "ミーティングに参加",
   "meetingJoinAction": "ミーティングに参加",
@@ -1068,7 +1326,13 @@
   "meetingOpenFailedDescription": "ブラウザと通信環境を確認して、もう一度お試しください。",
   "meetingDetailsAction": "詳細",
   "meetingNativeParticipantsCount": "参加者 {count}人",
-  "@meetingNativeParticipantsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@meetingNativeParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "meetingNativeConnecting": "ミーティングに接続しています…",
   "meetingNativeJoining": "ルームに参加しています…",
   "meetingNativeReconnecting": "再接続しています…",
@@ -1105,7 +1369,16 @@
   "homeMeetingFallbackDescription": "ルームコードまたはリンクで参加します。",
   "homeUpcomingMeetingTitle": "次の相談予定",
   "homeMeetingSchedule": "{date} • {time}",
-  "@homeMeetingSchedule": {"placeholders": {"date": {"type": "String"}, "time": {"type": "String"}}},
+  "@homeMeetingSchedule": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "placementTitle": "JLPTレベル診断",
   "placementLoading": "レベル診断を読み込んでいます…",
   "placementLoadErrorTitle": "レベル診断を読み込めません",
@@ -1113,15 +1386,42 @@
   "placementIntroTitle": "入門レベルチェック",
   "placementIntroDescription": "N5からN3までの力を短時間で確認し、JLPT目標と個別学習プランを提案します。",
   "placementLatestScore": "直近の診断結果：{score}%",
-  "@placementLatestScore": {"placeholders": {"score": {"type": "String"}}},
+  "@placementLatestScore": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
   "placementLatestLevels": "現在のレベル：{assessed} · おすすめ目標：{recommended}",
-  "@placementLatestLevels": {"placeholders": {"assessed": {"type": "String"}, "recommended": {"type": "String"}}},
+  "@placementLatestLevels": {
+    "placeholders": {
+      "assessed": {
+        "type": "String"
+      },
+      "recommended": {
+        "type": "String"
+      }
+    }
+  },
   "placementStarting": "問題を準備しています…",
   "placementRecoverResult": "結果を復元する",
   "placementRetake": "もう一度診断する",
   "placementStart": "診断を始める",
   "placementQuestionProgress": "問題 {current}/{total} · 回答済み {answered}/{total}",
-  "@placementQuestionProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}, "answered": {"type": "int"}}},
+  "@placementQuestionProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "answered": {
+        "type": "int"
+      }
+    }
+  },
   "placementPreviousQuestion": "前の問題",
   "placementNextQuestion": "次の問題",
   "placementGrading": "採点しています…",
@@ -1132,7 +1432,19 @@
   "placementAudioUnavailableDescription": "この問題の音声は未対応、または現在利用できません。",
   "placementResultTitle": "レベル診断結果",
   "placementResultScore": "総合スコア：{score}%（{correct}/{total}問正解）",
-  "@placementResultScore": {"placeholders": {"score": {"type": "String"}, "correct": {"type": "int"}, "total": {"type": "int"}}},
+  "@placementResultScore": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "placementAssessedLevel": "現在のレベル",
   "placementRecommendedLevel": "おすすめ目標",
   "placementBreakdownTitle": "JLPTレベル別の詳細",
@@ -1140,7 +1452,13 @@
   "placementGeneratingPath": "学習プランを作成しています…",
   "placementRefreshingPath": "学習プランを更新しています…",
   "placementApplyGoalAndPath": "JLPT {level}を設定して学習プランを作成",
-  "@placementApplyGoalAndPath": {"placeholders": {"level": {"type": "String"}}},
+  "@placementApplyGoalAndPath": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "placementIssueValidation": "診断データが正しくありません。内容を確認してください。",
   "placementIssueExamDateRequired": "診断結果は保存されました。AI学習計画を作成する前に、プロフィールのJLPT目標で受験予定日を選択してください。",
   "placementSetExamDate": "プロフィールで受験予定日を選択",
@@ -1159,7 +1477,6 @@
   "onboardingPlacementDescription": "レベル診断テストを受けて、あなたに合ったJLPT目標レベルの提案を受け取りましょう。",
   "onboardingPlacementAction": "入門レベル診断を受ける",
   "onboardingStartingLevel": "学習開始レベル",
-  "onboardingSkipPlacement": "レベル診断をスキップ",
   "onboardingSkipComplete": "スキップしました。後でプロフィールから受けられます。",
   "onboardingSkipRequired": "診断を受けるか、スキップして続けてください。",
   "onboardingSupportedLevels": "自動学習プランは現在N5〜N3に対応しています。",
@@ -1175,7 +1492,13 @@
   "pathHistoryTitle": "プラン履歴",
   "pathNoHistory": "確定したプランはまだありません。",
   "pathVersionLabel": "バージョン {version}",
-  "@pathVersionLabel": {"placeholders": {"version": {"type": "int"}}},
+  "@pathVersionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
   "pathStatusActive": "使用中",
   "pathStatusSuperseded": "以前",
   "pathPreviewError": "プランをプレビューできません。レベルと学習内容を確認して再試行してください。",
@@ -1185,5 +1508,30 @@
   "pathInitialRequired": "プランの調整前に初期設定を完了してください。",
   "placementSectionBreakdownTitle": "セクション別の結果",
   "placementWrongQuestionsSummary": "復習が必要な問題（{count}問）：{questions}",
-  "@placementWrongQuestionsSummary": {"placeholders": {"count": {"type": "int"}, "questions": {"type": "String"}}}
+  "@placementWrongQuestionsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "questions": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingGeneric": "こんにちは！",
+  "homeEduBannerTag": "学習習慣",
+  "homeEduBannerTitle": "毎日の学習リズムを維持",
+  "homeEduBannerMessage": "週末にまとめて勉強するより、毎日15〜20分コツコツ進める方が定着します。今日の学習を始めましょう！",
+  "roadmapEduBannerTag": "JLPTの秘訣",
+  "roadmapEduBannerTitle": "ステップごとの確実な習得",
+  "roadmapEduBannerMessage": "各ステージの語彙と文法をしっかり身につけてから次のステップに進み、着実な土台を作りましょう。",
+  "kanaEduBannerTag": "筆順ルール",
+  "kanaEduBannerTitle": "日本語の正しい書き順",
+  "kanaEduBannerMessage": "上から下、左から右へと正しい筆順で書くことで、美しい文字と筋肉の記憶が身につきます。",
+  "grammarEduBannerTag": "文脈理解",
+  "grammarEduBannerTitle": "例文で身につける文法",
+  "grammarEduBannerMessage": "文法規則を暗記するだけでなく、実際の会話を想定した例文を作って自然に覚えましょう。",
+  "notebookEduBannerTag": "SRS学習法",
+  "notebookEduBannerTitle": "間隔反復で記憶を定着",
+  "notebookEduBannerMessage": "苦手な単語や文型を単語帳に保存し、1日後・3日後・7日後に復習して長期記憶に変えましょう。"
 }

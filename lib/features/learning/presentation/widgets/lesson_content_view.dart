@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
@@ -640,7 +640,7 @@ class _ExampleCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadius.compact),
             ),
             child: Text(
-              '👉 ${example.translation}',
+              '• ${example.translation}',
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.learnerTextPrimary,
                 height: 1.45,

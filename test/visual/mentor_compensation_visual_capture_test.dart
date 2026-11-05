@@ -10,6 +10,7 @@ import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart'
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_compensation_screen.dart';
 
 void main() {
+  final skip = Platform.environment['RIKI_CAPTURE_DIR'] == null;
   final outputDir = Directory(
     Platform.environment['RIKI_CAPTURE_DIR'] ??
         r'C:\Users\ADMIN\.gemini\antigravity\brain\e3992171-3ce2-4736-abc5-aba1234129ce',
@@ -176,7 +177,8 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     final boundary = boundaryKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
     final image = await boundary.toImage(pixelRatio: 1.0);
@@ -191,10 +193,12 @@ void main() {
   }
 
   testWidgets('Capture Tab 3 Payrolls', (tester) async {
+    if (skip) return;
     await captureTab(tester, 2, 'e2e_mobile_mentor_compensation_tab3_payrolls');
   });
 
   testWidgets('Capture Tab 4 Payouts', (tester) async {
+    if (skip) return;
     await captureTab(tester, 3, 'e2e_mobile_mentor_compensation_tab4_payouts');
   });
 }

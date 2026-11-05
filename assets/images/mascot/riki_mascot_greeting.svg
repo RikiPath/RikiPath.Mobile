@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" fill="none">
+  <!-- Background Glow -->
+  <circle cx="120" cy="120" r="100" fill="#FFF5F7" opacity="0.6"/>
+  <circle cx="120" cy="120" r="85" fill="#FFE8ED" opacity="0.4"/>
+  
+  <!-- Fluffy Tail -->
+  <path d="M165 170 C195 160 215 130 205 105 C198 88 175 92 165 110 C155 125 155 155 165 170 Z" fill="#FCFBFB" stroke="#2D282A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Tail Sakura Dip -->
+  <path d="M190 120 C205 105 205 95 195 90 C185 85 175 92 170 102 C178 112 185 116 190 120 Z" fill="#E05A7A" opacity="0.85"/>
+
+  <!-- Body -->
+  <ellipse cx="120" cy="165" rx="46" ry="40" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+  <!-- Belly Soft Tint -->
+  <ellipse cx="120" cy="170" rx="30" ry="26" fill="#FFF0F3"/>
+
+  <!-- Left Foot & Right Foot -->
+  <ellipse cx="92" cy="195" rx="16" ry="10" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+  <ellipse cx="148" cy="195" rx="16" ry="10" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+  <circle cx="92" cy="195" r="4" fill="#F8BBD0"/>
+  <circle cx="148" cy="195" r="4" fill="#F8BBD0"/>
+
+  <!-- Left Ear -->
+  <path d="M80 92 L62 45 C60 40 68 36 74 40 L102 75 Z" fill="#FCFBFB" stroke="#2D282A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M78 82 L68 52 L94 72 Z" fill="#FFE8ED"/>
+  <path d="M68 52 L62 45 L74 40 Z" fill="#E05A7A"/>
+
+  <!-- Right Ear -->
+  <path d="M160 92 L178 45 C180 40 172 36 166 40 L138 75 Z" fill="#FCFBFB" stroke="#2D282A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M162 82 L172 52 L146 72 Z" fill="#FFE8ED"/>
+  <path d="M172 52 L178 45 L166 40 Z" fill="#E05A7A"/>
+
+  <!-- Head -->
+  <ellipse cx="120" cy="105" rx="52" ry="46" fill="#FCFBFB" stroke="#2D282A" stroke-width="3"/>
+
+  <!-- Forehead Sakura Blossom Crest -->
+  <g transform="translate(120,78) scale(0.7)">
+    <circle cx="0" cy="-10" r="6" fill="#E05A7A"/>
+    <circle cx="9.5" cy="-3.1" r="6" fill="#E05A7A"/>
+    <circle cx="5.9" cy="8.1" r="6" fill="#E05A7A"/>
+    <circle cx="-5.9" cy="8.1" r="6" fill="#E05A7A"/>
+    <circle cx="-9.5" cy="-3.1" r="6" fill="#E05A7A"/>
+    <circle cx="0" cy="0" r="4" fill="#F59E0B"/>
+  </g>
+
+  <!-- Rosy Cheeks -->
+  <ellipse cx="88" cy="116" rx="9" ry="5.5" fill="#F8BBD0" opacity="0.8"/>
+  <ellipse cx="152" cy="116" rx="9" ry="5.5" fill="#F8BBD0" opacity="0.8"/>
+
+  <!-- Smiling Eyes -->
+  <path d="M92 104 C96 99 104 99 108 104" stroke="#2D282A" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <path d="M132 104 C136 99 144 99 148 104" stroke="#2D282A" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Cute Nose & Mouth -->
+  <polygon points="120,113 117,110 123,110" fill="#2D282A"/>
+  <path d="M116 117 C118 120 120 120 120 117 C120 120 122 120 124 117" stroke="#2D282A" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+  <!-- Left Paw (Resting) -->
+  <ellipse cx="98" cy="155" rx="8" ry="12" fill="#FCFBFB" stroke="#2D282A" stroke-width="2.5"/>
+
+  <!-- Right Paw (Waving Hello) -->
+  <g transform="translate(148,142) rotate(-25)">
+    <ellipse cx="0" cy="0" rx="9" ry="14" fill="#FCFBFB" stroke="#2D282A" stroke-width="2.5"/>
+    <circle cx="0" cy="-6" r="4" fill="#F8BBD0"/>
+  </g>
+
+  <!-- Floating Sakura Petal near Waving Paw -->
+  <path d="M172 128 C176 122 184 124 182 130 C180 136 172 138 170 134 C168 130 170 128 172 128 Z" fill="#E05A7A" opacity="0.85"/>
+</svg>

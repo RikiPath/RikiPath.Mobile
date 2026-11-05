@@ -148,7 +148,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get authPromotion => 'Học tiếng Nhật cá nhân hoá cùng AI';
 
   @override
-  String get loginWelcome => 'Chào mừng trở lại! 👋';
+  String get loginWelcome => 'Chào mừng trở lại!';
 
   @override
   String get loginSubtitle =>
@@ -925,7 +925,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String greetingName(String name) {
-    return 'Xin chào, $name! 👋';
+    return 'Xin chào, $name!';
   }
 
   @override
@@ -1120,7 +1120,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get setupCompleteStatus => 'Thiết lập hoàn tất';
 
   @override
-  String get readyToStart => 'Sẵn sàng bắt đầu! 🎉';
+  String get readyToStart => 'Sẵn sàng bắt đầu!';
 
   @override
   String get learningPlanReady => 'Lộ trình học của bạn đã được thiết lập.';
@@ -1686,7 +1686,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String studyStreak(int days) {
-    return 'Chuỗi học: $days ngày 🔥';
+    return 'Chuỗi học: $days ngày';
   }
 
   @override
@@ -2872,7 +2872,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get homeDailyMotivation => 'Học mỗi ngày';
 
   @override
-  String get homeDailyMotivationSubtitle => 'Tiến bộ hơn mỗi ngày! がんばろう! 🌸';
+  String get homeDailyMotivationSubtitle => 'Tiến bộ hơn mỗi ngày! がんばろう!';
 
   @override
   String get homeTargetGoalTitle => 'Mục tiêu JLPT';
@@ -3947,4 +3947,57 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get placementOpenStandardRoadmap => 'Tiếp tục lộ trình học tiêu chuẩn';
+
+  @override
+  String get greetingGeneric => 'Xin chào bạn!';
+
+  @override
+  String get homeEduBannerTag => 'Thói quen học';
+
+  @override
+  String get homeEduBannerTitle => 'Duy trì nhịp học đều đặn';
+
+  @override
+  String get homeEduBannerMessage =>
+      'Chỉ 15–20 phút mỗi ngày sẽ hiệu quả gấp 5 lần so với học dồn vào cuối tuần. Hãy bắt đầu bài học hôm nay!';
+
+  @override
+  String get roadmapEduBannerTag => 'Bí quyết JLPT';
+
+  @override
+  String get roadmapEduBannerTitle => 'Học theo chặng kiến thức';
+
+  @override
+  String get roadmapEduBannerMessage =>
+      'Nắm vững ngữ pháp và từ vựng cốt lõi từng chặng trước khi bước sang chặng tiếp theo để giữ kiến thức lâu dài.';
+
+  @override
+  String get kanaEduBannerTag => 'Kỹ thuật viết';
+
+  @override
+  String get kanaEduBannerTitle => 'Quy tắc thuận bút tiếng Nhật';
+
+  @override
+  String get kanaEduBannerMessage =>
+      'Viết nét từ trên xuống dưới, từ trái sang phải để hình thành nét chữ cân đối và kích hoạt trí nhớ cơ bắp.';
+
+  @override
+  String get grammarEduBannerTag => 'Ngữ cảnh';
+
+  @override
+  String get grammarEduBannerTitle => 'Học ngữ pháp qua ví dụ thực tế';
+
+  @override
+  String get grammarEduBannerMessage =>
+      'Đặt câu với ngữ cảnh hội thoại hàng ngày thay vì chỉ ghi nhớ công thức khô khan.';
+
+  @override
+  String get notebookEduBannerTag => 'Phương pháp SRS';
+
+  @override
+  String get notebookEduBannerTitle => 'Lặp lại ngắt quãng thông minh';
+
+  @override
+  String get notebookEduBannerMessage =>
+      'Lưu các từ khó vào sổ từ và ôn lại sau 1, 3, và 7 ngày để chuyển hóa vào trí nhớ dài hạn.';
 }

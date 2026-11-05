@@ -48,12 +48,12 @@ class SakuraDayTracker extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isActive
-                      ? AppColors.brandPrimary
+                      ? AppColors.streakFire
                       : isToday
-                          ? AppColors.brandTint
+                          ? AppColors.streakFireBackground
                           : AppColors.surfaceMuted,
                   border: isToday && !isActive
-                      ? Border.all(color: AppColors.brandPrimary, width: 1.5)
+                      ? Border.all(color: AppColors.streakFire, width: 1.5)
                       : null,
                 ),
                 child: isActive

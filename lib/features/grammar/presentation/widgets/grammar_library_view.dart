@@ -70,8 +70,18 @@ class _GrammarLibraryViewState extends State<GrammarLibraryView> {
             AppSpacing.space4,
             AppSpacing.space2,
           ),
-          child: TextField(
-            key: const ValueKey<String>('grammar_search_field'),
+          child: Column(
+            children: [
+              SakuraEducationalBanner(
+                tag: context.l10n.grammarEduBannerTag,
+                title: context.l10n.grammarEduBannerTitle,
+                message: context.l10n.grammarEduBannerMessage,
+                mascotPose: SakuraMascotPose.guiding,
+                compact: true,
+              ),
+              const SizedBox(height: AppSpacing.space3),
+              TextField(
+                key: const ValueKey<String>('grammar_search_field'),
             controller: _searchController,
             textInputAction: TextInputAction.search,
             onChanged: (_) => setState(() {}),
@@ -91,6 +101,8 @@ class _GrammarLibraryViewState extends State<GrammarLibraryView> {
                       icon: const Icon(Icons.close),
                     ),
             ),
+          ),
+            ],
           ),
         ),
         JlptCatalogFilterChips(

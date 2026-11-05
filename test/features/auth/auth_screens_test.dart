@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -48,7 +48,7 @@ void main() {
       expect(find.byType(LoginScreen), findsOneWidget);
       expect(find.text('RikiPath'), findsOneWidget);
       expect(find.text('N4'), findsNothing);
-      expect(find.text('Chào mừng trở lại! 👋'), findsOneWidget);
+      expect(find.text('Chào mừng trở lại!'), findsOneWidget);
       expect(find.text('Email học viên'), findsOneWidget);
       expect(find.text('Mẹo đăng nhập'), findsNothing);
       expect(find.text('Tham gia cuộc họp'), findsNothing);
