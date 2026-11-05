@@ -66,6 +66,11 @@ abstract final class AppTypography {
     fontWeight: FontWeight.w400,
   );
 
+
+  // Semantic Material & System Aliases
+  static const TextStyle caption = metadata;
+  static const TextStyle bodyMedium = body;
+
   static const TextStyle metadata = TextStyle(
     color: AppColors.textSecondary,
     fontSize: 12,

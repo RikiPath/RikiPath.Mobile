@@ -32,6 +32,8 @@ abstract final class AppRoutes {
   static const String mentorCompensation = '$mentor/$mentorCompensationSegment';
   static const String mentorBankAccountSegment = 'bank-account';
   static const String mentorBankAccount = '$mentor/$mentorBankAccountSegment';
+  static const String mentorCalendarSegment = 'calendar';
+  static const String mentorCalendar = '$mentor/$mentorCalendarSegment';
   static String mentorMeetingDetail(int meetingId) {
     if (meetingId <= 0) {
       throw ArgumentError.value(meetingId, 'meetingId', 'Must be positive');
@@ -115,6 +117,7 @@ abstract final class AppRoutes {
   }
 
   static const String home = '/home';
+  static const String calendar = '/calendar';
   static const String notifications = '/notifications';
   static const String learn = '/learn';
   static const String learnRoadmapSegment = 'roadmap';

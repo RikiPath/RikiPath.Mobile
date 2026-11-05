@@ -1,3 +1,5 @@
+import 'package:rikipath_mobile/features/calendar/presentation/learner_calendar_screen.dart';
+import 'package:rikipath_mobile/features/calendar/presentation/mentor_calendar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -201,6 +203,10 @@ GoRouter createAppRouter({
             builder: (context, state) => const MentorBankAccountScreen(),
           ),
           GoRoute(
+            path: AppRoutes.mentorCalendarSegment,
+            builder: (context, state) => const MentorCalendarScreen(),
+          ),
+          GoRoute(
             path: AppRoutes.mentorMeetingsSegment,
             builder: (context, state) => const MentorMeetingsScreen(),
             routes: [
@@ -301,6 +307,10 @@ GoRouter createAppRouter({
       GoRoute(
         path: AppRoutes.analytics,
         builder: (context, state) => const LearnerAnalyticsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.calendar,
+        builder: (context, state) => const LearnerCalendarScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

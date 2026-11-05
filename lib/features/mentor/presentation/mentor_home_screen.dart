@@ -69,6 +69,16 @@ class MentorHomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space4),
               _MentorSummaryCard(
+                key: const Key('mentor_home_calendar_summary'),
+                icon: Icons.calendar_month_outlined,
+                title: 'Lịch giảng dạy',
+                count: '',
+                detail: 'Lịch biểu chi tiết, chế độ Ngày, 3 ngày, Tuần, Tháng.',
+                actionLabel: 'Mở lịch',
+                onPressed: () => context.push(AppRoutes.mentorCalendar),
+              ),
+              const SizedBox(height: AppSpacing.space4),
+              _MentorSummaryCard(
                 key: const Key('mentor_home_compensation_summary'),
                 icon: Icons.payments_outlined,
                 title: 'Thu nhập của tôi',

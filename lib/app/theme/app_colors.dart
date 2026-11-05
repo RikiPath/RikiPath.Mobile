@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 /// Semantic colors derived from the Neo-Japoniste Sakura Stitch references.
 abstract final class AppColors {
   static const Color brandPrimary = Color(0xFFE05A7A);
+
+  // Semantic Material & System Aliases
+  static const Color primary = brandPrimary;
+  static const Color primaryContainer = brandTint;
+  static const Color textTertiary = textMuted;
+
   static const Color brandPrimaryPressed = Color(0xFFC24362);
   // Web brand primary (#A62E4F) and its deeper gradient endpoint (#9E2A4B).
   static const Color mentorAction = Color(0xFFA62E4F);
