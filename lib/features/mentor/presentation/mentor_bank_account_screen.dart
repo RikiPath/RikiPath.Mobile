@@ -211,7 +211,9 @@ class _AccountList extends StatelessWidget {
         for (final a in accounts) ...[
           RikiCard(
             key: ValueKey('mentor_bank_account_${a.id}'),
-            borderColor: a.isCurrent ? AppColors.brandPrimary : AppColors.border,
+            backgroundColor: AppColors.cardWarmWhite,
+            borderColor: a.isCurrent ? AppColors.brandPrimary : AppColors.borderSubtlePink,
+            boxShadow: AppShadows.sakuraSubtle,
             child: Row(
               children: [
                 const Icon(

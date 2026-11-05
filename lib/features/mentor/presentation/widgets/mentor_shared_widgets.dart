@@ -59,8 +59,9 @@ class MentorAvailabilityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RikiCard(
-      boxShadow: AppShadows.cardSoft,
-      borderColor: AppColors.border,
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.borderSubtlePink,
+      boxShadow: AppShadows.sakuraSubtle,
       padding: const EdgeInsets.all(AppSpacing.space4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,8 +121,9 @@ class MentorMeetingCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.card),
           onTap: onTap,
           child: RikiCard(
-            boxShadow: AppShadows.cardSoft,
-            borderColor: AppColors.border,
+            backgroundColor: AppColors.cardWarmWhite,
+            borderColor: AppColors.borderSubtlePink,
+            boxShadow: AppShadows.sakuraSubtle,
             padding: const EdgeInsets.all(AppSpacing.space4),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,

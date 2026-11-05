@@ -180,7 +180,9 @@ class _OverviewTab extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.space4),
             RikiCard(
-              borderColor: AppColors.border,
+              backgroundColor: AppColors.cardWarmWhite,
+              borderColor: AppColors.borderSubtlePink,
+              boxShadow: AppShadows.sakuraSubtle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -256,7 +258,9 @@ class _EarningsTab extends ConsumerWidget {
             final e = items[index];
             return RikiCard(
               key: ValueKey('mentor_earning_${e.id}'),
-              borderColor: AppColors.border,
+              backgroundColor: AppColors.cardWarmWhite,
+              borderColor: AppColors.borderSubtlePink,
+              boxShadow: AppShadows.sakuraSubtle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -342,7 +346,9 @@ class _PayrollsTab extends ConsumerWidget {
             );
             return RikiCard(
               key: ValueKey('mentor_payroll_${p.id}'),
-              borderColor: AppColors.border,
+              backgroundColor: AppColors.cardWarmWhite,
+              borderColor: AppColors.borderSubtlePink,
+              boxShadow: AppShadows.sakuraSubtle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -441,7 +447,9 @@ class _PayoutsTab extends ConsumerWidget {
             final o = items[index];
             return RikiCard(
               key: ValueKey('mentor_payout_${o.id}'),
-              borderColor: AppColors.border,
+              backgroundColor: AppColors.cardWarmWhite,
+              borderColor: AppColors.borderSubtlePink,
+              boxShadow: AppShadows.sakuraSubtle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -538,7 +546,9 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RikiCard(
-      borderColor: highlight ? AppColors.brandPrimary : AppColors.border,
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: highlight ? AppColors.brandPrimary : AppColors.borderSubtlePink,
+      boxShadow: AppShadows.sakuraSubtle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
