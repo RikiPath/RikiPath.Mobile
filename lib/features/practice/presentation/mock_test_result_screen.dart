@@ -52,14 +52,26 @@ class MockTestResultScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSpacing.space4),
             children: [
               RikiCard(
-                borderColor: AppColors.successBorder,
+                backgroundColor: AppColors.cardWarmWhite,
+                borderColor: AppColors.borderSubtlePink,
+                boxShadow: AppShadows.sakuraSubtle,
                 child: Column(
                   children: [
-                    const CircleAvatar(
-                      radius: 30,
-                      backgroundColor: AppColors.successBackground,
-                      foregroundColor: AppColors.success,
-                      child: Icon(Icons.emoji_events_outlined, size: 34),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircleAvatar(
+                          radius: 28,
+                          backgroundColor: AppColors.successBackground,
+                          foregroundColor: AppColors.success,
+                          child: Icon(Icons.emoji_events_outlined, size: 32),
+                        ),
+                        const SizedBox(width: AppSpacing.space3),
+                        const SakuraMascot(
+                          pose: SakuraMascotPose.celebrating,
+                          size: 76,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.space3),
                     Text(
@@ -97,6 +109,9 @@ class MockTestResultScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space4),
               RikiCard(
+                backgroundColor: AppColors.cardWarmWhite,
+                borderColor: AppColors.borderSubtlePink,
+                boxShadow: AppShadows.sakuraSubtle,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

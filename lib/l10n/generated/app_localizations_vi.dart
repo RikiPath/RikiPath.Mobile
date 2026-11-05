@@ -3959,7 +3959,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get homeEduBannerMessage =>
-      'Chỉ 15–20 phút mỗi ngày sẽ hiệu quả gấp 5 lần so với học dồn vào cuối tuần. Hãy bắt đầu bài học hôm nay!';
+      'Duy trì thói quen học mỗi ngày 15–20 phút giúp não bộ củng cố trí nhớ và chuyển hóa kiến thức tiếng Nhật thành phản xạ tự nhiên. Hãy bắt đầu ngay!';
 
   @override
   String get roadmapEduBannerTag => 'Bí quyết JLPT';
@@ -4010,4 +4010,14 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get vocabularyEduBannerMessage =>
       'Ghi nhớ từ vựng kết hợp trợ từ và động từ đi kèm để hình thành phản xạ tự nhiên khi giao tiếp.';
+
+  @override
+  String get practiceEduBannerTag => 'Chiến lược ôn luyện';
+
+  @override
+  String get practiceEduBannerTitle => 'Luyện đề có chủ đích';
+
+  @override
+  String get practiceEduBannerMessage =>
+      'Kết hợp làm đề thi thử có bấm giờ cùng ôn tập ngắt quãng (SRS) mỗi ngày giúp bạn quen áp lực phòng thi và củng cố phản xạ tự nhiên.';
 }

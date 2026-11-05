@@ -3805,4 +3805,14 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get vocabularyEduBannerMessage =>
       '単語を1つずつ覚えるのではなく、助詞や動詞とセットで覚えることで、自然な表現力が身につきます。';
+
+  @override
+  String get practiceEduBannerTag => '対策のアドバイス';
+
+  @override
+  String get practiceEduBannerTitle => '目的を持った試験演習';
+
+  @override
+  String get practiceEduBannerMessage =>
+      '時間制限付きの模擬試験と毎日の間隔反復（SRS）を組み合わせることで、本番のプレッシャーに慣れ、自然な解答力を養います。';
 }

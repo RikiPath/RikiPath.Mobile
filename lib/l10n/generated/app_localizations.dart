@@ -6965,7 +6965,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeEduBannerMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Chỉ 15–20 phút mỗi ngày sẽ hiệu quả gấp 5 lần so với học dồn vào cuối tuần. Hãy bắt đầu bài học hôm nay!'**
+  /// **'Duy trì thói quen học mỗi ngày 15–20 phút giúp não bộ củng cố trí nhớ và chuyển hóa kiến thức tiếng Nhật thành phản xạ tự nhiên. Hãy bắt đầu ngay!'**
   String get homeEduBannerMessage;
 
   /// No description provided for @roadmapEduBannerTag.
@@ -7057,6 +7057,24 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Ghi nhớ từ vựng kết hợp trợ từ và động từ đi kèm để hình thành phản xạ tự nhiên khi giao tiếp.'**
   String get vocabularyEduBannerMessage;
+
+  /// No description provided for @practiceEduBannerTag.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chiến lược ôn luyện'**
+  String get practiceEduBannerTag;
+
+  /// No description provided for @practiceEduBannerTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Luyện đề có chủ đích'**
+  String get practiceEduBannerTitle;
+
+  /// No description provided for @practiceEduBannerMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết hợp làm đề thi thử có bấm giờ cùng ôn tập ngắt quãng (SRS) mỗi ngày giúp bạn quen áp lực phòng thi và củng cố phản xạ tự nhiên.'**
+  String get practiceEduBannerMessage;
 }
 
 class _AppLocalizationsDelegate

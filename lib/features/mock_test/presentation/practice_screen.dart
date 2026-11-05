@@ -77,6 +77,13 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
                 color: AppColors.learnerTextSecondary,
               ),
             ),
+            const SizedBox(height: AppSpacing.space4),
+            SakuraEducationalBanner(
+              tag: context.l10n.practiceEduBannerTag,
+              title: context.l10n.practiceEduBannerTitle,
+              message: context.l10n.practiceEduBannerMessage,
+              mascotPose: SakuraMascotPose.studying,
+            ),
             const SizedBox(height: AppSpacing.space5),
             _LiveDailyReviewCard(state: dailyReviews),
             const SizedBox(height: AppSpacing.space3),
@@ -298,6 +305,9 @@ class _PracticeEntryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return RikiCard(
       onTap: onPressed,
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.borderSubtlePink,
+      boxShadow: AppShadows.sakuraSubtle,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

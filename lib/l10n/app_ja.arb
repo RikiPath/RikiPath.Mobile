@@ -1536,5 +1536,8 @@
   "notebookEduBannerMessage": "苦手な単語や文型を単語帳に保存し、1日後・3日後・7日後に復習して長期記憶に変えましょう。",
   "vocabularyEduBannerTag": "語彙のコツ",
   "vocabularyEduBannerTitle": "コロケーションで覚える",
-  "vocabularyEduBannerMessage": "単語を1つずつ覚えるのではなく、助詞や動詞とセットで覚えることで、自然な表現力が身につきます。"
+  "vocabularyEduBannerMessage": "単語を1つずつ覚えるのではなく、助詞や動詞とセットで覚えることで、自然な表現力が身につきます。",
+  "practiceEduBannerTag": "対策のアドバイス",
+  "practiceEduBannerTitle": "目的を持った試験演習",
+  "practiceEduBannerMessage": "時間制限付きの模擬試験と毎日の間隔反復（SRS）を組み合わせることで、本番のプレッシャーに慣れ、自然な解答力を養います。"
 }

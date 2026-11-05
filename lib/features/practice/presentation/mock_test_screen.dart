@@ -182,12 +182,49 @@ class _MockInstructions extends StatelessWidget {
       children: [
         const SizedBox(height: AppSpacing.space3),
         RikiCard(
+          backgroundColor: AppColors.cardWarmWhite,
+          borderColor: AppColors.borderSubtlePink,
+          boxShadow: AppShadows.sakuraSubtle,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(test.jlptLevelName, style: AppTypography.badgeText),
-              const SizedBox(height: AppSpacing.space2),
-              Text(test.title, style: AppTypography.pageTitle),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.brandTint,
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                            border: Border.all(color: AppColors.borderSubtlePink),
+                          ),
+                          child: Text(
+                            test.jlptLevelName,
+                            style: AppTypography.badgeText.copyWith(
+                              color: AppColors.brandPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.space2),
+                        Text(test.title, style: AppTypography.pageTitle),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.space2),
+                  const SakuraMascot(
+                    pose: SakuraMascotPose.studying,
+                    size: 72,
+                  ),
+                ],
+              ),
               if (test.description.trim().isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.space2),
                 Text(
@@ -270,8 +307,20 @@ class _MockQuestionView extends ConsumerWidget {
           backgroundColor: AppColors.brandTint,
           semanticsLabel: context.l10n.questionProgress(index + 1, total),
         ),
+        const SizedBox(height: AppSpacing.space3),
+        _QuestionNavigatorStrip(
+          currentIndex: index,
+          total: total,
+          questions: attempt.questions,
+          answers: attempt.answers,
+          isSubmitting: state.isSubmitting,
+          onSelect: controller.showQuestion,
+        ),
         const SizedBox(height: AppSpacing.space4),
         RikiCard(
+          backgroundColor: AppColors.cardWarmWhite,
+          borderColor: AppColors.borderSubtlePink,
+          boxShadow: AppShadows.sakuraSubtle,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -348,6 +397,95 @@ class _MockQuestionView extends ConsumerWidget {
   }
 }
 
+class _QuestionNavigatorStrip extends StatelessWidget {
+  const _QuestionNavigatorStrip({
+    required this.currentIndex,
+    required this.total,
+    required this.questions,
+    required this.answers,
+    required this.isSubmitting,
+    required this.onSelect,
+  });
+
+  final int currentIndex;
+  final int total;
+  final List<LiveMockTestQuestion> questions;
+  final Map<int, int> answers;
+  final bool isSubmitting;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 38,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: total,
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.space2),
+        itemBuilder: (context, i) {
+          final isCurrent = i == currentIndex;
+          final isAnswered =
+              i < questions.length && answers.containsKey(questions[i].id);
+
+          Color bgColor;
+          Color borderColor;
+          Color textColor;
+
+          if (isCurrent) {
+            bgColor = AppColors.brandPrimary;
+            borderColor = AppColors.brandPrimary;
+            textColor = Colors.white;
+          } else if (isAnswered) {
+            bgColor = AppColors.brandTint;
+            borderColor = AppColors.borderSubtlePink;
+            textColor = AppColors.brandPrimary;
+          } else {
+            bgColor = AppColors.cardWarmWhite;
+            borderColor = AppColors.borderSubtlePink;
+            textColor = AppColors.learnerTextSecondary;
+          }
+
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              onTap: isSubmitting ? null : () => onSelect(i),
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 36),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                  border: Border.all(color: borderColor),
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${i + 1}',
+                      style: AppTypography.badgeText.copyWith(
+                        color: textColor,
+                        fontWeight:
+                            isCurrent ? FontWeight.w700 : FontWeight.w600,
+                      ),
+                    ),
+                    if (isAnswered && !isCurrent) ...[
+                      const SizedBox(width: 3),
+                      Icon(Icons.check, size: 12, color: textColor),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _MockOptionTile extends StatelessWidget {
   const _MockOptionTile({
     required this.option,
@@ -362,7 +500,7 @@ class _MockOptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? AppColors.brandTint : AppColors.surface,
+      color: selected ? AppColors.brandTint : AppColors.cardWarmWhite,
       borderRadius: BorderRadius.circular(AppRadius.input),
       child: InkWell(
         key: ValueKey<String>('mock_option_${option.id}'),
@@ -371,10 +509,12 @@ class _MockOptionTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.space3),
           decoration: BoxDecoration(
+            color: selected ? AppColors.brandTint : AppColors.cardWarmWhite,
             border: Border.all(
               color: selected
                   ? AppColors.brandPrimary
-                  : AppColors.learnerOutline,
+                  : AppColors.borderSubtlePink,
+              width: selected ? 1.5 : 1.0,
             ),
             borderRadius: BorderRadius.circular(AppRadius.input),
           ),
@@ -387,7 +527,17 @@ class _MockOptionTile extends StatelessWidget {
                 color: selected ? AppColors.brandPrimary : AppColors.textMuted,
               ),
               const SizedBox(width: AppSpacing.space3),
-              Expanded(child: Text(option.content)),
+              Expanded(
+                child: Text(
+                  option.content,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: selected
+                        ? AppColors.brandPrimary
+                        : AppColors.textPrimary,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -429,23 +579,38 @@ class _TimerPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isUrgent = remaining.inMinutes < 5;
     final minutes = remaining.inMinutes.toString().padLeft(2, '0');
     final seconds = remaining.inSeconds
         .remainder(60)
         .toString()
         .padLeft(2, '0');
+    final bgColor =
+        isUrgent ? AppColors.errorBackground : AppColors.brandTint;
+    final borderColor =
+        isUrgent ? AppColors.errorBorder : AppColors.borderSubtlePink;
+    final textColor = isUrgent ? AppColors.error : AppColors.brandPrimary;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.brandTint,
+        color: bgColor,
         borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: Border.all(color: borderColor),
       ),
-      child: Text(
-        '$minutes:$seconds',
-        style: AppTypography.badgeText.copyWith(
-          color: AppColors.brandPrimary,
-          fontWeight: FontWeight.w700,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.timer_outlined, size: 14, color: textColor),
+          const SizedBox(width: 4),
+          Text(
+            '$minutes:$seconds',
+            style: AppTypography.badgeText.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }
