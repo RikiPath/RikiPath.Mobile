@@ -7039,6 +7039,24 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Lưu các từ khó vào sổ từ và ôn lại sau 1, 3, và 7 ngày để chuyển hóa vào trí nhớ dài hạn.'**
   String get notebookEduBannerMessage;
+
+  /// No description provided for @vocabularyEduBannerTag.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mẹo từ vựng'**
+  String get vocabularyEduBannerTag;
+
+  /// No description provided for @vocabularyEduBannerTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học từ theo ngữ cảnh & Collocation'**
+  String get vocabularyEduBannerTitle;
+
+  /// No description provided for @vocabularyEduBannerMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi nhớ từ vựng kết hợp trợ từ và động từ đi kèm để hình thành phản xạ tự nhiên khi giao tiếp.'**
+  String get vocabularyEduBannerMessage;
 }
 
 class _AppLocalizationsDelegate

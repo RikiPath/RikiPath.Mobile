@@ -1533,5 +1533,8 @@
   "grammarEduBannerMessage": "文法規則を暗記するだけでなく、実際の会話を想定した例文を作って自然に覚えましょう。",
   "notebookEduBannerTag": "SRS学習法",
   "notebookEduBannerTitle": "間隔反復で記憶を定着",
-  "notebookEduBannerMessage": "苦手な単語や文型を単語帳に保存し、1日後・3日後・7日後に復習して長期記憶に変えましょう。"
+  "notebookEduBannerMessage": "苦手な単語や文型を単語帳に保存し、1日後・3日後・7日後に復習して長期記憶に変えましょう。",
+  "vocabularyEduBannerTag": "語彙のコツ",
+  "vocabularyEduBannerTitle": "コロケーションで覚える",
+  "vocabularyEduBannerMessage": "単語を1つずつ覚えるのではなく、助詞や動詞とセットで覚えることで、自然な表現力が身につきます。"
 }

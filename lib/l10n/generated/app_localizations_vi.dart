@@ -4000,4 +4000,14 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get notebookEduBannerMessage =>
       'Lưu các từ khó vào sổ từ và ôn lại sau 1, 3, và 7 ngày để chuyển hóa vào trí nhớ dài hạn.';
+
+  @override
+  String get vocabularyEduBannerTag => 'Mẹo từ vựng';
+
+  @override
+  String get vocabularyEduBannerTitle => 'Học từ theo ngữ cảnh & Collocation';
+
+  @override
+  String get vocabularyEduBannerMessage =>
+      'Ghi nhớ từ vựng kết hợp trợ từ và động từ đi kèm để hình thành phản xạ tự nhiên khi giao tiếp.';
 }

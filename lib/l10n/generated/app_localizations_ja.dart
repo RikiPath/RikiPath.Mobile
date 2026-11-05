@@ -3795,4 +3795,14 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get notebookEduBannerMessage =>
       '苦手な単語や文型を単語帳に保存し、1日後・3日後・7日後に復習して長期記憶に変えましょう。';
+
+  @override
+  String get vocabularyEduBannerTag => '語彙のコツ';
+
+  @override
+  String get vocabularyEduBannerTitle => 'コロケーションで覚える';
+
+  @override
+  String get vocabularyEduBannerMessage =>
+      '単語を1つずつ覚えるのではなく、助詞や動詞とセットで覚えることで、自然な表現力が身につきます。';
 }

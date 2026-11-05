@@ -266,14 +266,39 @@ class _ReviewSummary extends ConsumerWidget {
       children: [
         const SizedBox(height: AppSpacing.space5),
         RikiCard(
+          backgroundColor: AppColors.cardWarmWhite,
           borderColor: AppColors.successBorder,
+          boxShadow: AppShadows.sakuraSubtle,
           child: Column(
             children: [
-              const CircleAvatar(
-                radius: 30,
-                backgroundColor: AppColors.successBackground,
-                foregroundColor: AppColors.success,
-                child: Icon(Icons.check_rounded, size: 34),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircleAvatar(
+                    radius: 26,
+                    backgroundColor: AppColors.successBackground,
+                    foregroundColor: AppColors.success,
+                    child: Icon(Icons.check_rounded, size: 30),
+                  ),
+                  const SizedBox(width: AppSpacing.space3),
+                  Container(
+                    width: 52,
+                    height: 52,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.sakuraHeroGradient,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.borderSubtlePink,
+                        width: 1.2,
+                      ),
+                    ),
+                    child: const SakuraMascot(
+                      pose: SakuraMascotPose.celebrating,
+                      size: 40,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.space3),
               Text(

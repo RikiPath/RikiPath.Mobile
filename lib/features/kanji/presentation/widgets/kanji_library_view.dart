@@ -72,7 +72,15 @@ class KanjiLibraryView extends StatelessWidget {
           keyPrefix: 'kanji_filter',
           includeJlptPrefix: false,
         ),
-        const SizedBox(height: AppSpacing.space4),
+        const SizedBox(height: AppSpacing.space3),
+        SakuraEducationalBanner(
+          tag: context.l10n.kanaEduBannerTag,
+          title: context.l10n.kanaEduBannerTitle,
+          message: context.l10n.kanaEduBannerMessage,
+          mascotPose: SakuraMascotPose.studying,
+          compact: true,
+        ),
+        const SizedBox(height: AppSpacing.space3),
         Row(
           children: [
             Expanded(
