@@ -116,7 +116,11 @@ class _LearnerMentorOrderConfirmationSheetState
       final creditBalance = ref
           .read(learnerCreditBalanceControllerProvider)
           .value;
-      final planJlptLevel = widget.plan?.jlptLevel;
+      final planJlptLevel = widget.plan?.jlptLevel ??
+          creditBalance?.activeGrants
+              .where((g) => g.availableQuantity > 0 && g.jlptLevel != null)
+              .firstOrNull
+              ?.jlptLevel;
       final hasCredit = (creditBalance?.availableBalance ?? 0) > 0;
       final isExistingSubscription =
           (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
@@ -150,7 +154,7 @@ class _LearnerMentorOrderConfirmationSheetState
           }
         }
         // Đặt lịch trực tiếp bằng lượt học đã thanh toán hoặc vé khả dụng
-        final opKey = 'booking_';
+        final opKey = 'booking_${DateTime.now().millisecondsSinceEpoch}';
         final booking = await ref
             .read(learnerMentorMutationControllerProvider.notifier)
             .bookWithCredit(

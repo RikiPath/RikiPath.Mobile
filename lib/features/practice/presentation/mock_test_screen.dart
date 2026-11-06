@@ -40,8 +40,27 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
         _timer = null;
         return;
       }
+      final now = ref.read(mockTestNowProvider)();
+      if (state != null &&
+          state.remainingAt(now) <= Duration.zero &&
+          !state.isSubmitting) {
+        _autoSubmitOnExpiry();
+        return;
+      }
       setState(() {});
     });
+  }
+
+  Future<void> _autoSubmitOnExpiry() async {
+    _timer?.cancel();
+    _timer = null;
+    final outcome = await ref
+        .read(mockTestControllerProvider.notifier)
+        .submit();
+    if (!mounted) return;
+    if (outcome != MockTestSubmitOutcome.failed) {
+      context.pushReplacement(AppRoutes.mockTestResult(widget.testId));
+    }
   }
 
   @override
@@ -114,9 +133,16 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
             }
 
             _ensureTimer();
+            final now = ref.read(mockTestNowProvider)();
+            final remaining = state.remainingAt(now);
+            if (remaining <= Duration.zero && !state.isSubmitting) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _autoSubmitOnExpiry();
+              });
+            }
             return _MockQuestionView(
               state: state,
-              remaining: state.remainingAt(ref.read(mockTestNowProvider)()),
+              remaining: remaining,
               onSubmit: _confirmSubmit,
             );
           },
