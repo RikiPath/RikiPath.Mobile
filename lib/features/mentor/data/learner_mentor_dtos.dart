@@ -720,12 +720,19 @@ class CancelMentorBookingRequestDto {
 class RescheduleMentorBookingRequestDto {
   const RescheduleMentorBookingRequestDto({
     required this.newMentorAvailabilityId,
+    this.reason,
+    this.idempotencyKey,
   });
 
   final int newMentorAvailabilityId;
+  final String? reason;
+  final String? idempotencyKey;
 
   Map<String, Object?> toJson() => <String, Object?>{
+    'newSlotId': newMentorAvailabilityId,
     'newMentorAvailabilityId': newMentorAvailabilityId,
+    if (reason != null) 'reason': reason,
+    if (idempotencyKey != null) 'idempotencyKey': idempotencyKey,
   };
 }
 

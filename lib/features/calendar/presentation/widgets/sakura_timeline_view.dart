@@ -367,19 +367,38 @@ class _DayTimelineColumn extends StatelessWidget {
     final cardWidth = (totalWidth - 4) / pe.totalColumns;
     final left = pe.columnIndex * cardWidth + 2;
 
+    // Smart abbreviation for dense / narrow columns (e.g. 7-day Week View in portrait)
+    final isNarrow = cardWidth < 65;
+    final String displayTitle;
+    if (isNarrow) {
+      if (ev.participantName != null && ev.participantName!.isNotEmpty) {
+        displayTitle = 'TV: ${ev.participantName}';
+      } else if (ev.type == SakuraCalendarEventType.consultation) {
+        displayTitle = 'TV JLPT';
+      } else {
+        displayTitle = ev.title;
+      }
+    } else {
+      displayTitle = ev.title;
+    }
+
+    final timeStr = '${ev.startTime.hour.toString().padLeft(2, '0')}:${ev.startTime.minute.toString().padLeft(2, '0')} - ${ev.endTime.hour.toString().padLeft(2, '0')}:${ev.endTime.minute.toString().padLeft(2, '0')}';
+    final minCardHeight = height > 32 ? height : 32.0;
+
     return Positioned(
       top: top,
       left: left,
       width: cardWidth - 2,
-      height: height > 24 ? height : 24,
+      height: minCardHeight,
       child: Material(
         color: ev.backgroundColor,
         borderRadius: BorderRadius.circular(6),
         child: InkWell(
+          key: Key('calendar_event_card_${ev.id}'),
           onTap: () => onSelectEvent(ev),
           borderRadius: BorderRadius.circular(6),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: ev.borderColor),
@@ -388,7 +407,7 @@ class _DayTimelineColumn extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 3,
+                  width: 3.5,
                   height: double.infinity,
                   decoration: BoxDecoration(
                     color: ev.primaryColor,
@@ -403,24 +422,24 @@ class _DayTimelineColumn extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          ev.title,
+                          displayTitle,
                           maxLines: height > 45 ? 2 : 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: isNarrow ? 9.5 : 10.5,
                             fontWeight: FontWeight.w700,
                             color: ev.primaryColor,
                           ),
                         ),
                         if (height > 35) ...[
                           Text(
-                            ': (p)',
+                            timeStr,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 8.5,
+                              fontSize: isNarrow ? 8.0 : 8.5,
                               color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],

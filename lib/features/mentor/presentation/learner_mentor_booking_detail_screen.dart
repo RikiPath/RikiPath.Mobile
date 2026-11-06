@@ -12,6 +12,7 @@ import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.da
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_reschedule_sheet.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 
@@ -46,6 +47,8 @@ class LearnerMentorBookingDetailScreen extends ConsumerWidget {
                 .where((booking) => booking.id == bookingId)
                 .firstOrNull,
             onJoin: (booking) => _joinMeeting(ref, context, booking),
+            onReschedule: (booking) =>
+                LearnerMentorRescheduleSheet.show(context, booking: booking),
             onCancel: (booking) =>
                 _showCancellationDialog(context, ref, booking),
             onReview: (booking) => _showReviewDialog(context, ref, booking),
@@ -477,6 +480,7 @@ class _DetailBody extends StatelessWidget {
   const _DetailBody({
     required this.booking,
     required this.onJoin,
+    this.onReschedule,
     required this.onCancel,
     required this.onReview,
     required this.onDispute,
@@ -484,6 +488,7 @@ class _DetailBody extends StatelessWidget {
 
   final LearnerMentorBooking? booking;
   final Future<void> Function(LearnerMentorBooking booking) onJoin;
+  final void Function(LearnerMentorBooking booking)? onReschedule;
   final void Function(LearnerMentorBooking booking) onCancel;
   final void Function(LearnerMentorBooking booking) onReview;
   final void Function(LearnerMentorBooking booking) onDispute;
@@ -616,19 +621,39 @@ class _DetailBody extends StatelessWidget {
             onPressed: () => onJoin(value),
           ),
 
-        // 5. Nút hủy lịch hẹn cho Learner khi buổi học chưa diễn ra
+        // 5. Nút Dời lịch hẹn & Hủy lịch hẹn cho Learner khi buổi học chưa diễn ra
         if (isAssigned || isAccepted) ...[
           const SizedBox(height: AppSpacing.space3),
-          OutlinedButton.icon(
-            key: const Key('learner_mentor_cancel_booking_button'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.error,
-              side: const BorderSide(color: AppColors.error),
-              minimumSize: const Size(double.infinity, 44),
-            ),
-            icon: const Icon(Icons.cancel_outlined, size: 18),
-            label: const Text('Hủy lịch hẹn tư vấn'),
-            onPressed: () => onCancel(value),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: const Key('learner_mentor_reschedule_button'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.brandPrimary,
+                    side: const BorderSide(color: AppColors.brandPrimary),
+                    minimumSize: const Size(0, 44),
+                  ),
+                  icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                  label: const Text('Dời lịch hẹn'),
+                  onPressed: () => onReschedule?.call(value),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.space2),
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: const Key('learner_mentor_cancel_booking_button'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
+                    minimumSize: const Size(0, 44),
+                  ),
+                  icon: const Icon(Icons.cancel_outlined, size: 18),
+                  label: const Text('Hủy lịch hẹn'),
+                  onPressed: () => onCancel(value),
+                ),
+              ),
+            ],
           ),
         ],
 

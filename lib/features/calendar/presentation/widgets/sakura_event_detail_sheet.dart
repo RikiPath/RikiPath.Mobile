@@ -10,8 +10,19 @@ import 'package:rikipath_mobile/features/calendar/application/mentor_calendar_co
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_reschedule_sheet.dart';
 
 class SakuraEventDetailSheet extends ConsumerWidget {
+
+  Future<void> _showRescheduleSheet(BuildContext context, WidgetRef ref) async {
+    final bookings = await ref.read(learnerMentorBookingsControllerProvider.future);
+    final booking = bookings.where((b) => b.id == event.bookingId).firstOrNull;
+    if (booking == null) return;
+    if (context.mounted) {
+      Navigator.of(context).pop();
+      await LearnerMentorRescheduleSheet.show(context, booking: booking);
+    }
+  }
 
   Future<void> _showCancelDialog(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
@@ -399,28 +410,51 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                 ),
               ],
 
-              // Booking Cancellation Action (Policy-compliant with confirmation)
+              // Booking Reschedule & Cancellation Actions (Policy-compliant with confirmation)
               if (event.bookingId != null &&
                   event.type == SakuraCalendarEventType.consultation &&
                   event.status != MentorMeetingStatus.cancelled &&
                   event.status != MentorMeetingStatus.completed) ...[
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showCancelDialog(context, ref),
-                    icon: const Icon(Icons.event_busy, size: 18, color: AppColors.error),
-                    label: const Text('Hủy buổi tư vấn này'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      side: const BorderSide(color: Color(0xFFFECACA)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.space3,
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        key: const Key('sakura_event_reschedule_button'),
+                        onPressed: () => _showRescheduleSheet(context, ref),
+                        icon: const Icon(Icons.edit_calendar_outlined, size: 18, color: AppColors.primary),
+                        label: const Text('Dời lịch hẹn'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.space3,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: AppSpacing.space2),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        key: const Key('sakura_event_cancel_button'),
+                        onPressed: () => _showCancelDialog(context, ref),
+                        icon: const Icon(Icons.event_busy, size: 18, color: AppColors.error),
+                        label: const Text('Hủy buổi tư vấn này'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.error,
+                          side: const BorderSide(color: Color(0xFFFECACA)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.space3,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: AppSpacing.space3),
               ],
