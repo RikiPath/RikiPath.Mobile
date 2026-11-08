@@ -452,7 +452,7 @@ void main() {
   });
 
   group('AccountSettingsScreen', () {
-    testWidgets('does not expose backend-blocked account mutations', (
+    testWidgets('exposes change password and omits duplicate logout', (
       tester,
     ) async {
       await _pump(
@@ -468,6 +468,10 @@ void main() {
       );
       expect(
         find.byKey(const ValueKey<String>('account_change_password_action')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('account_logout_button')),
         findsNothing,
       );
     });
@@ -484,13 +488,16 @@ void main() {
       );
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.byKey(const ValueKey<String>('account_logout_button')),
+        find.byKey(
+          const ValueKey<String>('account_notification_settings_action'),
+        ),
         240,
         scrollable: find.byType(Scrollable).first,
       );
 
+      expect(find.text('セキュリティ'), findsOneWidget);
       expect(find.text('設定'), findsOneWidget);
-      expect(find.text('セッション'), findsOneWidget);
+      expect(find.text('セッション'), findsNothing);
       expect(tester.takeException(), isNull);
     });
   });

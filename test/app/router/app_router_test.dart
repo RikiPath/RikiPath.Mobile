@@ -301,28 +301,32 @@ void main() {
     expect(find.byType(ChangePasswordScreen), findsOneWidget);
   });
 
-  testWidgets('account logout clears the session and returns to Login', (
+  testWidgets('profile logout clears the session and returns to Login', (
     tester,
   ) async {
     final session = createTestAuthSession(userId: 42);
     final router = await _pumpRouter(
       tester,
-      initialLocation: AppRoutes.profileAccount,
+      initialLocation: AppRoutes.profile,
       authSession: session,
     );
     await tester.pumpAndSettle();
 
-    final logout = find.byKey(const Key('account_logout_button'));
+    final logout = find.byKey(const ValueKey<String>('profile_logout_action'));
     await tester.scrollUntilVisible(
       logout,
       260,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(logout);
+    await tester.pumpAndSettle();
     await tester.tap(logout);
     await tester.pumpAndSettle();
 
     expect(session.value, AuthSessionState.authenticated);
-    await tester.tap(find.byKey(const Key('account_logout_confirm_button')));
+    await tester.tap(
+      find.byKey(const ValueKey<String>('profile_logout_confirm_button')),
+    );
     await tester.pumpAndSettle();
 
     expect(session.value, AuthSessionState.unauthenticated);

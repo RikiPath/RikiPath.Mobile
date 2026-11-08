@@ -5,29 +5,12 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
-import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
 
 class AccountSettingsScreen extends ConsumerWidget {
   const AccountSettingsScreen({super.key});
-
-  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
-    final l10n = context.l10n;
-    final confirmed = await showProfileConfirmationSheet(
-      context: context,
-      icon: Icons.logout_rounded,
-      title: l10n.logoutConfirmationTitle,
-      message: l10n.logoutConfirmationMessage,
-      confirmLabel: l10n.logout,
-      cancelLabel: l10n.cancel,
-      confirmKey: const ValueKey<String>('account_logout_confirm_button'),
-      destructive: true,
-    );
-    if (!confirmed) return;
-    await ref.read(authSessionControllerProvider).signOut();
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,7 +22,7 @@ class AccountSettingsScreen extends ConsumerWidget {
       body: profileValue.when(
         loading: () => const ProfileDetailSkeleton(
           key: ValueKey<String>('account_settings_loading_view'),
-          groupCount: 3,
+          groupCount: 2,
           rowsPerGroup: 2,
         ),
         error: (error, _) => Center(
@@ -85,6 +68,21 @@ class AccountSettingsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space6),
               ProfileSettingsGroup(
+                label: l10n.accountSecuritySection,
+                children: [
+                  ProfileSettingsTile(
+                    key: const ValueKey<String>(
+                      'account_change_password_action',
+                    ),
+                    icon: Icons.lock_outline_rounded,
+                    title: l10n.changePassword,
+                    subtitle: l10n.changePasswordSubtitle,
+                    onTap: () => context.push(AppRoutes.profileChangePassword),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.space6),
+              ProfileSettingsGroup(
                 label: l10n.accountOptionsSection,
                 children: [
                   ProfileSettingsTile(
@@ -95,20 +93,6 @@ class AccountSettingsScreen extends ConsumerWidget {
                     title: l10n.notificationSettingsTitle,
                     subtitle: l10n.notificationSettingsSubtitle,
                     onTap: () => context.push(AppRoutes.profileNotifications),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.space6),
-              ProfileSettingsGroup(
-                label: l10n.accountSessionSection,
-                children: [
-                  ProfileSettingsTile(
-                    key: const ValueKey<String>('account_logout_button'),
-                    icon: Icons.logout_rounded,
-                    title: l10n.logout,
-                    subtitle: l10n.logoutConfirmationMessage,
-                    destructive: true,
-                    onTap: () => _confirmLogout(context, ref),
                   ),
                 ],
               ),
