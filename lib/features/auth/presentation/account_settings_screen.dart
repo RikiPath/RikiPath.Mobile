@@ -59,13 +59,7 @@ class AccountSettingsScreen extends ConsumerWidget {
                 title: l10n.accountSecurity,
                 description: l10n.accountSecuritySubtitle,
               ),
-              const SizedBox(height: AppSpacing.space5),
-              ProfileSecurityCard(
-                email: state.profile.email,
-                verified: state.profile.isEmailVerified,
-                verifiedTitle: l10n.accountVerifiedTitle,
-                unverifiedTitle: l10n.accountUnverifiedTitle,
-              ),
+
               const SizedBox(height: AppSpacing.space6),
               ProfileSettingsGroup(
                 label: l10n.accountSecuritySection,
