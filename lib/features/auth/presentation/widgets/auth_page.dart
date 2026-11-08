@@ -170,12 +170,14 @@ class AuthNavigationPrompt extends StatelessWidget {
     required this.message,
     required this.actionLabel,
     required this.onPressed,
+    this.actionKey,
     super.key,
   });
 
   final String message;
   final String actionLabel;
   final VoidCallback? onPressed;
+  final Key? actionKey;
 
   @override
   Widget build(BuildContext context) {
@@ -194,6 +196,7 @@ class AuthNavigationPrompt extends StatelessWidget {
           ),
         ),
         TextButton(
+          key: actionKey,
           onPressed: onPressed,
           style: TextButton.styleFrom(
             minimumSize: const Size(44, 44),

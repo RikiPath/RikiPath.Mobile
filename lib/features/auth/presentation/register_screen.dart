@@ -296,30 +296,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               padding: const EdgeInsets.only(top: AppSpacing.space8),
               child: Column(
                 children: [
-                  if (widget.mentorRegistration)
-                    TextButton(
-                      key: const Key('mentor_registration_login_prompt'),
-                      onPressed: state.isLoading
-                          ? null
-                          : () async {
+                  AuthNavigationPrompt(
+                    actionKey: widget.mentorRegistration
+                        ? const Key('mentor_registration_login_prompt')
+                        : null,
+                    message: l10n.alreadyHaveAccount,
+                    actionLabel: l10n.login,
+                    onPressed: state.isLoading
+                        ? null
+                        : () async {
+                            if (widget.mentorRegistration) {
                               await ref
                                   .read(mentorRegistrationIntentProvider)
                                   .mark();
-                              if (context.mounted) context.go(AppRoutes.login);
-                            },
-                      child: Text(
-                        l10n.mentorRegistrationLoginPrompt,
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  else
-                    AuthNavigationPrompt(
-                      message: l10n.alreadyHaveAccount,
-                      actionLabel: l10n.login,
-                      onPressed: state.isLoading
-                          ? null
-                          : () => context.go(AppRoutes.login),
-                    ),
+                            }
+                            if (context.mounted) context.go(AppRoutes.login);
+                          },
+                  ),
                   const AuthSecurityFooter(),
                 ],
               ),
