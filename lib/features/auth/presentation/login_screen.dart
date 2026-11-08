@@ -197,19 +197,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             padding: const EdgeInsets.only(top: AppSpacing.space4),
             child: Column(
               children: [
-                AuthNavigationPrompt(
-                  message: l10n.noAccount,
-                  actionLabel: l10n.register,
-                  onPressed: state.isLoading
-                      ? null
-                      : () async {
-                          await ref
-                              .read(mentorRegistrationIntentProvider)
-                              .clear();
-                          if (context.mounted) context.push(AppRoutes.register);
-                        },
-                ),
-                const SizedBox(height: AppSpacing.space3),
                 SizedBox(
                   width: double.infinity,
                   height: 54,
@@ -223,6 +210,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     isLoading: _openingMentorRegistration,
                     onPressed: state.isLoading ? null : _openMentorRegistration,
                   ),
+                ),
+                const SizedBox(height: AppSpacing.space3),
+                AuthNavigationPrompt(
+                  message: l10n.noAccount,
+                  actionLabel: l10n.register,
+                  onPressed: state.isLoading
+                      ? null
+                      : () async {
+                          await ref
+                              .read(mentorRegistrationIntentProvider)
+                              .clear();
+                          if (context.mounted) context.push(AppRoutes.register);
+                        },
                 ),
                 const SizedBox(height: AppSpacing.space2),
                 const AuthSecurityFooter(),

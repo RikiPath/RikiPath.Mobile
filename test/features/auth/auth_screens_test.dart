@@ -111,7 +111,11 @@ void main() {
       );
       expect(submitButton.height, 54);
       expect(
-        registerPrompt.top - submitButton.bottom,
+        mentorRegisterAction.top - submitButton.bottom,
+        lessThanOrEqualTo(AppSpacing.space8),
+      );
+      expect(
+        registerPrompt.top - mentorRegisterAction.bottom,
         lessThanOrEqualTo(AppSpacing.space8),
       );
       expect(
@@ -120,7 +124,7 @@ void main() {
               math.max(registerPrompt.bottom, registerAction.bottom),
               mentorRegisterAction.bottom,
             ),
-        lessThanOrEqualTo(AppSpacing.space4),
+        lessThanOrEqualTo(AppSpacing.space6),
       );
       expect(
         rememberText.top - forgotPasswordText.bottom,

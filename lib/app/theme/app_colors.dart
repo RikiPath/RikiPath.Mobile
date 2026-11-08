@@ -10,9 +10,9 @@ abstract final class AppColors {
   static const Color textTertiary = textMuted;
 
   static const Color brandPrimaryPressed = Color(0xFFC24362);
-  // Web brand primary (#A62E4F) and its deeper gradient endpoint (#9E2A4B).
-  static const Color mentorAction = Color(0xFFA62E4F);
-  static const Color mentorActionPressed = Color(0xFF9E2A4B);
+  // Softened mentor action tone (Color(0xFFBD385E)) with original as pressed state.
+  static const Color mentorAction = Color(0xFFBD385E);
+  static const Color mentorActionPressed = Color(0xFFA62E4F);
   static const Color brandPrimaryDisabled = Color(0xFFEAE0E2);
   static const Color brandSecondary = Color(0xFFF8BBD0);
   static const Color brandSecondaryPressed = Color(0xFFF8DBE2);
