@@ -331,6 +331,7 @@ class ProfileActionTile extends StatefulWidget {
     required this.subtitle,
     required this.onTap,
     this.emphasized = false,
+    this.destructive = false,
     super.key,
   });
 
@@ -339,6 +340,7 @@ class ProfileActionTile extends StatefulWidget {
   final String subtitle;
   final VoidCallback? onTap;
   final bool emphasized;
+  final bool destructive;
 
   @override
   State<ProfileActionTile> createState() => _ProfileActionTileState();
@@ -354,9 +356,16 @@ class _ProfileActionTileState extends State<ProfileActionTile> {
     final reduceMotion =
         (mediaQuery?.disableAnimations ?? false) ||
         (mediaQuery?.accessibleNavigation ?? false);
-    final accent = widget.emphasized
-        ? AppColors.brandPrimary
-        : AppColors.textSecondary;
+    final foreground = widget.destructive
+        ? AppColors.errorText
+        : widget.emphasized
+            ? AppColors.brandPrimary
+            : AppColors.textSecondary;
+    final background = widget.destructive
+        ? AppColors.errorBackground
+        : widget.emphasized
+            ? AppColors.brandTint
+            : AppColors.profileBackground;
     return Semantics(
       button: true,
       enabled: enabled,
@@ -386,19 +395,24 @@ class _ProfileActionTileState extends State<ProfileActionTile> {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: widget.emphasized
-                          ? AppColors.brandTint
-                          : AppColors.profileBackground,
+                      color: background,
                       borderRadius: BorderRadius.circular(AppRadius.input),
                     ),
-                    child: Icon(widget.icon, size: 21, color: accent),
+                    child: Icon(widget.icon, size: 21, color: foreground),
                   ),
                   const SizedBox(width: AppSpacing.space3),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.title, style: AppTypography.cardTitle),
+                        Text(
+                          widget.title,
+                          style: AppTypography.cardTitle.copyWith(
+                            color: widget.destructive
+                                ? AppColors.errorText
+                                : AppColors.textPrimary,
+                          ),
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           widget.subtitle,

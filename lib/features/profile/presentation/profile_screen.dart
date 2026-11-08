@@ -8,11 +8,13 @@ import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_components.dart';
+import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -52,17 +54,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 }
 
-class _ProfileSuccessView extends StatefulWidget {
+class _ProfileSuccessView extends ConsumerStatefulWidget {
   const _ProfileSuccessView({required this.profile});
 
   final UserProfile profile;
 
   @override
-  State<_ProfileSuccessView> createState() => _ProfileSuccessViewState();
+  ConsumerState<_ProfileSuccessView> createState() => _ProfileSuccessViewState();
 }
 
-class _ProfileSuccessViewState extends State<_ProfileSuccessView>
+class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
     with SingleTickerProviderStateMixin {
+  Future<void> _confirmLogout(BuildContext context) async {
+    final l10n = context.l10n;
+    final confirmed = await showProfileConfirmationSheet(
+      context: context,
+      icon: Icons.logout_rounded,
+      title: l10n.logoutConfirmationTitle,
+      message: l10n.logoutConfirmationMessage,
+      confirmLabel: l10n.logout,
+      cancelLabel: l10n.cancel,
+      confirmKey: const ValueKey<String>('profile_logout_confirm_button'),
+      destructive: true,
+    );
+    if (!confirmed) return;
+    await ref.read(authSessionControllerProvider).signOut();
+  }
   late final AnimationController _entranceController = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 680),
@@ -206,6 +223,24 @@ class _ProfileSuccessViewState extends State<_ProfileSuccessView>
           begin: 0.42,
           end: 0.9,
           child: ProfileSection(
+            title: l10n.profileServicesSection,
+            children: [
+              ProfileActionTile(
+                key: const ValueKey<String>('profile_consultation_action'),
+                icon: Icons.support_agent_outlined,
+                title: l10n.consultation,
+                subtitle: l10n.profileConsultationSubtitle,
+                emphasized: true,
+                onTap: () => context.push(AppRoutes.learnerMentorMeetings),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.space6),
+        _entrance(
+          begin: 0.5,
+          end: 1,
+          child: ProfileSection(
             title: l10n.account,
             children: [
               ProfileActionTile(
@@ -229,23 +264,13 @@ class _ProfileSuccessViewState extends State<_ProfileSuccessView>
                 subtitle: l10n.profileSettingsSubtitle,
                 onTap: () => context.push(AppRoutes.profileAccount),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.space6),
-        _entrance(
-          begin: 0.5,
-          end: 1,
-          child: ProfileSection(
-            title: l10n.profileServicesSection,
-            children: [
               ProfileActionTile(
-                key: const ValueKey<String>('profile_consultation_action'),
-                icon: Icons.support_agent_outlined,
-                title: l10n.consultation,
-                subtitle: l10n.profileConsultationSubtitle,
-                emphasized: true,
-                onTap: () => context.push(AppRoutes.learnerMentorMeetings),
+                key: const ValueKey<String>('profile_logout_action'),
+                icon: Icons.logout_rounded,
+                title: l10n.logout,
+                subtitle: l10n.logoutConfirmationMessage,
+                destructive: true,
+                onTap: () => _confirmLogout(context),
               ),
             ],
           ),

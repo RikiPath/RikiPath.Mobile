@@ -11,6 +11,8 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
+import 'package:rikipath_mobile/core/storage/token_storage.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/account_settings_screen.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
@@ -154,9 +156,11 @@ void main() {
         'profile_jlpt_goal_action',
         'profile_placement_test_action',
         'profile_progress_action',
+        'profile_consultation_action',
+        'profile_mentor_application_action',
         'profile_edit_action',
         'profile_settings_action',
-        'profile_consultation_action',
+        'profile_logout_action',
       ]) {
         await tester.scrollUntilVisible(
           find.byKey(ValueKey<String>(key)),
@@ -253,15 +257,18 @@ void main() {
     testWidgets('edit action keeps the existing Profile route', (tester) async {
       await _pumpProfileRouter(tester, repository: _ProfileRepository());
       await tester.pumpAndSettle();
+      final editAction = find.byKey(
+        const ValueKey<String>('profile_edit_action'),
+      );
       await tester.scrollUntilVisible(
-        find.byKey(const ValueKey<String>('profile_edit_action')),
+        editAction,
         220,
         scrollable: find.byType(Scrollable).first,
       );
+      await tester.ensureVisible(editAction);
+      await tester.pumpAndSettle();
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('profile_edit_action')),
-      );
+      await tester.tap(editAction);
       await tester.pumpAndSettle();
 
       expect(find.text('profile-edit-route'), findsOneWidget);
@@ -278,6 +285,46 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('placement-test-route'), findsOneWidget);
+    });
+
+    testWidgets('logout action shows confirmation sheet and executes sign out', (
+      tester,
+    ) async {
+      var signedOut = false;
+      final authSessionController = _TestAuthSessionController(
+        onSignOut: () => signedOut = true,
+      );
+      await _pump(
+        tester,
+        const ProfileScreen(),
+        repository: _ProfileRepository(),
+        authSessionController: authSessionController,
+      );
+      await tester.pumpAndSettle();
+
+      final logoutAction = find.byKey(
+        const ValueKey<String>('profile_logout_action'),
+      );
+      await tester.scrollUntilVisible(
+        logoutAction,
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(logoutAction);
+      await tester.pumpAndSettle();
+      await tester.tap(logoutAction);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey<String>('profile_logout_confirm_button')),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('profile_logout_confirm_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(signedOut, isTrue);
     });
   });
 
@@ -666,6 +713,7 @@ Future<void> _pump(
   Widget screen, {
   required UserProfileRepository repository,
   ProfileAvatarPicker? picker,
+  AuthSessionController? authSessionController,
   Locale locale = const Locale('vi'),
   Size size = const Size(390, 844),
 }) async {
@@ -683,6 +731,8 @@ Future<void> _pump(
         ),
         if (picker != null)
           profileAvatarPickerProvider.overrideWithValue(picker),
+        if (authSessionController != null)
+          authSessionControllerProvider.overrideWithValue(authSessionController),
       ],
       child: MaterialApp(
         theme: AppTheme.light,
@@ -895,5 +945,33 @@ class _ProfileRepository implements UserProfileRepository {
       emailNotifications: emailNotificationsEnabled,
       systemNotifications: systemNotificationsEnabled,
     );
+  }
+}
+
+
+class _FakeSecureKeyValueStore implements SecureKeyValueStore {
+  final Map<String, String?> _store = {};
+
+  @override
+  Future<void> delete({required String key}) async => _store.remove(key);
+
+  @override
+  Future<String?> read({required String key}) async => _store[key];
+
+  @override
+  Future<void> write({required String key, required String? value}) async =>
+      _store[key] = value;
+}
+
+class _TestAuthSessionController extends AuthSessionController {
+  _TestAuthSessionController({this.onSignOut})
+      : super(TokenStorage(_FakeSecureKeyValueStore()));
+
+  final VoidCallback? onSignOut;
+
+  @override
+  Future<void> signOut({Future<void> Function()? onBeforeClear}) async {
+    onSignOut?.call();
+    await super.signOut(onBeforeClear: onBeforeClear);
   }
 }
