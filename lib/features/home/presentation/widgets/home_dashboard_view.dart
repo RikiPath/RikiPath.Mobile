@@ -945,28 +945,12 @@ class _PracticeSections extends StatelessWidget {
       ),
     ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth < 360) {
-          return Column(
-            children: [
-              cards.first,
-              const SizedBox(height: AppSpacing.space3),
-              cards.last,
-            ],
-          );
-        }
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: cards.first),
-              const SizedBox(width: AppSpacing.space3),
-              Expanded(child: cards.last),
-            ],
-          ),
-        );
-      },
+    return Column(
+      children: [
+        cards.first,
+        const SizedBox(height: AppSpacing.space3),
+        cards.last,
+      ],
     );
   }
 }
@@ -1100,25 +1084,103 @@ class _ActionCard extends StatelessWidget {
       backgroundColor: AppColors.cardWarmWhite,
       borderColor: AppColors.cardBorderSubtle,
       boxShadow: AppShadows.sakuraCard,
-      borderRadius: AppRadius.cardSmooth,
+      borderRadius: AppRadius.cardLarge,
       onTap: onPressed,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _IconTile(icon: icon, tone: tone),
-          const SizedBox(height: AppSpacing.space3),
-          Text(title, style: AppTypography.cardTitle),
-          const SizedBox(height: AppSpacing.space1),
-          Text(description, style: AppTypography.bodySmall),
-          const SizedBox(height: AppSpacing.space3),
-          TextButton.icon(
-            onPressed: onPressed,
-            style: TextButton.styleFrom(foregroundColor: tone.foreground),
-            iconAlignment: IconAlignment.end,
-            icon: const Icon(Icons.arrow_forward, size: 18),
-            label: Text(actionLabel),
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final iconWidget = _IconTile(icon: icon, tone: tone);
+
+          final textInfo = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: AppTypography.cardTitle.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  letterSpacing: -0.2,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 3),
+              Text(
+                description,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 12.5,
+                  height: 1.35,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          );
+
+          final actionPill = Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: tone.background,
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              border: Border.all(
+                color: tone.border.withValues(alpha: 0.6),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  actionLabel,
+                  style: TextStyle(
+                    color: tone.foreground,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 14,
+                  color: tone.foreground,
+                ),
+              ],
+            ),
+          );
+
+          if (constraints.maxWidth < 330) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    iconWidget,
+                    const SizedBox(width: AppSpacing.space3),
+                    Expanded(child: textInfo),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.space2),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: actionPill,
+                ),
+              ],
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              iconWidget,
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(child: textInfo),
+              const SizedBox(width: AppSpacing.space2),
+              actionPill,
+            ],
+          );
+        },
       ),
     );
   }
