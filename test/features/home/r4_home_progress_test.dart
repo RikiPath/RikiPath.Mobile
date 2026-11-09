@@ -29,6 +29,11 @@ import 'package:rikipath_mobile/features/learning/domain/learner_journey.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
+import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
+import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_day_tracker.dart';
+import 'package:rikipath_mobile/features/calendar/presentation/learner_calendar_screen.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/notifications/domain/app_notification.dart';
 import 'package:rikipath_mobile/features/notifications/domain/notification_repository.dart';
@@ -69,6 +74,7 @@ void main() {
         journey: _journeyWithFirstLessonCompleted(),
       );
       await _pumpFrames(tester);
+      await _scrollTo(tester, const ValueKey<String>('home_local_progress_card'));
       expect(
         find.byKey(const ValueKey<String>('home_local_progress_value')),
         findsOneWidget,
@@ -86,6 +92,7 @@ void main() {
         learningRepository: const _ZeroDurationLearningRepository(),
       );
       await _pumpFrames(tester);
+      await _scrollTo(tester, const ValueKey<String>('home_local_progress_card'));
 
       expect(find.textContaining('0 phút'), findsNothing);
       expect(
@@ -160,8 +167,10 @@ void main() {
         journey: const LearnerJourneyState(),
       );
       await _pumpFrames(tester);
+      const chooseKey = ValueKey<String>('home_choose_jlpt_card');
+      await _scrollTo(tester, chooseKey);
       expect(
-        find.byKey(const ValueKey<String>('home_choose_jlpt_card')),
+        find.byKey(chooseKey),
         findsOneWidget,
       );
       await tester.tap(find.text('Chọn mục tiêu'));
@@ -189,6 +198,7 @@ void main() {
       );
       await _pumpFrames(tester);
       const roadmapCardKey = ValueKey<String>('home_view_roadmap_card');
+      await _scrollTo(tester, roadmapCardKey);
       final roadmapCard = find.byKey(roadmapCardKey);
       expect(roadmapCard, findsOneWidget);
       final roadmapLabel = tester.element(roadmapCard).l10n.viewRoadmap;
@@ -289,7 +299,7 @@ void main() {
       harness.dispose();
     });
 
-    testWidgets('10. Partial Analytics success keeps available metrics', (
+    testWidgets('10. Roadmap completion is independent of Analytics section', (
       tester,
     ) async {
       final harness = await _pumpHome(
@@ -321,7 +331,7 @@ void main() {
       );
       expect(
         find.byKey(const ValueKey<String>('home_analytics_completion')),
-        findsNothing,
+        findsOneWidget,
       );
       harness.dispose();
     });
@@ -405,6 +415,187 @@ void main() {
       );
       expect(_homeSource(), isNot(contains('DateTime.now')));
       expect(_homeSource(), isNot(contains('.difference(')));
+      harness.dispose();
+    });
+
+    testWidgets(
+      'Home completion uses the selected roadmap, not global Analytics',
+      (tester) async {
+        final harness = await _pumpHome(
+          tester,
+          journey: _selectedJourney(),
+          roadmap: _roadmap(completed: 2, total: 8),
+        );
+        await _pumpFrames(tester);
+        const completionKey = ValueKey<String>('home_analytics_completion');
+        await _scrollTo(tester, completionKey);
+        final card = find.byKey(completionKey);
+        expect(
+          find.descendant(of: card, matching: find.text('2 / 8 bài')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: card, matching: find.text('25%')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: card,
+            matching: find.text('Còn 6 bài chưa hoàn thành'),
+          ),
+          findsNothing,
+        );
+        expect(
+          tester
+              .widget<LinearProgressIndicator>(
+                find.descendant(
+                  of: card,
+                  matching: find.byType(LinearProgressIndicator),
+                ),
+              )
+              .value,
+          closeTo(0.25, 0.001),
+        );
+        harness.dispose();
+      },
+    );
+
+    testWidgets('Home completion handles a zero-lesson roadmap', (
+      tester,
+    ) async {
+      final harness = await _pumpHome(
+        tester,
+        journey: _selectedJourney(),
+        roadmap: _roadmap(completed: 0, total: 0),
+      );
+      await _pumpFrames(tester);
+      const completionKey = ValueKey<String>('home_analytics_completion');
+      await _scrollTo(tester, completionKey);
+      final card = find.byKey(completionKey);
+      expect(
+        find.descendant(of: card, matching: find.text('0 / 0 bài')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: card, matching: find.text('0%')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      harness.dispose();
+    });
+
+    testWidgets('statistics cards have equal height when shown side by side', (
+      tester,
+    ) async {
+      final harness = await _pumpHome(
+        tester,
+        width: 800,
+        journey: _selectedJourney(),
+        roadmap: _roadmap(completed: 2, total: 8),
+      );
+      await _pumpFrames(tester);
+      await _scrollTo(tester, const ValueKey<String>('home_analytics_streak'));
+      final streak = tester.getRect(
+        find.byKey(const ValueKey<String>('home_analytics_streak')),
+      );
+      final completion = tester.getRect(
+        find.byKey(const ValueKey<String>('home_analytics_completion')),
+      );
+      expect(streak.top, closeTo(completion.top, 0.1));
+      expect(streak.height, closeTo(completion.height, 0.1));
+      expect(tester.takeException(), isNull);
+      harness.dispose();
+    });
+
+    for (final width in <double>[360, 393, 412]) {
+      testWidgets('statistics remain readable at ${width.toInt()}px', (
+        tester,
+      ) async {
+        final harness = await _pumpHome(
+          tester,
+          width: width,
+          journey: _selectedJourney(),
+          roadmap: _roadmap(completed: 2, total: 8),
+        );
+        await _pumpFrames(tester);
+        await _scrollTo(
+          tester,
+          const ValueKey<String>('home_analytics_streak'),
+        );
+        expect(
+          find.byKey(const ValueKey<String>('home_analytics_completion')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+        harness.dispose();
+      });
+    }
+
+    for (final scale in <double>[1.3, 2.0]) {
+      testWidgets('statistics adapt at ${scale}x text scale', (tester) async {
+        final harness = await _pumpHome(
+          tester,
+          textScale: scale,
+          journey: _selectedJourney(),
+          roadmap: _roadmap(completed: 2, total: 8),
+        );
+        await _pumpFrames(tester);
+        await _scrollTo(
+          tester,
+          const ValueKey<String>('home_analytics_streak'),
+        );
+        expect(
+          find.byKey(const ValueKey<String>('home_analytics_completion')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+        harness.dispose();
+      });
+    }
+
+    testWidgets('header and weekly date open the same calendar route', (
+      tester,
+    ) async {
+      final harness = await _pumpHome(
+        tester,
+        journey: _selectedJourney(),
+        roadmap: _roadmap(completed: 2, total: 8),
+      );
+      await _pumpFrames(tester);
+      await tester.tap(
+        find.byKey(const ValueKey<String>('home_calendar_button')),
+      );
+      await _pumpFrames(tester);
+      expect(find.byType(LearnerCalendarScreen), findsOneWidget);
+      expect(
+        tester
+            .widget<LearnerCalendarScreen>(find.byType(LearnerCalendarScreen))
+            .initialDate,
+        isNull,
+      );
+      await tester.binding.handlePopRoute();
+      await _pumpFrames(tester);
+
+      await _scrollTo(tester, const ValueKey<String>('home_analytics_streak'));
+      final firstDay = find
+          .descendant(
+            of: find.byType(SakuraDayTracker),
+            matching: find.byType(InkWell),
+          )
+          .first;
+      await tester.tap(firstDay);
+      await _pumpFrames(tester);
+      expect(find.byType(LearnerCalendarScreen), findsOneWidget);
+      final selected = tester
+          .widget<LearnerCalendarScreen>(find.byType(LearnerCalendarScreen))
+          .initialDate;
+      final today = DateTime.now();
+      final monday = DateTime(
+        today.year,
+        today.month,
+        today.day,
+      ).subtract(Duration(days: today.weekday - 1));
+      expect(selected, monday);
       harness.dispose();
     });
   });
@@ -496,8 +687,13 @@ void main() {
         sessions: _sessions(active: _activeAttempt()),
       );
       await _pumpFrames(tester);
-      await _scrollToText(tester, 'Bắt đầu luyện tập');
-      await tester.tap(find.text('Bắt đầu luyện tập'));
+      await _scrollTo(
+        tester,
+        const ValueKey<String>('home_start_practice_card'),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('home_start_practice_card')),
+      );
       await _pumpFrames(tester);
       expect(
         harness.router.routeInformationProvider.value.uri.path,
@@ -518,8 +714,13 @@ void main() {
     ) async {
       final harness = await _pumpHome(tester, journey: _selectedJourney());
       await _pumpFrames(tester);
-      await _scrollToText(tester, 'Ôn tập ngay');
-      await tester.tap(find.text('Ôn tập ngay'));
+      await _scrollTo(
+        tester,
+        const ValueKey<String>('home_daily_review_card'),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('home_daily_review_card')),
+      );
       await _pumpFrames(tester);
       expect(
         harness.router.routeInformationProvider.value.uri.path,
@@ -622,7 +823,7 @@ void main() {
           of: header,
           matching: find.byKey(const Key('language_switcher_button')),
         ),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         find.descendant(of: header, matching: find.byType(JlptBadge)),
@@ -856,6 +1057,19 @@ void main() {
   });
 }
 
+StandardRoadmap _roadmap({required int completed, required int total}) =>
+    StandardRoadmap(
+      currentStudyLevelId: 2,
+      currentStudyLevelName: 'N4',
+      targetJlptLevelId: 2,
+      targetJlptLevelName: 'N4',
+      learningMode: LearningMode.standard,
+      totalLessons: total,
+      completedLessons: completed,
+      nextLessonId: null,
+      lessons: const [],
+    );
+
 LearnerJourneyState _selectedJourney() => const LearnerJourneyState(
   selectedLevel: JlptLevel.n4,
   hasSelectedLevel: true,
@@ -977,6 +1191,9 @@ _ProviderHarness _providerHarness({required LearnerJourneyState journey}) {
 
 Future<_HomeHarness> _pumpHome(
   WidgetTester tester, {
+  double width = 390,
+  double textScale = 1,
+  StandardRoadmap? roadmap,
   LearnerJourneyState? journey,
   LearnerJourneyRepository? journeyRepository,
   LearningRepository? learningRepository,
@@ -989,10 +1206,12 @@ Future<_HomeHarness> _pumpHome(
   DemoNotebookRepository? notebookRepository,
   DateTime? now,
 }) async {
-  tester.view.physicalSize = const Size(390, 844);
+  tester.view.physicalSize = Size(width, 844);
   tester.view.devicePixelRatio = 1;
+  tester.platformDispatcher.textScaleFactorTestValue = textScale;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
+  addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
   final notificationRepository =
       notifications ?? _TestNotificationRepository(unreadCount: 0);
@@ -1011,6 +1230,8 @@ Future<_HomeHarness> _pumpHome(
         const FixtureLessonRepository(),
       ),
       analyticsRepositoryProvider.overrideWithValue(analytics),
+      if (roadmap != null)
+        standardRoadmapProvider.overrideWith((ref) async => roadmap),
       notificationRepositoryProvider.overrideWithValue(notificationRepository),
       practiceSessionRepositoryProvider.overrideWithValue(practiceRepository),
       dailyReviewRepositoryProvider.overrideWithValue(dailyReviewRepository),

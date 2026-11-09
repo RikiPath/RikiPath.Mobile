@@ -1267,6 +1267,8 @@ class _ReturningLearnerProfileRepository implements UserProfileRepository {
     avatarUrl: null,
     role: 'Learner',
     isEmailVerified: true,
+    currentStudyLevelId: 101,
+    currentStudyLevelName: 'N5',
     targetJlptLevelId: 101,
     targetJlptLevelName: 'N5',
     dailyStudyMinutes: 30,

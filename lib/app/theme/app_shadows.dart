@@ -45,6 +45,15 @@ abstract final class AppShadows {
     ),
   ];
 
+  /// Dynamic scroll-aware shadow for Sakura header (clean, neutral, no garish pink).
+  static const List<BoxShadow> learnerHeaderScrolled = <BoxShadow>[
+    BoxShadow(
+      color: Color(0x121A1317), // Neutral black/gray ~0.07 opacity
+      offset: Offset(0, 3),
+      blurRadius: 14,
+    ),
+  ];
+
   static const List<BoxShadow> learnerBottomNavigation = <BoxShadow>[
     BoxShadow(
       color: AppColors.neutralShadow,

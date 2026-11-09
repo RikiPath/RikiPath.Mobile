@@ -757,23 +757,15 @@ class _StepHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.space3),
-        Container(
+        SizedBox(
           width: 48,
           height: 48,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.brandPrimary,
-            borderRadius: BorderRadius.circular(AppRadius.input),
-            boxShadow: AppShadows.cardSoft,
-          ),
-          child: const Text(
-            '文',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              height: 1,
-              fontWeight: FontWeight.w700,
-            ),
+          child: Image.asset(
+            'assets/images/icons_3d/riki_brand_logo.webp',
+            width: 48,
+            height: 48,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
           ),
         ),
       ],

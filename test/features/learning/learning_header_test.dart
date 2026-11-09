@@ -26,7 +26,7 @@ void main() {
     expect(tester.getSize(find.byType(AppBar)).height, 64);
     expect(find.text('RikiPath'), findsOneWidget);
     expect(find.text('N4'), findsNothing);
-    expect(find.byKey(const Key('language_switcher_button')), findsOneWidget);
+    expect(find.byKey(const Key('language_switcher_button')), findsNothing);
     expect(tester.takeException(), isNull);
 
     const detailHeader = LearningHeader.detail(
@@ -51,7 +51,7 @@ void main() {
     );
 
     expect(find.text('N4'), findsNothing);
-    expect(find.byKey(const Key('language_switcher_button')), findsOneWidget);
+    expect(find.byKey(const Key('language_switcher_button')), findsNothing);
     expect(tester.takeException(), isNull);
     expect(find.text('NGỮ PHÁP'), findsOneWidget);
     expect(find.byTooltip('Quay lại'), findsOneWidget);

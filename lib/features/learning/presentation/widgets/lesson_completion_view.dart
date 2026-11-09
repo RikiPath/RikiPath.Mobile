@@ -105,9 +105,10 @@ class LessonCompletionView extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.local_fire_department,
-                      color: AppColors.skillGrammar,
+                    const Sakura3DIcon(
+                      type: Sakura3DIconType.streak,
+                      size: 24,
+                      fallbackColor: AppColors.skillGrammar,
                     ),
                     const SizedBox(width: AppSpacing.space2),
                     Expanded(

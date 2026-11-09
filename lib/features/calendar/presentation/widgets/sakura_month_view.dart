@@ -78,7 +78,8 @@ class _SakuraMonthViewState extends State<SakuraMonthView> {
           }
         }
       },
-      child: Column(
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: [
           // Weekday Header Row
           Container(
@@ -110,95 +111,89 @@ class _SakuraMonthViewState extends State<SakuraMonthView> {
           ),
 
           // 7-Column Grid
-          Expanded(
-            flex: 5,
-            child: GridView.builder(
-              padding: EdgeInsets.zero,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7,
-                childAspectRatio: days.length > 35 ? 0.95 : 1.15,
-              ),
-              itemCount: days.length,
-              itemBuilder: (context, index) {
-                final day = days[index];
-                final isCurrentMonth = day.month == widget.selectedDate.month;
-                final isToday = _isSameDay(day, today);
-                final isSelected = _isSameDay(day, widget.selectedDate);
-                final dayEvents = _eventsForDay(day);
+          LayoutBuilder(
+            builder: (context, constraints) => SizedBox(
+              height:
+                  (days.length ~/ 7) *
+                  (constraints.maxWidth / 7).clamp(46.0, 64.0),
+              child: GridView.builder(
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 7,
+                  mainAxisExtent: (constraints.maxWidth / 7).clamp(46.0, 64.0),
+                ),
+                itemCount: days.length,
+                itemBuilder: (context, index) {
+                  final day = days[index];
+                  final isCurrentMonth = day.month == widget.selectedDate.month;
+                  final isToday = _isSameDay(day, today);
+                  final isSelected = _isSameDay(day, widget.selectedDate);
+                  final dayEvents = _eventsForDay(day);
 
-                return _MonthDayCell(
-                  day: day,
-                  isCurrentMonth: isCurrentMonth,
-                  isToday: isToday,
-                  isSelected: isSelected,
-                  events: dayEvents,
-                  onTap: () => widget.onSelectDate(day),
-                );
-              },
+                  return _MonthDayCell(
+                    day: day,
+                    isCurrentMonth: isCurrentMonth,
+                    isToday: isToday,
+                    isSelected: isSelected,
+                    events: dayEvents,
+                    onTap: () => widget.onSelectDate(day),
+                  );
+                },
+              ),
             ),
           ),
 
           // Selected Day Event Preview Section
-          Expanded(
-            flex: 3,
-            child: Container(
-              padding: const EdgeInsets.all(AppSpacing.space3),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                border: Border(
-                  top: BorderSide(color: AppColors.border),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.space3),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              border: Border(top: BorderSide(color: AppColors.border)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.space2),
+                    Text(
+                      '${widget.selectedDate.day} tháng ${widget.selectedDate.month} — ${selectedDayEvents.length} sự kiện',
+                      style: AppTypography.cardTitle.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
+                const SizedBox(height: AppSpacing.space2),
+                if (selectedDayEvents.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      'Chưa có sự kiện nào được lên lịch trong ngày này.',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
                       ),
-                      const SizedBox(width: AppSpacing.space2),
-                      Text(
-                        '${widget.selectedDate.day} tháng ${widget.selectedDate.month} — ${selectedDayEvents.length} sự kiện',
-                        style: AppTypography.cardTitle.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.space2),
-                  Expanded(
-                    child: selectedDayEvents.isEmpty
-                        ? Center(
-                            child: Text(
-                              'Không có lịch hẹn trong ngày này.',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          )
-                        : ListView.separated(
-                            itemCount: selectedDayEvents.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(height: AppSpacing.space2),
-                            itemBuilder: (context, idx) {
-                              final event = selectedDayEvents[idx];
-                              return _MonthDayPreviewCard(
-                                event: event,
-                                onTap: () => widget.onSelectEvent(event),
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              ),
+                    ),
+                  )
+                else
+                  for (final event in selectedDayEvents) ...[
+                    const SizedBox(height: AppSpacing.space2),
+                    _MonthDayPreviewCard(
+                      event: event,
+                      onTap: () => widget.onSelectEvent(event),
+                    ),
+                  ],
+              ],
             ),
           ),
         ],
@@ -229,10 +224,10 @@ class _MonthDayCell extends StatelessWidget {
     final textColor = !isCurrentMonth
         ? AppColors.textTertiary
         : isToday
-            ? Colors.white
-            : isSelected
-                ? AppColors.primary
-                : AppColors.textPrimary;
+        ? Colors.white
+        : isSelected
+        ? AppColors.primary
+        : AppColors.textPrimary;
 
     return InkWell(
       onTap: onTap,
@@ -280,7 +275,10 @@ class _MonthDayCell extends StatelessWidget {
                 for (final ev in events.take(1))
                   Container(
                     margin: const EdgeInsets.only(bottom: 1.5),
-                    padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 0.5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 2,
+                      vertical: 0.5,
+                    ),
                     decoration: BoxDecoration(
                       color: ev.primaryColor.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(3),
@@ -315,10 +313,7 @@ class _MonthDayCell extends StatelessWidget {
 }
 
 class _MonthDayPreviewCard extends StatelessWidget {
-  const _MonthDayPreviewCard({
-    required this.event,
-    required this.onTap,
-  });
+  const _MonthDayPreviewCard({required this.event, required this.onTap});
 
   final SakuraCalendarEvent event;
   final VoidCallback onTap;

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
 import 'package:rikipath_mobile/core/widgets/riki_card.dart';
 
 /// RikiPath's default Japanese-inspired loading mark.
@@ -84,22 +85,16 @@ class _RikiAnimatedStudyLoaderState extends State<RikiAnimatedStudyLoader>
                   ],
                 );
               },
-              child: Container(
-                width: widget.size * 0.39,
-                height: widget.size * 0.46,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(color: AppColors.brandBorder),
-                  borderRadius: BorderRadius.circular(AppRadius.compact),
-                  boxShadow: AppShadows.cardSoft,
-                ),
-                child: Text(
-                  '文',
-                  style: AppTypography.compactPageTitle.copyWith(
-                    color: AppColors.brandPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
+              child: SizedBox(
+                key: const ValueKey<String>('riki_study_loader_logo'),
+                width: widget.size * 0.56,
+                height: widget.size * 0.56,
+                child: Image.asset(
+                  rikiBrandLogoAsset,
+                  width: widget.size * 0.56,
+                  height: widget.size * 0.56,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
                 ),
               ),
             ),

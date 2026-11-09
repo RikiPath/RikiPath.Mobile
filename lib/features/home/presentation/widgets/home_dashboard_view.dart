@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart
 import 'package:rikipath_mobile/features/home/domain/home_dashboard.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
+import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
 import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_home_section.dart';
 import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
@@ -18,6 +19,7 @@ class HomeDashboardView extends StatelessWidget {
     required this.journeyState,
     required this.learningState,
     required this.analyticsState,
+    this.roadmapState,
     required this.practiceState,
     required this.dailyReviewState,
     required this.upcomingMeetingState,
@@ -32,6 +34,7 @@ class HomeDashboardView extends StatelessWidget {
     required this.onOpenPractice,
     required this.onOpenReview,
     required this.onOpenAnalytics,
+    this.onOpenCalendarDate,
     required this.onOpenMeeting,
     required this.onOpenMeetingDetail,
     required this.onJoinMeeting,
@@ -45,6 +48,7 @@ class HomeDashboardView extends StatelessWidget {
   final AsyncValue<LearnerJourneyState> journeyState;
   final AsyncValue<LearningSnapshot> learningState;
   final AsyncValue<LearnerAnalytics> analyticsState;
+  final AsyncValue<StandardRoadmap>? roadmapState;
   final AsyncValue<DemoPracticeState> practiceState;
   final AsyncValue<DailyReviewState> dailyReviewState;
   final AsyncValue<UpcomingMeeting?> upcomingMeetingState;
@@ -59,6 +63,7 @@ class HomeDashboardView extends StatelessWidget {
   final VoidCallback onOpenPractice;
   final VoidCallback onOpenReview;
   final VoidCallback onOpenAnalytics;
+  final ValueChanged<DateTime>? onOpenCalendarDate;
   final VoidCallback onOpenMeeting;
   final ValueChanged<int> onOpenMeetingDetail;
   final ValueChanged<Uri> onJoinMeeting;
@@ -68,6 +73,13 @@ class HomeDashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentLevel = learningState.value?.hasSelectedLevel == true
+        ? learningState.value?.jlptTarget
+        : (journeyState.value?.hasSelectedLevel == true
+              ? journeyState.value?.selectedLevel
+              : dashboardState.value?.jlptTarget);
+    final targetLevelName = roadmapState?.value?.targetJlptLevelName;
+
     return RefreshIndicator(
       onRefresh: onRefreshLive,
       color: AppColors.brandPrimary,
@@ -76,98 +88,122 @@ class HomeDashboardView extends StatelessWidget {
         key: const ValueKey<String>('home_success_view'),
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
-          AppSpacing.space4,
+          0,
           AppSpacing.space3,
-          AppSpacing.space4,
+          0,
           AppSpacing.space8,
         ),
         children: [
           // 1. Welcoming personalized learner header
-          _GreetingSection(state: dashboardState, onRetry: onRetryHome),
-          const SizedBox(height: AppSpacing.space4),
-
-          // 2. Primary Continue Learning action (dominant study action)
-          _ContinueLearningSection(
-            journeyState: journeyState,
-            learningState: learningState,
-            onOpenLearning: onOpenLearning,
-            onRetry: onRetryLearning,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: _GreetingSection(
+              state: dashboardState,
+              currentLevel: currentLevel,
+              targetLevelName: targetLevelName,
+              onRetry: onRetryHome,
+            ),
           ),
-          const SizedBox(height: AppSpacing.space4),
+          const SizedBox(height: AppSpacing.space3),
 
-          // 3. Compact real learning-progress display
-          _LocalProgressSection(
-            journeyState: journeyState,
-            learningState: learningState,
-            onOpenRoadmap: onOpenRoadmap,
-            onRetry: onRetryLearning,
-          ),
-          const SizedBox(height: AppSpacing.space4),
-
-          // 4. Learning Analytics & streak/skill breakdown
-          _AnalyticsSection(
-            state: analyticsState,
-            onOpen: onOpenAnalytics,
-            onRetry: onRetryAnalytics,
-          ),
-          const SizedBox(height: AppSpacing.space5),
-
-          // 5. Quick feature category shortcuts (Học tập, Từ vựng, Ngữ pháp, Luyện nghe)
-          _QuickActionCategories(
-            onOpenRoadmap: onOpenRoadmap,
-            onOpenVocabulary: onOpenVocabulary ?? onOpenLearning,
-            onOpenGrammar: onOpenGrammar ?? onOpenLearning,
-            onOpenPractice: onOpenPractice,
-          ),
-          const SizedBox(height: AppSpacing.space4),
-
-          // 6. Daily encouragement Sakura banner
-          SakuraMotivationBanner(
-            title: context.l10n.homeDailyMotivation,
-            subtitle: context.l10n.homeDailyMotivationSubtitle,
+          // 2. Full-bleed Real-Time Sakura Hero Banner (touches left & right edges)
+          SakuraHeroBanner(
+            key: const ValueKey<String>('home_hero_banner'),
             onTap: onOpenLearning,
           ),
           const SizedBox(height: AppSpacing.space4),
 
-          // 7. Educational Guidance Banner
-          SakuraEducationalBanner(
-            tag: context.l10n.homeEduBannerTag,
-            title: context.l10n.homeEduBannerTitle,
-            message: context.l10n.homeEduBannerMessage,
-            mascotPose: SakuraMascotPose.guiding,
-            onTap: onOpenRoadmap,
-          ),
-          const SizedBox(height: AppSpacing.space5),
-
-          // 7. Study Categories (Bảng chữ cái, Ngữ pháp)
-          _StudyCategoriesSection(
-            onOpenWriting: onOpenWriting ?? onOpenPractice,
-            onOpenGrammar: onOpenGrammar ?? onOpenLearning,
-            onOpenRoadmap: onOpenRoadmap,
-          ),
-          const SizedBox(height: AppSpacing.space5),
-
-          // 8. Practice & Daily Review
-          _PracticeSections(
-            state: practiceState,
-            dailyReviewState: dailyReviewState,
-            onOpenReview: onOpenReview,
-            onOpenPractice: onOpenPractice,
-            onRetry: onRetryPractice,
+          // 3. Learning Analytics & streak/completion (2 equal-height cards)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: _AnalyticsSection(
+              state: analyticsState,
+              roadmapState: roadmapState,
+              onOpen: onOpenAnalytics,
+              onOpenRoadmap: onOpenRoadmap,
+              onOpenCalendarDate: onOpenCalendarDate,
+              onRetry: onRetryAnalytics,
+            ),
           ),
           const SizedBox(height: AppSpacing.space4),
 
-          // 9. Meeting section
-          MeetingHomeSection(
-            state: upcomingMeetingState,
-            onOpenMeeting: onOpenMeeting,
-            onOpenDetail: onOpenMeetingDetail,
-            onJoin: onJoinMeeting,
+          // 4. Quick feature category shortcuts (Học tập, Từ vựng, Ngữ pháp, Luyện nghe)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: _QuickActionCategories(
+              onOpenRoadmap: onOpenRoadmap,
+              onOpenVocabulary: onOpenVocabulary ?? onOpenLearning,
+              onOpenGrammar: onOpenGrammar ?? onOpenLearning,
+              onOpenPractice: onOpenPractice,
+            ),
           ),
           const SizedBox(height: AppSpacing.space4),
 
-          // 10. Notebook shortcut
-          _NotebookShortcut(onPressed: onOpenNotebook),
+          // 5. Primary Continue Learning action (dominant study action)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: _ContinueLearningSection(
+              journeyState: journeyState,
+              learningState: learningState,
+              onOpenLearning: onOpenLearning,
+              onRetry: onRetryLearning,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space4),
+
+          // 5b. Compact real learning-progress display
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: _LocalProgressSection(
+              journeyState: journeyState,
+              learningState: learningState,
+              onOpenRoadmap: onOpenRoadmap,
+              onRetry: onRetryLearning,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space4),
+
+          // 6. Study Categories (Bảng chữ cái, Ngữ pháp)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: _StudyCategoriesSection(
+              onOpenWriting: onOpenWriting ?? onOpenPractice,
+              onOpenGrammar: onOpenGrammar ?? onOpenLearning,
+              onOpenRoadmap: onOpenRoadmap,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space4),
+
+          // 7. Practice & Daily Review
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: _PracticeSections(
+              state: practiceState,
+              dailyReviewState: dailyReviewState,
+              onOpenReview: onOpenReview,
+              onOpenPractice: onOpenPractice,
+              onRetry: onRetryPractice,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space3),
+
+          // 8. Meeting section
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: MeetingHomeSection(
+              state: upcomingMeetingState,
+              onOpenMeeting: onOpenMeeting,
+              onOpenDetail: onOpenMeetingDetail,
+              onJoin: onJoinMeeting,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space3),
+
+          // 9. Notebook shortcut
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: _NotebookShortcut(onPressed: onOpenNotebook),
+          ),
         ],
       ),
     );
@@ -178,10 +214,17 @@ class HomeDashboardView extends StatelessWidget {
 // 1. Welcoming Greeting
 // -----------------------------------------------------------------------------
 class _GreetingSection extends StatelessWidget {
-  const _GreetingSection({required this.state, required this.onRetry});
+  const _GreetingSection({
+    required this.state,
+    required this.onRetry,
+    this.currentLevel,
+    this.targetLevelName,
+  });
 
   final AsyncValue<HomeDashboard> state;
   final VoidCallback onRetry;
+  final JlptLevel? currentLevel;
+  final String? targetLevelName;
 
   @override
   Widget build(BuildContext context) {
@@ -196,53 +239,75 @@ class _GreetingSection extends StatelessWidget {
       ),
       error: (_, _) =>
           _CompactError(title: context.l10n.homeLoadFailed, onRetry: onRetry),
-      data: (dashboard) => Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              gradient: AppColors.sakuraHeroGradient,
-              borderRadius: BorderRadius.circular(AppRadius.cardSmooth),
-              border: Border.all(color: AppColors.borderSubtlePink, width: 1.5),
-            ),
-            child: const SakuraBlossomMark(size: 24),
-          ),
-          const SizedBox(width: AppSpacing.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  dashboard.learnerName.trim().isNotEmpty
-                      ? context.l10n.greetingName(dashboard.learnerName)
-                      : context.l10n.greetingGeneric,
-                  key: const ValueKey<String>('home_greeting'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.compactPageTitle.copyWith(
-                    color: AppColors.learnerTextPrimary,
-                    fontSize: 20,
-                    letterSpacing: -0.3,
-                  ),
+      data: (dashboard) {
+        final target = targetLevelName?.trim();
+        final current = currentLevel ?? dashboard.jlptTarget;
+        final String subtitle;
+        if (current != null &&
+            target != null &&
+            target.isNotEmpty &&
+            target != current.label) {
+          subtitle = context.l10n.homeGreetingCurrentAndTargetLevel(
+            current.label,
+            target,
+          );
+        } else if (current != null) {
+          subtitle = context.l10n.homeGreetingLearningLevel(current.label);
+        } else {
+          subtitle = context.l10n.homeGreetingNoLevel;
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                gradient: AppColors.sakuraHeroGradient,
+                borderRadius: BorderRadius.circular(AppRadius.cardSmooth),
+                border: Border.all(
+                  color: AppColors.borderSubtlePink,
+                  width: 1.5,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  context.l10n.practiceJourneySubtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.learnerTextSecondary,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+              ),
+              child: const SakuraBlossomMark(size: 24),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(width: AppSpacing.space3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    dashboard.learnerName.trim().isNotEmpty
+                        ? context.l10n.greetingName(dashboard.learnerName)
+                        : context.l10n.greetingGeneric,
+                    key: const ValueKey<String>('home_greeting'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.compactPageTitle.copyWith(
+                      color: AppColors.learnerTextPrimary,
+                      fontSize: 20,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.learnerTextSecondary,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -280,6 +345,7 @@ class _ContinueLearningSection extends StatelessWidget {
       return _FeatureCard(
         key: const ValueKey<String>('home_choose_jlpt_card'),
         icon: Icons.flag_outlined,
+        icon3d: Sakura3DIconType.achievement,
         title: context.l10n.homeChooseJlptTitle,
         description: context.l10n.homeChooseJlptDescription,
         actionLabel: context.l10n.homeChooseJlptAction,
@@ -293,6 +359,7 @@ class _ContinueLearningSection extends StatelessWidget {
       return _FeatureCard(
         key: const ValueKey<String>('home_view_roadmap_card'),
         icon: Icons.route_outlined,
+        icon3d: Sakura3DIconType.roadmap,
         title: context.l10n.homeRoadmapProgressTitle,
         description: context.l10n.homeRoadmapProgressDescription,
         actionLabel: context.l10n.viewRoadmap,
@@ -302,6 +369,7 @@ class _ContinueLearningSection extends StatelessWidget {
     }
 
     final lesson = snapshot.currentLesson;
+    final lessonDisplayTitle = _formatLessonTitle(lesson);
 
     return RikiCard(
       key: const ValueKey<String>('home_continue_learning_card'),
@@ -309,58 +377,42 @@ class _ContinueLearningSection extends StatelessWidget {
       borderColor: AppColors.cardBorderSubtle,
       boxShadow: AppShadows.sakuraCard,
       borderRadius: AppRadius.cardLarge,
-      padding: const EdgeInsets.all(AppSpacing.space5),
+      padding: const EdgeInsets.all(AppSpacing.space4),
       onTap: onOpenLearning,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.pastelOrangeBg,
-                  borderRadius: BorderRadius.circular(AppRadius.input),
-                  border: Border.all(
-                    color: AppColors.pastelOrangeBorder,
-                    width: 1,
-                  ),
+              Sakura3DIcon(
+                type: SakuraIconMapper.iconForLesson(
+                  title: lessonDisplayTitle,
+                  topic: lesson.category,
+                  contentType: lesson.category,
                 ),
-                child: const Icon(
-                  Icons.play_arrow_rounded,
-                  color: AppColors.pastelOrangeFg,
-                  size: 24,
-                ),
+                size: 46,
+                fallbackColor: AppColors.pastelOrangeFg,
               ),
               const SizedBox(width: AppSpacing.space3),
               Expanded(
                 child: Text(
-                  context.l10n.homeContinueLearningTitle,
-                  style: AppTypography.sectionTitle,
+                  lessonDisplayTitle,
+                  key: const ValueKey<String>('home_current_lesson_title'),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.cardTitle.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
                 ),
               ),
+              const SizedBox(width: AppSpacing.space2),
               _LevelPill(label: snapshot.jlptTarget.label),
             ],
           ),
-          const SizedBox(height: AppSpacing.space4),
-          Text(
-            lesson.title,
-            key: const ValueKey<String>('home_current_lesson_title'),
-            style: AppTypography.cardTitle.copyWith(fontSize: 18),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            lesson.durationMinutes > 0
-                ? context.l10n.homeCurrentLessonMeta(
-                    lesson.lessonNumber,
-                    lesson.durationMinutes,
-                  )
-                : context.l10n.homeCurrentLessonLabel(lesson.lessonNumber),
-            style: AppTypography.bodySmall,
-          ),
-          const SizedBox(height: AppSpacing.space4),
+          const SizedBox(height: AppSpacing.space3),
           Row(
             children: [
               Expanded(
@@ -379,7 +431,7 @@ class _ContinueLearningSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.space4),
+          const SizedBox(height: AppSpacing.space3),
           RikiPrimaryButton(
             key: const ValueKey<String>('home_continue_learning_button'),
             label: context.l10n.continueStudy,
@@ -389,6 +441,30 @@ class _ContinueLearningSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  static String _formatLessonTitle(CurrentLessonSummary lesson) {
+    final trimmed = lesson.title.trim();
+    if (trimmed.isEmpty) {
+      return lesson.lessonNumber > 0 ? 'Bài ${lesson.lessonNumber}' : '';
+    }
+    final hasLessonPrefix =
+        RegExp(
+          r'^(?:bài\s*(?:học\s*)?|lesson\s*|第\s*)\d+',
+          caseSensitive: false,
+        ).hasMatch(trimmed) ||
+        RegExp(
+          r'^(?:bài\s*(?:học\s*)?|lesson\s*)[:\-\s]',
+          caseSensitive: false,
+        ).hasMatch(trimmed);
+
+    if (hasLessonPrefix) {
+      return trimmed;
+    }
+    if (lesson.lessonNumber > 0) {
+      return 'Bài ${lesson.lessonNumber}: $trimmed';
+    }
+    return trimmed;
   }
 }
 
@@ -532,6 +608,7 @@ class _QuickActionCategories extends StatelessWidget {
           child: SakuraCategoryShortcut(
             label: context.l10n.homeQuickStudy,
             icon: Icons.school_outlined,
+            icon3d: Sakura3DIconType.roadmap,
             backgroundColor: AppColors.pastelGreenBg,
             foregroundColor: AppColors.pastelGreenFg,
             borderColor: AppColors.pastelGreenBorder,
@@ -542,6 +619,7 @@ class _QuickActionCategories extends StatelessWidget {
           child: SakuraCategoryShortcut(
             label: context.l10n.homeQuickVocabulary,
             icon: Icons.auto_stories_outlined,
+            icon3d: Sakura3DIconType.vocabulary,
             backgroundColor: AppColors.pastelBlueBg,
             foregroundColor: AppColors.pastelBlueFg,
             borderColor: AppColors.pastelBlueBorder,
@@ -552,6 +630,7 @@ class _QuickActionCategories extends StatelessWidget {
           child: SakuraCategoryShortcut(
             label: context.l10n.homeQuickGrammar,
             icon: Icons.format_list_bulleted_outlined,
+            icon3d: Sakura3DIconType.grammar,
             backgroundColor: AppColors.pastelOrangeBg,
             foregroundColor: AppColors.pastelOrangeFg,
             borderColor: AppColors.pastelOrangeBorder,
@@ -562,6 +641,7 @@ class _QuickActionCategories extends StatelessWidget {
           child: SakuraCategoryShortcut(
             label: context.l10n.homeQuickListening,
             icon: Icons.headphones_outlined,
+            icon3d: Sakura3DIconType.speech,
             backgroundColor: AppColors.pastelPurpleBg,
             foregroundColor: AppColors.pastelPurpleFg,
             borderColor: AppColors.pastelPurpleBorder,
@@ -627,6 +707,7 @@ class _StudyCategoriesSection extends StatelessWidget {
             Expanded(
               child: _CategoryShowcaseCard(
                 glyph: 'あ',
+                icon3d: Sakura3DIconType.kana,
                 title: context.l10n.homeAlphabetShortcutTitle,
                 subtitle: context.l10n.homeAlphabetShortcutSubtitle,
                 glyphColor: AppColors.pastelBlueFg,
@@ -638,6 +719,7 @@ class _StudyCategoriesSection extends StatelessWidget {
             Expanded(
               child: _CategoryShowcaseCard(
                 icon: Icons.temple_buddhist_outlined,
+                icon3d: Sakura3DIconType.grammar,
                 title: context.l10n.homeGrammarShortcutTitle,
                 subtitle: context.l10n.homeGrammarShortcutSubtitle,
                 glyphColor: AppColors.brandPrimary,
@@ -661,6 +743,7 @@ class _CategoryShowcaseCard extends StatelessWidget {
     required this.onTap,
     this.glyph,
     this.icon,
+    this.icon3d,
   });
 
   final String title;
@@ -670,39 +753,43 @@ class _CategoryShowcaseCard extends StatelessWidget {
   final VoidCallback onTap;
   final String? glyph;
   final IconData? icon;
+  final Sakura3DIconType? icon3d;
 
   @override
   Widget build(BuildContext context) {
     return RikiCard(
       padding: const EdgeInsets.all(AppSpacing.space4),
       backgroundColor: AppColors.cardWarmWhite,
-      borderColor: AppColors.cardBorderSubtle,
+      borderColor: null,
       boxShadow: AppShadows.sakuraCard,
       borderRadius: AppRadius.cardSmooth,
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 42,
-            height: 42,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: glyphBgColor,
-              borderRadius: BorderRadius.circular(AppRadius.input),
+          if (icon3d != null)
+            Sakura3DIcon(type: icon3d!, size: 46, fallbackColor: glyphColor)
+          else
+            Container(
+              width: 46,
+              height: 46,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: glyphBgColor,
+                borderRadius: BorderRadius.circular(AppRadius.input),
+              ),
+              child: glyph != null
+                  ? Text(
+                      glyph!,
+                      style: TextStyle(
+                        color: glyphColor,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        height: 1,
+                      ),
+                    )
+                  : Icon(icon, color: glyphColor, size: 22),
             ),
-            child: glyph != null
-                ? Text(
-                    glyph!,
-                    style: TextStyle(
-                      color: glyphColor,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      height: 1,
-                    ),
-                  )
-                : Icon(icon, color: glyphColor, size: 22),
-          ),
           const SizedBox(height: AppSpacing.space3),
           Text(
             title,
@@ -729,12 +816,18 @@ class _CategoryShowcaseCard extends StatelessWidget {
 class _AnalyticsSection extends StatelessWidget {
   const _AnalyticsSection({
     required this.state,
+    required this.roadmapState,
     required this.onOpen,
+    required this.onOpenRoadmap,
+    required this.onOpenCalendarDate,
     required this.onRetry,
   });
 
   final AsyncValue<LearnerAnalytics> state;
+  final AsyncValue<StandardRoadmap>? roadmapState;
   final VoidCallback onOpen;
+  final VoidCallback onOpenRoadmap;
+  final ValueChanged<DateTime>? onOpenCalendarDate;
   final VoidCallback onRetry;
 
   @override
@@ -757,75 +850,106 @@ class _AnalyticsSection extends StatelessWidget {
             onRetry: onRetry,
           )
         else
-          _AnalyticsSummary(data: state.requireValue),
+          _AnalyticsSummary(
+            data: state.requireValue,
+            roadmapState: roadmapState,
+            onOpenRoadmap: onOpenRoadmap,
+            onOpenCalendarDate: onOpenCalendarDate,
+          ),
       ],
     );
   }
 }
 
 class _AnalyticsSummary extends StatelessWidget {
-  const _AnalyticsSummary({required this.data});
+  const _AnalyticsSummary({
+    required this.data,
+    required this.roadmapState,
+    required this.onOpenRoadmap,
+    required this.onOpenCalendarDate,
+  });
 
   final LearnerAnalytics data;
+  final AsyncValue<StandardRoadmap>? roadmapState;
+  final VoidCallback onOpenRoadmap;
+  final ValueChanged<DateTime>? onOpenCalendarDate;
 
   @override
   Widget build(BuildContext context) {
-    final tiles = <Widget>[
-      if (data.isAvailable(AnalyticsSection.streak))
-        _StreakMetricTile(
-          key: const ValueKey<String>('home_analytics_streak'),
-          streakDays: data.streakDays,
-        ),
-      if (data.isAvailable(AnalyticsSection.completion))
-        _MetricTile(
-          key: const ValueKey<String>('home_analytics_completion'),
-          icon: Icons.task_alt_outlined,
-          tone: AppFeatureTones.success,
-          label: context.l10n.completedLessonsLabel,
-          value: context.l10n.analyticsCompletedLessons(
-            data.completedLessons,
-            data.totalLessons,
-          ),
-        ),
-      if (data.isAvailable(AnalyticsSection.skills) && data.skills.isNotEmpty)
-        _MetricTile(
-          key: const ValueKey<String>('home_analytics_skill'),
-          icon: Icons.auto_graph_outlined,
-          tone: AppFeatureTones.learning,
-          label: context.l10n.skillBreakdown,
-          value: data.skills.first.skill,
-        ),
-    ];
-
-    if (tiles.isEmpty) {
-      return RikiCard(
-        boxShadow: const <BoxShadow>[],
-        child: Text(context.l10n.analyticsEmpty),
-      );
-    }
-
+    final roadmap = roadmapState?.value;
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 350 || tiles.length == 1) {
-          return Column(
-            children: [
-              for (var index = 0; index < tiles.length; index++) ...[
-                tiles[index],
-                if (index < tiles.length - 1)
-                  const SizedBox(height: AppSpacing.space2),
-              ],
-            ],
+        final largeText = MediaQuery.textScalerOf(context).scale(14) >= 22;
+        final hasBothTiles =
+            data.isAvailable(AnalyticsSection.streak) && roadmapState != null;
+        final stacked =
+            constraints.maxWidth < 320 || largeText || !hasBothTiles;
+
+        final tiles = <Widget>[
+          if (data.isAvailable(AnalyticsSection.streak))
+            _StreakMetricTile(
+              key: const ValueKey<String>('home_analytics_streak'),
+              streakDays: data.streakDays,
+              compact: !stacked,
+              onDateSelected: onOpenCalendarDate,
+            ),
+          if (roadmapState != null)
+            _CompletionMetricTile(
+              key: const ValueKey<String>('home_analytics_completion'),
+              completed: roadmap?.completedLessons,
+              total: roadmap?.totalLessons,
+              isLoading: roadmapState!.isLoading,
+              isError: roadmapState!.hasError,
+              onTap: onOpenRoadmap,
+            ),
+        ];
+
+        final skillTile =
+            data.isAvailable(AnalyticsSection.skills) && data.skills.isNotEmpty
+            ? _MetricTile(
+                key: const ValueKey<String>('home_analytics_skill'),
+                icon: Icons.auto_graph_outlined,
+                icon3d: Sakura3DIconType.kanji,
+                tone: AppFeatureTones.learning,
+                label: context.l10n.skillBreakdown,
+                value: data.skills.first.skill,
+              )
+            : null;
+
+        if (tiles.isEmpty && skillTile == null) {
+          return RikiCard(
+            boxShadow: const <BoxShadow>[],
+            child: Text(context.l10n.analyticsEmpty),
           );
         }
-        return Wrap(
-          spacing: AppSpacing.space2,
-          runSpacing: AppSpacing.space2,
+
+        final primary = stacked
+            ? Column(
+                children: [
+                  for (var index = 0; index < tiles.length; index++) ...[
+                    tiles[index],
+                    if (index < tiles.length - 1)
+                      const SizedBox(height: AppSpacing.space2),
+                  ],
+                ],
+              )
+            : IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: tiles[0]),
+                    const SizedBox(width: AppSpacing.space2),
+                    Expanded(child: tiles[1]),
+                  ],
+                ),
+              );
+        if (skillTile == null) return primary;
+        if (tiles.isEmpty) return skillTile;
+        return Column(
           children: [
-            for (final tile in tiles)
-              SizedBox(
-                width: (constraints.maxWidth - AppSpacing.space2) / 2,
-                child: tile,
-              ),
+            primary,
+            const SizedBox(height: AppSpacing.space2),
+            skillTile,
           ],
         );
       },
@@ -834,25 +958,37 @@ class _AnalyticsSummary extends StatelessWidget {
 }
 
 class _StreakMetricTile extends StatelessWidget {
-  const _StreakMetricTile({required this.streakDays, super.key});
+  const _StreakMetricTile({
+    required this.streakDays,
+    required this.onDateSelected,
+    this.compact = false,
+    super.key,
+  });
 
   final int streakDays;
+  final ValueChanged<DateTime>? onDateSelected;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return RikiCard(
-      padding: const EdgeInsets.all(AppSpacing.space3),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space3,
+        vertical: 10,
+      ),
       backgroundColor: AppColors.cardWarmWhite,
       borderColor: AppColors.cardBorderSubtle,
       boxShadow: AppShadows.sakuraSubtle,
       borderRadius: AppRadius.cardSmooth,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
-              _IconTile(
+              const _IconTile(
                 icon: Icons.local_fire_department_outlined,
+                icon3d: Sakura3DIconType.streak,
                 compact: true,
                 tone: AppFeatureTones.streak,
               ),
@@ -865,30 +1001,169 @@ class _StreakMetricTile extends StatelessWidget {
                       context.l10n.studyStreakLabel,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.metadata,
+                      style: AppTypography.metadata.copyWith(
+                        fontSize: 11.5,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
+                    const SizedBox(height: 1),
                     Text(
                       context.l10n.streakDaysValue(streakDays),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.cardTitle,
+                      style: AppTypography.cardTitle.copyWith(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.space2),
-          SakuraDayTracker(streakDays: streakDays),
+          const SizedBox(height: 10),
+          SakuraDayTracker(
+            compact: true,
+            onDateSelected: onDateSelected,
+          ),
         ],
       ),
     );
   }
 }
 
-// -----------------------------------------------------------------------------
-// 8. Practice & Daily Review
-// -----------------------------------------------------------------------------
+class _CompletionMetricTile extends StatelessWidget {
+  const _CompletionMetricTile({
+    required this.completed,
+    required this.total,
+    required this.isLoading,
+    required this.isError,
+    required this.onTap,
+    super.key,
+  });
+
+  final int? completed;
+  final int? total;
+  final bool isLoading;
+  final bool isError;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final count = completed ?? 0;
+    final scope = total ?? 0;
+    final progress = scope <= 0 ? 0.0 : (count / scope).clamp(0.0, 1.0);
+    final percent = (progress * 100).round();
+
+    return RikiCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space3,
+        vertical: 10,
+      ),
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.cardBorderSubtle,
+      boxShadow: AppShadows.sakuraSubtle,
+      borderRadius: AppRadius.cardSmooth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const _IconTile(
+                icon: Icons.task_alt_outlined,
+                icon3d: Sakura3DIconType.achievement,
+                compact: true,
+                tone: AppFeatureTones.success,
+              ),
+              const SizedBox(width: AppSpacing.space2),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.completedLessonsLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.metadata.copyWith(
+                        fontSize: 11.5,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      isLoading || isError
+                          ? '—'
+                          : context.l10n.analyticsCompletedLessons(
+                              count,
+                              scope,
+                            ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.cardTitle.copyWith(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: progress),
+                duration: const Duration(milliseconds: 260),
+                builder: (context, value, _) => LinearProgressIndicator(
+                  value: value,
+                  minHeight: 5,
+                  borderRadius: BorderRadius.circular(5),
+                  color: AppColors.brandPrimary,
+                  backgroundColor: AppColors.surfaceMuted,
+                  semanticsLabel: context.l10n.completedLessonsLabel,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Tiến độ',
+                    style: AppTypography.metadata.copyWith(
+                      color: AppColors.learnerTextSecondary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    isLoading || isError ? '—' : '$percent%',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.badgeText.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10,
+                      color: AppColors.brandPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PracticeSections extends StatelessWidget {
   const _PracticeSections({
     required this.state,
@@ -917,31 +1192,46 @@ class _PracticeSections extends StatelessWidget {
       );
     }
     final dailyReview = dailyReviewState.value;
-    final reviewAction =
-        dailyReview != null &&
-            dailyReview.currentIndex > 0 &&
-            !dailyReview.isComplete
-        ? context.l10n.homeResumeReview
-        : context.l10n.homeReviewNow;
-
     final cards = <Widget>[
-      _ActionCard(
+      SakuraNavigationCard(
         key: const ValueKey<String>('home_daily_review_card'),
-        icon: Icons.style_outlined,
-        tone: AppFeatureTones.review,
+        icon3d: Sakura3DIconType.flashcards,
+        fallbackIcon: Icons.style_outlined,
         title: context.l10n.dailyReviewTitle,
         description: context.l10n.homeReviewDescription,
-        actionLabel: reviewAction,
-        onPressed: onOpenReview,
+        badge:
+            (dailyReview != null &&
+                dailyReview.currentIndex > 0 &&
+                !dailyReview.isComplete)
+            ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.brandTint,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                  border: Border.all(
+                    color: AppColors.borderSubtlePink,
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  context.l10n.homeResumeReview,
+                  style: const TextStyle(
+                    color: AppColors.brandPrimary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              )
+            : null,
+        onTap: onOpenReview,
       ),
-      _ActionCard(
+      SakuraNavigationCard(
         key: const ValueKey<String>('home_start_practice_card'),
-        icon: Icons.quiz_outlined,
-        tone: AppFeatureTones.practice,
+        icon3d: Sakura3DIconType.mockExam,
+        fallbackIcon: Icons.quiz_outlined,
         title: context.l10n.homePracticeTitle,
         description: context.l10n.practiceJourneySubtitle,
-        actionLabel: context.l10n.homeStartPractice,
-        onPressed: onOpenPractice,
+        onTap: onOpenPractice,
       ),
     ];
 
@@ -965,15 +1255,13 @@ class _NotebookShortcut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _FeatureCard(
+    return SakuraNavigationCard(
       key: const ValueKey<String>('home_notebook_shortcut'),
-      icon: Icons.bookmark_outline,
+      icon3d: Sakura3DIconType.notebook,
+      fallbackIcon: Icons.bookmark_outline,
       title: context.l10n.homeNotebookShortcutTitle,
       description: context.l10n.homeNotebookShortcutDescription,
-      actionLabel: context.l10n.navigationNotebook,
-      tone: AppFeatureTones.neutral,
-      onPressed: onPressed,
-      compact: true,
+      onTap: onPressed,
     );
   }
 }
@@ -989,25 +1277,25 @@ class _FeatureCard extends StatelessWidget {
     required this.actionLabel,
     required this.tone,
     required this.onPressed,
-    this.compact = false,
+    this.icon3d,
     super.key,
   });
 
   final IconData icon;
+  final Sakura3DIconType? icon3d;
   final String title;
   final String description;
   final String actionLabel;
   final RikiFeatureTone tone;
   final VoidCallback onPressed;
-  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return RikiCard(
-      padding: EdgeInsets.all(compact ? AppSpacing.space3 : AppSpacing.space4),
+      padding: const EdgeInsets.all(AppSpacing.space4),
       backgroundColor: AppColors.cardWarmWhite,
-      borderColor: AppColors.cardBorderSubtle,
-      boxShadow: compact ? const <BoxShadow>[] : AppShadows.sakuraCard,
+      borderColor: null,
+      boxShadow: AppShadows.sakuraCard,
       borderRadius: AppRadius.cardLarge,
       onTap: onPressed,
       child: LayoutBuilder(
@@ -1015,7 +1303,7 @@ class _FeatureCard extends StatelessWidget {
           final content = Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _IconTile(icon: icon, compact: true, tone: tone),
+              _IconTile(icon: icon, icon3d: icon3d, compact: true, tone: tone),
               const SizedBox(width: AppSpacing.space3),
               Expanded(
                 child: Column(
@@ -1059,143 +1347,18 @@ class _FeatureCard extends StatelessWidget {
   }
 }
 
-class _ActionCard extends StatelessWidget {
-  const _ActionCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.actionLabel,
-    required this.tone,
-    required this.onPressed,
-    super.key,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-  final String actionLabel;
-  final RikiFeatureTone tone;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return RikiCard(
-      padding: const EdgeInsets.all(AppSpacing.space4),
-      backgroundColor: AppColors.cardWarmWhite,
-      borderColor: AppColors.cardBorderSubtle,
-      boxShadow: AppShadows.sakuraCard,
-      borderRadius: AppRadius.cardLarge,
-      onTap: onPressed,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final iconWidget = _IconTile(icon: icon, tone: tone);
-
-          final textInfo = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: AppTypography.cardTitle.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  letterSpacing: -0.2,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 3),
-              Text(
-                description,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                  fontSize: 12.5,
-                  height: 1.35,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          );
-
-          final actionPill = Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: tone.background,
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-              border: Border.all(
-                color: tone.border.withValues(alpha: 0.6),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  actionLabel,
-                  style: TextStyle(
-                    color: tone.foreground,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 14,
-                  color: tone.foreground,
-                ),
-              ],
-            ),
-          );
-
-          if (constraints.maxWidth < 330) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    iconWidget,
-                    const SizedBox(width: AppSpacing.space3),
-                    Expanded(child: textInfo),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.space2),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: actionPill,
-                ),
-              ],
-            );
-          }
-
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              iconWidget,
-              const SizedBox(width: AppSpacing.space3),
-              Expanded(child: textInfo),
-              const SizedBox(width: AppSpacing.space2),
-              actionPill,
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
 class _MetricTile extends StatelessWidget {
   const _MetricTile({
     required this.icon,
     required this.label,
     required this.value,
     required this.tone,
+    this.icon3d,
     super.key,
   });
 
   final IconData icon;
+  final Sakura3DIconType? icon3d;
   final String label;
   final String value;
   final RikiFeatureTone tone;
@@ -1205,12 +1368,12 @@ class _MetricTile extends StatelessWidget {
     return RikiCard(
       padding: const EdgeInsets.all(AppSpacing.space3),
       backgroundColor: AppColors.cardWarmWhite,
-      borderColor: AppColors.cardBorderSubtle,
+      borderColor: AppColors.cardBorderMuted,
       boxShadow: AppShadows.sakuraSubtle,
       borderRadius: AppRadius.cardSmooth,
       child: Row(
         children: [
-          _IconTile(icon: icon, compact: true, tone: tone),
+          _IconTile(icon: icon, icon3d: icon3d, compact: true, tone: tone),
           const SizedBox(width: AppSpacing.space2),
           Expanded(
             child: Column(
@@ -1250,6 +1413,18 @@ class _SectionHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (MediaQuery.textScalerOf(context).scale(16) >= 26) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: AppTypography.sectionTitle),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(onPressed: onAction, child: Text(actionLabel)),
+          ),
+        ],
+      );
+    }
     return Row(
       children: [
         Expanded(child: Text(title, style: AppTypography.sectionTitle)),
@@ -1315,19 +1490,22 @@ class _SectionSkeleton extends StatelessWidget {
 class _IconTile extends StatelessWidget {
   const _IconTile({
     required this.icon,
+    this.icon3d,
     this.compact = false,
     this.tone = AppFeatureTones.brand,
   });
 
   final IconData icon;
+  final Sakura3DIconType? icon3d;
   final bool compact;
   final RikiFeatureTone tone;
 
   @override
   Widget build(BuildContext context) {
-    final size = compact ? 36.0 : 44.0;
+    final size = compact ? 38.0 : 46.0;
     return RikiFeatureIcon(
       icon: icon,
+      icon3d: icon3d,
       tone: tone,
       extent: size,
       iconSize: compact ? 19 : 22,

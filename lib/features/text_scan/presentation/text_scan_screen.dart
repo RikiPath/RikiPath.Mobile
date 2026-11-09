@@ -199,6 +199,7 @@ class _ImagePickerCard extends StatelessWidget {
                         children: [
                           const RikiFeatureIcon(
                             icon: Icons.document_scanner_outlined,
+                            icon3d: Sakura3DIconType.ocr,
                             tone: AppFeatureTones.textScan,
                             extent: 64,
                             iconSize: 32,

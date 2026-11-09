@@ -65,10 +65,7 @@ String bankVerificationLabel(String status) => switch (status) {
 };
 
 class MentorCompensationScreen extends ConsumerWidget {
-  const MentorCompensationScreen({
-    super.key,
-    this.initialTabIndex = 0,
-  });
+  const MentorCompensationScreen({super.key, this.initialTabIndex = 0});
 
   final int initialTabIndex;
 
@@ -181,7 +178,7 @@ class _OverviewTab extends ConsumerWidget {
             const SizedBox(height: AppSpacing.space4),
             RikiCard(
               backgroundColor: AppColors.cardWarmWhite,
-              borderColor: AppColors.borderSubtlePink,
+              borderColor: AppColors.cardBorderMuted,
               boxShadow: AppShadows.sakuraSubtle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +256,7 @@ class _EarningsTab extends ConsumerWidget {
             return RikiCard(
               key: ValueKey('mentor_earning_${e.id}'),
               backgroundColor: AppColors.cardWarmWhite,
-              borderColor: AppColors.borderSubtlePink,
+              borderColor: AppColors.cardBorderMuted,
               boxShadow: AppShadows.sakuraSubtle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,7 +288,8 @@ class _EarningsTab extends ConsumerWidget {
                   ),
                   _InfoRow(
                     label: 'Đơn giá đã chốt',
-                    value: '${formatCompensationVnd(e.frozenHourlyRateVnd)}/giờ',
+                    value:
+                        '${formatCompensationVnd(e.frozenHourlyRateVnd)}/giờ',
                   ),
                   _InfoRow(
                     label: 'Hệ số trình độ',
@@ -347,7 +345,7 @@ class _PayrollsTab extends ConsumerWidget {
             return RikiCard(
               key: ValueKey('mentor_payroll_${p.id}'),
               backgroundColor: AppColors.cardWarmWhite,
-              borderColor: AppColors.borderSubtlePink,
+              borderColor: AppColors.cardBorderMuted,
               boxShadow: AppShadows.sakuraSubtle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,7 +446,7 @@ class _PayoutsTab extends ConsumerWidget {
             return RikiCard(
               key: ValueKey('mentor_payout_${o.id}'),
               backgroundColor: AppColors.cardWarmWhite,
-              borderColor: AppColors.borderSubtlePink,
+              borderColor: AppColors.cardBorderMuted,
               boxShadow: AppShadows.sakuraSubtle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,7 +478,9 @@ class _PayoutsTab extends ConsumerWidget {
                   ),
                   _InfoRow(
                     label: 'Đã nhận',
-                    value: formatCompensationVnd(o.isPaid ? o.paidAmountVnd : 0),
+                    value: formatCompensationVnd(
+                      o.isPaid ? o.paidAmountVnd : 0,
+                    ),
                     emphasize: o.isPaid,
                   ),
                   _InfoRow(
@@ -494,7 +494,10 @@ class _PayoutsTab extends ConsumerWidget {
                             .trim(),
                   ),
                   if (o.isPaid)
-                    _InfoRow(label: 'Ngày chi trả', value: _dateLabel(o.paidAtUtc)),
+                    _InfoRow(
+                      label: 'Ngày chi trả',
+                      value: _dateLabel(o.paidAtUtc),
+                    ),
                 ],
               ),
             );
@@ -547,7 +550,9 @@ class _MetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return RikiCard(
       backgroundColor: AppColors.cardWarmWhite,
-      borderColor: highlight ? AppColors.brandPrimary : AppColors.borderSubtlePink,
+      borderColor: highlight
+          ? AppColors.brandPrimary
+          : AppColors.cardBorderMuted,
       boxShadow: AppShadows.sakuraSubtle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -563,10 +568,11 @@ class _MetricCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.space1),
           Text(
             value,
-            style: (highlight
-                    ? AppTypography.sectionTitle
-                    : AppTypography.cardTitle)
-                .copyWith(color: AppColors.textPrimary),
+            style:
+                (highlight
+                        ? AppTypography.sectionTitle
+                        : AppTypography.cardTitle)
+                    .copyWith(color: AppColors.textPrimary),
           ),
         ],
       ),
@@ -606,7 +612,9 @@ class _InfoRow extends StatelessWidget {
               value,
               textAlign: TextAlign.right,
               style: AppTypography.bodySmall.copyWith(
-                color: emphasize ? AppColors.brandPrimary : AppColors.textPrimary,
+                color: emphasize
+                    ? AppColors.brandPrimary
+                    : AppColors.textPrimary,
                 fontWeight: emphasize ? FontWeight.bold : FontWeight.w500,
               ),
             ),

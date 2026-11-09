@@ -59,7 +59,8 @@ class LessonController extends AsyncNotifier<LessonSession> {
         ? loadedLesson
         : loadedLesson.copyWith(progress: storedProgress);
     final prerequisite = lesson.prerequisite;
-    if (lesson.availability == LessonAvailability.locked &&
+    if (lesson.remoteLessonId == null &&
+        lesson.availability == LessonAvailability.locked &&
         prerequisite != null &&
         journey.isLessonCompleted(prerequisite.routeId)) {
       lesson = lesson.copyWith(
@@ -458,6 +459,40 @@ class LessonController extends AsyncNotifier<LessonSession> {
       } else {
         ref.invalidate(learningControllerProvider);
         ref.invalidate(standardRoadmapProvider);
+        // Completion is already committed by Backend. A failed roadmap refresh
+        // must never turn that success into a retryable completion error.
+        try {
+          final roadmap = await ref.read(standardRoadmapProvider.future);
+          final nextId = roadmap.nextLessonId;
+          if (nextId != null &&
+              nextId != current.lesson.remoteLessonId &&
+              current.lesson.nextLesson == null) {
+            final next = roadmap.lessons
+                .where((item) => item.lessonId == nextId)
+                .firstOrNull;
+            final latest = state.value;
+            if (next != null &&
+                latest != null &&
+                latest.stage == LessonStage.completed) {
+              state = AsyncData(
+                latest.copyWith(
+                  lesson: latest.lesson.copyWith(
+                    nextLesson: LessonLink(
+                      routeId: '$nextId',
+                      lessonNumber: next.sortOrder,
+                      title: next.title,
+                      subtitle: '',
+                      durationMinutes: 0,
+                      level: latest.lesson.level,
+                    ),
+                  ),
+                ),
+              );
+            }
+          }
+        } catch (_) {
+          // The Roadmap screen retains its own error/retry state.
+        }
       }
     } catch (_) {
       state = AsyncData(
@@ -477,7 +512,7 @@ class LessonController extends AsyncNotifier<LessonSession> {
 
     final snapshot = ref.read(learningControllerProvider).value;
     final recommended = ref
-        .watch(learningPathControllerProvider)
+        .read(learningPathControllerProvider)
         .value
         ?.recommendationAfter(currentId);
 

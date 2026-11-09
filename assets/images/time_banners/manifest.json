@@ -1,0 +1,70 @@
+{
+  "reference_size_px": [
+    2048,
+    682
+  ],
+  "aspect_ratio": "2048:682",
+  "time_source": "device local time",
+  "banners": [
+    {
+      "name": "sakura_morning",
+      "hours": "05:00–10:59",
+      "description": "Sáng — bình minh, học từ vựng bên cửa sổ",
+      "png": "assets/images/time_banners/sakura_morning.png",
+      "webp": "assets/images/time_banners/sakura_morning.webp",
+      "size": [
+        2048,
+        682
+      ],
+      "embedded_text": false
+    },
+    {
+      "name": "sakura_noon",
+      "hours": "11:00–13:59",
+      "description": "Trưa — dạo bước khám phá Nhật Bản, hứng khởi",
+      "png": "assets/images/time_banners/sakura_noon.png",
+      "webp": "assets/images/time_banners/sakura_noon.webp",
+      "size": [
+        2048,
+        682
+      ],
+      "embedded_text": false
+    },
+    {
+      "name": "sakura_afternoon",
+      "hours": "14:00–17:59",
+      "description": "Chiều — quán học ven hồ, hoàng hôn ấm áp",
+      "png": "assets/images/time_banners/sakura_afternoon.png",
+      "webp": "assets/images/time_banners/sakura_afternoon.webp",
+      "size": [
+        2048,
+        682
+      ],
+      "embedded_text": false
+    },
+    {
+      "name": "sakura_evening",
+      "hours": "18:00–21:59",
+      "description": "Tối — đèn đường và nhà gỗ bắt đầu sáng, đọc bài trong không gian hoàng hôn hồng tím",
+      "png": "assets/images/time_banners/sakura_evening.png",
+      "webp": "assets/images/time_banners/sakura_evening.webp",
+      "size": [
+        2048,
+        682
+      ],
+      "embedded_text": false
+    },
+    {
+      "name": "sakura_late_night",
+      "hours": "22:00–04:59",
+      "description": "Khuya — yên tĩnh, trăng sao, học nhẹ nhàng",
+      "png": "assets/images/time_banners/sakura_late_night.png",
+      "webp": "assets/images/time_banners/sakura_late_night.webp",
+      "size": [
+        2048,
+        682
+      ],
+      "embedded_text": false
+    }
+  ]
+}

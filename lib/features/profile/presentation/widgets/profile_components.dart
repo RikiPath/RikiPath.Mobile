@@ -330,12 +330,14 @@ class ProfileActionTile extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.icon3d,
     this.emphasized = false,
     this.destructive = false,
     super.key,
   });
 
   final IconData icon;
+  final Sakura3DIconType? icon3d;
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
@@ -359,13 +361,13 @@ class _ProfileActionTileState extends State<ProfileActionTile> {
     final foreground = widget.destructive
         ? AppColors.errorText
         : widget.emphasized
-            ? AppColors.brandPrimary
-            : AppColors.textSecondary;
+        ? AppColors.brandPrimary
+        : AppColors.textSecondary;
     final background = widget.destructive
         ? AppColors.errorBackground
         : widget.emphasized
-            ? AppColors.brandTint
-            : AppColors.profileBackground;
+        ? AppColors.brandTint
+        : AppColors.profileBackground;
     return Semantics(
       button: true,
       enabled: enabled,
@@ -391,15 +393,23 @@ class _ProfileActionTileState extends State<ProfileActionTile> {
               ),
               child: Row(
                 children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: background,
-                      borderRadius: BorderRadius.circular(AppRadius.input),
+                  if (widget.icon3d != null)
+                    Sakura3DIcon(
+                      type: widget.icon3d!,
+                      size: 42,
+                      fallbackColor: foreground,
+                    )
+                  else
+                    Container(
+                      width: 42,
+                      height: 42,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: background,
+                        borderRadius: BorderRadius.circular(AppRadius.input),
+                      ),
+                      child: Icon(widget.icon, size: 21, color: foreground),
                     ),
-                    child: Icon(widget.icon, size: 21, color: foreground),
-                  ),
                   const SizedBox(width: AppSpacing.space3),
                   Expanded(
                     child: Column(

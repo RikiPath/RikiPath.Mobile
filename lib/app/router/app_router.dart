@@ -310,7 +310,15 @@ GoRouter createAppRouter({
       ),
       GoRoute(
         path: AppRoutes.calendar,
-        builder: (context, state) => const LearnerCalendarScreen(),
+        builder: (context, state) {
+          final rawDate = state.uri.queryParameters['date'];
+          final parsedDate =
+              rawDate == null ||
+                  !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(rawDate)
+              ? null
+              : DateTime.tryParse(rawDate);
+          return LearnerCalendarScreen(initialDate: parsedDate);
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

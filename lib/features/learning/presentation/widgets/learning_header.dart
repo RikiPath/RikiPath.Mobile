@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
-import 'package:rikipath_mobile/core/widgets/riki_language_switcher.dart';
 import 'package:rikipath_mobile/core/widgets/riki_learner_header.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_3d_icon.dart';
 
 class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
   const LearningHeader.root({
     required this.streakDays,
     required this.hasUnreadNotifications,
+    this.isScrolled = false,
     super.key,
   }) : title = null,
        subtitle = null,
@@ -18,6 +19,7 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     required this.subtitle,
     required this.onBack,
+    this.isScrolled = false,
     super.key,
   }) : streakDays = null,
        hasUnreadNotifications = false;
@@ -27,6 +29,7 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
   final int? streakDays;
   final bool hasUnreadNotifications;
   final VoidCallback? onBack;
+  final bool isScrolled;
 
   bool get _isRoot => onBack == null;
 
@@ -38,6 +41,7 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
     final compact = MediaQuery.sizeOf(context).width < 360;
 
     return RikiLearnerHeader(
+      isScrolled: isScrolled,
       titleSpacing: _isRoot ? AppSpacing.space4 : 0,
       leadingWidth: _isRoot ? 0 : 64,
       leading: _isRoot
@@ -129,10 +133,10 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.local_fire_department,
-                size: 17,
-                color: AppColors.skillGrammar,
+              const Sakura3DIcon(
+                type: Sakura3DIconType.streak,
+                size: 19,
+                fallbackColor: AppColors.skillGrammar,
               ),
               const SizedBox(width: AppSpacing.space1),
               Text(
@@ -175,16 +179,11 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      const RikiLanguageSwitcher(),
-      const SizedBox(width: AppSpacing.space2),
     ];
   }
 
   List<Widget> _buildDetailActions() {
-    return [
-      const RikiLanguageSwitcher(),
-      const SizedBox(width: AppSpacing.space2),
-    ];
+    return const [];
   }
 }
 

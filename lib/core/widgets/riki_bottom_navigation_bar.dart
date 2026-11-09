@@ -16,6 +16,11 @@ class RikiBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scaledLabelSize = MediaQuery.textScalerOf(context).scale(11);
+    final largeText = scaledLabelSize >= 17;
+    final navigationHeight = largeText
+        ? 112.0
+        : 64.0 + (scaledLabelSize - 11).clamp(0.0, 6.0) * 4;
     final l10n = context.l10n;
     final destinations = <RikiNavigationDestination>[
       RikiNavigationDestination(
@@ -55,7 +60,7 @@ class RikiBottomNavigationBar extends StatelessWidget {
         child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 64,
+            height: navigationHeight,
             child: Row(
               children: List<Widget>.generate(destinations.length, (index) {
                 final destination = destinations[index];
@@ -136,8 +141,9 @@ class _NavigationItem extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 destination.label,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: AppTypography.badgeText.copyWith(
                   color: foreground,
                   fontSize: 11,

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_language_bottom_sheet.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
@@ -15,6 +18,8 @@ class AccountSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final locale = ref.watch(localeControllerProvider);
+    final isJa = locale.languageCode == 'ja';
     final profileValue = ref.watch(userProfileControllerProvider);
     return Scaffold(
       backgroundColor: AppColors.profileBackground,
@@ -79,6 +84,47 @@ class AccountSettingsScreen extends ConsumerWidget {
               ProfileSettingsGroup(
                 label: l10n.accountOptionsSection,
                 children: [
+                  ProfileSettingsTile(
+                    key: const ValueKey<String>(
+                      'account_language_settings_action',
+                    ),
+                    icon: Icons.language_rounded,
+                    title: l10n.appLanguageTitle,
+                    subtitleWidget: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 14,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(2),
+                            border: Border.all(
+                              color: AppColors.border,
+                              width: 0.5,
+                            ),
+                          ),
+                          child: SvgPicture.asset(
+                            isJa
+                                ? 'assets/flags/ja.svg'
+                                : 'assets/flags/vi.svg',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.space2),
+                        Text(
+                          isJa
+                              ? l10n.languageJapanese
+                              : l10n.languageVietnamese,
+                          style: AppTypography.metadata.copyWith(
+                            color: AppColors.learnerTextSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () => showSakuraLanguageBottomSheet(context),
+                  ),
                   ProfileSettingsTile(
                     key: const ValueKey<String>(
                       'account_notification_settings_action',

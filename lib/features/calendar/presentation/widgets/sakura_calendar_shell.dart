@@ -9,6 +9,7 @@ import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_ca
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_event_detail_sheet.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_month_view.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_timeline_view.dart';
+import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_year_view.dart';
 
 class SakuraCalendarShell extends ConsumerStatefulWidget {
   const SakuraCalendarShell({
@@ -19,6 +20,7 @@ class SakuraCalendarShell extends ConsumerStatefulWidget {
     this.fabIcon = Icons.add,
     this.onFabPressed,
     this.initialMode = SakuraCalendarViewMode.month,
+    this.initialDate,
   });
 
   final List<SakuraCalendarEvent> events;
@@ -27,6 +29,7 @@ class SakuraCalendarShell extends ConsumerStatefulWidget {
   final IconData fabIcon;
   final VoidCallback? onFabPressed;
   final SakuraCalendarViewMode initialMode;
+  final DateTime? initialDate;
 
   @override
   ConsumerState<SakuraCalendarShell> createState() =>
@@ -35,14 +38,28 @@ class SakuraCalendarShell extends ConsumerStatefulWidget {
 
 class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final TextEditingController _searchController = TextEditingController();
+  bool _searchOpen = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref
           .read(sakuraCalendarControllerProvider.notifier)
           .setViewMode(widget.initialMode);
+      if (widget.initialDate != null) {
+        ref
+            .read(sakuraCalendarControllerProvider.notifier)
+            .setSelectedDate(widget.initialDate!);
+      }
     });
   }
 
@@ -56,9 +73,32 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
     final controller = ref.read(sakuraCalendarControllerProvider.notifier);
 
     // Filter events by selected visible layers
+    final query = _searchController.text.trim().toLowerCase();
     final filteredEvents = widget.events
         .where((e) => calendarState.visibleEventTypes.contains(e.type))
+        .where((e) {
+          if (query.isEmpty) return true;
+          final searchable = [
+            e.title,
+            e.subtitle ?? '',
+            e.type.labelVi,
+            e.participantName ?? '',
+            e.jlptLevel ?? '',
+            '${e.startTime.day}/${e.startTime.month}/${e.startTime.year}',
+          ].join(' ').toLowerCase();
+          return searchable.contains(query);
+        })
         .toList();
+    final upcoming =
+        filteredEvents
+            .where(
+              (e) =>
+                  e.startTime.isAfter(DateTime.now()) &&
+                  e.status?.name != 'cancelled' &&
+                  e.status?.name != 'completed',
+            )
+            .toList()
+          ..sort((a, b) => a.startTime.compareTo(b.startTime));
 
     return Scaffold(
       key: _scaffoldKey,
@@ -81,51 +121,122 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
               onSelectDate: (d) => controller.setSelectedDate(d),
               onSelectViewMode: (m) => controller.setViewMode(m),
               onTodayPressed: () => controller.goToToday(),
+              onPrevious: () => controller.previous(),
+              onNext: () => controller.next(),
+              onSearchPressed: () => setState(() => _searchOpen = !_searchOpen),
             ),
+            if (_searchOpen)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                child: TextField(
+                  key: const Key('calendar_event_search'),
+                  controller: _searchController,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: 'Tìm sự kiện, Cố vấn, ngày...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchController.text.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: 'Xóa tìm kiếm',
+                            onPressed: () => setState(_searchController.clear),
+                            icon: const Icon(Icons.close),
+                          ),
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ),
+            if (upcoming.isNotEmpty && query.isEmpty)
+              InkWell(
+                key: const Key('calendar_next_event'),
+                onTap: () {
+                  controller.setSelectedDate(upcoming.first.startTime);
+                  controller.setViewMode(SakuraCalendarViewMode.day);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 5,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.event_available_outlined,
+                        size: 16,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Sắp tới: ${upcoming.first.title} · '
+                          '${upcoming.first.startTime.day}/${upcoming.first.startTime.month}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right, size: 16),
+                    ],
+                  ),
+                ),
+              ),
 
             // Active Calendar View
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
                 child: switch (calendarState.viewMode) {
+                  SakuraCalendarViewMode.year => SakuraYearView(
+                    key: ValueKey('year_${calendarState.selectedDate.year}'),
+                    selectedDate: calendarState.selectedDate,
+                    events: filteredEvents,
+                    onSelectMonth: (date) {
+                      controller.setSelectedDate(date);
+                      controller.setViewMode(SakuraCalendarViewMode.month);
+                    },
+                    onSelectDate: (date) {
+                      controller.setSelectedDate(date);
+                      controller.setViewMode(SakuraCalendarViewMode.day);
+                    },
+                  ),
                   SakuraCalendarViewMode.month => SakuraMonthView(
-                      key: ValueKey('month_${calendarState.selectedDate.month}'),
-                      selectedDate: calendarState.selectedDate,
-                      events: filteredEvents,
-                      onSelectDate: (d) => controller.setSelectedDate(d),
-                      onSelectEvent: _onEventSelected,
-                      onPreviousMonth: () => controller.previous(),
-                      onNextMonth: () => controller.next(),
-                    ),
+                    key: ValueKey('month_${calendarState.selectedDate.month}'),
+                    selectedDate: calendarState.selectedDate,
+                    events: filteredEvents,
+                    onSelectDate: (d) => controller.setSelectedDate(d),
+                    onSelectEvent: _onEventSelected,
+                    onPreviousMonth: () => controller.previous(),
+                    onNextMonth: () => controller.next(),
+                  ),
                   SakuraCalendarViewMode.agenda => SakuraAgendaView(
-                      key: const ValueKey('agenda_view'),
-                      selectedDate: calendarState.selectedDate,
-                      events: filteredEvents,
-                      onSelectEvent: _onEventSelected,
-                      onAddEventAction: widget.onFabPressed,
-                    ),
+                    key: const ValueKey('agenda_view'),
+                    selectedDate: calendarState.selectedDate,
+                    events: filteredEvents,
+                    onSelectEvent: _onEventSelected,
+                    onAddEventAction: widget.onFabPressed,
+                  ),
                   SakuraCalendarViewMode.day ||
                   SakuraCalendarViewMode.threeDay ||
-                  SakuraCalendarViewMode.week =>
-                    SakuraTimelineView(
-                      key: ValueKey(
-                        'timeline_${calendarState.viewMode.id}_${calendarState.selectedDate.toIso8601String()}',
-                      ),
-                      selectedDate: calendarState.selectedDate,
-                      viewMode: calendarState.viewMode,
-                      events: filteredEvents,
-                      onSelectDate: (d) => controller.setSelectedDate(d),
-                      onSelectEvent: _onEventSelected,
-                      onPrevious: () => controller.previous(),
-                      onNext: () => controller.next(),
+                  SakuraCalendarViewMode.week => SakuraTimelineView(
+                    key: ValueKey(
+                      'timeline_${calendarState.viewMode.id}_${calendarState.selectedDate.toIso8601String()}',
                     ),
+                    selectedDate: calendarState.selectedDate,
+                    viewMode: calendarState.viewMode,
+                    events: filteredEvents,
+                    onSelectDate: (d) => controller.setSelectedDate(d),
+                    onSelectEvent: _onEventSelected,
+                    onPrevious: () => controller.previous(),
+                    onNext: () => controller.next(),
+                  ),
                 },
               ),
             ),
           ],
         ),
       ),
-      floatingActionButton: (widget.fabLabel != null && widget.onFabPressed != null)
+      floatingActionButton:
+          (widget.fabLabel != null && widget.onFabPressed != null)
           ? FloatingActionButton.extended(
               key: const Key('calendar_fab_action'),
               onPressed: widget.onFabPressed,

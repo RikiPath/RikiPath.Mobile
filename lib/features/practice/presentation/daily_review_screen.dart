@@ -395,6 +395,7 @@ class _ReviewEmpty extends StatelessWidget {
   Widget build(BuildContext context) {
     return RikiEmptyState(
       icon: Icons.auto_awesome_outlined,
+      icon3d: Sakura3DIconType.srs,
       title: context.l10n.dailyReviewTitle,
       message: context.l10n.reviewQueueEmpty,
     );

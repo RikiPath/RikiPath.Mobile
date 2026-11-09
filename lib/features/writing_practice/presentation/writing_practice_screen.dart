@@ -52,17 +52,10 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  context.l10n.writingSubtitle,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.space3),
                 SakuraEducationalBanner(
                   tag: context.l10n.kanaEduBannerTag,
-                  title: context.l10n.kanaEduBannerTitle,
-                  message: context.l10n.kanaEduBannerMessage,
+                  title: context.l10n.writingSelectCharacter,
+                  message: context.l10n.writingQueueHint,
                   mascotPose: SakuraMascotPose.studying,
                   compact: true,
                 ),
@@ -79,18 +72,6 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
                   ),
                 ],
                 const SizedBox(height: AppSpacing.space4),
-                Text(
-                  context.l10n.writingSelectCharacter,
-                  style: AppTypography.sectionTitle,
-                ),
-                const SizedBox(height: AppSpacing.space1),
-                Text(
-                  context.l10n.writingQueueHint,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.space3),
               ],
             ),
           ),
@@ -128,6 +109,7 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
                     ),
             ),
           ),
+          const SizedBox(height: AppSpacing.space4),
         ],
       ),
     );
@@ -267,13 +249,13 @@ class _WritingCharacterGrid extends StatelessWidget {
       key: const ValueKey<String>('writing_character_grid'),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.space4,
-        0,
+        AppSpacing.space2,
         AppSpacing.space4,
-        AppSpacing.space8,
+        AppSpacing.space6,
       ),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 116,
-        mainAxisExtent: 146,
+        maxCrossAxisExtent: 112,
+        mainAxisExtent: 122,
         mainAxisSpacing: AppSpacing.space3,
         crossAxisSpacing: AppSpacing.space3,
       ),
@@ -303,20 +285,23 @@ class _WritingCharacterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(AppRadius.card),
+      color: AppColors.cardWarmWhite,
+      borderRadius: BorderRadius.circular(AppRadius.cardSmooth),
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(AppRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.cardSmooth),
         child: Ink(
           decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            border: Border.all(color: AppColors.border),
-            boxShadow: AppShadows.cardSoft,
+            color: AppColors.cardWarmWhite,
+            borderRadius: BorderRadius.circular(AppRadius.cardSmooth),
+            border: Border.all(color: AppColors.cardBorderSubtle),
+            boxShadow: AppShadows.sakuraSubtle,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.space3),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.space2,
+              vertical: AppSpacing.space2,
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -324,11 +309,12 @@ class _WritingCharacterCard extends StatelessWidget {
                   item.character,
                   style: AppTypography.heroTitle.copyWith(
                     color: AppColors.textPrimary,
-                    fontSize: 44,
-                    height: 1,
+                    fontSize: 36,
+                    fontWeight: FontWeight.w700,
+                    height: 1.05,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.space2),
+                const SizedBox(height: 6),
                 Text(
                   item.romaji ??
                       item.meaning ??
@@ -338,22 +324,39 @@ class _WritingCharacterCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.textSecondary,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.space1),
-                Text(
-                  item.writingScore == null
-                      ? (item.isNew
-                            ? context.l10n.writingNewCharacter
-                            : context.l10n.writingReviewCharacter)
-                      : context.l10n.writingLastScore(item.writingScore!),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.badgeText.copyWith(
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
                     color: item.isNew
-                        ? AppColors.brandPrimary
-                        : AppColors.success,
+                        ? AppColors.brandTint
+                        : AppColors.successBackgroundSoft,
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                  child: Text(
+                    item.writingScore == null
+                        ? (item.isNew
+                              ? context.l10n.writingNewCharacter
+                              : context.l10n.writingReviewCharacter)
+                        : context.l10n.writingLastScore(item.writingScore!),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.badgeText.copyWith(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: item.isNew
+                          ? AppColors.brandPrimary
+                          : AppColors.success,
+                    ),
                   ),
                 ),
               ],

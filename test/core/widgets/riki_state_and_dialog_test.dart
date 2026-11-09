@@ -59,6 +59,33 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('illustrated empty state stays readable at large text scale', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+        child: _host(
+          const RikiEmptyState(
+            icon: Icons.bookmark_border,
+            icon3d: Sakura3DIconType.notebook,
+            title: 'Sổ từ chưa có mục nào',
+            message: 'Lưu từ mới để bắt đầu ôn tập.',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Sakura3DIcon), findsOneWidget);
+    expect(find.text('Sổ từ chưa có mục nào'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('error state exposes a clear retry action', (tester) async {
     var retries = 0;
     await tester.pumpWidget(

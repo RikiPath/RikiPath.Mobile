@@ -7,7 +7,8 @@ enum SakuraCalendarViewMode {
   day('day', 'Ngày', Icons.view_day_outlined),
   threeDay('threeDay', '3 ngày', Icons.view_column_outlined),
   week('week', 'Tuần', Icons.view_week_outlined),
-  month('month', 'Tháng', Icons.calendar_view_month_outlined);
+  month('month', 'Tháng', Icons.calendar_view_month_outlined),
+  year('year', 'Năm', Icons.calendar_today_outlined);
 
   const SakuraCalendarViewMode(this.id, this.labelVi, this.icon);
 
@@ -151,13 +152,19 @@ class SakuraCalendarEvent {
 
   static bool isSupportedConsultationLevel(String? level) {
     if (level == null) return false;
-    final normalized = level.replaceAll('JLPT', '').replaceAll(' ', '').toUpperCase();
+    final normalized = level
+        .replaceAll('JLPT', '')
+        .replaceAll(' ', '')
+        .toUpperCase();
     return supportedConsultationLevels.contains(normalized);
   }
 
   static String? normalizeConsultationLevel(String? level) {
     if (level == null) return null;
-    final normalized = level.replaceAll('JLPT', '').replaceAll(' ', '').toUpperCase();
+    final normalized = level
+        .replaceAll('JLPT', '')
+        .replaceAll(' ', '')
+        .toUpperCase();
     if (supportedConsultationLevels.contains(normalized)) {
       return normalized;
     }

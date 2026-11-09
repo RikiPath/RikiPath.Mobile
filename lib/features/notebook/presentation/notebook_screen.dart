@@ -10,6 +10,7 @@ import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_scroll_scaffold.dart';
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
@@ -31,13 +32,15 @@ class NotebookScreen extends ConsumerWidget {
         ? analytics?.streakDays
         : null;
 
-    return Scaffold(
+    return SakuraScrollScaffold(
       backgroundColor: AppColors.learnerBackground,
-      appBar: HomeHeader(
+      appBarBuilder: (context, isScrolled) => HomeHeader(
+        isScrolled: isScrolled,
         streakDays: liveStreak,
         isStreakLoading: analyticsState.isLoading,
         unreadNotificationCount: notificationState.value?.unreadCount,
         onNotificationsPressed: () => context.push(AppRoutes.notifications),
+        onCalendarPressed: () => context.push(AppRoutes.calendar),
       ),
       body: SafeArea(
         top: false,

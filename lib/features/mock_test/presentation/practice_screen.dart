@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_scroll_scaffold.dart';
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
@@ -43,13 +44,15 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
     final liveStreak = analytics?.isAvailable(AnalyticsSection.streak) == true
         ? analytics?.streakDays
         : null;
-    return Scaffold(
+    return SakuraScrollScaffold(
       backgroundColor: AppColors.learnerBackground,
-      appBar: HomeHeader(
+      appBarBuilder: (context, isScrolled) => HomeHeader(
+        isScrolled: isScrolled,
         streakDays: liveStreak,
         isStreakLoading: analyticsState.isLoading,
         unreadNotificationCount: notificationState.value?.unreadCount,
         onNotificationsPressed: () => context.push(AppRoutes.notifications),
+        onCalendarPressed: () => context.push(AppRoutes.calendar),
       ),
       body: practice.when(
         loading: () =>
@@ -104,6 +107,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
             _PracticeEntryCard(
               key: const ValueKey<String>('practice_speech_card'),
               icon: Icons.record_voice_over_outlined,
+              icon3d: Sakura3DIconType.speech,
               title: context.l10n.practiceSpeechTitle,
               description: context.l10n.practiceSpeechDescription,
               tone: AppFeatureTones.speech,
@@ -114,6 +118,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
             _PracticeEntryCard(
               key: const ValueKey<String>('practice_writing_card'),
               icon: Icons.draw_outlined,
+              icon3d: Sakura3DIconType.kanji,
               title: context.l10n.practiceWritingTitle,
               description: context.l10n.practiceWritingDescription,
               tone: AppFeatureTones.writing,
@@ -124,6 +129,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
             _PracticeEntryCard(
               key: const ValueKey<String>('practice_text_scan_card'),
               icon: Icons.document_scanner_outlined,
+              icon3d: Sakura3DIconType.ocr,
               title: context.l10n.practiceTextScanTitle,
               description: context.l10n.practiceTextScanDescription,
               tone: AppFeatureTones.textScan,
@@ -177,6 +183,7 @@ class _LiveDailyReviewCard extends StatelessWidget {
     return _PracticeEntryCard(
       key: const ValueKey<String>('practice_daily_review_card'),
       icon: Icons.style_outlined,
+      icon3d: Sakura3DIconType.srs,
       title: context.l10n.dailyReviewTitle,
       description: description,
       tone: AppFeatureTones.review,
@@ -262,6 +269,7 @@ class _MockTestCatalogCard extends ConsumerWidget {
     return _PracticeEntryCard(
       key: ValueKey<String>('practice_mock_test_${test.id}'),
       icon: Icons.assignment_outlined,
+      icon3d: Sakura3DIconType.mockExam,
       title: test.title,
       description: context.l10n.mockDurationStatus(
         test.timeLimitMinutes,
@@ -291,10 +299,12 @@ class _PracticeEntryCard extends StatelessWidget {
     required this.tone,
     required this.status,
     required this.onPressed,
+    this.icon3d,
     super.key,
   });
 
   final IconData icon;
+  final Sakura3DIconType? icon3d;
   final String title;
   final String description;
   final RikiFeatureTone tone;
@@ -306,12 +316,12 @@ class _PracticeEntryCard extends StatelessWidget {
     return RikiCard(
       onTap: onPressed,
       backgroundColor: AppColors.cardWarmWhite,
-      borderColor: AppColors.borderSubtlePink,
+      borderColor: AppColors.cardBorderMuted,
       boxShadow: AppShadows.sakuraSubtle,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RikiFeatureIcon(icon: icon, tone: tone),
+          RikiFeatureIcon(icon: icon, icon3d: icon3d, tone: tone),
           const SizedBox(width: AppSpacing.space3),
           Expanded(
             child: Column(
@@ -427,6 +437,7 @@ class _MentorDemoCard extends ConsumerWidget {
             children: [
               const RikiFeatureIcon(
                 icon: Icons.support_agent_outlined,
+                icon3d: Sakura3DIconType.mentor,
                 tone: AppFeatureTones.meeting,
                 extent: 40,
                 iconSize: 20,

@@ -638,7 +638,13 @@ void main() {
     ];
 
     expect(find.text('Trang chủ'), findsOneWidget);
-    expect(find.text('Học tập'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(RikiBottomNavigationBar),
+        matching: find.text('Học tập'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Luyện tập'), findsOneWidget);
     expect(find.text('Sổ từ'), findsOneWidget);
     expect(find.text('Cá nhân'), findsOneWidget);
@@ -651,7 +657,7 @@ void main() {
       expect(find.byType(RikiBottomNavigationBar), findsOneWidget);
       expect(
         find.byType(HomeHeader),
-        destination.path == AppRoutes.learn ? findsNothing : findsOneWidget,
+        findsOneWidget,
       );
       final navigationBar = tester.widget<RikiBottomNavigationBar>(
         find.byType(RikiBottomNavigationBar),
@@ -666,7 +672,12 @@ void main() {
     await _pumpRouter(tester, initialLocation: AppRoutes.home);
     final originalHomeElement = tester.element(find.byType(HomeScreen));
 
-    await tester.tap(find.text('Học tập'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(RikiBottomNavigationBar),
+        matching: find.text('Học tập'),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(LearnScreen), findsOneWidget);
@@ -675,7 +686,12 @@ void main() {
     );
     expect(identical(offstageHomeElement, originalHomeElement), isTrue);
 
-    await tester.tap(find.text('Trang chủ'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(RikiBottomNavigationBar),
+        matching: find.text('Trang chủ'),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(tester.element(find.byType(HomeScreen)), same(originalHomeElement));
@@ -822,6 +838,8 @@ class _RouterProfileRepository implements UserProfileRepository {
     avatarUrl: null,
     role: 'Learner',
     isEmailVerified: true,
+    currentStudyLevelId: targetJlptLevelId == null ? null : 101,
+    currentStudyLevelName: targetJlptLevelId == null ? null : 'N5',
     targetJlptLevelId: targetJlptLevelId,
     targetJlptLevelName: targetJlptLevelName,
     dailyStudyMinutes: 30,

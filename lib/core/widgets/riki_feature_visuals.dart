@@ -1,22 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_3d_icon.dart';
 
 class RikiFeatureIcon extends StatelessWidget {
   const RikiFeatureIcon({
     required this.icon,
     required this.tone,
+    this.icon3d,
     this.extent = 48,
     this.iconSize = 24,
+    this.showIllustrationBackground = false,
     super.key,
   });
 
   final IconData icon;
   final RikiFeatureTone tone;
+  final Sakura3DIconType? icon3d;
   final double extent;
   final double iconSize;
+  final bool showIllustrationBackground;
 
   @override
   Widget build(BuildContext context) {
+    if (icon3d != null && !showIllustrationBackground) {
+      return ExcludeSemantics(
+        child: SizedBox.square(
+          dimension: extent,
+          child: Center(
+            child: Sakura3DIcon(
+              type: icon3d!,
+              size: extent,
+              fallbackColor: tone.foreground,
+            ),
+          ),
+        ),
+      );
+    }
+
     return ExcludeSemantics(
       child: Container(
         width: extent,
@@ -28,7 +48,13 @@ class RikiFeatureIcon extends StatelessWidget {
             extent <= 40 ? AppRadius.compact : AppRadius.input,
           ),
         ),
-        child: Icon(icon, size: iconSize, color: tone.foreground),
+        child: icon3d != null
+            ? Sakura3DIcon(
+                type: icon3d!,
+                size: (extent * 0.78).roundToDouble(),
+                fallbackColor: tone.foreground,
+              )
+            : Icon(icon, size: iconSize, color: tone.foreground),
       ),
     );
   }

@@ -731,15 +731,10 @@ class _LearningSectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: section.kind.backgroundColor,
-              borderRadius: BorderRadius.circular(AppRadius.compact),
-            ),
-            child: Icon(section.kind.icon, color: section.kind.foregroundColor),
+          Sakura3DIcon(
+            type: section.kind.icon3d,
+            size: 44,
+            fallbackColor: section.kind.foregroundColor,
           ),
           const SizedBox(height: AppSpacing.space3),
           Text(
@@ -825,10 +820,10 @@ class _ProgressBar extends StatelessWidget {
 }
 
 extension on LearningSectionKind {
-  IconData get icon => switch (this) {
-    LearningSectionKind.roadmap => Icons.map_outlined,
-    LearningSectionKind.lessons => Icons.menu_book_outlined,
-    LearningSectionKind.library => Icons.inventory_2_outlined,
+  Sakura3DIconType get icon3d => switch (this) {
+    LearningSectionKind.roadmap => Sakura3DIconType.roadmap,
+    LearningSectionKind.lessons => Sakura3DIconType.lesson,
+    LearningSectionKind.library => Sakura3DIconType.srs,
   };
 
   Color get foregroundColor => switch (this) {

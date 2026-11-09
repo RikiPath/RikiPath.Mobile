@@ -8,21 +8,12 @@ import 'package:rikipath_mobile/features/profile/application/user_profile_contro
 
 final learnerStartupDestinationProvider =
     FutureProvider.autoDispose<LearnerStartupDestination>((ref) async {
-      final placement = await ref.watch(placementTestControllerProvider.future);
-      if (placement.hasActiveAttempt ||
-          placement.result != null ||
-          placement.shouldRetryResultRecovery) {
-        return LearnerStartupDestination.placementTest;
-      }
-
       final profile = await ref
           .watch(userProfileRepositoryProvider)
           .loadProfile();
       final targetLevelId = profile.targetJlptLevelId;
       final currentLevelId =
-          profile.currentStudyLevelId ??
-          profile.startingJlptLevelId ??
-          targetLevelId;
+          profile.currentStudyLevelId ?? profile.startingJlptLevelId;
       if (currentLevelId == null && targetLevelId == null) {
         return LearnerStartupDestination.onboarding;
       }
@@ -47,6 +38,12 @@ final learnerStartupDestinationProvider =
               targetExamDate: profile.targetExamDate,
             );
         return LearnerStartupDestination.onboarding;
+      }
+      final placement = await ref.watch(placementTestControllerProvider.future);
+      if (placement.hasActiveAttempt ||
+          placement.result != null ||
+          placement.shouldRetryResultRecovery) {
+        return LearnerStartupDestination.placementTest;
       }
       await ref
           .read(learnerJourneyControllerProvider.notifier)

@@ -118,6 +118,15 @@ abstract final class AppRoutes {
 
   static const String home = '/home';
   static const String calendar = '/calendar';
+  static String calendarOn(DateTime date) {
+    final day = DateTime(date.year, date.month, date.day);
+    final dateParam =
+        '${day.year.toString().padLeft(4, '0')}-'
+        '${day.month.toString().padLeft(2, '0')}-'
+        '${day.day.toString().padLeft(2, '0')}';
+    return '$calendar?date=$dateParam';
+  }
+
   static const String notifications = '/notifications';
   static const String learn = '/learn';
   static const String learnRoadmapSegment = 'roadmap';

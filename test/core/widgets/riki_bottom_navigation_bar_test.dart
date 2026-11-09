@@ -45,7 +45,7 @@ void main() {
     );
   });
 
-  testWidgets('destinations keep equal width and single-line labels', (
+  testWidgets('destinations keep equal width and can wrap for accessibility', (
     tester,
   ) async {
     await _pumpNavigation(tester, selectedIndex: 0);
@@ -60,7 +60,7 @@ void main() {
     expect(RikiBottomNavigationBar.destinationCount, labels.length);
     for (final destinationLabel in labels) {
       final label = tester.widget<Text>(find.text(destinationLabel));
-      expect(label.maxLines, 1);
+      expect(label.maxLines, 2);
     }
 
     final itemWidths = labels.map((destinationLabel) {
@@ -73,6 +73,35 @@ void main() {
           .width;
     }).toSet();
     expect(itemWidths, hasLength(1));
+  });
+
+  testWidgets('labels remain visible at 412px and 2x text scale', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(412, 915);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await _pumpNavigation(tester, selectedIndex: 0, textScale: 2);
+
+    expect(tester.getSize(find.byType(RikiBottomNavigationBar)).height, 112);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('navigation grows before labels overflow at 1.3x text scale', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await _pumpNavigation(tester, selectedIndex: 3, textScale: 1.3);
+
+    expect(
+      tester.getSize(find.byType(RikiBottomNavigationBar)).height,
+      greaterThan(64),
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('destination tap reports its index', (tester) async {
@@ -102,6 +131,7 @@ Future<void> _pumpNavigation(
   required int selectedIndex,
   ValueChanged<int>? onDestinationSelected,
   Locale locale = const Locale('vi'),
+  double textScale = 1,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -109,10 +139,17 @@ Future<void> _pumpNavigation(
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        bottomNavigationBar: RikiBottomNavigationBar(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: onDestinationSelected ?? (_) {},
+      home: Builder(
+        builder: (context) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: Scaffold(
+            bottomNavigationBar: RikiBottomNavigationBar(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: onDestinationSelected ?? (_) {},
+            ),
+          ),
         ),
       ),
     ),

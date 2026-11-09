@@ -127,39 +127,13 @@ class _MeetingShortcut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RikiCard(
+    return SakuraNavigationCard(
       key: const ValueKey<String>('home_meeting_fallback_card'),
-      borderColor: AppFeatureTones.meeting.border,
-      boxShadow: const <BoxShadow>[],
-      padding: const EdgeInsets.all(AppSpacing.space3),
+      icon3d: Sakura3DIconType.classroom,
+      fallbackIcon: Icons.videocam_outlined,
+      title: context.l10n.homeMeetingFallbackTitle,
+      description: context.l10n.homeMeetingFallbackDescription,
       onTap: onPressed,
-      child: Row(
-        children: [
-          const _MeetingIcon(),
-          const SizedBox(width: AppSpacing.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.homeMeetingFallbackTitle,
-                  style: AppTypography.cardTitle,
-                ),
-                const SizedBox(height: AppSpacing.space1),
-                Text(
-                  context.l10n.homeMeetingFallbackDescription,
-                  style: AppTypography.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          const Icon(
-            Icons.arrow_forward,
-            key: ValueKey<String>('home_meeting_shortcut_button'),
-            color: AppColors.textSecondary,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -171,6 +145,7 @@ class _MeetingIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return const RikiFeatureIcon(
       icon: Icons.videocam_outlined,
+      icon3d: Sakura3DIconType.classroom,
       tone: AppFeatureTones.meeting,
     );
   }

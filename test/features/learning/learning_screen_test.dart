@@ -120,6 +120,16 @@ void main() {
     expect(AppRoutes.learnProgress, '/learn/progress');
   });
 
+  testWidgets('Learn offers every study level returned by Backend catalog', (
+    tester,
+  ) async {
+    await _pumpLearning(tester, initialLocation: AppRoutes.learn);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('learning_level_n2')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('learning_level_n1')), findsOneWidget);
+  });
+
   testWidgets('Learning Home opens the roadmap inside the Learn branch', (
     tester,
   ) async {
@@ -282,6 +292,30 @@ void main() {
       findsNothing,
     );
     _expectLearnTabSelected(tester);
+  });
+
+  testWidgets('existing AI path remains visible when regeneration is unavailable', (
+    tester,
+  ) async {
+    final pathRepository = _TestLearningPathRepository(
+      activePath: _testPath(summary: 'Lộ trình đã lưu từ Backend', version: 1),
+    );
+    await _pumpLearning(
+      tester,
+      initialLocation: AppRoutes.learnRoadmap,
+      pathRepository: pathRepository,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lộ trình đã lưu từ Backend'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('standard_lesson_501')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('ai_learning_path_generate_button')),
+      findsNothing,
+    );
   });
 
   testWidgets('next standard lesson navigates using the real backend ID', (

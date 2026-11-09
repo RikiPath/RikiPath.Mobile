@@ -72,6 +72,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageCodeJapanese => 'JA';
 
   @override
+  String get appLanguageTitle => 'アプリの言語';
+
+  @override
+  String get appLanguageSubtitle => 'アプリの表示言語を選択してください';
+
+  @override
+  String get vietnameseSubLabel => 'ベトナム語';
+
+  @override
+  String get japaneseSubLabel => '日本語';
+
+  @override
   String get back => '戻る';
 
   @override
@@ -105,10 +117,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get loading => '読み込み中...';
 
   @override
-  String get preparingLearningContent => '学習内容を準備しています…';
+  String get preparingLearningContent => 'RikiPathを開いています…';
 
   @override
-  String get preparingLearningSubtext => 'あなたの学習プランを整えています。';
+  String get preparingLearningSubtext => 'ログイン状態を確認し、学習画面へご案内します。';
+
+  @override
+  String get learnerStartupLoadingTitle => '次の学習ステップを確認しています…';
+
+  @override
+  String get learnerStartupLoadingSubtitle => 'プロフィールとJLPTの目標を確認しています。';
+
+  @override
+  String get learnerStartupOnboardingTitle => '学習設定を開いています…';
+
+  @override
+  String get learnerStartupPlacementTitle => 'レベルチェックを開いています…';
+
+  @override
+  String get learnerStartupHomeTitle => '学習ホームを開いています…';
 
   @override
   String get notAvailable => '現在利用できません';
@@ -2594,7 +2621,26 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get completedLessonsLabel => '完了したレッスン';
+  String get completedLessonsLabel => '学習済み';
+
+  @override
+  String get weeklyActivityNoDailyData => '日別の学習データはまだありません';
+
+  @override
+  String analyticsPercentComplete(int percent) {
+    return '$percent% 完了';
+  }
+
+  @override
+  String analyticsRemainingLessons(int remaining) {
+    return '未完了のレッスンはあと$remaining件';
+  }
+
+  @override
+  String get analyticsNoLessons => '学習計画にレッスンはまだありません';
+
+  @override
+  String get analyticsInvalidProgress => '進捗データを確認してください';
 
   @override
   String analyticsCompletedLessons(int completed, int total) {
@@ -2743,7 +2789,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeDailyMotivation => '毎日の学習';
 
   @override
-  String get homeDailyMotivationSubtitle => '毎日コツコツ前進！がんばろう！';
+  String get homeDailyMotivationSubtitle => '一歩ずつの積み重ねで、JLPT合格へ。';
 
   @override
   String get homeTargetGoalTitle => 'JLPT目標';
@@ -3815,4 +3861,50 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get practiceEduBannerMessage =>
       '時間制限付きの模擬試験と毎日の間隔反復（SRS）を組み合わせることで、本番のプレッシャーに慣れ、自然な解答力を養います。';
+
+  @override
+  String homeGreetingLearningLevel(String level) {
+    return 'JLPT $level を学習中 · 毎日コツコツ進めましょう！';
+  }
+
+  @override
+  String homeGreetingCurrentAndTargetLevel(String current, String target) {
+    return '$current 学習中 · 目標: $target';
+  }
+
+  @override
+  String get homeGreetingNoLevel => 'あなたに合った学習ロードマップを見つけましょう。';
+
+  @override
+  String get heroBannerTag => 'がんばろう！';
+
+  @override
+  String get heroBannerMorningTitle => 'おはようございます！';
+
+  @override
+  String get heroBannerMorningSubtitle => '楽しい学習の始まりです。';
+
+  @override
+  String get heroBannerNoonTitle => '少し勉強しましょう！';
+
+  @override
+  String get heroBannerNoonSubtitle => '新しい知識を取り入れましょう。';
+
+  @override
+  String get heroBannerAfternoonTitle => '午後も頑張りましょう！';
+
+  @override
+  String get heroBannerAfternoonSubtitle => '一歩一歩が大切です。';
+
+  @override
+  String get heroBannerEveningTitle => '一緒に復習しましょう！';
+
+  @override
+  String get heroBannerEveningSubtitle => '学んだことを定着させましょう。';
+
+  @override
+  String get heroBannerLateNightTitle => '今夜はゆっくり休んでね！';
+
+  @override
+  String get heroBannerLateNightSubtitle => '明日もまた続けましょう。';
 }

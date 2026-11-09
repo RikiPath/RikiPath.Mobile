@@ -203,7 +203,8 @@ class _AccountList extends StatelessWidget {
       return const MentorEmptyState(
         icon: Icons.account_balance_outlined,
         title: 'Chưa có tài khoản nhận thù lao',
-        description: 'Thêm tài khoản để nhận thù lao sau khi kỳ lương được duyệt.',
+        description:
+            'Thêm tài khoản để nhận thù lao sau khi kỳ lương được duyệt.',
       );
     }
     return Column(
@@ -212,7 +213,9 @@ class _AccountList extends StatelessWidget {
           RikiCard(
             key: ValueKey('mentor_bank_account_${a.id}'),
             backgroundColor: AppColors.cardWarmWhite,
-            borderColor: a.isCurrent ? AppColors.brandPrimary : AppColors.borderSubtlePink,
+            borderColor: a.isCurrent
+                ? AppColors.brandPrimary
+                : AppColors.cardBorderMuted,
             boxShadow: AppShadows.sakuraSubtle,
             child: Row(
               children: [

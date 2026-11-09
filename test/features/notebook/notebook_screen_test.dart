@@ -9,6 +9,7 @@ import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_3d_icon.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/login_screen.dart';
 import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
@@ -76,6 +77,17 @@ void main() {
     );
     expect(find.text('経験'), findsNothing);
     expect(find.text('改善'), findsNothing);
+    final collectionIcon = find.descendant(
+      of: find.byKey(
+        const ValueKey<String>('notebook_collection_fixture-learning-saved'),
+      ),
+      matching: find.byType(Sakura3DIcon),
+    );
+    expect(collectionIcon, findsOneWidget);
+    expect(
+      tester.widget<Sakura3DIcon>(collectionIcon).type,
+      Sakura3DIconType.notebook,
+    );
 
     await _openCollection(tester, NotebookController.demoCollectionRouteKey);
     expect(find.text('経験'), findsOneWidget);
@@ -485,6 +497,24 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final width in <double>[360, 390, 412]) {
+    for (final textScale in <double>[1.3, 2]) {
+      testWidgets('Notebook illustration fits ${width}px at ${textScale}x', (
+        tester,
+      ) async {
+        await _pumpNotebook(
+          tester,
+          viewportSize: Size(width, 873),
+          textScale: textScale,
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(Sakura3DIcon), findsWidgets);
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
+
   test('Notebook presentation contains no Dio, raw JSON, or API paths', () {
     final files = Directory('lib/features/notebook/presentation')
         .listSync(recursive: true)
@@ -563,6 +593,7 @@ Future<GoRouter> _pumpNotebook(
   SessionDemoNotebookRepository? demoRepository,
   AuthSessionState authState = AuthSessionState.authenticated,
   Size viewportSize = const Size(390, 844),
+  double textScale = 1,
 }) async {
   tester.view.physicalSize = viewportSize;
   tester.view.devicePixelRatio = 1;
@@ -609,7 +640,16 @@ Future<GoRouter> _pumpNotebook(
           effectiveDemoRepository,
         ),
       ],
-      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      child: MaterialApp.router(
+        theme: AppTheme.light,
+        routerConfig: router,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+      ),
     ),
   );
   return router;

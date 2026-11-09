@@ -27,13 +27,26 @@ class SakuraCalendarState {
       selectedDate: selectedDate ?? this.selectedDate,
       viewMode: viewMode ?? this.viewMode,
       visibleEventTypes: visibleEventTypes ?? this.visibleEventTypes,
-      selectedEvent:
-          clearSelectedEvent ? null : (selectedEvent ?? this.selectedEvent),
+      selectedEvent: clearSelectedEvent
+          ? null
+          : (selectedEvent ?? this.selectedEvent),
     );
   }
 }
 
 class SakuraCalendarController extends Notifier<SakuraCalendarState> {
+  DateTime _shiftMonth(DateTime date, int offset) {
+    final first = DateTime(date.year, date.month + offset);
+    final lastDay = DateTime(first.year, first.month + 1, 0).day;
+    return DateTime(first.year, first.month, date.day.clamp(1, lastDay));
+  }
+
+  DateTime _shiftYear(DateTime date, int offset) {
+    final year = date.year + offset;
+    final lastDay = DateTime(year, date.month + 1, 0).day;
+    return DateTime(year, date.month, date.day.clamp(1, lastDay));
+  }
+
   @override
   SakuraCalendarState build() {
     return SakuraCalendarState(
@@ -79,9 +92,9 @@ class SakuraCalendarController extends Notifier<SakuraCalendarState> {
           selectedDate: cur.subtract(const Duration(days: 7)),
         );
       case SakuraCalendarViewMode.month:
-        state = state.copyWith(
-          selectedDate: DateTime(cur.year, cur.month - 1, cur.day),
-        );
+        state = state.copyWith(selectedDate: _shiftMonth(cur, -1));
+      case SakuraCalendarViewMode.year:
+        state = state.copyWith(selectedDate: _shiftYear(cur, -1));
       case SakuraCalendarViewMode.agenda:
         state = state.copyWith(
           selectedDate: cur.subtract(const Duration(days: 7)),
@@ -93,30 +106,24 @@ class SakuraCalendarController extends Notifier<SakuraCalendarState> {
     final cur = state.selectedDate;
     switch (state.viewMode) {
       case SakuraCalendarViewMode.day:
-        state = state.copyWith(
-          selectedDate: cur.add(const Duration(days: 1)),
-        );
+        state = state.copyWith(selectedDate: cur.add(const Duration(days: 1)));
       case SakuraCalendarViewMode.threeDay:
-        state = state.copyWith(
-          selectedDate: cur.add(const Duration(days: 3)),
-        );
+        state = state.copyWith(selectedDate: cur.add(const Duration(days: 3)));
       case SakuraCalendarViewMode.week:
-        state = state.copyWith(
-          selectedDate: cur.add(const Duration(days: 7)),
-        );
+        state = state.copyWith(selectedDate: cur.add(const Duration(days: 7)));
       case SakuraCalendarViewMode.month:
-        state = state.copyWith(
-          selectedDate: DateTime(cur.year, cur.month + 1, cur.day),
-        );
+        state = state.copyWith(selectedDate: _shiftMonth(cur, 1));
+      case SakuraCalendarViewMode.year:
+        state = state.copyWith(selectedDate: _shiftYear(cur, 1));
       case SakuraCalendarViewMode.agenda:
-        state = state.copyWith(
-          selectedDate: cur.add(const Duration(days: 7)),
-        );
+        state = state.copyWith(selectedDate: cur.add(const Duration(days: 7)));
     }
   }
 
   void toggleEventType(SakuraCalendarEventType type) {
-    final nextTypes = Set<SakuraCalendarEventType>.from(state.visibleEventTypes);
+    final nextTypes = Set<SakuraCalendarEventType>.from(
+      state.visibleEventTypes,
+    );
     if (nextTypes.contains(type)) {
       if (nextTypes.length > 1) {
         nextTypes.remove(type);
@@ -130,5 +137,5 @@ class SakuraCalendarController extends Notifier<SakuraCalendarState> {
 
 final sakuraCalendarControllerProvider =
     NotifierProvider.autoDispose<SakuraCalendarController, SakuraCalendarState>(
-  SakuraCalendarController.new,
-);
+      SakuraCalendarController.new,
+    );

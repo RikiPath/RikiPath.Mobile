@@ -39,4 +39,8 @@ class LearningPathController extends AsyncNotifier<RecommendedLearningPath?> {
       return false;
     }
   }
+
+  void showServerPath(RecommendedLearningPath path) {
+    state = AsyncData(path);
+  }
 }

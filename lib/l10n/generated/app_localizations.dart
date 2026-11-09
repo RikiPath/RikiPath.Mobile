@@ -224,6 +224,30 @@ abstract class AppLocalizations {
   /// **'JA'**
   String get languageCodeJapanese;
 
+  /// No description provided for @appLanguageTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngôn ngữ ứng dụng'**
+  String get appLanguageTitle;
+
+  /// No description provided for @appLanguageSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn ngôn ngữ hiển thị trong ứng dụng'**
+  String get appLanguageSubtitle;
+
+  /// No description provided for @vietnameseSubLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vietnamese'**
+  String get vietnameseSubLabel;
+
+  /// No description provided for @japaneseSubLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Japanese'**
+  String get japaneseSubLabel;
+
   /// No description provided for @back.
   ///
   /// In vi, this message translates to:
@@ -293,14 +317,44 @@ abstract class AppLocalizations {
   /// No description provided for @preparingLearningContent.
   ///
   /// In vi, this message translates to:
-  /// **'RikiPath đang chuẩn bị bài học cho bạn...'**
+  /// **'Đang mở RikiPath...'**
   String get preparingLearningContent;
 
   /// No description provided for @preparingLearningSubtext.
   ///
   /// In vi, this message translates to:
-  /// **'Nội dung và lộ trình học tập sẽ sẵn sàng trong giây lát.'**
+  /// **'Đang kiểm tra phiên đăng nhập để đưa bạn vào không gian học tập.'**
   String get preparingLearningSubtext;
+
+  /// No description provided for @learnerStartupLoadingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang xác định bước học tiếp theo...'**
+  String get learnerStartupLoadingTitle;
+
+  /// No description provided for @learnerStartupLoadingSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'RikiPath đang kiểm tra hồ sơ và mục tiêu JLPT của bạn.'**
+  String get learnerStartupLoadingSubtitle;
+
+  /// No description provided for @learnerStartupOnboardingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang mở phần thiết lập học tập...'**
+  String get learnerStartupOnboardingTitle;
+
+  /// No description provided for @learnerStartupPlacementTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang mở bài kiểm tra đầu vào...'**
+  String get learnerStartupPlacementTitle;
+
+  /// No description provided for @learnerStartupHomeTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang mở trang học tập của bạn...'**
+  String get learnerStartupHomeTitle;
 
   /// No description provided for @notAvailable.
   ///
@@ -4787,8 +4841,38 @@ abstract class AppLocalizations {
   /// No description provided for @completedLessonsLabel.
   ///
   /// In vi, this message translates to:
-  /// **'Bài học đã hoàn thành'**
+  /// **'Bài đã học'**
   String get completedLessonsLabel;
+
+  /// No description provided for @weeklyActivityNoDailyData.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có chi tiết học từng ngày'**
+  String get weeklyActivityNoDailyData;
+
+  /// No description provided for @analyticsPercentComplete.
+  ///
+  /// In vi, this message translates to:
+  /// **'{percent}% hoàn thành'**
+  String analyticsPercentComplete(int percent);
+
+  /// No description provided for @analyticsRemainingLessons.
+  ///
+  /// In vi, this message translates to:
+  /// **'Còn {remaining} bài chưa hoàn thành'**
+  String analyticsRemainingLessons(int remaining);
+
+  /// No description provided for @analyticsNoLessons.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có bài học trong lộ trình'**
+  String get analyticsNoLessons;
+
+  /// No description provided for @analyticsInvalidProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dữ liệu tiến độ cần được kiểm tra'**
+  String get analyticsInvalidProgress;
 
   /// No description provided for @analyticsCompletedLessons.
   ///
@@ -5069,7 +5153,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeDailyMotivationSubtitle.
   ///
   /// In vi, this message translates to:
-  /// **'Tiến bộ hơn mỗi ngày! がんばろう!'**
+  /// **'Mỗi ngày một chút, chạm mục tiêu JLPT.'**
   String get homeDailyMotivationSubtitle;
 
   /// No description provided for @homeTargetGoalTitle.
@@ -7075,6 +7159,90 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Kết hợp làm đề thi thử có bấm giờ cùng ôn tập ngắt quãng (SRS) mỗi ngày giúp bạn quen áp lực phòng thi và củng cố phản xạ tự nhiên.'**
   String get practiceEduBannerMessage;
+
+  /// No description provided for @homeGreetingLearningLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn đang học JLPT {level} · Cùng tiến bộ mỗi ngày!'**
+  String homeGreetingLearningLevel(String level);
+
+  /// No description provided for @homeGreetingCurrentAndTargetLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang học {current} · Hướng đến {target}'**
+  String homeGreetingCurrentAndTargetLevel(String current, String target);
+
+  /// No description provided for @homeGreetingNoLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khám phá lộ trình học phù hợp với bạn.'**
+  String get homeGreetingNoLevel;
+
+  /// No description provided for @heroBannerTag.
+  ///
+  /// In vi, this message translates to:
+  /// **'がんばろう！'**
+  String get heroBannerTag;
+
+  /// No description provided for @heroBannerMorningTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chào buổi sáng!'**
+  String get heroBannerMorningTitle;
+
+  /// No description provided for @heroBannerMorningSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khởi đầu một ngày học thật vui.'**
+  String get heroBannerMorningSubtitle;
+
+  /// No description provided for @heroBannerNoonTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học một chút nhé!'**
+  String get heroBannerNoonTitle;
+
+  /// No description provided for @heroBannerNoonSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nạp thêm kiến thức mới.'**
+  String get heroBannerNoonSubtitle;
+
+  /// No description provided for @heroBannerAfternoonTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiếp tục cố gắng!'**
+  String get heroBannerAfternoonTitle;
+
+  /// No description provided for @heroBannerAfternoonSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mỗi bước nhỏ đều đáng giá.'**
+  String get heroBannerAfternoonSubtitle;
+
+  /// No description provided for @heroBannerEveningTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cùng ôn tập nào!'**
+  String get heroBannerEveningTitle;
+
+  /// No description provided for @heroBannerEveningSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Củng cố những điều đã học.'**
+  String get heroBannerEveningSubtitle;
+
+  /// No description provided for @heroBannerLateNightTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nghỉ ngơi thật tốt!'**
+  String get heroBannerLateNightTitle;
+
+  /// No description provided for @heroBannerLateNightSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày mai mình lại tiếp tục nhé.'**
+  String get heroBannerLateNightSubtitle;
 }
 
 class _AppLocalizationsDelegate

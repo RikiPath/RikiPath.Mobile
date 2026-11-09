@@ -34,6 +34,7 @@ class MeetingLandingScreen extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: const RikiFeatureIcon(
                       icon: Icons.videocam_outlined,
+                      icon3d: Sakura3DIconType.classroom,
                       tone: AppFeatureTones.meeting,
                       extent: 56,
                       iconSize: 30,

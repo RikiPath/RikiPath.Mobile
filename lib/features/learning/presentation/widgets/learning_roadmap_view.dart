@@ -165,7 +165,7 @@ class _RecommendedPathSection extends StatelessWidget {
       return RikiCard(
         key: const ValueKey<String>('learning_path_empty'),
         backgroundColor: AppColors.cardWarmWhite,
-        borderColor: AppColors.borderSubtlePink,
+        borderColor: AppColors.cardBorderMuted,
         boxShadow: AppShadows.sakuraSubtle,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

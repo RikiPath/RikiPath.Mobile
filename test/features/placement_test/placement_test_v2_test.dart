@@ -364,7 +364,7 @@ void main() {
     });
 
     test('routes authenticated startup to a restored active attempt', () async {
-      final profile = _ProfileRepository();
+      final profile = _ProfileRepository(targetId: 309);
       final scope = _container(
         placement: _PlacementRepository(
           status: _activeStatus,
@@ -378,7 +378,7 @@ void main() {
       );
 
       expect(destination, LearnerStartupDestination.placementTest);
-      expect(profile.loadCalls, 0);
+      expect(profile.loadCalls, 1);
       scope.dispose();
     });
 
@@ -839,6 +839,7 @@ void main() {
         final scope = _container(
           placement: _PlacementRepository(status: readyStatus),
           learning: learning,
+          profile: _ProfileRepository(targetId: 309),
         );
 
         final destination = await scope.container.read(

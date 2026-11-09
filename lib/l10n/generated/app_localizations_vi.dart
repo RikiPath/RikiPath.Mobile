@@ -78,6 +78,18 @@ class AppLocalizationsVi extends AppLocalizations {
   String get languageCodeJapanese => 'JA';
 
   @override
+  String get appLanguageTitle => 'Ngôn ngữ ứng dụng';
+
+  @override
+  String get appLanguageSubtitle => 'Chọn ngôn ngữ hiển thị trong ứng dụng';
+
+  @override
+  String get vietnameseSubLabel => 'Vietnamese';
+
+  @override
+  String get japaneseSubLabel => 'Japanese';
+
+  @override
   String get back => 'Quay lại';
 
   @override
@@ -111,12 +123,29 @@ class AppLocalizationsVi extends AppLocalizations {
   String get loading => 'Đang tải...';
 
   @override
-  String get preparingLearningContent =>
-      'RikiPath đang chuẩn bị bài học cho bạn...';
+  String get preparingLearningContent => 'Đang mở RikiPath...';
 
   @override
   String get preparingLearningSubtext =>
-      'Nội dung và lộ trình học tập sẽ sẵn sàng trong giây lát.';
+      'Đang kiểm tra phiên đăng nhập để đưa bạn vào không gian học tập.';
+
+  @override
+  String get learnerStartupLoadingTitle =>
+      'Đang xác định bước học tiếp theo...';
+
+  @override
+  String get learnerStartupLoadingSubtitle =>
+      'RikiPath đang kiểm tra hồ sơ và mục tiêu JLPT của bạn.';
+
+  @override
+  String get learnerStartupOnboardingTitle =>
+      'Đang mở phần thiết lập học tập...';
+
+  @override
+  String get learnerStartupPlacementTitle => 'Đang mở bài kiểm tra đầu vào...';
+
+  @override
+  String get learnerStartupHomeTitle => 'Đang mở trang học tập của bạn...';
 
   @override
   String get notAvailable => 'Chưa khả dụng';
@@ -2715,7 +2744,26 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get completedLessonsLabel => 'Bài học đã hoàn thành';
+  String get completedLessonsLabel => 'Bài đã học';
+
+  @override
+  String get weeklyActivityNoDailyData => 'Chưa có chi tiết học từng ngày';
+
+  @override
+  String analyticsPercentComplete(int percent) {
+    return '$percent% hoàn thành';
+  }
+
+  @override
+  String analyticsRemainingLessons(int remaining) {
+    return 'Còn $remaining bài chưa hoàn thành';
+  }
+
+  @override
+  String get analyticsNoLessons => 'Chưa có bài học trong lộ trình';
+
+  @override
+  String get analyticsInvalidProgress => 'Dữ liệu tiến độ cần được kiểm tra';
 
   @override
   String analyticsCompletedLessons(int completed, int total) {
@@ -2872,7 +2920,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get homeDailyMotivation => 'Học mỗi ngày';
 
   @override
-  String get homeDailyMotivationSubtitle => 'Tiến bộ hơn mỗi ngày! がんばろう!';
+  String get homeDailyMotivationSubtitle =>
+      'Mỗi ngày một chút, chạm mục tiêu JLPT.';
 
   @override
   String get homeTargetGoalTitle => 'Mục tiêu JLPT';
@@ -4020,4 +4069,50 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get practiceEduBannerMessage =>
       'Kết hợp làm đề thi thử có bấm giờ cùng ôn tập ngắt quãng (SRS) mỗi ngày giúp bạn quen áp lực phòng thi và củng cố phản xạ tự nhiên.';
+
+  @override
+  String homeGreetingLearningLevel(String level) {
+    return 'Bạn đang học JLPT $level · Cùng tiến bộ mỗi ngày!';
+  }
+
+  @override
+  String homeGreetingCurrentAndTargetLevel(String current, String target) {
+    return 'Đang học $current · Hướng đến $target';
+  }
+
+  @override
+  String get homeGreetingNoLevel => 'Khám phá lộ trình học phù hợp với bạn.';
+
+  @override
+  String get heroBannerTag => 'がんばろう！';
+
+  @override
+  String get heroBannerMorningTitle => 'Chào buổi sáng!';
+
+  @override
+  String get heroBannerMorningSubtitle => 'Khởi đầu một ngày học thật vui.';
+
+  @override
+  String get heroBannerNoonTitle => 'Học một chút nhé!';
+
+  @override
+  String get heroBannerNoonSubtitle => 'Nạp thêm kiến thức mới.';
+
+  @override
+  String get heroBannerAfternoonTitle => 'Tiếp tục cố gắng!';
+
+  @override
+  String get heroBannerAfternoonSubtitle => 'Mỗi bước nhỏ đều đáng giá.';
+
+  @override
+  String get heroBannerEveningTitle => 'Cùng ôn tập nào!';
+
+  @override
+  String get heroBannerEveningSubtitle => 'Củng cố những điều đã học.';
+
+  @override
+  String get heroBannerLateNightTitle => 'Nghỉ ngơi thật tốt!';
+
+  @override
+  String get heroBannerLateNightSubtitle => 'Ngày mai mình lại tiếp tục nhé.';
 }

@@ -18,6 +18,9 @@ class StandardRoadmapView extends StatelessWidget {
     required this.aiPathError,
     required this.aiPath,
     required this.onGenerateAiPath,
+    this.onUpdateAiDay,
+    this.updatingAiDay,
+    this.aiDayError,
     super.key,
   });
 
@@ -30,6 +33,9 @@ class StandardRoadmapView extends StatelessWidget {
   final String? aiPathError;
   final RecommendedLearningPath? aiPath;
   final VoidCallback onGenerateAiPath;
+  final Future<void> Function(int day, {required bool complete})? onUpdateAiDay;
+  final int? updatingAiDay;
+  final String? aiDayError;
 
   @override
   Widget build(BuildContext context) {
@@ -111,14 +117,18 @@ class StandardRoadmapView extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.space4),
                   RikiPrimaryButton(
-                    key: const ValueKey<String>('standard_roadmap_change_goal_button'),
+                    key: const ValueKey<String>(
+                      'standard_roadmap_change_goal_button',
+                    ),
                     label: 'Đổi mục tiêu JLPT',
                     leadingIcon: Icons.flag_outlined,
                     onPressed: () => context.push(AppRoutes.profileJlptGoal),
                   ),
                   const SizedBox(height: AppSpacing.space2),
                   RikiSecondaryButton(
-                    key: const ValueKey<String>('standard_roadmap_placement_test_button'),
+                    key: const ValueKey<String>(
+                      'standard_roadmap_placement_test_button',
+                    ),
                     label: 'Đánh giá đầu vào',
                     leadingIcon: Icons.quiz_outlined,
                     onPressed: () => context.push(AppRoutes.placementTest),
@@ -145,6 +155,10 @@ class StandardRoadmapView extends StatelessWidget {
             error: aiPathError,
             path: aiPath,
             onGenerate: onGenerateAiPath,
+            onUpdateDay: onUpdateAiDay,
+            onOpenLesson: onOpenLesson,
+            updatingDay: updatingAiDay,
+            dayError: aiDayError,
           ),
           const SizedBox(height: AppSpacing.space4),
           SakuraEducationalBanner(
@@ -225,6 +239,10 @@ class _AiPathSection extends StatelessWidget {
     required this.error,
     required this.path,
     required this.onGenerate,
+    this.onUpdateDay,
+    this.onOpenLesson,
+    this.updatingDay,
+    this.dayError,
   });
 
   final bool canGenerate;
@@ -233,6 +251,10 @@ class _AiPathSection extends StatelessWidget {
   final String? error;
   final RecommendedLearningPath? path;
   final VoidCallback onGenerate;
+  final Future<void> Function(int day, {required bool complete})? onUpdateDay;
+  final ValueChanged<String>? onOpenLesson;
+  final int? updatingDay;
+  final String? dayError;
 
   @override
   Widget build(BuildContext context) {
@@ -249,7 +271,7 @@ class _AiPathSection extends StatelessWidget {
             const LinearProgressIndicator(),
             const SizedBox(height: AppSpacing.space2),
             Text(l10n.generatingLearningPath),
-          ] else if (!canGenerate)
+          ] else if (!canGenerate && path == null)
             Text(
               error ??
                   (hasCompletedPlacement
@@ -275,6 +297,82 @@ class _AiPathSection extends StatelessWidget {
                   ],
                 ),
               ],
+              if (value.dailySchedules.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.space3),
+                for (final day in value.dailySchedules) ...[
+                  const Divider(),
+                  Text(
+                    'Ngày ${day.day}: ${day.title}',
+                    style: AppTypography.cardTitle,
+                  ),
+                  Text(day.focus, style: AppTypography.bodySmall),
+                  const SizedBox(height: AppSpacing.space1),
+                  Text(
+                    day.isCompleted == true
+                        ? 'Đã hoàn thành'
+                        : day.isStarted == true
+                        ? 'Đang học'
+                        : day.canStart == true
+                        ? 'Có thể bắt đầu'
+                        : 'Chưa mở',
+                    style: AppTypography.metadata,
+                  ),
+                  for (final lesson in day.lessons)
+                    TextButton.icon(
+                      key: ValueKey<String>(
+                        'ai_day_${day.day}_lesson_${lesson.lessonId}',
+                      ),
+                      onPressed:
+                          day.isStarted == true || day.isCompleted == true
+                          ? () => onOpenLesson?.call(lesson.routeId)
+                          : null,
+                      icon: const Icon(Icons.menu_book_outlined),
+                      label: Text(lesson.title),
+                    ),
+                  if (day.canStart == true && day.isStarted != true)
+                    OutlinedButton(
+                      key: ValueKey<String>('ai_day_${day.day}_start'),
+                      onPressed: updatingDay == null && onUpdateDay != null
+                          ? () => onUpdateDay!(day.day, complete: false)
+                          : null,
+                      child: const Text('Bắt đầu ngày học'),
+                    ),
+                  if (day.canStart == true &&
+                      day.isStarted == true &&
+                      day.isCompleted != true)
+                    OutlinedButton(
+                      key: ValueKey<String>('ai_day_${day.day}_complete'),
+                      onPressed: updatingDay == null && onUpdateDay != null
+                          ? () => onUpdateDay!(day.day, complete: true)
+                          : null,
+                      child: const Text('Hoàn thành ngày học'),
+                    ),
+                  if (updatingDay == day.day) const LinearProgressIndicator(),
+                ],
+              ],
+              if (dayError case final message?) ...[
+                const SizedBox(height: AppSpacing.space2),
+                Text(
+                  message,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.error,
+                  ),
+                ),
+              ],
+              if (!canGenerate) ...[
+                const SizedBox(height: AppSpacing.space2),
+                Text(
+                  error ??
+                      (hasCompletedPlacement
+                          ? l10n.aiLearningGoalRequired
+                          : l10n.aiPlacementRequired),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: error == null
+                        ? AppColors.textSecondary
+                        : AppColors.error,
+                  ),
+                ),
+              ],
             ] else
               Text(
                 error ?? l10n.learningPathRequirements,
@@ -284,17 +382,19 @@ class _AiPathSection extends StatelessWidget {
                       : AppColors.error,
                 ),
               ),
-            const SizedBox(height: AppSpacing.space3),
-            FilledButton.icon(
-              key: const ValueKey<String>('ai_learning_path_generate_button'),
-              onPressed: onGenerate,
-              icon: const Icon(Icons.auto_awesome_outlined),
-              label: Text(
-                path == null
-                    ? l10n.generateLearningPath
-                    : l10n.regenerateLearningPath,
+            if (canGenerate) ...[
+              const SizedBox(height: AppSpacing.space3),
+              FilledButton.icon(
+                key: const ValueKey<String>('ai_learning_path_generate_button'),
+                onPressed: onGenerate,
+                icon: const Icon(Icons.auto_awesome_outlined),
+                label: Text(
+                  path == null
+                      ? l10n.generateLearningPath
+                      : l10n.regenerateLearningPath,
+                ),
               ),
-            ),
+            ],
           ],
         ],
       ),

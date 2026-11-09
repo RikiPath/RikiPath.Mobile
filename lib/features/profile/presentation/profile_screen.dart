@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_scroll_scaffold.dart';
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
@@ -33,13 +34,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final liveStreak = analytics?.isAvailable(AnalyticsSection.streak) == true
         ? analytics?.streakDays
         : null;
-    return Scaffold(
+    return SakuraScrollScaffold(
       backgroundColor: AppColors.profileBackground,
-      appBar: HomeHeader(
+      appBarBuilder: (context, isScrolled) => HomeHeader(
+        isScrolled: isScrolled,
         streakDays: liveStreak,
         isStreakLoading: analyticsState.isLoading,
         unreadNotificationCount: notificationState.value?.unreadCount,
         onNotificationsPressed: () => context.push(AppRoutes.notifications),
+        onCalendarPressed: () => context.push(AppRoutes.calendar),
       ),
       body: profileState.when(
         loading: () => const ProfileSkeleton(),
@@ -196,6 +199,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
               ProfileActionTile(
                 key: const ValueKey<String>('profile_jlpt_goal_action'),
                 icon: Icons.track_changes_outlined,
+                icon3d: Sakura3DIconType.roadmap,
                 title: l10n.jlptGoalSettings,
                 subtitle: l10n.jlptGoalSettingsSubtitle,
                 emphasized: true,
@@ -204,6 +208,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
               ProfileActionTile(
                 key: const ValueKey<String>('profile_placement_test_action'),
                 icon: Icons.assignment_turned_in_outlined,
+                icon3d: Sakura3DIconType.mockExam,
                 title: l10n.onboardingPlacementAction,
                 subtitle: l10n.onboardingPlacementDescription,
                 onTap: () => context.push(AppRoutes.placementTest),
@@ -211,6 +216,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
               ProfileActionTile(
                 key: const ValueKey<String>('profile_progress_action'),
                 icon: Icons.insights_outlined,
+                icon3d: Sakura3DIconType.achievement,
                 title: l10n.progressAndHistory,
                 subtitle: l10n.profileProgressSubtitle,
                 onTap: () => context.push(AppRoutes.analytics),
@@ -228,6 +234,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
               ProfileActionTile(
                 key: const ValueKey<String>('profile_consultation_action'),
                 icon: Icons.support_agent_outlined,
+                icon3d: Sakura3DIconType.mentor,
                 title: l10n.consultation,
                 subtitle: l10n.profileConsultationSubtitle,
                 emphasized: true,

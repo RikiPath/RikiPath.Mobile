@@ -22,6 +22,11 @@ class RecommendedLearningPath {
     this.baseActivePathId,
     this.previewExpiresAt,
     this.confirmedAt,
+    this.horizon,
+    this.planDurationDays,
+    this.targetExamDate,
+    this.daysUntilExam,
+    this.hasTargetExamDate,
   });
 
   final int userId;
@@ -30,7 +35,7 @@ class RecommendedLearningPath {
   final List<String> strengths;
   final List<String> weaknesses;
   final String feasibility;
-  final bool isExamDateRealistic;
+  final bool? isExamDateRealistic;
   final int recommendedStudyDays;
   final DateTime? suggestedExamDate;
   final int? pathId;
@@ -41,6 +46,11 @@ class RecommendedLearningPath {
   final int? baseActivePathId;
   final DateTime? previewExpiresAt;
   final DateTime? confirmedAt;
+  final String? horizon;
+  final int? planDurationDays;
+  final DateTime? targetExamDate;
+  final int? daysUntilExam;
+  final bool? hasTargetExamDate;
   final List<String> focusTopics;
   final List<RecommendedLearningDay> dailySchedules;
 
@@ -54,9 +64,18 @@ class RecommendedLearningPath {
       (item) => item.lessonId == lessonId,
     );
     if (currentIndex >= 0 && currentIndex + 1 < lessons.length) {
-      return lessons[currentIndex + 1];
+      final next = lessons[currentIndex + 1];
+      final nextDay = dailySchedules
+          .where((day) => day.lessons.any((item) => item.lessonId == next.lessonId))
+          .firstOrNull;
+      if (nextDay?.canStart == false &&
+          nextDay?.isStarted != true &&
+          nextDay?.isCompleted != true) {
+        return null;
+      }
+      return next;
     }
-    return currentIndex < 0 ? lessons.firstOrNull : null;
+    return null;
   }
 }
 
@@ -69,12 +88,22 @@ class RecommendedLearningDay {
     required this.title,
     required this.focus,
     required this.lessons,
+    this.canStart,
+    this.isStarted,
+    this.isCompleted,
+    this.startedAt,
+    this.completedAt,
   });
 
   final int day;
   final String title;
   final String focus;
   final List<RecommendedLesson> lessons;
+  final bool? canStart;
+  final bool? isStarted;
+  final bool? isCompleted;
+  final DateTime? startedAt;
+  final DateTime? completedAt;
 }
 
 @immutable

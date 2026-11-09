@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 
+/// Canonical asset path for the RikiPath Sakura Book brand logo.
+const String rikiBrandLogoAsset = 'assets/images/icons_3d/riki_brand_logo.webp';
+
 /// Canonical RikiPath mark, wordmark, and optional learner-level badge.
 class RikiBrandLockup extends StatelessWidget {
   const RikiBrandLockup({this.level, this.compact = false, super.key});
@@ -11,7 +14,7 @@ class RikiBrandLockup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final markSize = compact ? 32.0 : 40.0;
+    final markSize = compact ? 36.0 : 44.0;
 
     return Semantics(
       container: true,
@@ -25,19 +28,12 @@ class RikiBrandLockup extends StatelessWidget {
             width: markSize,
             height: markSize,
             alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.brandPrimary,
-              borderRadius: BorderRadius.circular(AppRadius.compact),
-              boxShadow: AppShadows.cardSoft,
-            ),
-            child: Text(
-              '文',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: compact ? 16 : 20,
-                height: 1,
-                fontWeight: FontWeight.w700,
-              ),
+            child: Image.asset(
+              rikiBrandLogoAsset,
+              width: markSize,
+              height: markSize,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
             ),
           ),
           const SizedBox(width: AppSpacing.space2),

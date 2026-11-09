@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_buttons.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_3d_icon.dart';
 
 /// A consistent, responsive presentation for a screen or section with no
 /// content. Business/state decisions remain with the owning feature.
@@ -9,6 +10,7 @@ class RikiEmptyState extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.message,
+    this.icon3d,
     this.actionLabel,
     this.onAction,
     this.actionKey,
@@ -23,6 +25,7 @@ class RikiEmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String message;
+  final Sakura3DIconType? icon3d;
   final String? actionLabel;
   final VoidCallback? onAction;
   final Key? actionKey;
@@ -33,6 +36,7 @@ class RikiEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return RikiStateView(
       icon: icon,
+      icon3d: icon3d,
       iconColor: AppColors.brandPrimary,
       iconBackgroundColor: AppColors.brandTint,
       title: title,
@@ -91,6 +95,7 @@ class RikiStateView extends StatelessWidget {
     required this.iconBackgroundColor,
     required this.title,
     required this.message,
+    this.icon3d,
     this.actionLabel,
     this.onAction,
     this.actionKey,
@@ -107,6 +112,7 @@ class RikiStateView extends StatelessWidget {
   final Color iconBackgroundColor;
   final String title;
   final String message;
+  final Sakura3DIconType? icon3d;
   final String? actionLabel;
   final VoidCallback? onAction;
   final Key? actionKey;
@@ -127,16 +133,22 @@ class RikiStateView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ExcludeSemantics(
-                child: Container(
-                  width: iconExtent,
-                  height: iconExtent,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: iconBackgroundColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, size: compact ? 27 : 32, color: iconColor),
-                ),
+                child: icon3d != null
+                    ? Sakura3DIcon(type: icon3d!, size: iconExtent)
+                    : Container(
+                        width: iconExtent,
+                        height: iconExtent,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: iconBackgroundColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          icon,
+                          size: compact ? 27 : 32,
+                          color: iconColor,
+                        ),
+                      ),
               ),
               SizedBox(height: compact ? AppSpacing.space3 : AppSpacing.space4),
               Text(

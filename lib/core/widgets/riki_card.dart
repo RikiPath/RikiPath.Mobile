@@ -16,7 +16,7 @@ class RikiCard extends StatefulWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final Color backgroundColor;
-  final Color borderColor;
+  final Color? borderColor;
   final List<BoxShadow> boxShadow;
   final double borderRadius;
   final VoidCallback? onTap;
@@ -40,7 +40,9 @@ class _RikiCardState extends State<RikiCard> {
     final card = DecoratedBox(
       decoration: BoxDecoration(
         color: widget.backgroundColor,
-        border: Border.all(color: widget.borderColor),
+        border: widget.borderColor == null
+            ? null
+            : Border.all(color: widget.borderColor!),
         borderRadius: radius,
         boxShadow: widget.boxShadow,
       ),

@@ -158,6 +158,46 @@ void main() {
     expect(destination, LearnerStartupDestination.home);
     expect(journey.saved?.selectedLevelId, 204);
   });
+
+  test('target JLPT alone never substitutes for current study level', () async {
+    final journey = _MemoryJourneyRepository();
+    final session = createTestAuthSession();
+    final container = ProviderContainer(
+      overrides: [
+        authSessionControllerProvider.overrideWithValue(session),
+        userProfileRepositoryProvider.overrideWithValue(
+          const _StartupProfileRepository(
+            targetJlptLevelId: 309,
+            currentStudyLevelId: null,
+            targetExamDate: null,
+          ),
+        ),
+        jlptCatalogRepositoryProvider.overrideWithValue(
+          TestJlptCatalogRepository(),
+        ),
+        learnerJourneyRepositoryProvider.overrideWithValue(journey),
+        placementTestRepositoryProvider.overrideWithValue(
+          const _UnexpectedPlacementRepository(),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    addTearDown(session.dispose);
+
+    expect(
+      await container.read(learnerStartupDestinationProvider.future),
+      LearnerStartupDestination.onboarding,
+    );
+    expect(journey.saved, isNull);
+  });
+}
+
+class _UnexpectedPlacementRepository extends _NoPlacementRepository {
+  const _UnexpectedPlacementRepository();
+
+  @override
+  Future<PlacementTestStatus> loadStatus() =>
+      throw StateError('Placement must wait for onboarding preferences.');
 }
 
 class _NoPlacementRepository implements PlacementTestRepository {

@@ -98,28 +98,32 @@ class SakuraEducationalBanner extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 7,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.brandTint,
-                                    borderRadius: BorderRadius.circular(
-                                      AppRadius.pill,
+                                Flexible(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                      vertical: 2,
                                     ),
-                                    border: Border.all(
-                                      color: AppColors.brandBorder,
-                                      width: 0.8,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.brandTint,
+                                      borderRadius: BorderRadius.circular(
+                                        AppRadius.pill,
+                                      ),
+                                      border: Border.all(
+                                        color: AppColors.brandBorder,
+                                        width: 0.8,
+                                      ),
                                     ),
-                                  ),
-                                  child: Text(
-                                    tag,
-                                    style: const TextStyle(
-                                      color: AppColors.brandPrimary,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.2,
+                                    child: Text(
+                                      tag,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: AppColors.brandPrimary,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.2,
+                                      ),
                                     ),
                                   ),
                                 ),

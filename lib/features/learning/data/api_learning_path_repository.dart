@@ -6,7 +6,10 @@ import 'package:rikipath_mobile/features/learning/domain/learning_path_repositor
 import 'package:rikipath_mobile/features/learning/domain/recommended_learning_path.dart';
 
 class ApiLearningPathRepository
-    implements LearningPathRepository, LearningPathVersionRepository {
+    implements
+        LearningPathRepository,
+        LearningPathVersionRepository,
+        LearningPathDayRepository {
   const ApiLearningPathRepository(this._client);
 
   final ApiClient _client;
@@ -111,6 +114,22 @@ class ApiLearningPathRepository
     return _readVersioned(response.data, LearningPathStatus.cancelled);
   }
 
+  @override
+  Future<RecommendedLearningPath> startDay(int day) async {
+    final response = await _client.post<Object?>(
+      LearningApiPaths.startActiveDay(day),
+    );
+    return _readVersioned(response.data, LearningPathStatus.active);
+  }
+
+  @override
+  Future<RecommendedLearningPath> completeDay(int day) async {
+    final response = await _client.post<Object?>(
+      LearningApiPaths.completeActiveDay(day),
+    );
+    return _readVersioned(response.data, LearningPathStatus.active);
+  }
+
   RecommendedLearningPath _readVersioned(
     Object? body, [
     LearningPathStatus? expectedStatus,
@@ -141,6 +160,11 @@ class ApiLearningPathRepository
                 day: day.day,
                 title: day.title,
                 focus: day.focus,
+                canStart: day.canStart,
+                isStarted: day.isStarted,
+                isCompleted: day.isCompleted,
+                startedAt: day.startedAt,
+                completedAt: day.completedAt,
                 lessons: List<RecommendedLesson>.unmodifiable([
                   for (var index = 0; index < day.lessonIds.length; index++)
                     RecommendedLesson(
@@ -178,6 +202,11 @@ class ApiLearningPathRepository
       baseActivePathId: dto.baseActivePathId,
       previewExpiresAt: dto.previewExpiresAt,
       confirmedAt: dto.confirmedAt,
+      horizon: dto.horizon,
+      planDurationDays: dto.planDurationDays,
+      targetExamDate: dto.targetExamDate,
+      daysUntilExam: dto.daysUntilExam,
+      hasTargetExamDate: dto.hasTargetExamDate,
     );
   }
 }

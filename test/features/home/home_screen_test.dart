@@ -83,10 +83,11 @@ void main() {
 
     expect(find.text('Chưa thể tải Trang chủ'), findsOneWidget);
     expect(find.text('Thử lại'), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey<String>('home_choose_jlpt_card')),
-      findsOneWidget,
+    final chooseCard = find.byKey(
+      const ValueKey<String>('home_choose_jlpt_card'),
     );
+    await tester.scrollUntilVisible(chooseCard, 200);
+    expect(chooseCard, findsOneWidget);
   });
 
   test('Home fixture keeps the learner JLPT scope typed', () {
@@ -106,7 +107,11 @@ void main() {
     await _pumpHome(tester);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Chọn mục tiêu'));
+    final target = find.text('Chọn mục tiêu');
+    await tester.scrollUntilVisible(target, 100);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -150));
+    await tester.pumpAndSettle();
+    await tester.tap(target);
     await tester.pumpAndSettle();
 
     expect(find.byType(LearnScreen), findsOneWidget);

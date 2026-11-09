@@ -27,6 +27,8 @@ class LearningRoadmapScreen extends ConsumerStatefulWidget {
 class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
   bool _isPreparingPreview = false;
   String? _previewError;
+  int? _updatingDay;
+  String? _dayError;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +71,9 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
             aiPathError:
                 _previewError ?? _pathError(context, pathState, placementState),
             aiPath: pathState.asData?.value,
+            onUpdateAiDay: _updateAiDay,
+            updatingAiDay: _updatingDay,
+            aiDayError: _dayError,
             onGenerateAiPath: () {
               if (eligible) {
                 if (pathState.asData?.value != null) {
@@ -82,6 +87,36 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _updateAiDay(int day, {required bool complete}) async {
+    if (_updatingDay != null) return;
+    setState(() {
+      _updatingDay = day;
+      _dayError = null;
+    });
+    try {
+      final repository = ref.read(learningPathRepositoryProvider);
+      if (repository is! LearningPathDayRepository) {
+        throw StateError('Learning Path day actions are unavailable.');
+      }
+      final dayRepository = repository as LearningPathDayRepository;
+      final updated = complete
+          ? await dayRepository.completeDay(day)
+          : await dayRepository.startDay(day);
+      ref.read(learningPathControllerProvider.notifier).showServerPath(updated);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _dayError = appErrorMessage(
+          error,
+          context.l10n,
+          fallback: 'Không thể cập nhật ngày học. Vui lòng thử lại.',
+        );
+      });
+    } finally {
+      if (mounted) setState(() => _updatingDay = null);
+    }
   }
 
   Future<void> _previewReplacement(StandardRoadmap roadmap) async {

@@ -210,7 +210,7 @@ class _MentorSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return RikiCard(
       backgroundColor: AppColors.cardWarmWhite,
-      borderColor: AppColors.borderSubtlePink,
+      borderColor: AppColors.cardBorderMuted,
       boxShadow: AppShadows.sakuraSubtle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

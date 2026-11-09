@@ -141,6 +141,69 @@ void main() {
   });
 
   test(
+    'AI path accepts a missing exam date and maps server day state',
+    () async {
+      final body = _learningPathEnvelope();
+      final result = body['result']! as Map<String, Object?>;
+      result['isExamDateRealistic'] = null;
+      result['hasTargetExamDate'] = false;
+      result['horizon'] = 'long_term';
+      result['planDurationDays'] = 30;
+      final days = result['dailySchedules']! as List<Object?>;
+      (days.first! as Map<String, Object?>).addAll(<String, Object?>{
+        'canStart': true,
+        'isStarted': false,
+        'isCompleted': false,
+        'startedAt': null,
+        'completedAt': null,
+      });
+      final client = _LearningApiClient(<String, Object?>{
+        'GET /api/LearningPath/latest': body,
+      });
+
+      final path = await ApiLearningPathRepository(client).loadLatest();
+
+      expect(path?.isExamDateRealistic, isNull);
+      expect(path?.hasTargetExamDate, isFalse);
+      expect(path?.planDurationDays, 30);
+      expect(path?.dailySchedules.first.canStart, isTrue);
+      expect(path?.dailySchedules.first.isStarted, isFalse);
+    },
+  );
+
+  test('AI next lesson never crosses a locked day or unrelated lesson', () async {
+    final body = _learningPathEnvelope();
+    final result = body['result']! as Map<String, Object?>;
+    final days = result['dailySchedules']! as List<Object?>;
+    (days[0]! as Map<String, Object?>)['canStart'] = true;
+    (days[1]! as Map<String, Object?>)['canStart'] = false;
+    final client = _LearningApiClient(<String, Object?>{
+      'GET /api/LearningPath/latest': body,
+    });
+
+    final path = await ApiLearningPathRepository(client).loadLatest();
+
+    expect(path?.recommendationAfter(709), isNull);
+    expect(path?.recommendationAfter(999), isNull);
+  });
+
+  test('AI day actions call canonical Backend routes', () async {
+    final client = _LearningApiClient(<String, Object?>{
+      'POST /api/LearningPath/active/days/1/start': _learningPathEnvelope(),
+      'POST /api/LearningPath/active/days/1/complete': _learningPathEnvelope(),
+    });
+    final repository = ApiLearningPathRepository(client);
+
+    await repository.startDay(1);
+    await repository.completeDay(1);
+
+    expect(client.calls, <String>[
+      'POST /api/LearningPath/active/days/1/start',
+      'POST /api/LearningPath/active/days/1/complete',
+    ]);
+  });
+
+  test(
     'learning-path generation rejects mismatched lesson IDs and titles',
     () async {
       final client = _LearningApiClient(<String, Object?>{
@@ -335,6 +398,79 @@ void main() {
 
     expect(roadmapLoads, 2);
   });
+
+  test(
+    'live completion uses Backend next lesson ID, never guessed order',
+    () async {
+      final repository = _ControlledLessonRepository();
+      final container = ProviderContainer(
+        overrides: [
+          jsonPreferenceStoreProvider.overrideWithValue(
+            TestJsonPreferenceStore(),
+          ),
+          lessonRepositoryProvider.overrideWithValue(repository),
+          standardRoadmapProvider.overrideWith(
+            (ref) async => const StandardRoadmap(
+              currentStudyLevelId: 1,
+              currentStudyLevelName: 'N5',
+              targetJlptLevelId: 2,
+              targetJlptLevelName: 'N4',
+              learningMode: LearningMode.standard,
+              totalLessons: 2,
+              completedLessons: 1,
+              nextLessonId: 824,
+              lessons: <StandardRoadmapLesson>[
+                StandardRoadmapLesson(
+                  lessonId: 709,
+                  title: 'Bài đã học',
+                  sortOrder: 1,
+                  progressPercent: 100,
+                  isCompleted: true,
+                ),
+                StandardRoadmapLesson(
+                  lessonId: 824,
+                  title: 'Bài học tiếp theo từ Backend',
+                  sortOrder: 6,
+                  progressPercent: 0,
+                  isCompleted: false,
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final lessonSubscription = container.listen(
+        lessonControllerProvider('709'),
+        (_, _) {},
+      );
+      addTearDown(lessonSubscription.close);
+      final controller = container.read(
+        lessonControllerProvider('709').notifier,
+      );
+      await container.read(lessonControllerProvider('709').future);
+      final completion = controller.completeLesson();
+      repository.completeResult.complete(_completedProgress);
+      await completion;
+
+      final completed = container
+          .read(lessonControllerProvider('709'))
+          .requireValue;
+      expect(
+        completed.stage,
+        LessonStage.completed,
+        reason:
+            'progress=${completed.lesson.progress.isCompleted}, '
+            'calls=${repository.completeCalls}, '
+            'error=${completed.completionErrorMessage}',
+      );
+      expect(completed.lesson.nextLesson?.routeId, '824');
+      expect(
+        completed.lesson.nextLesson?.title,
+        'Bài học tiếp theo từ Backend',
+      );
+    },
+  );
 
   test(
     'completion failure preserves lesson data and exposes retry state',
@@ -624,6 +760,9 @@ Map<String, Object?> _learningPathEnvelope({
   'isSuccess': true,
   'result': <String, Object?>{
     'userId': 42,
+    'pathId': 99,
+    'version': 1,
+    'status': 'ACTIVE',
     'generatedAt': '2026-10-26T08:00:00Z',
     'summary': 'Ưu tiên ngữ pháp còn yếu.',
     'strengths': <String>['Từ vựng'],

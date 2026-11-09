@@ -20,3 +20,9 @@ abstract interface class LearningPathVersionRepository {
 
   Future<RecommendedLearningPath> cancelPreview(int pathId);
 }
+
+abstract interface class LearningPathDayRepository {
+  Future<RecommendedLearningPath> startDay(int day);
+
+  Future<RecommendedLearningPath> completeDay(int day);
+}

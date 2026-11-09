@@ -21,6 +21,10 @@
   "languageJapanese": "日本語",
   "languageCodeVietnamese": "VI",
   "languageCodeJapanese": "JA",
+  "appLanguageTitle": "Ngôn ngữ ứng dụng",
+  "appLanguageSubtitle": "Chọn ngôn ngữ hiển thị trong ứng dụng",
+  "vietnameseSubLabel": "Vietnamese",
+  "japaneseSubLabel": "Japanese",
   "back": "Quay lại",
   "retry": "Thử lại",
   "clearFilters": "Xóa bộ lọc",
@@ -32,8 +36,13 @@
   "continueLabel": "Tiếp tục",
   "finish": "Hoàn tất",
   "loading": "Đang tải...",
-  "preparingLearningContent": "RikiPath đang chuẩn bị bài học cho bạn...",
-  "preparingLearningSubtext": "Nội dung và lộ trình học tập sẽ sẵn sàng trong giây lát.",
+  "preparingLearningContent": "Đang mở RikiPath...",
+  "preparingLearningSubtext": "Đang kiểm tra phiên đăng nhập để đưa bạn vào không gian học tập.",
+  "learnerStartupLoadingTitle": "Đang xác định bước học tiếp theo...",
+  "learnerStartupLoadingSubtitle": "RikiPath đang kiểm tra hồ sơ và mục tiêu JLPT của bạn.",
+  "learnerStartupOnboardingTitle": "Đang mở phần thiết lập học tập...",
+  "learnerStartupPlacementTitle": "Đang mở bài kiểm tra đầu vào...",
+  "learnerStartupHomeTitle": "Đang mở trang học tập của bạn...",
   "notAvailable": "Chưa khả dụng",
   "pageNotFound": "Không tìm thấy trang: {uri}",
   "@pageNotFound": {
@@ -1639,7 +1648,26 @@
       }
     }
   },
-  "completedLessonsLabel": "Bài học đã hoàn thành",
+  "completedLessonsLabel": "Bài đã học",
+  "weeklyActivityNoDailyData": "Chưa có chi tiết học từng ngày",
+  "analyticsPercentComplete": "{percent}% hoàn thành",
+  "@analyticsPercentComplete": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsRemainingLessons": "Còn {remaining} bài chưa hoàn thành",
+  "@analyticsRemainingLessons": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsNoLessons": "Chưa có bài học trong lộ trình",
+  "analyticsInvalidProgress": "Dữ liệu tiến độ cần được kiểm tra",
   "analyticsCompletedLessons": "{completed} / {total} bài",
   "@analyticsCompletedLessons": {
     "placeholders": {
@@ -1732,7 +1760,7 @@
   "homeQuickGrammar": "Ngữ pháp",
   "homeQuickListening": "Luyện nghe",
   "homeDailyMotivation": "Học mỗi ngày",
-  "homeDailyMotivationSubtitle": "Tiến bộ hơn mỗi ngày! がんばろう!",
+  "homeDailyMotivationSubtitle": "Mỗi ngày một chút, chạm mục tiêu JLPT.",
   "homeTargetGoalTitle": "Mục tiêu JLPT",
   "commonErrorNetwork": "Không thể kết nối tới RikiPath. Vui lòng kiểm tra mạng và thử lại.",
   "commonErrorUnauthorized": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
@@ -2253,5 +2281,36 @@
   "vocabularyEduBannerMessage": "Ghi nhớ từ vựng kết hợp trợ từ và động từ đi kèm để hình thành phản xạ tự nhiên khi giao tiếp.",
   "practiceEduBannerTag": "Chiến lược ôn luyện",
   "practiceEduBannerTitle": "Luyện đề có chủ đích",
-  "practiceEduBannerMessage": "Kết hợp làm đề thi thử có bấm giờ cùng ôn tập ngắt quãng (SRS) mỗi ngày giúp bạn quen áp lực phòng thi và củng cố phản xạ tự nhiên."
+  "practiceEduBannerMessage": "Kết hợp làm đề thi thử có bấm giờ cùng ôn tập ngắt quãng (SRS) mỗi ngày giúp bạn quen áp lực phòng thi và củng cố phản xạ tự nhiên.",
+  "homeGreetingLearningLevel": "Bạn đang học JLPT {level} · Cùng tiến bộ mỗi ngày!",
+  "@homeGreetingLearningLevel": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingCurrentAndTargetLevel": "Đang học {current} · Hướng đến {target}",
+  "@homeGreetingCurrentAndTargetLevel": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingNoLevel": "Khám phá lộ trình học phù hợp với bạn.",
+  "heroBannerTag": "がんばろう！",
+  "heroBannerMorningTitle": "Chào buổi sáng!",
+  "heroBannerMorningSubtitle": "Khởi đầu một ngày học thật vui.",
+  "heroBannerNoonTitle": "Học một chút nhé!",
+  "heroBannerNoonSubtitle": "Nạp thêm kiến thức mới.",
+  "heroBannerAfternoonTitle": "Tiếp tục cố gắng!",
+  "heroBannerAfternoonSubtitle": "Mỗi bước nhỏ đều đáng giá.",
+  "heroBannerEveningTitle": "Cùng ôn tập nào!",
+  "heroBannerEveningSubtitle": "Củng cố những điều đã học.",
+  "heroBannerLateNightTitle": "Nghỉ ngơi thật tốt!",
+  "heroBannerLateNightSubtitle": "Ngày mai mình lại tiếp tục nhé."
 }

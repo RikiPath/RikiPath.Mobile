@@ -19,6 +19,11 @@ class RecommendedLearningPathDto {
     this.baseActivePathId,
     this.previewExpiresAt,
     this.confirmedAt,
+    this.horizon,
+    this.planDurationDays,
+    this.targetExamDate,
+    this.daysUntilExam,
+    this.hasTargetExamDate,
   });
 
   factory RecommendedLearningPathDto.fromJson(Map<String, Object?> json) {
@@ -29,7 +34,7 @@ class RecommendedLearningPathDto {
       strengths: _stringList(json, 'strengths'),
       weaknesses: _stringList(json, 'weaknesses'),
       feasibility: _requiredString(json, 'feasibility'),
-      isExamDateRealistic: _requiredBool(json, 'isExamDateRealistic'),
+      isExamDateRealistic: _optionalBool(json, 'isExamDateRealistic'),
       recommendedStudyDays: _requiredNonNegativeInt(
         json,
         'recommendedStudyDays',
@@ -48,6 +53,11 @@ class RecommendedLearningPathDto {
       baseActivePathId: _optionalPositiveInt(json, 'baseActivePathId'),
       previewExpiresAt: _optionalDateTime(json, 'previewExpiresAt'),
       confirmedAt: _optionalDateTime(json, 'confirmedAt'),
+      horizon: _optionalString(json, 'horizon'),
+      planDurationDays: _optionalNonNegativeInt(json, 'planDurationDays'),
+      targetExamDate: _optionalDateTime(json, 'targetExamDate'),
+      daysUntilExam: _optionalNonNegativeInt(json, 'daysUntilExam'),
+      hasTargetExamDate: _optionalBool(json, 'hasTargetExamDate'),
     );
   }
 
@@ -57,7 +67,7 @@ class RecommendedLearningPathDto {
   final List<String> strengths;
   final List<String> weaknesses;
   final String feasibility;
-  final bool isExamDateRealistic;
+  final bool? isExamDateRealistic;
   final int recommendedStudyDays;
   final DateTime? suggestedExamDate;
   final List<String> focusTopics;
@@ -70,6 +80,11 @@ class RecommendedLearningPathDto {
   final int? baseActivePathId;
   final DateTime? previewExpiresAt;
   final DateTime? confirmedAt;
+  final String? horizon;
+  final int? planDurationDays;
+  final DateTime? targetExamDate;
+  final int? daysUntilExam;
+  final bool? hasTargetExamDate;
 }
 
 class RecommendedLearningDayDto {
@@ -79,6 +94,11 @@ class RecommendedLearningDayDto {
     required this.focus,
     required this.lessonIds,
     required this.lessons,
+    this.canStart,
+    this.isStarted,
+    this.isCompleted,
+    this.startedAt,
+    this.completedAt,
   });
 
   factory RecommendedLearningDayDto.fromJson(Map<String, Object?> json) {
@@ -95,6 +115,11 @@ class RecommendedLearningDayDto {
       focus: _requiredString(json, 'focus'),
       lessonIds: lessonIds,
       lessons: lessons,
+      canStart: _optionalBool(json, 'canStart'),
+      isStarted: _optionalBool(json, 'isStarted'),
+      isCompleted: _optionalBool(json, 'isCompleted'),
+      startedAt: _optionalDateTime(json, 'startedAt'),
+      completedAt: _optionalDateTime(json, 'completedAt'),
     );
   }
 
@@ -103,6 +128,11 @@ class RecommendedLearningDayDto {
   final String focus;
   final List<int> lessonIds;
   final List<String> lessons;
+  final bool? canStart;
+  final bool? isStarted;
+  final bool? isCompleted;
+  final DateTime? startedAt;
+  final DateTime? completedAt;
 }
 
 RecommendedLearningPathDto readRecommendedLearningPath(Object? body) {
@@ -221,10 +251,20 @@ int _requiredNonNegativeInt(Map<String, Object?> json, String field) {
   throw FormatException('Expected a non-negative integer field named $field.');
 }
 
-bool _requiredBool(Map<String, Object?> json, String field) {
+bool? _optionalBool(Map<String, Object?> json, String field) {
   final value = json[field];
+  if (value == null) return null;
   if (value is bool) return value;
-  throw FormatException('Expected a boolean field named $field.');
+  throw FormatException('Expected a nullable boolean field named $field.');
+}
+
+int? _optionalNonNegativeInt(Map<String, Object?> json, String field) {
+  final value = json[field];
+  if (value == null) return null;
+  if (value is int && value >= 0) return value;
+  throw FormatException(
+    'Expected a nullable non-negative integer field named $field.',
+  );
 }
 
 DateTime _requiredDateTime(Map<String, Object?> json, String field) {

@@ -1,12 +1,13 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_motifs.dart';
 
-/// A friendly Sakura encouragement banner matching the showcase style.
+/// Full-width Neo-Japoniste Sakura Hero Banner delivering daily encouragement
+/// with airy, premium typography, delicate blossom badge, and soft floating petals.
 class SakuraMotivationBanner extends StatelessWidget {
   const SakuraMotivationBanner({
     this.title = 'Học mỗi ngày',
-    this.subtitle = 'Tiến bộ hơn mỗi ngày! がんばろう!',
+    this.subtitle = 'Mỗi ngày một chút, chạm mục tiêu JLPT.',
     this.japaneseCheer = 'がんばろう！',
     this.onTap,
     super.key,
@@ -21,99 +22,122 @@ class SakuraMotivationBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: AppColors.sakuraHeroGradient,
-        borderRadius: BorderRadius.circular(AppRadius.cardSmooth),
-        border: Border.all(color: AppColors.borderSubtlePink, width: 1),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Color(0x0DE05A7A),
-            offset: Offset(0, 4),
-            blurRadius: 14,
-          ),
-        ],
+        color: AppColors.cardWarmWhite,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: AppColors.cardBorderSubtle,
+          width: 1,
+        ),
+        boxShadow: AppShadows.sakuraSubtle,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.cardSmooth),
+        borderRadius: BorderRadius.circular(22),
         child: Stack(
           children: [
             const Positioned(
-              right: 0,
-              top: 0,
-              bottom: 0,
-              child: SakuraDecorativeCorner(width: 120, height: 90, opacity: 0.35),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.space4,
-                vertical: AppSpacing.space3 + 2,
+              right: -6,
+              top: -6,
+              bottom: -6,
+              child: SakuraDecorativeCorner(
+                width: 130,
+                height: 96,
+                opacity: 0.28,
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(AppRadius.input),
-                      boxShadow: const <BoxShadow>[
-                        BoxShadow(
-                          color: Color(0x10E05A7A),
-                          offset: Offset(0, 2),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
-                    child: const SakuraBlossomMark(size: 26),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(22),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.space4,
+                    vertical: 16,
                   ),
-                  const SizedBox(width: AppSpacing.space3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.brandTint,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppColors.borderSubtlePink,
+                            width: 1,
+                          ),
+                        ),
+                        child: const SakuraBlossomMark(size: 24),
+                      ),
+                      const SizedBox(width: AppSpacing.space3),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Flexible(
-                              child: Text(
-                                title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTypography.motivationalTitle,
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.space2),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.brandPrimary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(AppRadius.pill),
-                              ),
-                              child: Text(
-                                japaneseCheer,
-                                maxLines: 1,
-                                style: const TextStyle(
-                                  color: AppColors.brandPrimary,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.cardTitle.copyWith(
+                                      fontSize: 16.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.learnerTextPrimary,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
                                 ),
+                                const SizedBox(width: AppSpacing.space2),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.brandTint,
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.pill,
+                                    ),
+                                    border: Border.all(
+                                      color: AppColors.brandBorder,
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    japaneseCheer,
+                                    maxLines: 1,
+                                    style: const TextStyle(
+                                      color: AppColors.brandPrimary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.15,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.learnerTextSecondary,
+                                fontSize: 12,
+                                height: 1.35,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.motivationalBody,
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ],

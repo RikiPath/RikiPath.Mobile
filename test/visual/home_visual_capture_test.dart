@@ -81,16 +81,15 @@ void main() {
     ),
     _Scenario('05_loading_412x915', Size(412, 915), loading: true),
     _Scenario('06_api_failure_412x915', Size(412, 915), failing: true),
-    _Scenario(
-      '07_japanese_412x915',
-      Size(412, 915),
-      locale: Locale('ja'),
-    ),
+    _Scenario('07_japanese_412x915', Size(412, 915), locale: Locale('ja')),
     _Scenario(
       '08_long_vietnamese_name_360x740',
       Size(360, 740),
       firstName: 'Nguyễn Hoàng Phương Thảo Quỳnh',
     ),
+    _Scenario('09_phone_360x800_vi', Size(360, 800)),
+    _Scenario('10_phone_393x873_vi', Size(393, 873)),
+    _Scenario('11_phone_412x915_textscale_2', Size(412, 915), textScale: 2),
   ];
 
   for (final scenario in scenarios) {
@@ -209,7 +208,16 @@ Future<void> _capture(WidgetTester tester, _Scenario scenario) async {
       ),
     ),
   );
-  for (var frame = 0; frame < 12; frame++) {
+  for (var frame = 0; frame < 6; frame++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  await tester.runAsync(() async {
+    for (final element in find.byType(Image).evaluate()) {
+      final widget = element.widget as Image;
+      await precacheImage(widget.image, element);
+    }
+  });
+  for (var frame = 0; frame < 6; frame++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
 
@@ -218,10 +226,34 @@ Future<void> _capture(WidgetTester tester, _Scenario scenario) async {
   final scrollable = find.byType(Scrollable).first;
   if (!scenario.loading && scrollable.evaluate().isNotEmpty) {
     await tester.drag(scrollable, Offset(0, -scenario.size.height * 0.75));
-    for (var frame = 0; frame < 10; frame++) {
+    for (var frame = 0; frame < 5; frame++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await tester.runAsync(() async {
+      for (final element in find.byType(Image).evaluate()) {
+        final widget = element.widget as Image;
+        await precacheImage(widget.image, element);
+      }
+    });
+    for (var frame = 0; frame < 5; frame++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
     await _writeBoundary(tester, boundaryKey, '${scenario.name}_scrolled');
+
+    await tester.drag(scrollable, Offset(0, -scenario.size.height * 0.65));
+    for (var frame = 0; frame < 5; frame++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await tester.runAsync(() async {
+      for (final element in find.byType(Image).evaluate()) {
+        final widget = element.widget as Image;
+        await precacheImage(widget.image, element);
+      }
+    });
+    for (var frame = 0; frame < 5; frame++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await _writeBoundary(tester, boundaryKey, '${scenario.name}_bottom');
   }
 
   final exception = tester.takeException();
@@ -230,6 +262,11 @@ Future<void> _capture(WidgetTester tester, _Scenario scenario) async {
       '${_outputDirectory!}${Platform.pathSeparator}${scenario.name}_EXCEPTION.txt',
     ).writeAsStringSync('$exception');
   }
+  expect(
+    exception,
+    isNull,
+    reason: 'Visual scenario ${scenario.name} overflowed',
+  );
 }
 
 Future<void> _writeBoundary(
@@ -280,7 +317,9 @@ Future<void> _loadFonts() async {
     await load('Roboto', roboto);
     // Styles without an explicit family resolve to the test default family.
     await load('FlutterTest', roboto);
-    await load('MaterialIcons', <String>['$sdkFonts/materialicons-regular.otf']);
+    await load('MaterialIcons', <String>[
+      '$sdkFonts/materialicons-regular.otf',
+    ]);
   }
   // Host Japanese font registered under the theme fallback family name.
   await load('Noto Sans JP', <String>[
@@ -381,7 +420,8 @@ class _PracticeSessionRepository implements PracticeSessionRepository {
   Future<void> reset() async => _sessions = null;
 
   @override
-  Future<void> save(DemoPracticeSessions sessions) async => _sessions = sessions;
+  Future<void> save(DemoPracticeSessions sessions) async =>
+      _sessions = sessions;
 }
 
 class _DailyReviewRepository implements DailyReviewRepository {

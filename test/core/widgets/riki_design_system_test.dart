@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,9 +14,9 @@ void main() {
 
     expect(
       vietnamese.preparingLearningContent,
-      'RikiPath đang chuẩn bị bài học cho bạn...',
+      'Đang mở RikiPath...',
     );
-    expect(japanese.preparingLearningContent, '学習内容を準備しています…');
+    expect(japanese.preparingLearningContent, 'RikiPathを開いています…');
   });
 
   test('theme exposes the canonical brand and focused input tokens', () {
@@ -92,6 +93,93 @@ void main() {
     );
   });
 
+  testWidgets('3D feature illustration is not boxed by default', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _testHost(
+        const RikiFeatureIcon(
+          icon: Icons.map_rounded,
+          icon3d: Sakura3DIconType.roadmap,
+          tone: AppFeatureTones.learning,
+        ),
+      ),
+    );
+
+    final illustration = find.byType(RikiFeatureIcon);
+    expect(
+      find.descendant(of: illustration, matching: find.byType(Container)),
+      findsNothing,
+    );
+    expect(find.byType(Sakura3DIcon), findsOneWidget);
+  });
+
+  testWidgets('feature illustration background stays opt-in', (tester) async {
+    await tester.pumpWidget(
+      _testHost(
+        const RikiFeatureIcon(
+          icon: Icons.map_rounded,
+          icon3d: Sakura3DIconType.roadmap,
+          tone: AppFeatureTones.learning,
+          showIllustrationBackground: true,
+        ),
+      ),
+    );
+
+    final illustration = find.byType(RikiFeatureIcon);
+    expect(
+      find.descendant(of: illustration, matching: find.byType(Container)),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('3D category shortcut renders a circular white background tile', (
+    tester,
+  ) async {
+    var tapped = false;
+    await tester.pumpWidget(
+      _testHost(
+        SakuraCategoryShortcut(
+          label: 'Từ vựng',
+          icon: Icons.book,
+          icon3d: Sakura3DIconType.vocabulary,
+          backgroundColor: AppColors.pastelGreenBg,
+          foregroundColor: AppColors.pastelGreenFg,
+          onTap: () => tapped = true,
+        ),
+      ),
+    );
+
+    final container = tester.widget<Container>(
+      find.descendant(
+        of: find.byType(SakuraCategoryShortcut),
+        matching: find.byType(Container),
+      ),
+    );
+    final decoration = container.decoration as BoxDecoration;
+    expect(decoration.shape, BoxShape.circle);
+    expect(decoration.color, Colors.white);
+    expect(find.byType(Sakura3DIcon), findsOneWidget);
+    await tester.tap(find.text('Từ vựng'));
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('card supports a borderless surface', (tester) async {
+    await tester.pumpWidget(
+      _testHost(const RikiCard(borderColor: null, child: Text('Bài học'))),
+    );
+
+    final box = tester.widget<DecoratedBox>(
+      find
+          .descendant(
+            of: find.byType(RikiCard),
+            matching: find.byType(DecoratedBox),
+          )
+          .first,
+    );
+    expect((box.decoration as BoxDecoration).border, isNull);
+  });
+
   testWidgets('tappable card uses subtle press motion without layout shift', (
     tester,
   ) async {
@@ -143,28 +231,22 @@ void main() {
     );
 
     expect(find.text('RikiPath'), findsNWidgets(2));
-    expect(find.text('文'), findsNWidgets(2));
     expect(
       find.byKey(const ValueKey<String>('riki_brand_mark')),
       findsNWidgets(2),
     );
 
-    final marks = tester.widgetList<Container>(
-      find.byKey(const ValueKey<String>('riki_brand_mark')),
+    final logoImages = tester.widgetList<Image>(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('riki_brand_mark')),
+        matching: find.byType(Image),
+      ),
     );
-    expect(
-      marks.map((mark) => mark.decoration),
-      everyElement(isA<BoxDecoration>()),
-    );
-    final decorations = marks.map((mark) => mark.decoration! as BoxDecoration);
-    expect(
-      decorations.map((decoration) => decoration.color),
-      everyElement(AppColors.brandPrimary),
-    );
-    expect(
-      decorations.map((decoration) => decoration.gradient),
-      everyElement(isNull),
-    );
+    expect(logoImages, hasLength(2));
+    for (final img in logoImages) {
+      expect(img.image, isA<AssetImage>());
+      expect((img.image as AssetImage).assetName, rikiBrandLogoAsset);
+    }
   });
 
   testWidgets('primary button renders its label and invokes its action', (
@@ -279,7 +361,17 @@ void main() {
       find.byKey(const ValueKey<String>('riki_animated_study_loader')),
       findsOneWidget,
     );
-    expect(find.text('文'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('riki_study_loader_logo')),
+      findsOneWidget,
+    );
+    final loaderLogo = tester.widget<Image>(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('riki_study_loader_logo')),
+        matching: find.byType(Image),
+      ),
+    );
+    expect((loaderLogo.image as AssetImage).assetName, rikiBrandLogoAsset);
     expect(
       find.text('RikiPath đang chuẩn bị bài học cho bạn...'),
       findsOneWidget,
@@ -512,6 +604,50 @@ void main() {
     await tester.tap(find.text('N3 - Trung cấp'));
     await tester.pump();
     expect(selections, 1);
+  });
+
+  test(
+    'all 18 Sakura3DIconType assets exist on disk and are valid WebP files',
+    () {
+      expect(Sakura3DIconType.values.length, 18);
+      for (final iconType in Sakura3DIconType.values) {
+        final file = File(iconType.assetPath);
+        expect(
+          file.existsSync(),
+          isTrue,
+          reason: 'Missing 3D icon asset: ${iconType.assetPath}',
+        );
+        final bytes = file.readAsBytesSync();
+        expect(
+          bytes.length,
+          greaterThan(1024),
+          reason: '3D icon asset is unexpectedly small: ${iconType.assetPath}',
+        );
+        expect(String.fromCharCodes(bytes.sublist(0, 4)), 'RIFF');
+        expect(String.fromCharCodes(bytes.sublist(8, 12)), 'WEBP');
+      }
+    },
+  );
+
+  testWidgets('Sakura3DIcon renders all 18 3D icon types cleanly', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _testHost(
+        Wrap(
+          spacing: AppSpacing.space2,
+          runSpacing: AppSpacing.space2,
+          children: [
+            for (final type in Sakura3DIconType.values)
+              Sakura3DIcon(type: type, size: 32),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(Sakura3DIcon), findsNWidgets(18));
+    expect(tester.takeException(), isNull);
   });
 }
 

@@ -205,17 +205,22 @@ class ProfileSettingsTile extends StatefulWidget {
   const ProfileSettingsTile({
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
+    this.subtitleWidget,
     required this.onTap,
     this.trailing,
     this.emphasized = false,
     this.destructive = false,
     super.key,
-  });
+  }) : assert(
+          subtitle != null || subtitleWidget != null,
+          'Either subtitle or subtitleWidget must be provided',
+        );
 
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
+  final Widget? subtitleWidget;
   final VoidCallback? onTap;
   final Widget? trailing;
   final bool emphasized;
@@ -287,12 +292,13 @@ class _ProfileSettingsTileState extends State<ProfileSettingsTile> {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          widget.subtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.metadata,
-                        ),
+                        widget.subtitleWidget ??
+                            Text(
+                              widget.subtitle ?? '',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.metadata,
+                            ),
                       ],
                     ),
                   ),

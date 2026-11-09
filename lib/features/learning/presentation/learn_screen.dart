@@ -10,7 +10,11 @@ import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart'
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
-import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_header.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_app_header.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_scroll_scaffold.dart';
+import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
+import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
+import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_home_view.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_state_views.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
@@ -23,13 +27,22 @@ class LearnScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final learningState = ref.watch(learningControllerProvider);
     final catalog = ref.watch(jlptCatalogControllerProvider);
-    final snapshot = learningState.asData?.value;
+    final analyticsState = ref.watch(learnerAnalyticsControllerProvider);
+    final notificationState = ref.watch(notificationControllerProvider);
+    final analytics = analyticsState.value;
+    final liveStreak = analytics?.isAvailable(AnalyticsSection.streak) == true
+        ? analytics?.streakDays
+        : null;
 
-    return Scaffold(
+    return SakuraScrollScaffold(
       backgroundColor: AppColors.learnerBackground,
-      appBar: LearningHeader.root(
-        streakDays: snapshot?.streakDays,
-        hasUnreadNotifications: snapshot?.hasUnreadNotifications ?? false,
+      appBarBuilder: (context, isScrolled) => SakuraAppHeader(
+        isScrolled: isScrolled,
+        streakDays: liveStreak,
+        isStreakLoading: analyticsState.isLoading,
+        unreadNotificationCount: notificationState.value?.unreadCount,
+        onNotificationsPressed: () => context.push(AppRoutes.notifications),
+        onCalendarPressed: () => context.push(AppRoutes.calendar),
       ),
       body: SafeArea(
         top: false,
@@ -40,17 +53,7 @@ class LearnScreen extends ConsumerWidget {
           ),
           data: (data) => LearningHomeView(
             snapshot: data,
-            catalog: catalog.whenData(
-              (levels) => levels
-                  .where(
-                    (level) => const <String>{
-                      'N5',
-                      'N4',
-                      'N3',
-                    }.contains(level.code.toUpperCase()),
-                  )
-                  .toList(growable: false),
-            ),
+            catalog: catalog,
             onSelectLevel: (level) => _selectLevel(context, ref, level),
             onRetryCatalog: ref
                 .read(jlptCatalogControllerProvider.notifier)

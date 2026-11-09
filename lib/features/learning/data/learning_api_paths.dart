@@ -6,6 +6,11 @@ abstract final class LearningApiPaths {
   static const String pathHistory = '/api/LearningPath/history';
   static const String previewPath = '/api/LearningPath/preview';
 
+  static String startActiveDay(int day) =>
+      '/api/LearningPath/active/days/$day/start';
+  static String completeActiveDay(int day) =>
+      '/api/LearningPath/active/days/$day/complete';
+
   static String confirmPreview(int pathId) =>
       '/api/LearningPath/previews/$pathId/confirm';
   static String cancelPreview(int pathId) =>

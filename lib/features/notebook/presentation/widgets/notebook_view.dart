@@ -400,26 +400,17 @@ class _CollectionCard extends StatelessWidget {
       child: RikiCard(
         key: ValueKey<String>('notebook_collection_${collection.routeKey}'),
         onTap: onTap,
-        borderColor: AppColors.learnerOutline,
+        backgroundColor: AppColors.cardWarmWhite,
+        borderColor: AppColors.cardBorderMuted,
+        boxShadow: AppShadows.sakuraSubtle,
         child: Row(
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: collection.source == NotebookDataSource.fixture
-                    ? AppColors.successBackgroundSoft
-                    : AppColors.brandTint,
-                borderRadius: BorderRadius.circular(AppRadius.input),
+            Sakura3DIcon(
+              type: SakuraIconMapper.iconForNotebookCollection(
+                name: collection.name,
+                routeKey: collection.routeKey,
               ),
-              child: Icon(
-                collection.source == NotebookDataSource.fixture
-                    ? Icons.auto_stories_outlined
-                    : Icons.folder_outlined,
-                color: collection.source == NotebookDataSource.fixture
-                    ? AppColors.success
-                    : AppColors.brandPrimary,
-              ),
+              size: 48,
             ),
             const SizedBox(width: AppSpacing.space3),
             Expanded(
@@ -471,21 +462,18 @@ class _CollectionSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RikiCard(
-      borderColor: AppColors.learnerOutline,
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.cardBorderMuted,
+      boxShadow: AppShadows.sakuraSubtle,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.brandTint,
-              borderRadius: BorderRadius.circular(AppRadius.input),
+          Sakura3DIcon(
+            type: SakuraIconMapper.iconForNotebookCollection(
+              name: collection.name,
+              routeKey: collection.routeKey,
             ),
-            child: const Icon(
-              Icons.folder_open_outlined,
-              color: AppColors.brandPrimary,
-            ),
+            size: 44,
           ),
           const SizedBox(width: AppSpacing.space3),
           Expanded(
@@ -521,21 +509,12 @@ class _OverviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RikiCard(
-      borderColor: AppColors.learnerOutline,
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.cardBorderMuted,
+      boxShadow: AppShadows.sakuraSubtle,
       child: Row(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: const BoxDecoration(
-              color: AppColors.learnerPrimaryFixed,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.collections_bookmark_outlined,
-              color: AppColors.brandPrimary,
-            ),
-          ),
+          const Sakura3DIcon(type: Sakura3DIconType.notebook, size: 48),
           const SizedBox(width: AppSpacing.space3),
           Expanded(
             child: Column(
@@ -703,6 +682,7 @@ class _EmptyNotebook extends StatelessWidget {
     return RikiEmptyState(
       key: const ValueKey<String>('notebook_empty_view'),
       icon: Icons.collections_bookmark_outlined,
+      icon3d: Sakura3DIconType.notebook,
       title: context.l10n.notebookEmptyTitle,
       message: context.l10n.notebookEmptyMessage,
       actionLabel: context.l10n.createCollectionAction,
@@ -736,6 +716,7 @@ class _EmptyEntries extends StatelessWidget {
         hasQuery ? 'notebook_search_empty_view' : 'notebook_entries_empty_view',
       ),
       icon: hasQuery ? Icons.search_off_outlined : Icons.bookmark_border,
+      icon3d: hasQuery ? null : Sakura3DIconType.notebook,
       title: hasQuery
           ? context.l10n.noMatchingWord
           : context.l10n.collectionHasNoWords,

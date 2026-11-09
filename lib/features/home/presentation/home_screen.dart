@@ -7,9 +7,11 @@ import 'package:rikipath_mobile/features/analytics/application/analytics_control
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
 import 'package:rikipath_mobile/features/home/application/home_controller.dart';
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_dashboard_view.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_scroll_scaffold.dart';
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
 import 'package:rikipath_mobile/features/meeting/application/upcoming_meeting_provider.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
@@ -30,6 +32,9 @@ class HomeScreen extends ConsumerWidget {
     final journeyState = ref.watch(learnerJourneyControllerProvider);
     final learningState = ref.watch(learningControllerProvider);
     final analyticsState = ref.watch(learnerAnalyticsControllerProvider);
+    final roadmapState = journeyState.value?.hasSelectedLevel == true
+        ? ref.watch(standardRoadmapProvider)
+        : null;
     final practiceState = ref.watch(demoPracticeControllerProvider);
     final dailyReviewState = ref.watch(dailyReviewControllerProvider);
     final notificationState = ref.watch(notificationControllerProvider);
@@ -39,9 +44,10 @@ class HomeScreen extends ConsumerWidget {
         ? analytics?.streakDays
         : null;
 
-    return Scaffold(
+    return SakuraScrollScaffold(
       backgroundColor: AppColors.learnerBackground,
-      appBar: HomeHeader(
+      appBarBuilder: (context, isScrolled) => HomeHeader(
+        isScrolled: isScrolled,
         streakDays: liveStreak,
         isStreakLoading: analyticsState.isLoading,
         unreadNotificationCount: notificationState.value?.unreadCount,
@@ -55,6 +61,7 @@ class HomeScreen extends ConsumerWidget {
           journeyState: journeyState,
           learningState: learningState,
           analyticsState: analyticsState,
+          roadmapState: roadmapState,
           practiceState: practiceState,
           dailyReviewState: dailyReviewState,
           upcomingMeetingState: upcomingMeetingState,
@@ -93,6 +100,8 @@ class HomeScreen extends ConsumerWidget {
           },
           onOpenReview: () => context.go(AppRoutes.dailyReview),
           onOpenAnalytics: () => context.push(AppRoutes.analytics),
+          onOpenCalendarDate: (date) =>
+              context.push(AppRoutes.calendarOn(date)),
           onOpenMeeting: () => context.push(AppRoutes.meetingJoin),
           onOpenMeetingDetail: (bookingId) =>
               context.push(AppRoutes.learnerMentorBookingDetail(bookingId)),

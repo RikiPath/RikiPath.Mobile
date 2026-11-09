@@ -58,6 +58,7 @@ class _AnalyticsContent extends StatelessWidget {
         if (data.isAvailable(AnalyticsSection.streak))
           _MetricCard(
             icon: Icons.local_fire_department_outlined,
+            icon3d: Sakura3DIconType.streak,
             tone: AppFeatureTones.review,
             label: context.l10n.studyStreakLabel,
             value: context.l10n.streakDaysValue(data.streakDays),
@@ -68,6 +69,7 @@ class _AnalyticsContent extends StatelessWidget {
         if (data.isAvailable(AnalyticsSection.completion))
           _MetricCard(
             icon: Icons.task_alt_outlined,
+            icon3d: Sakura3DIconType.achievement,
             tone: AppFeatureTones.success,
             label: context.l10n.completedLessonsLabel,
             value: context.l10n.analyticsCompletedLessons(
@@ -105,9 +107,11 @@ class _MetricCard extends StatelessWidget {
     required this.tone,
     required this.label,
     required this.value,
+    this.icon3d,
   });
 
   final IconData icon;
+  final Sakura3DIconType? icon3d;
   final RikiFeatureTone tone;
   final String label;
   final String value;
@@ -117,7 +121,7 @@ class _MetricCard extends StatelessWidget {
     return RikiCard(
       child: Row(
         children: [
-          RikiFeatureIcon(icon: icon, tone: tone),
+          RikiFeatureIcon(icon: icon, icon3d: icon3d, tone: tone),
           const SizedBox(width: AppSpacing.space3),
           Expanded(
             child: Column(

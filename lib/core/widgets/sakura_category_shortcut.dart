@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_3d_icon.dart';
 
 /// A colorful category shortcut button matching the Sakura Home showcase.
 class SakuraCategoryShortcut extends StatefulWidget {
@@ -9,6 +10,7 @@ class SakuraCategoryShortcut extends StatefulWidget {
     required this.backgroundColor,
     required this.foregroundColor,
     required this.onTap,
+    this.icon3d,
     this.badge,
     this.borderColor,
     super.key,
@@ -16,6 +18,7 @@ class SakuraCategoryShortcut extends StatefulWidget {
 
   final String label;
   final IconData icon;
+  final Sakura3DIconType? icon3d;
   final Color backgroundColor;
   final Color foregroundColor;
   final VoidCallback onTap;
@@ -37,6 +40,7 @@ class _SakuraCategoryShortcutState extends State<SakuraCategoryShortcut> {
   @override
   Widget build(BuildContext context) {
     final reduceMotion = AppMotion.isReducedMotion(context);
+    final illustration = widget.icon3d;
 
     return Semantics(
       button: true,
@@ -53,40 +57,41 @@ class _SakuraCategoryShortcutState extends State<SakuraCategoryShortcut> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 52,
-                height: 52,
+                width: 64,
+                height: 64,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: widget.backgroundColor,
-                  borderRadius: BorderRadius.circular(AppRadius.cardSmooth),
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: AppShadows.cardSoft,
                   border: Border.all(
-                    color: widget.borderColor ?? widget.backgroundColor,
+                    color: AppColors.cardBorderSubtle,
                     width: 1,
                   ),
-                  boxShadow: const <BoxShadow>[
-                    BoxShadow(
-                      color: Color(0x082D282A),
-                      offset: Offset(0, 2),
-                      blurRadius: 6,
-                    ),
-                  ],
                 ),
-                child: Icon(
-                  widget.icon,
-                  color: widget.foregroundColor,
-                  size: 26,
-                ),
+                child: illustration != null
+                    ? Sakura3DIcon(
+                        type: illustration,
+                        size: 46,
+                        fallbackColor: widget.foregroundColor,
+                      )
+                    : Icon(
+                        widget.icon,
+                        color: widget.foregroundColor,
+                        size: 28,
+                      ),
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
                 widget.label,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: AppTypography.badgeText.copyWith(
                   color: AppColors.textPrimary,
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
+                  letterSpacing: -0.2,
                 ),
               ),
             ],

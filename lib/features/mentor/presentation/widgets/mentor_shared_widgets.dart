@@ -60,7 +60,7 @@ class MentorAvailabilityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return RikiCard(
       backgroundColor: AppColors.cardWarmWhite,
-      borderColor: AppColors.borderSubtlePink,
+      borderColor: AppColors.cardBorderMuted,
       boxShadow: AppShadows.sakuraSubtle,
       padding: const EdgeInsets.all(AppSpacing.space4),
       child: Row(
@@ -122,7 +122,7 @@ class MentorMeetingCard extends StatelessWidget {
           onTap: onTap,
           child: RikiCard(
             backgroundColor: AppColors.cardWarmWhite,
-            borderColor: AppColors.borderSubtlePink,
+            borderColor: AppColors.cardBorderMuted,
             boxShadow: AppShadows.sakuraSubtle,
             padding: const EdgeInsets.all(AppSpacing.space4),
             child: Row(

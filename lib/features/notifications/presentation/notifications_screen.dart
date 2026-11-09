@@ -150,7 +150,7 @@ class _NotificationTile extends StatelessWidget {
             ? AppColors.cardWarmWhite
             : AppColors.brandTint,
         borderColor: notification.isRead
-            ? AppColors.borderSubtlePink
+            ? AppColors.cardBorderMuted
             : AppColors.brandSelectedBorder,
         boxShadow: notification.isRead
             ? const <BoxShadow>[]

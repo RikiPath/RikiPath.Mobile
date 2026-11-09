@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
-import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
 import 'package:rikipath_mobile/core/widgets/riki_loading.dart';
 import 'package:rikipath_mobile/core/widgets/riki_state_view.dart';
 import 'package:rikipath_mobile/features/onboarding/application/learner_startup_controller.dart';
@@ -21,10 +20,9 @@ class LearnerStartupScreen extends ConsumerWidget {
       body: destination.when(
         loading: () => RikiFullScreenLoader(
           key: const ValueKey<String>('learner_startup_loading'),
-          title: context.l10n.preparingLearningContent,
-          subtitle: context.l10n.preparingLearningSubtext,
+          title: context.l10n.learnerStartupLoadingTitle,
+          subtitle: context.l10n.learnerStartupLoadingSubtitle,
           semanticsLabel: context.l10n.loading,
-          header: const RikiBrandLockup(),
         ),
         error: (error, _) => SafeArea(
           child: RikiErrorState(
@@ -48,7 +46,14 @@ class LearnerStartupScreen extends ConsumerWidget {
           });
           return RikiFullScreenLoader(
             key: const ValueKey<String>('learner_startup_resolved'),
-            title: context.l10n.preparingLearningContent,
+            title: switch (target) {
+              LearnerStartupDestination.onboarding =>
+                context.l10n.learnerStartupOnboardingTitle,
+              LearnerStartupDestination.placementTest =>
+                context.l10n.learnerStartupPlacementTitle,
+              LearnerStartupDestination.home =>
+                context.l10n.learnerStartupHomeTitle,
+            },
             semanticsLabel: context.l10n.loading,
           );
         },
