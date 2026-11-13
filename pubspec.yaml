@@ -51,4 +51,8 @@ flutter:
     - assets/images/auth/auth_sakura_background.webp
     - assets/images/mascot/
     - assets/images/icons_3d/
+    - assets/images/icons_2d/
     - assets/images/time_banners/
+    - assets/images/practice/
+    - assets/images/notebook/
+    - assets/images/learning/

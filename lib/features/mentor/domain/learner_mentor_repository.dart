@@ -9,6 +9,7 @@ abstract interface class LearnerMentorRepository {
     required DateTime from,
     required DateTime to,
     int? mentorId,
+    String? jlptLevel,
   });
 
   Future<MentorMeetingPurchase> purchase({

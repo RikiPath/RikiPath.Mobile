@@ -86,7 +86,7 @@ class SakuraNavigationCard extends StatelessWidget {
         const SizedBox(height: 3),
         Text(
           description,
-          maxLines: 2,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppTypography.bodySmall.copyWith(
             color: AppColors.textSecondary,

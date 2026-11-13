@@ -38,6 +38,7 @@ enum MockTestSubmitOutcome { success, recoveredCompleted, failed }
 
 class MockTestController extends AsyncNotifier<MockTestFlowState> {
   MockTestRepository get _repository => ref.read(mockTestRepositoryProvider);
+  Future<void> _pendingSave = Future<void>.value();
 
   @override
   Future<MockTestFlowState> build() => _loadCatalog();
@@ -91,6 +92,34 @@ class MockTestController extends AsyncNotifier<MockTestFlowState> {
     return true;
   }
 
+  /// Selects a server-discovered test from the cross-level library while
+  /// retaining the same attempt, timer, submit and result flow.
+  bool selectLibraryTest(LiveMockTestSummary test) {
+    final current = state.value;
+    if (current == null || current.isStarting || current.isSubmitting) {
+      return false;
+    }
+    if (current.hasActiveAttempt && current.selectedTest?.id != test.id) {
+      return false;
+    }
+    if (current.selectedTest?.id == test.id) return true;
+    final tests = current.tests.any((candidate) => candidate.id == test.id)
+        ? current.tests
+        : <LiveMockTestSummary>[...current.tests, test];
+    state = AsyncData(
+      current.copyWith(
+        catalogStatus: MockTestCatalogStatus.ready,
+        tests: tests,
+        selectedTest: test,
+        clearAttempt: true,
+        clearResult: true,
+        clearDetailedResult: true,
+        clearActionIssue: true,
+      ),
+    );
+    return true;
+  }
+
   Future<bool> startSelectedTest() async {
     final current = state.value;
     final selected = current?.selectedTest;
@@ -106,7 +135,9 @@ class MockTestController extends AsyncNotifier<MockTestFlowState> {
       current.copyWith(isStarting: true, clearActionIssue: true),
     );
     try {
-      final attempt = await _repository.start(selected.id);
+      final attempt =
+          await _repository.loadActive(selected.id) ??
+          await _repository.start(selected.id);
       if (attempt.mockTestId != selected.id || attempt.questions.isEmpty) {
         throw const FormatException('Invalid Mock Test start response.');
       }
@@ -170,6 +201,163 @@ class MockTestController extends AsyncNotifier<MockTestFlowState> {
         clearActionIssue: true,
       ),
     );
+    final attemptId = attempt.id;
+    _pendingSave = _pendingSave
+        .then((_) async {
+          await _repository.saveAnswer(
+            attemptId,
+            MockTestAnswerSubmission(
+              questionId: questionId,
+              selectedOptionId: optionId,
+            ),
+          );
+        })
+        .catchError((Object error) {
+          final latest = state.value;
+          if (latest?.attempt?.id == attemptId && latest?.result == null) {
+            state = AsyncData(latest!.copyWith(actionIssue: _classify(error)));
+          }
+        });
+    return true;
+  }
+
+  bool toggleMultipleChoiceOption(int questionId, int optionId) {
+    final current = state.value;
+    final attempt = current?.attempt;
+    if (current == null ||
+        attempt == null ||
+        current.isSubmitting ||
+        current.result != null) {
+      return false;
+    }
+    final question = attempt.questions
+        .where((candidate) => candidate.id == questionId)
+        .firstOrNull;
+    if (question == null ||
+        !question.options.any((option) => option.id == optionId)) {
+      return false;
+    }
+
+    final currentSelection = (attempt.structuredAnswers[questionId] is List)
+        ? List<int>.from(attempt.structuredAnswers[questionId] as List)
+        : <int>[];
+    if (currentSelection.contains(optionId)) {
+      currentSelection.remove(optionId);
+    } else {
+      currentSelection.add(optionId);
+    }
+    currentSelection.sort();
+
+    state = AsyncData(
+      current.copyWith(
+        attempt: attempt.copyWith(
+          structuredAnswers: <int, Object?>{
+            ...attempt.structuredAnswers,
+            questionId: currentSelection,
+          },
+        ),
+        clearActionIssue: true,
+      ),
+    );
+    final attemptId = attempt.id;
+    _pendingSave = _pendingSave
+        .then((_) async {
+          await _repository.saveAnswer(
+            attemptId,
+            MockTestAnswerSubmission(
+              questionId: questionId,
+              response: currentSelection,
+            ),
+          );
+        })
+        .catchError((Object error) {
+          final latest = state.value;
+          if (latest?.attempt?.id == attemptId && latest?.result == null) {
+            state = AsyncData(latest!.copyWith(actionIssue: _classify(error)));
+          }
+        });
+    return true;
+  }
+
+  bool setOrderingAnswer(int questionId, List<String> orderedTokens) {
+    final current = state.value;
+    final attempt = current?.attempt;
+    if (current == null ||
+        attempt == null ||
+        current.isSubmitting ||
+        current.result != null) {
+      return false;
+    }
+
+    state = AsyncData(
+      current.copyWith(
+        attempt: attempt.copyWith(
+          structuredAnswers: <int, Object?>{
+            ...attempt.structuredAnswers,
+            questionId: orderedTokens,
+          },
+        ),
+        clearActionIssue: true,
+      ),
+    );
+    final attemptId = attempt.id;
+    _pendingSave = _pendingSave
+        .then((_) async {
+          await _repository.saveAnswer(
+            attemptId,
+            MockTestAnswerSubmission(
+              questionId: questionId,
+              response: orderedTokens,
+            ),
+          );
+        })
+        .catchError((Object error) {
+          final latest = state.value;
+          if (latest?.attempt?.id == attemptId && latest?.result == null) {
+            state = AsyncData(latest!.copyWith(actionIssue: _classify(error)));
+          }
+        });
+    return true;
+  }
+
+  bool setTextAnswer(int questionId, String text) {
+    final current = state.value;
+    final attempt = current?.attempt;
+    if (current == null ||
+        attempt == null ||
+        current.isSubmitting ||
+        current.result != null) {
+      return false;
+    }
+
+    state = AsyncData(
+      current.copyWith(
+        attempt: attempt.copyWith(
+          structuredAnswers: <int, Object?>{
+            ...attempt.structuredAnswers,
+            questionId: text,
+          },
+        ),
+        clearActionIssue: true,
+      ),
+    );
+    final attemptId = attempt.id;
+    _pendingSave = _pendingSave
+        .then((_) async {
+          await _repository.saveAnswer(
+            attemptId,
+            MockTestAnswerSubmission(
+              questionId: questionId,
+              response: text,
+            ),
+          );
+        })
+        .catchError((Object error) {
+          final latest = state.value;
+          if (latest?.attempt?.id == attemptId && latest?.result == null) {
+            state = AsyncData(latest!.copyWith(actionIssue: _classify(error)));
+          }
+        });
     return true;
   }
 
@@ -181,6 +369,7 @@ class MockTestController extends AsyncNotifier<MockTestFlowState> {
           (question) => MockTestAnswerSubmission(
             questionId: question.id,
             selectedOptionId: attempt.answers[question.id],
+            response: attempt.structuredAnswers[question.id],
           ),
         )
         .toList(growable: false);
@@ -201,6 +390,7 @@ class MockTestController extends AsyncNotifier<MockTestFlowState> {
       current.copyWith(isSubmitting: true, clearActionIssue: true),
     );
     try {
+      await _pendingSave;
       final result = await _repository.submit(attempt.id, answers);
       _publishResult(result);
       return MockTestSubmitOutcome.success;
@@ -210,6 +400,38 @@ class MockTestController extends AsyncNotifier<MockTestFlowState> {
           issue == MockTestActionIssue.networkUncertain) {
         final recovered = await _recoverCompletedResult(attempt.id);
         if (recovered) return MockTestSubmitOutcome.recoveredCompleted;
+      }
+      state = AsyncData(
+        state.requireValue.copyWith(isSubmitting: false, actionIssue: issue),
+      );
+      return MockTestSubmitOutcome.failed;
+    }
+  }
+
+  Future<MockTestSubmitOutcome> finalizeExpired() async {
+    final current = state.value;
+    final attempt = current?.attempt;
+    if (current == null ||
+        attempt == null ||
+        current.isSubmitting ||
+        current.result != null) {
+      return MockTestSubmitOutcome.failed;
+    }
+    state = AsyncData(
+      current.copyWith(isSubmitting: true, clearActionIssue: true),
+    );
+    try {
+      await _pendingSave;
+      final result = await _repository.finalizeExpired(attempt.id);
+      _publishResult(result);
+      return MockTestSubmitOutcome.success;
+    } catch (error) {
+      final issue = _classify(error);
+      if (issue == MockTestActionIssue.networkUncertain ||
+          issue == MockTestActionIssue.alreadyCompleted) {
+        if (await _recoverCompletedResult(attempt.id)) {
+          return MockTestSubmitOutcome.recoveredCompleted;
+        }
       }
       state = AsyncData(
         state.requireValue.copyWith(isSubmitting: false, actionIssue: issue),

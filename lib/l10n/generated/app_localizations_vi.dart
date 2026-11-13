@@ -1588,7 +1588,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get noMatchingWord => 'Không tìm thấy từ phù hợp';
 
   @override
-  String get collectionHasNoWords => 'Danh sách chưa có từ';
+  String get collectionHasNoWords => 'Danh sách chưa có từ nào';
 
   @override
   String get notebookSearchEmptyMessage =>
@@ -1596,7 +1596,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get notebookCollectionEmptyMessage =>
-      'Thêm từ đầu tiên để bắt đầu ôn tập trong danh sách này.';
+      'Thêm từ đầu tiên để bắt đầu ôn tập.';
 
   @override
   String get notebookLoadFailed => 'Không thể tải Sổ từ';
@@ -2673,7 +2673,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get practiceJourneySubtitle =>
-      'Ôn lại kiến thức, thử sức với đề JLPT và theo dõi từng bước tiến bộ.';
+      'Thử sức với đề thi JLPT và theo dõi kết quả.';
 
   @override
   String mockSummary(String level, int minutes, int count) {
@@ -2843,8 +2843,7 @@ class AppLocalizationsVi extends AppLocalizations {
       'Thống kê trực tuyến tạm thời chưa tải được.';
 
   @override
-  String get homeReviewDescription =>
-      'Ôn lại kiến thức theo nhịp học hiện tại của bạn.';
+  String get homeReviewDescription => 'Ôn lại kiến thức theo nhịp học của bạn.';
 
   @override
   String get homeResumeReview => 'Tiếp tục ôn tập';
@@ -3020,6 +3019,89 @@ class AppLocalizationsVi extends AppLocalizations {
       'Chưa thể tải lịch trống của cố vấn.';
 
   @override
+  String get mentorFinderTitle => 'Tìm lịch tư vấn';
+
+  @override
+  String get mentorFinderChooseDate => 'Chọn ngày phù hợp với bạn';
+
+  @override
+  String get mentorFinderPickDate => 'Chọn ngày trên lịch';
+
+  @override
+  String get mentorFinderJlptLevel => 'Trình độ JLPT';
+
+  @override
+  String get mentorFinderChooseLevel =>
+      'Chọn trình độ JLPT để xem lịch phù hợp.';
+
+  @override
+  String get mentorFinderNoSlotsTitle => 'Chưa có lịch tư vấn phù hợp';
+
+  @override
+  String get mentorFinderNoSlotsDescription =>
+      'Hãy thử chọn ngày khác hoặc thay đổi bộ lọc.';
+
+  @override
+  String get mentorFinderChooseAnotherDate => 'Xem ngày khác';
+
+  @override
+  String get mentorFinderViewMyBookings => 'Xem lịch của tôi';
+
+  @override
+  String get mentorFinderBackToCalendar => 'Quay lại Lịch học';
+
+  @override
+  String get mentorFinderAvailableSlots => 'Khung giờ còn trống · 90 phút';
+
+  @override
+  String get mentorFinderCreditError =>
+      'Không tải được số lượt tư vấn. Vui lòng thử lại.';
+
+  @override
+  String mentorFinderAvailableTickets(int count, String level) {
+    return '$count lượt JLPT $level khả dụng';
+  }
+
+  @override
+  String mentorFinderNeedCredit(String level) {
+    return 'Bạn cần có lượt tư vấn JLPT $level để đặt lịch này.';
+  }
+
+  @override
+  String get mentorFinderChooseSlot => 'Chọn khung giờ';
+
+  @override
+  String get mentorFinderReviewBooking => 'Xem và xác nhận đặt lịch';
+
+  @override
+  String get mentorFinderChoosePlan => 'Chọn gói tư vấn';
+
+  @override
+  String get mentorFinderNoPlans =>
+      'Chưa có gói tư vấn phù hợp. Vui lòng tải lại danh sách gói.';
+
+  @override
+  String get mentorFinderPlansError =>
+      'Không tải được các gói tư vấn. Vui lòng thử lại.';
+
+  @override
+  String mentorFinderPlanSummary(int count, int days) {
+    return '$count lượt · $days ngày';
+  }
+
+  @override
+  String get mentorFinderTimeAll => 'Tất cả giờ';
+
+  @override
+  String get mentorFinderTimeMorning => 'Buổi sáng';
+
+  @override
+  String get mentorFinderTimeAfternoon => 'Buổi chiều';
+
+  @override
+  String get mentorFinderTimeEvening => 'Buổi tối';
+
+  @override
   String learnerMentorSlotTime(String start, String end) {
     return '$start – $end';
   }
@@ -3168,7 +3250,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get practiceSpeechDescription =>
-      'Nói tiếng Nhật và xem nội dung được nhận dạng theo thời gian thực.';
+      'Luyện phát âm với nhận diện giọng nói AI.';
 
   @override
   String get practiceSpeechStatus => 'Nhận dạng trực tiếp';
@@ -3178,7 +3260,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get practiceTextScanDescription =>
-      'Chọn ảnh bài viết để nhận dạng và chỉnh sửa văn bản tiếng Nhật.';
+      'Quét bài viết từ hình ảnh để chỉnh sửa.';
 
   @override
   String get practiceTextScanStatus => 'Ảnh → Văn bản';
@@ -3357,7 +3439,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get practiceWritingDescription =>
-      'Xem thứ tự nét, viết trực tiếp và lưu tiến độ ôn tập.';
+      'Luyện viết nét và theo dõi tiến độ ôn tập.';
 
   @override
   String get practiceWritingStatus => 'Nét chữ tương tác';
@@ -4115,4 +4197,118 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get heroBannerLateNightSubtitle => 'Ngày mai mình lại tiếp tục nhé.';
+
+  @override
+  String get mockLibraryTitle => 'Đề thi thử JLPT';
+
+  @override
+  String get mockLibraryDescription =>
+      'Luyện đề theo trình độ và theo dõi kết quả.';
+
+  @override
+  String mockLibraryAvailableCount(int count) {
+    return '$count đề khả dụng';
+  }
+
+  @override
+  String get mockLibraryOpenFailed =>
+      'Không thể mở đề thi lúc này. Vui lòng thử lại.';
+
+  @override
+  String get mockLibraryActiveAttempt =>
+      'Hãy hoàn thành đề đang làm trước khi chọn đề khác.';
+
+  @override
+  String get essayWritingTitle => 'Luyện viết tiếng Nhật';
+
+  @override
+  String get essayWritingDescription => 'Viết bài và nhận đánh giá.';
+
+  @override
+  String get essayWritingIntro =>
+      'Viết một đoạn tiếng Nhật. Bài chỉ được gửi khi bạn nhấn nút chấm.';
+
+  @override
+  String get essayWritingNoLevel => 'Chưa có cấp độ JLPT để luyện viết.';
+
+  @override
+  String get essayWritingLevelLoadError =>
+      'Không tải được cấp độ JLPT. Thử lại';
+
+  @override
+  String get essayWritingLevelLabel => 'Cấp độ JLPT';
+
+  @override
+  String get essayWritingInputHint => 'Nhập bài viết tiếng Nhật của bạn';
+
+  @override
+  String get essayWritingSubmit => 'Chấm bài luyện tập';
+
+  @override
+  String get essayWritingSubmitting => 'Đang chấm bài...';
+
+  @override
+  String get essayWritingSubmitUncertain =>
+      'Không thể xác nhận bài nộp. Vui lòng kiểm tra trước khi gửi lại.';
+
+  @override
+  String essayWritingSaved(int id) {
+    return 'Đã lưu bài nộp #$id';
+  }
+
+  @override
+  String get essayWritingNew => 'Viết bài mới';
+
+  @override
+  String essayWritingScore(String score) {
+    return 'Điểm: $score/100';
+  }
+
+  @override
+  String get essayWritingStrengths => 'Điểm mạnh';
+
+  @override
+  String get essayWritingImprovements => 'Cần cải thiện';
+
+  @override
+  String get essayWritingCorrections => 'Gợi ý sửa lỗi';
+
+  @override
+  String get practiceHeroBadge => 'がんばろう！';
+
+  @override
+  String get practiceHeroTitle => 'Sẵn sàng luyện tập?';
+
+  @override
+  String get practiceHeroSubtitle => 'Mỗi bài tập, thêm một bước tiến.';
+
+  @override
+  String get profilePlacementSubtitle =>
+      'Đánh giá năng lực và gợi ý cấp độ phù hợp.';
+
+  @override
+  String get profileLogoutSubtitle => 'Đăng xuất tài khoản khỏi thiết bị này.';
+
+  @override
+  String get profileMentorApplicationTitle => 'Đăng ký trở thành Cố vấn';
+
+  @override
+  String get profileMentorApplicationSubtitle =>
+      'Nộp hồ sơ chuyên môn để xét duyệt.';
+
+  @override
+  String get notebookEmptyHeroBadge => 'がんばろう！';
+
+  @override
+  String get notebookEmptyHeroTitle => 'Bắt đầu sổ từ của bạn!';
+
+  @override
+  String get notebookEmptyHeroDescription =>
+      'Lưu lại những từ vựng và mẫu câu yêu thích.';
+
+  @override
+  String get createFirstCollectionAction => 'Tạo danh sách đầu tiên';
+
+  @override
+  String get addFirstWordAction => 'Thêm từ đầu tiên';
 }

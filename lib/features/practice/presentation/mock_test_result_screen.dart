@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
 import 'package:rikipath_mobile/features/mock_test/domain/mock_test.dart';
+import 'package:rikipath_mobile/features/mock_test/domain/mock_test_display_title.dart';
 
 class MockTestResultScreen extends ConsumerWidget {
   const MockTestResultScreen({required this.testId, super.key});
@@ -91,7 +92,7 @@ class MockTestResultScreen extends ConsumerWidget {
                     if (test != null) ...[
                       const SizedBox(height: AppSpacing.space1),
                       Text(
-                        '${test.title} • ${test.jlptLevelName}',
+                        '${mockTestDisplayTitle(test.title, japanese: Localizations.localeOf(context).languageCode == 'ja')} • ${test.jlptLevelName}',
                         textAlign: TextAlign.center,
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.learnerTextSecondary,
@@ -265,12 +266,51 @@ class _ReviewQuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selected = question.options
-        .where((option) => option.id == question.selectedOptionId)
-        .firstOrNull;
-    final correct = question.options
-        .where((option) => option.isCorrect)
-        .firstOrNull;
+    final isMultiple =
+        question.questionType.toLowerCase() == 'multiplechoice';
+    final isStructured = question.questionType.toLowerCase() == 'ordering' ||
+        question.questionType.toLowerCase() == 'sentenceordering' ||
+        question.questionType.toLowerCase() == 'fillblank' ||
+        question.questionType.toLowerCase() == 'shortanswer';
+
+    String selectedText;
+    String correctText;
+
+    if (isMultiple) {
+      final selectedIds = (question.response is List)
+          ? List<dynamic>.from(question.response as List)
+          : (question.selectedOptionId != null ? [question.selectedOptionId] : []);
+      final selectedOps = question.options.where((o) => selectedIds.contains(o.id));
+      selectedText = selectedOps.isEmpty
+          ? context.l10n.notAnswered
+          : selectedOps.map((o) => o.text).join(', ');
+
+      final correctOps = question.options.where((o) => o.isCorrect);
+      correctText = correctOps.isEmpty
+          ? context.l10n.mockAnswerUnavailable
+          : correctOps.map((o) => o.text).join(', ');
+    } else if (isStructured) {
+      if (question.response is List) {
+        selectedText = (question.response as List).join(' -> ');
+      } else {
+        selectedText = question.response?.toString() ?? context.l10n.notAnswered;
+      }
+      if (question.answerKey is List) {
+        correctText = (question.answerKey as List).join(' -> ');
+      } else {
+        correctText = question.answerKey?.toString() ?? context.l10n.mockAnswerUnavailable;
+      }
+    } else {
+      final selected = question.options
+          .where((option) => option.id == question.selectedOptionId)
+          .firstOrNull;
+      final correct = question.options
+          .where((option) => option.isCorrect)
+          .firstOrNull;
+      selectedText = selected?.text ?? context.l10n.notAnswered;
+      correctText = correct?.text ?? context.l10n.mockAnswerUnavailable;
+    }
+
     return RikiCard(
       borderColor: question.isCorrect
           ? AppColors.successBorder
@@ -290,16 +330,8 @@ class _ReviewQuestionCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.space2),
           Text(question.questionText, style: AppTypography.cardTitle),
           const SizedBox(height: AppSpacing.space3),
-          Text(
-            context.l10n.selectedAnswer(
-              selected?.text ?? context.l10n.notAnswered,
-            ),
-          ),
-          Text(
-            context.l10n.correctAnswer(
-              correct?.text ?? context.l10n.mockAnswerUnavailable,
-            ),
-          ),
+          Text(context.l10n.selectedAnswer(selectedText)),
+          Text(context.l10n.correctAnswer(correctText)),
           if (question.explanation?.trim().isNotEmpty == true) ...[
             const SizedBox(height: AppSpacing.space2),
             Text(

@@ -17,7 +17,9 @@ import 'package:rikipath_mobile/features/learning/presentation/widgets/standard_
 import 'package:rikipath_mobile/features/placement_test/application/placement_test_controller.dart';
 
 class LearningRoadmapScreen extends ConsumerStatefulWidget {
-  const LearningRoadmapScreen({super.key});
+  const LearningRoadmapScreen({this.aiOnly = false, super.key});
+
+  final bool aiOnly;
 
   @override
   ConsumerState<LearningRoadmapScreen> createState() =>
@@ -35,6 +37,9 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
     final roadmapState = ref.watch(standardRoadmapProvider);
     final placementState = ref.watch(placementTestStatusProvider);
     final pathState = ref.watch(learningPathControllerProvider);
+    final activeState = ref.watch(activeLearningPathProvider);
+    final activePath = activeState.asData?.value;
+    final latestPath = pathState.asData?.value;
     final roadmap = roadmapState.asData?.value;
     final placement = placementState.asData?.value;
     final eligible =
@@ -44,8 +49,12 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
-        title: context.l10n.standardRoadmapTitle,
-        subtitle: roadmap == null
+        title: widget.aiOnly
+            ? context.l10n.aiPersonalizedPathTitle
+            : context.l10n.standardRoadmapTitle,
+        subtitle: widget.aiOnly
+            ? 'Xem và quản lý hành trình học của bạn'
+            : roadmap == null
             ? context.l10n.loadingRoadmap
             : context.l10n.standardRoadmapProgress(
                 roadmap.completedLessons,
@@ -61,6 +70,7 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
             onRetry: () => ref.invalidate(standardRoadmapProvider),
           ),
           data: (data) => StandardRoadmapView(
+            showStandard: !widget.aiOnly,
             roadmap: data,
             onOpenLesson: (lessonId) =>
                 context.push(AppRoutes.lesson(lessonId)),
@@ -70,16 +80,25 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
             isGeneratingAiPath: pathState.isLoading || _isPreparingPreview,
             aiPathError:
                 _previewError ?? _pathError(context, pathState, placementState),
-            aiPath: pathState.asData?.value,
+            aiPath: activePath ?? latestPath,
+            hasPendingPreview:
+                latestPath?.status == LearningPathStatus.draft &&
+                latestPath?.pathId != null,
             onUpdateAiDay: _updateAiDay,
             updatingAiDay: _updatingDay,
             aiDayError: _dayError,
-            onGenerateAiPath: () {
+            onGenerateAiPath: () async {
               if (eligible) {
-                if (pathState.asData?.value != null) {
+                if (latestPath?.status == LearningPathStatus.draft &&
+                    latestPath?.pathId != null) {
+                  _showExistingPreview(latestPath!);
+                } else if (activePath != null || latestPath != null) {
                   _previewReplacement(data);
                 } else {
-                  ref.read(learningPathControllerProvider.notifier).generate();
+                  final generated = await ref
+                      .read(learningPathControllerProvider.notifier)
+                      .generate();
+                  if (generated) ref.invalidate(activeLearningPathProvider);
                 }
               }
             },
@@ -105,6 +124,7 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
           ? await dayRepository.completeDay(day)
           : await dayRepository.startDay(day);
       ref.read(learningPathControllerProvider.notifier).showServerPath(updated);
+      ref.invalidate(activeLearningPathProvider);
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -140,15 +160,7 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
       }
       if (!mounted) return;
       setState(() => _isPreparingPreview = false);
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) => _LearningPathPreviewDialog(
-          preview: preview,
-          repository: versionRepository,
-          onConfirmed: () => ref.invalidate(learningPathControllerProvider),
-        ),
-      );
+      await _presentPreview(preview, versionRepository);
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -163,10 +175,35 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
     }
   }
 
+  Future<void> _showExistingPreview(RecommendedLearningPath preview) async {
+    final repository = ref.read(learningPathRepositoryProvider);
+    if (repository is! LearningPathVersionRepository) return;
+    await _presentPreview(preview, repository as LearningPathVersionRepository);
+  }
+
+  Future<void> _presentPreview(
+    RecommendedLearningPath preview,
+    LearningPathVersionRepository repository,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _LearningPathPreviewDialog(
+        preview: preview,
+        repository: repository,
+        onChanged: () {
+          ref.invalidate(learningPathControllerProvider);
+          ref.invalidate(activeLearningPathProvider);
+        },
+      ),
+    );
+  }
+
   Future<void> _refresh(WidgetRef ref) async {
     ref.invalidate(standardRoadmapProvider);
     ref.invalidate(placementTestStatusProvider);
     ref.invalidate(learningPathControllerProvider);
+    ref.invalidate(activeLearningPathProvider);
     await ref.read(standardRoadmapProvider.future);
   }
 
@@ -209,12 +246,12 @@ class _LearningPathPreviewDialog extends StatefulWidget {
   const _LearningPathPreviewDialog({
     required this.preview,
     required this.repository,
-    required this.onConfirmed,
+    required this.onChanged,
   });
 
   final RecommendedLearningPath preview;
   final LearningPathVersionRepository repository;
-  final VoidCallback onConfirmed;
+  final VoidCallback onChanged;
 
   @override
   State<_LearningPathPreviewDialog> createState() =>
@@ -236,10 +273,10 @@ class _LearningPathPreviewDialogState
     try {
       if (confirm) {
         await widget.repository.confirmPreview(pathId);
-        widget.onConfirmed();
       } else {
         await widget.repository.cancelPreview(pathId);
       }
+      widget.onChanged();
       if (mounted) Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
@@ -268,6 +305,11 @@ class _LearningPathPreviewDialogState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(widget.preview.summary),
+              const SizedBox(height: AppSpacing.space2),
+              const Text(
+                'Lộ trình đang học chỉ được thay thế sau khi bạn xác nhận. '
+                'Tiến độ và lịch sử bài học cũ vẫn được lưu.',
+              ),
               const SizedBox(height: AppSpacing.space2),
               Text(
                 context.l10n.learningPathPreviewVersion(

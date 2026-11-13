@@ -607,9 +607,9 @@ void main() {
   });
 
   test(
-    'all 18 Sakura3DIconType assets exist on disk and are valid WebP files',
+    'all 21 Sakura3DIconType assets exist on disk and are valid WebP files',
     () {
-      expect(Sakura3DIconType.values.length, 18);
+      expect(Sakura3DIconType.values.length, 21);
       for (final iconType in Sakura3DIconType.values) {
         final file = File(iconType.assetPath);
         expect(
@@ -629,7 +629,7 @@ void main() {
     },
   );
 
-  testWidgets('Sakura3DIcon renders all 18 3D icon types cleanly', (
+  testWidgets('Sakura3DIcon renders all 21 3D icon types cleanly', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -646,7 +646,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(Sakura3DIcon), findsNWidgets(18));
+    expect(find.byType(Sakura3DIcon), findsNWidgets(21));
     expect(tester.takeException(), isNull);
   });
 }

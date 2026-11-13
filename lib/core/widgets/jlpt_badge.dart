@@ -22,13 +22,25 @@ enum JlptLevel {
 }
 
 class JlptBadge extends StatelessWidget {
-  const JlptBadge(this.level, {super.key});
+  const JlptBadge(
+    this.level, {
+    super.key,
+    this.backgroundColor,
+    this.borderColor,
+    this.foregroundColor,
+  });
 
   final JlptLevel level;
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
-    final colors = _colorsFor(level);
+    final defaultColors = _colorsFor(level);
+    final bg = backgroundColor ?? defaultColors.background;
+    final border = borderColor ?? defaultColors.border;
+    final fg = foregroundColor ?? defaultColors.foreground;
 
     return Semantics(
       label: context.l10n.jlptLevelSemantics(level.label),
@@ -38,13 +50,16 @@ class JlptBadge extends StatelessWidget {
           vertical: 2,
         ),
         decoration: BoxDecoration(
-          color: colors.background,
-          border: Border.all(color: colors.border),
+          color: bg,
+          border: Border.all(color: border),
           borderRadius: BorderRadius.circular(AppRadius.pill),
         ),
         child: Text(
           level.label,
-          style: AppTypography.badgeText.copyWith(color: colors.foreground),
+          style: AppTypography.badgeText.copyWith(
+            color: fg,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -55,27 +70,27 @@ class JlptBadge extends StatelessWidget {
       JlptLevel.n5 => const _JlptBadgeColors(
         foreground: AppColors.jlptN5Foreground,
         background: AppColors.jlptN5Background,
-        border: AppColors.brandBorder,
+        border: AppColors.jlptBadgeBorder,
       ),
       JlptLevel.n4 => const _JlptBadgeColors(
         foreground: AppColors.jlptN4Foreground,
         background: AppColors.jlptN4Background,
-        border: AppColors.brandPrimary,
+        border: AppColors.jlptBadgeBorder,
       ),
       JlptLevel.n3 => const _JlptBadgeColors(
         foreground: AppColors.jlptN3Foreground,
         background: AppColors.jlptN3Background,
-        border: AppColors.borderStrong,
+        border: AppColors.jlptBadgeBorder,
       ),
       JlptLevel.n2 => const _JlptBadgeColors(
         foreground: AppColors.jlptN4Foreground,
         background: AppColors.jlptN4Background,
-        border: AppColors.brandPrimary,
+        border: AppColors.jlptBadgeBorder,
       ),
       JlptLevel.n1 => const _JlptBadgeColors(
         foreground: AppColors.jlptN3Foreground,
         background: AppColors.jlptN3Background,
-        border: AppColors.borderStrong,
+        border: AppColors.jlptBadgeBorder,
       ),
     };
   }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
@@ -101,6 +102,7 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
               children: [
                 ProfileDetailIntro(
                   icon: Icons.track_changes_outlined,
+                  colorfulIcon: SakuraColorfulIconType.learningGoal,
                   title: context.l10n.jlptGoalSettings,
                   description: context.l10n.jlptGoalSettingsSubtitle,
                 ),
@@ -174,20 +176,42 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
                             child: Text(context.l10n.retry),
                           ),
                         ],
-                        data: (levels) => levels.isEmpty
-                            ? <Widget>[Text(context.l10n.jlptCatalogEmpty)]
-                            : <Widget>[
-                                for (final item in levels)
-                                  ChoiceChip(
-                                    key: ValueKey<String>(
-                                      'jlpt_goal_choice_${item.code}',
+                        data: (levels) {
+                          final supportedLevels = levels
+                              .where((item) => item.level != JlptLevel.n1)
+                              .toList(growable: false);
+                          return supportedLevels.isEmpty
+                              ? <Widget>[Text(context.l10n.jlptCatalogEmpty)]
+                              : <Widget>[
+                                  for (final item in supportedLevels)
+                                    ChoiceChip(
+                                      key: ValueKey<String>(
+                                        'jlpt_goal_choice_${item.code}',
+                                      ),
+                                      label: Text(item.code),
+                                      selected: _selectedLevel?.id == item.id,
+                                      onSelected: (_) =>
+                                          setState(() => _selectedLevel = item),
+                                      selectedColor: const Color(0xFFFDEBF0),
+                                      backgroundColor: Colors.white,
+                                      side: BorderSide(
+                                        color: _selectedLevel?.id == item.id
+                                            ? AppColors.primary
+                                            : const Color(0xFFFFCCD8),
+                                        width: _selectedLevel?.id == item.id ? 1.5 : 1.0,
+                                      ),
+                                      labelStyle: TextStyle(
+                                        color: _selectedLevel?.id == item.id
+                                            ? AppColors.primary
+                                            : const Color(0xFFC73D65),
+                                        fontWeight: _selectedLevel?.id == item.id
+                                            ? FontWeight.w700
+                                            : FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
                                     ),
-                                    label: Text(item.code),
-                                    selected: _selectedLevel?.id == item.id,
-                                    onSelected: (_) =>
-                                        setState(() => _selectedLevel = item),
-                                  ),
-                              ],
+                                ];
+                        },
                       ),
                     ],
                   ),

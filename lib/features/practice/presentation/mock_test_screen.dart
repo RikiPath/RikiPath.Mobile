@@ -9,6 +9,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
 import 'package:rikipath_mobile/features/mock_test/domain/mock_test.dart';
+import 'package:rikipath_mobile/features/mock_test/domain/mock_test_display_title.dart';
 
 class MockTestScreen extends ConsumerStatefulWidget {
   const MockTestScreen({required this.testId, super.key});
@@ -56,10 +57,12 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
     _timer = null;
     final outcome = await ref
         .read(mockTestControllerProvider.notifier)
-        .submit();
+        .finalizeExpired();
     if (!mounted) return;
     if (outcome != MockTestSubmitOutcome.failed) {
       context.pushReplacement(AppRoutes.mockTestResult(widget.testId));
+    } else {
+      _ensureTimer();
     }
   }
 
@@ -229,7 +232,9 @@ class _MockInstructions extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: AppColors.brandTint,
                             borderRadius: BorderRadius.circular(AppRadius.pill),
-                            border: Border.all(color: AppColors.borderSubtlePink),
+                            border: Border.all(
+                              color: AppColors.borderSubtlePink,
+                            ),
                           ),
                           child: Text(
                             test.jlptLevelName,
@@ -240,15 +245,20 @@ class _MockInstructions extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: AppSpacing.space2),
-                        Text(test.title, style: AppTypography.pageTitle),
+                        Text(
+                          mockTestDisplayTitle(
+                            test.title,
+                            japanese:
+                                Localizations.localeOf(context).languageCode ==
+                                'ja',
+                          ),
+                          style: AppTypography.pageTitle,
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(width: AppSpacing.space2),
-                  const SakuraMascot(
-                    pose: SakuraMascotPose.studying,
-                    size: 72,
-                  ),
+                  const SakuraMascot(pose: SakuraMascotPose.studying, size: 72),
                 ],
               ),
               if (test.description.trim().isNotEmpty) ...[
@@ -338,7 +348,7 @@ class _MockQuestionView extends ConsumerWidget {
           currentIndex: index,
           total: total,
           questions: attempt.questions,
-          answers: attempt.answers,
+          attempt: attempt,
           isSubmitting: state.isSubmitting,
           onSelect: controller.showQuestion,
         ),
@@ -359,7 +369,10 @@ class _MockQuestionView extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space3),
               Text(question.content, style: AppTypography.sectionTitle),
-              if (question.imageUrl != null || question.audioUrl != null) ...[
+              if (question.audioUrl != null) ...[
+                const SizedBox(height: AppSpacing.space3),
+                _MockAudioPlayerBanner(audioUrl: question.audioUrl!),
+              ] else if (question.imageUrl != null) ...[
                 const SizedBox(height: AppSpacing.space2),
                 Text(
                   context.l10n.mockMediaAvailable,
@@ -369,15 +382,66 @@ class _MockQuestionView extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: AppSpacing.space4),
-              for (final option in question.options) ...[
-                _MockOptionTile(
-                  option: option,
-                  selected: attempt.answers[question.id] == option.id,
-                  onTap: state.isSubmitting
-                      ? null
-                      : () => controller.selectAnswer(question.id, option.id),
+              if (question.questionType.toLowerCase() == 'multiplechoice') ...[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.space2),
+                  child: Text(
+                    '(Chọn một hoặc nhiều đáp án)',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.brandPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.space2),
+                for (final option in question.options) ...[
+                  _MockCheckboxOptionTile(
+                    option: option,
+                    selected: (attempt.structuredAnswers[question.id] as List?)
+                            ?.contains(option.id) ==
+                        true,
+                    onTap: state.isSubmitting
+                        ? null
+                        : () => controller.toggleMultipleChoiceOption(
+                              question.id,
+                              option.id,
+                            ),
+                  ),
+                  const SizedBox(height: AppSpacing.space2),
+                ],
+              ] else if (question.questionType.toLowerCase() == 'ordering' ||
+                  question.questionType.toLowerCase() == 'sentenceordering') ...[
+                _MockOrderingWidget(
+                  question: question,
+                  currentSelection: (attempt.structuredAnswers[question.id] as List?)
+                          ?.map((e) => e.toString())
+                          .toList() ??
+                      const <String>[],
+                  onChanged: state.isSubmitting
+                      ? null
+                      : (tokens) =>
+                          controller.setOrderingAnswer(question.id, tokens),
+                ),
+              ] else if (question.questionType.toLowerCase() == 'fillblank' ||
+                  question.questionType.toLowerCase() == 'shortanswer') ...[
+                _MockFillBlankWidget(
+                  question: question,
+                  currentText:
+                      (attempt.structuredAnswers[question.id] as String?) ?? '',
+                  onChanged: state.isSubmitting
+                      ? null
+                      : (text) => controller.setTextAnswer(question.id, text),
+                ),
+              ] else ...[
+                for (final option in question.options) ...[
+                  _MockOptionTile(
+                    option: option,
+                    selected: attempt.answers[question.id] == option.id,
+                    onTap: state.isSubmitting
+                        ? null
+                        : () => controller.selectAnswer(question.id, option.id),
+                  ),
+                  const SizedBox(height: AppSpacing.space2),
+                ],
               ],
             ],
           ),
@@ -428,7 +492,7 @@ class _QuestionNavigatorStrip extends StatelessWidget {
     required this.currentIndex,
     required this.total,
     required this.questions,
-    required this.answers,
+    required this.attempt,
     required this.isSubmitting,
     required this.onSelect,
   });
@@ -436,7 +500,7 @@ class _QuestionNavigatorStrip extends StatelessWidget {
   final int currentIndex;
   final int total;
   final List<LiveMockTestQuestion> questions;
-  final Map<int, int> answers;
+  final LiveMockTestAttempt attempt;
   final bool isSubmitting;
   final ValueChanged<int> onSelect;
 
@@ -451,7 +515,7 @@ class _QuestionNavigatorStrip extends StatelessWidget {
         itemBuilder: (context, i) {
           final isCurrent = i == currentIndex;
           final isAnswered =
-              i < questions.length && answers.containsKey(questions[i].id);
+              i < questions.length && attempt.isQuestionAnswered(questions[i].id);
 
           Color bgColor;
           Color borderColor;
@@ -478,8 +542,10 @@ class _QuestionNavigatorStrip extends StatelessWidget {
               onTap: isSubmitting ? null : () => onSelect(i),
               child: Container(
                 constraints: const BoxConstraints(minWidth: 36),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: bgColor,
                   borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -493,8 +559,9 @@ class _QuestionNavigatorStrip extends StatelessWidget {
                       '${i + 1}',
                       style: AppTypography.badgeText.copyWith(
                         color: textColor,
-                        fontWeight:
-                            isCurrent ? FontWeight.w700 : FontWeight.w600,
+                        fontWeight: isCurrent
+                            ? FontWeight.w700
+                            : FontWeight.w600,
                       ),
                     ),
                     if (isAnswered && !isCurrent) ...[
@@ -611,10 +678,10 @@ class _TimerPill extends StatelessWidget {
         .remainder(60)
         .toString()
         .padLeft(2, '0');
-    final bgColor =
-        isUrgent ? AppColors.errorBackground : AppColors.brandTint;
-    final borderColor =
-        isUrgent ? AppColors.errorBorder : AppColors.borderSubtlePink;
+    final bgColor = isUrgent ? AppColors.errorBackground : AppColors.brandTint;
+    final borderColor = isUrgent
+        ? AppColors.errorBorder
+        : AppColors.borderSubtlePink;
     final textColor = isUrgent ? AppColors.error : AppColors.brandPrimary;
 
     return Container(
@@ -655,6 +722,308 @@ class _InfoRow extends StatelessWidget {
         Icon(icon, color: AppColors.brandPrimary),
         const SizedBox(width: AppSpacing.space2),
         Text(label, style: AppTypography.bodySmall),
+      ],
+    );
+  }
+}
+
+
+class _MockAudioPlayerBanner extends StatefulWidget {
+  const _MockAudioPlayerBanner({required this.audioUrl});
+
+  final String audioUrl;
+
+  @override
+  State<_MockAudioPlayerBanner> createState() => _MockAudioPlayerBannerState();
+}
+
+class _MockAudioPlayerBannerState extends State<_MockAudioPlayerBanner> {
+  bool _isPlaying = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space3,
+        vertical: AppSpacing.space2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.brandTint,
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        border: Border.all(color: AppColors.borderSubtlePink),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(
+              _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+              color: AppColors.brandPrimary,
+              size: 32,
+            ),
+            onPressed: () {
+              setState(() {
+                _isPlaying = !_isPlaying;
+              });
+            },
+          ),
+          const SizedBox(width: AppSpacing.space2),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Bài nghe JLPT (Audio)',
+                  style: AppTypography.badgeText.copyWith(
+                    color: AppColors.brandPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  _isPlaying ? 'Đang phát âm thanh...' : 'Bấm để nghe đoạn hội thoại',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.learnerTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MockCheckboxOptionTile extends StatelessWidget {
+  const _MockCheckboxOptionTile({
+    required this.option,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final LiveMockTestOption option;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? AppColors.brandTint : AppColors.cardWarmWhite,
+      borderRadius: BorderRadius.circular(AppRadius.input),
+      child: InkWell(
+        key: ValueKey<String>('mock_checkbox_option_${option.id}'),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.space3),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.brandTint : AppColors.cardWarmWhite,
+            border: Border.all(
+              color: selected
+                  ? AppColors.brandPrimary
+                  : AppColors.borderSubtlePink,
+              width: selected ? 1.5 : 1.0,
+            ),
+            borderRadius: BorderRadius.circular(AppRadius.input),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                selected ? Icons.check_box : Icons.check_box_outline_blank,
+                color: selected ? AppColors.brandPrimary : AppColors.textMuted,
+              ),
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(
+                child: Text(
+                  option.content,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: selected
+                        ? AppColors.brandPrimary
+                        : AppColors.textPrimary,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MockOrderingWidget extends StatelessWidget {
+  const _MockOrderingWidget({
+    required this.question,
+    required this.currentSelection,
+    required this.onChanged,
+  });
+
+  final LiveMockTestQuestion question;
+  final List<String> currentSelection;
+  final ValueChanged<List<String>>? onChanged;
+
+  List<String> get _availableTokens {
+    final raw = question.interactionData?['tokens'];
+    if (raw is List) {
+      return raw.map((e) => e.toString()).toList();
+    }
+    return question.options.map((o) => o.content).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final remainingTokens = List<String>.from(_availableTokens);
+    for (final token in currentSelection) {
+      remainingTokens.remove(token);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Thứ tự đã sắp xếp:',
+          style: AppTypography.badgeText.copyWith(
+            color: AppColors.brandPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.space2),
+        Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.all(AppSpacing.space2),
+          decoration: BoxDecoration(
+            color: AppColors.cardWarmWhite,
+            borderRadius: BorderRadius.circular(AppRadius.input),
+            border: Border.all(color: AppColors.borderSubtlePink),
+          ),
+          child: currentSelection.isEmpty
+              ? Center(
+                  child: Text(
+                    'Chạm vào các từ bên dưới để sắp xếp',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.learnerTextSecondary,
+                    ),
+                  ),
+                )
+              : Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (int i = 0; i < currentSelection.length; i++)
+                      ActionChip(
+                        label: Text('${i + 1}. ${currentSelection[i]}'),
+                        avatar: const Icon(Icons.close, size: 14),
+                        onPressed: onChanged == null
+                            ? null
+                            : () {
+                                final next = List<String>.from(currentSelection)
+                                  ..removeAt(i);
+                                onChanged!(next);
+                              },
+                      ),
+                  ],
+                ),
+        ),
+        const SizedBox(height: AppSpacing.space3),
+        Text(
+          'Từ / Cụm từ có sẵn:',
+          style: AppTypography.badgeText.copyWith(
+            color: AppColors.learnerTextSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.space2),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final token in remainingTokens)
+              ActionChip(
+                label: Text(token),
+                avatar: const Icon(Icons.add, size: 14),
+                onPressed: onChanged == null
+                    ? null
+                    : () {
+                        final next = List<String>.from(currentSelection)
+                          ..add(token);
+                        onChanged!(next);
+                      },
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MockFillBlankWidget extends StatefulWidget {
+  const _MockFillBlankWidget({
+    required this.question,
+    required this.currentText,
+    required this.onChanged,
+  });
+
+  final LiveMockTestQuestion question;
+  final String currentText;
+  final ValueChanged<String>? onChanged;
+
+  @override
+  State<_MockFillBlankWidget> createState() => _MockFillBlankWidgetState();
+}
+
+class _MockFillBlankWidgetState extends State<_MockFillBlankWidget> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.currentText);
+  }
+
+  @override
+  void didUpdateWidget(_MockFillBlankWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.question.id != widget.question.id ||
+        (oldWidget.currentText != widget.currentText &&
+            _controller.text != widget.currentText)) {
+      _controller.text = widget.currentText;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Nhập câu trả lời:',
+          style: AppTypography.badgeText.copyWith(
+            color: AppColors.brandPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.space2),
+        TextField(
+          controller: _controller,
+          enabled: widget.onChanged != null,
+          decoration: InputDecoration(
+            hintText: 'Nhập đáp án của bạn...',
+            fillColor: AppColors.cardWarmWhite,
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.input),
+              borderSide: const BorderSide(color: AppColors.borderSubtlePink),
+            ),
+          ),
+          onChanged: widget.onChanged,
+        ),
       ],
     );
   }

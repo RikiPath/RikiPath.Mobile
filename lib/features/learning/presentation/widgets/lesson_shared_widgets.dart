@@ -4,6 +4,19 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 
+/// Chuyển nhãn kỹ năng từ hợp đồng Backend sang ngôn ngữ giao diện.
+String localizedLessonCategory(BuildContext context, String category) {
+  final isJapanese = Localizations.localeOf(context).languageCode == 'ja';
+  return switch (category.trim().toLowerCase()) {
+    'vocabulary' => isJapanese ? '語彙' : 'Từ vựng',
+    'grammar' => isJapanese ? '文法' : 'Ngữ pháp',
+    'kanji' => isJapanese ? '漢字' : 'Kanji',
+    'reading' => isJapanese ? '読解' : 'Đọc hiểu',
+    'listening' => isJapanese ? '聴解' : 'Nghe hiểu',
+    _ => category,
+  };
+}
+
 class LessonMetadataWrap extends StatelessWidget {
   const LessonMetadataWrap({required this.lesson, super.key});
 
@@ -17,7 +30,7 @@ class LessonMetadataWrap extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         JlptBadge(lesson.level),
-        _MetadataPill(label: lesson.category),
+        _MetadataPill(label: localizedLessonCategory(context, lesson.category)),
         if (lesson.durationSeconds > 0)
           _MetadataPill(
             label: context.l10n.durationMinutes(lesson.durationMinutes),
@@ -59,6 +72,9 @@ class LessonProgressMeter extends StatelessWidget {
             Text(
               progress.isCompleted
                   ? context.l10n.completedUpper
+                  : progress.progressPercent == 0 &&
+                        progress.resumePositionSeconds == 0
+                  ? '0% • ${context.l10n.notStarted}'
                   : context.l10n.learningProgressValue(
                       progress.progressPercent,
                     ),

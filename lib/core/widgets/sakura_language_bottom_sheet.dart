@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 
 /// Opens the Sakura-styled modal bottom sheet to select the application language.
 Future<Locale?> showSakuraLanguageBottomSheet(BuildContext context) {
@@ -33,7 +34,9 @@ class _SakuraLanguageBottomSheetState
     setState(() => _pendingLanguageCode = targetLocale.languageCode);
 
     if (currentCode != targetLocale.languageCode) {
-      await ref.read(localeControllerProvider.notifier).changeLocale(targetLocale);
+      await ref
+          .read(localeControllerProvider.notifier)
+          .changeLocale(targetLocale);
     }
 
     if (!mounted) return;
@@ -77,7 +80,9 @@ class _SakuraLanguageBottomSheetState
               // Drag handle
               Center(
                 child: Container(
-                  key: const ValueKey<String>('sakura_language_bottom_sheet_drag_handle'),
+                  key: const ValueKey<String>(
+                    'sakura_language_bottom_sheet_drag_handle',
+                  ),
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
@@ -90,19 +95,10 @@ class _SakuraLanguageBottomSheetState
               // Header
               Row(
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: AppColors.brandTint,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: const Icon(
-                      Icons.language_rounded,
-                      size: 20,
-                      color: AppColors.brandPrimary,
-                    ),
+                  const SakuraColorfulIcon(
+                    type: SakuraColorfulIconType.language,
+                    size: 34,
+                    useEmoji: true,
                   ),
                   const SizedBox(width: AppSpacing.space3),
                   Expanded(
@@ -224,15 +220,9 @@ class _LanguageOptionCard extends StatelessWidget {
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: AppColors.border,
-                          width: 0.6,
-                        ),
+                        border: Border.all(color: AppColors.border, width: 0.6),
                       ),
-                      child: SvgPicture.asset(
-                        flagAsset,
-                        fit: BoxFit.cover,
-                      ),
+                      child: SvgPicture.asset(flagAsset, fit: BoxFit.cover),
                     ),
                     const SizedBox(width: AppSpacing.space4),
                     // Language labels

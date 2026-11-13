@@ -63,13 +63,6 @@ class _SakuraTimelineViewState extends State<SakuraTimelineView> {
     switch (widget.viewMode) {
       case SakuraCalendarViewMode.day:
         return [DateTime(sel.year, sel.month, sel.day)];
-      case SakuraCalendarViewMode.threeDay:
-        // Center around selected date or start from selected date
-        return [
-          DateTime(sel.year, sel.month, sel.day),
-          DateTime(sel.year, sel.month, sel.day + 1),
-          DateTime(sel.year, sel.month, sel.day + 2),
-        ];
       case SakuraCalendarViewMode.week:
         // Week starts on Monday
         final monday = sel.subtract(Duration(days: sel.weekday - 1));
@@ -109,7 +102,7 @@ class _SakuraTimelineViewState extends State<SakuraTimelineView> {
           Container(
             padding: const EdgeInsets.only(bottom: AppSpacing.space2),
             decoration: const BoxDecoration(
-              color: AppColors.background,
+              color: Colors.white,
               border: Border(
                 bottom: BorderSide(color: AppColors.border, width: 0.8),
               ),
@@ -137,13 +130,15 @@ class _SakuraTimelineViewState extends State<SakuraTimelineView> {
 
           // Scrollable Time Grid
           Expanded(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: SizedBox(
-                height: contentHeight,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            child: Container(
+              color: Colors.white,
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: SizedBox(
+                  height: contentHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     // Hour labels column
                     SizedBox(
                       width: 48,
@@ -192,6 +187,7 @@ class _SakuraTimelineViewState extends State<SakuraTimelineView> {
               ),
             ),
           ),
+        ),
         ],
       ),
     );
@@ -215,6 +211,8 @@ class _TimelineHeaderCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isWeekend = weekdayLabel == 'CN' || weekdayLabel == 'T7';
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -229,7 +227,9 @@ class _TimelineHeaderCell extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 color: isToday
                     ? AppColors.primary
-                    : AppColors.textSecondary,
+                    : isWeekend
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 2),
@@ -241,9 +241,12 @@ class _TimelineHeaderCell extends StatelessWidget {
                 color: isToday
                     ? AppColors.primary
                     : isSelected
-                        ? AppColors.primaryContainer
+                        ? const Color(0xFFFFF1F2)
                         : Colors.transparent,
                 shape: BoxShape.circle,
+                border: isSelected && !isToday
+                    ? Border.all(color: AppColors.primary, width: 1.5)
+                    : null,
               ),
               child: Text(
                 '${day.day}',
@@ -283,6 +286,8 @@ class _DayTimelineColumn extends StatelessWidget {
   final double hourHeight;
   final List<SakuraCalendarEvent> events;
   final ValueChanged<SakuraCalendarEvent> onSelectEvent;
+
+  int get totalHours => endHour - startHour;
 
   @override
   Widget build(BuildContext context) {
@@ -360,15 +365,21 @@ class _DayTimelineColumn extends StatelessWidget {
     final startMins = (ev.startTime.hour - startHour) * 60 + ev.startTime.minute;
     final durationMins = ev.durationMinutes;
 
-    final top = (startMins / 60.0) * hourHeight;
-    final height = (durationMins / 60.0) * hourHeight;
+    final totalGridHeight = totalHours * hourHeight;
+    final top = ((startMins / 60.0) * hourHeight).clamp(0.0, totalGridHeight - 20.0);
+    final rawHeight = (durationMins / 60.0) * hourHeight;
+    final maxAllowedHeight = totalGridHeight - top;
+    final height = rawHeight.clamp(32.0, maxAllowedHeight > 32.0 ? maxAllowedHeight : 32.0);
 
     // Calculate horizontal column placement
     final cardWidth = (totalWidth - 4) / pe.totalColumns;
     final left = pe.columnIndex * cardWidth + 2;
 
-    // Smart abbreviation for dense / narrow columns (e.g. 7-day Week View in portrait)
+    // Responsive tiers based on card width
     final isNarrow = cardWidth < 65;
+    final isWide = cardWidth >= 110;
+    final isVeryWide = cardWidth >= 200;
+
     final String displayTitle;
     if (isNarrow) {
       if (ev.participantName != null && ev.participantName!.isNotEmpty) {
@@ -385,6 +396,27 @@ class _DayTimelineColumn extends StatelessWidget {
     final timeStr = '${ev.startTime.hour.toString().padLeft(2, '0')}:${ev.startTime.minute.toString().padLeft(2, '0')} - ${ev.endTime.hour.toString().padLeft(2, '0')}:${ev.endTime.minute.toString().padLeft(2, '0')}';
     final minCardHeight = height > 32 ? height : 32.0;
 
+    // Typography and spacing scaled responsively to fill card space elegantly
+    final double titleFontSize = isVeryWide
+        ? 14.0
+        : (isWide ? 13.0 : (isNarrow ? 9.5 : 11.0));
+    final double timeFontSize = isVeryWide
+        ? 12.0
+        : (isWide ? 11.0 : (isNarrow ? 8.0 : 9.5));
+    final double badgeFontSize = isVeryWide
+        ? 11.0
+        : (isWide ? 10.5 : (isNarrow ? 8.0 : 8.5));
+    final double badgeIconSize = isVeryWide
+        ? 11.5
+        : (isWide ? 11.0 : 8.5);
+
+    final double cardPaddingH = isWide ? 8.0 : 4.0;
+    final double cardPaddingV = isWide ? (height >= 80 ? 7.0 : 5.0) : 3.0;
+    final double accentBarWidth = isWide ? 4.0 : 3.5;
+    final double barGap = isWide ? 6.0 : 3.0;
+    final double titleTimeGap = isWide ? 3.0 : 1.0;
+    final double timeBadgeGap = isWide ? (height >= 80 ? 5.0 : 3.0) : 1.5;
+
     return Positioned(
       top: top,
       left: left,
@@ -392,54 +424,103 @@ class _DayTimelineColumn extends StatelessWidget {
       height: minCardHeight,
       child: Material(
         color: ev.backgroundColor,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(isWide ? 8 : 6),
         child: InkWell(
           key: Key('calendar_event_card_${ev.id}'),
           onTap: () => onSelectEvent(ev),
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(isWide ? 8 : 6),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+            padding: EdgeInsets.symmetric(
+              horizontal: cardPaddingH,
+              vertical: cardPaddingV,
+            ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(isWide ? 8 : 6),
               border: Border.all(color: ev.borderColor),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 3.5,
+                  width: accentBarWidth,
                   height: double.infinity,
                   decoration: BoxDecoration(
                     color: ev.primaryColor,
-                    borderRadius: BorderRadius.circular(1.5),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(width: 3),
+                SizedBox(width: barGap),
                 Expanded(
                   child: ClipRect(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                    child: SingleChildScrollView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                         Text(
                           displayTitle,
-                          maxLines: height > 45 ? 2 : 1,
+                          maxLines: height > 85 ? 2 : 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: isNarrow ? 9.5 : 10.5,
+                            fontSize: titleFontSize,
                             fontWeight: FontWeight.w700,
                             color: ev.primaryColor,
+                            height: 1.2,
                           ),
                         ),
                         if (height > 35) ...[
+                          SizedBox(height: titleTimeGap),
                           Text(
                             timeStr,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: isNarrow ? 8.0 : 8.5,
+                              fontSize: timeFontSize,
                               color: AppColors.textSecondary,
                               fontWeight: FontWeight.w600,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                        if (height >= 58 && !isNarrow && ev.statusLabel != null) ...[
+                          SizedBox(height: timeBadgeGap),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isWide ? 7.0 : 4.0,
+                              vertical: isWide ? 2.5 : 1.0,
+                            ),
+                            decoration: BoxDecoration(
+                              color: ev.statusBadgeBgColor,
+                              borderRadius: BorderRadius.circular(isWide ? 6 : 4),
+                              border: Border.all(
+                                color: ev.statusBadgeBorderColor,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (ev.statusBadgeIcon != null) ...[
+                                  Icon(
+                                    ev.statusBadgeIcon,
+                                    size: badgeIconSize,
+                                    color: ev.statusBadgeTextColor,
+                                  ),
+                                  SizedBox(width: isWide ? 3.5 : 2.5),
+                                ],
+                                Flexible(
+                                  child: Text(
+                                    ev.statusLabel!,
+                                    style: TextStyle(
+                                      fontSize: badgeFontSize,
+                                      fontWeight: FontWeight.w700,
+                                      color: ev.statusBadgeTextColor,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -447,6 +528,7 @@ class _DayTimelineColumn extends StatelessWidget {
                     ),
                   ),
                 ),
+              ),
               ],
             ),
           ),

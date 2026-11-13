@@ -34,6 +34,7 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
     required DateTime from,
     required DateTime to,
     int? mentorId,
+    String? jlptLevel,
   }) async {
     final response = await _apiClient.get<Object?>(
       LearnerMentorApiPaths.availability,
@@ -41,6 +42,7 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
         'from': from.toUtc().toIso8601String(),
         'to': to.toUtc().toIso8601String(),
         'mentorId': ?mentorId,
+        'jlptLevel': ?jlptLevel,
       },
     );
     return readLearnerMentorResultList(response.data)
@@ -251,5 +253,4 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
         .map((dto) => dto.toDomain())
         .toList(growable: false);
   }
-
 }

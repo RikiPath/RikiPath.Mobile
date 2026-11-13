@@ -115,6 +115,9 @@ class TestLiveMockTestRepository implements MockTestRepository {
   });
 
   final List<LiveMockTestSummary> tests;
+
+  @override
+  Future<LiveMockTestAttempt?> loadActive(int mockTestId) async => null;
   int submitCalls = 0;
   List<MockTestAnswerSubmission>? submittedAnswers;
 
@@ -135,6 +138,16 @@ class TestLiveMockTestRepository implements MockTestRepository {
     submittedAnswers = answers;
     return testLiveMockResult();
   }
+
+  @override
+  Future<void> saveAnswer(
+    int attemptId,
+    MockTestAnswerSubmission answer,
+  ) async {}
+
+  @override
+  Future<LiveMockTestResult> finalizeExpired(int attemptId) async =>
+      testLiveMockResult();
 
   @override
   Future<LiveMockTestResult> loadResult(int attemptId) async =>

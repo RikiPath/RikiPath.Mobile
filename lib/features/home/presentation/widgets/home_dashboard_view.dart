@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
 import 'package:rikipath_mobile/features/home/domain/home_dashboard.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey.dart';
@@ -904,26 +905,14 @@ class _AnalyticsSummary extends StatelessWidget {
             ),
         ];
 
-        final skillTile =
-            data.isAvailable(AnalyticsSection.skills) && data.skills.isNotEmpty
-            ? _MetricTile(
-                key: const ValueKey<String>('home_analytics_skill'),
-                icon: Icons.auto_graph_outlined,
-                icon3d: Sakura3DIconType.kanji,
-                tone: AppFeatureTones.learning,
-                label: context.l10n.skillBreakdown,
-                value: data.skills.first.skill,
-              )
-            : null;
-
-        if (tiles.isEmpty && skillTile == null) {
+        if (tiles.isEmpty) {
           return RikiCard(
             boxShadow: const <BoxShadow>[],
             child: Text(context.l10n.analyticsEmpty),
           );
         }
 
-        final primary = stacked
+        return stacked
             ? Column(
                 children: [
                   for (var index = 0; index < tiles.length; index++) ...[
@@ -943,15 +932,6 @@ class _AnalyticsSummary extends StatelessWidget {
                   ],
                 ),
               );
-        if (skillTile == null) return primary;
-        if (tiles.isEmpty) return skillTile;
-        return Column(
-          children: [
-            primary,
-            const SizedBox(height: AppSpacing.space2),
-            skillTile,
-          ],
-        );
       },
     );
   }
@@ -974,7 +954,7 @@ class _StreakMetricTile extends StatelessWidget {
     return RikiCard(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.space3,
-        vertical: 10,
+        vertical: 7,
       ),
       backgroundColor: AppColors.cardWarmWhite,
       borderColor: AppColors.cardBorderSubtle,
@@ -986,11 +966,9 @@ class _StreakMetricTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              const _IconTile(
-                icon: Icons.local_fire_department_outlined,
-                icon3d: Sakura3DIconType.streak,
-                compact: true,
-                tone: AppFeatureTones.streak,
+              const SakuraColorfulIcon(
+                type: SakuraColorfulIconType.streak,
+                size: 30,
               ),
               const SizedBox(width: AppSpacing.space2),
               Expanded(
@@ -1023,7 +1001,7 @@ class _StreakMetricTile extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           SakuraDayTracker(
             compact: true,
             onDateSelected: onDateSelected,
@@ -1061,7 +1039,7 @@ class _CompletionMetricTile extends StatelessWidget {
       onTap: onTap,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.space3,
-        vertical: 10,
+        vertical: 7,
       ),
       backgroundColor: AppColors.cardWarmWhite,
       borderColor: AppColors.cardBorderSubtle,
@@ -1073,11 +1051,9 @@ class _CompletionMetricTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              const _IconTile(
-                icon: Icons.task_alt_outlined,
-                icon3d: Sakura3DIconType.achievement,
-                compact: true,
-                tone: AppFeatureTones.success,
+              const SakuraColorfulIcon(
+                type: SakuraColorfulIconType.trophy,
+                size: 30,
               ),
               const SizedBox(width: AppSpacing.space2),
               Expanded(
@@ -1115,7 +1091,7 @@ class _CompletionMetricTile extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
@@ -1347,59 +1323,6 @@ class _FeatureCard extends StatelessWidget {
   }
 }
 
-class _MetricTile extends StatelessWidget {
-  const _MetricTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.tone,
-    this.icon3d,
-    super.key,
-  });
-
-  final IconData icon;
-  final Sakura3DIconType? icon3d;
-  final String label;
-  final String value;
-  final RikiFeatureTone tone;
-
-  @override
-  Widget build(BuildContext context) {
-    return RikiCard(
-      padding: const EdgeInsets.all(AppSpacing.space3),
-      backgroundColor: AppColors.cardWarmWhite,
-      borderColor: AppColors.cardBorderMuted,
-      boxShadow: AppShadows.sakuraSubtle,
-      borderRadius: AppRadius.cardSmooth,
-      child: Row(
-        children: [
-          _IconTile(icon: icon, icon3d: icon3d, compact: true, tone: tone),
-          const SizedBox(width: AppSpacing.space2),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.metadata,
-                ),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.cardTitle,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _SectionHeading extends StatelessWidget {
   const _SectionHeading({
     required this.title,
@@ -1502,13 +1425,13 @@ class _IconTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = compact ? 38.0 : 46.0;
+    final size = compact ? 36.0 : 46.0;
     return RikiFeatureIcon(
       icon: icon,
       icon3d: icon3d,
       tone: tone,
       extent: size,
-      iconSize: compact ? 19 : 22,
+      iconSize: compact ? 18 : 22,
     );
   }
 }

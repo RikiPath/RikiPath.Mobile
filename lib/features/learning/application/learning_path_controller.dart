@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/api_learning_path_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_path_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/recommended_learning_path.dart';
@@ -10,6 +11,20 @@ import 'package:rikipath_mobile/features/learning/domain/recommended_learning_pa
 final learningPathRepositoryProvider = Provider<LearningPathRepository>(
   (ref) => ApiLearningPathRepository(ref.watch(apiClientProvider)),
 );
+
+/// The roadmap tab must never present a draft/latest path as the active plan.
+final activeLearningPathProvider = FutureProvider<RecommendedLearningPath?>((
+  ref,
+) async {
+  ref.watch(authenticatedUserIdProvider);
+  final repository = ref.watch(learningPathRepositoryProvider);
+  if (repository is! LearningPathVersionRepository) return null;
+  try {
+    return await (repository as LearningPathVersionRepository).loadActive();
+  } on NotFoundError {
+    return null;
+  }
+});
 
 final learningPathControllerProvider =
     AsyncNotifierProvider<LearningPathController, RecommendedLearningPath?>(
@@ -20,6 +35,7 @@ final learningPathControllerProvider =
 class LearningPathController extends AsyncNotifier<RecommendedLearningPath?> {
   @override
   FutureOr<RecommendedLearningPath?> build() async {
+    ref.watch(authenticatedUserIdProvider);
     try {
       return await ref.watch(learningPathRepositoryProvider).loadLatest();
     } on NotFoundError {

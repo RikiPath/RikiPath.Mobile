@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/placement_test/application/placement_test_controller.dart';
 import 'package:rikipath_mobile/features/placement_test/domain/placement_test.dart';
 
@@ -194,17 +195,10 @@ class _PlacementIntroView extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.brandTint,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.analytics_outlined,
-                      color: AppColors.brandPrimary,
-                    ),
+                  const SakuraColorfulIcon(
+                    type: SakuraColorfulIconType.placementTest,
+                    size: 40,
+                    useEmoji: true,
                   ),
                   const SizedBox(width: AppSpacing.space3),
                   Expanded(

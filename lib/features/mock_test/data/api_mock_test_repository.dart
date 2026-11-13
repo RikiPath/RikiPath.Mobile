@@ -29,6 +29,15 @@ class ApiMockTestRepository implements MockTestRepository {
   }
 
   @override
+  Future<LiveMockTestAttempt?> loadActive(int mockTestId) async {
+    final response = await _client.get<Object?>(
+      MockTestApiPaths.active(mockTestId),
+    );
+    final attempt = readActiveAttempt(response.data);
+    return attempt == null ? null : MockTestMapper.attempt(attempt);
+  }
+
+  @override
   Future<LiveMockTestResult> submit(
     int attemptId,
     List<MockTestAnswerSubmission> answers,
@@ -37,14 +46,28 @@ class ApiMockTestRepository implements MockTestRepository {
       MockTestApiPaths.submit(attemptId),
       data: <String, Object?>{
         'answers': answers
-            .map(
-              (answer) => <String, Object?>{
-                'questionId': answer.questionId,
-                'selectedOptionId': answer.selectedOptionId,
-              },
-            )
+            .map((answer) => answer.toJson())
             .toList(growable: false),
       },
+    );
+    return MockTestMapper.result(readAttemptResult(response.data));
+  }
+
+  @override
+  Future<void> saveAnswer(
+    int attemptId,
+    MockTestAnswerSubmission answer,
+  ) async {
+    await _client.put<Object?>(
+      MockTestApiPaths.saveAnswer(attemptId),
+      data: answer.toJson(),
+    );
+  }
+
+  @override
+  Future<LiveMockTestResult> finalizeExpired(int attemptId) async {
+    final response = await _client.post<Object?>(
+      MockTestApiPaths.finalizeExpired(attemptId),
     );
     return MockTestMapper.result(readAttemptResult(response.data));
   }

@@ -14,8 +14,8 @@ class SharedBankScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
-        title: context.l10n.library,
-        subtitle: 'SharedBank',
+        title: 'Ngân hàng kiến thức',
+        subtitle: 'Chọn tài nguyên bạn muốn khám phá',
         onBack: context.pop,
       ),
       body: SafeArea(
@@ -31,25 +31,25 @@ class SharedBankScreen extends StatelessWidget {
           children: [
             _LibraryEntry(
               key: const ValueKey<String>('shared_bank_vocabulary'),
-              icon: Icons.translate,
-              color: AppColors.brandPrimary,
+              icon3d: Sakura3DIconType.vocabulary,
               label: context.l10n.vocabulary,
+              description: 'Khám phá và ghi nhớ từ mới.',
               onTap: () => context.push(AppRoutes.vocabulary),
             ),
             const SizedBox(height: AppSpacing.space3),
             _LibraryEntry(
               key: const ValueKey<String>('shared_bank_kanji'),
-              icon: Icons.brush_outlined,
-              color: AppColors.info,
+              icon3d: Sakura3DIconType.kanji,
               label: context.l10n.skillKanji,
+              description: 'Khám phá chữ Hán và cách viết.',
               onTap: () => context.push(AppRoutes.kanji),
             ),
             const SizedBox(height: AppSpacing.space3),
             _LibraryEntry(
               key: const ValueKey<String>('shared_bank_grammar'),
-              icon: Icons.account_tree_outlined,
-              color: AppColors.skillGrammar,
+              icon3d: Sakura3DIconType.grammar,
               label: context.l10n.grammar,
+              description: 'Nắm vững các cấu trúc tiếng Nhật.',
               onTap: () => context.push(AppRoutes.grammar),
             ),
           ],
@@ -61,46 +61,63 @@ class SharedBankScreen extends StatelessWidget {
 
 class _LibraryEntry extends StatelessWidget {
   const _LibraryEntry({
-    required this.icon,
-    required this.color,
+    required this.icon3d,
     required this.label,
     required this.onTap,
+    this.description,
     super.key,
   });
 
-  final IconData icon;
-  final Color color;
+  final Sakura3DIconType icon3d;
   final String label;
+  final String? description;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        child: RikiCard(
-          borderColor: AppColors.learnerOutline,
-          padding: const EdgeInsets.all(AppSpacing.space4),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppRadius.input),
+    return RikiCard(
+      onTap: onTap,
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.cardBorderMuted,
+      boxShadow: AppShadows.sakuraSubtle,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space4,
+        vertical: AppSpacing.space3,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Sakura3DIcon(type: icon3d, size: 52),
+          const SizedBox(width: AppSpacing.space3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.cardTitle,
                 ),
-                child: Icon(icon, color: color),
-              ),
-              const SizedBox(width: AppSpacing.space3),
-              Expanded(child: Text(label, style: AppTypography.cardTitle)),
-              const Icon(Icons.chevron_right, color: AppColors.textMuted),
-            ],
+                if (description != null) ...[
+                  const SizedBox(height: AppSpacing.space1),
+                  Text(
+                    description!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.learnerTextSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
+          const SizedBox(width: AppSpacing.space2),
+          const Icon(Icons.chevron_right, color: AppColors.textMuted),
+        ],
       ),
     );
   }

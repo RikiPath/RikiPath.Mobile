@@ -744,9 +744,9 @@
   "notebookEmptyTitle": "Sổ từ của bạn đang trống",
   "notebookEmptyMessage": "Tạo danh sách đầu tiên để lưu từ vựng.",
   "noMatchingWord": "Không tìm thấy từ phù hợp",
-  "collectionHasNoWords": "Danh sách chưa có từ",
+  "collectionHasNoWords": "Danh sách chưa có từ nào",
   "notebookSearchEmptyMessage": "Thử từ khóa khác hoặc xóa tìm kiếm hiện tại.",
-  "notebookCollectionEmptyMessage": "Thêm từ đầu tiên để bắt đầu ôn tập trong danh sách này.",
+  "notebookCollectionEmptyMessage": "Thêm từ đầu tiên để bắt đầu ôn tập.",
   "notebookLoadFailed": "Không thể tải Sổ từ",
   "checkConnectionShort": "Kiểm tra kết nối rồi thử lại.",
   "loadingRoadmap": "Đang tải lộ trình",
@@ -1581,7 +1581,7 @@
   "mockAnswerUnavailable": "Không có dữ liệu",
   "practiceLoadingTitle": "RikiPath đang chuẩn bị nội dung luyện tập...",
   "practiceJourneyTitle": "Luyện tập theo nhịp của bạn",
-  "practiceJourneySubtitle": "Ôn lại kiến thức, thử sức với đề JLPT và theo dõi từng bước tiến bộ.",
+  "practiceJourneySubtitle": "Thử sức với đề thi JLPT và theo dõi kết quả.",
   "mockSummary": "{level} • {minutes} phút • {count} câu",
   "@mockSummary": {
     "placeholders": {
@@ -1723,7 +1723,7 @@
   "homeLiveProgressDescription": "Dữ liệu tổng hợp từ tài khoản RikiPath của bạn.",
   "homeViewProgress": "Xem tiến độ",
   "homeAnalyticsUnavailable": "Thống kê trực tuyến tạm thời chưa tải được.",
-  "homeReviewDescription": "Ôn lại kiến thức theo nhịp học hiện tại của bạn.",
+  "homeReviewDescription": "Ôn lại kiến thức theo nhịp học của bạn.",
   "homeResumeReview": "Tiếp tục ôn tập",
   "homeReviewNow": "Ôn tập ngay",
   "homePracticeTitle": "Luyện đề",
@@ -1811,6 +1811,33 @@
   "learnerMentorAvailabilitySubtitle": "Các khung giờ trống trong 30 ngày tới.",
   "learnerMentorAvailabilityEmpty": "Không có khung giờ trống trong ngày đã chọn.",
   "learnerMentorAvailabilityError": "Chưa thể tải lịch trống của cố vấn.",
+  "mentorFinderTitle": "Tìm lịch tư vấn",
+  "mentorFinderChooseDate": "Chọn ngày phù hợp với bạn",
+  "mentorFinderPickDate": "Chọn ngày trên lịch",
+  "mentorFinderJlptLevel": "Trình độ JLPT",
+  "mentorFinderChooseLevel": "Chọn trình độ JLPT để xem lịch phù hợp.",
+  "mentorFinderNoSlotsTitle": "Chưa có lịch tư vấn phù hợp",
+  "mentorFinderNoSlotsDescription": "Hãy thử chọn ngày khác hoặc thay đổi bộ lọc.",
+  "mentorFinderChooseAnotherDate": "Xem ngày khác",
+  "mentorFinderViewMyBookings": "Xem lịch của tôi",
+  "mentorFinderBackToCalendar": "Quay lại Lịch học",
+  "mentorFinderAvailableSlots": "Khung giờ còn trống · 90 phút",
+  "mentorFinderCreditError": "Không tải được số lượt tư vấn. Vui lòng thử lại.",
+  "mentorFinderAvailableTickets": "{count} lượt JLPT {level} khả dụng",
+  "@mentorFinderAvailableTickets": {"placeholders": {"count": {"type": "int"}, "level": {"type": "String"}}},
+  "mentorFinderNeedCredit": "Bạn cần có lượt tư vấn JLPT {level} để đặt lịch này.",
+  "@mentorFinderNeedCredit": {"placeholders": {"level": {"type": "String"}}},
+  "mentorFinderChooseSlot": "Chọn khung giờ",
+  "mentorFinderReviewBooking": "Xem và xác nhận đặt lịch",
+  "mentorFinderChoosePlan": "Chọn gói tư vấn",
+  "mentorFinderNoPlans": "Chưa có gói tư vấn phù hợp. Vui lòng tải lại danh sách gói.",
+  "mentorFinderPlansError": "Không tải được các gói tư vấn. Vui lòng thử lại.",
+  "mentorFinderPlanSummary": "{count} lượt · {days} ngày",
+  "@mentorFinderPlanSummary": {"placeholders": {"count": {"type": "int"}, "days": {"type": "int"}}},
+  "mentorFinderTimeAll": "Tất cả giờ",
+  "mentorFinderTimeMorning": "Buổi sáng",
+  "mentorFinderTimeAfternoon": "Buổi chiều",
+  "mentorFinderTimeEvening": "Buổi tối",
   "learnerMentorSlotTime": "{start} – {end}",
   "@learnerMentorSlotTime": {
     "placeholders": {
@@ -1876,10 +1903,10 @@
   "learnerMentorSelectedSlot": "Khung giờ đã chọn",
   "learnerMentorPleaseSelectSlot": "Vui lòng chọn khung giờ tư vấn",
   "practiceSpeechTitle": "Luyện nói tiếng Nhật",
-  "practiceSpeechDescription": "Nói tiếng Nhật và xem nội dung được nhận dạng theo thời gian thực.",
+  "practiceSpeechDescription": "Luyện phát âm với nhận diện giọng nói AI.",
   "practiceSpeechStatus": "Nhận dạng trực tiếp",
   "practiceTextScanTitle": "Quét văn bản tiếng Nhật",
-  "practiceTextScanDescription": "Chọn ảnh bài viết để nhận dạng và chỉnh sửa văn bản tiếng Nhật.",
+  "practiceTextScanDescription": "Quét bài viết từ hình ảnh để chỉnh sửa.",
   "practiceTextScanStatus": "Ảnh → Văn bản",
   "speechPracticeTitle": "Luyện nói",
   "speechPracticeHeading": "Biến giọng nói thành văn bản",
@@ -1933,7 +1960,7 @@
   "practiceStudioTitle": "Studio Riki",
   "practiceStudioSubtitle": "Luyện nói, luyện viết và khám phá tiếng Nhật bằng các công cụ tương tác.",
   "practiceWritingTitle": "Luyện viết Kana & Kanji",
-  "practiceWritingDescription": "Xem thứ tự nét, viết trực tiếp và lưu tiến độ ôn tập.",
+  "practiceWritingDescription": "Luyện viết nét và theo dõi tiến độ ôn tập.",
   "practiceWritingStatus": "Nét chữ tương tác",
   "writingTitle": "Luyện viết",
   "writingSubtitle": "Chọn một ký tự rồi luyện theo đúng thứ tự và hướng nét.",
@@ -2312,5 +2339,59 @@
   "heroBannerEveningTitle": "Cùng ôn tập nào!",
   "heroBannerEveningSubtitle": "Củng cố những điều đã học.",
   "heroBannerLateNightTitle": "Nghỉ ngơi thật tốt!",
-  "heroBannerLateNightSubtitle": "Ngày mai mình lại tiếp tục nhé."
+  "heroBannerLateNightSubtitle": "Ngày mai mình lại tiếp tục nhé.",
+  "mockLibraryTitle": "Đề thi thử JLPT",
+  "mockLibraryDescription": "Luyện đề theo trình độ và theo dõi kết quả.",
+  "mockLibraryAvailableCount": "{count} đề khả dụng",
+  "@mockLibraryAvailableCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mockLibraryOpenFailed": "Không thể mở đề thi lúc này. Vui lòng thử lại.",
+  "mockLibraryActiveAttempt": "Hãy hoàn thành đề đang làm trước khi chọn đề khác.",
+  "essayWritingTitle": "Luyện viết tiếng Nhật",
+  "essayWritingDescription": "Viết bài và nhận đánh giá.",
+  "essayWritingIntro": "Viết một đoạn tiếng Nhật. Bài chỉ được gửi khi bạn nhấn nút chấm.",
+  "essayWritingNoLevel": "Chưa có cấp độ JLPT để luyện viết.",
+  "essayWritingLevelLoadError": "Không tải được cấp độ JLPT. Thử lại",
+  "essayWritingLevelLabel": "Cấp độ JLPT",
+  "essayWritingInputHint": "Nhập bài viết tiếng Nhật của bạn",
+  "essayWritingSubmit": "Chấm bài luyện tập",
+  "essayWritingSubmitting": "Đang chấm bài...",
+  "essayWritingSubmitUncertain": "Không thể xác nhận bài nộp. Vui lòng kiểm tra trước khi gửi lại.",
+  "essayWritingSaved": "Đã lưu bài nộp #{id}",
+  "@essayWritingSaved": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "essayWritingNew": "Viết bài mới",
+  "essayWritingScore": "Điểm: {score}/100",
+  "@essayWritingScore": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "essayWritingStrengths": "Điểm mạnh",
+  "essayWritingImprovements": "Cần cải thiện",
+  "essayWritingCorrections": "Gợi ý sửa lỗi",
+  "practiceHeroBadge": "がんばろう！",
+  "practiceHeroTitle": "Sẵn sàng luyện tập?",
+  "practiceHeroSubtitle": "Mỗi bài tập, thêm một bước tiến.",
+  "profilePlacementSubtitle": "Đánh giá năng lực và gợi ý cấp độ phù hợp.",
+  "profileLogoutSubtitle": "Đăng xuất tài khoản khỏi thiết bị này.",
+  "profileMentorApplicationTitle": "Đăng ký trở thành Cố vấn",
+  "profileMentorApplicationSubtitle": "Nộp hồ sơ chuyên môn để xét duyệt.",
+  "notebookEmptyHeroBadge": "がんばろう！",
+  "notebookEmptyHeroTitle": "Bắt đầu sổ từ của bạn!",
+  "notebookEmptyHeroDescription": "Lưu lại những từ vựng và mẫu câu yêu thích.",
+  "createFirstCollectionAction": "Tạo danh sách đầu tiên",
+  "addFirstWordAction": "Thêm từ đầu tiên"
 }

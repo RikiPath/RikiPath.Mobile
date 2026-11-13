@@ -10,6 +10,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/storage/token_storage.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
@@ -152,23 +153,57 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      for (final key in <String>[
-        'profile_jlpt_goal_action',
-        'profile_placement_test_action',
-        'profile_progress_action',
-        'profile_consultation_action',
-        'profile_mentor_application_action',
-        'profile_edit_action',
-        'profile_settings_action',
-        'profile_logout_action',
-      ]) {
+      final expectedIcons = <String, SakuraColorfulIconType>{
+        'profile_jlpt_goal_action': SakuraColorfulIconType.learningGoal,
+        'profile_placement_test_action': SakuraColorfulIconType.placementTest,
+        'profile_progress_action': SakuraColorfulIconType.learningProgress,
+        'profile_mentor_application_action':
+            SakuraColorfulIconType.mentorApplication,
+        'profile_edit_action': SakuraColorfulIconType.editProfile,
+        'profile_settings_action': SakuraColorfulIconType.settings,
+        'profile_logout_action': SakuraColorfulIconType.logout,
+      };
+      for (final entry in expectedIcons.entries) {
         await tester.scrollUntilVisible(
-          find.byKey(ValueKey<String>(key)),
+          find.byKey(ValueKey<String>(entry.key)),
           180,
           scrollable: find.byType(Scrollable).first,
         );
-        expect(find.byKey(ValueKey<String>(key)), findsOneWidget);
+        final tile = tester.widget<ProfileActionTile>(
+          find.byKey(ValueKey<String>(entry.key)),
+        );
+        expect(tile.colorfulIcon, entry.value);
+        final icon = tester.widget<SakuraColorfulIcon>(
+          find.descendant(
+            of: find.byKey(ValueKey<String>(entry.key)),
+            matching: find.byType(SakuraColorfulIcon),
+          ),
+        );
+        expect(icon.type, entry.value);
+        expect(icon.useEmoji, entry.value != SakuraColorfulIconType.logout);
       }
+
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey<String>('profile_consultation_action')),
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
+      final consultationTile = tester.widget<ProfileActionTile>(
+        find.byKey(const ValueKey<String>('profile_consultation_action')),
+      );
+      expect(
+        consultationTile.colorfulIcon,
+        SakuraColorfulIconType.consultation,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('profile_consultation_action')),
+          matching: find.byType(SakuraColorfulIcon),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('🧑‍🏫'), findsOneWidget);
+      expect(consultationTile.emphasized, isTrue);
 
       expect(find.textContaining('XP'), findsNothing);
       expect(find.textContaining('xếp hạng'), findsNothing);
@@ -178,10 +213,6 @@ void main() {
         find.text('Khám phá các gói tư vấn và lịch hẹn của bạn.'),
         findsOneWidget,
       );
-      final consultationTile = tester.widget<ProfileActionTile>(
-        find.byKey(const ValueKey<String>('profile_consultation_action')),
-      );
-      expect(consultationTile.emphasized, isTrue);
       expect(find.text('Khám phá'), findsNothing);
     });
 
@@ -287,45 +318,46 @@ void main() {
       expect(find.text('placement-test-route'), findsOneWidget);
     });
 
-    testWidgets('logout action shows confirmation sheet and executes sign out', (
-      tester,
-    ) async {
-      var signedOut = false;
-      final authSessionController = _TestAuthSessionController(
-        onSignOut: () => signedOut = true,
-      );
-      await _pump(
-        tester,
-        const ProfileScreen(),
-        repository: _ProfileRepository(),
-        authSessionController: authSessionController,
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'logout action shows confirmation sheet and executes sign out',
+      (tester) async {
+        var signedOut = false;
+        final authSessionController = _TestAuthSessionController(
+          onSignOut: () => signedOut = true,
+        );
+        await _pump(
+          tester,
+          const ProfileScreen(),
+          repository: _ProfileRepository(),
+          authSessionController: authSessionController,
+        );
+        await tester.pumpAndSettle();
 
-      final logoutAction = find.byKey(
-        const ValueKey<String>('profile_logout_action'),
-      );
-      await tester.scrollUntilVisible(
-        logoutAction,
-        220,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.ensureVisible(logoutAction);
-      await tester.pumpAndSettle();
-      await tester.tap(logoutAction);
-      await tester.pumpAndSettle();
+        final logoutAction = find.byKey(
+          const ValueKey<String>('profile_logout_action'),
+        );
+        await tester.scrollUntilVisible(
+          logoutAction,
+          220,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.ensureVisible(logoutAction);
+        await tester.pumpAndSettle();
+        await tester.tap(logoutAction);
+        await tester.pumpAndSettle();
 
-      expect(
-        find.byKey(const ValueKey<String>('profile_logout_confirm_button')),
-        findsOneWidget,
-      );
-      await tester.tap(
-        find.byKey(const ValueKey<String>('profile_logout_confirm_button')),
-      );
-      await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey<String>('profile_logout_confirm_button')),
+          findsOneWidget,
+        );
+        await tester.tap(
+          find.byKey(const ValueKey<String>('profile_logout_confirm_button')),
+        );
+        await tester.pumpAndSettle();
 
-      expect(signedOut, isTrue);
-    });
+        expect(signedOut, isTrue);
+      },
+    );
   });
 
   group('EditProfileScreen', () {
@@ -474,6 +506,18 @@ void main() {
         find.byKey(const ValueKey<String>('account_logout_button')),
         findsNothing,
       );
+      final expectedIcons = <String, SakuraColorfulIconType>{
+        'account_change_password_action': SakuraColorfulIconType.password,
+        'account_language_settings_action': SakuraColorfulIconType.language,
+        'account_notification_settings_action':
+            SakuraColorfulIconType.notifications,
+      };
+      for (final entry in expectedIcons.entries) {
+        final tile = tester.widget<ProfileSettingsTile>(
+          find.byKey(ValueKey<String>(entry.key)),
+        );
+        expect(tile.colorfulIcon, entry.value);
+      }
     });
 
     testWidgets('Japanese account groups fit a narrow 320px screen', (
@@ -589,7 +633,7 @@ void main() {
   });
 
   group('JlptGoalScreen', () {
-    testWidgets('offers N5 through N1 and submits the selected Backend ID', (
+    testWidgets('offers N5 through N2 (excluding N1) and submits the selected Backend ID', (
       tester,
     ) async {
       final repository = _ProfileRepository();
@@ -606,12 +650,16 @@ void main() {
         findsWidgets,
       );
 
-      for (final level in <String>['N5', 'N4', 'N3', 'N2', 'N1']) {
+      for (final level in <String>['N5', 'N4', 'N3', 'N2']) {
         expect(
           find.byKey(ValueKey<String>('jlpt_goal_choice_$level')),
           findsOneWidget,
         );
       }
+      expect(
+        find.byKey(const ValueKey<String>('jlpt_goal_choice_N1')),
+        findsNothing,
+      );
       expect(
         find.byKey(const ValueKey<String>('daily_study_choice_90')),
         findsOneWidget,
@@ -739,7 +787,9 @@ Future<void> _pump(
         if (picker != null)
           profileAvatarPickerProvider.overrideWithValue(picker),
         if (authSessionController != null)
-          authSessionControllerProvider.overrideWithValue(authSessionController),
+          authSessionControllerProvider.overrideWithValue(
+            authSessionController,
+          ),
       ],
       child: MaterialApp(
         theme: AppTheme.light,
@@ -955,7 +1005,6 @@ class _ProfileRepository implements UserProfileRepository {
   }
 }
 
-
 class _FakeSecureKeyValueStore implements SecureKeyValueStore {
   final Map<String, String?> _store = {};
 
@@ -972,7 +1021,7 @@ class _FakeSecureKeyValueStore implements SecureKeyValueStore {
 
 class _TestAuthSessionController extends AuthSessionController {
   _TestAuthSessionController({this.onSignOut})
-      : super(TokenStorage(_FakeSecureKeyValueStore()));
+    : super(TokenStorage(_FakeSecureKeyValueStore()));
 
   final VoidCallback? onSignOut;
 

@@ -21,6 +21,16 @@ abstract final class MockTestMapper {
       timeLimitMinutes: dto.timeLimitMinutes,
       previouslyWrongQuestionIds: dto.previouslyWrongQuestionIds,
       questions: dto.questions.map(_question).toList(growable: false),
+      answers: <int, int>{
+        for (final question in dto.questions)
+          if (question.selectedOptionId case final int optionId)
+            question.questionId: optionId,
+      },
+      structuredAnswers: <int, Object?>{
+        for (final question in dto.questions)
+          if (question.response != null)
+            question.questionId: question.response,
+      },
     );
   }
 
@@ -62,6 +72,9 @@ abstract final class MockTestMapper {
             (question) => LiveMockTestQuestionReview(
               questionId: question.questionId,
               questionText: question.questionText,
+              questionType: question.questionType,
+              response: question.response,
+              answerKey: question.answerKey,
               options: question.options
                   .map(
                     (option) => LiveMockTestReviewOption(
@@ -88,6 +101,8 @@ abstract final class MockTestMapper {
       sectionOrder: dto.sectionOrder,
       order: dto.order,
       content: dto.content,
+      questionType: dto.questionType,
+      interactionData: dto.interactionData,
       audioUrl: dto.audioUrl,
       imageUrl: dto.imageUrl,
       options: dto.options

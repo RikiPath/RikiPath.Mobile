@@ -15,12 +15,79 @@ void main() {
     () {
       expect(MockTestApiPaths.start(7), '/api/MockTest/7/start');
       expect(MockTestApiPaths.submit(11), '/api/MockTest/attempts/11/submit');
+      expect(
+        MockTestApiPaths.saveAnswer(11),
+        '/api/MockTest/attempts/11/answer',
+      );
+      expect(
+        MockTestApiPaths.finalizeExpired(11),
+        '/api/MockTest/attempts/11/finalize',
+      );
       expect(MockTestApiPaths.result(11), '/api/MockTest/attempts/11');
       expect(
         MockTestApiPaths.detailedResult(11),
         '/api/MockTest/attempts/11/detailed',
       );
       expect(MockTestApiPaths.testsByLevel(3), '/api/MockTest/level/3/tests');
+    },
+  );
+
+  test(
+    'autosave and expiry finalization use distinct server endpoints',
+    () async {
+      final requests = <RequestOptions>[];
+      final dio = Dio(BaseOptions(baseUrl: 'http://localhost:5265'));
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            requests.add(options);
+            handler.resolve(
+              Response<Object?>(
+                requestOptions: options,
+                statusCode: 200,
+                data: <String, Object?>{
+                  'isSuccess': true,
+                  'result': options.method == 'PUT'
+                      ? true
+                      : <String, Object?>{
+                          'attemptId': 9001,
+                          'mockTestId': 731,
+                          'status': 'completed',
+                          'startedAt': '2026-10-19T08:30:00Z',
+                          'submittedAt': '2026-10-19T08:50:00Z',
+                          'totalScore': 50,
+                          'wrongQuestionIds': <Object?>[],
+                          'sections': <Object?>[],
+                        },
+                },
+              ),
+            );
+          },
+        ),
+      );
+      final repository = ApiMockTestRepository(
+        ApiClient(dio, const ApiErrorMapper()),
+      );
+
+      await repository.saveAnswer(
+        9001,
+        const MockTestAnswerSubmission(
+          questionId: 1201,
+          selectedOptionId: 4401,
+        ),
+      );
+      await repository.finalizeExpired(9001);
+
+      expect(requests.map((request) => request.method), <String>[
+        'PUT',
+        'POST',
+      ]);
+      expect(requests[0].path, '/api/MockTest/attempts/9001/answer');
+      expect(requests[0].data, <String, Object?>{
+        'questionId': 1201,
+        'selectedOptionId': 4401,
+      });
+      expect(requests[1].path, '/api/MockTest/attempts/9001/finalize');
     },
   );
 

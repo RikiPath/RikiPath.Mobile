@@ -150,14 +150,14 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                 ),
               ),
 
-              // Type & Status Header Row
+              // Type & Status Header Row (Category always Sakura Pink, status badge follows booking status)
               Row(
                 children: [
                   Container(
                     width: 12,
                     height: 12,
-                    decoration: BoxDecoration(
-                      color: event.primaryColor,
+                    decoration: const BoxDecoration(
+                      color: SakuraCalendarEvent.mentorConsultationDotColor,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -165,7 +165,7 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                   Text(
                     event.type.labelVi,
                     style: AppTypography.bodySmall.copyWith(
-                      color: event.primaryColor,
+                      color: SakuraCalendarEvent.mentorConsultationTextColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -173,20 +173,35 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                   if (event.statusLabel != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.space2,
-                        vertical: 2,
+                        horizontal: 10,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: event.backgroundColor,
+                        color: event.statusBadgeBgColor,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: event.borderColor),
-                      ),
-                      child: Text(
-                        event.statusLabel!,
-                        style: AppTypography.caption.copyWith(
-                          color: event.primaryColor,
-                          fontWeight: FontWeight.w600,
+                        border: Border.all(
+                          color: event.statusBadgeBorderColor,
                         ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (event.statusBadgeIcon != null) ...[
+                            Icon(
+                              event.statusBadgeIcon,
+                              size: 13,
+                              color: event.statusBadgeTextColor,
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                          Text(
+                            event.statusLabel!,
+                            style: AppTypography.caption.copyWith(
+                              color: event.statusBadgeTextColor,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                 ],
@@ -254,7 +269,12 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                           ),
                         ),
                         if (event.jlptLevel != null)
-                          JlptBadge(JlptLevel.tryParse(event.jlptLevel?.replaceAll('JLPT ', '') ?? 'N3') ?? JlptLevel.n3),
+                          JlptBadge(
+                            JlptLevel.tryParse(event.jlptLevel?.replaceAll('JLPT ', '') ?? 'N3') ?? JlptLevel.n3,
+                            backgroundColor: event.levelChipBgColor,
+                            borderColor: event.levelChipBorderColor,
+                            foregroundColor: event.levelChipTextColor,
+                          ),
                       ],
                     ),
                   ],
@@ -262,7 +282,7 @@ class SakuraEventDetailSheet extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space3),
 
-              // Participant Information (Role-aware)
+              // Participant Information (Role-aware, fallback avatar is Sakura Pink)
               if (event.participantName != null) ...[
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.space4),
@@ -273,12 +293,21 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: event.backgroundColor,
-                        child: Icon(
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: SakuraCalendarEvent.mentorAvatarBgColor,
+                          border: Border.all(
+                            color: SakuraCalendarEvent.mentorAvatarBorderColor,
+                            width: 1.2,
+                          ),
+                        ),
+                        child: const Icon(
                           Icons.person_outline,
-                          color: event.primaryColor,
+                          size: 20,
+                          color: SakuraCalendarEvent.mentorAvatarFgColor,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.space3),
@@ -308,48 +337,59 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.space3),
               ],
 
-              // Online Meeting Room Action (Strict validation, no fake links)
-              if (event.meetingLink != null && event.meetingLink!.isNotEmpty) ...[
+              // Cancelled meeting notice per 08_Chi_Tiet_Da_Huy
+              if (event.status == MentorMeetingStatus.cancelled) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.space4),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.space3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFFECACA)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.event_busy,
+                        size: 20,
+                        color: Color(0xFFDC2626),
+                      ),
+                      const SizedBox(width: AppSpacing.space3),
+                      Expanded(
+                        child: Text(
+                          'Buổi tư vấn đã bị hủy',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: const Color(0xFFDC2626),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              // Online Meeting Room Action (Strict validation, no fake links, hidden when cancelled per 08_Chi_Tiet_Da_Huy)
+              if (event.meetingLink != null &&
+                  event.meetingLink!.isNotEmpty &&
+                  event.status != MentorMeetingStatus.cancelled) ...[
                 Builder(
                   builder: (context) {
                     final uri = Uri.tryParse(event.meetingLink!);
                     final isValidUrl = uri != null &&
                         uri.hasScheme &&
                         (uri.scheme == 'http' || uri.scheme == 'https');
-                    final isCancelled = event.status == MentorMeetingStatus.cancelled;
-
-                    if (isCancelled) {
-                      return Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(AppSpacing.space3),
-                        margin: const EdgeInsets.only(bottom: AppSpacing.space3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.block, size: 18, color: AppColors.textSecondary),
-                            const SizedBox(width: AppSpacing.space2),
-                            Text(
-                              'Buổi tư vấn đã bị hủy',
-                              style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
 
                     return Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(AppSpacing.space4),
                       margin: const EdgeInsets.only(bottom: AppSpacing.space3),
                       decoration: BoxDecoration(
-                        color: isValidUrl ? const Color(0xFFEFF6FF) : const Color(0xFFF9FAFB),
+                        color: isValidUrl ? const Color(0xFFFFF1F2) : const Color(0xFFF9FAFB),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isValidUrl ? const Color(0xFFBFDBFE) : AppColors.border,
+                          color: isValidUrl ? const Color(0xFFFFE4E6) : AppColors.border,
                         ),
                       ),
                       child: Column(
@@ -359,7 +399,7 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                             children: [
                               Icon(
                                 Icons.videocam_outlined,
-                                color: isValidUrl ? const Color(0xFF2563EB) : AppColors.textSecondary,
+                                color: isValidUrl ? AppColors.primary : AppColors.textSecondary,
                               ),
                               const SizedBox(width: AppSpacing.space2),
                               Expanded(
@@ -368,7 +408,7 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                                       ? 'Phòng học trực tuyến Google Meet / RikiPath'
                                       : 'Chưa có link phòng học trực tuyến',
                                   style: AppTypography.bodySmall.copyWith(
-                                    color: isValidUrl ? const Color(0xFF1E40AF) : AppColors.textSecondary,
+                                    color: isValidUrl ? AppColors.primary : AppColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                   maxLines: 1,
@@ -387,12 +427,20 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                                       .read(mentorMeetingLinkLauncherProvider)
                                       .open(uri);
                                 },
-                                icon: const Icon(Icons.open_in_new, size: 18),
-                                label: const Text('Tham gia phòng học'),
+                                icon: const Icon(Icons.open_in_new, size: 18, color: Colors.white),
+                                label: const Text(
+                                  'Tham gia phòng học',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                  ),
+                                ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2563EB),
+                                  backgroundColor: const Color(0xFFE5577F),
                                   foregroundColor: Colors.white,
-                                  elevation: 0,
+                                  elevation: 2,
+                                  shadowColor: const Color(0xFFE5577F).withValues(alpha: 0.35),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -421,11 +469,25 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                       child: OutlinedButton.icon(
                         key: const Key('sakura_event_reschedule_button'),
                         onPressed: () => _showRescheduleSheet(context, ref),
-                        icon: const Icon(Icons.edit_calendar_outlined, size: 18, color: AppColors.primary),
-                        label: const Text('Dời lịch hẹn'),
+                        icon: const Icon(
+                          Icons.edit_calendar_outlined,
+                          size: 18,
+                          color: Color(0xFF0284C7),
+                        ),
+                        label: const Text(
+                          'Dời lịch hẹn',
+                          style: TextStyle(
+                            color: Color(0xFF0284C7),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary),
+                          backgroundColor: const Color(0xFFEAF6FF),
+                          foregroundColor: const Color(0xFF0284C7),
+                          side: const BorderSide(
+                            color: Color(0xFF7DD3FC),
+                            width: 1.2,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -440,11 +502,25 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                       child: OutlinedButton.icon(
                         key: const Key('sakura_event_cancel_button'),
                         onPressed: () => _showCancelDialog(context, ref),
-                        icon: const Icon(Icons.event_busy, size: 18, color: AppColors.error),
-                        label: const Text('Hủy buổi tư vấn này'),
+                        icon: const Icon(
+                          Icons.event_busy,
+                          size: 18,
+                          color: Color(0xFFDC3545),
+                        ),
+                        label: const Text(
+                          'Hủy buổi tư vấn này',
+                          style: TextStyle(
+                            color: Color(0xFFDC3545),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.error,
-                          side: const BorderSide(color: Color(0xFFFECACA)),
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFFDC3545),
+                          side: const BorderSide(
+                            color: Color(0xFFF5C8CF),
+                            width: 1.2,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

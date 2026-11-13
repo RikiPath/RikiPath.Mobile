@@ -21,6 +21,7 @@ class PurchaseMentorPlanRequestDto {
       'jlptLevel': jlptLevel!.trim().toUpperCase(),
   };
 }
+
 class BookableMentorDto {
   const BookableMentorDto({
     required this.id,
@@ -33,7 +34,8 @@ class BookableMentorDto {
   });
 
   factory BookableMentorDto.fromJson(Map<String, Object?> json) {
-    final rawJlpt = json['teachingJlptLevels'] ?? json['jlptLevel'] ?? json['jlptLevels'];
+    final rawJlpt =
+        json['teachingJlptLevels'] ?? json['jlptLevel'] ?? json['jlptLevels'];
     final jlptList = <String>[];
     if (rawJlpt is String && rawJlpt.trim().isNotEmpty) {
       jlptList.add(rawJlpt.trim());
@@ -77,6 +79,7 @@ class BookableMentorDto {
     teachingMethod: teachingMethod,
   );
 }
+
 class MentorMeetingFeatureDto {
   const MentorMeetingFeatureDto({
     required this.id,
@@ -205,6 +208,7 @@ class LearnerMentorBookingDto {
     this.learnerName,
     this.paymentStatus,
     this.scheduledAt,
+    this.endsAt,
     this.meetingLink,
     this.roomId,
     this.jlptLevel,
@@ -228,6 +232,10 @@ class LearnerMentorBookingDto {
         final value? => MentorTimestamp.parse(value),
         null => null,
       },
+      endsAt: switch (_optionalString(json, 'endsAt')) {
+        final value? => MentorTimestamp.parse(value),
+        null => null,
+      },
       meetingLink: _optionalString(json, 'meetingLink'),
       roomId: _optionalString(json, 'roomId'),
       jlptLevel: _optionalString(json, 'jlptLevel'),
@@ -244,6 +252,7 @@ class LearnerMentorBookingDto {
   final MentorMeetingStatus status;
   final MentorPaymentStatus? paymentStatus;
   final MentorTimestamp? scheduledAt;
+  final MentorTimestamp? endsAt;
   final String? meetingLink;
   final String? roomId;
   final String? jlptLevel;
@@ -259,6 +268,7 @@ class LearnerMentorBookingDto {
     status: status,
     paymentStatus: paymentStatus,
     scheduledAt: scheduledAt,
+    endsAt: endsAt,
     meetingLink: meetingLink,
     roomId: roomId,
     jlptLevel: jlptLevel,
@@ -590,11 +600,13 @@ class LearnerCreditBalanceDto {
   });
 
   factory LearnerCreditBalanceDto.fromJson(Map<String, Object?> json) {
-    final totalCredits = _readInt(json['balance']) ??
+    final totalCredits =
+        _readInt(json['balance']) ??
         _readInt(json['totalAvailableCredits']) ??
         _readInt(json['availableBalance']) ??
         0;
-    final available = _readInt(json['availableBalance']) ??
+    final available =
+        _readInt(json['availableBalance']) ??
         _readInt(json['totalAvailableCredits']) ??
         _readInt(json['balance']) ??
         0;
@@ -605,7 +617,9 @@ class LearnerCreditBalanceDto {
         if (item is Map<String, Object?>) {
           grants.add(LearnerCreditGrantDto.fromJson(item));
         } else if (item is Map) {
-          grants.add(LearnerCreditGrantDto.fromJson(Map<String, Object?>.from(item)));
+          grants.add(
+            LearnerCreditGrantDto.fromJson(Map<String, Object?>.from(item)),
+          );
         }
       }
     }

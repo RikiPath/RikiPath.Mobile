@@ -8,9 +8,11 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
 import 'package:rikipath_mobile/core/widgets/riki_card.dart';
+import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/lesson_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
@@ -19,14 +21,66 @@ import 'package:rikipath_mobile/features/learning/data/fixture_learning_reposito
 import 'package:rikipath_mobile/features/learning/data/lesson_media_driver.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_repository.dart';
+import 'package:rikipath_mobile/features/learning/domain/learning_repository.dart';
+import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
 import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
 import 'package:rikipath_mobile/features/learning/presentation/lesson_screen.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_shared_widgets.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 
 import '../../support/test_auth_session.dart';
+import '../../support/test_jlpt_catalog.dart';
 import 'package:video_player/video_player.dart';
 
 void main() {
+  testWidgets(
+    'Backend skill labels are localized without changing identifiers',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('vi'),
+          home: Builder(
+            builder: (context) {
+              expect(localizedLessonCategory(context, 'Vocabulary'), 'Từ vựng');
+              expect(localizedLessonCategory(context, 'Grammar'), 'Ngữ pháp');
+              expect(
+                localizedLessonCategory(context, 'Listening'),
+                'Nghe hiểu',
+              );
+              expect(
+                localizedLessonCategory(context, 'UnknownSkill'),
+                'UnknownSkill',
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+    },
+  );
+
+  testWidgets('zero lesson progress is not described as in progress', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('vi'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(
+          body: LessonProgressMeter(
+            progress: LessonProgress(
+              progressPercent: 0,
+              resumePositionSeconds: 0,
+              isCompleted: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('0% • Chưa bắt đầu'), findsOneWidget);
+  });
+
   test('lesson route uses the supported nested Learn path', () {
     expect(
       AppRoutes.lesson(FixtureLessonRepository.lesson19RouteId),
@@ -102,21 +156,19 @@ void main() {
     expect(find.text('Ngữ pháp liên quan'), findsOneWidget);
   });
 
-  testWidgets('Learning Home continue action opens lesson detail', (
-    tester,
-  ) async {
-    await _pumpLesson(tester, initialLocation: AppRoutes.learn);
-    await tester.pumpAndSettle();
-
-    final continueButton = find.byKey(
-      const ValueKey<String>('learning_continue_lesson_button'),
-    );
-    await _scrollWithin(
+  testWidgets('available lesson catalog opens lesson detail', (tester) async {
+    await _pumpLesson(
       tester,
-      viewKey: 'learning_home_success_view',
-      target: continueButton,
+      initialLocation: AppRoutes.learn,
+      repository: const _NumericFixtureLessonRepository(),
+      learningRepository: const _CatalogFixtureLearningRepository(),
     );
-    await tester.tap(continueButton);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Thư viện'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('library_lessons_card')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('catalog_lesson_501')));
     await tester.pumpAndSettle();
 
     expect(find.byType(LessonScreen), findsOneWidget);
@@ -607,6 +659,7 @@ Future<GoRouter> _pumpLesson(
   String initialLocation =
       '/learn/lesson/${FixtureLessonRepository.lesson19RouteId}',
   LessonRepository repository = const FixtureLessonRepository(),
+  LearningRepository learningRepository = const FixtureLearningRepository(),
   StandardRoadmap? standardRoadmap,
   LessonMediaDriver mediaDriver = const FixtureLessonMediaDriver(),
   Size viewportSize = const Size(390, 844),
@@ -628,8 +681,9 @@ Future<GoRouter> _pumpLesson(
     ProviderScope(
       overrides: [
         lessonRepositoryProvider.overrideWithValue(repository),
-        learningRepositoryProvider.overrideWithValue(
-          const FixtureLearningRepository(),
+        learningRepositoryProvider.overrideWithValue(learningRepository),
+        jlptCatalogRepositoryProvider.overrideWithValue(
+          TestJlptCatalogRepository(),
         ),
         if (standardRoadmap != null)
           standardRoadmapProvider.overrideWith((ref) async => standardRoadmap),
@@ -652,4 +706,56 @@ Future<void> _scrollWithin(
       .first;
   await tester.scrollUntilVisible(target, 240, scrollable: scrollable);
   await tester.pumpAndSettle();
+}
+
+class _CatalogFixtureLearningRepository extends FixtureLearningRepository {
+  const _CatalogFixtureLearningRepository();
+
+  @override
+  Future<LearningSnapshot> loadLearningSnapshot({
+    required int certificateLevelId,
+  }) async {
+    return FixtureLearningRepository.snapshot.copyWith(
+      lessons: const [
+        LearningLessonSummary(
+          lessonId: 501,
+          title: 'Bài ngữ pháp kiểm thử',
+          description: 'Nội dung từ repository kiểm thử',
+          sortOrder: 1,
+          languageSkillId: 1,
+          languageSkillName: 'Ngữ pháp',
+          progressPercent: 40,
+          resumePositionSeconds: 10,
+          isCompleted: false,
+        ),
+      ],
+    );
+  }
+}
+
+class _NumericFixtureLessonRepository implements LessonRepository {
+  const _NumericFixtureLessonRepository();
+
+  @override
+  Future<Lesson> loadLesson(String routeId) async =>
+      (await const FixtureLessonRepository().loadLesson(
+        FixtureLessonRepository.lesson19RouteId,
+      )).copyWith(routeId: routeId);
+
+  @override
+  Future<LessonProgress> updatePlaybackPosition({
+    required String routeId,
+    required int positionSeconds,
+    required int durationSeconds,
+  }) => const FixtureLessonRepository().updatePlaybackPosition(
+    routeId: FixtureLessonRepository.lesson19RouteId,
+    positionSeconds: positionSeconds,
+    durationSeconds: durationSeconds,
+  );
+
+  @override
+  Future<LessonProgress> completeLesson({required String routeId}) =>
+      const FixtureLessonRepository().completeLesson(
+        routeId: FixtureLessonRepository.lesson19RouteId,
+      );
 }

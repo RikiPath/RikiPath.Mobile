@@ -17,6 +17,7 @@ class _MockLearnerMentorRepository implements LearnerMentorRepository {
     required DateTime from,
     required DateTime to,
     int? mentorId,
+    String? jlptLevel,
   }) async {
     return [
       // Old slot (id 101) - already booked
@@ -83,9 +84,7 @@ void main() {
 
   Widget createTestWidget() {
     return ProviderScope(
-      overrides: [
-        learnerMentorRepositoryProvider.overrideWithValue(mockRepo),
-      ],
+      overrides: [learnerMentorRepositoryProvider.overrideWithValue(mockRepo)],
       child: MaterialApp(
         home: Scaffold(
           body: LearnerMentorRescheduleSheet(booking: testBooking),
@@ -94,61 +93,75 @@ void main() {
     );
   }
 
-  testWidgets('LearnerMentorRescheduleSheet displays eligible future slots and excludes current slot', (tester) async {
-    await tester.pumpWidget(createTestWidget());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'LearnerMentorRescheduleSheet displays eligible future slots and excludes current slot',
+    (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
 
-    // Verify header and current schedule display
-    expect(find.text('Dời lịch hẹn tư vấn'), findsOneWidget);
-    expect(find.textContaining('Lịch hiện tại:'), findsOneWidget);
+      // Verify header and current schedule display
+      expect(find.text('Dời lịch hẹn tư vấn'), findsOneWidget);
+      expect(find.textContaining('Lịch hiện tại:'), findsOneWidget);
 
-    // Verify eligible slot 102 is shown
-    expect(find.byKey(const Key('reschedule_slot_tile_102')), findsOneWidget);
+      // Verify eligible slot 102 is shown
+      expect(find.byKey(const Key('reschedule_slot_tile_102')), findsOneWidget);
 
-    // Verify current slot 101 and <24h slot 103 are filtered out
-    expect(find.byKey(const Key('reschedule_slot_tile_101')), findsNothing);
-    expect(find.byKey(const Key('reschedule_slot_tile_103')), findsNothing);
+      // Verify current slot 101 and <24h slot 103 are filtered out
+      expect(find.byKey(const Key('reschedule_slot_tile_101')), findsNothing);
+      expect(find.byKey(const Key('reschedule_slot_tile_103')), findsNothing);
 
-    // Confirm button is initially disabled (prompting user to select a slot)
-    final confirmButtonFinder = find.byKey(const Key('confirm_reschedule_button'));
-    expect(confirmButtonFinder, findsOneWidget);
-    expect(find.text('Vui lòng chọn khung giờ mới'), findsOneWidget);
-  });
+      // Confirm button is initially disabled (prompting user to select a slot)
+      final confirmButtonFinder = find.byKey(
+        const Key('confirm_reschedule_button'),
+      );
+      expect(confirmButtonFinder, findsOneWidget);
+      expect(find.text('Vui lòng chọn khung giờ mới'), findsOneWidget);
+    },
+  );
 
-  testWidgets('Selecting an eligible slot enables confirmation and submits successfully', (tester) async {
-    await tester.pumpWidget(createTestWidget());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'Selecting an eligible slot enables confirmation and submits successfully',
+    (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
 
-    // Tap slot 102
-    await tester.tap(find.byKey(const Key('reschedule_slot_tile_102')));
-    await tester.pumpAndSettle();
+      // Tap slot 102
+      await tester.tap(find.byKey(const Key('reschedule_slot_tile_102')));
+      await tester.pumpAndSettle();
 
-    // Verify selected indicator and updated button label
-    expect(find.text('Khung giờ mới đã chọn:'), findsOneWidget);
-    expect(find.text('Xác nhận dời lịch sang giờ này'), findsOneWidget);
+      // Verify selected indicator and updated button label
+      expect(find.text('Khung giờ mới đã chọn:'), findsOneWidget);
+      expect(find.text('Xác nhận dời lịch sang giờ này'), findsOneWidget);
 
-    // Tap confirm
-    await tester.tap(find.byKey(const Key('confirm_reschedule_button')));
-    await tester.pump();
+      // Tap confirm
+      await tester.tap(find.byKey(const Key('confirm_reschedule_button')));
+      await tester.pump();
 
-    // Verify repository called with correct IDs
-    expect(mockRepo.lastRescheduledBookingId, 501);
-    expect(mockRepo.lastRescheduledSlotId, 102);
-  });
+      // Verify repository called with correct IDs
+      expect(mockRepo.lastRescheduledBookingId, 501);
+      expect(mockRepo.lastRescheduledSlotId, 102);
+    },
+  );
 
-  testWidgets('Reschedule failure shows friendly error banner and keeps sheet open for retry', (tester) async {
-    mockRepo.rescheduleSuccess = false;
-    await tester.pumpWidget(createTestWidget());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'Reschedule failure shows friendly error banner and keeps sheet open for retry',
+    (tester) async {
+      mockRepo.rescheduleSuccess = false;
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
 
-    // Tap slot 102 and confirm
-    await tester.tap(find.byKey(const Key('reschedule_slot_tile_102')));
-    await tester.pumpAndSettle();
+      // Tap slot 102 and confirm
+      await tester.tap(find.byKey(const Key('reschedule_slot_tile_102')));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('confirm_reschedule_button')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('confirm_reschedule_button')));
+      await tester.pumpAndSettle();
 
-    // Sheet remains open for user to pick another slot
-    expect(find.byKey(const Key('learner_mentor_reschedule_sheet')), findsOneWidget);
-  });
+      // Sheet remains open for user to pick another slot
+      expect(
+        find.byKey(const Key('learner_mentor_reschedule_sheet')),
+        findsOneWidget,
+      );
+    },
+  );
 }

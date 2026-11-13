@@ -66,6 +66,10 @@ class StartAttemptQuestionDto {
     required this.sectionTitle,
     required this.sectionOrder,
     required this.order,
+    this.selectedOptionId,
+    this.questionType = 'SingleChoice',
+    this.interactionData,
+    this.response,
     required this.content,
     required this.audioUrl,
     required this.imageUrl,
@@ -79,6 +83,14 @@ class StartAttemptQuestionDto {
       sectionTitle: _requiredString(json, 'sectionTitle'),
       sectionOrder: _requiredInt(json, 'sectionOrder'),
       order: _requiredInt(json, 'order'),
+      selectedOptionId: _optionalInt(json, 'selectedOptionId'),
+      questionType: _optionalString(json, 'questionType') ?? 'SingleChoice',
+      interactionData: json['interactionData'] is Map<String, Object?>
+          ? json['interactionData'] as Map<String, Object?>
+          : (json['interactionData'] is Map
+              ? Map<String, Object?>.from(json['interactionData'] as Map)
+              : null),
+      response: json['response'],
       content: _requiredString(json, 'content'),
       audioUrl: _optionalString(json, 'audioUrl'),
       imageUrl: _optionalString(json, 'imageUrl'),
@@ -94,6 +106,10 @@ class StartAttemptQuestionDto {
   final String sectionTitle;
   final int sectionOrder;
   final int order;
+  final int? selectedOptionId;
+  final String questionType;
+  final Map<String, Object?>? interactionData;
+  final Object? response;
   final String content;
   final String? audioUrl;
   final String? imageUrl;
@@ -217,6 +233,9 @@ class MockTestQuestionReviewDto {
   const MockTestQuestionReviewDto({
     required this.questionId,
     required this.questionText,
+    this.questionType = 'SingleChoice',
+    this.response,
+    this.answerKey,
     required this.options,
     required this.selectedOptionId,
     required this.isCorrect,
@@ -227,6 +246,9 @@ class MockTestQuestionReviewDto {
     return MockTestQuestionReviewDto(
       questionId: _requiredInt(json, 'questionId'),
       questionText: _requiredString(json, 'questionText'),
+      questionType: _optionalString(json, 'questionType') ?? 'SingleChoice',
+      response: json['response'],
+      answerKey: json['answerKey'],
       options: _objectList(
         json['options'],
         'options',
@@ -239,6 +261,9 @@ class MockTestQuestionReviewDto {
 
   final int questionId;
   final String questionText;
+  final String questionType;
+  final Object? response;
+  final Object? answerKey;
   final List<MockTestReviewOptionDto> options;
   final int? selectedOptionId;
   final bool isCorrect;
@@ -276,6 +301,13 @@ StartAttemptDto readStartAttempt(Object? body) {
   return StartAttemptDto.fromJson(
     _objectMap(_readEnvelopeResult(body), 'result'),
   );
+}
+
+StartAttemptDto? readActiveAttempt(Object? body) {
+  final result = _readEnvelopeResult(body);
+  return result == null
+      ? null
+      : StartAttemptDto.fromJson(_objectMap(result, 'result'));
 }
 
 AttemptResultDto readAttemptResult(Object? body) {

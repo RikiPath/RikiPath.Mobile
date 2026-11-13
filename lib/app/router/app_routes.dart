@@ -42,6 +42,21 @@ abstract final class AppRoutes {
   }
 
   static const String learnerMentorMeetings = '/mentor-meetings';
+  static const String learnerMentorFindSlotsSegment = 'find-slots';
+  static String learnerMentorFindSlots({int? availabilityId, int? mentorId}) {
+    final base = '$learnerMentorMeetings/$learnerMentorFindSlotsSegment';
+    final params = <String, String>{};
+    if (availabilityId != null && availabilityId > 0) {
+      params['availabilityId'] = availabilityId.toString();
+    }
+    if (mentorId != null && mentorId > 0) {
+      params['mentorId'] = mentorId.toString();
+    }
+    return params.isEmpty
+        ? base
+        : '$base?${Uri(queryParameters: params).query}';
+  }
+
   static const String learnerMentorDiscoverySegment = 'plans/:planId/mentors';
   static const String learnerMentorProfileSegment =
       'plans/:planId/mentors/:mentorId';
@@ -130,6 +145,7 @@ abstract final class AppRoutes {
   static const String notifications = '/notifications';
   static const String learn = '/learn';
   static const String learnRoadmapSegment = 'roadmap';
+  static const String lessonCatalogSegment = 'lessons';
   static const String learnProgressSegment = 'progress';
   static const String sharedBankSegment = 'library';
   static const String vocabularySegment = 'vocabulary';
@@ -140,6 +156,7 @@ abstract final class AppRoutes {
   static const String grammarDetailSegment = 'grammar/:entryKey';
   static const String lessonSegment = 'lesson/:lessonId';
   static const String learnRoadmap = '$learn/$learnRoadmapSegment';
+  static const String lessonCatalog = '$learn/$lessonCatalogSegment';
   static const String learnProgress = '$learn/$learnProgressSegment';
   static const String sharedBank = '$learn/$sharedBankSegment';
   static const String vocabulary = '$learn/$vocabularySegment';
@@ -156,6 +173,7 @@ abstract final class AppRoutes {
   static const String practice = '/practice';
   static const String reviewSegment = 'review';
   static const String writingSegment = 'writing';
+  static const String essayWritingSegment = 'essay';
   static const String writingHiraganaSegment = 'hiragana';
   static const String writingKatakanaSegment = 'katakana';
   static const String writingKanjiSegment = 'kanji';
@@ -165,10 +183,12 @@ abstract final class AppRoutes {
   static const String speechSegment = 'speech';
   static const String textScanSegment = 'scan-text';
   static const String mockTestSegment = 'mock/:testId';
+  static const String mockTestLibrarySegment = 'mock-library';
   static const String mockResultSegment = 'result';
   static const String mockDetailedReviewSegment = 'review';
   static const String dailyReview = '$practice/$reviewSegment';
   static const String writing = '$practice/$writingSegment';
+  static const String essayWriting = '$practice/$essayWritingSegment';
   static const String writingHiragana = '$writing/$writingHiraganaSegment';
   static const String writingKatakana = '$writing/$writingKatakanaSegment';
   static const String writingKanji = '$writing/$writingKanjiSegment';
@@ -180,6 +200,7 @@ abstract final class AppRoutes {
       '$writingKanji/${_positiveId(characterId, "characterId")}';
   static const String speechPractice = '$practice/$speechSegment';
   static const String textScan = '$practice/$textScanSegment';
+  static const String mockTestLibrary = '$practice/$mockTestLibrarySegment';
   static String mockTest(String testId) =>
       '$practice/mock/${Uri.encodeComponent(testId)}';
   static String mockTestResult(String testId) => '${mockTest(testId)}/result';

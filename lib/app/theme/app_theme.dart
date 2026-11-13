@@ -51,7 +51,7 @@ abstract final class AppTheme {
         foregroundColor: AppColors.textPrimary,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        scrolledUnderElevation: 2.0,
+        scrolledUnderElevation: 0,
         shadowColor: Color(0x1F1A1317),
         centerTitle: false,
         titleTextStyle: AppTypography.sectionTitle,

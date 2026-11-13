@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 
 class JlptCatalogFilterChips extends StatelessWidget {
@@ -51,7 +52,10 @@ class JlptCatalogFilterChips extends StatelessWidget {
         ),
       ),
       data: (levels) {
-        if (levels.isEmpty) {
+        final supportedLevels = levels
+            .where((level) => level.level != JlptLevel.n1)
+            .toList(growable: false);
+        if (supportedLevels.isEmpty) {
           return Padding(
             key: ValueKey<String>('${keyPrefix}_empty'),
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
@@ -74,7 +78,7 @@ class JlptCatalogFilterChips extends StatelessWidget {
                 selected: selected == null,
                 onSelected: () => onSelected(null),
               ),
-              for (final level in levels) ...[
+              for (final level in supportedLevels) ...[
                 const SizedBox(width: AppSpacing.space2),
                 _LevelChip(
                   key: ValueKey<String>(
@@ -112,15 +116,16 @@ class _LevelChip extends StatelessWidget {
       selected: selected,
       onSelected: (_) => onSelected(),
       showCheckmark: false,
-      selectedColor: AppColors.brandTint,
-      backgroundColor: AppColors.surface,
+      selectedColor: const Color(0xFFFDEBF0),
+      backgroundColor: Colors.white,
       side: BorderSide(
-        color: selected ? AppColors.brandPrimary : AppColors.border,
+        color: selected ? AppColors.brandPrimary : AppColors.jlptBadgeBorder,
+        width: selected ? 1.5 : 1.0,
       ),
       labelStyle: AppTypography.badgeText.copyWith(
         color: selected
             ? AppColors.brandPrimary
-            : AppColors.learnerTextSecondary,
+            : AppColors.jlptN5Foreground,
         fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
       ),
     );

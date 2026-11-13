@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
 import 'package:rikipath_mobile/features/calendar/application/sakura_calendar_controller.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_calendar_header.dart';
@@ -79,7 +80,54 @@ void main() {
         type: SakuraCalendarEventType.consultation,
         status: MentorMeetingStatus.accepted,
       );
-      expect(confirmed.primaryColor, AppColors.success);
+      expect(confirmed.primaryColor, const Color(0xFF3B82F6));
+      expect(confirmed.backgroundColor, const Color(0xFFEEF6FF));
+      expect(confirmed.borderColor, const Color(0xFFBFDBFE));
+      expect(confirmed.statusBadgeBgColor, const Color(0xFFDBEAFE));
+      expect(confirmed.statusBadgeTextColor, const Color(0xFF2563EB));
+      expect(confirmed.statusBadgeBorderColor, const Color(0xFFBFDBFE));
+      expect(confirmed.statusBadgeIcon, Icons.check);
+      expect(confirmed.levelChipBgColor, const Color(0xFFEFF6FF));
+      expect(confirmed.levelChipBorderColor, const Color(0xFF93C5FD));
+      expect(confirmed.levelChipTextColor, const Color(0xFF2563EB));
+
+      final completed = SakuraCalendarEvent(
+        id: 'evt-comp',
+        title: 'Completed Booking',
+        startTime: DateTime(2026, 11, 10, 9, 0),
+        endTime: DateTime(2026, 11, 10, 10, 30),
+        type: SakuraCalendarEventType.consultation,
+        status: MentorMeetingStatus.completed,
+      );
+      expect(completed.primaryColor, const Color(0xFF22C55E));
+      expect(completed.backgroundColor, const Color(0xFFECFDF5));
+      expect(completed.borderColor, const Color(0xFFA7E5C4));
+      expect(completed.statusBadgeBgColor, const Color(0xFFD1FAE5));
+      expect(completed.statusBadgeTextColor, const Color(0xFF059669));
+      expect(completed.statusBadgeBorderColor, const Color(0xFFA7E5C4));
+      expect(completed.statusBadgeIcon, Icons.check);
+      expect(completed.levelChipBgColor, const Color(0xFFECFDF5));
+      expect(completed.levelChipBorderColor, const Color(0xFF86EFAC));
+      expect(completed.levelChipTextColor, const Color(0xFF059669));
+
+      final cancelled = SakuraCalendarEvent(
+        id: 'evt-x',
+        title: 'Cancelled Booking',
+        startTime: DateTime(2026, 11, 10, 9, 0),
+        endTime: DateTime(2026, 11, 10, 10, 30),
+        type: SakuraCalendarEventType.consultation,
+        status: MentorMeetingStatus.cancelled,
+      );
+      expect(cancelled.primaryColor, const Color(0xFFF43F5E));
+      expect(cancelled.backgroundColor, const Color(0xFFFFF1F2));
+      expect(cancelled.borderColor, const Color(0xFFFECDD3));
+      expect(cancelled.statusBadgeBgColor, const Color(0xFFFFE4E6));
+      expect(cancelled.statusBadgeTextColor, const Color(0xFFBE123C));
+      expect(cancelled.statusBadgeBorderColor, const Color(0xFFFECDD3));
+      expect(cancelled.statusBadgeIcon, Icons.close);
+      expect(cancelled.levelChipBgColor, const Color(0xFFFFF1F2));
+      expect(cancelled.levelChipBorderColor, const Color(0xFFFDA4AF));
+      expect(cancelled.levelChipTextColor, const Color(0xFFBE123C));
 
       final slot = SakuraCalendarEvent(
         id: 'evt-s',
@@ -88,7 +136,45 @@ void main() {
         endTime: DateTime(2026, 11, 10, 10, 30),
         type: SakuraCalendarEventType.availableSlot,
       );
-      expect(slot.primaryColor, const Color(0xFF2563EB));
+      expect(slot.primaryColor, const Color(0xFF94A3B8));
+      expect(slot.backgroundColor, const Color(0xFFF8FAFC));
+      expect(slot.borderColor, const Color(0xFFE2E8F0));
+      expect(slot.statusBadgeBgColor, const Color(0xFFE2E8F0));
+      expect(slot.statusBadgeTextColor, const Color(0xFF475569));
+      expect(slot.statusBadgeIcon, isNull);
+      expect(slot.levelChipBgColor, const Color(0xFFF8FAFC));
+      expect(slot.levelChipBorderColor, const Color(0xFFCBD5E1));
+      expect(slot.levelChipTextColor, const Color(0xFF475569));
+
+      final srs = SakuraCalendarEvent(
+        id: 'evt-srs',
+        title: 'SRS Review',
+        startTime: DateTime(2026, 11, 10, 9, 0),
+        endTime: DateTime(2026, 11, 10, 10, 30),
+        type: SakuraCalendarEventType.srsReview,
+      );
+      expect(srs.primaryColor, const Color(0xFFF59E0B));
+      expect(srs.backgroundColor, const Color(0xFFFFFBEB));
+      expect(srs.borderColor, const Color(0xFFFDE68A));
+      expect(srs.statusBadgeBgColor, const Color(0xFFFEF3C7));
+      expect(srs.statusBadgeTextColor, const Color(0xFF92400E));
+      expect(srs.levelChipBgColor, const Color(0xFFFFFBEB));
+      expect(srs.levelChipBorderColor, const Color(0xFFFDE68A));
+      expect(srs.levelChipTextColor, const Color(0xFF92400E));
+
+      final learning = SakuraCalendarEvent(
+        id: 'evt-learn',
+        title: 'Completed Lesson',
+        startTime: DateTime(2026, 11, 10, 9, 0),
+        endTime: DateTime(2026, 11, 10, 10, 30),
+        type: SakuraCalendarEventType.learningPlan,
+      );
+      expect(learning.primaryColor, const Color(0xFF22C55E));
+      expect(learning.backgroundColor, const Color(0xFFECFDF5));
+      expect(learning.borderColor, const Color(0xFFA7E5C4));
+      expect(learning.statusBadgeBgColor, const Color(0xFFD1FAE5));
+      expect(learning.statusBadgeTextColor, const Color(0xFF059669));
+      expect(learning.statusBadgeBorderColor, const Color(0xFFA7E5C4));
     });
   });
 
@@ -106,9 +192,6 @@ void main() {
       // Switch view modes
       controller.setViewMode(SakuraCalendarViewMode.week);
       expect(container.read(sakuraCalendarControllerProvider).viewMode, SakuraCalendarViewMode.week);
-
-      controller.setViewMode(SakuraCalendarViewMode.threeDay);
-      expect(container.read(sakuraCalendarControllerProvider).viewMode, SakuraCalendarViewMode.threeDay);
 
       controller.setViewMode(SakuraCalendarViewMode.day);
       expect(container.read(sakuraCalendarControllerProvider).viewMode, SakuraCalendarViewMode.day);
@@ -202,18 +285,18 @@ void main() {
       // Check view options
       expect(find.text('Lịch biểu'), findsOneWidget);
       expect(find.text('Ngày'), findsOneWidget);
-      expect(find.text('3 ngày'), findsOneWidget);
+      expect(find.text('3 ngày'), findsNothing);
       expect(find.text('Tuần'), findsOneWidget);
 
-      // Toggle layer via CheckboxListTile first
-      await tester.tap(find.byType(CheckboxListTile).first);
+      // Toggle layer via CheckboxListTile
+      await tester.tap(find.byKey(const Key('drawer_layer_consultation')));
       await tester.pump();
       expect(layerToggled, isTrue);
 
-      // Tap 3-day mode
-      await tester.tap(find.text('3 ngày'));
+      // Tap Week mode
+      await tester.tap(find.text('Tuần'));
       await tester.pump();
-      expect(selectedView, SakuraCalendarViewMode.threeDay);
+      expect(selectedView, SakuraCalendarViewMode.week);
     });
 
     testWidgets('SakuraMonthView renders 7 weekday columns and handles date tap', (tester) async {
@@ -225,6 +308,9 @@ void main() {
         startTime: DateTime(2026, 11, 5, 9, 0),
         endTime: DateTime(2026, 11, 5, 10, 30),
         type: SakuraCalendarEventType.consultation,
+        status: MentorMeetingStatus.accepted,
+        statusLabel: 'Đã xác nhận',
+        jlptLevel: 'N5',
       );
 
       await tester.pumpWidget(
@@ -250,6 +336,8 @@ void main() {
 
       // Check event preview shown below month grid
       expect(find.text('Cố vấn JLPT 90p'), findsWidgets);
+      expect(find.text('Đã xác nhận'), findsWidgets);
+      expect(find.byType(JlptBadge), findsNothing);
     });
 
     testWidgets('SakuraAgendaView renders grouped dates and event cards', (tester) async {
@@ -260,6 +348,9 @@ void main() {
         endTime: DateTime(2026, 11, 10, 15, 30),
         type: SakuraCalendarEventType.consultation,
         participantName: 'Sensei Tanaka',
+        status: MentorMeetingStatus.accepted,
+        statusLabel: 'Đã xác nhận',
+        jlptLevel: 'N5',
       );
 
       await tester.pumpWidget(
@@ -276,6 +367,8 @@ void main() {
       expect(find.text('Buổi luyện đề N2'), findsOneWidget);
       expect(find.text('14:00 – 15:30 (90 phút)'), findsOneWidget);
       expect(find.textContaining('Sensei Tanaka'), findsOneWidget);
+      expect(find.text('Đã xác nhận'), findsWidgets);
+      expect(find.byType(JlptBadge), findsNothing);
     });
 
     testWidgets('SakuraCalendarEmptyState renders mascot emblem and message', (tester) async {
@@ -449,7 +542,19 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.text('Tham gia phòng học'), findsOneWidget);
+      expect(find.text('Dời lịch hẹn'), findsOneWidget);
       expect(find.text('Hủy buổi tư vấn này'), findsOneWidget);
+
+      final joinButton = tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, 'Tham gia phòng học'));
+      expect(joinButton.style?.backgroundColor?.resolve({}), const Color(0xFFE5577F));
+
+      final rescheduleButton = tester.widget<OutlinedButton>(find.byKey(const Key('sakura_event_reschedule_button')));
+      expect(rescheduleButton.style?.backgroundColor?.resolve({}), const Color(0xFFEAF6FF));
+      expect(rescheduleButton.style?.foregroundColor?.resolve({}), const Color(0xFF0284C7));
+
+      final cancelButton = tester.widget<OutlinedButton>(find.byKey(const Key('sakura_event_cancel_button')));
+      expect(cancelButton.style?.foregroundColor?.resolve({}), const Color(0xFFDC3545));
 
       await tester.tap(find.text('Hủy buổi tư vấn này'));
       await tester.pumpAndSettle();

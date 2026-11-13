@@ -4,6 +4,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_shared_widgets.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_practice_section.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LessonDetailView extends StatelessWidget {
@@ -35,9 +36,11 @@ class LessonDetailView extends StatelessWidget {
       children: [
         _LessonHero(lesson: lesson),
         const SizedBox(height: AppSpacing.space4),
-        _ObjectiveCard(objective: lesson.objective),
-        const SizedBox(height: AppSpacing.space4),
-        _StreakCard(lesson: lesson),
+        if (lesson.objective.trim().isNotEmpty) ...[
+          _ObjectiveCard(objective: lesson.objective),
+          const SizedBox(height: AppSpacing.space4),
+        ],
+        if (lesson.remoteLessonId == null) _StreakCard(lesson: lesson),
         if (lesson.parts.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.space5),
           _SectionHeader(
@@ -111,10 +114,17 @@ class LessonDetailView extends StatelessWidget {
             label: Text(context.l10n.lessonAttachment),
           ),
         ],
+        if (lesson.remoteLessonId case final lessonId?) ...[
+          const SizedBox(height: AppSpacing.space4),
+          LessonPracticeSection(lessonId: lessonId),
+        ],
         const SizedBox(height: AppSpacing.space5),
         RikiPrimaryButton(
           key: const ValueKey<String>('lesson_start_button'),
-          label: lesson.progress.resumePositionSeconds > 0
+          label: lesson.progress.isCompleted
+              ? 'Ôn lại bài học'
+              : lesson.progress.resumePositionSeconds > 0 ||
+                    lesson.progress.progressPercent > 0
               ? context.l10n.continueLessonProgress(
                   lesson.progress.progressPercent,
                 )
@@ -148,6 +158,19 @@ class _LessonHero extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: SizedBox(
+              width: double.infinity,
+              height: 132,
+              child: Image.asset(
+                'assets/images/learning/sakura_garden.png',
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space3),
           LessonMetadataWrap(lesson: lesson),
           const SizedBox(height: AppSpacing.space3),
           Text(
@@ -156,38 +179,69 @@ class _LessonHero extends StatelessWidget {
               color: AppColors.learnerTextPrimary,
             ),
           ),
-          const SizedBox(height: AppSpacing.space2),
-          Wrap(
-            spacing: AppSpacing.space2,
-            runSpacing: AppSpacing.space1,
-            crossAxisAlignment: WrapCrossAlignment.center,
+          if (lesson.focus.trim().isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.space2),
+            Wrap(
+              spacing: AppSpacing.space2,
+              runSpacing: AppSpacing.space1,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  context.l10n.focusLabel,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.space2,
+                    vertical: AppSpacing.space1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandTint,
+                    borderRadius: BorderRadius.circular(AppRadius.compact),
+                  ),
+                  child: Text(
+                    lesson.focus,
+                    style: AppTypography.sectionTitle.copyWith(
+                      color: AppColors.brandPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: AppSpacing.space4),
+          Row(
             children: [
-              Text(
-                context.l10n.focusLabel,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.space2,
-                  vertical: AppSpacing.space1,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.brandTint,
-                  borderRadius: BorderRadius.circular(AppRadius.compact),
-                ),
-                child: Text(
-                  lesson.focus,
-                  style: AppTypography.sectionTitle.copyWith(
-                    color: AppColors.brandPrimary,
+              Semantics(
+                label:
+                    'Tiến độ bài học ${lesson.progress.progressPercent.clamp(0, 100)} phần trăm',
+                child: SizedBox.square(
+                  dimension: 52,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        value: lesson.progress.fraction,
+                        strokeWidth: 5,
+                        backgroundColor: AppColors.brandTint,
+                        color: lesson.progress.isCompleted
+                            ? Colors.green
+                            : AppColors.brandPrimary,
+                      ),
+                      Text(
+                        '${lesson.progress.progressPercent.clamp(0, 100)}%',
+                        style: AppTypography.metadata,
+                      ),
+                    ],
                   ),
                 ),
               ),
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(child: LessonProgressMeter(progress: lesson.progress)),
             ],
           ),
-          const SizedBox(height: AppSpacing.space4),
-          LessonProgressMeter(progress: lesson.progress),
           const SizedBox(height: AppSpacing.space2),
           if (lesson.parts.isNotEmpty)
             Align(

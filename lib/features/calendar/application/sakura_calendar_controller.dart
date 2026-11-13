@@ -83,10 +83,6 @@ class SakuraCalendarController extends Notifier<SakuraCalendarState> {
         state = state.copyWith(
           selectedDate: cur.subtract(const Duration(days: 1)),
         );
-      case SakuraCalendarViewMode.threeDay:
-        state = state.copyWith(
-          selectedDate: cur.subtract(const Duration(days: 3)),
-        );
       case SakuraCalendarViewMode.week:
         state = state.copyWith(
           selectedDate: cur.subtract(const Duration(days: 7)),
@@ -107,8 +103,6 @@ class SakuraCalendarController extends Notifier<SakuraCalendarState> {
     switch (state.viewMode) {
       case SakuraCalendarViewMode.day:
         state = state.copyWith(selectedDate: cur.add(const Duration(days: 1)));
-      case SakuraCalendarViewMode.threeDay:
-        state = state.copyWith(selectedDate: cur.add(const Duration(days: 3)));
       case SakuraCalendarViewMode.week:
         state = state.copyWith(selectedDate: cur.add(const Duration(days: 7)));
       case SakuraCalendarViewMode.month:

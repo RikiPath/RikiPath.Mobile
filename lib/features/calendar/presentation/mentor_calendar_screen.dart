@@ -40,6 +40,7 @@ class MentorCalendarScreen extends ConsumerWidget {
           return SakuraCalendarShell(
             events: events,
             roleName: 'Cố vấn RikiPath',
+            isMentor: true,
             fabLabel: 'Đăng ký lịch trống',
             fabIcon: Icons.add_alarm_outlined,
             initialMode: initialMode,

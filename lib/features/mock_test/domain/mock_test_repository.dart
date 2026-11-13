@@ -5,10 +5,16 @@ abstract interface class MockTestRepository {
 
   Future<LiveMockTestAttempt> start(int mockTestId);
 
+  Future<LiveMockTestAttempt?> loadActive(int mockTestId);
+
   Future<LiveMockTestResult> submit(
     int attemptId,
     List<MockTestAnswerSubmission> answers,
   );
+
+  Future<void> saveAnswer(int attemptId, MockTestAnswerSubmission answer);
+
+  Future<LiveMockTestResult> finalizeExpired(int attemptId);
 
   Future<LiveMockTestResult> loadResult(int attemptId);
 

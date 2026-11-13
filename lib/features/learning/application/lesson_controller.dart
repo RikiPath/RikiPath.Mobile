@@ -458,6 +458,8 @@ class LessonController extends AsyncNotifier<LessonSession> {
             .recordLessonProgress(lessonId, progress);
       } else {
         ref.invalidate(learningControllerProvider);
+        ref.invalidate(lessonCatalogProvider);
+        ref.invalidate(activeLearningPathProvider);
         ref.invalidate(standardRoadmapProvider);
         // Completion is already committed by Backend. A failed roadmap refresh
         // must never turn that success into a retryable completion error.

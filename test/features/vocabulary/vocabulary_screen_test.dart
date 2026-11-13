@@ -57,7 +57,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('JLPT N2'), findsOneWidget);
-    expect(find.text('JLPT N1'), findsOneWidget);
+    expect(find.text('JLPT N1'), findsNothing);
     expect(find.text('Nội dung bổ sung'), findsOneWidget);
 
     final navigation = tester.widget<RikiBottomNavigationBar>(
@@ -119,22 +119,28 @@ void main() {
     );
   });
 
-  testWidgets('Learning Home opens SharedBank with all learner entries', (
+  testWidgets('Learning library opens Vocabulary directly and SharedBank renders all learner entries', (
     tester,
   ) async {
     await _pumpVocabulary(tester, initialLocation: AppRoutes.learn);
     await tester.pumpAndSettle();
 
-    final libraryCard = find.byKey(
-      const ValueKey<String>('learning_section_library'),
-    );
-    await tester.scrollUntilVisible(libraryCard, 180);
-    await tester.drag(
-      find.byKey(const ValueKey<String>('learning_home_success_view')),
-      const Offset(0, -120),
-    );
+    await tester.tap(find.text('Thư viện'));
     await tester.pumpAndSettle();
-    await tester.tap(libraryCard);
+    expect(
+      find.byKey(const PageStorageKey('learning_resource_library')),
+      findsOneWidget,
+    );
+    // Learning Library directly exposes Vocabulary card (knowledge bank card was removed)
+    await tester.tap(find.byKey(const ValueKey<String>('library_vocabulary_card')));
+    await tester.pumpAndSettle();
+    expect(find.byType(VocabularyLibraryScreen), findsOneWidget);
+  });
+
+  testWidgets('SharedBankScreen directly renders all learner entries and navigates to Vocabulary', (
+    tester,
+  ) async {
+    await _pumpVocabulary(tester, initialLocation: AppRoutes.sharedBank);
     await tester.pumpAndSettle();
 
     expect(find.byType(SharedBankScreen), findsOneWidget);

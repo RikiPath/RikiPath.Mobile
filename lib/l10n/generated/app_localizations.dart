@@ -2921,7 +2921,7 @@ abstract class AppLocalizations {
   /// No description provided for @collectionHasNoWords.
   ///
   /// In vi, this message translates to:
-  /// **'Danh sách chưa có từ'**
+  /// **'Danh sách chưa có từ nào'**
   String get collectionHasNoWords;
 
   /// No description provided for @notebookSearchEmptyMessage.
@@ -2933,7 +2933,7 @@ abstract class AppLocalizations {
   /// No description provided for @notebookCollectionEmptyMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Thêm từ đầu tiên để bắt đầu ôn tập trong danh sách này.'**
+  /// **'Thêm từ đầu tiên để bắt đầu ôn tập.'**
   String get notebookCollectionEmptyMessage;
 
   /// No description provided for @notebookLoadFailed.
@@ -4721,7 +4721,7 @@ abstract class AppLocalizations {
   /// No description provided for @practiceJourneySubtitle.
   ///
   /// In vi, this message translates to:
-  /// **'Ôn lại kiến thức, thử sức với đề JLPT và theo dõi từng bước tiến bộ.'**
+  /// **'Thử sức với đề thi JLPT và theo dõi kết quả.'**
   String get practiceJourneySubtitle;
 
   /// No description provided for @mockSummary.
@@ -5009,7 +5009,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeReviewDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Ôn lại kiến thức theo nhịp học hiện tại của bạn.'**
+  /// **'Ôn lại kiến thức theo nhịp học của bạn.'**
   String get homeReviewDescription;
 
   /// No description provided for @homeResumeReview.
@@ -5312,6 +5312,150 @@ abstract class AppLocalizations {
   /// **'Chưa thể tải lịch trống của cố vấn.'**
   String get learnerMentorAvailabilityError;
 
+  /// No description provided for @mentorFinderTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tìm lịch tư vấn'**
+  String get mentorFinderTitle;
+
+  /// No description provided for @mentorFinderChooseDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn ngày phù hợp với bạn'**
+  String get mentorFinderChooseDate;
+
+  /// No description provided for @mentorFinderPickDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn ngày trên lịch'**
+  String get mentorFinderPickDate;
+
+  /// No description provided for @mentorFinderJlptLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình độ JLPT'**
+  String get mentorFinderJlptLevel;
+
+  /// No description provided for @mentorFinderChooseLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn trình độ JLPT để xem lịch phù hợp.'**
+  String get mentorFinderChooseLevel;
+
+  /// No description provided for @mentorFinderNoSlotsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có lịch tư vấn phù hợp'**
+  String get mentorFinderNoSlotsTitle;
+
+  /// No description provided for @mentorFinderNoSlotsDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hãy thử chọn ngày khác hoặc thay đổi bộ lọc.'**
+  String get mentorFinderNoSlotsDescription;
+
+  /// No description provided for @mentorFinderChooseAnotherDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem ngày khác'**
+  String get mentorFinderChooseAnotherDate;
+
+  /// No description provided for @mentorFinderViewMyBookings.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem lịch của tôi'**
+  String get mentorFinderViewMyBookings;
+
+  /// No description provided for @mentorFinderBackToCalendar.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quay lại Lịch học'**
+  String get mentorFinderBackToCalendar;
+
+  /// No description provided for @mentorFinderAvailableSlots.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khung giờ còn trống · 90 phút'**
+  String get mentorFinderAvailableSlots;
+
+  /// No description provided for @mentorFinderCreditError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tải được số lượt tư vấn. Vui lòng thử lại.'**
+  String get mentorFinderCreditError;
+
+  /// No description provided for @mentorFinderAvailableTickets.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} lượt JLPT {level} khả dụng'**
+  String mentorFinderAvailableTickets(int count, String level);
+
+  /// No description provided for @mentorFinderNeedCredit.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn cần có lượt tư vấn JLPT {level} để đặt lịch này.'**
+  String mentorFinderNeedCredit(String level);
+
+  /// No description provided for @mentorFinderChooseSlot.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn khung giờ'**
+  String get mentorFinderChooseSlot;
+
+  /// No description provided for @mentorFinderReviewBooking.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem và xác nhận đặt lịch'**
+  String get mentorFinderReviewBooking;
+
+  /// No description provided for @mentorFinderChoosePlan.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn gói tư vấn'**
+  String get mentorFinderChoosePlan;
+
+  /// No description provided for @mentorFinderNoPlans.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có gói tư vấn phù hợp. Vui lòng tải lại danh sách gói.'**
+  String get mentorFinderNoPlans;
+
+  /// No description provided for @mentorFinderPlansError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tải được các gói tư vấn. Vui lòng thử lại.'**
+  String get mentorFinderPlansError;
+
+  /// No description provided for @mentorFinderPlanSummary.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} lượt · {days} ngày'**
+  String mentorFinderPlanSummary(int count, int days);
+
+  /// No description provided for @mentorFinderTimeAll.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tất cả giờ'**
+  String get mentorFinderTimeAll;
+
+  /// No description provided for @mentorFinderTimeMorning.
+  ///
+  /// In vi, this message translates to:
+  /// **'Buổi sáng'**
+  String get mentorFinderTimeMorning;
+
+  /// No description provided for @mentorFinderTimeAfternoon.
+  ///
+  /// In vi, this message translates to:
+  /// **'Buổi chiều'**
+  String get mentorFinderTimeAfternoon;
+
+  /// No description provided for @mentorFinderTimeEvening.
+  ///
+  /// In vi, this message translates to:
+  /// **'Buổi tối'**
+  String get mentorFinderTimeEvening;
+
   /// No description provided for @learnerMentorSlotTime.
   ///
   /// In vi, this message translates to:
@@ -5585,7 +5729,7 @@ abstract class AppLocalizations {
   /// No description provided for @practiceSpeechDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Nói tiếng Nhật và xem nội dung được nhận dạng theo thời gian thực.'**
+  /// **'Luyện phát âm với nhận diện giọng nói AI.'**
   String get practiceSpeechDescription;
 
   /// No description provided for @practiceSpeechStatus.
@@ -5603,7 +5747,7 @@ abstract class AppLocalizations {
   /// No description provided for @practiceTextScanDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Chọn ảnh bài viết để nhận dạng và chỉnh sửa văn bản tiếng Nhật.'**
+  /// **'Quét bài viết từ hình ảnh để chỉnh sửa.'**
   String get practiceTextScanDescription;
 
   /// No description provided for @practiceTextScanStatus.
@@ -5927,7 +6071,7 @@ abstract class AppLocalizations {
   /// No description provided for @practiceWritingDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Xem thứ tự nét, viết trực tiếp và lưu tiến độ ôn tập.'**
+  /// **'Luyện viết nét và theo dõi tiến độ ôn tập.'**
   String get practiceWritingDescription;
 
   /// No description provided for @practiceWritingStatus.
@@ -7243,6 +7387,204 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Ngày mai mình lại tiếp tục nhé.'**
   String get heroBannerLateNightSubtitle;
+
+  /// No description provided for @mockLibraryTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đề thi thử JLPT'**
+  String get mockLibraryTitle;
+
+  /// No description provided for @mockLibraryDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Luyện đề theo trình độ và theo dõi kết quả.'**
+  String get mockLibraryDescription;
+
+  /// No description provided for @mockLibraryAvailableCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} đề khả dụng'**
+  String mockLibraryAvailableCount(int count);
+
+  /// No description provided for @mockLibraryOpenFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể mở đề thi lúc này. Vui lòng thử lại.'**
+  String get mockLibraryOpenFailed;
+
+  /// No description provided for @mockLibraryActiveAttempt.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hãy hoàn thành đề đang làm trước khi chọn đề khác.'**
+  String get mockLibraryActiveAttempt;
+
+  /// No description provided for @essayWritingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Luyện viết tiếng Nhật'**
+  String get essayWritingTitle;
+
+  /// No description provided for @essayWritingDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Viết bài và nhận đánh giá.'**
+  String get essayWritingDescription;
+
+  /// No description provided for @essayWritingIntro.
+  ///
+  /// In vi, this message translates to:
+  /// **'Viết một đoạn tiếng Nhật. Bài chỉ được gửi khi bạn nhấn nút chấm.'**
+  String get essayWritingIntro;
+
+  /// No description provided for @essayWritingNoLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có cấp độ JLPT để luyện viết.'**
+  String get essayWritingNoLevel;
+
+  /// No description provided for @essayWritingLevelLoadError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tải được cấp độ JLPT. Thử lại'**
+  String get essayWritingLevelLoadError;
+
+  /// No description provided for @essayWritingLevelLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cấp độ JLPT'**
+  String get essayWritingLevelLabel;
+
+  /// No description provided for @essayWritingInputHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập bài viết tiếng Nhật của bạn'**
+  String get essayWritingInputHint;
+
+  /// No description provided for @essayWritingSubmit.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chấm bài luyện tập'**
+  String get essayWritingSubmit;
+
+  /// No description provided for @essayWritingSubmitting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang chấm bài...'**
+  String get essayWritingSubmitting;
+
+  /// No description provided for @essayWritingSubmitUncertain.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể xác nhận bài nộp. Vui lòng kiểm tra trước khi gửi lại.'**
+  String get essayWritingSubmitUncertain;
+
+  /// No description provided for @essayWritingSaved.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã lưu bài nộp #{id}'**
+  String essayWritingSaved(int id);
+
+  /// No description provided for @essayWritingNew.
+  ///
+  /// In vi, this message translates to:
+  /// **'Viết bài mới'**
+  String get essayWritingNew;
+
+  /// No description provided for @essayWritingScore.
+  ///
+  /// In vi, this message translates to:
+  /// **'Điểm: {score}/100'**
+  String essayWritingScore(String score);
+
+  /// No description provided for @essayWritingStrengths.
+  ///
+  /// In vi, this message translates to:
+  /// **'Điểm mạnh'**
+  String get essayWritingStrengths;
+
+  /// No description provided for @essayWritingImprovements.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cần cải thiện'**
+  String get essayWritingImprovements;
+
+  /// No description provided for @essayWritingCorrections.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gợi ý sửa lỗi'**
+  String get essayWritingCorrections;
+
+  /// No description provided for @practiceHeroBadge.
+  ///
+  /// In vi, this message translates to:
+  /// **'がんばろう！'**
+  String get practiceHeroBadge;
+
+  /// No description provided for @practiceHeroTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sẵn sàng luyện tập?'**
+  String get practiceHeroTitle;
+
+  /// No description provided for @practiceHeroSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mỗi bài tập, thêm một bước tiến.'**
+  String get practiceHeroSubtitle;
+
+  /// No description provided for @profilePlacementSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đánh giá năng lực và gợi ý cấp độ phù hợp.'**
+  String get profilePlacementSubtitle;
+
+  /// No description provided for @profileLogoutSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng xuất tài khoản khỏi thiết bị này.'**
+  String get profileLogoutSubtitle;
+
+  /// No description provided for @profileMentorApplicationTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng ký trở thành Cố vấn'**
+  String get profileMentorApplicationTitle;
+
+  /// No description provided for @profileMentorApplicationSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nộp hồ sơ chuyên môn để xét duyệt.'**
+  String get profileMentorApplicationSubtitle;
+
+  /// No description provided for @notebookEmptyHeroBadge.
+  ///
+  /// In vi, this message translates to:
+  /// **'がんばろう！'**
+  String get notebookEmptyHeroBadge;
+
+  /// No description provided for @notebookEmptyHeroTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bắt đầu sổ từ của bạn!'**
+  String get notebookEmptyHeroTitle;
+
+  /// No description provided for @notebookEmptyHeroDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu lại những từ vựng và mẫu câu yêu thích.'**
+  String get notebookEmptyHeroDescription;
+
+  /// No description provided for @createFirstCollectionAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tạo danh sách đầu tiên'**
+  String get createFirstCollectionAction;
+
+  /// No description provided for @addFirstWordAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm từ đầu tiên'**
+  String get addFirstWordAction;
 }
 
 class _AppLocalizationsDelegate

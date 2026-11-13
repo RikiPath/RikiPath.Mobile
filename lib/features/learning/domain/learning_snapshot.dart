@@ -53,6 +53,7 @@ class LearningSnapshot {
     int? completedLessons,
     CurrentLessonSummary? currentLesson,
     List<RoadmapChapter>? chapters,
+    List<LearningLessonSummary>? lessons,
     bool? hasSelectedLevel,
     bool? hasCurrentLesson,
   }) {
@@ -73,7 +74,7 @@ class LearningSnapshot {
       chapters: chapters ?? this.chapters,
       skillProgress: skillProgress,
       certificateLevelId: certificateLevelId,
-      lessons: lessons,
+      lessons: lessons ?? this.lessons,
       hasSelectedLevel: hasSelectedLevel ?? this.hasSelectedLevel,
       hasCurrentLesson: hasCurrentLesson ?? this.hasCurrentLesson,
     );

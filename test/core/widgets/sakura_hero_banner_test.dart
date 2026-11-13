@@ -26,8 +26,49 @@ Widget _buildTestHost({
   );
 }
 
+DateTime _vietnamInstant(int hour, [int minute = 0]) =>
+    DateTime.utc(2026, 11, 9, hour, minute).subtract(const Duration(hours: 7));
+
 void main() {
   group('SakuraTimeSlot logic tests', () {
+    test('classifies Vietnam instants independently of device timezone', () {
+      expect(
+        SakuraTimeSlot.atInstant(_vietnamInstant(7)),
+        SakuraTimeSlot.morning,
+      );
+      expect(
+        SakuraTimeSlot.atInstant(_vietnamInstant(12)),
+        SakuraTimeSlot.noon,
+      );
+      expect(
+        SakuraTimeSlot.atInstant(_vietnamInstant(16)),
+        SakuraTimeSlot.afternoon,
+      );
+      expect(
+        SakuraTimeSlot.atInstant(_vietnamInstant(20)),
+        SakuraTimeSlot.evening,
+      );
+      expect(
+        SakuraTimeSlot.atInstant(_vietnamInstant(23, 30)),
+        SakuraTimeSlot.lateNight,
+      );
+      expect(
+        SakuraTimeSlot.atInstant(_vietnamInstant(2)),
+        SakuraTimeSlot.lateNight,
+      );
+      expect(
+        SakuraTimeSlot.atInstant(_vietnamInstant(20).toLocal()),
+        SakuraTimeSlot.evening,
+      );
+      expect(
+        SakuraTimeSlot.nextBoundaryUtc(_vietnamInstant(20)),
+        _vietnamInstant(22),
+      );
+      expect(
+        SakuraTimeSlot.nextBoundaryUtc(_vietnamInstant(23, 30)),
+        DateTime.utc(2026, 11, 10, 5).subtract(const Duration(hours: 7)),
+      );
+    });
     test('derives morning correctly (05:00 - 10:59)', () {
       expect(
         SakuraTimeSlot.fromDateTime(DateTime(2026, 11, 9, 5, 0)),
@@ -136,35 +177,34 @@ void main() {
   });
 
   group('SakuraHeroBanner Widget Rendering', () {
-    testWidgets('renders Morning banner with Vietnamese copy and morning asset', (tester) async {
-      await tester.pumpWidget(
-        _buildTestHost(
-          child: SakuraHeroBanner(
-            nowOverride: () => DateTime(2026, 11, 9, 8, 0),
+    testWidgets(
+      'renders Morning banner with Vietnamese copy and morning asset',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildTestHost(
+            child: SakuraHeroBanner(nowOverride: () => _vietnamInstant(8)),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Chào buổi sáng!'), findsOneWidget);
-      expect(find.text('Khởi đầu một ngày học thật vui.'), findsOneWidget);
-      expect(find.text('がんばろう！'), findsOneWidget);
+        expect(find.text('Chào buổi sáng!'), findsOneWidget);
+        expect(find.text('Khởi đầu một ngày học thật vui.'), findsOneWidget);
+        expect(find.text('がんばろう！'), findsOneWidget);
 
-      final imageFinder = find.byType(Image);
-      expect(imageFinder, findsOneWidget);
-      final image = tester.widget<Image>(imageFinder);
-      expect(
-        (image.image as AssetImage).assetName,
-        'assets/images/time_banners/sakura_morning.webp',
-      );
-    });
+        final imageFinder = find.byType(Image);
+        expect(imageFinder, findsOneWidget);
+        final image = tester.widget<Image>(imageFinder);
+        expect(
+          (image.image as AssetImage).assetName,
+          'assets/images/time_banners/sakura_morning.webp',
+        );
+      },
+    );
 
     testWidgets('renders Noon banner with noon asset', (tester) async {
       await tester.pumpWidget(
         _buildTestHost(
-          child: SakuraHeroBanner(
-            nowOverride: () => DateTime(2026, 11, 9, 12, 0),
-          ),
+          child: SakuraHeroBanner(nowOverride: () => _vietnamInstant(12)),
         ),
       );
       await tester.pumpAndSettle();
@@ -180,12 +220,12 @@ void main() {
       );
     });
 
-    testWidgets('renders Afternoon banner with afternoon asset', (tester) async {
+    testWidgets('renders Afternoon banner with afternoon asset', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildTestHost(
-          child: SakuraHeroBanner(
-            nowOverride: () => DateTime(2026, 11, 9, 15, 30),
-          ),
+          child: SakuraHeroBanner(nowOverride: () => _vietnamInstant(15, 30)),
         ),
       );
       await tester.pumpAndSettle();
@@ -201,12 +241,12 @@ void main() {
       );
     });
 
-    testWidgets('renders Evening banner with dark theme typography', (tester) async {
+    testWidgets('renders Evening banner with dark theme typography', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildTestHost(
-          child: SakuraHeroBanner(
-            nowOverride: () => DateTime(2026, 11, 9, 19, 0),
-          ),
+          child: SakuraHeroBanner(nowOverride: () => _vietnamInstant(19)),
         ),
       );
       await tester.pumpAndSettle();
@@ -221,16 +261,16 @@ void main() {
       final image = tester.widget<Image>(imageFinder);
       expect(
         (image.image as AssetImage).assetName,
-        'assets/images/time_banners/sakura_evening.webp',
+        'assets/images/time_banners/sakura_evening_night.png',
       );
     });
 
-    testWidgets('renders Late Night banner with late night asset', (tester) async {
+    testWidgets('renders Late Night banner with late night asset', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildTestHost(
-          child: SakuraHeroBanner(
-            nowOverride: () => DateTime(2026, 11, 9, 23, 15),
-          ),
+          child: SakuraHeroBanner(nowOverride: () => _vietnamInstant(23, 15)),
         ),
       );
       await tester.pumpAndSettle();
@@ -250,9 +290,7 @@ void main() {
       await tester.pumpWidget(
         _buildTestHost(
           locale: const Locale('ja'),
-          child: SakuraHeroBanner(
-            nowOverride: () => DateTime(2026, 11, 9, 8, 0),
-          ),
+          child: SakuraHeroBanner(nowOverride: () => _vietnamInstant(8)),
         ),
       );
       await tester.pumpAndSettle();
@@ -268,7 +306,7 @@ void main() {
         _buildTestHost(
           child: SakuraHeroBanner(
             onTap: () => tapped = true,
-            nowOverride: () => DateTime(2026, 11, 9, 9, 0),
+            nowOverride: () => _vietnamInstant(9),
           ),
         ),
       );
@@ -280,11 +318,11 @@ void main() {
 
     testWidgets('captures all 5 time scenes for visual review', (tester) async {
       final scenes = <String, DateTime>{
-        '01_morning_08_00': DateTime(2026, 11, 9, 8, 0),
-        '02_noon_12_00': DateTime(2026, 11, 9, 12, 0),
-        '03_afternoon_15_30': DateTime(2026, 11, 9, 15, 30),
-        '04_evening_19_00': DateTime(2026, 11, 9, 19, 0),
-        '05_late_night_23_30': DateTime(2026, 11, 9, 23, 30),
+        '01_morning_08_00': _vietnamInstant(8),
+        '02_noon_12_00': _vietnamInstant(12),
+        '03_afternoon_15_30': _vietnamInstant(15, 30),
+        '04_evening_19_00': _vietnamInstant(19),
+        '05_late_night_23_30': _vietnamInstant(23, 30),
       };
 
       for (final entry in scenes.entries) {
@@ -297,19 +335,20 @@ void main() {
           _buildTestHost(
             child: RepaintBoundary(
               key: key,
-              child: SakuraHeroBanner(
-                nowOverride: () => entry.value,
-              ),
+              child: SakuraHeroBanner(nowOverride: () => entry.value),
             ),
           ),
         );
         await tester.pumpAndSettle();
 
-        final boundary = key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+        final boundary =
+            key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
         if (boundary != null) {
           await tester.runAsync(() async {
             final image = await boundary.toImage(pixelRatio: 2);
-            final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+            final byteData = await image.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
             image.dispose();
             if (byteData != null) {
               final file = File(

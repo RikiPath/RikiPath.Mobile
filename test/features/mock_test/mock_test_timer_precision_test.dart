@@ -14,61 +14,66 @@ import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 
 void main() {
   group('Mock Exam Timer Precision & Monotonic Invariance', () {
-    test('monotonic stopwatch logic decrements precisely across 3s, 30s, and 2m intervals', () {
-      final baseStartedAt = DateTime.utc(2026, 11, 6, 8, 0, 0);
-      const timeLimitMinutes = 30; // 1800 seconds total
-      final attempt = LiveMockTestAttempt(
-        id: 101,
-        mockTestId: 731,
-        startedAt: baseStartedAt,
-        timeLimitMinutes: timeLimitMinutes,
-        previouslyWrongQuestionIds: const <int>[],
-        questions: const <LiveMockTestQuestion>[
-          LiveMockTestQuestion(
-            id: 1,
-            mockTestSectionId: 1,
-            sectionTitle: 'Từ vựng',
-            sectionOrder: 1,
-            order: 1,
-            content: 'Q1',
-            audioUrl: null,
-            imageUrl: null,
-            options: <LiveMockTestOption>[
-              LiveMockTestOption(id: 1, content: 'A', order: 1),
-              LiveMockTestOption(id: 2, content: 'B', order: 2),
-            ],
-          ),
-        ],
-      );
+    test(
+      'monotonic stopwatch logic decrements precisely across 3s, 30s, and 2m intervals',
+      () {
+        final baseStartedAt = DateTime.utc(2026, 11, 6, 8, 0, 0);
+        const timeLimitMinutes = 30; // 1800 seconds total
+        final attempt = LiveMockTestAttempt(
+          id: 101,
+          mockTestId: 731,
+          startedAt: baseStartedAt,
+          timeLimitMinutes: timeLimitMinutes,
+          previouslyWrongQuestionIds: const <int>[],
+          questions: const <LiveMockTestQuestion>[
+            LiveMockTestQuestion(
+              id: 1,
+              mockTestSectionId: 1,
+              sectionTitle: 'Từ vựng',
+              sectionOrder: 1,
+              order: 1,
+              content: 'Q1',
+              audioUrl: null,
+              imageUrl: null,
+              options: <LiveMockTestOption>[
+                LiveMockTestOption(id: 1, content: 'A', order: 1),
+                LiveMockTestOption(id: 2, content: 'B', order: 2),
+              ],
+            ),
+          ],
+        );
 
-      // Baseline: remaining at start is exactly 30 minutes (1800s)
-      expect(attempt.remainingAt(baseStartedAt), const Duration(minutes: 30));
+        // Baseline: remaining at start is exactly 30 minutes (1800s)
+        expect(attempt.remainingAt(baseStartedAt), const Duration(minutes: 30));
 
-      // Interval 1: 3 seconds elapsed
-      final at3s = baseStartedAt.add(const Duration(seconds: 3));
-      final rem3s = attempt.remainingAt(at3s);
-      expect(rem3s.inSeconds, 1800 - 3);
-      expect(attempt.deadline.difference(at3s), rem3s);
+        // Interval 1: 3 seconds elapsed
+        final at3s = baseStartedAt.add(const Duration(seconds: 3));
+        final rem3s = attempt.remainingAt(at3s);
+        expect(rem3s.inSeconds, 1800 - 3);
+        expect(attempt.deadline.difference(at3s), rem3s);
 
-      // Interval 2: 30 seconds elapsed
-      final at30s = baseStartedAt.add(const Duration(seconds: 30));
-      final rem30s = attempt.remainingAt(at30s);
-      expect(rem30s.inSeconds, 1800 - 30);
-      expect(attempt.deadline.difference(at30s), rem30s);
+        // Interval 2: 30 seconds elapsed
+        final at30s = baseStartedAt.add(const Duration(seconds: 30));
+        final rem30s = attempt.remainingAt(at30s);
+        expect(rem30s.inSeconds, 1800 - 30);
+        expect(attempt.deadline.difference(at30s), rem30s);
 
-      // Interval 3: 2 minutes (120 seconds) elapsed
-      final at2m = baseStartedAt.add(const Duration(minutes: 2));
-      final rem2m = attempt.remainingAt(at2m);
-      expect(rem2m.inSeconds, 1800 - 120);
-      expect(attempt.deadline.difference(at2m), rem2m);
+        // Interval 3: 2 minutes (120 seconds) elapsed
+        final at2m = baseStartedAt.add(const Duration(minutes: 2));
+        final rem2m = attempt.remainingAt(at2m);
+        expect(rem2m.inSeconds, 1800 - 120);
+        expect(attempt.deadline.difference(at2m), rem2m);
 
-      // Interval 4: Background suspension spanning past the deadline (e.g. 35 minutes)
-      final pastDeadline = baseStartedAt.add(const Duration(minutes: 35));
-      final remExpired = attempt.remainingAt(pastDeadline);
-      expect(remExpired, Duration.zero);
-    });
+        // Interval 4: Background suspension spanning past the deadline (e.g. 35 minutes)
+        final pastDeadline = baseStartedAt.add(const Duration(minutes: 35));
+        final remExpired = attempt.remainingAt(pastDeadline);
+        expect(remExpired, Duration.zero);
+      },
+    );
 
-    testWidgets('timer countdown auto-submits on expiry without user intervention', (tester) async {
+    testWidgets('timer finalizes on expiry without late submit', (
+      tester,
+    ) async {
       final startTime = DateTime.utc(2026, 11, 6, 8, 0, 0);
       var currentTime = startTime;
 
@@ -164,8 +169,9 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
 
-      // Auto-submit was triggered upon expiry
-      expect(repo.submitCalls, 1);
+      // Server finalization, not a late submit with client answers.
+      expect(repo.finalizeCalls, 1);
+      expect(repo.submitCalls, 0);
     });
   });
 }
@@ -174,7 +180,11 @@ class _ExpiringMockRepository implements MockTestRepository {
   _ExpiringMockRepository({required this.attempt});
 
   final LiveMockTestAttempt attempt;
+
+  @override
+  Future<LiveMockTestAttempt?> loadActive(int mockTestId) async => null;
   int submitCalls = 0;
+  int finalizeCalls = 0;
 
   @override
   Future<List<LiveMockTestSummary>> loadTestsByLevel(int jlptLevelId) async {
@@ -211,9 +221,32 @@ class _ExpiringMockRepository implements MockTestRepository {
   }
 
   @override
-  Future<LiveMockTestResult> loadResult(int attemptId) async {
-    return submit(attemptId, const []);
+  Future<void> saveAnswer(
+    int attemptId,
+    MockTestAnswerSubmission answer,
+  ) async {}
+
+  @override
+  Future<LiveMockTestResult> finalizeExpired(int attemptId) async {
+    finalizeCalls += 1;
+    return _result(attemptId);
   }
+
+  @override
+  Future<LiveMockTestResult> loadResult(int attemptId) async {
+    return _result(attemptId);
+  }
+
+  LiveMockTestResult _result(int attemptId) => LiveMockTestResult(
+    attemptId: attemptId,
+    mockTestId: 731,
+    status: MockTestAttemptStatus.completed,
+    startedAt: attempt.startedAt,
+    submittedAt: DateTime.utc(2026, 11, 6, 8, 1, 0),
+    totalScore: 100,
+    wrongQuestionIds: const <int>[],
+    sections: const <LiveMockTestSectionResult>[],
+  );
 
   @override
   Future<LiveMockTestDetailedResult> loadDetailedResult(int attemptId) async {

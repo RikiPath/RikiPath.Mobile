@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 
 class ProfileAvatar extends StatelessWidget {
@@ -134,26 +135,48 @@ class ProfileHeroCard extends StatelessWidget {
                         ),
                       ),
                       Positioned(
-                        right: -4,
-                        bottom: -4,
-                        child: Material(
-                          color: AppColors.brandPrimary,
-                          shape: const CircleBorder(),
-                          child: InkWell(
-                            key: const ValueKey<String>(
-                              'profile_hero_avatar_edit',
-                            ),
-                            customBorder: const CircleBorder(),
-                            onTap: onEdit,
-                            child: Semantics(
-                              button: true,
-                              label: l10n.editAvatar,
-                              child: const SizedBox.square(
+                        right: -7,
+                        bottom: -7,
+                        child: Semantics(
+                          button: true,
+                          label: l10n.editAvatar,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              key: const ValueKey<String>(
+                                'profile_hero_avatar_edit',
+                              ),
+                              customBorder: const CircleBorder(),
+                              onTap: onEdit,
+                              child: SizedBox.square(
                                 dimension: 44,
-                                child: Icon(
-                                  Icons.photo_camera_outlined,
-                                  size: 18,
-                                  color: AppColors.surface,
+                                child: Center(
+                                  child: Container(
+                                    width: 26,
+                                    height: 26,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.brandPrimary,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: AppColors.surface,
+                                        width: 2,
+                                      ),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Color(0x33000000),
+                                          blurRadius: 3,
+                                          offset: Offset(0, 1.5),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.photo_camera_outlined,
+                                        size: 13,
+                                        color: AppColors.surface,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -331,6 +354,8 @@ class ProfileActionTile extends StatefulWidget {
     required this.subtitle,
     required this.onTap,
     this.icon3d,
+    this.colorfulIcon,
+    this.assetIcon,
     this.emphasized = false,
     this.destructive = false,
     super.key,
@@ -338,6 +363,8 @@ class ProfileActionTile extends StatefulWidget {
 
   final IconData icon;
   final Sakura3DIconType? icon3d;
+  final SakuraColorfulIconType? colorfulIcon;
+  final String? assetIcon;
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
@@ -393,7 +420,33 @@ class _ProfileActionTileState extends State<ProfileActionTile> {
               ),
               child: Row(
                 children: [
-                  if (widget.icon3d != null)
+                  if (widget.assetIcon != null)
+                    SizedBox.square(
+                      dimension: 42,
+                      child: Center(
+                        child: Image.asset(
+                          widget.assetIcon!,
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
+                        ),
+                      ),
+                    )
+                  else if (widget.colorfulIcon != null)
+                    SizedBox.square(
+                      dimension: 42,
+                      child: Center(
+                        child: SakuraColorfulIcon(
+                          type: widget.colorfulIcon!,
+                          size: 34,
+                          useEmoji:
+                              widget.colorfulIcon !=
+                              SakuraColorfulIconType.logout,
+                        ),
+                      ),
+                    )
+                  else if (widget.icon3d != null)
                     Sakura3DIcon(
                       type: widget.icon3d!,
                       size: 42,
@@ -426,7 +479,7 @@ class _ProfileActionTileState extends State<ProfileActionTile> {
                         const SizedBox(height: 2),
                         Text(
                           widget.subtitle,
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.metadata,
                         ),

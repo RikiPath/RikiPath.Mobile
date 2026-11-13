@@ -16,6 +16,7 @@ class SakuraCalendarHeader extends StatelessWidget {
     this.onPrevious,
     this.onNext,
     this.onSearchPressed,
+    this.onBackPressed,
   });
 
   final DateTime selectedDate;
@@ -27,6 +28,7 @@ class SakuraCalendarHeader extends StatelessWidget {
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
   final VoidCallback? onSearchPressed;
+  final VoidCallback? onBackPressed;
 
   String _formatMonthYear(DateTime dt) {
     return currentViewMode == SakuraCalendarViewMode.year
@@ -74,8 +76,8 @@ class SakuraCalendarHeader extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space2,
-        vertical: AppSpacing.space1,
+        horizontal: AppSpacing.space3,
+        vertical: AppSpacing.space2,
       ),
       decoration: const BoxDecoration(
         color: AppColors.background,
@@ -86,96 +88,113 @@ class SakuraCalendarHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              // 1. Hamburger Menu Button
-              IconButton(
-                key: const Key('calendar_menu_button'),
-                icon: const Icon(Icons.menu, color: AppColors.textPrimary),
-                tooltip: 'Mở danh mục lịch',
-                onPressed: onToggleDrawer,
-                padding: const EdgeInsets.all(AppSpacing.space2),
-                constraints: const BoxConstraints(),
-              ),
-
-              const SizedBox(width: AppSpacing.space1),
-
-              // 2. Month & Year Title with dropdown arrow
-              Flexible(
-                child: Tooltip(
-                  message: 'Chọn tháng và năm',
-                  child: InkWell(
-                    key: const Key('calendar_month_picker_button'),
-                    onTap: () => _pickMonthYear(context),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.space1,
-                        vertical: AppSpacing.space1,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              _formatMonthYear(selectedDate),
-                              style: AppTypography.cardTitle.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 2),
-                          const Icon(
-                            Icons.arrow_drop_down,
-                            size: 18,
-                            color: AppColors.textSecondary,
-                          ),
-                        ],
-                      ),
-                    ),
+              // 1. Left Back Button (38x38 rounded container)
+              InkWell(
+                key: const Key('calendar_back_button'),
+                onTap: onBackPressed ?? () => Navigator.of(context).maybePop(),
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: const Icon(
+                    Icons.chevron_left,
+                    color: AppColors.primary,
+                    size: 22,
                   ),
                 ),
               ),
 
-              const SizedBox(width: AppSpacing.space1),
+              const SizedBox(width: AppSpacing.space2),
 
-              // 3. Jump to Today shortcut button
-              IconButton(
-                key: const Key('calendar_today_button'),
-                icon: Stack(
-                  alignment: Alignment.center,
+              // 2. Month & Year Title with dropdown arrow + Today quick-jump
+              Expanded(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.calendar_today,
-                      size: 20,
-                      color: isTodaySelected
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
-                    ),
-                    Positioned(
-                      top: 6,
-                      child: Text(
-                        '${today.day}',
-                        style: TextStyle(
-                          fontSize: 8.5,
-                          fontWeight: FontWeight.w800,
-                          color: isTodaySelected
-                              ? AppColors.primary
-                              : AppColors.textSecondary,
+                    Flexible(
+                      child: Tooltip(
+                        message: 'Chọn tháng và năm',
+                        child: InkWell(
+                          key: const Key('calendar_month_picker_button'),
+                          onTap: () => _pickMonthYear(context),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 4,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    _formatMonthYear(selectedDate),
+                                    style: AppTypography.cardTitle.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textPrimary,
+                                      fontSize: 16.5,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                const Icon(
+                                  Icons.arrow_drop_down,
+                                  size: 18,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
+                    const SizedBox(width: 2),
+                    // Quick Jump to Today Button
+                    IconButton(
+                      key: const Key('calendar_today_button'),
+                      icon: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            size: 18,
+                            color: isTodaySelected
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                          ),
+                          Positioned(
+                            top: 5,
+                            child: Text(
+                              '${today.day}',
+                              style: TextStyle(
+                                fontSize: 7.5,
+                                fontWeight: FontWeight.w800,
+                                color: isTodaySelected
+                                    ? AppColors.primary
+                                    : AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      tooltip: 'Về ngày hôm nay',
+                      onPressed: onTodayPressed,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                    ),
                   ],
                 ),
-                tooltip: 'Về ngày hôm nay',
-                onPressed: onTodayPressed,
-                padding: const EdgeInsets.all(AppSpacing.space2),
-                constraints: const BoxConstraints(),
               ),
 
               const SizedBox(width: AppSpacing.space2),
 
-              // 4. View Mode Selector Dropdown / Pill
+              // 3. View Mode Selector Dropdown Pill
               PopupMenuButton<SakuraCalendarViewMode>(
                 key: const Key('calendar_view_mode_menu'),
                 initialValue: currentViewMode,
@@ -185,13 +204,13 @@ class SakuraCalendarHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Container(
+                  height: 38,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.space2,
-                    vertical: AppSpacing.space1,
+                    horizontal: 10,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(19),
                     border: Border.all(color: AppColors.border),
                   ),
                   child: Row(
@@ -251,38 +270,107 @@ class SakuraCalendarHeader extends StatelessWidget {
                   }).toList();
                 },
               ),
+
+              const SizedBox(width: AppSpacing.space2),
+
+              // 4. Hamburger Menu Button (Right side, opens endDrawer)
+              InkWell(
+                key: const Key('calendar_menu_button'),
+                onTap: onToggleDrawer,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: const Icon(
+                    Icons.menu,
+                    color: AppColors.textPrimary,
+                    size: 20,
+                  ),
+                ),
+              ),
             ],
           ),
           if (onPrevious != null && onNext != null)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  key: const Key('calendar_previous_button'),
-                  tooltip: 'Khoảng thời gian trước',
-                  onPressed: onPrevious,
-                  icon: const Icon(Icons.chevron_left),
-                ),
-                Text(
-                  currentViewMode == SakuraCalendarViewMode.year
-                      ? 'Tổng quan 12 tháng'
-                      : '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
-                  style: AppTypography.caption,
-                ),
-                if (onSearchPressed != null)
-                  IconButton(
-                    key: const Key('calendar_search_button'),
-                    tooltip: 'Tìm sự kiện',
-                    onPressed: onSearchPressed,
-                    icon: const Icon(Icons.search, size: 20),
+            Container(
+              margin: const EdgeInsets.only(top: 8, bottom: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
                   ),
-                IconButton(
-                  key: const Key('calendar_next_button'),
-                  tooltip: 'Khoảng thời gian sau',
-                  onPressed: onNext,
-                  icon: const Icon(Icons.chevron_right),
-                ),
-              ],
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    key: const Key('calendar_previous_button'),
+                    tooltip: 'Khoảng thời gian trước',
+                    onPressed: onPrevious,
+                    icon: const Icon(
+                      Icons.chevron_left,
+                      size: 22,
+                      color: AppColors.textPrimary,
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(),
+                  ),
+                  Flexible(
+                    child: Text(
+                      currentViewMode == SakuraCalendarViewMode.year
+                          ? 'Tổng quan 12 tháng'
+                          : '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                      style: AppTypography.caption.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        color: AppColors.textPrimary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (onSearchPressed != null)
+                        IconButton(
+                          key: const Key('calendar_search_button'),
+                          tooltip: 'Tìm sự kiện',
+                          onPressed: onSearchPressed,
+                          icon: const Icon(
+                            Icons.search,
+                            size: 20,
+                            color: AppColors.textPrimary,
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          constraints: const BoxConstraints(),
+                        ),
+                      IconButton(
+                        key: const Key('calendar_next_button'),
+                        tooltip: 'Khoảng thời gian sau',
+                        onPressed: onNext,
+                        icon: const Icon(
+                          Icons.chevron_right,
+                          size: 22,
+                          color: AppColors.textPrimary,
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
         ],
       ),

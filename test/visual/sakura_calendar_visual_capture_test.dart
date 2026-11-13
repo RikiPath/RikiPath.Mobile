@@ -190,7 +190,7 @@ void main() {
       fileName: 'mobile_phase1_6_three_day_view',
       child: SakuraCalendarShell(
         roleName: 'Học viên RikiPath',
-        initialMode: SakuraCalendarViewMode.threeDay,
+        initialMode: SakuraCalendarViewMode.day,
         events: sampleEvents,
         fabLabel: '+ Đặt lịch cố vấn',
         onFabPressed: () {},
@@ -274,7 +274,7 @@ void main() {
       fileName: 'mobile_phase1_6_dense_overlapping_calendar',
       child: SakuraCalendarShell(
         roleName: 'Học viên RikiPath',
-        initialMode: SakuraCalendarViewMode.threeDay,
+        initialMode: SakuraCalendarViewMode.day,
         events: overlappingEvents,
         fabLabel: '+ Đặt lịch cố vấn',
         onFabPressed: () {},

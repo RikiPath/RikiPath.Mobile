@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_colors.dart';
 import 'package:rikipath_mobile/app/theme/app_spacing.dart';
 import 'package:rikipath_mobile/app/theme/app_typography.dart';
-import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_calendar_empty_state.dart';
 
@@ -37,8 +36,8 @@ class SakuraAgendaView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (events.isEmpty) {
       return SakuraCalendarEmptyState(
-        title: 'Chưa có lịch hẹn nào',
-        message: 'Bạn chưa có buổi tư vấn hoặc khung giờ học nào được lên lịch.',
+        title: 'Chưa có hoạt động nào',
+        message: 'Chưa có hoạt động nào được lên lịch trong khoảng thời gian này.',
         actionLabel: onAddEventAction != null ? 'Đặt lịch ngay' : null,
         onAction: onAddEventAction,
       );
@@ -55,192 +54,239 @@ class SakuraAgendaView extends StatelessWidget {
 
     final sortedDates = groupedEvents.keys.toList()..sort();
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space4,
-        vertical: AppSpacing.space3,
-      ),
-      itemCount: sortedDates.length,
-      itemBuilder: (context, index) {
-        final date = sortedDates[index];
-        final dayEvents = groupedEvents[date]!;
-        final isToday = _isSameDay(date, today);
+    return Container(
+      color: Colors.white,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.space4,
+          vertical: AppSpacing.space3,
+        ),
+        itemCount: sortedDates.length,
+        itemBuilder: (context, index) {
+          final date = sortedDates[index];
+          final dayEvents = groupedEvents[date]!;
+          final isToday = _isSameDay(date, today);
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.space4),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Date Badge Column (Google Calendar style)
-              SizedBox(
-                width: 52,
-                child: Column(
-                  children: [
-                    Text(
-                      _formatWeekday(date),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: isToday
-                            ? AppColors.primary
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Container(
-                      width: 32,
-                      height: 32,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isToday ? AppColors.primary : Colors.transparent,
-                        shape: BoxShape.circle,
-                        border: isToday
-                            ? null
-                            : Border.all(color: AppColors.border, width: 1.2),
-                      ),
-                      child: Text(
-                        '${date.day}',
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.space4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Date Badge Column (Google Calendar style)
+                SizedBox(
+                  width: 52,
+                  child: Column(
+                    children: [
+                      Text(
+                        _formatWeekday(date),
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: isToday ? Colors.white : AppColors.textPrimary,
+                          color: isToday
+                              ? AppColors.primary
+                              : AppColors.textSecondary,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Container(
+                        width: 32,
+                        height: 32,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isToday ? AppColors.primary : Colors.white,
+                          shape: BoxShape.circle,
+                          border: isToday
+                              ? null
+                              : Border.all(color: AppColors.border, width: 1.2),
+                        ),
+                        child: Text(
+                          '${date.day}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: isToday ? Colors.white : AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(width: AppSpacing.space2),
+                const SizedBox(width: AppSpacing.space2),
 
-              // Events list for this day
-              Expanded(
-                child: Column(
-                  children: dayEvents.map((ev) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.space2),
-                      child: Material(
-                        color: ev.backgroundColor,
-                        borderRadius: BorderRadius.circular(14),
-                        child: InkWell(
-                          onTap: () => onSelectEvent(ev),
+                // Events list for this day
+                Expanded(
+                  child: Column(
+                    children: dayEvents.map((ev) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.space2),
+                        child: Material(
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(14),
-                          child: Container(
-                            padding: const EdgeInsets.all(AppSpacing.space3),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: ev.borderColor),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 4,
-                                      height: 16,
-                                      decoration: BoxDecoration(
-                                        color: ev.primaryColor,
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                    ),
-                                    const SizedBox(width: AppSpacing.space2),
-                                    Expanded(
-                                      child: Text(
-                                        ev.title,
-                                        style: AppTypography.cardTitle.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ),
-                                    if (ev.statusLabel != null)
+                          elevation: 0,
+                          child: InkWell(
+                            onTap: () => onSelectEvent(ev),
+                            borderRadius: BorderRadius.circular(14),
+                            child: Container(
+                              padding: const EdgeInsets.all(AppSpacing.space3),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: ev.borderColor.withValues(alpha: 0.85),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
                                       Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: AppSpacing.space2,
-                                          vertical: 2,
-                                        ),
+                                        width: 4,
+                                        height: 16,
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                          border: Border.all(
-                                            color: ev.borderColor,
-                                          ),
+                                          color: ev.primaryColor,
+                                          borderRadius: BorderRadius.circular(2),
                                         ),
+                                      ),
+                                      const SizedBox(width: AppSpacing.space2),
+                                      Expanded(
                                         child: Text(
-                                          ev.statusLabel!,
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w600,
-                                            color: ev.primaryColor,
+                                          ev.title,
+                                          style: AppTypography.cardTitle.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
                                           ),
                                         ),
                                       ),
-                                  ],
-                                ),
-                                const SizedBox(height: AppSpacing.space2),
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.access_time,
-                                      size: 14,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        '${_formatTime(ev.startTime)} – ${_formatTime(ev.endTime)} (${ev.durationMinutes} phút)',
-                                        style: AppTypography.bodySmall.copyWith(
-                                          color: AppColors.textSecondary,
-                                          fontWeight: FontWeight.w500,
+                                      if (ev.statusLabel != null)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 3.5,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: ev.statusBadgeBgColor,
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                            border: Border.all(
+                                              color: ev.statusBadgeBorderColor,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              if (ev.statusBadgeIcon != null) ...[
+                                                Icon(
+                                                  ev.statusBadgeIcon,
+                                                  size: 11,
+                                                  color: ev.statusBadgeTextColor,
+                                                ),
+                                                const SizedBox(width: 3.5),
+                                              ],
+                                              Text(
+                                                ev.statusLabel!,
+                                                style: TextStyle(
+                                                  fontSize: 10.5,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: ev.statusBadgeTextColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    if (ev.jlptLevel != null) ...[
-                                      const SizedBox(width: 6),
-                                      JlptBadge(JlptLevel.tryParse(ev.jlptLevel?.replaceAll('JLPT ', '') ?? 'N3') ?? JlptLevel.n3),
                                     ],
-                                  ],
-                                ),
-                                if (ev.participantName != null) ...[
-                                  const SizedBox(height: AppSpacing.space1),
+                                  ),
+                                  const SizedBox(height: AppSpacing.space2),
                                   Row(
                                     children: [
                                       const Icon(
-                                        Icons.person_outline,
+                                        Icons.access_time,
                                         size: 14,
                                         color: AppColors.textSecondary,
                                       ),
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
-                                          '${ev.participantRole ?? "Người tham gia"}: ${ev.participantName}',
-                                          style: AppTypography.caption.copyWith(
+                                          '${_formatTime(ev.startTime)} – ${_formatTime(ev.endTime)} (${ev.durationMinutes} phút)',
+                                          style: AppTypography.bodySmall.copyWith(
                                             color: AppColors.textSecondary,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
+                                      if (ev.jlptLevel != null && ev.jlptLevel!.isNotEmpty) ...[
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: ev.levelChipBgColor,
+                                            borderRadius: BorderRadius.circular(4),
+                                            border: Border.all(
+                                              color: ev.levelChipBorderColor,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            ev.jlptLevel!,
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                              color: ev.levelChipTextColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ],
                                   ),
+                                  if (ev.participantName != null) ...[
+                                    const SizedBox(height: AppSpacing.space1),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.person_outline,
+                                          size: 14,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            '${ev.participantRole ?? "Người tham gia"}: ${ev.participantName}',
+                                            style: AppTypography.caption.copyWith(
+                                              color: AppColors.textSecondary,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

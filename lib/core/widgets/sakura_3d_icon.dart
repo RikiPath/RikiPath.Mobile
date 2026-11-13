@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 
-/// Enumeration of all 16 official RikiPath Premium 3D Realistic App Icons.
+/// Tập hợp 21 biểu tượng 3D chính thức của RikiPath.
 ///
-/// Each icon maps to a real 3D rendered raster asset in `assets/images/icons_3d/`
-/// with transparent background, studio lighting, and Sakura palette harmony.
+/// Mỗi biểu tượng dùng một ảnh trong `assets/images/icons_3d/`, có nền trong suốt
+/// và màu sắc hài hòa với giao diện Sakura.
 enum Sakura3DIconType {
   streak(
     assetPath: 'assets/images/icons_3d/streak_flame.webp',
@@ -27,9 +27,19 @@ enum Sakura3DIconType {
     defaultLabel: 'Vocabulary',
   ),
   kanji(
+    assetPath: 'assets/images/icons_3d/kanji_tile.webp',
+    fallbackIcon: Icons.translate_rounded,
+    defaultLabel: 'Kanji',
+  ),
+  brush(
     assetPath: 'assets/images/icons_3d/kanji_brush.webp',
     fallbackIcon: Icons.brush_rounded,
-    defaultLabel: 'Kanji',
+    defaultLabel: 'Calligraphy Brush',
+  ),
+  essay(
+    assetPath: 'assets/images/icons_3d/essay_writing.webp',
+    fallbackIcon: Icons.edit_note_rounded,
+    defaultLabel: 'Essay Writing',
   ),
   flashcards(
     assetPath: 'assets/images/icons_3d/flashcards.webp',
@@ -95,6 +105,11 @@ enum Sakura3DIconType {
     assetPath: 'assets/images/icons_3d/conversation.webp',
     fallbackIcon: Icons.forum_rounded,
     defaultLabel: 'Conversation',
+  ),
+  notification(
+    assetPath: 'assets/images/icons_3d/notification_bell.webp',
+    fallbackIcon: Icons.notifications_rounded,
+    defaultLabel: 'Notification',
   );
 
   const Sakura3DIconType({

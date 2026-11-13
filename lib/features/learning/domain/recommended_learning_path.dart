@@ -66,7 +66,9 @@ class RecommendedLearningPath {
     if (currentIndex >= 0 && currentIndex + 1 < lessons.length) {
       final next = lessons[currentIndex + 1];
       final nextDay = dailySchedules
-          .where((day) => day.lessons.any((item) => item.lessonId == next.lessonId))
+          .where(
+            (day) => day.lessons.any((item) => item.lessonId == next.lessonId),
+          )
           .firstOrNull;
       if (nextDay?.canStart == false &&
           nextDay?.isStarted != true &&

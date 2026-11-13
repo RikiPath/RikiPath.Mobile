@@ -501,9 +501,9 @@
   "notebookEmptyTitle": "単語帳はまだ空です",
   "notebookEmptyMessage": "最初のリストを作成して語彙を保存しましょう。",
   "noMatchingWord": "一致する単語が見つかりません",
-  "collectionHasNoWords": "このリストには単語がありません",
+  "collectionHasNoWords": "単語がまだありません",
   "notebookSearchEmptyMessage": "別のキーワードを試すか、現在の検索をクリアしてください。",
-  "notebookCollectionEmptyMessage": "最初の単語を追加して、このリストで復習を始めましょう。",
+  "notebookCollectionEmptyMessage": "最初の単語を追加して復習を始めましょう。",
   "notebookLoadFailed": "単語帳を読み込めません",
   "checkConnectionShort": "通信環境を確認して再試行してください。",
   "loadingRoadmap": "学習プランを読み込み中",
@@ -914,7 +914,7 @@
   "mockAnswerUnavailable": "データがありません",
   "practiceLoadingTitle": "練習内容を準備しています…",
   "practiceJourneyTitle": "自分のペースで練習",
-  "practiceJourneySubtitle": "復習、JLPT模擬試験、学習の振り返りを一つの流れで進めます。",
+  "practiceJourneySubtitle": "JLPT模擬試験に挑戦し、結果を確認します。",
   "mockSummary": "{level}・{minutes}分・{count}問",
   "@mockSummary": {
     "placeholders": {
@@ -1041,7 +1041,7 @@
   "homeLiveProgressDescription": "RikiPathアカウントから集計したデータです。",
   "homeViewProgress": "進捗を見る",
   "homeAnalyticsUnavailable": "オンライン統計を一時的に読み込めません。",
-  "homeReviewDescription": "現在の学習ペースに合わせて復習しましょう。",
+  "homeReviewDescription": "学習ペースに合わせて復習を進めます。",
   "homeResumeReview": "復習を続ける",
   "homeReviewNow": "今すぐ復習",
   "homePracticeTitle": "模擬練習",
@@ -1116,6 +1116,31 @@
   "learnerMentorAvailabilitySubtitle": "今後30日間の空き時間です。",
   "learnerMentorAvailabilityEmpty": "選択した日に空き時間はありません。",
   "learnerMentorAvailabilityError": "メンターの空き時間を読み込めませんでした。",
+  "mentorFinderTitle": "相談枠を探す",
+  "mentorFinderChooseDate": "ご都合のよい日を選んでください",
+  "mentorFinderPickDate": "カレンダーから日付を選ぶ",
+  "mentorFinderJlptLevel": "JLPTレベル",
+  "mentorFinderChooseLevel": "レベルを選ぶと、対象の相談枠が表示されます。",
+  "mentorFinderNoSlotsTitle": "条件に合う相談枠がありません",
+  "mentorFinderNoSlotsDescription": "別の日付または絞り込み条件をお試しください。",
+  "mentorFinderChooseAnotherDate": "別の日を見る",
+  "mentorFinderViewMyBookings": "自分の予約を見る",
+  "mentorFinderBackToCalendar": "学習カレンダーに戻る",
+  "mentorFinderAvailableSlots": "空き時間 · 90分",
+  "mentorFinderCreditError": "相談回数を読み込めませんでした。もう一度お試しください。",
+  "mentorFinderAvailableTickets": "JLPT {level}：利用可能な回数 {count}回",
+  "mentorFinderNeedCredit": "JLPT {level} の相談を予約するには利用可能な回数が必要です。",
+  "mentorFinderChooseSlot": "時間を選ぶ",
+  "mentorFinderReviewBooking": "予約内容を確認する",
+  "mentorFinderChoosePlan": "相談プランを選ぶ",
+  "mentorFinderNoPlans": "対象の相談プランがありません。プラン一覧を更新してください。",
+  "mentorFinderPlansError": "相談プランを読み込めませんでした。もう一度お試しください。",
+  "mentorFinderPlanSummary": "{count}回 · {days}日間",
+  "@mentorFinderPlanSummary": {"placeholders": {"count": {"type": "int"}, "days": {"type": "int"}}},
+  "mentorFinderTimeAll": "すべての時間",
+  "mentorFinderTimeMorning": "午前",
+  "mentorFinderTimeAfternoon": "午後",
+  "mentorFinderTimeEvening": "夜",
   "learnerMentorSlotTime": "{start}～{end}",
   "@learnerMentorSlotTime": {
     "placeholders": {
@@ -1181,10 +1206,10 @@
   "learnerMentorSelectedSlot": "選択された時間枠",
   "learnerMentorPleaseSelectSlot": "希望する時間枠を選択してください",
   "practiceSpeechTitle": "日本語スピーキング練習",
-  "practiceSpeechDescription": "日本語を話して、リアルタイムの認識結果を確認できます。",
+  "practiceSpeechDescription": "AI音声認識で発音をリアルタイム練習します。",
   "practiceSpeechStatus": "リアルタイム認識",
   "practiceTextScanTitle": "日本語テキストスキャン",
-  "practiceTextScanDescription": "作文の画像から日本語テキストを読み取り、編集できます。",
+  "practiceTextScanDescription": "画像から文章をスキャンして編集します。",
   "practiceTextScanStatus": "画像 → テキスト",
   "speechPracticeTitle": "スピーキング練習",
   "speechPracticeHeading": "音声をテキストに変換",
@@ -1238,7 +1263,7 @@
   "practiceStudioTitle": "Studio Riki",
   "practiceStudioSubtitle": "話す・書く・読み取るインタラクティブな練習ツールです。",
   "practiceWritingTitle": "かな・漢字の書き取り",
-  "practiceWritingDescription": "書き順を確認し、画面に書いて復習記録を保存します。",
+  "practiceWritingDescription": "筆順を確認し、練習の進捗を記録します。",
   "practiceWritingStatus": "インタラクティブ書写",
   "writingTitle": "書き取り練習",
   "writingSubtitle": "文字を選び、正しい書き順と方向で練習しましょう。",
@@ -1598,5 +1623,59 @@
   "heroBannerEveningTitle": "一緒に復習しましょう！",
   "heroBannerEveningSubtitle": "学んだことを定着させましょう。",
   "heroBannerLateNightTitle": "今夜はゆっくり休んでね！",
-  "heroBannerLateNightSubtitle": "明日もまた続けましょう。"
+  "heroBannerLateNightSubtitle": "明日もまた続けましょう。",
+  "mockLibraryTitle": "JLPT模擬試験",
+  "mockLibraryDescription": "レベル別に問題を解き、結果を確認できます。",
+  "mockLibraryAvailableCount": "受験可能な試験：{count}件",
+  "@mockLibraryAvailableCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mockLibraryOpenFailed": "試験を開けませんでした。もう一度お試しください。",
+  "mockLibraryActiveAttempt": "別の試験を選ぶ前に、進行中の試験を終えてください。",
+  "essayWritingTitle": "日本語作文練習",
+  "essayWritingDescription": "文章を書いて評価を受けましょう。",
+  "essayWritingIntro": "日本語で文章を書いてください。採点ボタンを押すまで送信されません。",
+  "essayWritingNoLevel": "作文に利用できるJLPTレベルがありません。",
+  "essayWritingLevelLoadError": "JLPTレベルを読み込めませんでした。再試行",
+  "essayWritingLevelLabel": "JLPTレベル",
+  "essayWritingInputHint": "日本語の文章を入力してください",
+  "essayWritingSubmit": "作文を採点する",
+  "essayWritingSubmitting": "採点中...",
+  "essayWritingSubmitUncertain": "送信結果を確認できませんでした。再送信する前に履歴を確認してください。",
+  "essayWritingSaved": "提出 #{id} を保存しました",
+  "@essayWritingSaved": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "essayWritingNew": "新しい作文を書く",
+  "essayWritingScore": "得点：{score}/100",
+  "@essayWritingScore": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "essayWritingStrengths": "良い点",
+  "essayWritingImprovements": "改善点",
+  "essayWritingCorrections": "修正の提案",
+  "practiceHeroBadge": "がんばろう！",
+  "practiceHeroTitle": "練習の準備はいい？",
+  "practiceHeroSubtitle": "毎日の練習で、一歩ずつ前進。",
+  "profilePlacementSubtitle": "実力を測定し、最適なレベルを提案します。",
+  "profileLogoutSubtitle": "この端末からログアウトします。",
+  "profileMentorApplicationTitle": "メンター登録の申請",
+  "profileMentorApplicationSubtitle": "専門プロフィールの審査を申請します。",
+  "notebookEmptyHeroBadge": "がんばろう！",
+  "notebookEmptyHeroTitle": "単語帳を始めましょう！",
+  "notebookEmptyHeroDescription": "お気に入りの単語や文型を保存しましょう。",
+  "createFirstCollectionAction": "最初のリストを作成",
+  "addFirstWordAction": "最初の単語を追加"
 }

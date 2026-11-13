@@ -7,8 +7,8 @@ import 'package:rikipath_mobile/core/widgets/sakura_mascot.dart';
 class SakuraCalendarEmptyState extends StatelessWidget {
   const SakuraCalendarEmptyState({
     super.key,
-    this.title = 'Không có lịch hẹn nào',
-    this.message = 'Bạn chưa có buổi tư vấn hoặc khung giờ học nào trong khoảng thời gian này.',
+    this.title = 'Chưa có hoạt động nào',
+    this.message = 'Chưa có hoạt động nào trong khoảng thời gian này.',
     this.actionLabel,
     this.onAction,
   });

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/availability_conflicts.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_order_confirmation_sheet.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
@@ -17,12 +21,16 @@ class LearnerMentorAvailabilityScreen extends ConsumerStatefulWidget {
     required this.planId,
     this.subscriptionId,
     this.mentorId,
+    this.initialDate,
+    this.initialAvailabilityId,
     super.key,
   });
 
   final int? planId;
   final int? subscriptionId;
   final int? mentorId;
+  final DateTime? initialDate;
+  final int? initialAvailabilityId;
 
   @override
   ConsumerState<LearnerMentorAvailabilityScreen> createState() =>
@@ -35,18 +43,78 @@ class _LearnerMentorAvailabilityScreenState
   int? _selectedSlotId;
   bool _checkingSlot = false;
   late DateTime _displayedMonth;
+  late DateTime _dateStripStart;
+  String? _selectedJlptLevel;
+  _SlotTimeFilter _timeFilter = _SlotTimeFilter.all;
+
+  Future<void> _pickFinderDate() async {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final last = today.add(const Duration(days: 89));
+    final selectedDate = _selectedDate ?? today;
+    final initial = selectedDate.isBefore(today)
+        ? today
+        : selectedDate.isAfter(last)
+        ? last
+        : selectedDate;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: today,
+      lastDate: last,
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _selectedDate = DateUtils.dateOnly(picked);
+        _selectedSlotId = null;
+        _dateStripStart = _selectedDate!;
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _displayedMonth = DateTime(now.year, now.month);
+    _selectedDate = widget.initialDate == null
+        ? (widget.planId == null ? DateUtils.dateOnly(now) : null)
+        : DateUtils.dateOnly(widget.initialDate!);
+    _selectedSlotId = widget.initialAvailabilityId;
+    final displayedDate = _selectedDate ?? now;
+    _displayedMonth = DateTime(displayedDate.year, displayedDate.month);
+    final stripAnchor = DateUtils.dateOnly(
+      displayedDate,
+    ).subtract(const Duration(days: 2));
+    final today = DateUtils.dateOnly(now);
+    _dateStripStart = stripAnchor.isBefore(today) ? today : stripAnchor;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Nếu có mentorId thì ưu tiên load theo mentorId, ngược lại fallback load toàn bộ
-    final state = widget.mentorId != null
+    final credit = widget.planId == null
+        ? ref.watch(learnerCreditBalanceControllerProvider).value
+        : null;
+    final grantLevels =
+        credit?.activeGrants
+            .where(
+              (grant) =>
+                  grant.availableQuantity > 0 &&
+                  isSupportedConsultationJlptLevel(grant.jlptLevel),
+            )
+            .map((grant) => normalizeConsultationJlptLevel(grant.jlptLevel))
+            .toSet() ??
+        <String>{};
+    final level =
+        _selectedJlptLevel ??
+        (grantLevels.length == 1 ? grantLevels.single : null);
+    final query = (
+      day: _selectedDate ?? DateUtils.dateOnly(DateTime.now()),
+      mentorId: widget.mentorId,
+      jlptLevel: level,
+    );
+    final AsyncValue<List<LearnerMentorAvailability>> state =
+        widget.planId == null
+        ? ref.watch(learnerMentorSlotsForDayProvider(query))
+        : widget.mentorId != null
         ? ref.watch(
             learnerMentorAvailabilityByMentorControllerProvider(
               widget.mentorId,
@@ -58,7 +126,11 @@ class _LearnerMentorAvailabilityScreenState
       key: const Key('learner_mentor_availability_screen'),
       backgroundColor: AppColors.learnerBackground,
       appBar: AppBar(
-        title: const Text('Chọn ngày học'),
+        title: Text(
+          widget.planId == null
+              ? context.l10n.mentorFinderTitle
+              : 'Chọn ngày học',
+        ),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: AppSpacing.space3),
@@ -77,7 +149,9 @@ class _LearnerMentorAvailabilityScreenState
               key: const Key('learner_mentor_availability_error'),
               message: context.l10n.learnerMentorAvailabilityError,
               onRetry: () {
-                if (widget.mentorId != null) {
+                if (widget.planId == null) {
+                  ref.invalidate(learnerMentorSlotsForDayProvider(query));
+                } else if (widget.mentorId != null) {
                   ref
                       .read(
                         learnerMentorAvailabilityByMentorControllerProvider(
@@ -95,11 +169,16 @@ class _LearnerMentorAvailabilityScreenState
               },
             ),
           ),
-          AsyncData(:final value) => _buildContent(value),
+          AsyncData(:final value) =>
+            widget.planId == null
+                ? _buildFinderContent(value, level)
+                : _buildContent(value),
         },
       ),
       bottomNavigationBar: state is AsyncData<List<LearnerMentorAvailability>>
-          ? _buildBottomBar(context, state.value)
+          ? widget.planId == null
+                ? _buildFinderBottomBar(state.value, level)
+                : _buildBottomBar(context, state.value)
           : null,
     );
   }
@@ -208,6 +287,398 @@ class _LearnerMentorAvailabilityScreenState
     );
   }
 
+  Widget _buildFinderContent(
+    List<LearnerMentorAvailability> slots,
+    String? level,
+  ) {
+    final selectedDate = _selectedDate ?? DateUtils.dateOnly(DateTime.now());
+    final now = DateTime.now();
+    final conflicts = AvailabilityConflictView(slots);
+    final available = conflicts.slots
+        .where((slot) {
+          final start = slot.startTime.displayValue;
+          final minutes = slot.endTime.value
+              .difference(slot.startTime.value)
+              .inMinutes;
+          return conflicts.canBook(slot) &&
+              !slot.isBooked &&
+              start.isAfter(now) &&
+              minutes == 90 &&
+              DateUtils.isSameDay(start, selectedDate) &&
+              _timeFilter.includes(start.hour);
+        })
+        .toList(growable: false);
+    final mentors =
+        ref.watch(learnerMentorListControllerProvider).value ??
+        const <BookableMentor>[];
+    final grouped = <int, List<LearnerMentorAvailability>>{};
+    for (final slot in available) {
+      grouped.putIfAbsent(slot.mentorId, () => []).add(slot);
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(
+          learnerMentorSlotsForDayProvider((
+            day: selectedDate,
+            mentorId: widget.mentorId,
+            jlptLevel: level,
+          )),
+        );
+        await ref.read(
+          learnerMentorSlotsForDayProvider((
+            day: selectedDate,
+            mentorId: widget.mentorId,
+            jlptLevel: level,
+          )).future,
+        );
+      },
+      child: ListView(
+        key: const Key('learner_mentor_availability_list'),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
+        children: [
+          Text(
+            context.l10n.mentorFinderChooseDate,
+            style: AppTypography.sectionTitle,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 76,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 14,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final day = _dateStripStart.add(Duration(days: index));
+                      final selected = DateUtils.isSameDay(day, selectedDate);
+                      return ChoiceChip(
+                        key: ValueKey<String>(
+                          'learner_mentor_date_${day.toIso8601String()}',
+                        ),
+                        selected: selected,
+                        selectedColor: AppColors.brandTint,
+                        side: BorderSide(
+                          color: selected
+                              ? AppColors.brandPrimary
+                              : AppColors.border,
+                        ),
+                        label: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              DateFormat.E(
+                                Localizations.localeOf(context).toLanguageTag(),
+                              ).format(day),
+                            ),
+                            Text('${day.day}', style: AppTypography.cardTitle),
+                          ],
+                        ),
+                        onSelected: (_) => setState(() {
+                          _selectedDate = day;
+                          _selectedSlotId = null;
+                        }),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: context.l10n.mentorFinderPickDate,
+                icon: const Icon(Icons.calendar_month_outlined),
+                onPressed: _pickFinderDate,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            context.l10n.mentorFinderJlptLevel,
+            style: AppTypography.cardTitle,
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final option in const ['N5', 'N4', 'N3', 'N2'])
+                ChoiceChip(
+                  key: ValueKey<String>('finder_level_$option'),
+                  label: Text(option),
+                  selected: level == option,
+                  selectedColor: AppColors.brandTint,
+                  onSelected: (_) => setState(() {
+                    _selectedJlptLevel = option;
+                  }),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final filter in _SlotTimeFilter.values) ...[
+                  ChoiceChip(
+                    key: ValueKey<String>('finder_time_${filter.name}'),
+                    label: Text(filter.label(context)),
+                    selected: _timeFilter == filter,
+                    selectedColor: AppColors.brandTint,
+                    onSelected: (_) => setState(() {
+                      _timeFilter = filter;
+                      _selectedSlotId = null;
+                    }),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          if (level == null) Text(context.l10n.mentorFinderChooseLevel),
+          if (level != null && available.isEmpty) ...[
+            MentorEmptyState(
+              key: const Key('learner_mentor_availability_empty'),
+              icon: Icons.event_busy_outlined,
+              title: context.l10n.mentorFinderNoSlotsTitle,
+              description: context.l10n.mentorFinderNoSlotsDescription,
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _pickFinderDate,
+              icon: const Icon(Icons.calendar_month_outlined),
+              label: Text(context.l10n.mentorFinderChooseAnotherDate),
+            ),
+          ],
+          if (level != null)
+            for (final entry in grouped.entries) ...[
+              Builder(
+                builder: (context) {
+                  final profile = mentors
+                      .where((m) => m.id == entry.key)
+                      .firstOrNull;
+                  final name = profile?.name ?? entry.value.first.mentorName;
+                  final avatarUri = safeExternalHttpUri(profile?.avatarUrl);
+                  return RikiCard(
+                    key: ValueKey<String>('finder_mentor_${entry.key}'),
+                    boxShadow: AppShadows.cardSoft,
+                    borderColor: AppColors.border,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: AppColors.brandTint,
+                              foregroundImage: avatarUri == null
+                                  ? null
+                                  : NetworkImage(avatarUri.toString()),
+                              child: Text(
+                                name.isEmpty ? '?' : name.characters.first,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.cardTitle,
+                                  ),
+                                  if (profile?.headline?.trim().isNotEmpty ==
+                                      true)
+                                    Text(
+                                      profile!.headline!,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTypography.bodySmall,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          context.l10n.mentorFinderAvailableSlots,
+                          style: AppTypography.bodySmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final slot in entry.value)
+                              ChoiceChip(
+                                key: ValueKey<String>(
+                                  'learner_mentor_slot_${slot.id}',
+                                ),
+                                label: Text(
+                                  DateFormat.Hm(
+                                    Localizations.localeOf(
+                                      context,
+                                    ).toLanguageTag(),
+                                  ).format(slot.startTime.displayValue),
+                                ),
+                                selected: _selectedSlotId == slot.id,
+                                selectedColor: AppColors.brandTint,
+                                backgroundColor:
+                                    AppColors.featureBlueBackground,
+                                side: BorderSide(
+                                  color: _selectedSlotId == slot.id
+                                      ? AppColors.brandPrimary
+                                      : AppColors.featureBlueBorder,
+                                ),
+                                labelStyle: TextStyle(
+                                  color: _selectedSlotId == slot.id
+                                      ? AppColors.brandPrimary
+                                      : AppColors.featureBlue,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                onSelected: (_) =>
+                                    setState(() => _selectedSlotId = slot.id),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFinderBottomBar(
+    List<LearnerMentorAvailability> slots,
+    String? level,
+  ) {
+    final conflictView = AvailabilityConflictView(slots);
+    final selected = conflictView.slots
+        .where(
+          (slot) =>
+              slot.id == _selectedSlotId &&
+              conflictView.canBook(slot) &&
+              !slot.isBooked &&
+              slot.startTime.displayValue.isAfter(DateTime.now()) &&
+              slot.endTime.value.difference(slot.startTime.value).inMinutes ==
+                  90,
+        )
+        .firstOrNull;
+    final creditState = ref.watch(learnerCreditBalanceControllerProvider);
+    final credit = creditState.value;
+    final availableTickets = level == null
+        ? 0
+        : credit?.availableForLevel(level) ?? 0;
+    return SafeArea(
+      top: false,
+      child: Container(
+        color: AppColors.surface,
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (selected != null)
+              Text(
+                '${selected.mentorName} · ${DateFormat('dd/MM/yyyy HH:mm').format(selected.startTime.displayValue)}–${DateFormat.Hm().format(selected.endTime.displayValue)}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.bodySmall,
+              ),
+            if (creditState.hasError)
+              Text(context.l10n.mentorFinderCreditError),
+            if (credit != null && level != null)
+              Text(
+                availableTickets > 0
+                    ? context.l10n.mentorFinderAvailableTickets(
+                        availableTickets,
+                        level,
+                      )
+                    : context.l10n.mentorFinderNeedCredit(level),
+              ),
+            const SizedBox(height: 8),
+            RikiPrimaryButton(
+              key: const Key('learner_mentor_purchase_button'),
+              label: selected == null
+                  ? context.l10n.mentorFinderChooseSlot
+                  : availableTickets > 0
+                  ? context.l10n.mentorFinderReviewBooking
+                  : context.l10n.mentorFinderChoosePlan,
+              onPressed:
+                  selected == null ||
+                      level == null ||
+                      credit == null ||
+                      _checkingSlot
+                  ? null
+                  : () => availableTickets > 0
+                        ? _openConfirmation(selected, null, jlptLevel: level)
+                        : _choosePlan(selected, level),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _choosePlan(LearnerMentorAvailability slot, String level) async {
+    List<MentorMeetingPlan> plans;
+    try {
+      plans = (await ref.read(learnerMentorPlansControllerProvider.future))
+          .where(
+            (plan) => normalizeConsultationJlptLevel(plan.jlptLevel) == level,
+          )
+          .toList(growable: false);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.mentorFinderPlansError)),
+      );
+      return;
+    }
+    if (!mounted) return;
+    if (plans.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.mentorFinderNoPlans)));
+      ref.invalidate(learnerMentorPlansControllerProvider);
+      return;
+    }
+    final plan = await showModalBottomSheet<MentorMeetingPlan>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            ListTile(title: Text(context.l10n.mentorFinderChoosePlan)),
+            for (final item in plans)
+              ListTile(
+                title: Text(item.name),
+                subtitle: Text(
+                  context.l10n.mentorFinderPlanSummary(
+                    item.meetingSessionCount,
+                    item.durationDays,
+                  ),
+                ),
+                onTap: () => Navigator.of(sheetContext).pop(item),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (plan != null && mounted) {
+      await _openConfirmation(slot, plan, jlptLevel: level);
+    }
+  }
+
   Widget _buildContent(List<LearnerMentorAvailability> allSlots) {
     final conflictView = AvailabilityConflictView(allSlots);
     final availableSlots = conflictView.displaySlots
@@ -223,10 +694,8 @@ class _LearnerMentorAvailabilityScreenState
     }
     dates.sort();
 
-    final activeDate =
-        dates.any((date) => DateUtils.isSameDay(date, _selectedDate))
-        ? _selectedDate
-        : dates.firstOrNull;
+    // Giữ ngày người học chọn từ Lịch học, kể cả khi ngày đó hết chỗ.
+    final activeDate = _selectedDate ?? dates.firstOrNull;
 
     // Cập nhật tháng hiển thị theo ngày có slot đầu tiên nếu chưa chọn tháng
     if (_selectedDate == null && activeDate != null) {
@@ -737,16 +1206,29 @@ class _LearnerMentorAvailabilityScreenState
 
   Future<void> _openConfirmation(
     LearnerMentorAvailability slot,
-    MentorMeetingPlan? plan,
-  ) async {
+    MentorMeetingPlan? plan, {
+    String? jlptLevel,
+  }) async {
     setState(() => _checkingSlot = true);
     try {
+      final selectedDay = slot.startTime.displayValue;
+      final from = DateTime(
+        selectedDay.year,
+        selectedDay.month,
+        selectedDay.day,
+      );
+      final to = DateTime(
+        selectedDay.year,
+        selectedDay.month,
+        selectedDay.day + 1,
+      );
       final fresh = await ref
           .read(learnerMentorRepositoryProvider)
           .loadAvailability(
-            from: DateTime.now().toUtc(),
-            to: DateTime.now().toUtc().add(const Duration(days: 60)),
+            from: from.toUtc(),
+            to: to.toUtc(),
             mentorId: widget.mentorId ?? slot.mentorId,
+            jlptLevel: jlptLevel ?? plan?.jlptLevel,
           );
       if (!mounted) return;
       final view = AvailabilityConflictView(fresh);
@@ -777,15 +1259,111 @@ class _LearnerMentorAvailabilityScreenState
       if (mounted) setState(() => _checkingSlot = false);
     }
     if (!mounted) return;
-    final effectivePlanId = widget.planId ?? plan?.id ?? 1;
-    LearnerMentorOrderConfirmationSheet.show(
+    final effectivePlanId = widget.planId ?? plan?.id;
+    final booking = await LearnerMentorOrderConfirmationSheet.show(
       context,
       planId: effectivePlanId,
       slot: slot,
       plan: plan,
       subscriptionId: widget.subscriptionId,
+      requestedJlptLevel: jlptLevel,
     );
+    if (!mounted) return;
+    ref.invalidate(
+      learnerMentorSlotsForDayProvider((
+        day: _selectedDate ?? DateUtils.dateOnly(DateTime.now()),
+        mentorId: widget.mentorId,
+        jlptLevel: jlptLevel ?? _selectedJlptLevel,
+      )),
+    );
+    ref.invalidate(learnerMentorBookingsControllerProvider);
+    ref.invalidate(learnerCreditBalanceControllerProvider);
+    if (booking != null) {
+      final selectedDay =
+          _selectedDate ?? DateUtils.dateOnly(slot.startTime.displayValue);
+      await showModalBottomSheet<void>(
+        context: context,
+        builder: (sheetContext) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Icon(
+                  Icons.check_circle,
+                  color: AppColors.success,
+                  size: 52,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  context.l10n.learnerMentorBookingSuccess,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.sectionTitle,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${booking.mentorName ?? slot.mentorName} · '
+                  '${DateFormat('dd/MM/yyyy HH:mm').format(slot.startTime.displayValue)}–'
+                  '${DateFormat.Hm().format(slot.endTime.displayValue)}',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  learnerMentorBookingStatusLabel(booking.status, context),
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodySmall.copyWith(
+                    color:
+                        booking.status == MentorMeetingStatus.accepted ||
+                            booking.status == MentorMeetingStatus.assigned
+                        ? AppColors.success
+                        : AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                RikiPrimaryButton(
+                  label: context.l10n.mentorFinderViewMyBookings,
+                  onPressed: () {
+                    Navigator.of(sheetContext).pop();
+                    context.push(AppRoutes.learnerMentorBookings);
+                  },
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.of(sheetContext).pop();
+                    context.go(AppRoutes.calendarOn(selectedDay));
+                  },
+                  child: Text(context.l10n.mentorFinderBackToCalendar),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
   }
+}
+
+enum _SlotTimeFilter {
+  all,
+  morning,
+  afternoon,
+  evening;
+
+  String label(BuildContext context) => switch (this) {
+    _SlotTimeFilter.all => context.l10n.mentorFinderTimeAll,
+    _SlotTimeFilter.morning => context.l10n.mentorFinderTimeMorning,
+    _SlotTimeFilter.afternoon => context.l10n.mentorFinderTimeAfternoon,
+    _SlotTimeFilter.evening => context.l10n.mentorFinderTimeEvening,
+  };
+
+  bool includes(int hour) => switch (this) {
+    _SlotTimeFilter.all => true,
+    _SlotTimeFilter.morning => hour < 12,
+    _SlotTimeFilter.afternoon => hour >= 12 && hour < 18,
+    _SlotTimeFilter.evening => hour >= 18,
+  };
 }
 
 class _WeekdayLabel extends StatelessWidget {

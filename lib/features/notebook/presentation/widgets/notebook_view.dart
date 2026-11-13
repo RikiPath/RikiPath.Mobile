@@ -1,3 +1,4 @@
+import 'package:rikipath_mobile/features/notebook/presentation/widgets/notebook_empty_hero_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
@@ -162,13 +163,6 @@ class _NotebookViewState extends State<NotebookView> {
                     );
                   },
                 ),
-              const SizedBox(height: AppSpacing.space5),
-              SakuraEducationalBanner(
-                tag: context.l10n.notebookEduBannerTag,
-                title: context.l10n.notebookEduBannerTitle,
-                message: context.l10n.notebookEduBannerMessage,
-                mascotPose: SakuraMascotPose.studying,
-              ),
             ],
           ),
         ),
@@ -236,6 +230,8 @@ class _NotebookCollectionViewState extends State<NotebookCollectionView> {
     final isSelected =
         state.selectedCollectionKey == widget.collection.routeKey;
     final canAdd = isSelected && state.canAddManualEntry;
+    final showSearchAndToolbarAdd =
+        isSelected && !state.isLoadingEntries && state.entries.isNotEmpty;
 
     return Column(
       children: [
@@ -255,62 +251,64 @@ class _NotebookCollectionViewState extends State<NotebookCollectionView> {
               AppSpacing.space8,
             ),
             children: [
-              _CollectionSummary(collection: widget.collection),
-              const SizedBox(height: AppSpacing.space4),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      key: const ValueKey<String>('notebook_search_field'),
-                      controller: _searchController,
-                      textInputAction: TextInputAction.search,
-                      onChanged: (value) {
-                        setState(() {});
-                        widget.onSearch(value);
-                      },
-                      decoration: InputDecoration(
-                        hintText: context.l10n.notebookSearchHint,
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: _searchController.text.isEmpty
-                            ? null
-                            : IconButton(
-                                tooltip: context.l10n.clearSearch,
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() {});
-                                  widget.onClearSearch();
-                                },
-                                icon: const Icon(Icons.close),
-                              ),
+              if (showSearchAndToolbarAdd) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        key: const ValueKey<String>('notebook_search_field'),
+                        controller: _searchController,
+                        textInputAction: TextInputAction.search,
+                        onChanged: (value) {
+                          setState(() {});
+                          widget.onSearch(value);
+                        },
+                        decoration: InputDecoration(
+                          hintText: context.l10n.notebookSearchHint,
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon: _searchController.text.isEmpty
+                              ? null
+                              : IconButton(
+                                  tooltip: context.l10n.clearSearch,
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() {});
+                                    widget.onClearSearch();
+                                  },
+                                  icon: const Icon(Icons.close),
+                                ),
+                        ),
                       ),
                     ),
-                  ),
-                  if (canAdd) ...[
-                    const SizedBox(width: AppSpacing.space2),
-                    IconButton.filled(
-                      key: const ValueKey<String>('notebook_add_entry_button'),
-                      tooltip: context.l10n.addNewWord,
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppColors.brandPrimary,
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: AppColors.brandPrimaryDisabled,
-                        disabledForegroundColor: Colors.white,
+                    if (canAdd) ...[
+                      const SizedBox(width: AppSpacing.space2),
+                      IconButton.filled(
+                        key: const ValueKey<String>('notebook_add_entry_button'),
+                        tooltip: context.l10n.addNewWord,
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.brandPrimary,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor:
+                              AppColors.brandPrimaryDisabled,
+                          disabledForegroundColor: Colors.white,
+                        ),
+                        onPressed:
+                            state.isAddingEntry ? null : widget.onAddEntry,
+                        icon: const Icon(Icons.add),
                       ),
-                      onPressed: state.isAddingEntry ? null : widget.onAddEntry,
-                      icon: const Icon(Icons.add),
-                    ),
+                    ],
                   ],
-                ],
-              ),
+                ),
+                const SizedBox(height: AppSpacing.space4),
+              ],
               if (state.mutationError != null) ...[
-                const SizedBox(height: AppSpacing.space3),
                 NotebookInlineError(
                   key: const ValueKey<String>('notebook_mutation_error'),
                   message: state.mutationError!,
                   onDismiss: widget.onDismissMutationError,
                 ),
+                const SizedBox(height: AppSpacing.space3),
               ],
-              const SizedBox(height: AppSpacing.space4),
               if (!isSelected || state.isLoadingEntries)
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -333,12 +331,18 @@ class _NotebookCollectionViewState extends State<NotebookCollectionView> {
                   message: state.entriesError!,
                   onRetry: widget.onRetryEntries,
                 )
-              else if (state.visibleEntries.isEmpty)
-                _EmptyEntries(
-                  hasQuery: state.query.isNotEmpty,
+              else if (state.entries.isEmpty)
+                _CollectionEmptyState(
                   canAddEntry: canAdd,
-                  onClear: widget.onClearSearch,
                   onAddEntry: widget.onAddEntry,
+                )
+              else if (state.visibleEntries.isEmpty)
+                _SearchEmptyView(
+                  onClear: () {
+                    _searchController.clear();
+                    setState(() {});
+                    widget.onClearSearch();
+                  },
                 )
               else ...[
                 if (state.entriesError != null) ...[
@@ -394,6 +398,8 @@ class _CollectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasDescription = collection.description?.trim().isNotEmpty == true;
+
     return Semantics(
       button: true,
       label: context.l10n.openCollection(collection.name),
@@ -403,45 +409,56 @@ class _CollectionCard extends StatelessWidget {
         backgroundColor: AppColors.cardWarmWhite,
         borderColor: AppColors.cardBorderMuted,
         boxShadow: AppShadows.sakuraSubtle,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.space4,
+          vertical: AppSpacing.space3,
+        ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Sakura3DIcon(
-              type: SakuraIconMapper.iconForNotebookCollection(
-                name: collection.name,
-                routeKey: collection.routeKey,
+            SizedBox.square(
+              dimension: 48,
+              child: Center(
+                child: Image.asset(
+                  'assets/images/icons_2d/collection_folder.webp',
+                  width: 44,
+                  height: 44,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                ),
               ),
-              size: 48,
             ),
             const SizedBox(width: AppSpacing.space3),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     collection.name,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.cardTitle,
                   ),
                   const SizedBox(height: AppSpacing.space1),
-                  Text(
-                    collection.description?.trim().isNotEmpty == true
-                        ? collection.description!
-                        : context.l10n.itemCount(collection.entryCount),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.bodySmall,
-                  ),
-                  if (collection.description?.trim().isNotEmpty == true) ...[
-                    const SizedBox(height: AppSpacing.space1),
+                  if (hasDescription) ...[
                     Text(
-                      context.l10n.itemCount(collection.entryCount),
-                      style: AppTypography.metadata.copyWith(
-                        color: AppColors.brandPrimary,
-                        fontWeight: FontWeight.w700,
+                      collection.description!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.learnerTextSecondary,
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.space1),
                   ],
+                  Text(
+                    context.l10n.itemCount(collection.entryCount),
+                    style: AppTypography.metadata.copyWith(
+                      color: AppColors.brandPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -449,49 +466,6 @@ class _CollectionCard extends StatelessWidget {
             const Icon(Icons.chevron_right, color: AppColors.textMuted),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CollectionSummary extends StatelessWidget {
-  const _CollectionSummary({required this.collection});
-
-  final NotebookCollection collection;
-
-  @override
-  Widget build(BuildContext context) {
-    return RikiCard(
-      backgroundColor: AppColors.cardWarmWhite,
-      borderColor: AppColors.cardBorderMuted,
-      boxShadow: AppShadows.sakuraSubtle,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Sakura3DIcon(
-            type: SakuraIconMapper.iconForNotebookCollection(
-              name: collection.name,
-              routeKey: collection.routeKey,
-            ),
-            size: 44,
-          ),
-          const SizedBox(width: AppSpacing.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.itemCount(collection.entryCount),
-                  style: AppTypography.cardTitle,
-                ),
-                if (collection.description?.trim().isNotEmpty == true) ...[
-                  const SizedBox(height: AppSpacing.space1),
-                  Text(collection.description!, style: AppTypography.bodySmall),
-                ],
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -512,26 +486,71 @@ class _OverviewCard extends StatelessWidget {
       backgroundColor: AppColors.cardWarmWhite,
       borderColor: AppColors.cardBorderMuted,
       boxShadow: AppShadows.sakuraSubtle,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space4,
+        vertical: AppSpacing.space3,
+      ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Sakura3DIcon(type: Sakura3DIconType.notebook, size: 48),
           const SizedBox(width: AppSpacing.space3),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   context.l10n.savedItemCount(entryCount),
-                  style: AppTypography.sectionTitle,
+                  style: AppTypography.cardTitle,
                 ),
+                const SizedBox(height: AppSpacing.space1),
                 Text(
                   context.l10n.personalCollectionCount(collectionCount),
-                  style: AppTypography.bodySmall,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.learnerTextSecondary,
+                  ),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class NotebookItem2DIcon extends StatelessWidget {
+  const NotebookItem2DIcon({required this.type, super.key});
+
+  final NotebookContentType type;
+
+  @override
+  Widget build(BuildContext context) {
+    final glyph = switch (type) {
+      NotebookContentType.vocabulary => '📇',
+      NotebookContentType.kanji => '🈯',
+      NotebookContentType.grammar => '📚',
+      NotebookContentType.manual => '📝',
+      NotebookContentType.unknown => '🔖',
+    };
+
+    return Container(
+      width: 44,
+      height: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        border: Border.all(
+          color: const Color(0xFFE5E7EB),
+          width: 0.8,
+        ),
+      ),
+      child: Text(
+        glyph,
+        textScaler: TextScaler.noScaling,
+        style: const TextStyle(fontSize: 22, height: 1),
       ),
     );
   }
@@ -559,25 +578,17 @@ class NotebookEntryCard extends StatelessWidget {
       child: RikiCard(
         key: ValueKey<String>('notebook_entry_${entry.routeKey}'),
         onTap: isRemoving ? null : onOpen,
-        borderColor: AppColors.learnerOutline,
+        backgroundColor: AppColors.cardWarmWhite,
+        borderColor: AppColors.cardBorderMuted,
+        boxShadow: AppShadows.sakuraSubtle,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.space4,
+          vertical: AppSpacing.space3,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColors.brandTint,
-                borderRadius: BorderRadius.circular(AppRadius.input),
-              ),
-              child: Text(
-                entry.term.characters.firstOrNull ?? '文',
-                style: AppTypography.cardTitle.copyWith(
-                  color: AppColors.brandPrimary,
-                ),
-              ),
-            ),
+            NotebookItem2DIcon(type: entry.contentType),
             const SizedBox(width: AppSpacing.space3),
             Expanded(
               child: Column(
@@ -637,7 +648,7 @@ class NotebookEntryCard extends StatelessWidget {
                 key: ValueKey<String>('notebook_remove_${entry.routeKey}'),
                 tooltip: context.l10n.removeFromNotebook,
                 onPressed: onRemove,
-                icon: const Icon(Icons.delete_outline),
+                icon: const Icon(Icons.delete_outline, color: AppColors.textMuted),
               ),
             const Icon(Icons.chevron_right, color: AppColors.textMuted),
           ],
@@ -679,62 +690,128 @@ class _EmptyNotebook extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RikiEmptyState(
+    return ListView(
       key: const ValueKey<String>('notebook_empty_view'),
-      icon: Icons.collections_bookmark_outlined,
-      icon3d: Sakura3DIconType.notebook,
-      title: context.l10n.notebookEmptyTitle,
-      message: context.l10n.notebookEmptyMessage,
-      actionLabel: context.l10n.createCollectionAction,
-      actionIcon: Icons.add,
-      onAction: onCreateCollection,
-      actionKey: const ValueKey<String>(
-        'notebook_empty_create_collection_button',
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.space4,
+        AppSpacing.space3,
+        AppSpacing.space4,
+        AppSpacing.space8,
+      ),
+      children: [
+        const SakuraNotebookEmptyBanner(
+          key: ValueKey<String>('notebook_empty_hero_banner'),
+        ),
+        const SizedBox(height: AppSpacing.space5),
+        Text(
+          context.l10n.yourCollections,
+          style: AppTypography.sectionTitle,
+        ),
+        const SizedBox(height: AppSpacing.space3),
+        SizedBox(
+          width: double.infinity,
+          child: RikiPrimaryButton(
+            key: const ValueKey<String>(
+              'notebook_empty_create_collection_button',
+            ),
+            label: context.l10n.createFirstCollectionAction,
+            leadingIcon: Icons.add,
+            onPressed: onCreateCollection,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CollectionEmptyState extends StatelessWidget {
+  const _CollectionEmptyState({
+    required this.canAddEntry,
+    required this.onAddEntry,
+  });
+
+  final bool canAddEntry;
+  final VoidCallback onAddEntry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space4,
+        vertical: AppSpacing.space8,
+      ),
+      child: Center(
+        child: Column(
+          key: const ValueKey<String>('notebook_entries_empty_view'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0xFFFFF0F3),
+                    Color(0xFFFFE4E9),
+                  ],
+                ),
+              ),
+              child: const Center(
+                child: Sakura3DIcon(
+                  type: Sakura3DIconType.flashcards,
+                  size: 58,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space4),
+            Text(
+              context.l10n.collectionHasNoWords,
+              style: AppTypography.cardTitle.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.space2),
+            Text(
+              context.l10n.notebookCollectionEmptyMessage,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.learnerTextSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (canAddEntry) ...[
+              const SizedBox(height: AppSpacing.space5),
+              RikiPrimaryButton(
+                key: const ValueKey<String>('notebook_empty_add_button'),
+                label: context.l10n.addFirstWordAction,
+                leadingIcon: Icons.add,
+                onPressed: onAddEntry,
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class _EmptyEntries extends StatelessWidget {
-  const _EmptyEntries({
-    required this.hasQuery,
-    required this.canAddEntry,
-    required this.onClear,
-    required this.onAddEntry,
-  });
+class _SearchEmptyView extends StatelessWidget {
+  const _SearchEmptyView({required this.onClear});
 
-  final bool hasQuery;
-  final bool canAddEntry;
   final VoidCallback onClear;
-  final VoidCallback onAddEntry;
 
   @override
   Widget build(BuildContext context) {
-    final showAction = hasQuery || canAddEntry;
     return RikiEmptyState(
-      key: ValueKey<String>(
-        hasQuery ? 'notebook_search_empty_view' : 'notebook_entries_empty_view',
-      ),
-      icon: hasQuery ? Icons.search_off_outlined : Icons.bookmark_border,
-      icon3d: hasQuery ? null : Sakura3DIconType.notebook,
-      title: hasQuery
-          ? context.l10n.noMatchingWord
-          : context.l10n.collectionHasNoWords,
-      message: hasQuery
-          ? context.l10n.notebookSearchEmptyMessage
-          : context.l10n.notebookCollectionEmptyMessage,
-      actionLabel: showAction
-          ? (hasQuery ? context.l10n.clearSearch : context.l10n.addNewWord)
-          : null,
-      actionIcon: hasQuery ? null : Icons.add,
-      onAction: showAction ? (hasQuery ? onClear : onAddEntry) : null,
-      actionKey: showAction
-          ? ValueKey<String>(
-              hasQuery
-                  ? 'notebook_clear_search_button'
-                  : 'notebook_empty_add_button',
-            )
-          : null,
+      key: const ValueKey<String>('notebook_search_empty_view'),
+      icon: Icons.search_off_outlined,
+      title: context.l10n.noMatchingWord,
+      message: context.l10n.notebookSearchEmptyMessage,
+      actionLabel: context.l10n.clearSearch,
+      onAction: onClear,
+      actionKey: const ValueKey<String>('notebook_clear_search_button'),
       compact: true,
     );
   }

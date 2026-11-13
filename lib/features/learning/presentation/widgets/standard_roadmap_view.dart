@@ -6,6 +6,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/recommended_learning_path.dart';
 import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/sakura_learning_journey_map.dart';
 
 class StandardRoadmapView extends StatelessWidget {
   const StandardRoadmapView({
@@ -18,6 +19,8 @@ class StandardRoadmapView extends StatelessWidget {
     required this.aiPathError,
     required this.aiPath,
     required this.onGenerateAiPath,
+    this.showStandard = true,
+    this.hasPendingPreview = false,
     this.onUpdateAiDay,
     this.updatingAiDay,
     this.aiDayError,
@@ -33,6 +36,8 @@ class StandardRoadmapView extends StatelessWidget {
   final String? aiPathError;
   final RecommendedLearningPath? aiPath;
   final VoidCallback onGenerateAiPath;
+  final bool showStandard;
+  final bool hasPendingPreview;
   final Future<void> Function(int day, {required bool complete})? onUpdateAiDay;
   final int? updatingAiDay;
   final String? aiDayError;
@@ -40,6 +45,11 @@ class StandardRoadmapView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final progressFraction = roadmap.totalLessons == 0
+        ? 0.0
+        : (roadmap.completedLessons / roadmap.totalLessons).clamp(0.0, 1.0);
+    final progressPercent = (progressFraction * 100).round();
+
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
@@ -47,56 +57,134 @@ class StandardRoadmapView extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.space4,
-          AppSpacing.space3,
+          0,
           AppSpacing.space4,
-          AppSpacing.space8,
+          AppSpacing.space4,
         ),
         children: [
-          RikiCard(
-            key: const ValueKey<String>('standard_roadmap_summary'),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  l10n.standardRoadmapTitle,
-                  style: AppTypography.sectionTitle,
-                ),
-                const SizedBox(height: AppSpacing.space2),
-                Wrap(
-                  spacing: AppSpacing.space2,
-                  runSpacing: AppSpacing.space2,
-                  children: [
-                    Chip(label: Text(roadmap.currentStudyLevelName)),
-                    if (roadmap.targetJlptLevelName case final target?)
-                      Chip(
-                        label: Text(
-                          '${l10n.onboardingTargetJlptTitle}: $target',
+          // 1. Premium Summary Card
+          if (showStandard)
+            RikiCard(
+              key: const ValueKey<String>('standard_roadmap_summary'),
+              backgroundColor: AppColors.cardWarmWhite,
+              borderColor: AppColors.borderSubtlePink,
+              boxShadow: AppShadows.sakuraSubtle,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.standardRoadmapTitle,
+                          style: AppTypography.sectionTitle.copyWith(
+                            fontSize: 17,
+                          ),
                         ),
                       ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.space2),
-                Text(
-                  l10n.standardRoadmapProgress(
-                    roadmap.completedLessons,
-                    roadmap.totalLessons,
+                      const SizedBox(width: AppSpacing.space2),
+                      Text(
+                        '$progressPercent%',
+                        style: AppTypography.pageTitle.copyWith(
+                          color: SakuraJourneyColors.primarySakura,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
                   ),
-                  style: AppTypography.bodySmall,
-                ),
-                const SizedBox(height: AppSpacing.space2),
-                LinearProgressIndicator(
-                  value: roadmap.totalLessons == 0
-                      ? 0
-                      : roadmap.completedLessons / roadmap.totalLessons,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-              ],
+                  const SizedBox(height: AppSpacing.space2),
+                  Wrap(
+                    spacing: AppSpacing.space2,
+                    runSpacing: AppSpacing.space2,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 3.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: SakuraJourneyColors.primarySakura,
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                        child: Text(
+                          'JLPT ${roadmap.currentStudyLevelName}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      if (roadmap.targetJlptLevelName case final target?)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: SakuraJourneyColors.softPink,
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                          ),
+                          child: Text(
+                            '${l10n.onboardingTargetJlptTitle}: $target',
+                            style: const TextStyle(
+                              color: SakuraJourneyColors.primarySakuraDark,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.space3),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.standardRoadmapProgress(
+                            roadmap.completedLessons,
+                            roadmap.totalLessons,
+                          ),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.learnerTextPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.space2),
+                      Text(
+                        '${roadmap.completedLessons}/${roadmap.totalLessons}',
+                        style: AppTypography.metadata.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.space2),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                    child: LinearProgressIndicator(
+                      value: progressFraction,
+                      minHeight: 8,
+                      backgroundColor: SakuraJourneyColors.lavender,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        SakuraJourneyColors.primarySakura,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.space4),
-          Text(l10n.standardRoadmapTitle, style: AppTypography.sectionTitle),
-          const SizedBox(height: AppSpacing.space3),
-          if (roadmap.lessons.isEmpty)
+          if (showStandard) const SizedBox(height: AppSpacing.space2),
+
+          // 2. Empty State or Gamified Journey Map
+          if (showStandard && roadmap.lessons.isEmpty)
             RikiCard(
               key: const ValueKey<String>('standard_roadmap_empty'),
               padding: const EdgeInsets.all(AppSpacing.space6),
@@ -136,95 +224,31 @@ class StandardRoadmapView extends StatelessWidget {
                 ],
               ),
             )
-          else
-            for (var index = 0; index < roadmap.lessons.length; index++) ...[
-              _StandardLessonCard(
-                lesson: roadmap.lessons[index],
-                isNext: roadmap.lessons[index].lessonId == roadmap.nextLessonId,
-                onTap: () =>
-                    onOpenLesson(roadmap.lessons[index].lessonId.toString()),
-              ),
-              if (index < roadmap.lessons.length - 1)
-                const SizedBox(height: AppSpacing.space3),
-            ],
-          const SizedBox(height: AppSpacing.space5),
+          else if (showStandard) ...[
+            SakuraLearningJourneyMap(
+              lessons: roadmap.lessons,
+              currentStudyLevelName: roadmap.currentStudyLevelName,
+              targetJlptLevelName: roadmap.targetJlptLevelName,
+              nextLessonId: roadmap.nextLessonId,
+              onOpenLesson: onOpenLesson,
+            ),
+          ],
+          if (showStandard) const SizedBox(height: AppSpacing.space3),
+
+          // 3. AI Personalized Path Section (preserved)
           _AiPathSection(
             canGenerate: canGenerateAiPath,
             hasCompletedPlacement: hasCompletedPlacement,
             isLoading: isGeneratingAiPath,
             error: aiPathError,
             path: aiPath,
+            hasPendingPreview: hasPendingPreview,
             onGenerate: onGenerateAiPath,
             onUpdateDay: onUpdateAiDay,
             onOpenLesson: onOpenLesson,
             updatingDay: updatingAiDay,
             dayError: aiDayError,
           ),
-          const SizedBox(height: AppSpacing.space4),
-          SakuraEducationalBanner(
-            tag: l10n.roadmapEduBannerTag,
-            title: l10n.roadmapEduBannerTitle,
-            message: l10n.roadmapEduBannerMessage,
-            mascotPose: SakuraMascotPose.studying,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StandardLessonCard extends StatelessWidget {
-  const _StandardLessonCard({
-    required this.lesson,
-    required this.isNext,
-    required this.onTap,
-  });
-
-  final StandardRoadmapLesson lesson;
-  final bool isNext;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return RikiCard(
-      key: ValueKey<String>('standard_lesson_${lesson.lessonId}'),
-      onTap: onTap,
-      child: Row(
-        children: [
-          Icon(
-            lesson.isCompleted ? Icons.check_circle : Icons.menu_book,
-            color: lesson.isCompleted
-                ? AppColors.success
-                : AppColors.brandPrimary,
-          ),
-          const SizedBox(width: AppSpacing.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (isNext) ...[
-                  Text(
-                    l10n.standardRoadmapNextLesson,
-                    style: AppTypography.metadata.copyWith(
-                      color: AppColors.brandPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.space1),
-                ],
-                Text(lesson.title, style: AppTypography.cardTitle),
-                const SizedBox(height: AppSpacing.space1),
-                Text(
-                  lesson.isCompleted
-                      ? l10n.completedLessonsLabel
-                      : '${lesson.progressPercent}%',
-                  style: AppTypography.metadata,
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right),
         ],
       ),
     );
@@ -238,6 +262,7 @@ class _AiPathSection extends StatelessWidget {
     required this.isLoading,
     required this.error,
     required this.path,
+    required this.hasPendingPreview,
     required this.onGenerate,
     this.onUpdateDay,
     this.onOpenLesson,
@@ -250,6 +275,7 @@ class _AiPathSection extends StatelessWidget {
   final bool isLoading;
   final String? error;
   final RecommendedLearningPath? path;
+  final bool hasPendingPreview;
   final VoidCallback onGenerate;
   final Future<void> Function(int day, {required bool complete})? onUpdateDay;
   final ValueChanged<String>? onOpenLesson;
@@ -262,6 +288,7 @@ class _AiPathSection extends StatelessWidget {
     return RikiCard(
       key: const ValueKey<String>('ai_personalized_path_section'),
       borderColor: AppColors.brandBorder,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -297,7 +324,8 @@ class _AiPathSection extends StatelessWidget {
                   ],
                 ),
               ],
-              if (value.dailySchedules.isNotEmpty) ...[
+              if (value.status != LearningPathStatus.draft &&
+                  value.dailySchedules.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.space3),
                 for (final day in value.dailySchedules) ...[
                   const Divider(),
@@ -389,7 +417,9 @@ class _AiPathSection extends StatelessWidget {
                 onPressed: onGenerate,
                 icon: const Icon(Icons.auto_awesome_outlined),
                 label: Text(
-                  path == null
+                  hasPendingPreview || path?.status == LearningPathStatus.draft
+                      ? 'Xem bản xem trước'
+                      : path == null
                       ? l10n.generateLearningPath
                       : l10n.regenerateLearningPath,
                 ),

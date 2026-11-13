@@ -77,16 +77,18 @@ void main() {
     );
     expect(find.text('経験'), findsNothing);
     expect(find.text('改善'), findsNothing);
+    expect(find.text('Phương pháp SRS'), findsNothing);
     final collectionIcon = find.descendant(
       of: find.byKey(
         const ValueKey<String>('notebook_collection_fixture-learning-saved'),
       ),
-      matching: find.byType(Sakura3DIcon),
+      matching: find.byType(Image),
     );
     expect(collectionIcon, findsOneWidget);
+    final imageWidget = tester.widget<Image>(collectionIcon);
     expect(
-      tester.widget<Sakura3DIcon>(collectionIcon).type,
-      Sakura3DIconType.notebook,
+      (imageWidget.image as AssetImage).assetName,
+      'assets/images/icons_2d/collection_folder.webp',
     );
 
     await _openCollection(tester, NotebookController.demoCollectionRouteKey);
@@ -94,6 +96,39 @@ void main() {
     expect(find.text('けいけん'), findsOneWidget);
     expect(find.text('Kinh nghiệm'), findsOneWidget);
     expect(find.text('改善'), findsOneWidget);
+  });
+
+  testWidgets('all Notebook collection cards use the same folder icon', (
+    tester,
+  ) async {
+    const secondCollection = NotebookCollection(
+      routeKey: 'remote-list-kanji',
+      remoteId: 8,
+      name: 'Hán tự',
+      entryCount: 2,
+      createdAt: null,
+      source: NotebookDataSource.remote,
+    );
+    await _pumpNotebook(
+      tester,
+      repository: _TestNotebookRepository(
+        collections: <NotebookCollection>[_collection, secondCollection],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (final key in <String>['remote-list-3', 'remote-list-kanji']) {
+      final icon = find.descendant(
+        of: find.byKey(ValueKey<String>('notebook_collection_$key')),
+        matching: find.byType(Image),
+      );
+      expect(icon, findsOneWidget);
+      final imageWidget = tester.widget<Image>(icon);
+      expect(
+        (imageWidget.image as AssetImage).assetName,
+        'assets/images/icons_2d/collection_folder.webp',
+      );
+    }
   });
 
   testWidgets('fixture entries do not expose internal source labels', (
@@ -130,7 +165,7 @@ void main() {
       find.byKey(const ValueKey<String>('notebook_empty_view')),
       findsOneWidget,
     );
-    expect(find.text('Sổ từ của bạn đang trống'), findsOneWidget);
+    expect(find.text('Bắt đầu sổ từ của bạn!'), findsOneWidget);
   });
 
   testWidgets('empty selected list renders the add-entry action', (
@@ -150,7 +185,7 @@ void main() {
       find.byKey(const ValueKey<String>('notebook_entries_empty_view')),
       findsOneWidget,
     );
-    expect(find.text('Danh sách chưa có từ'), findsOneWidget);
+    expect(find.text('Danh sách chưa có từ nào'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const ValueKey<String>('notebook_empty_add_button')),
@@ -158,13 +193,40 @@ void main() {
       ),
       findsOneWidget,
     );
-
-    final addButton = tester.widget<IconButton>(
+    expect(
       find.byKey(const ValueKey<String>('notebook_add_entry_button')),
+      findsNothing,
     );
     expect(
-      addButton.style?.foregroundColor?.resolve(const <WidgetState>{}),
-      Colors.white,
+      find.byKey(const ValueKey<String>('notebook_search_field')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('non-empty selected list renders toolbar add and search field', (
+    tester,
+  ) async {
+    await _pumpNotebook(
+      tester,
+      repository: _TestNotebookRepository(
+        collections: <NotebookCollection>[_collection],
+        entries: <NotebookEntry>[_remoteEntry],
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _openCollection(tester, _collection.routeKey);
+
+    expect(
+      find.byKey(const ValueKey<String>('notebook_search_field')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('notebook_add_entry_button')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('notebook_entries_empty_view')),
+      findsNothing,
     );
   });
 
@@ -454,7 +516,7 @@ void main() {
     await _openCollection(tester, _collection.routeKey);
 
     await tester.tap(
-      find.byKey(const ValueKey<String>('notebook_add_entry_button')),
+      find.byKey(const ValueKey<String>('notebook_empty_add_button')),
     );
     await tester.pumpAndSettle();
     await tester.enterText(

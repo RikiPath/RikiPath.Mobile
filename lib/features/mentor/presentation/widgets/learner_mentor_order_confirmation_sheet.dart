@@ -13,32 +13,36 @@ import 'package:rikipath_mobile/features/mentor/application/learner_mentor_contr
 import 'package:rikipath_mobile/features/mentor/domain/availability_conflicts.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Modal bottom sheet xác nhận gói học, Mentor, thời gian và học phí trước khi đặt lịch hoặc thanh toán.
 class LearnerMentorOrderConfirmationSheet extends ConsumerStatefulWidget {
   const LearnerMentorOrderConfirmationSheet({
-    required this.planId,
+    this.planId,
     required this.slot,
     this.plan,
     this.subscriptionId,
+    this.requestedJlptLevel,
     super.key,
   });
 
-  final int planId;
+  final int? planId;
   final LearnerMentorAvailability slot;
   final MentorMeetingPlan? plan;
   final int? subscriptionId;
+  final String? requestedJlptLevel;
 
-  static Future<void> show(
+  static Future<LearnerMentorBooking?> show(
     BuildContext context, {
-    required int planId,
+    int? planId,
     required LearnerMentorAvailability slot,
     MentorMeetingPlan? plan,
     int? subscriptionId,
+    String? requestedJlptLevel,
   }) {
-    return showModalBottomSheet<void>(
+    return showModalBottomSheet<LearnerMentorBooking>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -47,6 +51,7 @@ class LearnerMentorOrderConfirmationSheet extends ConsumerStatefulWidget {
         slot: slot,
         plan: plan,
         subscriptionId: subscriptionId,
+        requestedJlptLevel: requestedJlptLevel,
       ),
     );
   }
@@ -90,6 +95,12 @@ class _LearnerMentorOrderConfirmationSheetState
   @override
   void initState() {
     super.initState();
+    if (isSupportedConsultationJlptLevel(widget.requestedJlptLevel)) {
+      _selectedJlptLevel = normalizeConsultationJlptLevel(
+        widget.requestedJlptLevel,
+      );
+      return;
+    }
     final planLevel = widget.plan?.jlptLevel;
     if (planLevel != null && isSupportedConsultationJlptLevel(planLevel)) {
       _selectedJlptLevel = normalizeConsultationJlptLevel(planLevel);
@@ -107,15 +118,48 @@ class _LearnerMentorOrderConfirmationSheetState
     setState(() => _isSubmitting = true);
 
     try {
+      final creditBalance = ref
+          .read(learnerCreditBalanceControllerProvider)
+          .value;
+      String? effectiveJlptLevel = _selectedJlptLevel;
+      if (effectiveJlptLevel == null && widget.plan?.jlptLevel != null) {
+        effectiveJlptLevel = normalizeConsultationJlptLevel(
+          widget.plan!.jlptLevel,
+        );
+      }
+      if (effectiveJlptLevel == null && creditBalance != null) {
+        final supportedGrants = creditBalance.activeGrants
+            .where(
+              (grant) =>
+                  grant.availableQuantity > 0 &&
+                  isSupportedConsultationJlptLevel(grant.jlptLevel),
+            )
+            .toList();
+        if (supportedGrants.length == 1) {
+          effectiveJlptLevel = normalizeConsultationJlptLevel(
+            supportedGrants.first.jlptLevel,
+          );
+        }
+      }
+      final hasCreditForLevel =
+          effectiveJlptLevel != null &&
+          (creditBalance?.availableForLevel(effectiveJlptLevel) ?? 0) > 0;
+      final isExistingSubscription =
+          (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
+          hasCreditForLevel;
+
       // Check again at the actual mutation boundary: the sheet may have stayed
       // open while an administrator changed the published calendar.
-      final now = DateTime.now().toUtc();
+      final day = widget.slot.startTime.displayValue;
+      final from = DateTime(day.year, day.month, day.day);
+      final to = DateTime(day.year, day.month, day.day + 1);
       final latest = await ref
           .read(learnerMentorRepositoryProvider)
           .loadAvailability(
-            from: now,
-            to: now.add(const Duration(days: 60)),
+            from: from.toUtc(),
+            to: to.toUtc(),
             mentorId: widget.slot.mentorId,
+            jlptLevel: effectiveJlptLevel,
           );
       if (!mounted) return;
       final view = AvailabilityConflictView(latest);
@@ -136,51 +180,34 @@ class _LearnerMentorOrderConfirmationSheetState
             );
         return;
       }
-      final creditBalance = ref
-          .read(learnerCreditBalanceControllerProvider)
-          .value;
-
-      final hasCredit = (creditBalance?.availableBalance ?? 0) > 0;
-      final isExistingSubscription =
-          (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
-          hasCredit;
-
-      // Determine explicit JLPT level (strictly N5, N4, N3, N2; N1 forbidden)
-      String? effectiveJlptLevel = _selectedJlptLevel;
-      if (effectiveJlptLevel == null && widget.plan?.jlptLevel != null) {
-        effectiveJlptLevel = normalizeConsultationJlptLevel(widget.plan!.jlptLevel);
-      }
-
-      if (effectiveJlptLevel == null && creditBalance != null) {
-        final supportedGrants = creditBalance.activeGrants
-            .where((g) => g.availableQuantity > 0 && isSupportedConsultationJlptLevel(g.jlptLevel))
-            .toList();
-        if (supportedGrants.length == 1) {
-          effectiveJlptLevel = normalizeConsultationJlptLevel(supportedGrants.first.jlptLevel);
-        }
-      }
-
       if (effectiveJlptLevel == null) {
         setState(() => _isSubmitting = false);
-        ref.read(rikiToastServiceProvider.notifier).error(
-          title: 'Chưa chọn trình độ JLPT',
-          description: 'Vui lòng chọn trình độ JLPT (N5 - N2) trước khi xác nhận đặt lịch.',
-        );
+        ref
+            .read(rikiToastServiceProvider.notifier)
+            .error(
+              title: 'Chưa chọn trình độ JLPT',
+              description:
+                  'Vui lòng chọn trình độ JLPT (N5 - N2) trước khi xác nhận đặt lịch.',
+            );
         return;
       }
 
       if (!isSupportedConsultationJlptLevel(effectiveJlptLevel)) {
         setState(() => _isSubmitting = false);
-        ref.read(rikiToastServiceProvider.notifier).error(
-          title: 'Trình độ chưa được hỗ trợ',
-          description: 'Hệ thống tư vấn 1-1 chỉ hỗ trợ trình độ JLPT N5, N4, N3 và N2 (không hỗ trợ N1).',
-        );
+        ref
+            .read(rikiToastServiceProvider.notifier)
+            .error(
+              title: 'Trình độ chưa được hỗ trợ',
+              description:
+                  'Hệ thống tư vấn 1-1 chỉ hỗ trợ trình độ JLPT N5, N4, N3 và N2 (không hỗ trợ N1).',
+            );
         return;
       }
 
       if (isExistingSubscription) {
-        if (hasCredit) {
-          final availForLevel = creditBalance?.availableForLevel(effectiveJlptLevel) ?? 0;
+        if (hasCreditForLevel) {
+          final availForLevel =
+              creditBalance?.availableForLevel(effectiveJlptLevel) ?? 0;
           final errorMsg = validateBookingJlptEligibility(
             selectedJlptLevel: effectiveJlptLevel,
             mentorQualifiedLevels: const [],
@@ -189,10 +216,9 @@ class _LearnerMentorOrderConfirmationSheetState
           );
           if (errorMsg != null) {
             setState(() => _isSubmitting = false);
-            ref.read(rikiToastServiceProvider.notifier).error(
-              title: 'Vé không phù hợp',
-              description: errorMsg,
-            );
+            ref
+                .read(rikiToastServiceProvider.notifier)
+                .error(title: 'Vé không phù hợp', description: errorMsg);
             return;
           }
         }
@@ -207,22 +233,34 @@ class _LearnerMentorOrderConfirmationSheetState
               jlptLevel: effectiveJlptLevel,
             );
 
+        LearnerMentorBooking? confirmedBooking = booking;
+        if (confirmedBooking == null) {
+          try {
+            final ownBookings = await ref
+                .read(learnerMentorRepositoryProvider)
+                .loadBookings();
+            confirmedBooking = ownBookings
+                .where(
+                  (item) =>
+                      item.mentorAvailabilityId == widget.slot.id &&
+                      (item.status == MentorMeetingStatus.assigned ||
+                          item.status == MentorMeetingStatus.accepted),
+                )
+                .firstOrNull;
+          } catch (_) {
+            // Nếu mạng vẫn lỗi, giữ operation key để lần thử lại không tạo lịch trùng.
+          }
+        }
         if (!mounted) return;
         setState(() => _isSubmitting = false);
 
-        if (booking != null) {
-          Navigator.of(context).pop();
+        if (confirmedBooking != null) {
+          final title = context.l10n.learnerMentorBookingSuccess;
+          final description = context.l10n.learnerMentorBookingSuccessDesc;
           ref
               .read(rikiToastServiceProvider.notifier)
-              .success(
-                title: context.l10n.learnerMentorBookingSuccess,
-                description: context.l10n.learnerMentorBookingSuccessDesc,
-              );
-          try {
-            context.push(AppRoutes.learnerMentorBookingDetail(booking.id));
-          } catch (_) {
-            // Context might not have GoRouter in test environments
-          }
+              .success(title: title, description: description);
+          Navigator.of(context).pop(confirmedBooking);
         } else {
           final error = ref.read(learnerMentorMutationControllerProvider).error;
           ref
@@ -230,15 +268,26 @@ class _LearnerMentorOrderConfirmationSheetState
               .error(
                 title: context.l10n.learnerMentorBookingsError,
                 description:
-                    error?.toString() ?? 'Khung giờ có thể vừa được người khác đặt.',
+                    error?.toString() ??
+                    'Chưa xác nhận được kết quả đặt lịch. Vui lòng kiểm tra Lịch của tôi trước khi thử lại.',
               );
         }
       } else {
+        if (widget.planId == null) {
+          setState(() => _isSubmitting = false);
+          ref
+              .read(rikiToastServiceProvider.notifier)
+              .error(
+                title: 'Chưa chọn gói tư vấn',
+                description: 'Vui lòng chọn gói phù hợp trước khi thanh toán.',
+              );
+          return;
+        }
         // Mua gói và đặt lịch thông qua PayOS checkout link
         final purchase = await ref
             .read(learnerMentorMutationControllerProvider.notifier)
             .purchase(
-              subscriptionPlanId: widget.planId,
+              subscriptionPlanId: widget.planId!,
               mentorAvailabilityId: widget.slot.id,
               idempotencyKey: _purchaseIdempotencyKey,
               jlptLevel: effectiveJlptLevel,
@@ -301,10 +350,6 @@ class _LearnerMentorOrderConfirmationSheetState
     final creditBalance = ref
         .watch(learnerCreditBalanceControllerProvider)
         .value;
-    final hasCredit = (creditBalance?.availableBalance ?? 0) > 0;
-    final isExistingSubscription =
-        (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
-        hasCredit;
 
     final planPriceFormatted = widget.plan != null
         ? NumberFormat.currency(
@@ -314,18 +359,33 @@ class _LearnerMentorOrderConfirmationSheetState
           ).format(widget.plan!.price)
         : null;
 
-    final supportedGrants = creditBalance?.activeGrants
-        .where((g) => g.availableQuantity > 0 && isSupportedConsultationJlptLevel(g.jlptLevel))
-        .toList() ?? [];
+    final supportedGrants =
+        creditBalance?.activeGrants
+            .where(
+              (g) =>
+                  g.availableQuantity > 0 &&
+                  isSupportedConsultationJlptLevel(g.jlptLevel),
+            )
+            .toList() ??
+        [];
 
     if (_selectedJlptLevel == null && supportedGrants.length == 1) {
-      _selectedJlptLevel = normalizeConsultationJlptLevel(supportedGrants.first.jlptLevel);
+      _selectedJlptLevel = normalizeConsultationJlptLevel(
+        supportedGrants.first.jlptLevel,
+      );
     }
 
-    final effectiveJlpt = _selectedJlptLevel ??
+    final effectiveJlpt =
+        _selectedJlptLevel ??
         (isSupportedConsultationJlptLevel(widget.plan?.jlptLevel)
             ? normalizeConsultationJlptLevel(widget.plan?.jlptLevel)
             : null);
+    final hasCreditForLevel =
+        effectiveJlpt != null &&
+        (creditBalance?.availableForLevel(effectiveJlpt) ?? 0) > 0;
+    final isExistingSubscription =
+        (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
+        hasCreditForLevel;
 
     return Container(
       key: const Key('learner_mentor_order_confirmation_sheet'),
@@ -432,12 +492,10 @@ class _LearnerMentorOrderConfirmationSheetState
                     icon: Icons.payments_outlined,
                     label: context.l10n.learnerMentorConfirmPrice,
                     value: isExistingSubscription
-                        ? (hasCredit &&
+                        ? (hasCreditForLevel &&
                                   (widget.subscriptionId == null ||
                                       widget.subscriptionId! <= 0)
-                              ? (effectiveJlpt != null
-                                  ? '1 vé JLPT $effectiveJlpt (${creditBalance?.availableForLevel(effectiveJlpt) ?? 1} vé còn lại)'
-                                  : '1 vé khả dụng (${creditBalance?.availableBalance ?? 1} vé còn lại)')
+                              ? '1 vé JLPT $effectiveJlpt (${creditBalance?.availableForLevel(effectiveJlpt) ?? 0} vé còn lại)'
                               : context.l10n.learnerMentorIncludedSession)
                         : (planPriceFormatted ?? 'Theo gói đã chọn'),
                   ),
@@ -447,7 +505,9 @@ class _LearnerMentorOrderConfirmationSheetState
             const SizedBox(height: AppSpacing.space3),
 
             // Interactive Level Selector if multiple levels are available or plan level is unspecified
-            if (widget.plan?.jlptLevel == null && hasCredit) ...[
+            if (widget.plan?.jlptLevel == null &&
+                widget.requestedJlptLevel == null &&
+                supportedGrants.isNotEmpty) ...[
               Container(
                 padding: const EdgeInsets.all(AppSpacing.space3),
                 decoration: BoxDecoration(
@@ -469,7 +529,8 @@ class _LearnerMentorOrderConfirmationSheetState
                     Wrap(
                       spacing: AppSpacing.space2,
                       children: ['N5', 'N4', 'N3', 'N2'].map((lvl) {
-                        final count = creditBalance?.availableForLevel(lvl) ?? 0;
+                        final count =
+                            creditBalance?.availableForLevel(lvl) ?? 0;
                         final isSelected = _selectedJlptLevel == lvl;
                         return ChoiceChip(
                           key: Key('jlpt_chip_$lvl'),
@@ -477,7 +538,9 @@ class _LearnerMentorOrderConfirmationSheetState
                           selected: isSelected,
                           selectedColor: AppColors.primaryContainer,
                           onSelected: (selected) {
-                            setState(() => _selectedJlptLevel = selected ? lvl : null);
+                            setState(
+                              () => _selectedJlptLevel = selected ? lvl : null,
+                            );
                           },
                         );
                       }).toList(),

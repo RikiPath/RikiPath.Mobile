@@ -4,6 +4,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_shared_widgets.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_practice_section.dart';
 
 class LessonCompletionView extends StatelessWidget {
   const LessonCompletionView({
@@ -96,81 +97,89 @@ class LessonCompletionView extends StatelessWidget {
                 completedColor: true,
               ),
               const SizedBox(height: AppSpacing.space4),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.space3),
-                decoration: BoxDecoration(
-                  color: AppColors.warningBackground,
-                  border: Border.all(color: AppColors.warningBorder),
-                  borderRadius: BorderRadius.circular(AppRadius.input),
-                ),
-                child: Row(
-                  children: [
-                    const Sakura3DIcon(
-                      type: Sakura3DIconType.streak,
-                      size: 24,
-                      fallbackColor: AppColors.skillGrammar,
-                    ),
-                    const SizedBox(width: AppSpacing.space2),
-                    Expanded(
-                      child: Text(
-                        context.l10n.streakConsecutive(lesson.streakDays),
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.learnerTextPrimary,
+              if (lesson.remoteLessonId == null)
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.space3),
+                  decoration: BoxDecoration(
+                    color: AppColors.warningBackground,
+                    border: Border.all(color: AppColors.warningBorder),
+                    borderRadius: BorderRadius.circular(AppRadius.input),
+                  ),
+                  child: Row(
+                    children: [
+                      const Sakura3DIcon(
+                        type: Sakura3DIconType.streak,
+                        size: 24,
+                        fallbackColor: AppColors.skillGrammar,
+                      ),
+                      const SizedBox(width: AppSpacing.space2),
+                      Expanded(
+                        child: Text(
+                          context.l10n.streakConsecutive(lesson.streakDays),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.learnerTextPrimary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '+${lesson.completionXp} XP',
+                        style: AppTypography.badgeText.copyWith(
+                          color: AppColors.learnerTertiary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.space4),
+        if (lesson.remoteLessonId == null || lesson.masteryItems.isNotEmpty)
+          RikiCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  spacing: AppSpacing.space3,
+                  runSpacing: AppSpacing.space1,
+                  children: [
+                    Text(
+                      context.l10n.masteredContent,
+                      style: AppTypography.sectionTitle.copyWith(
+                        color: AppColors.learnerTextPrimary,
+                      ),
                     ),
                     Text(
-                      '+${lesson.completionXp} XP',
+                      context.l10n.masteredItemCount(
+                        lesson.masteryItems.length,
+                      ),
                       style: AppTypography.badgeText.copyWith(
-                        color: AppColors.learnerTertiary,
+                        color: AppColors.success,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.space4),
-        RikiCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                spacing: AppSpacing.space3,
-                runSpacing: AppSpacing.space1,
-                children: [
-                  Text(
-                    context.l10n.masteredContent,
-                    style: AppTypography.sectionTitle.copyWith(
-                      color: AppColors.learnerTextPrimary,
-                    ),
-                  ),
-                  Text(
-                    context.l10n.masteredItemCount(lesson.masteryItems.length),
-                    style: AppTypography.badgeText.copyWith(
-                      color: AppColors.success,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                const SizedBox(height: AppSpacing.space3),
+                for (
+                  var index = 0;
+                  index < lesson.masteryItems.length;
+                  index++
+                ) ...[
+                  _MasteryItem(item: lesson.masteryItems[index]),
+                  if (index != lesson.masteryItems.length - 1)
+                    const SizedBox(height: AppSpacing.space2),
                 ],
-              ),
-              const SizedBox(height: AppSpacing.space3),
-              for (
-                var index = 0;
-                index < lesson.masteryItems.length;
-                index++
-              ) ...[
-                _MasteryItem(item: lesson.masteryItems[index]),
-                if (index != lesson.masteryItems.length - 1)
-                  const SizedBox(height: AppSpacing.space2),
               ],
-            ],
+            ),
           ),
-        ),
+        if (lesson.remoteLessonId case final lessonId?) ...[
+          const SizedBox(height: AppSpacing.space4),
+          LessonPracticeSection(lessonId: lessonId),
+        ],
         if (lesson.nextLesson != null) ...[
           const SizedBox(height: AppSpacing.space4),
           _NextLessonCard(nextLesson: lesson.nextLesson!),

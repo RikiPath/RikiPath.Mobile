@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
@@ -61,6 +62,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
               children: [
                 ProfileDetailIntro(
                   icon: Icons.notifications_none_rounded,
+                  colorfulIcon: SakuraColorfulIconType.notifications,
                   title: context.l10n.notificationSettingsTitle,
                   description: context.l10n.notificationSettingsSubtitle,
                 ),

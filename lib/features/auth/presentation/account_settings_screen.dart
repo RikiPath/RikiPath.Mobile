@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_language_bottom_sheet.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
@@ -61,6 +62,7 @@ class AccountSettingsScreen extends ConsumerWidget {
             children: [
               ProfileDetailIntro(
                 icon: Icons.shield_outlined,
+                colorfulIcon: SakuraColorfulIconType.security,
                 title: l10n.accountSecurity,
                 description: l10n.accountSecuritySubtitle,
               ),
@@ -74,6 +76,7 @@ class AccountSettingsScreen extends ConsumerWidget {
                       'account_change_password_action',
                     ),
                     icon: Icons.lock_outline_rounded,
+                    colorfulIcon: SakuraColorfulIconType.password,
                     title: l10n.changePassword,
                     subtitle: l10n.changePasswordSubtitle,
                     onTap: () => context.push(AppRoutes.profileChangePassword),
@@ -89,6 +92,7 @@ class AccountSettingsScreen extends ConsumerWidget {
                       'account_language_settings_action',
                     ),
                     icon: Icons.language_rounded,
+                    colorfulIcon: SakuraColorfulIconType.language,
                     title: l10n.appLanguageTitle,
                     subtitleWidget: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -130,6 +134,7 @@ class AccountSettingsScreen extends ConsumerWidget {
                       'account_notification_settings_action',
                     ),
                     icon: Icons.notifications_none_rounded,
+                    colorfulIcon: SakuraColorfulIconType.notifications,
                     title: l10n.notificationSettingsTitle,
                     subtitle: l10n.notificationSettingsSubtitle,
                     onTap: () => context.push(AppRoutes.profileNotifications),

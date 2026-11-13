@@ -109,21 +109,6 @@ class _VocabularyLibraryViewState extends State<VocabularyLibraryView> {
             AppSpacing.space4,
             AppSpacing.space2,
             AppSpacing.space4,
-            AppSpacing.space1,
-          ),
-          child: SakuraEducationalBanner(
-            tag: context.l10n.vocabularyEduBannerTag,
-            title: context.l10n.vocabularyEduBannerTitle,
-            message: context.l10n.vocabularyEduBannerMessage,
-            mascotPose: SakuraMascotPose.guiding,
-            compact: true,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.space4,
-            AppSpacing.space1,
-            AppSpacing.space4,
             AppSpacing.space2,
           ),
           child: Row(

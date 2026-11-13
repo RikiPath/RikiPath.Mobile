@@ -5,6 +5,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_scroll_scaffold.dart';
@@ -63,7 +64,8 @@ class _ProfileSuccessView extends ConsumerStatefulWidget {
   final UserProfile profile;
 
   @override
-  ConsumerState<_ProfileSuccessView> createState() => _ProfileSuccessViewState();
+  ConsumerState<_ProfileSuccessView> createState() =>
+      _ProfileSuccessViewState();
 }
 
 class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
@@ -83,6 +85,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
     if (!confirmed) return;
     await ref.read(authSessionControllerProvider).signOut();
   }
+
   late final AnimationController _entranceController = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 680),
@@ -200,6 +203,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
                 key: const ValueKey<String>('profile_jlpt_goal_action'),
                 icon: Icons.track_changes_outlined,
                 icon3d: Sakura3DIconType.roadmap,
+                colorfulIcon: SakuraColorfulIconType.learningGoal,
                 title: l10n.jlptGoalSettings,
                 subtitle: l10n.jlptGoalSettingsSubtitle,
                 emphasized: true,
@@ -209,14 +213,16 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
                 key: const ValueKey<String>('profile_placement_test_action'),
                 icon: Icons.assignment_turned_in_outlined,
                 icon3d: Sakura3DIconType.mockExam,
+                colorfulIcon: SakuraColorfulIconType.placementTest,
                 title: l10n.onboardingPlacementAction,
-                subtitle: l10n.onboardingPlacementDescription,
+                subtitle: l10n.profilePlacementSubtitle,
                 onTap: () => context.push(AppRoutes.placementTest),
               ),
               ProfileActionTile(
                 key: const ValueKey<String>('profile_progress_action'),
                 icon: Icons.insights_outlined,
                 icon3d: Sakura3DIconType.achievement,
+                colorfulIcon: SakuraColorfulIconType.learningProgress,
                 title: l10n.progressAndHistory,
                 subtitle: l10n.profileProgressSubtitle,
                 onTap: () => context.push(AppRoutes.analytics),
@@ -234,7 +240,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
               ProfileActionTile(
                 key: const ValueKey<String>('profile_consultation_action'),
                 icon: Icons.support_agent_outlined,
-                icon3d: Sakura3DIconType.mentor,
+                colorfulIcon: SakuraColorfulIconType.consultation,
                 title: l10n.consultation,
                 subtitle: l10n.profileConsultationSubtitle,
                 emphasized: true,
@@ -251,15 +257,19 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
             title: l10n.account,
             children: [
               ProfileActionTile(
-                key: const ValueKey<String>('profile_mentor_application_action'),
+                key: const ValueKey<String>(
+                  'profile_mentor_application_action',
+                ),
                 icon: Icons.workspace_premium_outlined,
-                title: 'Đăng ký trở thành Cố vấn',
-                subtitle: 'Nộp hồ sơ chuyên môn để được xét duyệt',
+                colorfulIcon: SakuraColorfulIconType.mentorApplication,
+                title: l10n.profileMentorApplicationTitle,
+                subtitle: l10n.profileMentorApplicationSubtitle,
                 onTap: () => context.push(AppRoutes.mentorApplication),
               ),
               ProfileActionTile(
                 key: const ValueKey<String>('profile_edit_action'),
                 icon: Icons.person_outline_rounded,
+                colorfulIcon: SakuraColorfulIconType.editProfile,
                 title: l10n.profileEdit,
                 subtitle: l10n.profileEditSubtitle,
                 onTap: () => context.push(AppRoutes.profileEdit),
@@ -267,6 +277,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
               ProfileActionTile(
                 key: const ValueKey<String>('profile_settings_action'),
                 icon: Icons.settings_outlined,
+                colorfulIcon: SakuraColorfulIconType.settings,
                 title: l10n.settings,
                 subtitle: l10n.profileSettingsSubtitle,
                 onTap: () => context.push(AppRoutes.profileAccount),
@@ -274,8 +285,9 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
               ProfileActionTile(
                 key: const ValueKey<String>('profile_logout_action'),
                 icon: Icons.logout_rounded,
+                colorfulIcon: SakuraColorfulIconType.logout,
                 title: l10n.logout,
-                subtitle: l10n.logoutConfirmationMessage,
+                subtitle: l10n.profileLogoutSubtitle,
                 destructive: true,
                 onTap: () => _confirmLogout(context),
               ),

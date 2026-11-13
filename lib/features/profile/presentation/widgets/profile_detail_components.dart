@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 
 class ProfileDetailHeader extends StatelessWidget
     implements PreferredSizeWidget {
@@ -64,6 +65,7 @@ class ProfileDetailIntro extends StatelessWidget {
     required this.description,
     this.iconColor = AppColors.brandPrimary,
     this.iconBackground = AppColors.brandTint,
+    this.colorfulIcon,
     this.trailing,
     super.key,
   });
@@ -73,6 +75,7 @@ class ProfileDetailIntro extends StatelessWidget {
   final String description;
   final Color iconColor;
   final Color iconBackground;
+  final SakuraColorfulIconType? colorfulIcon;
   final Widget? trailing;
 
   @override
@@ -86,6 +89,7 @@ class ProfileDetailIntro extends StatelessWidget {
             foreground: iconColor,
             background: iconBackground,
             size: 48,
+            colorfulIcon: colorfulIcon,
           ),
           const SizedBox(width: AppSpacing.space3),
           Expanded(
@@ -211,11 +215,12 @@ class ProfileSettingsTile extends StatefulWidget {
     this.trailing,
     this.emphasized = false,
     this.destructive = false,
+    this.colorfulIcon,
     super.key,
   }) : assert(
-          subtitle != null || subtitleWidget != null,
-          'Either subtitle or subtitleWidget must be provided',
-        );
+         subtitle != null || subtitleWidget != null,
+         'Either subtitle or subtitleWidget must be provided',
+       );
 
   final IconData icon;
   final String title;
@@ -225,6 +230,7 @@ class ProfileSettingsTile extends StatefulWidget {
   final Widget? trailing;
   final bool emphasized;
   final bool destructive;
+  final SakuraColorfulIconType? colorfulIcon;
 
   @override
   State<ProfileSettingsTile> createState() => _ProfileSettingsTileState();
@@ -277,6 +283,7 @@ class _ProfileSettingsTileState extends State<ProfileSettingsTile> {
                     icon: widget.icon,
                     foreground: foreground,
                     background: background,
+                    colorfulIcon: widget.colorfulIcon,
                   ),
                   const SizedBox(width: AppSpacing.space3),
                   Expanded(
@@ -623,15 +630,29 @@ class _ProfileIconBox extends StatelessWidget {
     required this.foreground,
     required this.background,
     this.size = 42,
+    this.colorfulIcon,
   });
 
   final IconData icon;
   final Color foreground;
   final Color background;
   final double size;
+  final SakuraColorfulIconType? colorfulIcon;
 
   @override
   Widget build(BuildContext context) {
+    if (colorfulIcon != null) {
+      return SizedBox.square(
+        dimension: size,
+        child: Center(
+          child: SakuraColorfulIcon(
+            type: colorfulIcon!,
+            size: size * 0.8,
+            useEmoji: true,
+          ),
+        ),
+      );
+    }
     return Container(
       width: size,
       height: size,

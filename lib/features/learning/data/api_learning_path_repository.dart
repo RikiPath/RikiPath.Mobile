@@ -49,7 +49,16 @@ class ApiLearningPathRepository
     final response = await _client.get<Object?>(LearningApiPaths.activePath);
     try {
       final dto = readOptionalRecommendedLearningPath(response.data);
-      return dto == null ? null : _map(dto);
+      final candidate = dto == null ? null : _map(dto);
+      if (candidate?.status == LearningPathStatus.active) return candidate;
+
+      // /active và /latest hiện dùng cùng service. Repository Backend hiện lọc
+      // ACTIVE; nếu response lệch hợp đồng, đối chiếu lịch sử từ chính Backend.
+      final history = await loadHistory();
+      for (final path in history) {
+        if (path.status == LearningPathStatus.active) return path;
+      }
+      return null;
     } on FormatException {
       throw const UnknownError(
         message:

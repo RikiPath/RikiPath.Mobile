@@ -36,6 +36,24 @@ final learnerMentorAvailabilityByMentorControllerProvider =
       int?
     >(LearnerMentorAvailabilityByMentorController.new, retry: (_, _) => null);
 
+/// Tải đúng một ngày đã chọn; key gồm cả cấp độ để kết quả cũ không lẫn sang bộ lọc mới.
+final learnerMentorSlotsForDayProvider = FutureProvider.autoDispose
+    .family<
+      List<LearnerMentorAvailability>,
+      ({DateTime day, int? mentorId, String? jlptLevel})
+    >((ref, query) {
+      final from = DateTime(query.day.year, query.day.month, query.day.day);
+      final to = DateTime(query.day.year, query.day.month, query.day.day + 1);
+      return ref
+          .watch(learnerMentorRepositoryProvider)
+          .loadAvailability(
+            from: from.toUtc(),
+            to: to.toUtc(),
+            mentorId: query.mentorId,
+            jlptLevel: query.jlptLevel,
+          );
+    }, retry: (_, _) => null);
+
 final learnerMentorBookingsControllerProvider =
     AsyncNotifierProvider<
       LearnerMentorBookingsController,

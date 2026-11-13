@@ -1514,13 +1514,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noMatchingWord => '一致する単語が見つかりません';
 
   @override
-  String get collectionHasNoWords => 'このリストには単語がありません';
+  String get collectionHasNoWords => '単語がまだありません';
 
   @override
   String get notebookSearchEmptyMessage => '別のキーワードを試すか、現在の検索をクリアしてください。';
 
   @override
-  String get notebookCollectionEmptyMessage => '最初の単語を追加して、このリストで復習を始めましょう。';
+  String get notebookCollectionEmptyMessage => '最初の単語を追加して復習を始めましょう。';
 
   @override
   String get notebookLoadFailed => '単語帳を読み込めません';
@@ -2551,7 +2551,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get practiceJourneyTitle => '自分のペースで練習';
 
   @override
-  String get practiceJourneySubtitle => '復習、JLPT模擬試験、学習の振り返りを一つの流れで進めます。';
+  String get practiceJourneySubtitle => 'JLPT模擬試験に挑戦し、結果を確認します。';
 
   @override
   String mockSummary(String level, int minutes, int count) {
@@ -2715,7 +2715,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeAnalyticsUnavailable => 'オンライン統計を一時的に読み込めません。';
 
   @override
-  String get homeReviewDescription => '現在の学習ペースに合わせて復習しましょう。';
+  String get homeReviewDescription => '学習ペースに合わせて復習を進めます。';
 
   @override
   String get homeResumeReview => '復習を続ける';
@@ -2876,6 +2876,84 @@ class AppLocalizationsJa extends AppLocalizations {
   String get learnerMentorAvailabilityError => 'メンターの空き時間を読み込めませんでした。';
 
   @override
+  String get mentorFinderTitle => '相談枠を探す';
+
+  @override
+  String get mentorFinderChooseDate => 'ご都合のよい日を選んでください';
+
+  @override
+  String get mentorFinderPickDate => 'カレンダーから日付を選ぶ';
+
+  @override
+  String get mentorFinderJlptLevel => 'JLPTレベル';
+
+  @override
+  String get mentorFinderChooseLevel => 'レベルを選ぶと、対象の相談枠が表示されます。';
+
+  @override
+  String get mentorFinderNoSlotsTitle => '条件に合う相談枠がありません';
+
+  @override
+  String get mentorFinderNoSlotsDescription => '別の日付または絞り込み条件をお試しください。';
+
+  @override
+  String get mentorFinderChooseAnotherDate => '別の日を見る';
+
+  @override
+  String get mentorFinderViewMyBookings => '自分の予約を見る';
+
+  @override
+  String get mentorFinderBackToCalendar => '学習カレンダーに戻る';
+
+  @override
+  String get mentorFinderAvailableSlots => '空き時間 · 90分';
+
+  @override
+  String get mentorFinderCreditError => '相談回数を読み込めませんでした。もう一度お試しください。';
+
+  @override
+  String mentorFinderAvailableTickets(int count, String level) {
+    return 'JLPT $level：利用可能な回数 $count回';
+  }
+
+  @override
+  String mentorFinderNeedCredit(String level) {
+    return 'JLPT $level の相談を予約するには利用可能な回数が必要です。';
+  }
+
+  @override
+  String get mentorFinderChooseSlot => '時間を選ぶ';
+
+  @override
+  String get mentorFinderReviewBooking => '予約内容を確認する';
+
+  @override
+  String get mentorFinderChoosePlan => '相談プランを選ぶ';
+
+  @override
+  String get mentorFinderNoPlans => '対象の相談プランがありません。プラン一覧を更新してください。';
+
+  @override
+  String get mentorFinderPlansError => '相談プランを読み込めませんでした。もう一度お試しください。';
+
+  @override
+  String mentorFinderPlanSummary(int count, int days) {
+    return '$count回 · $days日間';
+  }
+
+  @override
+  String get mentorFinderTimeAll => 'すべての時間';
+
+  @override
+  String get mentorFinderTimeMorning => '午前';
+
+  @override
+  String get mentorFinderTimeAfternoon => '午後';
+
+  @override
+  String get mentorFinderTimeEvening => '夜';
+
+  @override
   String learnerMentorSlotTime(String start, String end) {
     return '$start～$end';
   }
@@ -3018,7 +3096,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get practiceSpeechTitle => '日本語スピーキング練習';
 
   @override
-  String get practiceSpeechDescription => '日本語を話して、リアルタイムの認識結果を確認できます。';
+  String get practiceSpeechDescription => 'AI音声認識で発音をリアルタイム練習します。';
 
   @override
   String get practiceSpeechStatus => 'リアルタイム認識';
@@ -3027,7 +3105,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get practiceTextScanTitle => '日本語テキストスキャン';
 
   @override
-  String get practiceTextScanDescription => '作文の画像から日本語テキストを読み取り、編集できます。';
+  String get practiceTextScanDescription => '画像から文章をスキャンして編集します。';
 
   @override
   String get practiceTextScanStatus => '画像 → テキスト';
@@ -3191,7 +3269,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get practiceWritingTitle => 'かな・漢字の書き取り';
 
   @override
-  String get practiceWritingDescription => '書き順を確認し、画面に書いて復習記録を保存します。';
+  String get practiceWritingDescription => '筆順を確認し、練習の進捗を記録します。';
 
   @override
   String get practiceWritingStatus => 'インタラクティブ書写';
@@ -3907,4 +3985,110 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get heroBannerLateNightSubtitle => '明日もまた続けましょう。';
+
+  @override
+  String get mockLibraryTitle => 'JLPT模擬試験';
+
+  @override
+  String get mockLibraryDescription => 'レベル別に問題を解き、結果を確認できます。';
+
+  @override
+  String mockLibraryAvailableCount(int count) {
+    return '受験可能な試験：$count件';
+  }
+
+  @override
+  String get mockLibraryOpenFailed => '試験を開けませんでした。もう一度お試しください。';
+
+  @override
+  String get mockLibraryActiveAttempt => '別の試験を選ぶ前に、進行中の試験を終えてください。';
+
+  @override
+  String get essayWritingTitle => '日本語作文練習';
+
+  @override
+  String get essayWritingDescription => '文章を書いて評価を受けましょう。';
+
+  @override
+  String get essayWritingIntro => '日本語で文章を書いてください。採点ボタンを押すまで送信されません。';
+
+  @override
+  String get essayWritingNoLevel => '作文に利用できるJLPTレベルがありません。';
+
+  @override
+  String get essayWritingLevelLoadError => 'JLPTレベルを読み込めませんでした。再試行';
+
+  @override
+  String get essayWritingLevelLabel => 'JLPTレベル';
+
+  @override
+  String get essayWritingInputHint => '日本語の文章を入力してください';
+
+  @override
+  String get essayWritingSubmit => '作文を採点する';
+
+  @override
+  String get essayWritingSubmitting => '採点中...';
+
+  @override
+  String get essayWritingSubmitUncertain =>
+      '送信結果を確認できませんでした。再送信する前に履歴を確認してください。';
+
+  @override
+  String essayWritingSaved(int id) {
+    return '提出 #$id を保存しました';
+  }
+
+  @override
+  String get essayWritingNew => '新しい作文を書く';
+
+  @override
+  String essayWritingScore(String score) {
+    return '得点：$score/100';
+  }
+
+  @override
+  String get essayWritingStrengths => '良い点';
+
+  @override
+  String get essayWritingImprovements => '改善点';
+
+  @override
+  String get essayWritingCorrections => '修正の提案';
+
+  @override
+  String get practiceHeroBadge => 'がんばろう！';
+
+  @override
+  String get practiceHeroTitle => '練習の準備はいい？';
+
+  @override
+  String get practiceHeroSubtitle => '毎日の練習で、一歩ずつ前進。';
+
+  @override
+  String get profilePlacementSubtitle => '実力を測定し、最適なレベルを提案します。';
+
+  @override
+  String get profileLogoutSubtitle => 'この端末からログアウトします。';
+
+  @override
+  String get profileMentorApplicationTitle => 'メンター登録の申請';
+
+  @override
+  String get profileMentorApplicationSubtitle => '専門プロフィールの審査を申請します。';
+
+  @override
+  String get notebookEmptyHeroBadge => 'がんばろう！';
+
+  @override
+  String get notebookEmptyHeroTitle => '単語帳を始めましょう！';
+
+  @override
+  String get notebookEmptyHeroDescription => 'お気に入りの単語や文型を保存しましょう。';
+
+  @override
+  String get createFirstCollectionAction => '最初のリストを作成';
+
+  @override
+  String get addFirstWordAction => '最初の単語を追加';
 }

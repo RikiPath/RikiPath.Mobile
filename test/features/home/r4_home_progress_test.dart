@@ -326,15 +326,72 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey<String>('home_analytics_skill')),
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('home_analytics_streak')),
+          matching: find.text('🔥'),
+        ),
         findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('home_analytics_skill')),
+        findsNothing,
       );
       expect(
         find.byKey(const ValueKey<String>('home_analytics_completion')),
         findsOneWidget,
       );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('home_analytics_completion')),
+          matching: find.text('🏆'),
+        ),
+        findsOneWidget,
+      );
       harness.dispose();
     });
+
+    testWidgets(
+      '10b. Statistics emoji icons render without overflow on various widths & text scale',
+      (tester) async {
+        for (final width in [360.0, 393.0, 412.0]) {
+          final harness = await _pumpHome(
+            tester,
+            width: width,
+            journey: _selectedJourney(),
+            roadmap: _roadmap(completed: 3, total: 31),
+          );
+          await _pumpFrames(tester);
+          expect(tester.takeException(), isNull);
+          expect(
+            find.descendant(
+              of: find.byKey(const ValueKey<String>('home_analytics_streak')),
+              matching: find.text('🔥'),
+            ),
+            findsOneWidget,
+          );
+          expect(
+            find.descendant(
+              of: find.byKey(const ValueKey<String>('home_analytics_completion')),
+              matching: find.text('🏆'),
+            ),
+            findsOneWidget,
+          );
+          harness.dispose();
+        }
+
+        final scaleHarness = await _pumpHome(
+          tester,
+          width: 360,
+          textScale: 1.3,
+          journey: _selectedJourney(),
+          roadmap: _roadmap(completed: 3, total: 31),
+        );
+        await _pumpFrames(tester);
+        expect(scaleHarness.container, isNotNull);
+        expect(tester.takeException(), isNull);
+        scaleHarness.dispose();
+      },
+    );
 
     testWidgets('11. Analytics total failure does not break Home navigation', (
       tester,

@@ -14,10 +14,12 @@ import 'package:rikipath_mobile/features/learning/application/learning_controlle
 import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/api_learning_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/api_learning_path_repository.dart';
+import 'package:rikipath_mobile/features/learning/data/api_lesson_practice_repository.dart';
 import 'package:rikipath_mobile/features/learning/data/api_lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_session.dart';
+import 'package:rikipath_mobile/features/learning/domain/recommended_learning_path.dart';
 import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
@@ -140,6 +142,42 @@ void main() {
     expect(client.calls, <String>['GET /api/LearningPath/latest']);
   });
 
+  test('active path survives a newer unconfirmed preview', () async {
+    final draft = _learningPathEnvelope();
+    (draft['result']! as Map<String, Object?>)
+      ..['pathId'] = 100
+      ..['version'] = 2
+      ..['status'] = 'DRAFT';
+    final active = _learningPathEnvelope()['result'];
+    final client = _LearningApiClient(<String, Object?>{
+      'GET /api/LearningPath/active': draft,
+      'GET /api/LearningPath/history': <String, Object?>{
+        'isSuccess': true,
+        'result': <Object?>[active],
+      },
+    });
+
+    final path = await ApiLearningPathRepository(client).loadActive();
+
+    expect(path?.pathId, 99);
+    expect(path?.status, LearningPathStatus.active);
+    expect(client.calls, <String>[
+      'GET /api/LearningPath/active',
+      'GET /api/LearningPath/history',
+    ]);
+  });
+
+  test('an active response does not fetch history unnecessarily', () async {
+    final client = _LearningApiClient(<String, Object?>{
+      'GET /api/LearningPath/active': _learningPathEnvelope(),
+    });
+
+    final path = await ApiLearningPathRepository(client).loadActive();
+
+    expect(path?.status, LearningPathStatus.active);
+    expect(client.calls, <String>['GET /api/LearningPath/active']);
+  });
+
   test(
     'AI path accepts a missing exam date and maps server day state',
     () async {
@@ -171,21 +209,24 @@ void main() {
     },
   );
 
-  test('AI next lesson never crosses a locked day or unrelated lesson', () async {
-    final body = _learningPathEnvelope();
-    final result = body['result']! as Map<String, Object?>;
-    final days = result['dailySchedules']! as List<Object?>;
-    (days[0]! as Map<String, Object?>)['canStart'] = true;
-    (days[1]! as Map<String, Object?>)['canStart'] = false;
-    final client = _LearningApiClient(<String, Object?>{
-      'GET /api/LearningPath/latest': body,
-    });
+  test(
+    'AI next lesson never crosses a locked day or unrelated lesson',
+    () async {
+      final body = _learningPathEnvelope();
+      final result = body['result']! as Map<String, Object?>;
+      final days = result['dailySchedules']! as List<Object?>;
+      (days[0]! as Map<String, Object?>)['canStart'] = true;
+      (days[1]! as Map<String, Object?>)['canStart'] = false;
+      final client = _LearningApiClient(<String, Object?>{
+        'GET /api/LearningPath/latest': body,
+      });
 
-    final path = await ApiLearningPathRepository(client).loadLatest();
+      final path = await ApiLearningPathRepository(client).loadLatest();
 
-    expect(path?.recommendationAfter(709), isNull);
-    expect(path?.recommendationAfter(999), isNull);
-  });
+      expect(path?.recommendationAfter(709), isNull);
+      expect(path?.recommendationAfter(999), isNull);
+    },
+  );
 
   test('AI day actions call canonical Backend routes', () async {
     final client = _LearningApiClient(<String, Object?>{
@@ -201,6 +242,144 @@ void main() {
       'POST /api/LearningPath/active/days/1/start',
       'POST /api/LearningPath/active/days/1/complete',
     ]);
+  });
+
+  test(
+    'lesson Practice Exercise uses actual Backend IDs and answer contract',
+    () async {
+      final client = _LearningApiClient(<String, Object?>{
+        'GET /api/PracticeExercise/lesson/709': <String, Object?>{
+          'isSuccess': true,
+          'result': <Object?>[
+            <String, Object?>{
+              'id': 801,
+              'lessonId': 709,
+              'title': 'Ôn ngữ pháp',
+              'description': null,
+              'questionCount': 1,
+              'bestScorePercent': null,
+            },
+          ],
+        },
+        'POST /api/PracticeExercise/801/start': <String, Object?>{
+          'isSuccess': true,
+          'result': <String, Object?>{
+            'attemptId': 901,
+            'practiceExerciseId': 801,
+            'title': 'Ôn ngữ pháp',
+            'resumed': false,
+            'questions': <Object?>[
+              <String, Object?>{
+                'id': 1001,
+                'questionText': 'Chọn đáp án',
+                'options': <Object?>[
+                  <String, Object?>{'id': 1101, 'optionText': 'A'},
+                  <String, Object?>{'id': 1102, 'optionText': 'B'},
+                ],
+              },
+            ],
+            'savedAnswers': <Object?>[],
+          },
+        },
+        'POST /api/PracticeExercise/attempt/901/submit': <String, Object?>{
+          'isSuccess': true,
+          'result': <String, Object?>{
+            'attemptId': 901,
+            'scorePercent': 100,
+            'correctCount': 1,
+            'gradedQuestions': 1,
+            'totalQuestions': 1,
+          },
+        },
+      });
+      final repository = ApiLessonPracticeRepository(client);
+
+      final exercises = await repository.loadForLesson(709);
+      final attempt = await repository.start(exercises.single.id);
+      final result = await repository.submit(
+        attemptId: attempt.attemptId,
+        selectedOptionIds: <int, int>{attempt.questions.single.id: 1102},
+        textAnswers: const <int, String>{},
+      );
+
+      expect(exercises.single.id, 801);
+      expect(attempt.questions.single.options.map((item) => item.id), <int>[
+        1101,
+        1102,
+      ]);
+      expect(result.scorePercent, 100);
+      expect(client.lastData, <String, Object?>{
+        'answers': <Map<String, Object?>>[
+          <String, Object?>{
+            'questionId': 1001,
+            'selectedOptionId': 1102,
+            'textAnswer': null,
+          },
+        ],
+      });
+      expect(client.calls, <String>[
+        'GET /api/PracticeExercise/lesson/709',
+        'POST /api/PracticeExercise/801/start',
+        'POST /api/PracticeExercise/attempt/901/submit',
+      ]);
+    },
+  );
+
+  test('Practice Exercise restores and submits a written answer', () async {
+    final client = _LearningApiClient(<String, Object?>{
+      'POST /api/PracticeExercise/801/start': <String, Object?>{
+        'isSuccess': true,
+        'result': <String, Object?>{
+          'attemptId': 901,
+          'practiceExerciseId': 801,
+          'title': 'Viết câu',
+          'resumed': true,
+          'questions': <Object?>[
+            <String, Object?>{
+              'id': 1001,
+              'questionText': 'Viết câu trả lời',
+              'options': <Object?>[],
+            },
+          ],
+          'savedAnswers': <Object?>[
+            <String, Object?>{
+              'questionId': 1001,
+              'selectedOptionId': null,
+              'textAnswer': 'Xin chào',
+            },
+          ],
+        },
+      },
+      'POST /api/PracticeExercise/attempt/901/submit': <String, Object?>{
+        'isSuccess': true,
+        'result': <String, Object?>{
+          'attemptId': 901,
+          'scorePercent': 0,
+          'correctCount': 0,
+          'gradedQuestions': 0,
+          'totalQuestions': 1,
+        },
+      },
+    });
+    final repository = ApiLessonPracticeRepository(client);
+
+    final attempt = await repository.start(801);
+    expect(attempt.resumed, isTrue);
+    expect(attempt.savedTextAnswers, <int, String>{1001: 'Xin chào'});
+    await repository.submit(
+      attemptId: attempt.attemptId,
+      selectedOptionIds: const <int, int>{},
+      textAnswers: attempt.savedTextAnswers,
+    );
+    expect(client.lastData, <String, Object?>{
+      'answers': <Map<String, Object?>>[
+        <String, Object?>{
+          'questionId': 1001,
+          'selectedOptionId': null,
+          'textAnswer': 'Xin chào',
+        },
+      ],
+    });
   });
 
   test(

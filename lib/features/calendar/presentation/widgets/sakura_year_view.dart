@@ -82,121 +82,139 @@ class _YearMonth extends StatelessWidget {
     final selected = DateUtils.dateOnly(selectedDate);
     const weekdays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          children: [
-            InkWell(
-              key: Key('year_month_$month'),
-              onTap: () => onSelectMonth(DateTime(year, month, 1)),
-              borderRadius: BorderRadius.circular(8),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Tháng $month',
-                        style: TextStyle(
-                          color: selectedDate.month == month
-                              ? AppColors.primary
-                              : AppColors.textPrimary,
-                          fontWeight: FontWeight.w700,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            children: [
+              InkWell(
+                key: Key('year_month_$month'),
+                onTap: () => onSelectMonth(DateTime(year, month, 1)),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Tháng $month',
+                          style: TextStyle(
+                            color: selectedDate.month == month
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-                    const Icon(Icons.chevron_right, size: 16),
-                  ],
+                      const Icon(Icons.chevron_right, size: 16),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                for (final weekday in weekdays)
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        weekday,
-                        style: const TextStyle(
-                          fontSize: 9,
-                          color: AppColors.textSecondary,
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  for (final weekday in weekdays)
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          weekday,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: (weekday == 'CN' || weekday == 'T7')
+                                ? FontWeight.w700
+                                : FontWeight.w400,
+                            color: (weekday == 'CN' || weekday == 'T7')
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                          ),
                         ),
                       ),
                     ),
+                ],
+              ),
+              const SizedBox(height: 3),
+              Expanded(
+                child: GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    childAspectRatio: 0.95,
                   ),
-              ],
-            ),
-            const SizedBox(height: 3),
-            Expanded(
-              child: GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
-                  childAspectRatio: 0.95,
-                ),
-                itemCount: leading + daysInMonth,
-                itemBuilder: (context, index) {
-                  if (index < leading) return const SizedBox.shrink();
-                  final day = DateTime(year, month, index - leading + 1);
-                  final dayEvents =
-                      eventsByDay[day] ?? const <SakuraCalendarEvent>[];
-                  final isToday = day == today;
-                  final isSelected = day == selected;
-                  return Semantics(
-                    button: true,
-                    label:
-                        '${day.day} tháng $month năm $year, ${dayEvents.length} sự kiện',
-                    child: InkWell(
-                      key: Key('year_day_${month}_${day.day}'),
-                      onTap: () => onSelectDate(day),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 21,
-                            height: 21,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isToday ? AppColors.primary : null,
-                              border: isSelected && !isToday
-                                  ? Border.all(color: AppColors.primary)
-                                  : null,
-                            ),
-                            child: Text(
-                              '${day.day}',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: isToday || isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w400,
-                                color: isToday
-                                    ? Colors.white
-                                    : AppColors.textPrimary,
-                              ),
-                            ),
-                          ),
-                          if (dayEvents.isNotEmpty)
+                  itemCount: leading + daysInMonth,
+                  itemBuilder: (context, index) {
+                    if (index < leading) return const SizedBox.shrink();
+                    final day = DateTime(year, month, index - leading + 1);
+                    final dayEvents =
+                        eventsByDay[day] ?? const <SakuraCalendarEvent>[];
+                    final isToday = day == today;
+                    final isSelected = day == selected;
+                    return Semantics(
+                      button: true,
+                      label:
+                          '${day.day} tháng $month năm $year, ${dayEvents.length} sự kiện',
+                      child: InkWell(
+                        key: Key('year_day_${month}_${day.day}'),
+                        onTap: () => onSelectDate(day),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
                             Container(
-                              width: 4,
-                              height: 4,
+                              width: 21,
+                              height: 21,
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: dayEvents.first.primaryColor,
+                                color: isToday
+                                    ? AppColors.primary
+                                    : (isSelected
+                                        ? const Color(0xFFFFF1F2)
+                                        : null),
+                                border: isSelected && !isToday
+                                    ? Border.all(color: AppColors.primary, width: 1.2)
+                                    : null,
+                              ),
+                              child: Text(
+                                '${day.day}',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: isToday || isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.w400,
+                                  color: isToday
+                                      ? Colors.white
+                                      : (isSelected
+                                          ? AppColors.primary
+                                          : AppColors.textPrimary),
+                                ),
                               ),
                             ),
-                        ],
+                            if (dayEvents.isNotEmpty)
+                              Container(
+                                width: 4,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: dayEvents.first.primaryColor,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

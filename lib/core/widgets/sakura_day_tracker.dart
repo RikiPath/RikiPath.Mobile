@@ -49,8 +49,8 @@ class _SakuraDayTrackerState extends State<SakuraDayTracker>
     final monday = today.subtract(Duration(days: today.weekday - 1));
     final japanese = Localizations.localeOf(context).languageCode == 'ja';
     final compact = widget.compact;
-    final circleSize = compact ? 19.0 : 28.0;
-    final iconSize = compact ? 12.0 : 17.0;
+    final circleSize = compact ? 17.0 : 28.0;
+    final iconSize = compact ? 10.5 : 17.0;
     final labels = japanese
         ? const ['月', '火', '水', '木', '金', '土', '日']
         : const ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
@@ -118,7 +118,7 @@ class _SakuraDayTrackerState extends State<SakuraDayTracker>
                     : () => widget.onDateSelected!(date),
                 borderRadius: BorderRadius.circular(14),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: compact ? 2 : 6),
+                  padding: EdgeInsets.symmetric(vertical: compact ? 1 : 6),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -145,7 +145,7 @@ class _SakuraDayTrackerState extends State<SakuraDayTracker>
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: compact ? 9.5 : 10.5,
+                          fontSize: compact ? 9.0 : 10.5,
                           fontWeight: isToday ? FontWeight.w700 : FontWeight.w600,
                           color: isToday ? AppColors.brandPrimary : AppColors.textSecondary,
                         ),

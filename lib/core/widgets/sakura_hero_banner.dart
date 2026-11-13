@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
@@ -20,7 +21,7 @@ enum SakuraTimeSlot {
   /// 22:00 - 04:59: Deep night, calm starry sky
   lateNight;
 
-  /// Determines the active [SakuraTimeSlot] from a local [DateTime].
+  /// Determines the active [SakuraTimeSlot] from Vietnam wall-clock time.
   static SakuraTimeSlot fromDateTime(DateTime dt) {
     final hour = dt.hour;
     if (hour >= 5 && hour < 11) {
@@ -34,6 +35,39 @@ enum SakuraTimeSlot {
     } else {
       return SakuraTimeSlot.lateNight;
     }
+  }
+
+  // Vietnam does not observe daylight saving time. Keep this fixed offset
+  // private to the learner banner; Calendar and Booking use their own clocks.
+  static const vietnamUtcOffset = Duration(hours: 7);
+
+  static DateTime vietnamTime(DateTime instant) =>
+      instant.toUtc().add(vietnamUtcOffset);
+
+  static SakuraTimeSlot atInstant(DateTime instant) =>
+      fromDateTime(vietnamTime(instant));
+
+  /// UTC instant of the next Vietnam-time scene transition.
+  static DateTime nextBoundaryUtc(DateTime instant) {
+    final vietnamNow = vietnamTime(instant);
+    final hour = vietnamNow.hour;
+    final boundaryHour = hour < 5
+        ? 5
+        : hour < 11
+        ? 11
+        : hour < 14
+        ? 14
+        : hour < 18
+        ? 18
+        : hour < 22
+        ? 22
+        : 5;
+    return DateTime.utc(
+      vietnamNow.year,
+      vietnamNow.month,
+      vietnamNow.day + (hour >= 22 ? 1 : 0),
+      boundaryHour,
+    ).subtract(vietnamUtcOffset);
   }
 
   /// Calculates the exact next boundary when the time slot changes.
@@ -66,7 +100,8 @@ enum SakuraTimeSlot {
     SakuraTimeSlot.noon => 'assets/images/time_banners/sakura_noon.webp',
     SakuraTimeSlot.afternoon =>
       'assets/images/time_banners/sakura_afternoon.webp',
-    SakuraTimeSlot.evening => 'assets/images/time_banners/sakura_evening.webp',
+    SakuraTimeSlot.evening =>
+      'assets/images/time_banners/sakura_evening_night.png',
     SakuraTimeSlot.lateNight =>
       'assets/images/time_banners/sakura_late_night.webp',
   };
@@ -104,13 +139,24 @@ class _SakuraHeroBannerState extends State<SakuraHeroBanner>
   late SakuraTimeSlot _currentSlot;
   Timer? _transitionTimer;
 
-  DateTime get _now => widget.nowOverride != null ? widget.nowOverride!() : DateTime.now();
+  DateTime get _now => (widget.nowOverride?.call() ?? DateTime.now()).toUtc();
+
+  void _logSelection(DateTime instant, SakuraTimeSlot slot) {
+    if (!kDebugMode) return;
+    debugPrint(
+      'SakuraHeroBanner: utc=${instant.toIso8601String()} '
+      'device=${instant.toLocal().toIso8601String()} '
+      'vietnam=${SakuraTimeSlot.vietnamTime(instant).toIso8601String().replaceFirst('Z', '+07:00')} '
+      'period=${slot.name} asset=${slot.assetPath}',
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _currentSlot = widget.forcedSlot ?? SakuraTimeSlot.fromDateTime(_now);
+    _currentSlot = widget.forcedSlot ?? SakuraTimeSlot.atInstant(_now);
+    _logSelection(_now, _currentSlot);
     _scheduleNextTransition();
   }
 
@@ -119,7 +165,8 @@ class _SakuraHeroBannerState extends State<SakuraHeroBanner>
     super.didUpdateWidget(oldWidget);
     if (widget.forcedSlot != null && widget.forcedSlot != _currentSlot) {
       setState(() => _currentSlot = widget.forcedSlot!);
-    } else if (widget.nowOverride != oldWidget.nowOverride) {
+    } else if (widget.nowOverride != oldWidget.nowOverride ||
+        oldWidget.forcedSlot != widget.forcedSlot) {
       _checkAndUpdateSlot();
     }
   }
@@ -140,12 +187,14 @@ class _SakuraHeroBannerState extends State<SakuraHeroBanner>
 
   void _checkAndUpdateSlot() {
     if (widget.forcedSlot != null) return;
-    final newSlot = SakuraTimeSlot.fromDateTime(_now);
+    final now = _now;
+    final newSlot = SakuraTimeSlot.atInstant(now);
     if (newSlot != _currentSlot && mounted) {
       setState(() {
         _currentSlot = newSlot;
       });
     }
+    _logSelection(now, newSlot);
     _scheduleNextTransition();
   }
 
@@ -154,7 +203,7 @@ class _SakuraHeroBannerState extends State<SakuraHeroBanner>
     if (widget.forcedSlot != null) return;
 
     final now = _now;
-    final next = SakuraTimeSlot.nextBoundary(now);
+    final next = SakuraTimeSlot.nextBoundaryUtc(now);
     final duration = next.difference(now) + const Duration(milliseconds: 150);
 
     if (duration > Duration.zero) {
@@ -166,7 +215,9 @@ class _SakuraHeroBannerState extends State<SakuraHeroBanner>
 
   @override
   Widget build(BuildContext context) {
-    final slot = widget.forcedSlot ?? _currentSlot;
+    // Also read the clock during a tab rebuild, so returning to Home cannot
+    // display a stale scene even if the app was never paused.
+    final slot = widget.forcedSlot ?? SakuraTimeSlot.atInstant(_now);
     final l10n = context.l10n;
     final reduceMotion = AppMotion.isReducedMotion(context);
 
@@ -195,25 +246,24 @@ class _SakuraHeroBannerState extends State<SakuraHeroBanner>
 
     final isDark = slot.isDarkTheme;
     final titleColor = isDark ? Colors.white : const Color(0xFF2C1E20);
-    final subtitleColor =
-        isDark ? const Color(0xFFE2D6DC) : const Color(0xFF5A3E42);
-    final tagBg =
-        isDark
-            ? Colors.black.withValues(alpha: 0.38)
-            : Colors.white.withValues(alpha: 0.88);
+    final subtitleColor = isDark
+        ? const Color(0xFFE2D6DC)
+        : const Color(0xFF5A3E42);
+    final tagBg = isDark
+        ? Colors.black.withValues(alpha: 0.38)
+        : Colors.white.withValues(alpha: 0.88);
     final tagFg = isDark ? const Color(0xFFFF8DA1) : const Color(0xFFC73659);
-    final scrimColors =
-        isDark
-            ? [
-              Colors.black.withValues(alpha: 0.60),
-              Colors.black.withValues(alpha: 0.30),
-              Colors.transparent,
-            ]
-            : [
-              Colors.white.withValues(alpha: 0.70),
-              Colors.white.withValues(alpha: 0.35),
-              Colors.transparent,
-            ];
+    final scrimColors = isDark
+        ? [
+            Colors.black.withValues(alpha: 0.60),
+            Colors.black.withValues(alpha: 0.30),
+            Colors.transparent,
+          ]
+        : [
+            Colors.white.withValues(alpha: 0.70),
+            Colors.white.withValues(alpha: 0.35),
+            Colors.transparent,
+          ];
 
     return Semantics(
       button: widget.onTap != null,
@@ -236,140 +286,141 @@ class _SakuraHeroBannerState extends State<SakuraHeroBanner>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                // Crossfade background artwork
-                AnimatedSwitcher(
-                  duration:
-                      reduceMotion
-                          ? Duration.zero
-                          : const Duration(milliseconds: 450),
-                  child: Image.asset(
-                    slot.assetPath,
-                    key: ValueKey<String>(slot.assetPath),
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                    width: double.infinity,
-                    height: double.infinity,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          gradient: isDark
-                              ? const LinearGradient(
-                                  colors: [Color(0xFF1E1A29), Color(0xFF332A3D)],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                )
-                              : AppColors.sakuraHeroGradient,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                // Subtle horizontal legibility gradient on the left side
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        stops: const [0.0, 0.48, 1.0],
-                        colors: scrimColors,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Left-aligned localized headline & subtitle with Japanese pill
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.space4,
-                      vertical: AppSpacing.space2,
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final maxTextWidth = (constraints.maxWidth * 0.62).clamp(
-                          180.0,
-                          340.0,
-                        );
-                        return Align(
-                          alignment: Alignment.centerLeft,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: maxTextWidth),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Japanese Motivational Pill
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: tagBg,
-                                    borderRadius: BorderRadius.circular(
-                                      AppRadius.pill,
-                                    ),
-                                    border: Border.all(
-                                      color:
-                                          isDark
-                                              ? Colors.white.withValues(
-                                                alpha: 0.15,
-                                              )
-                                              : AppColors.borderSubtlePink,
-                                      width: 0.8,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    l10n.heroBannerTag,
-                                    style: TextStyle(
-                                      color: tagFg,
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.2,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-
-                                // Main Title
-                                Text(
-                                  title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: titleColor,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.3,
-                                    height: 1.2,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-
-                                // Subtitle
-                                Text(
-                                  subtitle,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: subtitleColor,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    height: 1.25,
-                                  ),
-                                ),
-                              ],
-                            ),
+                  // Crossfade background artwork
+                  AnimatedSwitcher(
+                    duration: reduceMotion
+                        ? Duration.zero
+                        : const Duration(milliseconds: 450),
+                    child: Image.asset(
+                      slot.assetPath,
+                      key: ValueKey<String>(slot.assetPath),
+                      fit: BoxFit.cover,
+                      alignment: Alignment.center,
+                      width: double.infinity,
+                      height: double.infinity,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            gradient: isDark
+                                ? const LinearGradient(
+                                    colors: [
+                                      Color(0xFF1E1A29),
+                                      Color(0xFF332A3D),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                : AppColors.sakuraHeroGradient,
                           ),
                         );
                       },
                     ),
                   ),
-                ),
-              ],
-            ),
+
+                  // Subtle horizontal legibility gradient on the left side
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          stops: const [0.0, 0.48, 1.0],
+                          colors: scrimColors,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Left-aligned localized headline & subtitle with Japanese pill
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.space4,
+                        vertical: AppSpacing.space2,
+                      ),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final maxTextWidth = (constraints.maxWidth * 0.62)
+                              .clamp(180.0, 340.0);
+                          return Align(
+                            alignment: Alignment.centerLeft,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: maxTextWidth,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Japanese Motivational Pill
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: tagBg,
+                                      borderRadius: BorderRadius.circular(
+                                        AppRadius.pill,
+                                      ),
+                                      border: Border.all(
+                                        color: isDark
+                                            ? Colors.white.withValues(
+                                                alpha: 0.15,
+                                              )
+                                            : AppColors.borderSubtlePink,
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      l10n.heroBannerTag,
+                                      style: TextStyle(
+                                        color: tagFg,
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+
+                                  // Main Title
+                                  Text(
+                                    title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: titleColor,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.3,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+
+                                  // Subtitle
+                                  Text(
+                                    subtitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: subtitleColor,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.25,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

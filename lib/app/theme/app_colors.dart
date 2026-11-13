@@ -129,12 +129,14 @@ abstract final class AppColors {
   static const Color learnerTertiary = Color(0xFF8D4B00);
   static const Color learnerTertiaryBackground = Color(0xFFFFDCC3);
 
-  static const Color jlptN5Foreground = brandPrimary;
-  static const Color jlptN5Background = surfaceContainer;
-  static const Color jlptN4Foreground = brandPrimaryPressed;
-  static const Color jlptN4Background = brandSecondary;
-  static const Color jlptN3Foreground = Color(0xFF942B46);
-  static const Color jlptN3Background = border;
+  // Sakura Pink Tone JLPT Badges (N5, N4, N3, N2, N1)
+  static const Color jlptN5Foreground = Color(0xFFC73D65);
+  static const Color jlptN5Background = Color(0xFFFFF0F4);
+  static const Color jlptN4Foreground = Color(0xFFC73D65);
+  static const Color jlptN4Background = Color(0xFFFFF0F4);
+  static const Color jlptN3Foreground = Color(0xFFC73D65);
+  static const Color jlptN3Background = Color(0xFFFFF0F4);
+  static const Color jlptBadgeBorder = Color(0xFFFFCCD8);
 
   static const Color progressTrack = surfaceContainer;
 

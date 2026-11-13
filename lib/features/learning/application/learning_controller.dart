@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/data/api_learning_repository.dart';
@@ -11,6 +12,18 @@ import 'package:rikipath_mobile/features/profile/application/user_profile_contro
 final learningRepositoryProvider = Provider<LearningRepository>(
   (ref) => ApiLearningRepository(ref.watch(apiClientProvider)),
 );
+
+/// Lesson catalog is independent of Placement and CurrentStudyLevel.
+/// The Backend authorizes the learner and returns their own progress.
+final lessonCatalogProvider = FutureProvider.family<LearningSnapshot, int>((
+  ref,
+  certificateLevelId,
+) {
+  ref.watch(authenticatedUserIdProvider);
+  return ref
+      .watch(learningRepositoryProvider)
+      .loadLearningSnapshot(certificateLevelId: certificateLevelId);
+});
 
 final learningControllerProvider =
     AsyncNotifierProvider<LearningController, LearningSnapshot>(

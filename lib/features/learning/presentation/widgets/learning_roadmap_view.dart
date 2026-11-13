@@ -117,13 +117,6 @@ class LearningRoadmapView extends StatelessWidget {
                 ),
               ),
             ),
-          const SizedBox(height: AppSpacing.space4),
-          SakuraEducationalBanner(
-            tag: context.l10n.roadmapEduBannerTag,
-            title: context.l10n.roadmapEduBannerTitle,
-            message: context.l10n.roadmapEduBannerMessage,
-            mascotPose: SakuraMascotPose.studying,
-          ),
         ],
       ),
     );

@@ -50,7 +50,7 @@ void main() {
     ]);
   });
 
-  testWidgets('target step follows the live N5 through N1 catalog', (
+  testWidgets('target step follows the live N5 through N2 catalog (excluding N1)', (
     tester,
   ) async {
     await _pumpOnboarding(tester);
@@ -72,7 +72,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('jlpt_n4')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('jlpt_n3')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('jlpt_n2')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('jlpt_n1')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('jlpt_n1')), findsNothing);
   });
 
   testWidgets('Placement Test call to action is localized in Japanese', (

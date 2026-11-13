@@ -31,7 +31,7 @@ void main() {
     );
   });
 
-  testWidgets('library renders live N5-N1 filters and fixture label', (
+  testWidgets('library renders live N5-N2 filters and fixture label (excluding N1)', (
     tester,
   ) async {
     await _pumpKanji(tester);
@@ -69,7 +69,7 @@ void main() {
     );
     expect(
       find.byKey(const ValueKey<String>('kanji_filter_n1')),
-      findsOneWidget,
+      findsNothing,
     );
   });
 

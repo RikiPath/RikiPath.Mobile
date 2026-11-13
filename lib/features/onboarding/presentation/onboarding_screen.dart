@@ -333,17 +333,19 @@ class _StudyLevelsStep extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.space3),
-                  ...levels.map(
-                    (item) => _levelCard(
-                      item: item,
-                      selected: state.selectedJlptLevel?.id == item.id,
-                      keyPrefix: 'jlpt',
-                      onPressed: state.selectedCurrentStudyLevel == null
-                          ? null
-                          : () => onSelectTarget(item),
-                      l10n: l10n,
-                    ),
-                  ),
+                  ...levels
+                      .where((item) => item.level != JlptLevel.n1)
+                      .map(
+                        (item) => _levelCard(
+                          item: item,
+                          selected: state.selectedJlptLevel?.id == item.id,
+                          keyPrefix: 'jlpt',
+                          onPressed: state.selectedCurrentStudyLevel == null
+                              ? null
+                              : () => onSelectTarget(item),
+                          l10n: l10n,
+                        ),
+                      ),
                   RikiCard(
                     key: const ValueKey<String>(
                       'onboarding_placement_test_card',

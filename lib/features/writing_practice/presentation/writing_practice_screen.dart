@@ -52,14 +52,6 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SakuraEducationalBanner(
-                  tag: context.l10n.kanaEduBannerTag,
-                  title: context.l10n.writingSelectCharacter,
-                  message: context.l10n.writingQueueHint,
-                  mascotPose: SakuraMascotPose.studying,
-                  compact: true,
-                ),
-                const SizedBox(height: AppSpacing.space4),
                 _WritingScriptTabs(selected: widget.script),
                 if (widget.script == WritingScript.kanji) ...[
                   const SizedBox(height: AppSpacing.space3),

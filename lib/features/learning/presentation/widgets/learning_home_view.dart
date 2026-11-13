@@ -5,6 +5,8 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
+import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/sakura_learning_journey_map.dart';
 
 class LearningHomeView extends StatelessWidget {
   const LearningHomeView({
@@ -69,6 +71,22 @@ class LearningHomeView extends StatelessWidget {
               snapshot: snapshot,
               onOpenRoadmap: onOpenRoadmap,
             ),
+            if (snapshot.lessons.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.space4),
+              SakuraJourneyPreviewWidget(
+                lessons: [
+                  for (final l in snapshot.lessons)
+                    StandardRoadmapLesson(
+                      lessonId: l.lessonId,
+                      title: l.title,
+                      sortOrder: l.sortOrder,
+                      progressPercent: l.progressPercent,
+                      isCompleted: l.isCompleted,
+                    ),
+                ],
+                onOpenRoadmap: onOpenRoadmap,
+              ),
+            ],
             if (snapshot.hasCurrentLesson) ...[
               const SizedBox(height: AppSpacing.space4),
               _CurrentLessonCard(
@@ -76,14 +94,6 @@ class LearningHomeView extends StatelessWidget {
                 onOpenLesson: onOpenLesson,
               ),
             ],
-            const SizedBox(height: AppSpacing.space4),
-            SakuraEducationalBanner(
-              tag: context.l10n.roadmapEduBannerTag,
-              title: context.l10n.roadmapEduBannerTitle,
-              message: context.l10n.roadmapEduBannerMessage,
-              mascotPose: SakuraMascotPose.guiding,
-              onTap: onOpenRoadmap,
-            ),
             if (snapshot.sections.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.space5),
               Row(
@@ -178,7 +188,7 @@ class _JlptLevelSelector extends StatelessWidget {
                     spacing: AppSpacing.space2,
                     runSpacing: AppSpacing.space1,
                     children: [
-                      for (final item in levels)
+                      for (final item in levels.where((item) => item.level != JlptLevel.n1))
                         ChoiceChip(
                           key: ValueKey<String>(
                             'learning_level_${item.level.name}',
@@ -186,6 +196,23 @@ class _JlptLevelSelector extends StatelessWidget {
                           label: Text(item.code),
                           selected: selected == item.level,
                           onSelected: (_) => onSelected(item),
+                          selectedColor: const Color(0xFFFDEBF0),
+                          backgroundColor: Colors.white,
+                          side: BorderSide(
+                            color: selected == item.level
+                                ? AppColors.primary
+                                : const Color(0xFFFFCCD8),
+                            width: selected == item.level ? 1.5 : 1.0,
+                          ),
+                          labelStyle: TextStyle(
+                            color: selected == item.level
+                                ? AppColors.primary
+                                : const Color(0xFFC73D65),
+                            fontWeight: selected == item.level
+                                ? FontWeight.w700
+                                : FontWeight.w600,
+                            fontSize: 12,
+                          ),
                         ),
                     ],
                   ),

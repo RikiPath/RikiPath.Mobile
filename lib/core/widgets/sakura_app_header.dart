@@ -7,7 +7,7 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
 import 'package:rikipath_mobile/core/widgets/riki_learner_header.dart';
 import 'package:rikipath_mobile/core/widgets/riki_loading.dart';
-import 'package:rikipath_mobile/core/widgets/sakura_3d_icon.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
@@ -48,25 +48,27 @@ class SakuraAppHeader extends ConsumerWidget implements PreferredSizeWidget {
         ? ref.watch(learnerAnalyticsControllerProvider)
         : null;
     final liveAnalytics = analyticsAsync?.value;
-    final effectiveStreak = streakDays ??
+    final effectiveStreak =
+        streakDays ??
         (liveAnalytics?.isAvailable(AnalyticsSection.streak) == true
             ? liveAnalytics?.streakDays
             : null);
-    final effectiveLoading = isStreakLoading ||
+    final effectiveLoading =
+        isStreakLoading ||
         (streakDays == null && (analyticsAsync?.isLoading ?? false));
 
     // 2. Resolve Notifications
     final notificationsAsync = unreadNotificationCount == null
         ? ref.watch(notificationControllerProvider)
         : null;
-    final effectiveUnread = unreadNotificationCount ??
-        notificationsAsync?.value?.unreadCount;
+    final effectiveUnread =
+        unreadNotificationCount ?? notificationsAsync?.value?.unreadCount;
 
     // 3. Resolve Navigation callbacks
-    final handleNotifications = onNotificationsPressed ??
-        () => context.push(AppRoutes.notifications);
-    final handleCalendar = onCalendarPressed ??
-        () => context.push(AppRoutes.calendar);
+    final handleNotifications =
+        onNotificationsPressed ?? () => context.push(AppRoutes.notifications);
+    final handleCalendar =
+        onCalendarPressed ?? () => context.push(AppRoutes.calendar);
 
     // Responsive checks: fits comfortably on 340dp+, 360dp, 393dp, 412dp
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -91,10 +93,10 @@ class SakuraAppHeader extends ConsumerWidget implements PreferredSizeWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Sakura3DIcon(
-                  type: Sakura3DIconType.streak,
+                const SakuraColorfulIcon(
+                  type: SakuraColorfulIconType.streak,
                   size: 20,
-                  fallbackColor: AppColors.streakFire,
+                  useEmoji: true,
                 ),
                 const SizedBox(width: AppSpacing.space1),
                 Text(
@@ -122,10 +124,10 @@ class SakuraAppHeader extends ConsumerWidget implements PreferredSizeWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: <Widget>[
-                  const Icon(
-                    Icons.notifications_outlined,
+                  const SakuraColorfulIcon(
+                    type: SakuraColorfulIconType.notifications,
                     size: 24,
-                    color: AppColors.learnerTextSecondary,
+                    useEmoji: true,
                   ),
                   if ((effectiveUnread ?? 0) > 0)
                     Positioned(
@@ -148,9 +150,7 @@ class SakuraAppHeader extends ConsumerWidget implements PreferredSizeWidget {
                           ),
                         ),
                         child: Text(
-                          effectiveUnread! > 99
-                              ? '99+'
-                              : '$effectiveUnread',
+                          effectiveUnread! > 99 ? '99+' : '$effectiveUnread',
                           style: AppTypography.badgeText.copyWith(
                             color: Colors.white,
                             fontSize: 9,
@@ -167,10 +167,10 @@ class SakuraAppHeader extends ConsumerWidget implements PreferredSizeWidget {
         ),
         IconButton(
           key: const ValueKey<String>('home_calendar_button'),
-          icon: const Sakura3DIcon(
-            type: Sakura3DIconType.calendar,
+          icon: const SakuraColorfulIcon(
+            type: SakuraColorfulIconType.calendar,
             size: 24,
-            fallbackColor: AppColors.learnerTextSecondary,
+            useEmoji: true,
           ),
           tooltip: 'Lịch học',
           onPressed: handleCalendar,

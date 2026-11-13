@@ -40,6 +40,8 @@ class LiveMockTestQuestion {
     required this.sectionOrder,
     required this.order,
     required this.content,
+    this.questionType = 'SingleChoice',
+    this.interactionData,
     required this.audioUrl,
     required this.imageUrl,
     required this.options,
@@ -51,6 +53,8 @@ class LiveMockTestQuestion {
   final int sectionOrder;
   final int order;
   final String content;
+  final String questionType;
+  final Map<String, Object?>? interactionData;
   final String? audioUrl;
   final String? imageUrl;
   final List<LiveMockTestOption> options;
@@ -66,6 +70,7 @@ class LiveMockTestAttempt {
     required this.previouslyWrongQuestionIds,
     required this.questions,
     this.answers = const <int, int>{},
+    this.structuredAnswers = const <int, Object?>{},
     this.currentQuestionIndex = 0,
   });
 
@@ -76,6 +81,7 @@ class LiveMockTestAttempt {
   final List<int> previouslyWrongQuestionIds;
   final List<LiveMockTestQuestion> questions;
   final Map<int, int> answers;
+  final Map<int, Object?> structuredAnswers;
   final int currentQuestionIndex;
 
   DateTime get deadline =>
@@ -86,8 +92,19 @@ class LiveMockTestAttempt {
     return remaining.isNegative ? Duration.zero : remaining;
   }
 
+  bool isQuestionAnswered(int questionId) {
+    if (answers.containsKey(questionId)) return true;
+    final structured = structuredAnswers[questionId];
+    if (structured == null) return false;
+    if (structured is List && structured.isNotEmpty) return true;
+    if (structured is String && structured.trim().isNotEmpty) return true;
+    if (structured is Map && structured.isNotEmpty) return true;
+    return false;
+  }
+
   LiveMockTestAttempt copyWith({
     Map<int, int>? answers,
+    Map<int, Object?>? structuredAnswers,
     int? currentQuestionIndex,
   }) {
     return LiveMockTestAttempt(
@@ -98,6 +115,7 @@ class LiveMockTestAttempt {
       previouslyWrongQuestionIds: previouslyWrongQuestionIds,
       questions: questions,
       answers: answers ?? this.answers,
+      structuredAnswers: structuredAnswers ?? this.structuredAnswers,
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
     );
   }
@@ -107,11 +125,19 @@ class LiveMockTestAttempt {
 class MockTestAnswerSubmission {
   const MockTestAnswerSubmission({
     required this.questionId,
-    required this.selectedOptionId,
+    this.selectedOptionId,
+    this.response,
   });
 
   final int questionId;
   final int? selectedOptionId;
+  final Object? response;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'questionId': questionId,
+    'selectedOptionId': selectedOptionId,
+    if (response != null) 'response': response,
+  };
 }
 
 @immutable
@@ -180,6 +206,9 @@ class LiveMockTestQuestionReview {
   const LiveMockTestQuestionReview({
     required this.questionId,
     required this.questionText,
+    this.questionType = 'SingleChoice',
+    this.response,
+    this.answerKey,
     required this.options,
     required this.selectedOptionId,
     required this.isCorrect,
@@ -188,6 +217,9 @@ class LiveMockTestQuestionReview {
 
   final int questionId;
   final String questionText;
+  final String questionType;
+  final Object? response;
+  final Object? answerKey;
   final List<LiveMockTestReviewOption> options;
   final int? selectedOptionId;
   final bool isCorrect;

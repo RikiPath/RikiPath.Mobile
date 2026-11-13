@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/change_password_controller.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
@@ -64,6 +65,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           children: [
             ProfileDetailIntro(
               icon: Icons.lock_reset_rounded,
+              colorfulIcon: SakuraColorfulIconType.password,
               title: l10n.protectAccountTitle,
               description: l10n.passwordContractHint,
             ),

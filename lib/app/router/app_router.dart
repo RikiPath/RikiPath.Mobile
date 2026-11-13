@@ -24,9 +24,11 @@ import 'package:rikipath_mobile/features/kanji/presentation/kanji_detail_screen.
 import 'package:rikipath_mobile/features/kanji/presentation/kanji_library_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/jlpt_progress_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learn_screen.dart';
+import 'package:rikipath_mobile/features/learning/presentation/lesson_catalog_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learning_roadmap_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/lesson_screen.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
+import 'package:rikipath_mobile/features/mock_test/presentation/mock_test_library_screen.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_join_screen.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_landing_screen.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_room_screen.dart';
@@ -54,6 +56,7 @@ import 'package:rikipath_mobile/features/text_scan/presentation/text_scan_screen
 import 'package:rikipath_mobile/features/writing_practice/domain/writing_practice.dart';
 import 'package:rikipath_mobile/features/writing_practice/presentation/writing_practice_detail_screen.dart';
 import 'package:rikipath_mobile/features/writing_practice/presentation/writing_practice_screen.dart';
+import 'package:rikipath_mobile/features/writing_practice/presentation/essay_writing_screen.dart';
 import 'package:rikipath_mobile/features/notifications/presentation/notifications_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_entry_detail_screen.dart';
@@ -229,12 +232,32 @@ GoRouter createAppRouter({
       ),
       GoRoute(
         path: AppRoutes.learnerMentorMeetings,
-        builder: (context, state) => const LearnerMentorMeetingsScreen(),
+        builder: (context, state) => LearnerMentorMeetingsScreen(
+          initialDate: state.extra is DateTime ? state.extra as DateTime : null,
+        ),
         routes: [
+          GoRoute(
+            path: AppRoutes.learnerMentorFindSlotsSegment,
+            builder: (context, state) => LearnerMentorAvailabilityScreen(
+              planId: null,
+              mentorId: int.tryParse(
+                state.uri.queryParameters['mentorId'] ?? '',
+              ),
+              initialDate: state.extra is DateTime
+                  ? state.extra as DateTime
+                  : null,
+              initialAvailabilityId: int.tryParse(
+                state.uri.queryParameters['availabilityId'] ?? '',
+              ),
+            ),
+          ),
           GoRoute(
             path: AppRoutes.learnerMentorDiscoverySegment,
             builder: (context, state) => LearnerMentorDiscoveryScreen(
               planId: int.tryParse(state.pathParameters['planId'] ?? '') ?? 1,
+              initialDate: state.extra is DateTime
+                  ? state.extra as DateTime
+                  : null,
             ),
           ),
           GoRoute(
@@ -243,12 +266,18 @@ GoRouter createAppRouter({
               planId: int.tryParse(state.pathParameters['planId'] ?? '') ?? 1,
               mentorId:
                   int.tryParse(state.pathParameters['mentorId'] ?? '') ?? 1,
+              initialDate: state.extra is DateTime
+                  ? state.extra as DateTime
+                  : null,
             ),
           ),
           GoRoute(
             path: AppRoutes.learnerMentorAvailabilitySegment,
             builder: (context, state) => LearnerMentorAvailabilityScreen(
               planId: int.tryParse(state.pathParameters['planId'] ?? ''),
+              initialDate: state.extra is DateTime
+                  ? state.extra as DateTime
+                  : null,
               subscriptionId: int.tryParse(
                 state.uri.queryParameters['subscriptionId'] ?? '',
               ),
@@ -341,7 +370,42 @@ GoRouter createAppRouter({
                 routes: [
                   GoRoute(
                     path: AppRoutes.learnRoadmapSegment,
-                    builder: (context, state) => const LearningRoadmapScreen(),
+                    builder: (context, state) => LearningRoadmapScreen(
+                      aiOnly: state.uri.queryParameters['mode'] == 'ai',
+                    ),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.lessonCatalogSegment,
+                    pageBuilder: (context, state) => CustomTransitionPage<void>(
+                      key: state.pageKey,
+                      transitionDuration:
+                          MediaQuery.of(context).disableAnimations
+                          ? Duration.zero
+                          : const Duration(milliseconds: 250),
+                      reverseTransitionDuration:
+                          MediaQuery.of(context).disableAnimations
+                          ? Duration.zero
+                          : const Duration(milliseconds: 220),
+                      child: const LessonCatalogScreen(),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                            final curved = CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeOutCubic,
+                              reverseCurve: Curves.easeInCubic,
+                            );
+                            return FadeTransition(
+                              opacity: curved,
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(0.035, 0),
+                                  end: Offset.zero,
+                                ).animate(curved),
+                                child: child,
+                              ),
+                            );
+                          },
+                    ),
                   ),
                   GoRoute(
                     path: AppRoutes.learnProgressSegment,
@@ -401,6 +465,14 @@ GoRouter createAppRouter({
                   GoRoute(
                     path: AppRoutes.reviewSegment,
                     builder: (context, state) => const DailyReviewScreen(),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.mockTestLibrarySegment,
+                    builder: (context, state) => const MockTestLibraryScreen(),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.essayWritingSegment,
+                    builder: (context, state) => const EssayWritingScreen(),
                   ),
                   GoRoute(
                     path: AppRoutes.writingSegment,

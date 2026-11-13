@@ -1,10 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_session.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_shared_widgets.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_practice_section.dart';
 
 class LessonContentTabs extends StatelessWidget {
   const LessonContentTabs({
@@ -278,7 +279,12 @@ class LessonArticleOnlyView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.l10n.topicUpper(lesson.category.toUpperCase()),
+                      context.l10n.topicUpper(
+                        localizedLessonCategory(
+                          context,
+                          lesson.category,
+                        ).toUpperCase(),
+                      ),
                       style: AppTypography.badgeText.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -437,6 +443,10 @@ class LessonArticleOnlyView extends StatelessWidget {
               key: const ValueKey<String>('lesson_completion_error'),
               style: AppTypography.validationText,
             ),
+          ],
+          if (lesson.remoteLessonId case final lessonId?) ...[
+            const SizedBox(height: AppSpacing.space4),
+            LessonPracticeSection(lessonId: lessonId),
           ],
           const SizedBox(height: AppSpacing.space4),
           RikiPrimaryButton(

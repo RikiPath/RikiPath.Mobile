@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
@@ -13,11 +14,13 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
   const LearnerMentorProfileScreen({
     required this.planId,
     required this.mentorId,
+    this.initialDate,
     super.key,
   });
 
   final int planId;
   final int mentorId;
+  final DateTime? initialDate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -295,7 +298,10 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.surfaceContainer,
+                                color: AppColors.jlptN5Background,
+                                border: Border.all(
+                                  color: AppColors.jlptBadgeBorder,
+                                ),
                                 borderRadius: BorderRadius.circular(
                                   AppRadius.pill,
                                 ),
@@ -303,8 +309,8 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
                               child: Text(
                                 level,
                                 style: AppTypography.metadata.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.jlptN5Foreground,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
@@ -327,10 +333,11 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
           ),
           child: RikiPrimaryButton(
             key: const Key('learner_mentor_view_availability_button'),
-            label: 'Xem lịch học',
+            label: context.l10n.mentorFinderTitle,
             trailingIcon: Icons.calendar_month_outlined,
             onPressed: () => context.push(
-              AppRoutes.learnerMentorAvailability(planId, mentorId: mentor.id),
+              AppRoutes.learnerMentorFindSlots(mentorId: mentor.id),
+              extra: initialDate,
             ),
           ),
         ),

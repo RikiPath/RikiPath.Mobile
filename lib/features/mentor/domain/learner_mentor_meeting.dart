@@ -134,6 +134,7 @@ class LearnerMentorBooking {
     this.learnerName,
     this.paymentStatus,
     this.scheduledAt,
+    this.endsAt,
     this.meetingLink,
     this.roomId,
     this.jlptLevel,
@@ -149,6 +150,7 @@ class LearnerMentorBooking {
   final MentorMeetingStatus status;
   final MentorPaymentStatus? paymentStatus;
   final MentorTimestamp? scheduledAt;
+  final MentorTimestamp? endsAt;
   final String? meetingLink;
   final String? roomId;
   final String? jlptLevel;

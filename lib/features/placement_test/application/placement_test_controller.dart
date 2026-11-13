@@ -551,6 +551,8 @@ class PlacementTestController extends AsyncNotifier<PlacementTestFlowState> {
       ref.invalidate(learningControllerProvider);
       ref.invalidate(userProfileControllerProvider);
       ref.invalidate(learningPathControllerProvider);
+      ref.invalidate(activeLearningPathProvider);
+      ref.invalidate(placementTestStatusProvider);
       state = AsyncData(
         state.requireValue.copyWith(
           recommendationPhase: PlacementRecommendationPhase.idle,
@@ -724,6 +726,7 @@ class PlacementTestController extends AsyncNotifier<PlacementTestFlowState> {
         clearActionIssue: true,
       ),
     );
+    ref.invalidate(placementTestStatusProvider);
   }
 
   void _validateRecoveredResult(PlacementTestResult result, int attemptId) {

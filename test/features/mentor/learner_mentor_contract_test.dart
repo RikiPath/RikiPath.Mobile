@@ -43,6 +43,15 @@ void main() {
   group('Learner Mentor Meeting routes and role gates', () {
     test('exposes stable learner meeting routes with positive IDs', () {
       expect(AppRoutes.learnerMentorMeetings, '/mentor-meetings');
+      expect(AppRoutes.learnerMentorFindSlots(), '/mentor-meetings/find-slots');
+      expect(
+        AppRoutes.learnerMentorFindSlots(availabilityId: 12),
+        '/mentor-meetings/find-slots?availabilityId=12',
+      );
+      expect(
+        AppRoutes.learnerMentorFindSlots(mentorId: 5),
+        '/mentor-meetings/find-slots?mentorId=5',
+      );
       expect(
         AppRoutes.learnerMentorAvailability(4),
         '/mentor-meetings/plans/4/availability',
@@ -141,7 +150,7 @@ void main() {
 
         final slots = await ApiLearnerMentorRepository(
           client,
-        ).loadAvailability(from: from, to: to, mentorId: 5);
+        ).loadAvailability(from: from, to: to, mentorId: 5, jlptLevel: 'N5');
 
         expect(slots.single.id, 12);
         expect(slots.single.mentorId, 5);
@@ -149,6 +158,7 @@ void main() {
           'from': from.toUtc().toIso8601String(),
           'to': to.toUtc().toIso8601String(),
           'mentorId': 5,
+          'jlptLevel': 'N5',
         });
       },
     );
@@ -529,6 +539,77 @@ void main() {
         ),
       );
       expect(button.onPressed, isNotNull);
+    });
+
+    testWidgets(
+      'calendar finder keeps date and filters availability by JLPT level',
+      (tester) async {
+        final day = DateTime.now().add(const Duration(days: 2));
+        final start = DateTime(day.year, day.month, day.day, 9);
+        final slot = LearnerMentorAvailability(
+          id: 91,
+          mentorId: 5,
+          mentorName: 'Sato Haru',
+          startTime: MentorTimestamp.parse(start.toUtc().toIso8601String()),
+          endTime: MentorTimestamp.parse(
+            start.add(const Duration(minutes: 90)).toUtc().toIso8601String(),
+          ),
+          isBooked: false,
+        );
+        final repository = _TestLearnerMentorRepository(
+          availabilityResults: [
+            [slot],
+          ],
+        );
+        await _pumpLearnerMentor(
+          tester,
+          LearnerMentorAvailabilityScreen(planId: null, initialDate: day),
+          repository: repository,
+        );
+
+        expect(find.text('Tìm lịch tư vấn'), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey<String>('learner_mentor_slot_91')),
+          findsNothing,
+        );
+        expect(
+          repository.availabilityQueries.first.from,
+          DateTime(day.year, day.month, day.day).toUtc(),
+        );
+        await tester.tap(find.byKey(const ValueKey<String>('finder_level_N5')));
+        await tester.pumpAndSettle();
+        expect(repository.availabilityQueries.last.level, 'N5');
+        expect(
+          find.byKey(const ValueKey<String>('learner_mentor_slot_91')),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('calendar entry keeps selected date when no slots exist', (
+      tester,
+    ) async {
+      await _pumpLearnerMentor(
+        tester,
+        LearnerMentorAvailabilityScreen(
+          planId: 1,
+          initialDate: DateTime(2026, 10, 13),
+        ),
+        repository: _TestLearnerMentorRepository(
+          availabilityResults: [
+            [_slot(id: 12)],
+          ],
+        ),
+      );
+
+      expect(
+        find.byKey(const Key('learner_mentor_availability_empty')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('learner_mentor_slot_12')),
+        findsNothing,
+      );
     });
 
     testWidgets('duplicate availability IDs show one disabled time choice', (
@@ -1128,6 +1209,8 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
   final List<Object> purchaseStatusResults;
   int planCalls = 0;
   int availabilityCalls = 0;
+  final List<({DateTime from, DateTime to, String? level})>
+  availabilityQueries = [];
   int purchaseCalls = 0;
   int bookingMutationCalls = 0;
   int bookingCalls = 0;
@@ -1145,7 +1228,11 @@ class _TestLearnerMentorRepository implements LearnerMentorRepository {
     required DateTime from,
     required DateTime to,
     int? mentorId,
-  }) => _next(availabilityResults, availabilityCalls++);
+    String? jlptLevel,
+  }) {
+    availabilityQueries.add((from: from, to: to, level: jlptLevel));
+    return _next(availabilityResults, availabilityCalls++);
+  }
 
   @override
   Future<MentorMeetingPurchase> purchase({

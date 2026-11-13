@@ -12,7 +12,9 @@ import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shar
 
 /// Màn hình danh sách gói học cùng Mentor 1-1 (Screen 01 theo chuẩn Neo-Japoniste Sakura).
 class LearnerMentorMeetingsScreen extends ConsumerWidget {
-  const LearnerMentorMeetingsScreen({super.key});
+  const LearnerMentorMeetingsScreen({super.key, this.initialDate});
+
+  final DateTime? initialDate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,8 +24,16 @@ class LearnerMentorMeetingsScreen extends ConsumerWidget {
       backgroundColor: AppColors.learnerBackground,
       appBar: AppBar(
         title: const Text('Tư vấn 1-1'),
-        actions: const [
-          Padding(
+        actions: [
+          IconButton(
+            tooltip: context.l10n.mentorFinderTitle,
+            icon: const Icon(Icons.calendar_month_outlined),
+            onPressed: () => context.push(
+              AppRoutes.learnerMentorFindSlots(),
+              extra: initialDate,
+            ),
+          ),
+          const Padding(
             padding: EdgeInsets.only(right: AppSpacing.space3),
             child: RikiLanguageSwitcher(),
           ),
@@ -46,6 +56,7 @@ class LearnerMentorMeetingsScreen extends ConsumerWidget {
           ),
           AsyncData(:final value) => _PlansBody(
             plans: value,
+            initialDate: initialDate,
             onRefresh: ref
                 .read(learnerMentorPlansControllerProvider.notifier)
                 .retry,
@@ -57,10 +68,15 @@ class LearnerMentorMeetingsScreen extends ConsumerWidget {
 }
 
 class _PlansBody extends StatefulWidget {
-  const _PlansBody({required this.plans, required this.onRefresh});
+  const _PlansBody({
+    required this.plans,
+    required this.onRefresh,
+    this.initialDate,
+  });
 
   final List<MentorMeetingPlan> plans;
   final Future<void> Function() onRefresh;
+  final DateTime? initialDate;
 
   @override
   State<_PlansBody> createState() => _PlansBodyState();
@@ -160,6 +176,16 @@ class _PlansBodyState extends State<_PlansBody> {
                 ),
                 const SizedBox(height: AppSpacing.space4),
 
+                RikiPrimaryButton(
+                  key: const Key('learner_mentor_find_slots_button'),
+                  label: context.l10n.mentorFinderTitle,
+                  leadingIcon: Icons.calendar_month_outlined,
+                  onPressed: () => context.push(
+                    AppRoutes.learnerMentorFindSlots(),
+                    extra: widget.initialDate,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.space2),
                 RikiSecondaryButton(
                   key: const Key('learner_mentor_my_meetings_button'),
                   label: context.l10n.learnerMentorMyMeetings,
@@ -199,6 +225,7 @@ class _PlansBodyState extends State<_PlansBody> {
                                 AppRoutes.learnerMentorDiscovery(
                                   widget.plans[index].id,
                                 ),
+                                extra: widget.initialDate,
                               );
                             },
                           ),
@@ -285,6 +312,7 @@ class _PlansBodyState extends State<_PlansBody> {
                   trailingIcon: Icons.arrow_forward,
                   onPressed: () => context.push(
                     AppRoutes.learnerMentorDiscovery(selectedPlan.id),
+                    extra: widget.initialDate,
                   ),
                 ),
               ],

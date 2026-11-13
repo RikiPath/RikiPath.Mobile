@@ -85,6 +85,30 @@ void main() {
   });
 
   test(
+    'start resumes a server-owned active attempt and saved answer',
+    () async {
+      final repository = _FakeMockTestRepository()
+        ..activeAttempt = _attempt().copyWith(answers: <int, int>{1201: 4402});
+      final container = _container(repository: repository);
+      addTearDown(container.dispose);
+      await container.read(mockTestControllerProvider.future);
+      final controller = container.read(mockTestControllerProvider.notifier);
+
+      expect(controller.selectTest(731), isTrue);
+      expect(await controller.startSelectedTest(), isTrue);
+      expect(repository.startedTestIds, isEmpty);
+      expect(
+        container
+            .read(mockTestControllerProvider)
+            .requireValue
+            .attempt
+            ?.answers,
+        <int, int>{1201: 4402},
+      );
+    },
+  );
+
+  test(
     'submission includes every question once and null for unanswered',
     () async {
       final repository = _FakeMockTestRepository();
@@ -391,7 +415,22 @@ class _FakeMockTestRepository implements MockTestRepository {
   int submitCalls = 0;
   int loadResultCalls = 0;
   int? lastSubmittedAttemptId;
+
+  @override
+  Future<LiveMockTestAttempt?> loadActive(int mockTestId) async =>
+      activeAttempt;
+
+  LiveMockTestAttempt? activeAttempt;
   List<MockTestAnswerSubmission>? lastAnswers;
+
+  @override
+  Future<void> saveAnswer(
+    int attemptId,
+    MockTestAnswerSubmission answer,
+  ) async {}
+
+  @override
+  Future<LiveMockTestResult> finalizeExpired(int attemptId) async => _result();
 
   @override
   Future<List<LiveMockTestSummary>> loadTestsByLevel(int jlptLevelId) async {

@@ -10,9 +10,14 @@ import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shar
 
 /// Màn hình chọn Mentor hướng dẫn 1-1 (Screen 02 theo chuẩn Neo-Japoniste Sakura).
 class LearnerMentorDiscoveryScreen extends ConsumerStatefulWidget {
-  const LearnerMentorDiscoveryScreen({required this.planId, super.key});
+  const LearnerMentorDiscoveryScreen({
+    required this.planId,
+    this.initialDate,
+    super.key,
+  });
 
   final int planId;
+  final DateTime? initialDate;
 
   @override
   ConsumerState<LearnerMentorDiscoveryScreen> createState() =>
@@ -172,12 +177,14 @@ class _LearnerMentorDiscoveryScreenState
                             widget.planId,
                             mentor.id,
                           ),
+                          extra: widget.initialDate,
                         ),
                         onSelectCalendar: () => context.push(
                           AppRoutes.learnerMentorAvailability(
                             widget.planId,
                             mentorId: mentor.id,
                           ),
+                          extra: widget.initialDate,
                         ),
                       );
                     },
@@ -299,14 +306,19 @@ class _MentorDiscoveryCard extends StatelessWidget {
                         spacing: AppSpacing.space2,
                         runSpacing: AppSpacing.space1,
                         children: [
-                          for (final level in mentor.jlptLevels.where((l) => !l.toUpperCase().contains('N1')))
+                          for (final level in mentor.jlptLevels.where(
+                            (l) => !l.toUpperCase().contains('N1'),
+                          ))
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.space2,
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.surfaceContainer,
+                                color: AppColors.jlptN5Background,
+                                border: Border.all(
+                                  color: AppColors.jlptBadgeBorder,
+                                ),
                                 borderRadius: BorderRadius.circular(
                                   AppRadius.pill,
                                 ),
@@ -314,7 +326,8 @@ class _MentorDiscoveryCard extends StatelessWidget {
                               child: Text(
                                 level,
                                 style: AppTypography.metadata.copyWith(
-                                  color: AppColors.textPrimary,
+                                  color: AppColors.jlptN5Foreground,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),

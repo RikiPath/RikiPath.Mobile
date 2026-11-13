@@ -30,7 +30,7 @@ void main() {
     );
   });
 
-  testWidgets('library renders the live N5-N1 filters and fixture label', (
+  testWidgets('library renders the live N5-N2 filters and fixture label (excluding N1)', (
     tester,
   ) async {
     await _pumpGrammar(tester);
@@ -68,7 +68,7 @@ void main() {
     );
     expect(
       find.byKey(const ValueKey<String>('grammar_filter_n1')),
-      findsOneWidget,
+      findsNothing,
     );
   });
 

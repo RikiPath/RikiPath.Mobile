@@ -125,10 +125,54 @@ class _NotebookCollectionScreenState
       });
     }
 
+    final entryCount = (data?.selectedCollectionKey == collection?.routeKey &&
+            !data!.isLoadingEntries)
+        ? data.entries.length
+        : (collection?.entryCount ?? 0);
+
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: AppBar(
-        title: Text(collection?.name ?? context.l10n.navigationNotebook),
+        title: collection == null
+            ? Text(context.l10n.navigationNotebook)
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      collection.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.space2),
+                  Container(
+                    key: const ValueKey<String>(
+                      'notebook_collection_count_badge',
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFEEF1),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: const Color(0xFFFFD1DC),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Text(
+                      context.l10n.itemCount(entryCount),
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.brandPrimary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
       ),
       body: SafeArea(
         top: false,

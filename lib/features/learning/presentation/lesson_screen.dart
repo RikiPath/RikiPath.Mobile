@@ -13,6 +13,7 @@ import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_co
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_content_view.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_detail_view.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_locked_view.dart';
+import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_shared_widgets.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_state_views.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_video_view.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
@@ -275,10 +276,10 @@ class LessonScreen extends ConsumerWidget {
     return session.lesson.chapterNumber > 0
         ? context.l10n.chapterLessonSummary(
             session.lesson.chapterNumber,
-            session.lesson.category,
+            localizedLessonCategory(context, session.lesson.category),
             session.lesson.level.label,
           )
-        : '${session.lesson.category} • ${session.lesson.level.label}';
+        : '${localizedLessonCategory(context, session.lesson.category)} • ${session.lesson.level.label}';
   }
 
   void _handleBack(
