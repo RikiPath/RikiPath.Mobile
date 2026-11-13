@@ -42,21 +42,18 @@ class NotebookScreen extends ConsumerWidget {
         onNotificationsPressed: () => context.push(AppRoutes.notifications),
         onCalendarPressed: () => context.push(AppRoutes.calendar),
       ),
-      body: SafeArea(
-        top: false,
-        child: state.when(
-          loading: NotebookLoadingView.new,
-          error: (_, _) => NotebookErrorView(onRetry: controller.retry),
-          data: (data) => NotebookView(
-            state: data,
-            onDismissMutationError: controller.clearMutationError,
-            onCreateCollection: () =>
-                _createCollection(context, ref, controller),
-            onOpenCollection: (collection) {
-              unawaited(controller.selectCollection(collection));
-              context.push(AppRoutes.notebookCollection(collection.routeKey));
-            },
-          ),
+      body: state.when(
+        loading: NotebookLoadingView.new,
+        error: (_, _) => NotebookErrorView(onRetry: controller.retry),
+        data: (data) => NotebookView(
+          state: data,
+          onDismissMutationError: controller.clearMutationError,
+          onCreateCollection: () =>
+              _createCollection(context, ref, controller),
+          onOpenCollection: (collection) {
+            unawaited(controller.selectCollection(collection));
+            context.push(AppRoutes.notebookCollection(collection.routeKey));
+          },
         ),
       ),
     );

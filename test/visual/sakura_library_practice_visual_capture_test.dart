@@ -6,8 +6,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_app_header.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_library_home.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
+import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
+import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
+import 'package:rikipath_mobile/features/notebook/presentation/widgets/notebook_view.dart';
 import 'package:rikipath_mobile/features/shared_bank/presentation/shared_bank_screen.dart';
 import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
@@ -172,6 +176,31 @@ void main() {
       ),
     );
   });
+
+  testWidgets(
+    'Visual Capture 05: Notebook Home with edge-to-edge compact banner flush against header',
+    (tester) async {
+      await captureScreen(
+        tester,
+        fileName: 'sakura_notebook_banner_full_width',
+        child: Scaffold(
+          backgroundColor: AppColors.learnerBackground,
+          appBar: const SakuraAppHeader(),
+          body: NotebookView(
+            state: const NotebookLibraryState(
+              collections: [],
+              localEntries: [],
+              liveEntries: [],
+              isCreatingCollection: false,
+            ),
+            onCreateCollection: () {},
+            onOpenCollection: (_) {},
+            onDismissMutationError: () {},
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class _StaticTabSwitcherPreview extends StatelessWidget {

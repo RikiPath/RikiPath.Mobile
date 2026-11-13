@@ -692,31 +692,34 @@ class _EmptyNotebook extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       key: const ValueKey<String>('notebook_empty_view'),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.space4,
-        AppSpacing.space3,
-        AppSpacing.space4,
-        AppSpacing.space8,
-      ),
+      padding: const EdgeInsets.only(bottom: AppSpacing.space8),
       children: [
         const SakuraNotebookEmptyBanner(
           key: ValueKey<String>('notebook_empty_hero_banner'),
         ),
-        const SizedBox(height: AppSpacing.space5),
-        Text(
-          context.l10n.yourCollections,
-          style: AppTypography.sectionTitle,
-        ),
-        const SizedBox(height: AppSpacing.space3),
-        SizedBox(
-          width: double.infinity,
-          child: RikiPrimaryButton(
-            key: const ValueKey<String>(
-              'notebook_empty_create_collection_button',
-            ),
-            label: context.l10n.createFirstCollectionAction,
-            leadingIcon: Icons.add,
-            onPressed: onCreateCollection,
+        const SizedBox(height: AppSpacing.space4),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.yourCollections,
+                style: AppTypography.sectionTitle,
+              ),
+              const SizedBox(height: AppSpacing.space3),
+              SizedBox(
+                width: double.infinity,
+                child: RikiPrimaryButton(
+                  key: const ValueKey<String>(
+                    'notebook_empty_create_collection_button',
+                  ),
+                  label: context.l10n.createFirstCollectionAction,
+                  leadingIcon: Icons.add,
+                  onPressed: onCreateCollection,
+                ),
+              ),
+            ],
           ),
         ),
       ],

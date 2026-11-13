@@ -7,8 +7,10 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 /// Displayed ONLY when the user has 0 collections after successful load.
 ///
 /// Visual Specifications:
-/// - Responsive 3:1 aspect ratio (2048 x 682 px) matching Home and Practice banners
-/// - Smooth 20dp border radius with subtle neutral shadow
+/// - Full-width edge-to-edge layout matching the Practice and Library banners
+/// - Responsive compact 3:1 aspect ratio (2048 x 682 px)
+/// - Zero border radius, zero outer margin, no card wrapper or heavy shadow
+/// - Flush against top app bar when mounted at the top of the scroll container
 /// - Adorable 3D chibi fox mascot (Riki-chan) on the left holding Japanese notebook & pen
 /// - Clean pastel pink-cream gradient on the right with sakura cherry blossom branch
 /// - Localized badge pill, title, and description rendered via Flutter
@@ -34,22 +36,15 @@ class SakuraNotebookEmptyBanner extends StatelessWidget {
       button: onTap != null,
       label:
           '${l10n.notebookEmptyHeroBadge}. ${l10n.notebookEmptyHeroTitle}. ${l10n.notebookEmptyHeroDescription}',
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: AppShadows.sakuraSubtle,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              splashColor: AppColors.brandPrimary.withValues(alpha: 0.12),
-              highlightColor: AppColors.brandPrimary.withValues(alpha: 0.06),
-              child: AspectRatio(
-                aspectRatio: 2048 / 682,
-                child: MediaQuery(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          splashColor: AppColors.brandPrimary.withValues(alpha: 0.12),
+          highlightColor: AppColors.brandPrimary.withValues(alpha: 0.06),
+          child: AspectRatio(
+            aspectRatio: 2048 / 682,
+            child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
                     textScaler: MediaQuery.textScalerOf(
                       context,
@@ -190,8 +185,6 @@ class SakuraNotebookEmptyBanner extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
+        );
   }
 }
