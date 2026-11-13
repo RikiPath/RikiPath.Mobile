@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum RikiToastType { success, error, warning, info }
+enum RikiToastType { success, error, warning, info, celebration }
 
 @immutable
 class RikiToastData {
@@ -30,9 +30,11 @@ class RikiToastService extends Notifier<List<RikiToastData>> {
   static const infoDuration = Duration(milliseconds: 3000);
   static const warningDuration = Duration(milliseconds: 3600);
   static const errorDuration = Duration(milliseconds: 4000);
-  static const _maximumVisibleToasts = 3;
+  static const celebrationDuration = Duration(milliseconds: 1600);
+  static const _maximumQueuedToasts = 2;
 
   int _nextId = 0;
+  final List<RikiToastData> _pending = [];
 
   @override
   List<RikiToastData> build() => const [];
@@ -89,12 +91,26 @@ class RikiToastService extends Notifier<List<RikiToastData>> {
     );
   }
 
+  int celebrate({required String title, String? description}) => show(
+    type: RikiToastType.celebration,
+    title: title,
+    description: description,
+    duration: celebrationDuration,
+  );
+
   int show({
     required RikiToastType type,
     required String title,
     String? description,
     Duration? duration,
   }) {
+    for (final existing in [...state, ..._pending]) {
+      if (existing.type == type &&
+          existing.title == title &&
+          existing.description == description) {
+        return existing.id;
+      }
+    }
     final id = _nextId++;
     final toast = RikiToastData(
       id: id,
@@ -103,25 +119,40 @@ class RikiToastService extends Notifier<List<RikiToastData>> {
       description: description,
       duration: duration ?? _durationFor(type),
     );
-    final retained = state.length >= _maximumVisibleToasts
-        ? state.sublist(state.length - (_maximumVisibleToasts - 1))
-        : state;
-    state = [...retained, toast];
+    if (state.isEmpty || _priority(type) >= _priority(state.first.type)) {
+      state = [toast];
+    } else if (_pending.length < _maximumQueuedToasts) {
+      _pending.add(toast);
+    }
     return id;
   }
 
   void dismiss(int id) {
-    if (!state.any((toast) => toast.id == id)) return;
-    state = [
-      for (final toast in state)
-        if (toast.id != id) toast,
-    ];
+    if (state.any((toast) => toast.id == id)) {
+      state = _pending.isEmpty ? const [] : [_pending.removeAt(0)];
+    } else {
+      _pending.removeWhere((toast) => toast.id == id);
+    }
   }
+
+  void clear() {
+    _pending.clear();
+    state = const [];
+  }
+
+  int _priority(RikiToastType type) => switch (type) {
+    RikiToastType.error => 3,
+    RikiToastType.warning => 2,
+    RikiToastType.celebration => 2,
+    RikiToastType.success => 1,
+    RikiToastType.info => 0,
+  };
 
   Duration _durationFor(RikiToastType type) => switch (type) {
     RikiToastType.success => successDuration,
     RikiToastType.error => errorDuration,
     RikiToastType.warning => warningDuration,
     RikiToastType.info => infoDuration,
+    RikiToastType.celebration => celebrationDuration,
   };
 }

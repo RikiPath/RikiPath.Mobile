@@ -1014,11 +1014,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get onboardingSkipPlacement => 'Bỏ qua bài đánh giá';
 
   @override
-  String get onboardingStudyLevelsTitle => 'Chọn cấp độ học và mục tiêu';
+  String get onboardingStudyLevelsTitle => 'Chọn cấp độ và mục tiêu';
 
   @override
   String get onboardingStudyLevelsDescription =>
-      'Chọn cấp độ bạn đang học trước, sau đó chọn mục tiêu JLPT riêng.';
+      'Hãy cho RikiPath biết trình độ hiện tại và mục tiêu bạn muốn đạt được.';
 
   @override
   String get onboardingCurrentStudyLevelTitle => 'Cấp độ bạn đang học';
@@ -1115,11 +1115,22 @@ class AppLocalizationsVi extends AppLocalizations {
   String get backToGoalSelection => 'Quay lại bước chọn mục tiêu';
 
   @override
-  String get onboardingStudyTimeTitle => 'Bạn muốn học bao lâu mỗi ngày?';
+  String get onboardingStudyTimeTitle => 'Thiết lập kế hoạch học tập';
 
   @override
   String get onboardingStudyTimeDescription =>
-      'Chọn nhịp học phù hợp với lịch sinh hoạt của bạn. Sự đều đặn quan trọng hơn tốc độ.';
+      'Chọn thời lượng học phù hợp với lịch sinh hoạt của bạn.';
+
+  @override
+  String get onboardingCustomMinutesLabel => 'Số phút khác mỗi ngày';
+
+  @override
+  String get onboardingCustomMinutesHelper =>
+      'Từ 1 đến 1.440 phút theo giới hạn hồ sơ.';
+
+  @override
+  String get onboardingCustomMinutesError =>
+      'Vui lòng nhập từ 1 đến 1.440 phút.';
 
   @override
   String studyMinutesPerDay(int minutes) {
@@ -1152,7 +1163,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get readyToStart => 'Sẵn sàng bắt đầu!';
 
   @override
-  String get learningPlanReady => 'Lộ trình học của bạn đã được thiết lập.';
+  String get learningPlanReady =>
+      'Mục tiêu học tập của bạn đã được lưu thành công.';
 
   @override
   String studySummary(int minutes, String description) {
@@ -2403,11 +2415,21 @@ class AppLocalizationsVi extends AppLocalizations {
   String get accountUnverifiedTitle => 'Tài khoản chưa được xác thực';
 
   @override
-  String get logoutConfirmationTitle => 'Đăng xuất khỏi RikiPath?';
+  String get logoutConfirmationTitle => 'Bạn muốn đăng xuất?';
 
   @override
   String get logoutConfirmationMessage =>
-      'Bạn sẽ cần đăng nhập lại để tiếp tục hành trình học trên thiết bị này.';
+      'Bạn sẽ cần đăng nhập lại để tiếp tục học trên thiết bị này.';
+
+  @override
+  String get logoutStay => 'Ở lại';
+
+  @override
+  String get logoutSuccessTitle => 'Đã đăng xuất';
+
+  @override
+  String get logoutFailureTitle =>
+      'Không thể xóa phiên đăng nhập trên thiết bị. Vui lòng thử lại.';
 
   @override
   String get profileNameSection => 'THÔNG TIN HIỂN THỊ';

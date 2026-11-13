@@ -6,6 +6,7 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_hourglass_overlay.dart';
 import 'package:rikipath_mobile/features/auth/application/login_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/mentor_registration_intent.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
@@ -49,6 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submit() async {
+    if (ref.read(loginControllerProvider).isLoading) return;
     FocusScope.of(context).unfocus();
     final router = GoRouter.of(context);
     final succeeded = await ref
@@ -89,148 +91,149 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final l10n = context.l10n;
     final state = ref.watch(loginControllerProvider);
 
-    return AuthPage(
-      topContentOffset: AppSpacing.space12,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Column(
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        AuthPage(
+          topContentOffset: AppSpacing.space12,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const RikiAuthHeader(),
-              const SizedBox(height: AppSpacing.space6),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: RikiPromotionalPill(message: l10n.authPromotion),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const RikiAuthHeader(),
+                  const SizedBox(height: AppSpacing.space6),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: RikiPromotionalPill(message: l10n.authPromotion),
+                  ),
+                  const SizedBox(height: AppSpacing.space4),
+                  Text(l10n.loginWelcome, style: AppTypography.pageTitle),
+                  const SizedBox(height: AppSpacing.space2),
+                  Text(
+                    l10n.loginSubtitle,
+                    style: AppTypography.body.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.space6),
+                  RikiTextField(
+                    key: const Key('login_email_field'),
+                    label: l10n.studentEmail,
+                    hintText: l10n.emailHint,
+                    controller: _emailController,
+                    focusNode: _emailFocusNode,
+                    prefixIcon: Icons.mail_outline,
+                    errorText: state.emailError,
+                    enabled: !state.isLoading,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    onSubmitted: (_) => _passwordFocusNode.requestFocus(),
+                    autofillHints: const [AutofillHints.email],
+                    autocorrect: false,
+                    onChanged: (_) => ref
+                        .read(loginControllerProvider.notifier)
+                        .clearFeedback(),
+                  ),
+                  const SizedBox(height: AppSpacing.fieldGap),
+                  RikiPasswordField(
+                    key: const Key('login_password_field'),
+                    label: l10n.password,
+                    hintText: l10n.passwordHint,
+                    controller: _passwordController,
+                    errorText: state.passwordError,
+                    enabled: !state.isLoading,
+                    textInputAction: TextInputAction.done,
+                    onChanged: (_) => ref
+                        .read(loginControllerProvider.notifier)
+                        .clearFeedback(),
+                    onSubmitted: (_) {
+                      if (!state.isLoading) _submit();
+                    },
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: RikiTextButton(
+                      key: const Key('forgot_password_button'),
+                      label: l10n.forgotPassword,
+                      onPressed: state.isLoading
+                          ? null
+                          : () => context.push(AppRoutes.forgotPassword),
+                    ),
+                  ),
+                  RikiCheckboxRow(
+                    value: _rememberSession,
+                    compact: true,
+                    centerChild: true,
+                    onChanged: state.isLoading
+                        ? null
+                        : (value) {
+                            setState(() => _rememberSession = value ?? false);
+                          },
+                    child: Text(l10n.rememberSession),
+                  ),
+                  const SizedBox(height: AppSpacing.space3),
+                  SizedBox(
+                    height: 54,
+                    child: RikiPrimaryButton(
+                      key: const Key('login_submit_button'),
+                      label: l10n.login,
+                      trailingIcon: Icons.arrow_forward,
+                      onPressed: state.isLoading ? null : _submit,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: AppSpacing.space4),
-              Text(l10n.loginWelcome, style: AppTypography.pageTitle),
-              const SizedBox(height: AppSpacing.space2),
-              Text(
-                l10n.loginSubtitle,
-                style: AppTypography.body.copyWith(
-                  color: AppColors.textSecondary,
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.space4),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: RikiPrimaryButton(
+                        key: const Key('public_mentor_registration_entry'),
+                        label: l10n.registerAsMentor,
+                        loadingLabel: l10n.registerAsMentor,
+                        leadingIcon: Icons.volunteer_activism_outlined,
+                        backgroundColor: AppColors.mentorAction,
+                        pressedColor: AppColors.mentorActionPressed,
+                        isLoading: _openingMentorRegistration,
+                        onPressed: state.isLoading
+                            ? null
+                            : _openMentorRegistration,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.space3),
+                    AuthNavigationPrompt(
+                      message: l10n.noAccount,
+                      actionLabel: l10n.register,
+                      onPressed: state.isLoading
+                          ? null
+                          : () async {
+                              await ref
+                                  .read(mentorRegistrationIntentProvider)
+                                  .clear();
+                              if (context.mounted) {
+                                context.push(AppRoutes.register);
+                              }
+                            },
+                    ),
+                    const SizedBox(height: AppSpacing.space2),
+                    const AuthSecurityFooter(),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.space6),
-              RikiTextField(
-                key: const Key('login_email_field'),
-                label: l10n.studentEmail,
-                hintText: l10n.emailHint,
-                controller: _emailController,
-                focusNode: _emailFocusNode,
-                prefixIcon: Icons.mail_outline,
-                suffixIcon: state.isLoading
-                    ? const Icon(Icons.check, color: AppColors.success)
-                    : null,
-                errorText: state.emailError,
-                enabled: !state.isLoading,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                onSubmitted: (_) => _passwordFocusNode.requestFocus(),
-                autofillHints: const [AutofillHints.email],
-                autocorrect: false,
-                onChanged: (_) =>
-                    ref.read(loginControllerProvider.notifier).clearFeedback(),
-              ),
-              const SizedBox(height: AppSpacing.fieldGap),
-              RikiPasswordField(
-                key: const Key('login_password_field'),
-                label: l10n.password,
-                hintText: l10n.passwordHint,
-                controller: _passwordController,
-                errorText: state.passwordError,
-                enabled: !state.isLoading,
-                textInputAction: TextInputAction.done,
-                onChanged: (_) =>
-                    ref.read(loginControllerProvider.notifier).clearFeedback(),
-                onSubmitted: (_) {
-                  if (!state.isLoading) _submit();
-                },
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: RikiTextButton(
-                  key: const Key('forgot_password_button'),
-                  label: l10n.forgotPassword,
-                  onPressed: state.isLoading
-                      ? null
-                      : () => context.push(AppRoutes.forgotPassword),
-                ),
-              ),
-              RikiCheckboxRow(
-                value: _rememberSession,
-                compact: true,
-                centerChild: true,
-                onChanged: state.isLoading
-                    ? null
-                    : (value) {
-                        setState(() => _rememberSession = value ?? false);
-                      },
-                child: Text(l10n.rememberSession),
-              ),
-              const SizedBox(height: AppSpacing.space3),
-              SizedBox(
-                height: 54,
-                child: RikiPrimaryButton(
-                  key: const Key('login_submit_button'),
-                  label: l10n.login,
-                  loadingLabel: l10n.loggingIn,
-                  trailingIcon: Icons.arrow_forward,
-                  isLoading: state.isLoading,
-                  onPressed: _submit,
-                ),
-              ),
-              if (state.isLoading) ...[
-                const SizedBox(height: AppSpacing.space4),
-                RikiWarningBanner(
-                  icon: Icons.hourglass_bottom,
-                  message: l10n.loginSecureConnection,
-                ),
-                const SizedBox(height: AppSpacing.space3),
-                RikiProgressIndicator(semanticsLabel: l10n.loggingInSemantics),
-              ],
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.space4),
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: RikiPrimaryButton(
-                    key: const Key('public_mentor_registration_entry'),
-                    label: l10n.registerAsMentor,
-                    loadingLabel: l10n.registerAsMentor,
-                    leadingIcon: Icons.volunteer_activism_outlined,
-                    backgroundColor: AppColors.mentorAction,
-                    pressedColor: AppColors.mentorActionPressed,
-                    isLoading: _openingMentorRegistration,
-                    onPressed: state.isLoading ? null : _openMentorRegistration,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.space3),
-                AuthNavigationPrompt(
-                  message: l10n.noAccount,
-                  actionLabel: l10n.register,
-                  onPressed: state.isLoading
-                      ? null
-                      : () async {
-                          await ref
-                              .read(mentorRegistrationIntentProvider)
-                              .clear();
-                          if (context.mounted) context.push(AppRoutes.register);
-                        },
-                ),
-                const SizedBox(height: AppSpacing.space2),
-                const AuthSecurityFooter(),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+        SakuraHourglassOverlay(
+          visible: state.isLoading,
+          message: l10n.loggingIn,
+        ),
+      ],
     );
   }
 }

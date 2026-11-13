@@ -1060,6 +1060,16 @@ class AppLocalizationsJa extends AppLocalizations {
       '生活リズムに合うペースを選びましょう。速さより継続することが大切です。';
 
   @override
+  String get onboardingCustomMinutesLabel => '1日の学習時間を入力';
+
+  @override
+  String get onboardingCustomMinutesHelper =>
+      'プロフィールで許可される1～1,440分の範囲で入力してください。';
+
+  @override
+  String get onboardingCustomMinutesError => '1～1,440分を入力してください。';
+
+  @override
   String studyMinutesPerDay(int minutes) {
     return '1日$minutes分';
   }
@@ -2302,6 +2312,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get logoutConfirmationMessage => 'この端末で学習を続けるには、もう一度ログインする必要があります。';
+
+  @override
+  String get logoutStay => 'このまま続ける';
+
+  @override
+  String get logoutSuccessTitle => 'ログアウトしました';
+
+  @override
+  String get logoutFailureTitle => '端末のログイン情報を削除できませんでした。もう一度お試しください。';
 
   @override
   String get profileNameSection => '表示情報';

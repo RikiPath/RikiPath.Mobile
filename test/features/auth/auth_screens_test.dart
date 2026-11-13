@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -393,6 +393,15 @@ void main() {
       await tester.pump();
 
       expect(find.text('Đang đăng nhập...'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('sakura_hourglass_overlay')),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Đang kết nối an toàn với tài khoản của bạn...'),
+        findsNothing,
+      );
+      expect(find.byType(LinearProgressIndicator), findsNothing);
       final loginButton = find.descendant(
         of: find.byKey(const Key('login_submit_button')),
         matching: find.byType(FilledButton),

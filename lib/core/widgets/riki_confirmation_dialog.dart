@@ -25,23 +25,38 @@ class RikiConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = destructive ? AppColors.error : AppColors.brandPrimary;
-    final background = destructive
-        ? AppColors.errorBackground
-        : AppColors.brandTint;
+    const accent = AppColors.brandPrimary;
 
     return AlertDialog(
       backgroundColor: AppColors.surface,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.card),
+        borderRadius: BorderRadius.circular(24),
       ),
       icon: Container(
-        width: 52,
-        height: 52,
+        width: 56,
+        height: 56,
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: background, shape: BoxShape.circle),
-        child: Icon(icon, color: accent, size: 26),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFFFF0F4), Color(0xFFFFE5EB)],
+          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFFF8BBD0).withValues(alpha: 0.8),
+            width: 1.5,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x1CE05A7A),
+              blurRadius: 14,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: accent, size: 28),
       ),
       title: Text(
         title,
@@ -55,20 +70,31 @@ class RikiConfirmationDialog extends StatelessWidget {
       ),
       actionsAlignment: MainAxisAlignment.end,
       actions: [
-        TextButton(
+        OutlinedButton(
           key: cancelKey,
           onPressed: () => Navigator.of(context).pop(false),
+          style: OutlinedButton.styleFrom(
+            backgroundColor: const Color(0xFFFFF7F9),
+            foregroundColor: AppColors.textSecondary,
+            side: const BorderSide(color: Color(0xFFEBDDE1), width: 1.2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.button),
+            ),
+          ),
           child: Text(cancelLabel),
         ),
         FilledButton(
           key: confirmKey,
           onPressed: () => Navigator.of(context).pop(true),
-          style: destructive
-              ? FilledButton.styleFrom(
-                  backgroundColor: AppColors.error,
-                  foregroundColor: Colors.white,
-                )
-              : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.brandPrimary,
+            foregroundColor: Colors.white,
+            elevation: 2,
+            shadowColor: AppColors.brandShadow,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.button),
+            ),
+          ),
           child: Text(confirmLabel),
         ),
       ],

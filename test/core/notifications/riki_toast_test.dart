@@ -34,6 +34,28 @@ void main() {
     );
   });
 
+  testWidgets('major success uses a single centered celebration', (
+    tester,
+  ) async {
+    final container = await _pumpToastApp(tester);
+    container
+        .read(rikiToastServiceProvider.notifier)
+        .celebrate(
+          title: 'Đăng nhập thành công',
+          description: 'Chào mừng bạn trở lại RikiPath!',
+        );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 220));
+    expect(
+      find.byKey(const ValueKey<String>('riki_toast_celebration')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('riki_toast_success')),
+      findsNothing,
+    );
+  });
+
   testWidgets('error toast is visually distinct and never exposes raw data', (
     tester,
   ) async {
@@ -177,6 +199,46 @@ void main() {
       findsOneWidget,
     );
     expect(container.read(rikiToastServiceProvider), hasLength(1));
+  });
+
+  testWidgets(
+    'duplicate events share one toast and errors replace low priority',
+    (tester) async {
+      final container = await _pumpToastApp(tester);
+      final service = container.read(rikiToastServiceProvider.notifier);
+      final first = service.info(title: 'Đang cập nhật');
+      final duplicate = service.info(title: 'Đang cập nhật');
+      expect(duplicate, first);
+      expect(container.read(rikiToastServiceProvider), hasLength(1));
+
+      service.error(title: 'Không thể cập nhật');
+      await tester.pump();
+      expect(
+        find.byKey(const ValueKey<String>('riki_toast_error')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('riki_toast_info')),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets('lower-priority feedback waits and logout clears old events', (
+    tester,
+  ) async {
+    final container = await _pumpToastApp(tester);
+    final service = container.read(rikiToastServiceProvider.notifier);
+    final errorId = service.error(title: 'Lỗi mạng');
+    service.info(title: 'Đã cập nhật');
+    expect(container.read(rikiToastServiceProvider).single.title, 'Lỗi mạng');
+    service.dismiss(errorId);
+    expect(
+      container.read(rikiToastServiceProvider).single.title,
+      'Đã cập nhật',
+    );
+    service.clear();
+    expect(container.read(rikiToastServiceProvider), isEmpty);
   });
 }
 

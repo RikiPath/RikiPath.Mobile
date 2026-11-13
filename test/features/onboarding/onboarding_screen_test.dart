@@ -50,30 +50,30 @@ void main() {
     ]);
   });
 
-  testWidgets('target step follows the live N5 through N2 catalog (excluding N1)', (
-    tester,
-  ) async {
-    await _pumpOnboarding(tester);
-    await _skipPlacement(tester);
+  testWidgets(
+    'target step follows the live N5 through N2 catalog (excluding N1)',
+    (tester) async {
+      await _pumpOnboarding(tester);
 
-    expect(
-      find.byKey(const ValueKey<String>('current_level_n5')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('current_level_n4')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('current_level_n3')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey<String>('jlpt_n5')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('jlpt_n4')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('jlpt_n3')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('jlpt_n2')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('jlpt_n1')), findsNothing);
-  });
+      expect(
+        find.byKey(const ValueKey<String>('current_level_n5')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('current_level_n4')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('current_level_n3')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey<String>('jlpt_n5')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('jlpt_n4')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('jlpt_n3')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('jlpt_n2')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('jlpt_n1')), findsNothing);
+    },
+  );
 
   testWidgets('Placement Test call to action is localized in Japanese', (
     tester,
@@ -107,7 +107,6 @@ void main() {
     tester,
   ) async {
     await _pumpOnboarding(tester);
-    await _skipPlacement(tester);
 
     final button = tester.widget<RikiPrimaryButton>(
       find.byKey(const ValueKey<String>('onboarding_continue_button')),
@@ -118,7 +117,6 @@ void main() {
   testWidgets('selecting a JLPT target stores the typed level', (tester) async {
     final harness = await _pumpOnboarding(tester);
 
-    await _skipPlacement(tester);
     await _selectCurrentAndTarget(tester, JlptLevel.n5, JlptLevel.n4);
 
     expect(
@@ -134,14 +132,56 @@ void main() {
     tester,
   ) async {
     final harness = await _pumpOnboarding(tester);
-    await _skipPlacement(tester);
-
+    await _selectCurrentAndTarget(tester, JlptLevel.n5, JlptLevel.n4);
+    expect(harness.placementRepository.skipCalls, 0);
+    await tester.tap(
+      find.byKey(const ValueKey<String>('onboarding_continue_button')),
+    );
+    await tester.pumpAndSettle();
     expect(harness.placementRepository.skipCalls, 1);
     expect(harness.profileRepository.goalCalls, 0);
     expect(harness.profileRepository.studyLevelCalls, 0);
     expect(
       harness.container.read(onboardingControllerProvider).currentStep,
+      OnboardingStep.studyTime,
+    );
+  });
+
+  testWidgets('completed Placement is not overwritten by Skip', (tester) async {
+    final harness = await _pumpOnboarding(tester);
+    harness.placementRepository.status = const PlacementTestStatus(
+      hasCompletedPlacementTest: true,
+      placementDecision: PlacementDecision.completed,
+    );
+    await _selectCurrentAndTarget(tester, JlptLevel.n5, JlptLevel.n4);
+    await tester.tap(
+      find.byKey(const ValueKey<String>('onboarding_continue_button')),
+    );
+    await tester.pumpAndSettle();
+    expect(harness.placementRepository.skipCalls, 0);
+    expect(
+      harness.container.read(onboardingControllerProvider).currentStep,
+      OnboardingStep.studyTime,
+    );
+  });
+
+  testWidgets('failed Placement Skip keeps the learner on step one', (
+    tester,
+  ) async {
+    final harness = await _pumpOnboarding(tester);
+    harness.placementRepository.skipFails = true;
+    await _selectCurrentAndTarget(tester, JlptLevel.n5, JlptLevel.n4);
+    await tester.tap(
+      find.byKey(const ValueKey<String>('onboarding_continue_button')),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      harness.container.read(onboardingControllerProvider).currentStep,
       OnboardingStep.studyLevels,
+    );
+    expect(
+      harness.container.read(onboardingControllerProvider).placementSkipFailed,
+      isTrue,
     );
   });
 
@@ -153,7 +193,7 @@ void main() {
 
     final state = harness.container.read(onboardingControllerProvider);
     expect(state.currentStep, OnboardingStep.studyTime);
-    expect(find.text('Bạn muốn học bao lâu mỗi ngày?'), findsOneWidget);
+    expect(find.text('Thiết lập kế hoạch học tập'), findsOneWidget);
   });
 
   testWidgets('study-time step displays all five supported choices', (
@@ -177,6 +217,31 @@ void main() {
       find.byKey(const ValueKey<String>('onboarding_complete_button')),
     );
     expect(button.onPressed, isNull);
+  });
+
+  testWidgets('custom daily minutes obey the backend profile range', (
+    tester,
+  ) async {
+    final harness = await _pumpOnboarding(tester);
+    await _reachStudyTime(tester, JlptLevel.n3);
+    final field = find.byType(TextFormField);
+    await tester.enterText(field, '120');
+    await tester.pump();
+    expect(
+      harness.container.read(onboardingControllerProvider).dailyStudyMinutes,
+      120,
+    );
+    expect(
+      harness.container.read(onboardingControllerProvider).canComplete,
+      isTrue,
+    );
+    await tester.enterText(field, '1441');
+    await tester.pump();
+    expect(
+      harness.container.read(onboardingControllerProvider).canComplete,
+      isFalse,
+    );
+    expect(find.text('Vui lòng nhập từ 1 đến 1.440 phút.'), findsOneWidget);
   });
 
   testWidgets('back from study time preserves both selections', (tester) async {
@@ -240,6 +305,26 @@ void main() {
     },
   );
 
+  testWidgets('mismatched Backend response cannot show completion', (
+    tester,
+  ) async {
+    final harness = await _pumpOnboarding(tester);
+    harness.profileRepository.returnMismatchedGoal = true;
+    await _reachCompletion(
+      tester,
+      level: JlptLevel.n3,
+      studyTime: DailyStudyTime.thirty,
+    );
+    expect(
+      harness.container.read(onboardingControllerProvider).currentStep,
+      OnboardingStep.studyTime,
+    );
+    expect(
+      harness.container.read(onboardingControllerProvider).submissionFailed,
+      isTrue,
+    );
+  });
+
   testWidgets('back from completion keeps choices and returns to study time', (
     tester,
   ) async {
@@ -289,6 +374,28 @@ void main() {
     expect(find.byType(OnboardingScreen), findsOneWidget);
     expect(find.byType(RikiBottomNavigationBar), findsNothing);
   });
+
+  for (final width in <double>[360, 393, 412]) {
+    testWidgets(
+      'fixed onboarding footer remains usable at ${width.toInt()}dp',
+      (tester) async {
+        await _pumpOnboarding(tester);
+        tester.view.physicalSize = Size(width, 844);
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey<String>('onboarding_continue_button')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+        await _reachStudyTime(tester, JlptLevel.n4);
+        expect(
+          find.byKey(const ValueKey<String>('onboarding_complete_button')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }
 
 class _OnboardingHarness {
@@ -364,6 +471,7 @@ class _OnboardingProfileRepository
   int? savedTargetLevelId;
   int? savedDailyMinutes;
   DateTime? savedExamDate;
+  bool returnMismatchedGoal = false;
 
   @override
   Future<UserProfile> switchStudyLevel({
@@ -383,7 +491,7 @@ class _OnboardingProfileRepository
     savedTargetLevelId = targetJlptLevelId;
     savedDailyMinutes = dailyStudyMinutes;
     return _profile(
-      targetLevelId: targetJlptLevelId,
+      targetLevelId: returnMismatchedGoal ? null : targetJlptLevelId,
       dailyStudyMinutes: dailyStudyMinutes,
     );
   }
@@ -399,7 +507,7 @@ class _OnboardingProfileRepository
     savedDailyMinutes = dailyStudyMinutes;
     savedExamDate = targetExamDate;
     return _profile(
-      targetLevelId: targetJlptLevelId,
+      targetLevelId: returnMismatchedGoal ? null : targetJlptLevelId,
       dailyStudyMinutes: dailyStudyMinutes,
       targetExamDate: targetExamDate,
     );
@@ -450,10 +558,15 @@ class _OnboardingProfileRepository
 class _OnboardingPlacementRepository
     implements PlacementTestRepository, PlacementSkipRepository {
   int skipCalls = 0;
+  bool skipFails = false;
+  PlacementTestStatus status = const PlacementTestStatus(
+    hasCompletedPlacementTest: false,
+  );
 
   @override
   Future<PlacementTestStatus> skip() async {
     skipCalls++;
+    if (skipFails) throw StateError('QA Placement Skip failed');
     return const PlacementTestStatus(
       hasCompletedPlacementTest: false,
       placementDecision: PlacementDecision.skipped,
@@ -461,8 +574,7 @@ class _OnboardingPlacementRepository
   }
 
   @override
-  Future<PlacementTestStatus> loadStatus() async =>
-      const PlacementTestStatus(hasCompletedPlacementTest: false);
+  Future<PlacementTestStatus> loadStatus() async => status;
 
   @override
   Future<PlacementTestAttempt?> loadActiveAttempt() async => null;
@@ -482,7 +594,6 @@ class _OnboardingPlacementRepository
 }
 
 Future<void> _reachStudyTime(WidgetTester tester, JlptLevel level) async {
-  await _skipPlacement(tester);
   await _selectCurrentAndTarget(tester, JlptLevel.n5, level);
   await tester.ensureVisible(
     find.byKey(const ValueKey<String>('onboarding_continue_button')),
@@ -490,16 +601,6 @@ Future<void> _reachStudyTime(WidgetTester tester, JlptLevel level) async {
   await tester.tap(
     find.byKey(const ValueKey<String>('onboarding_continue_button')),
   );
-  await tester.pumpAndSettle();
-}
-
-Future<void> _skipPlacement(WidgetTester tester) async {
-  final skip = find.byKey(
-    const ValueKey<String>('onboarding_skip_placement_button'),
-  );
-  if (skip.evaluate().isEmpty) return;
-  await tester.ensureVisible(skip);
-  await tester.tap(skip);
   await tester.pumpAndSettle();
 }
 

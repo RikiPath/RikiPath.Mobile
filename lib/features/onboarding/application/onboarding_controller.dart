@@ -7,7 +7,7 @@ final onboardingControllerProvider =
       OnboardingController.new,
     );
 
-enum OnboardingStep { placementChoice, studyLevels, studyTime, complete }
+enum OnboardingStep { studyLevels, studyTime, complete }
 
 enum DailyStudyTime {
   fifteen(minutes: 15, description: 'Nhẹ nhàng'),
@@ -26,13 +26,15 @@ enum DailyStudyTime {
 
 class OnboardingState {
   const OnboardingState({
-    this.currentStep = OnboardingStep.placementChoice,
+    this.currentStep = OnboardingStep.studyLevels,
     this.selectedCurrentStudyLevel,
     this.selectedJlptLevel,
     this.selectedStudyTime,
     this.targetExamDate,
     this.dailyStudyMinutes,
+    this.customMinutesTouched = false,
     this.placementSkipFailed = false,
+    this.placementDecisionRecorded = false,
     this.isSubmitting = false,
     this.submissionFailed = false,
   });
@@ -43,7 +45,9 @@ class OnboardingState {
   final DailyStudyTime? selectedStudyTime;
   final DateTime? targetExamDate;
   final int? dailyStudyMinutes;
+  final bool customMinutesTouched;
   final bool placementSkipFailed;
+  final bool placementDecisionRecorded;
   final bool isSubmitting;
   final bool submissionFailed;
 
@@ -59,7 +63,11 @@ class OnboardingState {
     DailyStudyTime? selectedStudyTime,
     DateTime? targetExamDate,
     int? dailyStudyMinutes,
+    bool clearSelectedStudyTime = false,
+    bool clearDailyStudyMinutes = false,
+    bool? customMinutesTouched,
     bool? placementSkipFailed,
+    bool? placementDecisionRecorded,
     bool? isSubmitting,
     bool? submissionFailed,
   }) {
@@ -68,10 +76,17 @@ class OnboardingState {
       selectedCurrentStudyLevel:
           selectedCurrentStudyLevel ?? this.selectedCurrentStudyLevel,
       selectedJlptLevel: selectedJlptLevel ?? this.selectedJlptLevel,
-      selectedStudyTime: selectedStudyTime ?? this.selectedStudyTime,
+      selectedStudyTime: clearSelectedStudyTime
+          ? null
+          : selectedStudyTime ?? this.selectedStudyTime,
       targetExamDate: targetExamDate ?? this.targetExamDate,
-      dailyStudyMinutes: dailyStudyMinutes ?? this.dailyStudyMinutes,
+      dailyStudyMinutes: clearDailyStudyMinutes
+          ? null
+          : dailyStudyMinutes ?? this.dailyStudyMinutes,
+      customMinutesTouched: customMinutesTouched ?? this.customMinutesTouched,
       placementSkipFailed: placementSkipFailed ?? this.placementSkipFailed,
+      placementDecisionRecorded:
+          placementDecisionRecorded ?? this.placementDecisionRecorded,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       submissionFailed: submissionFailed ?? this.submissionFailed,
     );
@@ -94,7 +109,22 @@ class OnboardingController extends Notifier<OnboardingState> {
   }
 
   void selectStudyTime(DailyStudyTime studyTime) {
-    state = state.copyWith(selectedStudyTime: studyTime);
+    state = state.copyWith(
+      selectedStudyTime: studyTime,
+      dailyStudyMinutes: studyTime.minutes,
+      customMinutesTouched: false,
+    );
+  }
+
+  void selectCustomStudyMinutes(int? minutes) {
+    state = state.copyWith(
+      clearSelectedStudyTime: true,
+      clearDailyStudyMinutes: minutes == null || minutes < 1 || minutes > 1440,
+      dailyStudyMinutes: minutes != null && minutes >= 1 && minutes <= 1440
+          ? minutes
+          : null,
+      customMinutesTouched: true,
+    );
   }
 
   void selectTargetExamDate(DateTime date) {
@@ -106,9 +136,9 @@ class OnboardingController extends Notifier<OnboardingState> {
     state = state.copyWith(currentStep: OnboardingStep.studyTime);
   }
 
-  void continueAfterPlacementChoice() {
+  void recordPlacementDecision() {
     state = state.copyWith(
-      currentStep: OnboardingStep.studyLevels,
+      placementDecisionRecorded: true,
       placementSkipFailed: false,
       isSubmitting: false,
     );
@@ -124,7 +154,7 @@ class OnboardingController extends Notifier<OnboardingState> {
     required int dailyMinutes,
     required DateTime? targetExamDate,
   }) {
-    if (state.currentStep != OnboardingStep.placementChoice ||
+    if (state.currentStep != OnboardingStep.studyLevels ||
         state.selectedCurrentStudyLevel != null ||
         state.selectedJlptLevel != null) {
       return;
@@ -157,7 +187,7 @@ class OnboardingController extends Notifier<OnboardingState> {
   }
 
   void startPlacementSkip() {
-    if (state.isSubmitting) return;
+    if (state.isSubmitting || !state.canContinue) return;
     state = state.copyWith(isSubmitting: true, placementSkipFailed: false);
   }
 
@@ -167,10 +197,7 @@ class OnboardingController extends Notifier<OnboardingState> {
 
   void goBack() {
     switch (state.currentStep) {
-      case OnboardingStep.placementChoice:
-        return;
       case OnboardingStep.studyLevels:
-        state = state.copyWith(currentStep: OnboardingStep.placementChoice);
         return;
       case OnboardingStep.studyTime:
         state = state.copyWith(currentStep: OnboardingStep.studyLevels);

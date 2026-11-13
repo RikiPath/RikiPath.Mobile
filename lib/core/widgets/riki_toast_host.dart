@@ -22,33 +22,51 @@ class RikiToastHost extends ConsumerWidget {
       fit: StackFit.expand,
       children: [
         child,
-        Positioned(
-          top: topInset,
-          left: AppSpacing.space4,
-          right: AppSpacing.space4,
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final toast in toasts) ...[
-                    _RikiToastCard(
-                      key: ValueKey<int>(toast.id),
-                      toast: toast,
-                      onDismiss: () => ref
-                          .read(rikiToastServiceProvider.notifier)
-                          .dismiss(toast.id),
-                    ),
-                    if (toast != toasts.last)
-                      const SizedBox(height: AppSpacing.space2),
+        if (toasts.isNotEmpty && toasts.first.type == RikiToastType.celebration)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 340),
+                  child: _RikiToastCard(
+                    key: ValueKey<int>(toasts.first.id),
+                    toast: toasts.first,
+                    onDismiss: () => ref
+                        .read(rikiToastServiceProvider.notifier)
+                        .dismiss(toasts.first.id),
+                  ),
+                ),
+              ),
+            ),
+          )
+        else
+          Positioned(
+            top: topInset,
+            left: AppSpacing.space4,
+            right: AppSpacing.space4,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final toast in toasts) ...[
+                      _RikiToastCard(
+                        key: ValueKey<int>(toast.id),
+                        toast: toast,
+                        onDismiss: () => ref
+                            .read(rikiToastServiceProvider.notifier)
+                            .dismiss(toast.id),
+                      ),
+                      if (toast != toasts.last)
+                        const SizedBox(height: AppSpacing.space2),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -126,6 +144,75 @@ class _RikiToastCardState extends State<_RikiToastCard>
       reverseCurve: Curves.easeInCubic,
     );
     final description = widget.toast.description;
+
+    if (widget.toast.type == RikiToastType.celebration) {
+      return FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.94, end: 1).animate(animation),
+          child: Semantics(
+            container: true,
+            liveRegion: true,
+            label: description == null
+                ? widget.toast.title
+                : '${widget.toast.title}. $description',
+            child: Material(
+              key: const ValueKey<String>('riki_toast_celebration'),
+              color: Colors.transparent,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF30243B), Color(0xFF51304B)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  border: Border.all(color: const Color(0xFFEBA3BD)),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.brandPrimary.withValues(alpha: 0.22),
+                      blurRadius: 24,
+                      spreadRadius: 3,
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.space5),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.spa_rounded,
+                        size: 44,
+                        color: Color(0xFFFFA9C7),
+                      ),
+                      const SizedBox(height: AppSpacing.space2),
+                      Text(
+                        widget.toast.title,
+                        textAlign: TextAlign.center,
+                        style: AppTypography.sectionTitle.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                      if (description != null && description.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.space1),
+                        Text(
+                          description,
+                          textAlign: TextAlign.center,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: const Color(0xFFF7E4EC),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return FadeTransition(
       opacity: animation,
@@ -257,9 +344,14 @@ class _ToastVisual {
       icon: Icons.warning_amber_rounded,
     ),
     RikiToastType.info => const _ToastVisual(
+      accent: AppColors.info,
+      background: AppColors.infoBackground,
+      icon: Icons.info_outline_rounded,
+    ),
+    RikiToastType.celebration => const _ToastVisual(
       accent: AppColors.brandPrimary,
       background: AppColors.brandTint,
-      icon: Icons.info_outline_rounded,
+      icon: Icons.spa_rounded,
     ),
   };
 }

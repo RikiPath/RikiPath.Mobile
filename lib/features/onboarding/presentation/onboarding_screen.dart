@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
@@ -13,6 +14,7 @@ import 'package:rikipath_mobile/features/onboarding/application/onboarding_contr
 import 'package:rikipath_mobile/features/placement_test/application/placement_test_controller.dart';
 import 'package:rikipath_mobile/features/placement_test/domain/placement_test_repository.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
+import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile_repository.dart';
 
 class OnboardingScreen extends ConsumerWidget {
@@ -25,32 +27,29 @@ class OnboardingScreen extends ConsumerWidget {
     final catalog = ref.watch(jlptCatalogControllerProvider);
 
     return PopScope(
-      canPop: state.currentStep == OnboardingStep.placementChoice,
+      canPop: state.currentStep == OnboardingStep.studyLevels,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) controller.goBack();
       },
       child: Scaffold(
         body: SafeArea(
           child: switch (state.currentStep) {
-            OnboardingStep.placementChoice => _PlacementChoiceStep(
-              isSkipping: state.isSubmitting,
-              failed: state.placementSkipFailed,
-              onTakePlacement: () => context.push(AppRoutes.placementTest),
-              onSkipPlacement: () => _skipPlacement(ref, controller),
-            ),
             OnboardingStep.studyLevels => _StudyLevelsStep(
               state: state,
               catalog: catalog,
-              onBack: controller.goBack,
+              onBack: () =>
+                  context.canPop() ? context.pop() : context.go(AppRoutes.home),
               onSelectCurrent: controller.selectCurrentStudyLevel,
               onSelectTarget: controller.selectJlptLevel,
               onRetry: ref.read(jlptCatalogControllerProvider.notifier).retry,
-              onContinue: controller.continueToStudyTime,
+              onTakePlacement: () => context.push(AppRoutes.placementTest),
+              onContinue: () => _continueToStudyTime(ref, controller),
             ),
             OnboardingStep.studyTime => _StudyTimeStep(
               state: state,
               onBack: controller.goBack,
               onSelect: controller.selectStudyTime,
+              onCustom: controller.selectCustomStudyMinutes,
               onSelectExamDate: () =>
                   _selectExamDate(context, controller, state.targetExamDate),
               onComplete: () => _completeSetup(ref, controller),
@@ -88,18 +87,33 @@ class OnboardingScreen extends ConsumerWidget {
       await (repository as StudyLevelProfileRepository).switchStudyLevel(
         currentStudyLevelId: currentLevel.id,
       );
-      if (targetExamDate != null &&
-          repository is TargetExamDateProfileRepository) {
-        await (repository as TargetExamDateProfileRepository)
+      final UserProfile savedProfile;
+      if (targetExamDate != null) {
+        if (repository is! TargetExamDateProfileRepository) {
+          throw UnsupportedError('Target exam date cannot be persisted.');
+        }
+        savedProfile = await (repository as TargetExamDateProfileRepository)
             .setJlptGoalWithExamDate(
               targetJlptLevelId: level.id,
               dailyStudyMinutes: dailyMinutes,
               targetExamDate: targetExamDate,
             );
       } else {
-        await repository.setJlptGoal(
+        savedProfile = await repository.setJlptGoal(
           targetJlptLevelId: level.id,
           dailyStudyMinutes: dailyMinutes,
+        );
+      }
+      if (savedProfile.currentStudyLevelId != currentLevel.id ||
+          savedProfile.targetJlptLevelId != level.id ||
+          savedProfile.dailyStudyMinutes != dailyMinutes ||
+          (targetExamDate != null &&
+              !DateUtils.isSameDay(
+                savedProfile.targetExamDate,
+                targetExamDate,
+              ))) {
+        throw StateError(
+          'Profile save response does not match the learning goal.',
         );
       }
       await ref
@@ -117,19 +131,30 @@ class OnboardingScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _skipPlacement(
+  Future<void> _continueToStudyTime(
     WidgetRef ref,
     OnboardingController controller,
   ) async {
+    final state = ref.read(onboardingControllerProvider);
+    if (!state.canContinue || state.isSubmitting) return;
+    if (state.placementDecisionRecorded) {
+      controller.continueToStudyTime();
+      return;
+    }
     controller.startPlacementSkip();
     try {
       final repository = ref.read(placementTestRepositoryProvider);
-      if (repository is! PlacementSkipRepository) {
-        throw UnsupportedError('Placement skip is not supported.');
+      final status = await repository.loadStatus();
+      if (!status.hasCompletedPlacementTest &&
+          status.placementDecision != PlacementDecision.skipped) {
+        if (repository is! PlacementSkipRepository) {
+          throw UnsupportedError('Placement skip is not supported.');
+        }
+        await (repository as PlacementSkipRepository).skip();
       }
-      await (repository as PlacementSkipRepository).skip();
       ref.invalidate(placementTestControllerProvider);
-      controller.continueAfterPlacementChoice();
+      controller.recordPlacementDecision();
+      controller.continueToStudyTime();
     } catch (_) {
       controller.failSubmission();
       controller.placementSkipFailed();
@@ -155,80 +180,6 @@ class OnboardingScreen extends ConsumerWidget {
   }
 }
 
-class _PlacementChoiceStep extends StatelessWidget {
-  const _PlacementChoiceStep({
-    required this.isSkipping,
-    required this.failed,
-    required this.onTakePlacement,
-    required this.onSkipPlacement,
-  });
-
-  final bool isSkipping;
-  final bool failed;
-  final VoidCallback onTakePlacement;
-  final VoidCallback onSkipPlacement;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return _OnboardingPage(
-      header: const RikiAuthHeader(),
-      centered: true,
-      title: l10n.onboardingPlacementChoiceTitle,
-      description: l10n.onboardingPlacementChoiceDescription,
-      content: RikiCard(
-        key: const ValueKey<String>('onboarding_placement_choice_card'),
-        backgroundColor: AppColors.cardWarmWhite,
-        borderColor: AppColors.borderSubtlePink,
-        boxShadow: AppShadows.sakuraSubtle,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: AppSpacing.space3),
-                child: SakuraMascot(
-                  pose: SakuraMascotPose.guiding,
-                  size: 76,
-                ),
-              ),
-            ),
-            Text(
-              l10n.onboardingPlacementTitle,
-              style: AppTypography.cardTitle,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.space2),
-            Text(
-              l10n.onboardingPlacementDescription,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.space3),
-            RikiSecondaryButton(
-              key: const ValueKey<String>('onboarding_placement_test_button'),
-              label: l10n.onboardingPlacementAction,
-              leadingIcon: Icons.analytics_outlined,
-              onPressed: isSkipping ? null : onTakePlacement,
-            ),
-          ],
-        ),
-      ),
-      action: RikiPrimaryButton(
-        key: const ValueKey<String>('onboarding_skip_placement_button'),
-        label: l10n.onboardingSkipPlacement,
-        trailingIcon: Icons.arrow_forward,
-        isLoading: isSkipping,
-        loadingLabel: l10n.loading,
-        onPressed: isSkipping ? null : onSkipPlacement,
-      ),
-      helperText: failed ? l10n.checkConnectionRetry : null,
-    );
-  }
-}
-
 class _StudyLevelsStep extends StatelessWidget {
   const _StudyLevelsStep({
     required this.state,
@@ -237,6 +188,7 @@ class _StudyLevelsStep extends StatelessWidget {
     required this.onSelectCurrent,
     required this.onSelectTarget,
     required this.onRetry,
+    required this.onTakePlacement,
     required this.onContinue,
   });
 
@@ -246,6 +198,7 @@ class _StudyLevelsStep extends StatelessWidget {
   final ValueChanged<JlptLevelCatalogItem> onSelectCurrent;
   final ValueChanged<JlptLevelCatalogItem> onSelectTarget;
   final VoidCallback onRetry;
+  final VoidCallback onTakePlacement;
   final VoidCallback onContinue;
 
   @override
@@ -346,15 +299,37 @@ class _StudyLevelsStep extends StatelessWidget {
                           l10n: l10n,
                         ),
                       ),
-                  RikiCard(
-                    key: const ValueKey<String>(
-                      'onboarding_placement_test_card',
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.space2,
                     ),
-                    borderColor: AppColors.brandBorder,
-                    boxShadow: const <BoxShadow>[],
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [Text(l10n.onboardingPlacementCanTakeLater)],
+                      children: [
+                        Text(
+                          l10n.onboardingPlacementTitle,
+                          style: AppTypography.cardTitle,
+                        ),
+                        Text(
+                          l10n.onboardingPlacementDescription,
+                          style: AppTypography.metadata,
+                        ),
+                        const SizedBox(height: AppSpacing.space2),
+                        RikiSecondaryButton(
+                          key: const ValueKey<String>(
+                            'onboarding_placement_test_button',
+                          ),
+                          label: l10n.onboardingPlacementAction,
+                          leadingIcon: Icons.analytics_outlined,
+                          onPressed: state.isSubmitting
+                              ? null
+                              : onTakePlacement,
+                        ),
+                        Text(
+                          l10n.onboardingPlacementCanTakeLater,
+                          style: AppTypography.metadata,
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -364,9 +339,13 @@ class _StudyLevelsStep extends StatelessWidget {
         key: const ValueKey<String>('onboarding_continue_button'),
         label: l10n.continueLabel,
         trailingIcon: Icons.arrow_forward,
-        onPressed: state.canContinue ? onContinue : null,
+        isLoading: state.isSubmitting,
+        loadingLabel: l10n.loading,
+        onPressed: state.canContinue && !state.isSubmitting ? onContinue : null,
       ),
-      helperText: l10n.onboardingJlptHelper,
+      helperText: state.placementSkipFailed
+          ? l10n.checkConnectionRetry
+          : l10n.onboardingJlptHelper,
     );
   }
 
@@ -379,15 +358,50 @@ class _StudyLevelsStep extends StatelessWidget {
   }) {
     final level = item.level;
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.space3),
-      child: RikiSelectionCard(
+      padding: const EdgeInsets.only(bottom: AppSpacing.space2),
+      child: Material(
         key: ValueKey<String>('${keyPrefix}_${level.name}'),
-        title: item.code,
-        description: item.description ?? _descriptionFor(level, l10n),
-        badge: level == JlptLevel.n3 ? l10n.popular : null,
-        leading: _JlptLevelTile(level: level, selected: selected),
-        selected: selected,
-        onPressed: onPressed,
+        color: selected ? AppColors.brandTint : AppColors.surface,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: selected
+                ? AppColors.brandPrimary
+                : AppColors.borderSubtlePink,
+          ),
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.space3,
+              vertical: AppSpacing.space2,
+            ),
+            child: Row(
+              children: [
+                _JlptLevelTile(level: level, selected: selected),
+                const SizedBox(width: AppSpacing.space3),
+                Expanded(
+                  child: Text(
+                    item.description ?? _descriptionFor(level, l10n),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodySmall,
+                  ),
+                ),
+                Icon(
+                  selected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: selected
+                      ? AppColors.brandPrimary
+                      : AppColors.textMuted,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -408,6 +422,7 @@ class _StudyTimeStep extends StatelessWidget {
     required this.state,
     required this.onBack,
     required this.onSelect,
+    required this.onCustom,
     required this.onSelectExamDate,
     required this.onComplete,
   });
@@ -415,6 +430,7 @@ class _StudyTimeStep extends StatelessWidget {
   final OnboardingState state;
   final VoidCallback onBack;
   final ValueChanged<DailyStudyTime> onSelect;
+  final ValueChanged<int?> onCustom;
   final VoidCallback onSelectExamDate;
   final VoidCallback onComplete;
 
@@ -431,26 +447,86 @@ class _StudyTimeStep extends StatelessWidget {
       title: l10n.onboardingStudyTimeTitle,
       description: l10n.onboardingStudyTimeDescription,
       content: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ...DailyStudyTime.values.map((studyTime) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.space3),
-              child: RikiSelectionCard(
-                key: ValueKey<String>('study_time_${studyTime.minutes}'),
-                title: l10n.studyMinutesPerDay(studyTime.minutes),
-                description: _studyPaceDescription(studyTime, l10n),
-                badge: studyTime == DailyStudyTime.thirty
-                    ? l10n.mostPopular
-                    : null,
-                leading: _StudyTimeTile(
-                  studyTime: studyTime,
-                  selected: state.selectedStudyTime == studyTime,
-                ),
-                selected: state.selectedStudyTime == studyTime,
-                onPressed: () => onSelect(studyTime),
-              ),
-            );
-          }),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final itemWidth = (constraints.maxWidth - AppSpacing.space2) / 2;
+              return Wrap(
+                spacing: AppSpacing.space2,
+                runSpacing: AppSpacing.space2,
+                children: [
+                  for (final studyTime in DailyStudyTime.values)
+                    SizedBox(
+                      width: itemWidth,
+                      child: Material(
+                        key: ValueKey<String>(
+                          'study_time_${studyTime.minutes}',
+                        ),
+                        color: state.selectedStudyTime == studyTime
+                            ? AppColors.brandTint
+                            : AppColors.surface,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: state.selectedStudyTime == studyTime
+                                ? AppColors.brandPrimary
+                                : AppColors.borderSubtlePink,
+                          ),
+                          borderRadius: BorderRadius.circular(AppRadius.card),
+                        ),
+                        child: InkWell(
+                          onTap: () => onSelect(studyTime),
+                          borderRadius: BorderRadius.circular(AppRadius.card),
+                          child: Padding(
+                            padding: const EdgeInsets.all(AppSpacing.space3),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.studyMinutesPerDay(studyTime.minutes),
+                                  style: AppTypography.cardTitle,
+                                ),
+                                Text(
+                                  _studyPaceDescription(studyTime, l10n),
+                                  style: AppTypography.metadata,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: AppSpacing.space2),
+          TextFormField(
+            key: ValueKey<String>(
+              'onboarding_custom_minutes_${state.selectedStudyTime?.minutes ?? 0}',
+            ),
+            initialValue: state.selectedStudyTime == null
+                ? state.dailyStudyMinutes?.toString()
+                : null,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(4),
+            ],
+            decoration: InputDecoration(
+              labelText: l10n.onboardingCustomMinutesLabel,
+              helperText: l10n.onboardingCustomMinutesHelper,
+              errorText:
+                  state.customMinutesTouched &&
+                      state.selectedStudyTime == null &&
+                      state.dailyStudyMinutes == null
+                  ? l10n.onboardingCustomMinutesError
+                  : null,
+              prefixIcon: const Icon(Icons.edit_calendar_outlined),
+            ),
+            onChanged: (value) => onCustom(int.tryParse(value)),
+          ),
           const SizedBox(height: AppSpacing.space2),
           RikiCard(
             child: Material(
@@ -489,6 +565,11 @@ class _StudyTimeStep extends StatelessWidget {
       helperText: state.submissionFailed
           ? l10n.checkConnectionRetry
           : l10n.onboardingAdjustHelper,
+      secondaryAction: TextButton.icon(
+        onPressed: onBack,
+        icon: const Icon(Icons.arrow_back),
+        label: Text(l10n.back),
+      ),
     );
   }
 
@@ -613,6 +694,7 @@ class _OnboardingPage extends StatelessWidget {
     required this.content,
     required this.action,
     this.beforeTitle,
+    this.secondaryAction,
     this.helperText,
     this.centered = false,
   });
@@ -623,6 +705,7 @@ class _OnboardingPage extends StatelessWidget {
   final Widget content;
   final Widget action;
   final Widget? beforeTitle;
+  final Widget? secondaryAction;
   final String? helperText;
   final bool centered;
 
@@ -634,63 +717,90 @@ class _OnboardingPage extends StatelessWidget {
             ? AppSpacing.screenHorizontalCompact
             : AppSpacing.screenHorizontal;
 
-        return SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            horizontalPadding,
-            AppSpacing.space3,
-            horizontalPadding,
-            AppSpacing.bottomActionPadding,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 560),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight:
-                      constraints.maxHeight -
-                      AppSpacing.space3 -
-                      AppSpacing.bottomActionPadding,
+        return Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  AppSpacing.space3,
+                  horizontalPadding,
+                  AppSpacing.space3,
                 ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      header,
-                      if (beforeTitle != null) ...[
-                        const SizedBox(height: AppSpacing.space8),
-                        beforeTitle!,
-                      ] else
-                        const SizedBox(height: AppSpacing.space8),
-                      Text(
-                        title,
-                        textAlign: centered ? TextAlign.center : TextAlign.left,
-                        style: AppTypography.pageTitle,
-                      ),
-                      const SizedBox(height: AppSpacing.space2),
-                      Text(
-                        description,
-                        textAlign: centered ? TextAlign.center : TextAlign.left,
-                        style: AppTypography.bodySmall,
-                      ),
-                      const SizedBox(height: AppSpacing.space7),
-                      content,
-                      const Spacer(),
-                      const SizedBox(height: AppSpacing.space6),
-                      action,
-                      if (helperText != null) ...[
-                        const SizedBox(height: AppSpacing.space3),
-                        Text(
-                          helperText!,
-                          textAlign: TextAlign.center,
-                          style: AppTypography.metadata,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 560),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        header,
+                        SizedBox(
+                          height: beforeTitle == null
+                              ? AppSpacing.space5
+                              : AppSpacing.space4,
                         ),
+                        ?beforeTitle,
+                        Text(
+                          title,
+                          textAlign: centered
+                              ? TextAlign.center
+                              : TextAlign.left,
+                          style: AppTypography.pageTitle,
+                        ),
+                        const SizedBox(height: AppSpacing.space2),
+                        Text(
+                          description,
+                          textAlign: centered
+                              ? TextAlign.center
+                              : TextAlign.left,
+                          style: AppTypography.bodySmall,
+                        ),
+                        const SizedBox(height: AppSpacing.space5),
+                        content,
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                border: Border(
+                  top: BorderSide(color: AppColors.borderSubtlePink),
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  AppSpacing.space2,
+                  horizontalPadding,
+                  AppSpacing.space2,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 560),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        action,
+                        ?secondaryAction,
+                        if (helperText != null)
+                          Text(
+                            helperText!,
+                            textAlign: TextAlign.center,
+                            style: AppTypography.metadata,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -801,81 +911,43 @@ class _JlptLevelTile extends StatelessWidget {
   }
 }
 
-class _StudyTimeTile extends StatelessWidget {
-  const _StudyTimeTile({required this.studyTime, required this.selected});
-
-  final DailyStudyTime studyTime;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 48,
-      height: 48,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: selected ? AppColors.brandPrimary : AppColors.surfaceSubtle,
-        borderRadius: BorderRadius.circular(AppRadius.input),
-      ),
-      child: Icon(
-        _iconFor(studyTime),
-        color: selected ? Colors.white : AppColors.textSecondary,
-      ),
-    );
-  }
-
-  IconData _iconFor(DailyStudyTime value) {
-    return switch (value) {
-      DailyStudyTime.fifteen => Icons.eco_outlined,
-      DailyStudyTime.thirty => Icons.balance_outlined,
-      DailyStudyTime.fortyFive => Icons.local_fire_department_outlined,
-      DailyStudyTime.sixty => Icons.workspace_premium_outlined,
-      DailyStudyTime.ninety => Icons.bolt_outlined,
-    };
-  }
-}
-
 class _OnboardingSuccessIllustration extends StatelessWidget {
   const _OnboardingSuccessIllustration();
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.maybeOf(context);
+    final reduceMotion =
+        (media?.disableAnimations ?? false) ||
+        (media?.accessibleNavigation ?? false);
     return Center(
       child: Semantics(
         label: context.l10n.setupCompleteSemantics,
-        child: SizedBox(
-          height: 112,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 104,
-                height: 104,
-                decoration: const BoxDecoration(
-                  color: AppColors.brandTint,
-                  shape: BoxShape.circle,
-                ),
+        child: TweenAnimationBuilder<double>(
+          key: const ValueKey<String>('onboarding_completion_motion'),
+          tween: Tween(begin: 0, end: 1),
+          duration: reduceMotion
+              ? Duration.zero
+              : const Duration(milliseconds: 480),
+          curve: Curves.easeOutBack,
+          builder: (context, value, child) => Opacity(
+            opacity: value.clamp(0, 1),
+            child: Transform.translate(
+              offset: Offset(0, 18 * (1 - value)),
+              child: Transform.scale(
+                scale: 0.92 + (0.08 * value),
+                child: child,
               ),
-              const SakuraMascot(
-                pose: SakuraMascotPose.celebrating,
-                size: 88,
-              ),
-              const Positioned(
-                right: 12,
-                bottom: 4,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.check_circle,
-                    color: AppColors.successAccent,
-                    size: 28,
-                  ),
-                ),
-              ),
-            ],
+            ),
+          ),
+          child: SizedBox(
+            height: 238,
+            child: Image.asset(
+              'assets/images/auth/sakura_onboarding_complete.png',
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+              excludeFromSemantics: true,
+            ),
           ),
         ),
       ),

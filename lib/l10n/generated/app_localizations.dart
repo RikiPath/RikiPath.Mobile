@@ -1901,13 +1901,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingStudyLevelsTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Chọn cấp độ học và mục tiêu'**
+  /// **'Chọn cấp độ và mục tiêu'**
   String get onboardingStudyLevelsTitle;
 
   /// No description provided for @onboardingStudyLevelsDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Chọn cấp độ bạn đang học trước, sau đó chọn mục tiêu JLPT riêng.'**
+  /// **'Hãy cho RikiPath biết trình độ hiện tại và mục tiêu bạn muốn đạt được.'**
   String get onboardingStudyLevelsDescription;
 
   /// No description provided for @onboardingCurrentStudyLevelTitle.
@@ -2081,14 +2081,32 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingStudyTimeTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Bạn muốn học bao lâu mỗi ngày?'**
+  /// **'Thiết lập kế hoạch học tập'**
   String get onboardingStudyTimeTitle;
 
   /// No description provided for @onboardingStudyTimeDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Chọn nhịp học phù hợp với lịch sinh hoạt của bạn. Sự đều đặn quan trọng hơn tốc độ.'**
+  /// **'Chọn thời lượng học phù hợp với lịch sinh hoạt của bạn.'**
   String get onboardingStudyTimeDescription;
+
+  /// No description provided for @onboardingCustomMinutesLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Số phút khác mỗi ngày'**
+  String get onboardingCustomMinutesLabel;
+
+  /// No description provided for @onboardingCustomMinutesHelper.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ 1 đến 1.440 phút theo giới hạn hồ sơ.'**
+  String get onboardingCustomMinutesHelper;
+
+  /// No description provided for @onboardingCustomMinutesError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập từ 1 đến 1.440 phút.'**
+  String get onboardingCustomMinutesError;
 
   /// No description provided for @studyMinutesPerDay.
   ///
@@ -2147,7 +2165,7 @@ abstract class AppLocalizations {
   /// No description provided for @learningPlanReady.
   ///
   /// In vi, this message translates to:
-  /// **'Lộ trình học của bạn đã được thiết lập.'**
+  /// **'Mục tiêu học tập của bạn đã được lưu thành công.'**
   String get learningPlanReady;
 
   /// No description provided for @studySummary.
@@ -4265,14 +4283,32 @@ abstract class AppLocalizations {
   /// No description provided for @logoutConfirmationTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Đăng xuất khỏi RikiPath?'**
+  /// **'Bạn muốn đăng xuất?'**
   String get logoutConfirmationTitle;
 
   /// No description provided for @logoutConfirmationMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Bạn sẽ cần đăng nhập lại để tiếp tục hành trình học trên thiết bị này.'**
+  /// **'Bạn sẽ cần đăng nhập lại để tiếp tục học trên thiết bị này.'**
   String get logoutConfirmationMessage;
+
+  /// No description provided for @logoutStay.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ở lại'**
+  String get logoutStay;
+
+  /// No description provided for @logoutSuccessTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đăng xuất'**
+  String get logoutSuccessTitle;
+
+  /// No description provided for @logoutFailureTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể xóa phiên đăng nhập trên thiết bị. Vui lòng thử lại.'**
+  String get logoutFailureTitle;
 
   /// No description provided for @profileNameSection.
   ///

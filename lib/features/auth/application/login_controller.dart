@@ -59,14 +59,15 @@ class LoginController extends Notifier<LoginState> {
             persistSession: rememberSession,
           );
       ref
+          .read(authSessionControllerProvider)
+          .markAuthenticated(userId: account.userId, role: account.role);
+      ref.read(rikiToastServiceProvider.notifier).clear();
+      ref
           .read(rikiToastServiceProvider.notifier)
-          .success(
+          .celebrate(
             title: l10n.toastLoginSuccessTitle,
             description: l10n.toastLoginSuccessDescription,
           );
-      ref
-          .read(authSessionControllerProvider)
-          .markAuthenticated(userId: account.userId, role: account.role);
       state = const LoginState(succeeded: true);
       return true;
     } catch (error) {

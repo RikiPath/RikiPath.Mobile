@@ -539,85 +539,158 @@ Future<bool> showProfileConfirmationSheet({
   required String cancelLabel,
   Widget? preview,
   Key? confirmKey,
+  Key? cancelKey,
   bool destructive = false,
+  SakuraColorfulIconType? colorfulIcon,
 }) async {
   final result = await showModalBottomSheet<bool>(
     context: context,
     useSafeArea: true,
     isScrollControlled: true,
     backgroundColor: AppColors.surface,
+    barrierColor: const Color(0x66000000),
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
-    builder: (sheetContext) => Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.space5,
-        AppSpacing.space3,
-        AppSpacing.space5,
-        AppSpacing.space5 + MediaQuery.viewInsetsOf(sheetContext).bottom,
+    builder: (sheetContext) => Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 42,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.borderStrong,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.space5,
+          AppSpacing.space3,
+          AppSpacing.space5,
+          AppSpacing.space6 + MediaQuery.viewInsetsOf(sheetContext).bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 38,
+                height: 4.5,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE5D5DA),
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.space5),
-          Center(
-            child: _ProfileIconBox(
-              icon: icon,
-              foreground: destructive
-                  ? AppColors.errorText
-                  : AppColors.brandPrimary,
-              background: destructive
-                  ? AppColors.errorBackground
-                  : AppColors.brandTint,
-              size: 54,
+            const SizedBox(height: AppSpacing.space5),
+            Center(
+              child: Container(
+                width: 68,
+                height: 68,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFFF0F4), Color(0xFFFFE5EB)],
+                  ),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: const Color(0xFFF8BBD0).withValues(alpha: 0.8),
+                    width: 1.5,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x1CE05A7A),
+                      blurRadius: 16,
+                      offset: Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: colorfulIcon != null
+                    ? SakuraColorfulIcon(
+                        type: colorfulIcon,
+                        size: 36,
+                        useEmoji: false,
+                      )
+                    : Icon(
+                        icon,
+                        size: 30,
+                        color: AppColors.brandPrimary,
+                      ),
+              ),
             ),
-          ),
-          if (preview != null) ...[
+            if (preview != null) ...[
+              const SizedBox(height: AppSpacing.space4),
+              Center(child: preview),
+            ],
             const SizedBox(height: AppSpacing.space4),
-            Center(child: preview),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: AppTypography.pageTitle.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+                letterSpacing: -0.2,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space2),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodySmall.copyWith(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space5),
+            FilledButton(
+              key: confirmKey,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.brandPrimary,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.button),
+                ),
+                elevation: 2,
+                shadowColor: AppColors.brandShadow,
+              ),
+              onPressed: () => Navigator.of(sheetContext).pop(true),
+              child: Text(
+                confirmLabel,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space3),
+            OutlinedButton(
+              key: cancelKey,
+              onPressed: () => Navigator.of(sheetContext).pop(false),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                backgroundColor: const Color(0xFFFFF7F9),
+                foregroundColor: AppColors.textSecondary,
+                side: const BorderSide(
+                  color: Color(0xFFEBDDE1),
+                  width: 1.2,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.button),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                cancelLabel,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ],
-          const SizedBox(height: AppSpacing.space4),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: AppTypography.pageTitle,
-          ),
-          const SizedBox(height: AppSpacing.space2),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: AppTypography.bodySmall,
-          ),
-          const SizedBox(height: AppSpacing.space5),
-          FilledButton(
-            key: confirmKey,
-            style: destructive
-                ? FilledButton.styleFrom(
-                    backgroundColor: AppColors.errorBackground,
-                    foregroundColor: AppColors.errorText,
-                    elevation: 0,
-                  )
-                : null,
-            onPressed: () => Navigator.of(sheetContext).pop(true),
-            child: Text(confirmLabel),
-          ),
-          const SizedBox(height: AppSpacing.space2),
-          TextButton(
-            onPressed: () => Navigator.of(sheetContext).pop(false),
-            child: Text(cancelLabel),
-          ),
-        ],
+        ),
       ),
     ),
   );

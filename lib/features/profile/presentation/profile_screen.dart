@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
@@ -70,20 +71,35 @@ class _ProfileSuccessView extends ConsumerStatefulWidget {
 
 class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
     with SingleTickerProviderStateMixin {
+  bool _signingOut = false;
+
   Future<void> _confirmLogout(BuildContext context) async {
+    if (_signingOut) return;
     final l10n = context.l10n;
     final confirmed = await showProfileConfirmationSheet(
       context: context,
       icon: Icons.logout_rounded,
+      colorfulIcon: SakuraColorfulIconType.logout,
       title: l10n.logoutConfirmationTitle,
       message: l10n.logoutConfirmationMessage,
       confirmLabel: l10n.logout,
-      cancelLabel: l10n.cancel,
+      cancelLabel: l10n.logoutStay,
       confirmKey: const ValueKey<String>('profile_logout_confirm_button'),
       destructive: true,
     );
-    if (!confirmed) return;
-    await ref.read(authSessionControllerProvider).signOut();
+    if (!confirmed || !mounted || _signingOut) return;
+    setState(() => _signingOut = true);
+    final toast = ref.read(rikiToastServiceProvider.notifier);
+    final session = ref.read(authSessionControllerProvider);
+    toast.clear();
+    try {
+      await session.signOut();
+      toast.success(title: l10n.logoutSuccessTitle);
+    } catch (_) {
+      toast.error(title: l10n.logoutFailureTitle);
+    } finally {
+      if (mounted) setState(() => _signingOut = false);
+    }
   }
 
   late final AnimationController _entranceController = AnimationController(
