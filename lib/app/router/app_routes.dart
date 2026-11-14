@@ -1,3 +1,23 @@
+enum OnboardingOrigin {
+  auth('auth'),
+  profile('profile'),
+  profileGoal('profile_goal'),
+  roadmap('roadmap');
+
+  const OnboardingOrigin(this.queryValue);
+
+  final String queryValue;
+
+  static OnboardingOrigin fromQuery(String? value) {
+    for (final origin in OnboardingOrigin.values) {
+      if (origin.queryValue == value) {
+        return origin;
+      }
+    }
+    return OnboardingOrigin.auth;
+  }
+}
+
 abstract final class AppRoutes {
   static const String splash = '/splash';
 
@@ -9,6 +29,65 @@ abstract final class AppRoutes {
   static const String unsupportedRole = '/auth/unsupported-role';
   static const String learnerStartup = '/learner-startup';
   static const String onboarding = '/onboarding';
+
+  static String onboardingWithOrigin(
+    OnboardingOrigin origin, {
+    String? returnTo,
+  }) {
+    final queryParameters = <String, String>{
+      'from': origin.queryValue,
+      if (returnTo != null && returnTo.isNotEmpty) 'returnTo': returnTo,
+    };
+    return Uri(
+      path: onboarding,
+      queryParameters: queryParameters,
+    ).toString();
+  }
+
+  static bool isShellBranchRoute(String uriOrPath) {
+    final path = Uri.tryParse(uriOrPath)?.path ?? uriOrPath;
+    if (path == mentor ||
+        path == mentorCalendar ||
+        path == mentorMeetings ||
+        path == mentorAvailability ||
+        path == mentorProfile ||
+        path.startsWith('$mentorProfile/')) {
+      return true;
+    }
+    if (path == home ||
+        path == learn ||
+        path.startsWith('$learn/') ||
+        path == practice ||
+        path == mockTestLibrary ||
+        path == writing ||
+        path.startsWith('$writing/') ||
+        path == notebook ||
+        path.startsWith('$notebook/') ||
+        path == profile ||
+        path.startsWith('$profile/')) {
+      return true;
+    }
+    return false;
+  }
+
+  static bool isLearnerTabRoot(String uriOrPath) {
+    final path = Uri.tryParse(uriOrPath)?.path ?? uriOrPath;
+    return path == home ||
+        path == learn ||
+        path == practice ||
+        path == notebook ||
+        path == profile;
+  }
+
+  static bool isMentorTabRoot(String uriOrPath) {
+    final path = Uri.tryParse(uriOrPath)?.path ?? uriOrPath;
+    return path == mentor ||
+        path == mentorCalendar ||
+        path == mentorMeetings ||
+        path == mentorAvailability ||
+        path == mentorProfile;
+  }
+
   static const String placementTest = '/placement-test';
 
   static const String meeting = '/meeting';
@@ -28,17 +107,65 @@ abstract final class AppRoutes {
   static const String mentorMeetings = '$mentor/$mentorMeetingsSegment';
   static const String mentorProfileSegment = 'profile';
   static const String mentorProfile = '$mentor/$mentorProfileSegment';
+  static const String mentorProfileEditSegment = 'edit';
+  static const String mentorProfileEdit =
+      '$mentorProfile/$mentorProfileEditSegment';
+  static const String mentorSettingsSegment = 'settings';
+  static const String mentorSettings = '$mentorProfile/$mentorSettingsSegment';
+  static const String mentorNotificationsSegment = 'notifications';
+  static const String mentorNotifications =
+      '$mentorProfile/$mentorNotificationsSegment';
   static const String mentorCompensationSegment = 'compensation';
   static const String mentorCompensation = '$mentor/$mentorCompensationSegment';
   static const String mentorBankAccountSegment = 'bank-account';
   static const String mentorBankAccount = '$mentor/$mentorBankAccountSegment';
   static const String mentorCalendarSegment = 'calendar';
   static const String mentorCalendar = '$mentor/$mentorCalendarSegment';
+  static const String mentorChangePasswordSegment = 'change-password';
+  static const String mentorChangePassword =
+      '$mentor/$mentorChangePasswordSegment';
+  static const String mentorChangeEmailSegment = 'change-email';
+  static const String mentorChangeEmail = '$mentor/$mentorChangeEmailSegment';
+  static const String mentorVerifyEmailSegment = 'verify-email';
+  static const String mentorVerifyEmail = '$mentor/$mentorVerifyEmailSegment';
+  static const String mentorChatSegment = 'chat';
+  static const String mentorChatRoomSegment = ':bookingId';
+  static const String mentorChat = '$mentor/$mentorChatSegment';
+  static const String mentorReviewsSegment = 'reviews';
+  static const String mentorReviews = '$mentor/$mentorReviewsSegment';
+  static const String mentorDisputesSegment = 'disputes';
+  static const String mentorDisputeDetailSegment = ':disputeId';
+  static const String mentorDisputes = '$mentor/$mentorDisputesSegment';
+  static const String mentorPrepSegment = 'prep';
+  static const String mentorPrep = '$mentor/$mentorPrepSegment';
+  static const String mentorMeetingPrepSegment = 'prep';
+
   static String mentorMeetingDetail(int meetingId) {
     if (meetingId <= 0) {
       throw ArgumentError.value(meetingId, 'meetingId', 'Must be positive');
     }
     return '$mentorMeetings/$meetingId';
+  }
+
+  static String mentorMeetingPrep(int meetingId) {
+    if (meetingId <= 0) {
+      throw ArgumentError.value(meetingId, 'meetingId', 'Must be positive');
+    }
+    return '${mentorMeetingDetail(meetingId)}/$mentorMeetingPrepSegment';
+  }
+
+  static String mentorChatRoom(int bookingId) {
+    if (bookingId <= 0) {
+      throw ArgumentError.value(bookingId, 'bookingId', 'Must be positive');
+    }
+    return '$mentorChat/$bookingId';
+  }
+
+  static String mentorDisputeDetail(int disputeId) {
+    if (disputeId <= 0) {
+      throw ArgumentError.value(disputeId, 'disputeId', 'Must be positive');
+    }
+    return '$mentorDisputes/$disputeId';
   }
 
   static const String learnerMentorMeetings = '/mentor-meetings';
@@ -224,6 +351,7 @@ abstract final class AppRoutes {
   static const String profileNotificationsSegment = 'notifications';
   static const String profileChangeEmailSegment = 'change-email';
   static const String profileChangePasswordSegment = 'change-password';
+  static const String profileVerifyEmailSegment = 'verify-email';
   static const String profileAccount = '$profile/$profileAccountSegment';
   static const String profileEdit = '$profile/$profileEditSegment';
   static const String profileJlptGoal = '$profile/$profileJlptGoalSegment';
@@ -233,6 +361,8 @@ abstract final class AppRoutes {
       '$profile/$profileChangeEmailSegment';
   static const String profileChangePassword =
       '$profile/$profileChangePasswordSegment';
+  static const String profileVerifyEmail =
+      '$profile/$profileVerifyEmailSegment';
 
   static int _positiveId(int value, String name) {
     if (value <= 0) {

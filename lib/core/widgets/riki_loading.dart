@@ -1,15 +1,11 @@
-import 'dart:math' as math;
-
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
-import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
 import 'package:rikipath_mobile/core/widgets/riki_card.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_loading.dart';
 
-/// RikiPath's default Japanese-inspired loading mark.
-///
-/// The incomplete ensō, study card, and restrained sakura petals keep the
-/// motion recognizable without looking like a generic platform spinner.
-class RikiAnimatedStudyLoader extends StatefulWidget {
+/// Full-page waiting mark. Delegates to the shared Sakura Bloom so startup,
+/// splash and blocking overlays all speak the same loading language.
+class RikiAnimatedStudyLoader extends StatelessWidget {
   const RikiAnimatedStudyLoader({
     this.size = 112,
     this.semanticsLabel,
@@ -20,170 +16,16 @@ class RikiAnimatedStudyLoader extends StatefulWidget {
   final String? semanticsLabel;
 
   @override
-  State<RikiAnimatedStudyLoader> createState() =>
-      _RikiAnimatedStudyLoaderState();
-}
-
-class _RikiAnimatedStudyLoaderState extends State<RikiAnimatedStudyLoader>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1600),
-  );
-  bool _reduceMotion = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final mediaQuery = MediaQuery.maybeOf(context);
-    final reduceMotion =
-        (mediaQuery?.disableAnimations ?? false) ||
-        (mediaQuery?.accessibleNavigation ?? false);
-    if (_reduceMotion == reduceMotion && _controller.isAnimating) return;
-    _reduceMotion = reduceMotion;
-    if (_reduceMotion) {
-      _controller
-        ..stop()
-        ..value = 0.68;
-    } else if (!_controller.isAnimating) {
-      _controller.repeat();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: widget.semanticsLabel,
-      liveRegion: true,
-      child: ExcludeSemantics(
-        child: RepaintBoundary(
-          child: SizedBox.square(
-            key: const ValueKey<String>('riki_animated_study_loader'),
-            dimension: widget.size,
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                final progress = _controller.value;
-                final pulse = _reduceMotion
-                    ? 1.0
-                    : 1 + math.sin(progress * math.pi * 2) * 0.018;
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: _StudySealPainter(progress: progress),
-                      ),
-                    ),
-                    Transform.scale(scale: pulse, child: child),
-                  ],
-                );
-              },
-              child: SizedBox(
-                key: const ValueKey<String>('riki_study_loader_logo'),
-                width: widget.size * 0.56,
-                height: widget.size * 0.56,
-                child: Image.asset(
-                  rikiBrandLogoAsset,
-                  width: widget.size * 0.56,
-                  height: widget.size * 0.56,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                ),
-              ),
-            ),
-          ),
-        ),
+    return KeyedSubtree(
+      key: const ValueKey<String>('riki_animated_study_loader'),
+      child: SakuraLoadingIndicator(
+        size: size * 0.72,
+        semanticsLabel: semanticsLabel,
       ),
     );
   }
 }
-
-class _StudySealPainter extends CustomPainter {
-  const _StudySealPainter({required this.progress});
-
-  final double progress;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
-    final radius = size.shortestSide * 0.38;
-    final rect = Rect.fromCircle(center: center, radius: radius);
-    final track = Paint()
-      ..color = AppColors.brandSecondary.withValues(alpha: 0.42)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = size.shortestSide * 0.045;
-    final stroke = Paint()
-      ..color = AppColors.brandPrimary.withValues(alpha: 0.88)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = size.shortestSide * 0.052;
-
-    canvas.drawArc(rect, -math.pi * 0.78, math.pi * 1.62, false, track);
-    canvas.drawArc(
-      rect,
-      -math.pi * 0.78 + progress * math.pi * 2,
-      math.pi * 0.48,
-      false,
-      stroke,
-    );
-
-    _drawPetal(
-      canvas,
-      center +
-          Offset(
-            radius * 0.78 + math.sin(progress * math.pi * 2) * 2,
-            -radius * 0.72 + math.cos(progress * math.pi * 2) * 2,
-          ),
-      size.shortestSide * 0.045,
-      progress * math.pi,
-      AppColors.brandPrimary.withValues(alpha: 0.56),
-    );
-    _drawPetal(
-      canvas,
-      center +
-          Offset(
-            -radius * 0.88 + math.cos(progress * math.pi * 2) * 1.5,
-            radius * 0.48 + math.sin(progress * math.pi * 2) * 2,
-          ),
-      size.shortestSide * 0.038,
-      -progress * math.pi * 0.7,
-      AppColors.brandSecondary.withValues(alpha: 0.78),
-    );
-  }
-
-  void _drawPetal(
-    Canvas canvas,
-    Offset center,
-    double radius,
-    double rotation,
-    Color color,
-  ) {
-    canvas
-      ..save()
-      ..translate(center.dx, center.dy)
-      ..rotate(rotation);
-    final path = Path()
-      ..moveTo(0, -radius)
-      ..quadraticBezierTo(radius, -radius * 0.15, 0, radius)
-      ..quadraticBezierTo(-radius, -radius * 0.15, 0, -radius)
-      ..close();
-    canvas.drawPath(path, Paint()..color = color);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_StudySealPainter oldDelegate) =>
-      oldDelegate.progress != progress;
-}
-
 class RikiFullScreenLoader extends StatelessWidget {
   const RikiFullScreenLoader({
     required this.title,
@@ -321,16 +163,16 @@ class _InlineDotsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final radius = size.height * 0.12;
+    // Dots hop one after another instead of pulsing in place.
+    final radius = size.height * 0.13;
     final spacing = size.width / 4;
+    final restY = size.height * 0.7;
     for (var index = 0; index < 3; index++) {
-      final phase = (progress - index * 0.16) % 1.0;
-      final wave = (math.sin(phase * math.pi * 2 - math.pi / 2) + 1) / 2;
-      final dotRadius = radius * (0.72 + wave * 0.38);
+      final hop = sakuraDotBounce(progress, index);
       canvas.drawCircle(
-        Offset(spacing * (index + 1), size.height / 2),
-        dotRadius,
-        Paint()..color = color.withValues(alpha: 0.5 + wave * 0.5),
+        Offset(spacing * (index + 1), restY - hop * size.height * 0.42),
+        radius,
+        Paint()..color = color.withValues(alpha: 0.7 + hop * 0.3),
       );
     }
   }

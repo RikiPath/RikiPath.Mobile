@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/animated_notification_bell.dart';
 import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
 import 'package:rikipath_mobile/core/widgets/riki_learner_header.dart';
 import 'package:rikipath_mobile/core/widgets/riki_loading.dart';
@@ -24,18 +25,22 @@ class SakuraAppHeader extends ConsumerWidget implements PreferredSizeWidget {
   const SakuraAppHeader({
     this.streakDays,
     this.isStreakLoading = false,
+    this.showStreak = true,
     this.unreadNotificationCount,
     this.onNotificationsPressed,
     this.onCalendarPressed,
+    this.calendarTooltip = 'Lịch học',
     this.isScrolled = false,
     super.key,
   });
 
   final int? streakDays;
   final bool isStreakLoading;
+  final bool showStreak;
   final int? unreadNotificationCount;
   final VoidCallback? onNotificationsPressed;
   final VoidCallback? onCalendarPressed;
+  final String calendarTooltip;
   final bool isScrolled;
 
   @override
@@ -43,26 +48,27 @@ class SakuraAppHeader extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 1. Resolve Streak
-    final analyticsAsync = streakDays == null
+    // 1. Resolve Streak (skipped when showStreak is false, e.g. for Mentor)
+    final analyticsAsync = (showStreak && streakDays == null)
         ? ref.watch(learnerAnalyticsControllerProvider)
         : null;
     final liveAnalytics = analyticsAsync?.value;
-    final effectiveStreak =
-        streakDays ??
-        (liveAnalytics?.isAvailable(AnalyticsSection.streak) == true
-            ? liveAnalytics?.streakDays
-            : null);
+    final effectiveStreak = !showStreak
+        ? null
+        : (streakDays ??
+              (liveAnalytics?.isAvailable(AnalyticsSection.streak) == true
+                  ? liveAnalytics?.streakDays
+                  : null));
     final effectiveLoading =
-        isStreakLoading ||
-        (streakDays == null && (analyticsAsync?.isLoading ?? false));
+        showStreak &&
+        (isStreakLoading ||
+            (streakDays == null && (analyticsAsync?.isLoading ?? false)));
 
     // 2. Resolve Notifications
-    final notificationsAsync = unreadNotificationCount == null
-        ? ref.watch(notificationControllerProvider)
-        : null;
+    final notificationsAsync = ref.watch(notificationControllerProvider);
     final effectiveUnread =
-        unreadNotificationCount ?? notificationsAsync?.value?.unreadCount;
+        unreadNotificationCount ?? notificationsAsync.value?.unreadCount;
+    final bellTrigger = ref.watch(notificationBellTriggerProvider);
 
     // 3. Resolve Navigation callbacks
     final handleNotifications =
@@ -73,7 +79,8 @@ class SakuraAppHeader extends ConsumerWidget implements PreferredSizeWidget {
     // Responsive checks: fits comfortably on 340dp+, 360dp, 393dp, 412dp
     final screenWidth = MediaQuery.sizeOf(context).width;
     final textScale = MediaQuery.textScalerOf(context).scale(14);
-    final showHeaderStreak = screenWidth >= 340 && textScale < 24;
+    final showHeaderStreak =
+        showStreak && screenWidth >= 340 && textScale < 24;
 
     return RikiLearnerHeader(
       isScrolled: isScrolled,
@@ -113,57 +120,14 @@ class SakuraAppHeader extends ConsumerWidget implements PreferredSizeWidget {
         else if (showHeaderStreak && effectiveLoading)
           const _HeaderSkeleton(width: 54),
         const SizedBox(width: AppSpacing.space1),
-        Semantics(
-          button: true,
-          label: context.l10n.notifications,
-          child: InkResponse(
-            onTap: handleNotifications,
-            radius: 24,
-            child: SizedBox.square(
-              dimension: 40,
-              child: Stack(
-                alignment: Alignment.center,
-                children: <Widget>[
-                  const SakuraColorfulIcon(
-                    type: SakuraColorfulIconType.notifications,
-                    size: 24,
-                    useEmoji: true,
-                  ),
-                  if ((effectiveUnread ?? 0) > 0)
-                    Positioned(
-                      key: const ValueKey<String>(
-                        'home_notification_unread_badge',
-                      ),
-                      top: 2,
-                      right: 1,
-                      child: Container(
-                        constraints: const BoxConstraints(minWidth: 16),
-                        height: 16,
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.brandPrimary,
-                          borderRadius: BorderRadius.circular(AppRadius.pill),
-                          border: Border.all(
-                            color: AppColors.surface,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Text(
-                          effectiveUnread! > 99 ? '99+' : '$effectiveUnread',
-                          style: AppTypography.badgeText.copyWith(
-                            color: Colors.white,
-                            fontSize: 9,
-                            height: 1,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
+        AnimatedNotificationBell(
+          unreadCount: effectiveUnread,
+          ringSequence: bellTrigger.ringSequence,
+          consumedSequence: bellTrigger.consumedSequence,
+          onRingConsumed: (sequence) => ref
+              .read(notificationBellTriggerProvider.notifier)
+              .consumeRing(sequence),
+          onPressed: handleNotifications,
         ),
         IconButton(
           key: const ValueKey<String>('home_calendar_button'),
@@ -172,7 +136,7 @@ class SakuraAppHeader extends ConsumerWidget implements PreferredSizeWidget {
             size: 24,
             useEmoji: true,
           ),
-          tooltip: 'Lịch học',
+          tooltip: calendarTooltip,
           onPressed: handleCalendar,
         ),
       ],

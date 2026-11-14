@@ -43,15 +43,19 @@ class LearningController extends AsyncNotifier<LearningSnapshot> {
           .loadProfile();
       final serverLevelId = profile.currentStudyLevelId;
       if (serverLevelId == null || serverLevelId <= 0) {
-        return _empty(journey.selectedLevel);
+        return _empty(journey.hasSelectedLevel ? journey.selectedLevel : null);
       }
       return repository.loadLearningSnapshot(certificateLevelId: serverLevelId);
     }
     final levelId = journey.selectedLevelId;
     final snapshot = await repository.loadLearningSnapshot(
-      certificateLevelId: levelId ?? 1,
+      certificateLevelId: levelId ?? 0,
     );
-    if (snapshot.certificateLevelId != null) return snapshot;
+    if (snapshot.certificateLevelId != null) {
+      return journey.hasSelectedLevel
+          ? snapshot
+          : snapshot.copyWith(hasSelectedLevel: false);
+    }
 
     // Repositories injected by visual/widget tests keep their local fixture
     // journey behavior. The production provider above always returns API data.
@@ -107,9 +111,9 @@ class LearningController extends AsyncNotifier<LearningSnapshot> {
     state = await AsyncValue.guard(build);
   }
 
-  LearningSnapshot _empty(JlptLevel level) => LearningSnapshot(
+  LearningSnapshot _empty([JlptLevel? level]) => LearningSnapshot(
     initials: '',
-    jlptTarget: level,
+    jlptTarget: level ?? JlptLevel.n5,
     streakDays: 0,
     hasUnreadNotifications: false,
     examDateLabel: '',

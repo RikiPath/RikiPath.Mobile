@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
@@ -18,14 +20,33 @@ class NotebookEntryDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final key = NotebookEntryKey.tryParse(entryKey);
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(title: Text(context.l10n.notebookEntryTitle)),
-      body: key == null
-          ? _Unavailable(message: context.l10n.notebookEntryUnavailable)
-          : key.origin == NotebookItemOrigin.fixture
-          ? _fixtureBody(context, ref, key)
-          : _liveBody(context, ref, key),
+    final hasGoRouter = GoRouter.maybeOf(context) != null;
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ??
+        (ModalRoute.of(context)?.canPop ?? true);
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          popOrGo(context, AppRoutes.notebook);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.learnerBackground,
+        appBar: AppBar(
+          leading: hasGoRouter
+              ? BackButton(
+                  onPressed: () => popOrGo(context, AppRoutes.notebook),
+                )
+              : null,
+          title: Text(context.l10n.notebookEntryTitle),
+        ),
+        body: key == null
+            ? _Unavailable(message: context.l10n.notebookEntryUnavailable)
+            : key.origin == NotebookItemOrigin.fixture
+            ? _fixtureBody(context, ref, key)
+            : _liveBody(context, ref, key),
+      ),
     );
   }
 
@@ -87,7 +108,7 @@ class NotebookEntryDetailScreen extends ConsumerWidget {
         state.entries.any((candidate) => candidate.key == entry.key)) {
       return;
     }
-    context.pop();
+    popOrGo(context, AppRoutes.notebook);
   }
 
   Future<void> _removeLive(
@@ -99,7 +120,7 @@ class NotebookEntryDetailScreen extends ConsumerWidget {
     final removed = await ref
         .read(notebookControllerProvider.notifier)
         .removeEntry(entry);
-    if (removed && context.mounted) context.pop();
+    if (removed && context.mounted) popOrGo(context, AppRoutes.notebook);
   }
 
   Future<bool> _confirmRemove(BuildContext context, NotebookEntry entry) async {

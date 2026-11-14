@@ -21,6 +21,26 @@ class ApiMentorCompensationRepository implements MentorCompensationRepository {
   }
 
   @override
+  Future<List<MentorHourlyRateItem>> loadHourlyRates() async {
+    final response = await _apiClient.get<Object?>(
+      MentorApiPaths.compensationHourlyRates,
+    );
+    return readMentorResultList(
+      response.data,
+    ).map(parseMentorHourlyRate).toList(growable: false);
+  }
+
+  @override
+  Future<List<MentorTeachingQualificationItem>> loadQualifications() async {
+    final response = await _apiClient.get<Object?>(
+      MentorApiPaths.compensationQualifications,
+    );
+    return readMentorResultList(
+      response.data,
+    ).map(parseMentorQualification).toList(growable: false);
+  }
+
+  @override
   Future<List<MentorEarningEntryItem>> loadEarnings() async {
     final response = await _apiClient.get<Object?>(
       MentorApiPaths.compensationEarnings,
@@ -42,6 +62,14 @@ class ApiMentorCompensationRepository implements MentorCompensationRepository {
     return readMentorResultList(
       response.data,
     ).map(parseMentorPayrollPeriod).toList(growable: false);
+  }
+
+  @override
+  Future<MentorPayrollPeriodItem> loadPayrollDetail(int payrollPeriodId) async {
+    final response = await _apiClient.get<Object?>(
+      MentorApiPaths.compensationPayrollDetail(payrollPeriodId),
+    );
+    return parseMentorPayrollPeriod(readMentorResultObject(response.data));
   }
 
   @override
@@ -81,5 +109,13 @@ class ApiMentorCompensationRepository implements MentorCompensationRepository {
     return readMentorResultList(
       response.data,
     ).map(parseMentorPayoutObligation).toList(growable: false);
+  }
+
+  @override
+  Future<MentorPayoutObligationItem> loadPayoutDetail(int obligationId) async {
+    final response = await _apiClient.get<Object?>(
+      MentorApiPaths.compensationPayoutDetail(obligationId),
+    );
+    return parseMentorPayoutObligation(readMentorResultObject(response.data));
   }
 }

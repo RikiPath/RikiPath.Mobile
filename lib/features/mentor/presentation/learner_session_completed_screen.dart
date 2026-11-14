@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
@@ -19,37 +21,48 @@ class LearnerSessionCompletedScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsState = ref.watch(learnerMentorBookingsControllerProvider);
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ??
+        (ModalRoute.of(context)?.canPop ?? true);
 
-    return Scaffold(
-      key: const Key('learner_session_completed_screen'),
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(
-        title: const Text('Buổi tư vấn đã hoàn thành'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => context.go(AppRoutes.home),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: switch (bookingsState) {
-          AsyncLoading() => const MentorListSkeleton(),
-          AsyncError() => Center(
-            child: MentorErrorState(
-              message: 'Không thể tải chi tiết buổi tư vấn.',
-              onRetry: ref
-                  .read(learnerMentorBookingsControllerProvider.notifier)
-                  .retry,
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          popOrGo(context, AppRoutes.home);
+        }
+      },
+      child: Scaffold(
+        key: const Key('learner_session_completed_screen'),
+        backgroundColor: AppColors.learnerBackground,
+        appBar: AppBar(
+          title: const Text('Buổi tư vấn đã hoàn thành'),
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => context.go(AppRoutes.home),
             ),
-          ),
-          AsyncData(:final value) => _buildContent(
-            context,
-            ref,
-            value.where((b) => b.id == bookingId).firstOrNull,
-          ),
-        },
+          ],
+        ),
+        body: SafeArea(
+          child: switch (bookingsState) {
+            AsyncLoading() => const MentorListSkeleton(),
+            AsyncError() => Center(
+              child: MentorErrorState(
+                message: 'Không thể tải chi tiết buổi tư vấn.',
+                onRetry: ref
+                    .read(learnerMentorBookingsControllerProvider.notifier)
+                    .retry,
+              ),
+            ),
+            AsyncData(:final value) => _buildContent(
+              context,
+              ref,
+              value.where((b) => b.id == bookingId).firstOrNull,
+            ),
+          },
+        ),
       ),
     );
   }
@@ -225,6 +238,7 @@ class LearnerSessionCompletedScreen extends ConsumerWidget {
   }
 
   void _showReviewDialog(BuildContext context, WidgetRef ref) {
+    final hostContext = context;
     var rating = 5;
     final commentController = TextEditingController();
 
@@ -274,24 +288,29 @@ class LearnerSessionCompletedScreen extends ConsumerWidget {
                 key: const Key('completed_submit_review_button'),
                 onPressed: () async {
                   Navigator.of(dialogCtx).pop();
-                  final res = await ref
-                      .read(learnerMentorMutationControllerProvider.notifier)
-                      .createReview(
-                        bookingId: bookingId,
-                        rating: rating,
-                        comment: commentController.text.trim(),
-                      );
+                  if (!hostContext.mounted) return;
+                  final l10n = hostContext.l10n;
+                  final mutation = ref.read(
+                    learnerMentorMutationControllerProvider.notifier,
+                  );
+                  final toast = ref.read(rikiToastServiceProvider.notifier);
+                  final res = await runWithAppLoadingOverlay(
+                    hostContext,
+                    title: l10n.loadingOverlaySubmittingTitle,
+                    subtitle: l10n.loadingOverlayCompletingSubtitle,
+                    action: () => mutation.createReview(
+                      bookingId: bookingId,
+                      rating: rating,
+                      comment: commentController.text.trim(),
+                    ),
+                  );
                   if (res != null) {
-                    ref
-                        .read(rikiToastServiceProvider.notifier)
-                        .success(
-                          title: 'Gửi đánh giá thành công',
-                          description: 'Cảm ơn phản hồi của bạn.',
-                        );
+                    toast.success(
+                      title: 'Gửi đánh giá thành công',
+                      description: 'Cảm ơn phản hồi của bạn.',
+                    );
                   } else {
-                    ref
-                        .read(rikiToastServiceProvider.notifier)
-                        .error(title: 'Không thể gửi đánh giá');
+                    toast.error(title: 'Không thể gửi đánh giá');
                   }
                 },
                 child: const Text('Gửi'),
@@ -304,6 +323,7 @@ class LearnerSessionCompletedScreen extends ConsumerWidget {
   }
 
   void _showDisputeDialog(BuildContext context, WidgetRef ref) {
+    final hostContext = context;
     var selectedCategory = 1;
     final reasonController = TextEditingController();
 
@@ -326,22 +346,24 @@ class LearnerSessionCompletedScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   DropdownButtonFormField<int>(
+                    isExpanded: true,
                     initialValue: selectedCategory,
                     decoration: const InputDecoration(
                       labelText: 'Lý do khiếu nại',
                     ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 1,
-                        child: Text('Chất lượng tư vấn'),
-                      ),
-                      DropdownMenuItem(
-                        value: 2,
-                        child: Text('Cố vấn vắng mặt'),
-                      ),
-                      DropdownMenuItem(value: 3, child: Text('Sự cố kỹ thuật')),
-                      DropdownMenuItem(value: 4, child: Text('Khác')),
-                    ],
+                    items: learnerMentorDisputeCategories
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c.$1,
+                            child: Text(
+                              c.$2,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (val) {
                       if (val != null) {
                         setDialogState(() => selectedCategory = val);
@@ -381,24 +403,29 @@ class LearnerSessionCompletedScreen extends ConsumerWidget {
                     return;
                   }
                   Navigator.of(dialogCtx).pop();
-                  final res = await ref
-                      .read(learnerMentorMutationControllerProvider.notifier)
-                      .createDispute(
-                        bookingId: bookingId,
-                        category: selectedCategory,
-                        reason: reason,
-                      );
+                  if (!hostContext.mounted) return;
+                  final l10n = hostContext.l10n;
+                  final mutation = ref.read(
+                    learnerMentorMutationControllerProvider.notifier,
+                  );
+                  final toast = ref.read(rikiToastServiceProvider.notifier);
+                  final res = await runWithAppLoadingOverlay(
+                    hostContext,
+                    title: l10n.loadingOverlaySubmittingTitle,
+                    subtitle: l10n.loadingOverlayCompletingSubtitle,
+                    action: () => mutation.createDispute(
+                      bookingId: bookingId,
+                      category: selectedCategory,
+                      reason: reason,
+                    ),
+                  );
                   if (res != null) {
-                    ref
-                        .read(rikiToastServiceProvider.notifier)
-                        .success(
-                          title: 'Gửi khiếu nại thành công',
-                          description: 'Ban quản trị sẽ liên hệ hỗ trợ bạn.',
-                        );
+                    toast.success(
+                      title: 'Gửi khiếu nại thành công',
+                      description: 'Ban quản trị sẽ liên hệ hỗ trợ bạn.',
+                    );
                   } else {
-                    ref
-                        .read(rikiToastServiceProvider.notifier)
-                        .error(title: 'Không thể gửi khiếu nại');
+                    toast.error(title: 'Không thể gửi khiếu nại');
                   }
                 },
                 child: const Text('Gửi khiếu nại'),

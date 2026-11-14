@@ -25,6 +25,17 @@ class UserProfileController extends AsyncNotifier<UserProfileState> {
 
   @override
   Future<UserProfileState> build() async {
+    final session = ref.watch(authSessionControllerProvider);
+    final initialUserId = session.currentUserId;
+    void handleIdentityChange() {
+      if (session.currentUserId != initialUserId) {
+        ref.invalidateSelf();
+      }
+    }
+
+    session.addListener(handleIdentityChange);
+    ref.onDispose(() => session.removeListener(handleIdentityChange));
+
     try {
       final profile = await ref
           .watch(userProfileRepositoryProvider)
@@ -73,11 +84,22 @@ class UserProfileController extends AsyncNotifier<UserProfileState> {
     required int targetJlptLevelId,
     required int dailyStudyMinutes,
     DateTime? targetExamDate,
+    bool clearTargetExamDate = false,
   }) {
     return _mutate(
       flag: ProfileMutation.jlptGoal,
       request: () {
         final repository = _repository;
+        if (clearTargetExamDate) {
+          if (repository is! ClearTargetExamDateProfileRepository) {
+            throw UnsupportedError('Target exam date cannot be cleared.');
+          }
+          return (repository as ClearTargetExamDateProfileRepository)
+              .clearJlptGoalExamDate(
+                targetJlptLevelId: targetJlptLevelId,
+                dailyStudyMinutes: dailyStudyMinutes,
+              );
+        }
         if (targetExamDate != null &&
             repository is TargetExamDateProfileRepository) {
           return (repository as TargetExamDateProfileRepository)

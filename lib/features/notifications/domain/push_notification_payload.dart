@@ -10,6 +10,7 @@ class PushNotificationPayload {
     this.screen,
     this.bookingId,
     this.meetingId,
+    this.disputeId,
     this.rawData = const <String, dynamic>{},
     DateTime? receivedAt,
   }) : receivedAt = receivedAt ?? const _DefaultDateTime();
@@ -22,6 +23,7 @@ class PushNotificationPayload {
   final String? screen;
   final String? bookingId;
   final String? meetingId;
+  final String? disputeId;
   final Map<String, dynamic> rawData;
   final Object receivedAt;
 
@@ -56,6 +58,7 @@ class PushNotificationPayload {
     final screen = data['screen']?.toString();
     final bookingId = data['bookingId']?.toString();
     final meetingId = data['meetingId']?.toString();
+    final disputeId = data['disputeId']?.toString();
 
     final stringData = <String, dynamic>{};
     data.forEach((key, value) {
@@ -71,6 +74,7 @@ class PushNotificationPayload {
       screen: screen,
       bookingId: bookingId,
       meetingId: meetingId,
+      disputeId: disputeId,
       rawData: stringData,
       receivedAt: DateTime.now().toUtc(),
     );
@@ -85,6 +89,7 @@ class PushNotificationPayload {
     'screen': screen,
     'bookingId': bookingId,
     'meetingId': meetingId,
+    'disputeId': disputeId,
     'data': rawData,
   };
 }

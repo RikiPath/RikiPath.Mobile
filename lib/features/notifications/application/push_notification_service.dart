@@ -53,6 +53,10 @@ class PushNotificationService {
   StreamSubscription<RemoteMessage>? _onMessageOpenedAppSub;
   HubConnection? _notificationHub;
   Future<void>? _connectingHub;
+  bool _firebaseInitialized = false;
+  Future<void>? _initializingFirebase;
+  GoRouter? _activeRouter;
+  void Function(PushNotificationPayload payload)? _activeForegroundHandler;
 
   // Deduplication cache: notificationId -> received epoch ms
   final Map<String, int> _handledNotifications = <String, int>{};
@@ -126,18 +130,60 @@ class PushNotificationService {
     final value = (arguments.first as Map).map(
       (key, item) => MapEntry(key.toString(), item),
     );
-    final id = value['id'];
-    if (id is! int || id <= 0 || value['title'] is! String ||
+    final id = value['id'] ?? value['notificationId'];
+    final parsedId = switch (id) {
+      int() => id,
+      num() => id.toInt(),
+      String() => int.tryParse(id.trim()),
+      _ => null,
+    };
+    if (parsedId == null ||
+        parsedId <= 0 ||
+        value['title'] is! String ||
         value['message'] is! String) {
       return null;
     }
+    final linkUrl = value['linkUrl']?.toString();
+    final inferred = _inferRoutingFromLinkUrl(linkUrl);
     return PushNotificationPayload.fromMap({
-      'notificationId': id.toString(),
+      'notificationId': parsedId.toString(),
       'title': value['title'],
       'body': value['message'],
       'type': value['type'],
-      'linkUrl': value['linkUrl'],
+      'linkUrl': linkUrl,
+      if (value['screen'] != null || inferred['screen'] != null)
+        'screen': value['screen'] ?? inferred['screen'],
+      if (value['bookingId'] != null || inferred['bookingId'] != null)
+        'bookingId': value['bookingId'] ?? inferred['bookingId'],
+      if (value['meetingId'] != null || inferred['meetingId'] != null)
+        'meetingId': value['meetingId'] ?? inferred['meetingId'],
+      if (value['disputeId'] != null || inferred['disputeId'] != null)
+        'disputeId': value['disputeId'] ?? inferred['disputeId'],
     });
+  }
+
+  static Map<String, String> _inferRoutingFromLinkUrl(String? rawLinkUrl) {
+    if (rawLinkUrl == null || rawLinkUrl.trim().isEmpty) {
+      return const {};
+    }
+    final parsedUri = Uri.tryParse(rawLinkUrl.trim());
+    if (parsedUri == null) return const {};
+    final path = parsedUri.path.toLowerCase();
+    final bookingMatch = RegExp(
+      r'^/(?:mentor/(?:bookings|meetings)|mentor-meetings/bookings)/(\d+)',
+    ).firstMatch(path);
+    if (bookingMatch != null) {
+      return {'screen': 'meeting_room', 'bookingId': bookingMatch.group(1)!};
+    }
+    final chatMatch = RegExp(r'^/mentor/chat/(\d+)').firstMatch(path);
+    if (chatMatch != null) {
+      return {'screen': 'mentor_chat', 'bookingId': chatMatch.group(1)!};
+    }
+    final disputeMatch = RegExp(r'^/mentor/disputes/(\d+)').firstMatch(path);
+    if (disputeMatch != null) {
+      return {'screen': 'mentor_disputes', 'disputeId': disputeMatch.group(1)!};
+    }
+    return const {};
   }
 
   Future<void> disconnectForegroundNotifications() async {
@@ -181,6 +227,14 @@ class PushNotificationService {
     GoRouter? router,
     void Function(PushNotificationPayload payload)? onForegroundNotification,
   }) async {
+    _activeRouter = router;
+    _activeForegroundHandler = onForegroundNotification;
+    if (_firebaseInitialized) {
+      return;
+    }
+    if (_initializingFirebase != null) {
+      return _initializingFirebase;
+    }
     final msg = _resolvedMessaging;
     if (msg == null) {
       debugPrint(
@@ -189,6 +243,20 @@ class PushNotificationService {
       return;
     }
 
+    final future = _initializeFirebaseMessagingInternal(msg);
+    _initializingFirebase = future;
+    try {
+      await future;
+    } finally {
+      if (identical(_initializingFirebase, future)) {
+        _initializingFirebase = null;
+      }
+    }
+  }
+
+  Future<void> _initializeFirebaseMessagingInternal(
+    FirebaseMessaging msg,
+  ) async {
     try {
       final settings = await msg.requestPermission(
         alert: true,
@@ -244,9 +312,7 @@ class PushNotificationService {
           );
           return;
         }
-        if (onForegroundNotification != null) {
-          onForegroundNotification(payload);
-        }
+        _activeForegroundHandler?.call(payload);
       });
 
       // Listen to notification clicks from background state
@@ -255,19 +321,22 @@ class PushNotificationService {
         message,
       ) {
         final payload = PushNotificationPayload.fromRemoteMessage(message);
-        if (router != null) {
-          handleNotificationTap(router, payload);
+        final activeRouter = _activeRouter;
+        if (activeRouter != null) {
+          unawaited(handleNotificationTap(activeRouter, payload));
         }
       });
 
       // Check if app was opened from terminated state by a notification
       final initialMessage = await msg.getInitialMessage();
-      if (initialMessage != null && router != null) {
+      final activeRouter = _activeRouter;
+      if (initialMessage != null && activeRouter != null) {
         final payload = PushNotificationPayload.fromRemoteMessage(
           initialMessage,
         );
-        handleNotificationTap(router, payload);
+        unawaited(handleNotificationTap(activeRouter, payload));
       }
+      _firebaseInitialized = true;
     } catch (e) {
       debugPrint(
         '[PushNotificationService] Error initializing FirebaseMessaging: $e',
@@ -384,31 +453,109 @@ class PushNotificationService {
   }
 
   /// Resolves the in-app route destination from push notification payload data.
-  String resolveDeepLink(PushNotificationPayload payload) {
+  String resolveDeepLink(PushNotificationPayload payload, {String? role}) {
+    final normalizedRole = role?.trim().toLowerCase();
+    final isLearner = normalizedRole == 'learner';
+
     // 1. Direct screen parameter with ID
     if (payload.screen == 'booking_detail' && payload.bookingId != null) {
       final id = int.tryParse(payload.bookingId!);
       if (id != null && id > 0) {
-        return AppRoutes.learnerMentorBookingDetail(id);
+        return normalizedRole == 'mentor'
+            ? AppRoutes.mentorMeetingDetail(id)
+            : AppRoutes.learnerMentorBookingDetail(id);
       }
     }
 
-    if (payload.screen == 'meeting_room' && payload.meetingId != null) {
-      final id = int.tryParse(payload.meetingId!);
+    if (payload.screen == 'meeting_room') {
+      final id = int.tryParse(payload.meetingId ?? payload.bookingId ?? '');
       if (id != null && id > 0) {
-        return AppRoutes.mentorMeetingDetail(id);
+        return isLearner
+            ? AppRoutes.learnerMentorBookingDetail(id)
+            : AppRoutes.mentorMeetingDetail(id);
       }
     }
 
-    // 2. Link URL parsing
+    if (payload.screen == 'mentor_chat') {
+      final bookingId = int.tryParse(payload.bookingId ?? '');
+      if (bookingId != null && bookingId > 0) {
+        return AppRoutes.mentorChatRoom(bookingId);
+      }
+      return AppRoutes.mentorChat;
+    }
+
+    if (payload.screen == 'mentor_disputes') {
+      final disputeId = int.tryParse(payload.disputeId ?? '');
+      if (disputeId != null && disputeId > 0) {
+        return AppRoutes.mentorDisputeDetail(disputeId);
+      }
+      return AppRoutes.mentorDisputes;
+    }
+
+    if (payload.screen == 'mentor_reviews') {
+      return AppRoutes.mentorReviews;
+    }
+
+    // 2. Notification type & Link URL parsing
     if (payload.type == 'MentorVerificationResult') {
       return AppRoutes.mentorProfile;
     }
     if (payload.linkUrl != null && payload.linkUrl!.trim().isNotEmpty) {
-      final uri = payload.linkUrl!.trim();
-      if (uri == AppRoutes.mentorAvailability ||
-          uri == AppRoutes.mentorProfile) {
-        return uri;
+      final raw = payload.linkUrl!.trim();
+      final path = (Uri.tryParse(raw)?.path ?? raw).trim();
+      final lower = path.toLowerCase();
+
+      if (lower == AppRoutes.mentorAvailability ||
+          lower.startsWith('/mentor-availability')) {
+        return AppRoutes.mentorAvailability;
+      }
+      if (lower == AppRoutes.mentorProfile) {
+        return AppRoutes.mentorProfile;
+      }
+      if (lower == '/mentor/schedule' || lower == AppRoutes.mentorCalendar) {
+        return AppRoutes.mentorCalendar;
+      }
+      if (lower == AppRoutes.mentorReviews) {
+        return AppRoutes.mentorReviews;
+      }
+      if (lower == AppRoutes.mentorCompensation) {
+        return AppRoutes.mentorCompensation;
+      }
+      final chatMatch = RegExp(r'^/mentor/chat/(\d+)').firstMatch(lower);
+      if (chatMatch != null) {
+        final id = int.tryParse(chatMatch.group(1)!);
+        if (id != null && id > 0) return AppRoutes.mentorChatRoom(id);
+      }
+      if (lower == AppRoutes.mentorChat) {
+        return AppRoutes.mentorChat;
+      }
+      final disputeMatch = RegExp(r'^/mentor/disputes/(\d+)').firstMatch(lower);
+      if (disputeMatch != null) {
+        final id = int.tryParse(disputeMatch.group(1)!);
+        if (id != null && id > 0) return AppRoutes.mentorDisputeDetail(id);
+      }
+      if (lower == AppRoutes.mentorDisputes) {
+        return AppRoutes.mentorDisputes;
+      }
+      final learnerBookingMatch = RegExp(
+        r'^/mentor-meetings/bookings/(\d+)',
+      ).firstMatch(lower);
+      if (learnerBookingMatch != null) {
+        final id = int.tryParse(learnerBookingMatch.group(1)!);
+        if (id != null && id > 0) {
+          return AppRoutes.learnerMentorBookingDetail(id);
+        }
+      }
+      final mentorBookingMatch = RegExp(
+        r'^/mentor/(?:bookings|meetings)/(\d+)',
+      ).firstMatch(lower);
+      if (mentorBookingMatch != null) {
+        final id = int.tryParse(mentorBookingMatch.group(1)!);
+        if (id != null && id > 0) {
+          return isLearner
+              ? AppRoutes.learnerMentorBookingDetail(id)
+              : AppRoutes.mentorMeetingDetail(id);
+        }
       }
     }
 
@@ -417,9 +564,40 @@ class PushNotificationService {
   }
 
   /// Navigates to the appropriate destination for a tapped push notification.
-  void handleNotificationTap(GoRouter router, PushNotificationPayload payload) {
-    final destination = resolveDeepLink(payload);
-    router.go(destination);
+  Future<void> handleNotificationTap(
+    GoRouter router,
+    PushNotificationPayload payload,
+  ) async {
+    final role = await tokenStorage?.readAuthenticatedRole();
+    final destination = resolveDeepLink(payload, role: role);
+    if (destination == AppRoutes.notifications &&
+        payload.linkUrl != AppRoutes.notifications &&
+        role == null) {
+      _navigateRouterContextAware(router, AppRoutes.notifications);
+      return;
+    }
+    _navigateRouterContextAware(router, destination);
+  }
+
+  void _navigateRouterContextAware(GoRouter router, String destination) {
+    final currentUri = router.routerDelegate.currentConfiguration.uri;
+    final currentPath = currentUri.path;
+    if (currentUri.toString() == destination) {
+      return;
+    }
+    if (AppRoutes.isLearnerTabRoot(destination) ||
+        AppRoutes.isMentorTabRoot(destination)) {
+      router.go(destination);
+      return;
+    }
+    if (currentPath == AppRoutes.splash ||
+        currentPath == AppRoutes.learnerStartup ||
+        (AppRoutes.isShellBranchRoute(destination) &&
+            !AppRoutes.isShellBranchRoute(currentPath))) {
+      router.go(destination);
+      return;
+    }
+    router.push(destination);
   }
 
   void dispose() {

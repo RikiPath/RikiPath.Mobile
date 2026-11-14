@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
@@ -16,7 +17,7 @@ class SharedBankScreen extends StatelessWidget {
       appBar: LearningHeader.detail(
         title: 'Ngân hàng kiến thức',
         subtitle: 'Chọn tài nguyên bạn muốn khám phá',
-        onBack: context.pop,
+        onBack: () => popOrGo(context, AppRoutes.learn),
       ),
       body: SafeArea(
         top: false,

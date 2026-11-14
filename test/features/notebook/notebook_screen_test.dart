@@ -166,6 +166,11 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Bắt đầu sổ từ của bạn!'), findsOneWidget);
+    expect(find.text('Sổ từ của bạn đang trống'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('notebook_empty_collections_card')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('empty selected list renders the add-entry action', (

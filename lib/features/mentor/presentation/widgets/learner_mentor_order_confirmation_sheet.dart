@@ -148,112 +148,132 @@ class _LearnerMentorOrderConfirmationSheetState
           (widget.subscriptionId != null && widget.subscriptionId! > 0) ||
           hasCreditForLevel;
 
-      // Check again at the actual mutation boundary: the sheet may have stayed
-      // open while an administrator changed the published calendar.
-      final day = widget.slot.startTime.displayValue;
-      final from = DateTime(day.year, day.month, day.day);
-      final to = DateTime(day.year, day.month, day.day + 1);
-      final latest = await ref
-          .read(learnerMentorRepositoryProvider)
-          .loadAvailability(
-            from: from.toUtc(),
-            to: to.toUtc(),
-            mentorId: widget.slot.mentorId,
-            jlptLevel: effectiveJlptLevel,
-          );
-      if (!mounted) return;
-      final view = AvailabilityConflictView(latest);
-      final current = view.slots
-          .where((slot) => slot.id == widget.slot.id)
-          .firstOrNull;
-      if (current == null ||
-          !view.canBook(current) ||
-          current.startTime.value != widget.slot.startTime.value ||
-          current.endTime.value != widget.slot.endTime.value) {
-        setState(() => _isSubmitting = false);
-        ref
-            .read(rikiToastServiceProvider.notifier)
-            .error(
-              title: 'Lịch chưa khả dụng',
-              description:
-                  'Lịch đã thay đổi hoặc bị trùng. Vui lòng tải lại và chọn giờ khác.',
-            );
-        return;
-      }
-      if (effectiveJlptLevel == null) {
-        setState(() => _isSubmitting = false);
-        ref
-            .read(rikiToastServiceProvider.notifier)
-            .error(
-              title: 'Chưa chọn trình độ JLPT',
-              description:
-                  'Vui lòng chọn trình độ JLPT (N5 - N2) trước khi xác nhận đặt lịch.',
-            );
-        return;
-      }
+      String? errorTitle;
+      String? errorDescription;
+      LearnerMentorBooking? confirmedBooking;
+      MentorMeetingPurchase? purchase;
 
-      if (!isSupportedConsultationJlptLevel(effectiveJlptLevel)) {
-        setState(() => _isSubmitting = false);
+      await runWithAppLoadingOverlay<void>(
+        context,
+        title: context.l10n.loadingOverlayBookingTitle,
+        subtitle: context.l10n.loadingOverlayCompletingSubtitle,
+        action: () async {
+          // Check again at the actual mutation boundary: the sheet may have
+          // stayed open while an administrator changed the published calendar.
+          final day = widget.slot.startTime.displayValue;
+          final from = DateTime(day.year, day.month, day.day);
+          final to = DateTime(day.year, day.month, day.day + 1);
+          final latest = await ref
+              .read(learnerMentorRepositoryProvider)
+              .loadAvailability(
+                from: from.toUtc(),
+                to: to.toUtc(),
+                mentorId: widget.slot.mentorId,
+                jlptLevel: effectiveJlptLevel,
+              );
+          if (!mounted) return;
+          final view = AvailabilityConflictView(latest);
+          final current = view.slots
+              .where((slot) => slot.id == widget.slot.id)
+              .firstOrNull;
+          if (current == null ||
+              !view.canBook(current) ||
+              current.startTime.value != widget.slot.startTime.value ||
+              current.endTime.value != widget.slot.endTime.value) {
+            errorTitle = 'Lịch chưa khả dụng';
+            errorDescription =
+                'Lịch đã thay đổi hoặc bị trùng. Vui lòng tải lại và chọn giờ khác.';
+            return;
+          }
+          if (effectiveJlptLevel == null) {
+            errorTitle = 'Chưa chọn trình độ JLPT';
+            errorDescription =
+                'Vui lòng chọn trình độ JLPT (N5 - N2) trước khi xác nhận đặt lịch.';
+            return;
+          }
+          if (!isSupportedConsultationJlptLevel(effectiveJlptLevel)) {
+            errorTitle = 'Trình độ chưa được hỗ trợ';
+            errorDescription =
+                'Hệ thống tư vấn 1-1 chỉ hỗ trợ trình độ JLPT N5, N4, N3 và N2 (không hỗ trợ N1).';
+            return;
+          }
+
+          if (isExistingSubscription) {
+            if (hasCreditForLevel) {
+              final availForLevel =
+                  creditBalance?.availableForLevel(effectiveJlptLevel) ?? 0;
+              final errorMsg = validateBookingJlptEligibility(
+                selectedJlptLevel: effectiveJlptLevel,
+                mentorQualifiedLevels: const [],
+                availableTicketsForLevel: availForLevel,
+                requireTicketNow: true,
+              );
+              if (errorMsg != null) {
+                errorTitle = 'Vé không phù hợp';
+                errorDescription = errorMsg;
+                return;
+              }
+            }
+            // Đặt lịch trực tiếp bằng lượt học đã thanh toán hoặc vé khả dụng
+            // Idempotency key is preserved across retries of the same booking intent
+            confirmedBooking = await ref
+                .read(learnerMentorMutationControllerProvider.notifier)
+                .bookWithCredit(
+                  slotId: widget.slot.id,
+                  operationKey: _bookingOperationKey,
+                  notes: _questionController.text.trim(),
+                  jlptLevel: effectiveJlptLevel,
+                );
+
+            if (confirmedBooking == null) {
+              try {
+                final ownBookings = await ref
+                    .read(learnerMentorRepositoryProvider)
+                    .loadBookings();
+                confirmedBooking = ownBookings
+                    .where(
+                      (item) =>
+                          item.mentorAvailabilityId == widget.slot.id &&
+                          (item.status == MentorMeetingStatus.assigned ||
+                              item.status == MentorMeetingStatus.accepted),
+                    )
+                    .firstOrNull;
+              } catch (_) {
+                // Nếu mạng vẫn lỗi, giữ operation key để lần thử lại không tạo lịch trùng.
+              }
+            }
+            return;
+          }
+
+          if (widget.planId == null) {
+            errorTitle = 'Chưa chọn gói tư vấn';
+            errorDescription =
+                'Vui lòng chọn gói phù hợp trước khi thanh toán.';
+            return;
+          }
+          // Mua gói và đặt lịch thông qua PayOS checkout link
+          purchase = await ref
+              .read(learnerMentorMutationControllerProvider.notifier)
+              .purchase(
+                subscriptionPlanId: widget.planId!,
+                mentorAvailabilityId: widget.slot.id,
+                idempotencyKey: _purchaseIdempotencyKey,
+                jlptLevel: effectiveJlptLevel,
+              );
+        },
+      );
+
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+
+      if (errorTitle != null) {
         ref
             .read(rikiToastServiceProvider.notifier)
-            .error(
-              title: 'Trình độ chưa được hỗ trợ',
-              description:
-                  'Hệ thống tư vấn 1-1 chỉ hỗ trợ trình độ JLPT N5, N4, N3 và N2 (không hỗ trợ N1).',
-            );
+            .error(title: errorTitle!, description: errorDescription);
         return;
       }
 
       if (isExistingSubscription) {
-        if (hasCreditForLevel) {
-          final availForLevel =
-              creditBalance?.availableForLevel(effectiveJlptLevel) ?? 0;
-          final errorMsg = validateBookingJlptEligibility(
-            selectedJlptLevel: effectiveJlptLevel,
-            mentorQualifiedLevels: const [],
-            availableTicketsForLevel: availForLevel,
-            requireTicketNow: true,
-          );
-          if (errorMsg != null) {
-            setState(() => _isSubmitting = false);
-            ref
-                .read(rikiToastServiceProvider.notifier)
-                .error(title: 'Vé không phù hợp', description: errorMsg);
-            return;
-          }
-        }
-        // Đặt lịch trực tiếp bằng lượt học đã thanh toán hoặc vé khả dụng
-        // Idempotency key is preserved across retries of the same booking intent
-        final booking = await ref
-            .read(learnerMentorMutationControllerProvider.notifier)
-            .bookWithCredit(
-              slotId: widget.slot.id,
-              operationKey: _bookingOperationKey,
-              notes: _questionController.text.trim(),
-              jlptLevel: effectiveJlptLevel,
-            );
-
-        LearnerMentorBooking? confirmedBooking = booking;
-        if (confirmedBooking == null) {
-          try {
-            final ownBookings = await ref
-                .read(learnerMentorRepositoryProvider)
-                .loadBookings();
-            confirmedBooking = ownBookings
-                .where(
-                  (item) =>
-                      item.mentorAvailabilityId == widget.slot.id &&
-                      (item.status == MentorMeetingStatus.assigned ||
-                          item.status == MentorMeetingStatus.accepted),
-                )
-                .firstOrNull;
-          } catch (_) {
-            // Nếu mạng vẫn lỗi, giữ operation key để lần thử lại không tạo lịch trùng.
-          }
-        }
-        if (!mounted) return;
-        setState(() => _isSubmitting = false);
-
         if (confirmedBooking != null) {
           final title = context.l10n.learnerMentorBookingSuccess;
           final description = context.l10n.learnerMentorBookingSuccessDesc;
@@ -273,34 +293,25 @@ class _LearnerMentorOrderConfirmationSheetState
               );
         }
       } else {
-        if (widget.planId == null) {
-          setState(() => _isSubmitting = false);
-          ref
-              .read(rikiToastServiceProvider.notifier)
-              .error(
-                title: 'Chưa chọn gói tư vấn',
-                description: 'Vui lòng chọn gói phù hợp trước khi thanh toán.',
-              );
-          return;
-        }
-        // Mua gói và đặt lịch thông qua PayOS checkout link
-        final purchase = await ref
-            .read(learnerMentorMutationControllerProvider.notifier)
-            .purchase(
-              subscriptionPlanId: widget.planId!,
-              mentorAvailabilityId: widget.slot.id,
-              idempotencyKey: _purchaseIdempotencyKey,
-              jlptLevel: effectiveJlptLevel,
-            );
-
-        if (!mounted) return;
-        setState(() => _isSubmitting = false);
-
         if (purchase != null) {
+          ref
+              .read(learnerBookingIntentProvider.notifier)
+              .setIntent(
+                LearnerBookingIntent(
+                  planId: widget.planId,
+                  plan: widget.plan,
+                  subscriptionId: purchase!.subscriptionId,
+                  mentorAvailabilityId: widget.slot.id,
+                  slot: widget.slot,
+                  question: _questionController.text.trim(),
+                  jlptLevel: effectiveJlptLevel,
+                  checkoutUrl: purchase!.checkoutUrl,
+                ),
+              );
           Navigator.of(context).pop();
 
           // Mở liên kết thanh toán PayOS nếu khả dụng
-          final checkoutUri = purchase.safeCheckoutUri;
+          final checkoutUri = purchase!.safeCheckoutUri;
           if (checkoutUri != null) {
             try {
               await launchUrl(
@@ -316,7 +327,7 @@ class _LearnerMentorOrderConfirmationSheetState
           if (mounted) {
             try {
               context.push(
-                AppRoutes.learnerMentorPurchaseStatus(purchase.subscriptionId),
+                AppRoutes.learnerMentorPurchaseStatus(purchase!.subscriptionId),
               );
             } catch (_) {}
           }

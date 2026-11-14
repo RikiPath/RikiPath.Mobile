@@ -2,6 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
@@ -27,15 +30,39 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   String? _firstNameError;
   String? _lastNameError;
   bool _initialized = false;
+  bool _isDirty = false;
+  String _baselineFirstName = '';
+  String _baselineLastName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _firstNameController.addListener(_syncDirty);
+    _lastNameController.addListener(_syncDirty);
+  }
+
+  void _syncDirty() {
+    if (!_initialized) return;
+    final dirty =
+        _firstNameController.text.trim() != _baselineFirstName ||
+        _lastNameController.text.trim() != _baselineLastName;
+    if (dirty != _isDirty && mounted) {
+      setState(() => _isDirty = dirty);
+    }
+  }
 
   @override
   void dispose() {
+    _firstNameController.removeListener(_syncDirty);
+    _lastNameController.removeListener(_syncDirty);
     _firstNameController.dispose();
     _lastNameController.dispose();
     super.dispose();
   }
 
   void _initialize(UserProfile profile) {
+    _baselineFirstName = profile.firstName.trim();
+    _baselineLastName = profile.lastName.trim();
     if (_initialized) return;
     _firstNameController.text = profile.firstName;
     _lastNameController.text = profile.lastName;
@@ -114,9 +141,42 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profileValue = ref.watch(userProfileControllerProvider);
-    return Scaffold(
-      backgroundColor: AppColors.profileBackground,
-      appBar: ProfileDetailHeader(title: context.l10n.profileEdit),
+    final mutation = profileValue.value?.activeMutation;
+    final loadedProfile = profileValue.value?.profile;
+    final hasUnsavedChanges =
+        _initialized &&
+        loadedProfile != null &&
+        mutation == null &&
+        (_firstNameController.text.trim() != loadedProfile.firstName.trim() ||
+            _lastNameController.text.trim() != loadedProfile.lastName.trim());
+    final canPopRoute =
+        !hasUnsavedChanges &&
+        (GoRouter.maybeOf(context)?.canPop() ??
+            (ModalRoute.of(context)?.canPop ?? true));
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          handleProtectedBackNavigation(
+            context: context,
+            hasUnsavedChanges: hasUnsavedChanges,
+            fallbackRoute: AppRoutes.profileAccount,
+          );
+        }
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Scaffold(
+            backgroundColor: AppColors.profileBackground,
+            appBar: ProfileDetailHeader(
+              title: context.l10n.profileEdit,
+              onBack: () => handleProtectedBackNavigation(
+                context: context,
+                hasUnsavedChanges: hasUnsavedChanges,
+                fallbackRoute: AppRoutes.profileAccount,
+              ),
+            ),
       body: profileValue.when(
         loading: () => const ProfileDetailSkeleton(
           key: ValueKey<String>('profile_edit_loading_view'),
@@ -277,6 +337,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
           );
         },
+      ),
+        ),
+        AppLoadingOverlay(
+          visible: mutation != null,
+          title: mutation == ProfileMutation.avatar
+              ? context.l10n.uploadingAvatar
+              : context.l10n.loadingOverlaySavingTitle,
+          subtitle: context.l10n.loadingOverlayUpdatingSubtitle,
+        ),
+      ],
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rikipath_mobile/app/router/navigation_configuration.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_bottom_navigation_bar.dart';
@@ -55,7 +56,7 @@ void main() {
       'Sổ từ',
       'Cá nhân',
     ];
-    expect(RikiBottomNavigationBar.destinationCount, labels.length);
+    expect(LearnerNavigationConfiguration.tabCount, labels.length);
     for (final destinationLabel in labels) {
       final label = tester.widget<Text>(find.text(destinationLabel));
       expect(label.maxLines, 2);
@@ -152,8 +153,12 @@ void main() {
   ) async {
     await _pumpNavigation(tester, selectedIndex: 0);
     await _pumpNavigation(tester, selectedIndex: 2);
+    // At frame 0 of the glide from 0 -> 2, the circle carries tab 0's active
+    // icon while tab 2 keeps only its inactive icon — never duplicating either.
     expect(find.byIcon(Icons.home), findsOneWidget);
-    expect(find.byIcon(Icons.quiz), findsOneWidget);
+    expect(find.byIcon(Icons.home_outlined), findsNothing);
+    expect(find.byIcon(Icons.quiz), findsNothing);
+    expect(find.byIcon(Icons.quiz_outlined), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 110));
 
     final painter = _notchPainter(tester);
@@ -177,6 +182,9 @@ void main() {
       settled.rightEnd - settled.centerX,
       closeTo(settled.centerX - settled.leftStart, 0.01),
     );
+    expect(find.byIcon(Icons.quiz), findsOneWidget);
+    expect(find.byIcon(Icons.quiz_outlined), findsNothing);
+    expect(find.byIcon(Icons.home_outlined), findsOneWidget);
   });
 
   testWidgets('distant selection travels and settles without an instant snap', (
@@ -284,6 +292,328 @@ void main() {
       }
     }
   });
+
+  testWidgets(
+    'mentor destinations reuse SakuraBottomNavigation smoothly without overflow across viewports',
+    (tester) async {
+      for (final width in <double>[360, 393, 412]) {
+        tester.view.physicalSize = Size(width, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await _pumpNavigation(
+          tester,
+          selectedIndex: 2,
+          textScale: width == 360 ? 1.15 : 1.0,
+          destinationsBuilder: (context) =>
+              MentorNavigationConfiguration.buildDestinations(context.l10n),
+        );
+
+        for (final label in const <String>[
+          'Trang chủ',
+          'Lịch dạy',
+          'Buổi tư vấn',
+          'Lịch trống',
+          'Cá nhân',
+        ]) {
+          final itemFinder = find.byKey(
+            ValueKey<String>('bottom_navigation_item_$label'),
+          );
+          expect(itemFinder, findsOneWidget);
+          expect(tester.getSize(itemFinder).height, greaterThanOrEqualTo(48));
+        }
+        expect(find.byIcon(Icons.video_camera_front), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
+
+  testWidgets(
+    'indicator slides forward, reverses backward, and handles rapid switching cleanly',
+    (tester) async {
+      var selected = 0;
+      late StateSetter updateState;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              updateState = setState;
+              return Scaffold(
+                bottomNavigationBar: SakuraBottomNavigation(
+                  destinations: MentorNavigationConfiguration.buildDestinations(
+                    context.l10n,
+                  ),
+                  selectedIndex: selected,
+                  onDestinationSelected: (idx) =>
+                      setState(() => selected = idx),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final barWidth = tester.getSize(find.byType(SakuraBottomNavigation)).width;
+      final startX = _notchPainter(
+        tester,
+      ).geometryFor(Size(barWidth, 64)).centerX;
+      expect(startX, closeTo(barWidth * 0.1, 0.5));
+
+      // Forward transition 0 -> 3
+      updateState(() => selected = 3);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 140));
+      final midForwardX = _notchPainter(
+        tester,
+      ).geometryFor(Size(barWidth, 64)).centerX;
+      expect(midForwardX, greaterThan(barWidth * 0.25));
+      expect(midForwardX, lessThan(barWidth * 0.7));
+
+      // Rapidly interrupt with 3 -> 1 -> 4 before completion
+      updateState(() => selected = 1);
+      await tester.pump(const Duration(milliseconds: 30));
+      updateState(() => selected = 4);
+      await tester.pumpAndSettle();
+
+      final endForwardX = _notchPainter(
+        tester,
+      ).geometryFor(Size(barWidth, 64)).centerX;
+      expect(endForwardX, closeTo(barWidth * 0.9, 0.5));
+
+      // Reverse transition 4 -> 0
+      updateState(() => selected = 0);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 140));
+      final midReverseX = _notchPainter(
+        tester,
+      ).geometryFor(Size(barWidth, 64)).centerX;
+      expect(midReverseX, lessThan(barWidth * 0.85));
+      expect(midReverseX, greaterThan(barWidth * 0.15));
+      await tester.pumpAndSettle();
+      expect(
+        _notchPainter(tester).geometryFor(Size(barWidth, 64)).centerX,
+        closeTo(barWidth * 0.1, 0.5),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'active circle and icon keep compact centered geometry without enlargement across 360dp, 393dp, 412dp',
+    (tester) async {
+      for (final width in <double>[360, 393, 412]) {
+        tester.view.physicalSize = Size(width, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+
+        for (final selectedIndex in <int>[0, 1, 2, 3, 4]) {
+          await _pumpNavigation(tester, selectedIndex: selectedIndex);
+          await tester.pumpAndSettle();
+          final barRect = tester.getRect(find.byType(SakuraBottomNavigation));
+          final indicatorFinder = find.byKey(
+            const ValueKey<String>('sakura_floating_active_indicator'),
+          );
+          final indicatorRect = tester.getRect(indicatorFinder);
+          expect(indicatorRect.width, closeTo(40, 0.01));
+          expect(indicatorRect.height, closeTo(40, 0.01));
+          expect(indicatorRect.top, greaterThanOrEqualTo(barRect.top));
+          expect(indicatorRect.bottom, lessThanOrEqualTo(barRect.bottom));
+
+          final activeIcon = tester.widget<Icon>(
+            find.descendant(of: indicatorFinder, matching: find.byType(Icon)),
+          );
+          expect(activeIcon.size, 20);
+
+          final activeTabItem = tester.getRect(
+            find
+                .byKey(
+                  ValueKey<String>(
+                    'bottom_navigation_item_${['Trang chủ', 'Học tập', 'Luyện tập', 'Sổ từ', 'Cá nhân'][selectedIndex]}',
+                  ),
+                ),
+          );
+          expect(
+            indicatorRect.center.dx,
+            closeTo(activeTabItem.center.dx, 0.1),
+          );
+        }
+      }
+    },
+  );
+
+  testWidgets(
+    'never renders both active and inactive icons for any tab during forward, backward, and rapid switches',
+    (tester) async {
+      final destinations = <(IconData icon, IconData selectedIcon)>[
+        (Icons.home_outlined, Icons.home),
+        (Icons.menu_book_outlined, Icons.menu_book),
+        (Icons.quiz_outlined, Icons.quiz),
+        (Icons.style_outlined, Icons.style),
+        (Icons.person_outline, Icons.person),
+      ];
+
+      void assertNoDuplicateIcons() {
+        for (final entry in destinations) {
+          final outlinedIcons = tester
+              .widgetList<Icon>(find.byIcon(entry.$1))
+              .where((icon) {
+                final opacityFinder = find.ancestor(
+                  of: find.byWidget(icon),
+                  matching: find.byType(Opacity),
+                );
+                if (opacityFinder.evaluate().isEmpty) return true;
+                return tester
+                        .widget<Opacity>(opacityFinder.first)
+                        .opacity >
+                    0.01;
+              })
+              .toList();
+          final selectedIcons = tester
+              .widgetList<Icon>(find.byIcon(entry.$2))
+              .where((icon) {
+                final opacityFinder = find.ancestor(
+                  of: find.byWidget(icon),
+                  matching: find.byType(Opacity),
+                );
+                if (opacityFinder.evaluate().isEmpty) return true;
+                return tester
+                        .widget<Opacity>(opacityFinder.first)
+                        .opacity >
+                    0.01;
+              })
+              .toList();
+          expect(outlinedIcons.length, lessThanOrEqualTo(1));
+          expect(selectedIcons.length, lessThanOrEqualTo(1));
+          expect(
+            outlinedIcons.isNotEmpty && selectedIcons.isNotEmpty,
+            isFalse,
+            reason:
+                'Both ${entry.$1} and ${entry.$2} were visible simultaneously',
+          );
+        }
+      }
+
+      var selected = 0;
+      late StateSetter updateState;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              updateState = setState;
+              return Scaffold(
+                bottomNavigationBar: SakuraBottomNavigation(
+                  destinations: LearnerNavigationConfiguration.buildDestinations(
+                    context.l10n,
+                  ),
+                  selectedIndex: selected,
+                  onDestinationSelected: (idx) =>
+                      setState(() => selected = idx),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Jump 0 -> 2 (Luyện tập) and sample every 25ms through settle
+      updateState(() => selected = 2);
+      await tester.pump();
+      assertNoDuplicateIcons();
+      for (var i = 0; i < 16; i++) {
+        await tester.pump(const Duration(milliseconds: 25));
+        assertNoDuplicateIcons();
+      }
+      await tester.pumpAndSettle();
+      assertNoDuplicateIcons();
+
+      // Rapid switches: 2 -> 4 -> 1 -> 3 -> 0
+      for (final next in <int>[4, 1, 3, 0]) {
+        updateState(() => selected = next);
+        await tester.pump();
+        assertNoDuplicateIcons();
+        for (var i = 0; i < 3; i++) {
+          await tester.pump(const Duration(milliseconds: 35));
+          assertNoDuplicateIcons();
+        }
+      }
+      await tester.pumpAndSettle();
+      assertNoDuplicateIcons();
+      expect(find.byIcon(Icons.home), findsOneWidget);
+      expect(find.byIcon(Icons.home_outlined), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'mentor destinations share identical compact centered geometry and zero duplicate icons',
+    (tester) async {
+      tester.view.physicalSize = const Size(393, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      var selected = 0;
+      late StateSetter updateState;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              updateState = setState;
+              return Scaffold(
+                bottomNavigationBar: SakuraBottomNavigation(
+                  destinations: MentorNavigationConfiguration.buildDestinations(
+                    context.l10n,
+                  ),
+                  selectedIndex: selected,
+                  onDestinationSelected: (idx) =>
+                      setState(() => selected = idx),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      updateState(() => selected = 2);
+      await tester.pump();
+      expect(find.byIcon(Icons.home), findsOneWidget);
+      expect(find.byIcon(Icons.home_outlined), findsNothing);
+      expect(find.byIcon(Icons.video_camera_front), findsNothing);
+      expect(find.byIcon(Icons.video_camera_front_outlined), findsOneWidget);
+
+      await tester.pumpAndSettle();
+      final indicatorFinder = find.byKey(
+        const ValueKey<String>('sakura_floating_active_indicator'),
+      );
+      final indicatorRect = tester.getRect(indicatorFinder);
+      final barRect = tester.getRect(find.byType(SakuraBottomNavigation));
+      expect(indicatorRect.width, closeTo(40, 0.01));
+      expect(indicatorRect.height, closeTo(40, 0.01));
+      expect(indicatorRect.top, greaterThanOrEqualTo(barRect.top));
+      expect(indicatorRect.center.dx, closeTo(barRect.center.dx, 0.1));
+      expect(
+        tester
+            .widget<Icon>(
+              find.descendant(of: indicatorFinder, matching: find.byType(Icon)),
+            )
+            .size,
+        20,
+      );
+      expect(find.byIcon(Icons.video_camera_front), findsOneWidget);
+      expect(find.byIcon(Icons.video_camera_front_outlined), findsNothing);
+    },
+  );
 }
 
 SakuraCurvedNavigationPainter _notchPainter(WidgetTester tester) {
@@ -301,6 +631,8 @@ Future<void> _pumpNavigation(
   WidgetTester tester, {
   required int selectedIndex,
   ValueChanged<int>? onDestinationSelected,
+  List<RikiNavigationDestination> Function(BuildContext context)?
+  destinationsBuilder,
   Locale locale = const Locale('vi'),
   double textScale = 1,
   bool disableAnimations = false,
@@ -321,6 +653,11 @@ Future<void> _pumpNavigation(
           ),
           child: Scaffold(
             bottomNavigationBar: RikiBottomNavigationBar(
+              destinations:
+                  destinationsBuilder?.call(context) ??
+                  LearnerNavigationConfiguration.buildDestinations(
+                    context.l10n,
+                  ),
               selectedIndex: selectedIndex,
               onDestinationSelected: onDestinationSelected ?? (_) {},
             ),

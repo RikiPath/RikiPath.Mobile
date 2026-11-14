@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/storage/json_preference_store.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/learning/data/persistent_learner_journey_repository.dart';
 import 'package:rikipath_mobile/features/learning/domain/learner_journey.dart';
@@ -10,6 +11,7 @@ import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 final learnerJourneyRepositoryProvider = Provider<LearnerJourneyRepository>(
   (ref) => PersistentLearnerJourneyRepository(
     ref.watch(jsonPreferenceStoreProvider),
+    ref.watch(authenticatedUserIdProvider),
   ),
 );
 
@@ -24,6 +26,7 @@ class LearnerJourneyController extends AsyncNotifier<LearnerJourneyState> {
 
   @override
   Future<LearnerJourneyState> build() async {
+    ref.watch(authenticatedUserIdProvider);
     try {
       return await _repository.load();
     } catch (_) {

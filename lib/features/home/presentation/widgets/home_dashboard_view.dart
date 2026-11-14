@@ -78,8 +78,9 @@ class HomeDashboardView extends StatelessWidget {
         ? learningState.value?.jlptTarget
         : (journeyState.value?.hasSelectedLevel == true
               ? journeyState.value?.selectedLevel
-              : dashboardState.value?.jlptTarget);
-    final targetLevelName = roadmapState?.value?.targetJlptLevelName;
+              : null);
+    final targetLevelName = roadmapState?.value?.targetJlptLevelName ??
+        dashboardState.value?.jlptTarget?.label;
 
     return RefreshIndicator(
       onRefresh: onRefreshLive,
@@ -241,8 +242,8 @@ class _GreetingSection extends StatelessWidget {
       error: (_, _) =>
           _CompactError(title: context.l10n.homeLoadFailed, onRetry: onRetry),
       data: (dashboard) {
-        final target = targetLevelName?.trim();
-        final current = currentLevel ?? dashboard.jlptTarget;
+        final target = targetLevelName?.trim() ?? dashboard.jlptTarget?.label;
+        final current = currentLevel;
         final String subtitle;
         if (current != null &&
             target != null &&

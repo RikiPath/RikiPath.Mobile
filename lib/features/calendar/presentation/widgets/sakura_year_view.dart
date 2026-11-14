@@ -8,12 +8,14 @@ class SakuraYearView extends StatelessWidget {
     super.key,
     required this.selectedDate,
     required this.events,
+    this.dataIncomplete = false,
     required this.onSelectMonth,
     required this.onSelectDate,
   });
 
   final DateTime selectedDate;
   final List<SakuraCalendarEvent> events;
+  final bool dataIncomplete;
   final ValueChanged<DateTime> onSelectMonth;
   final ValueChanged<DateTime> onSelectDate;
 
@@ -47,6 +49,7 @@ class SakuraYearView extends StatelessWidget {
             month: index + 1,
             selectedDate: selectedDate,
             eventsByDay: eventsByDay,
+            dataIncomplete: dataIncomplete,
             onSelectMonth: onSelectMonth,
             onSelectDate: onSelectDate,
           ),
@@ -62,6 +65,7 @@ class _YearMonth extends StatelessWidget {
     required this.month,
     required this.selectedDate,
     required this.eventsByDay,
+    required this.dataIncomplete,
     required this.onSelectMonth,
     required this.onSelectDate,
   });
@@ -70,6 +74,7 @@ class _YearMonth extends StatelessWidget {
   final int month;
   final DateTime selectedDate;
   final Map<DateTime, List<SakuraCalendarEvent>> eventsByDay;
+  final bool dataIncomplete;
   final ValueChanged<DateTime> onSelectMonth;
   final ValueChanged<DateTime> onSelectDate;
 
@@ -159,8 +164,9 @@ class _YearMonth extends StatelessWidget {
                     final isSelected = day == selected;
                     return Semantics(
                       button: true,
-                      label:
-                          '${day.day} tháng $month năm $year, ${dayEvents.length} sự kiện',
+                      label: dataIncomplete
+                          ? '${day.day} tháng $month năm $year, ${dayEvents.length} hoạt động đã tải; một số lịch chưa cập nhật'
+                          : '${day.day} tháng $month năm $year, ${dayEvents.length} sự kiện',
                       child: InkWell(
                         key: Key('year_day_${month}_${day.day}'),
                         onTap: () => onSelectDate(day),
@@ -176,10 +182,13 @@ class _YearMonth extends StatelessWidget {
                                 color: isToday
                                     ? AppColors.primary
                                     : (isSelected
-                                        ? const Color(0xFFFFF1F2)
-                                        : null),
+                                          ? const Color(0xFFFFF1F2)
+                                          : null),
                                 border: isSelected && !isToday
-                                    ? Border.all(color: AppColors.primary, width: 1.2)
+                                    ? Border.all(
+                                        color: AppColors.primary,
+                                        width: 1.2,
+                                      )
                                     : null,
                               ),
                               child: Text(
@@ -192,8 +201,8 @@ class _YearMonth extends StatelessWidget {
                                   color: isToday
                                       ? Colors.white
                                       : (isSelected
-                                          ? AppColors.primary
-                                          : AppColors.textPrimary),
+                                            ? AppColors.primary
+                                            : AppColors.textPrimary),
                                 ),
                               ),
                             ),

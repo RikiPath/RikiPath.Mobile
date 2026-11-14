@@ -229,6 +229,186 @@ class SakuraMenuIconPainter extends CustomPainter {
         line(24, 24, 24, 13, blue, 3.4);
         line(24, 24, 33, 29, blue, 3.4);
         circle(24, 24, 2.5, gold);
+      case SakuraColorfulIconType.studySprout:
+        // Soft Green Sprout / Twin Fresh Leaves (15 min/day - Nhẹ nhàng)
+        const leafGreen = Color(0xFF2EA968);
+        const leafLight = Color(0xFF67D494);
+        const stemGreen = Color(0xFF238651);
+        // Soil mound / base arc
+        rounded(14, 38, 20, 4.5, 2.2, const Color(0xFFD6EADF));
+        // Central stem
+        final stem = Path()
+          ..moveTo(24, 39)
+          ..quadraticBezierTo(24, 26, 24, 17);
+        canvas.drawPath(stem, stroke(stemGreen, 3.4));
+        // Left leaf
+        final leftLeaf = Path()
+          ..moveTo(24, 27)
+          ..cubicTo(11, 26, 7, 15, 11, 10)
+          ..cubicTo(18, 9, 24, 17, 24, 27)
+          ..close();
+        canvas.drawPath(leftLeaf, fill(leafGreen));
+        line(22, 24, 13, 14, Colors.white.withValues(alpha: 0.7), 1.8);
+        // Right leaf
+        final rightLeaf = Path()
+          ..moveTo(24, 23)
+          ..cubicTo(36, 22, 41, 12, 37, 7)
+          ..cubicTo(29, 6, 24, 14, 24, 23)
+          ..close();
+        canvas.drawPath(rightLeaf, fill(leafLight));
+        line(26, 20, 34, 11, Colors.white.withValues(alpha: 0.75), 1.8);
+      case SakuraColorfulIconType.studyBalance:
+        // Soft Blue Balance Scale (30 min/day - Cân bằng)
+        const scaleBlue = Color(0xFF4282D6);
+        const scaleSky = Color(0xFF7CB2F4);
+        // Base pedestal
+        rounded(15, 39, 18, 4.5, 2.2, scaleBlue);
+        line(24, 11, 24, 39, scaleBlue, 3.2);
+        // Crossbeam
+        line(9, 16, 39, 16, scaleBlue, 3.0);
+        circle(24, 11, 3.8, gold);
+        // Left strings & pan
+        line(12, 16, 8, 27, scaleSky, 2.0);
+        line(12, 16, 16, 27, scaleSky, 2.0);
+        final leftPan = Path()
+          ..moveTo(6, 27)
+          ..quadraticBezierTo(12, 34, 18, 27)
+          ..close();
+        canvas.drawPath(leftPan, fill(scaleBlue));
+        // Right strings & pan
+        line(36, 16, 32, 27, scaleSky, 2.0);
+        line(36, 16, 40, 27, scaleSky, 2.0);
+        final rightPan = Path()
+          ..moveTo(30, 27)
+          ..quadraticBezierTo(36, 34, 42, 27)
+          ..close();
+        canvas.drawPath(rightPan, fill(scaleBlue));
+      case SakuraColorfulIconType.studyFlame:
+        // Warm Orange Flame (45 min/day - Tích cực)
+        const flameOrange = Color(0xFFF06E28);
+        const flameAmber = Color(0xFFFFB238);
+        final outerFlame = Path()
+          ..moveTo(24, 5)
+          ..cubicTo(33, 14, 40, 22, 38, 32)
+          ..cubicTo(36, 40, 30, 43, 24, 43)
+          ..cubicTo(17, 43, 10, 38, 10, 30)
+          ..cubicTo(10, 22, 16, 17, 18, 13)
+          ..cubicTo(19, 17, 20, 19, 22, 19)
+          ..cubicTo(20, 13, 21, 8, 24, 5)
+          ..close();
+        canvas.drawPath(outerFlame, fill(flameOrange));
+        final innerFlame = Path()
+          ..moveTo(25, 18)
+          ..cubicTo(30, 23, 33, 28, 31, 35)
+          ..cubicTo(30, 39, 27, 41, 24, 41)
+          ..cubicTo(20, 41, 17, 38, 17, 33)
+          ..cubicTo(17, 27, 21, 23, 25, 18)
+          ..close();
+        canvas.drawPath(innerFlame, fill(flameAmber));
+        circle(24, 36, 3.5, cream);
+      case SakuraColorfulIconType.studyBook:
+        // Soft Purple Open Study Book (60 min/day - Chuyên sâu)
+        const bookPurple = Color(0xFF7E57C2);
+        const bookLavender = Color(0xFFEDE7F6);
+        // Outer cover
+        rounded(6, 12, 36, 28, 4, bookPurple);
+        // Left page
+        final leftPage = Path()
+          ..moveTo(24, 14)
+          ..quadraticBezierTo(16, 11, 9, 13)
+          ..lineTo(9, 36)
+          ..quadraticBezierTo(16, 34, 24, 37)
+          ..close();
+        canvas.drawPath(leftPage, fill(Colors.white));
+        // Right page
+        final rightPage = Path()
+          ..moveTo(24, 14)
+          ..quadraticBezierTo(32, 11, 39, 13)
+          ..lineTo(39, 36)
+          ..quadraticBezierTo(32, 34, 24, 37)
+          ..close();
+        canvas.drawPath(rightPage, fill(bookLavender));
+        // Spine & text lines
+        line(24, 14, 24, 38, bookPurple, 2.2);
+        for (final y in [19.0, 24.0, 29.0]) {
+          line(12, y, 20, y, const Color(0xFF9E82D8), 2.0);
+          line(28, y, 36, y, const Color(0xFF9E82D8), 2.0);
+        }
+        // Sakura ribbon bookmark
+        path([
+          const Offset(31, 12),
+          const Offset(35, 12),
+          const Offset(35, 23),
+          const Offset(33, 20),
+          const Offset(31, 23),
+        ], coral);
+      case SakuraColorfulIconType.studyLightning:
+        // Warm Yellow / Amber Lightning Energy (90 min/day - Chuyên tâm)
+        const boltAmber = Color(0xFFF59E0B);
+        const boltGold = Color(0xFFFBBF24);
+        circle(24, 24, 19, const Color(0xFFFEF3C7));
+        final bolt = Path()
+          ..moveTo(27, 5)
+          ..lineTo(11, 26)
+          ..lineTo(23, 26)
+          ..lineTo(19, 43)
+          ..lineTo(37, 21)
+          ..lineTo(25, 21)
+          ..close();
+        canvas.drawPath(bolt, fill(boltAmber));
+        final highlightBolt = Path()
+          ..moveTo(26, 9)
+          ..lineTo(14, 24)
+          ..lineTo(23, 24)
+          ..lineTo(21, 35)
+          ..lineTo(33, 22)
+          ..lineTo(24, 22)
+          ..close();
+        canvas.drawPath(highlightBolt, fill(boltGold));
+      case SakuraColorfulIconType.studyCustomClock:
+        // Sakura Pink Clock / Time Adjustment (Thời gian tùy chỉnh)
+        const sakuraPink = Color(0xFFE5577F);
+        const sakuraSoft = Color(0xFFFCE7EE);
+        circle(23, 25, 17, sakuraPink);
+        circle(23, 25, 13.5, sakuraSoft);
+        // Hour ticks
+        line(23, 13.5, 23, 15.5, sakuraPink, 2.0);
+        line(23, 34.5, 23, 36.5, sakuraPink, 2.0);
+        line(11.5, 25, 13.5, 25, sakuraPink, 2.0);
+        line(32.5, 25, 34.5, 25, sakuraPink, 2.0);
+        // Clock hands
+        line(23, 25, 23, 17, sakuraPink, 2.8);
+        line(23, 25, 30, 28, ink, 2.6);
+        circle(23, 25, 2.5, gold);
+        // Top crown & adjustment badge
+        rounded(19, 5, 8, 3.2, 1.5, gold);
+        circle(36, 13, 6.5, gold);
+        line(36, 10, 36, 16, Colors.white, 2.2);
+        line(33, 13, 39, 13, Colors.white, 2.2);
+      case SakuraColorfulIconType.certificateMedal:
+        // Gold & Sakura Certificate Medal
+        path([
+          const Offset(16, 26),
+          const Offset(12, 42),
+          const Offset(18, 38),
+          const Offset(22, 43),
+          const Offset(23, 28),
+        ], coral);
+        path([
+          const Offset(32, 26),
+          const Offset(36, 42),
+          const Offset(30, 38),
+          const Offset(26, 43),
+          const Offset(25, 28),
+        ], coral);
+        circle(24, 19, 13, gold);
+        circle(24, 19, 9.5, const Color(0xFFFFE082));
+        path(
+          [const Offset(20, 19), const Offset(23, 22), const Offset(29, 16)],
+          coral,
+          close: false,
+          width: 2.8,
+        );
       case SakuraColorfulIconType.notifications:
         final bell = Path()
           ..moveTo(11, 34)

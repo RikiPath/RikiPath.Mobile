@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
@@ -35,32 +36,46 @@ class WritingPracticeDetailScreen extends ConsumerWidget {
       return _InvalidWritingCharacterScreen(script: script);
     }
     final queue = ref.watch(writingPracticeControllerProvider(request));
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(title: Text(context.l10n.writingTitle)),
-      body: queue.when(
-        loading: () =>
-            RikiFullScreenLoader(title: context.l10n.writingLoadingStrokeData),
-        error: (error, _) => RikiErrorState(
-          title: context.l10n.writingLoadFailed,
-          message: appErrorMessage(error, context.l10n),
-          actionLabel: context.l10n.retry,
-          onAction: () => ref
-              .read(writingPracticeControllerProvider(request).notifier)
-              .retry(),
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ??
+        (ModalRoute.of(context)?.canPop ?? true);
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          popOrGo(context, _scriptRoute(script));
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.learnerBackground,
+        appBar: AppBar(title: Text(context.l10n.writingTitle)),
+        body: queue.when(
+          loading: () => RikiFullScreenLoader(
+            title: context.l10n.writingLoadingStrokeData,
+          ),
+          error: (error, _) => RikiErrorState(
+            title: context.l10n.writingLoadFailed,
+            message: appErrorMessage(error, context.l10n),
+            actionLabel: context.l10n.retry,
+            onAction: () => ref
+                .read(writingPracticeControllerProvider(request).notifier)
+                .retry(),
+          ),
+          data: (state) {
+            final item = state.items
+                .where((entry) => entry.id == id)
+                .firstOrNull;
+            if (item == null) {
+              return _InvalidWritingCharacterScreen(script: script);
+            }
+            return _WritingPracticeSession(
+              key: ValueKey<String>('writing_session_${script.name}_$id'),
+              request: request,
+              state: state,
+              character: item,
+            );
+          },
         ),
-        data: (state) {
-          final item = state.items.where((entry) => entry.id == id).firstOrNull;
-          if (item == null) {
-            return _InvalidWritingCharacterScreen(script: script);
-          }
-          return _WritingPracticeSession(
-            key: ValueKey<String>('writing_session_${script.name}_$id'),
-            request: request,
-            state: state,
-            character: item,
-          );
-        },
       ),
     );
   }
@@ -261,10 +276,10 @@ class _WritingPracticeSessionState
         .read(writingPracticeControllerProvider(widget.request).notifier)
         .selectNextCharacter();
     if (nextId == null) {
-      context.go(_scriptRoute(widget.character.script));
+      popOrGo(context, _scriptRoute(widget.character.script));
       return;
     }
-    context.go(_detailRoute(widget.character.script, nextId));
+    context.pushReplacement(_detailRoute(widget.character.script, nextId));
   }
 }
 
@@ -826,7 +841,7 @@ class _InvalidWritingCharacterScreen extends StatelessWidget {
         title: context.l10n.writingEmptyTitle,
         message: context.l10n.commonErrorNotFound,
         actionLabel: context.l10n.back,
-        onAction: () => context.go(_scriptRoute(script)),
+        onAction: () => popOrGo(context, _scriptRoute(script)),
       ),
     );
   }

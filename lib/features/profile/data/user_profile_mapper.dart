@@ -37,6 +37,9 @@ abstract final class UserProfileMapper {
       },
       dailyStudyMinutes: dto.dailyStudyMinutes,
       targetExamDate: dto.targetExamDate,
+      learningGoalVersion: dto.learningGoalVersion,
+      certifiedJlptLevelId: dto.certifiedJlptLevelId,
+      certifiedJlptLevelName: _nonEmpty(dto.certifiedJlptLevelName),
       emailNotificationsEnabled: dto.emailNotificationsEnabled,
       systemNotificationsEnabled: dto.systemNotificationsEnabled,
     );

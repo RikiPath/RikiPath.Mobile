@@ -23,6 +23,9 @@ class UserProfile {
     this.placementDecision = PlacementDecision.notTaken,
     required this.dailyStudyMinutes,
     this.targetExamDate,
+    this.learningGoalVersion = 0,
+    this.certifiedJlptLevelId,
+    this.certifiedJlptLevelName,
     required this.emailNotificationsEnabled,
     required this.systemNotificationsEnabled,
   });
@@ -46,6 +49,10 @@ class UserProfile {
   final PlacementDecision placementDecision;
   final int dailyStudyMinutes;
   final DateTime? targetExamDate;
+  final int learningGoalVersion;
+  final int? certifiedJlptLevelId;
+  final String? certifiedJlptLevelName;
+  bool get hasJlptCertificate => certifiedJlptLevelId != null;
   final bool emailNotificationsEnabled;
   final bool systemNotificationsEnabled;
 

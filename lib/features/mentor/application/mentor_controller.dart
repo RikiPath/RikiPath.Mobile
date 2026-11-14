@@ -254,10 +254,11 @@ class MentorWeeklyScheduleController
         );
         return false;
       }
-    } catch (e) {
+    } catch (_) {
       state = state.copyWith(
         isSaving: false,
-        errorMessage: 'Không thể lưu đăng ký lịch dạy: $e',
+        errorMessage:
+            'Không thể lưu đăng ký lịch dạy. Vui lòng thử lại hoặc kiểm tra kết nối.',
       );
       return false;
     }

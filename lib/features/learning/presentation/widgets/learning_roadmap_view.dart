@@ -552,7 +552,11 @@ class _RoadmapChapterCard extends StatelessWidget {
               child: FilledButton.icon(
                 key: const ValueKey<String>('roadmap_continue_lesson_button'),
                 onPressed: onContinueLesson,
-                label: Text(context.l10n.continueLessonNineteen),
+                label: Text(
+                  chapter.title.trim().isNotEmpty
+                      ? 'Học tiếp: ${chapter.title}'
+                      : context.l10n.continueLessonNineteen,
+                ),
                 iconAlignment: IconAlignment.end,
                 icon: const Icon(Icons.arrow_forward, size: 18),
               ),

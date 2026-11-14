@@ -6,12 +6,19 @@ import 'package:rikipath_mobile/app/theme/app_colors.dart';
 /// No font family is forced here. Flutter therefore uses the platform font and
 /// the fallback chain configured by [AppTheme].
 abstract final class AppTypography {
+  static const List<String> _fallback = <String>[
+    'Noto Sans',
+    'Noto Sans JP',
+    'Roboto',
+  ];
+
   static const TextStyle brandWordmark = TextStyle(
     color: AppColors.brandPrimary,
-    fontSize: 20,
-    height: 1.2,
+    fontSize: 24,
+    height: 1.15,
     fontWeight: FontWeight.w700,
-    letterSpacing: -0.5,
+    letterSpacing: -0.55,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle heroTitle = TextStyle(
@@ -20,6 +27,7 @@ abstract final class AppTypography {
     height: 1.35,
     fontWeight: FontWeight.w700,
     letterSpacing: -0.65,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle pageTitle = TextStyle(
@@ -28,6 +36,7 @@ abstract final class AppTypography {
     height: 1.3,
     fontWeight: FontWeight.w700,
     letterSpacing: -0.6,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle compactPageTitle = TextStyle(
@@ -36,6 +45,7 @@ abstract final class AppTypography {
     height: 1.27,
     fontWeight: FontWeight.w700,
     letterSpacing: -0.5,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle sectionTitle = TextStyle(
@@ -43,6 +53,7 @@ abstract final class AppTypography {
     fontSize: 16,
     height: 1.38,
     fontWeight: FontWeight.w700,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle cardTitle = TextStyle(
@@ -50,6 +61,7 @@ abstract final class AppTypography {
     fontSize: 14,
     height: 1.43,
     fontWeight: FontWeight.w700,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle body = TextStyle(
@@ -57,6 +69,7 @@ abstract final class AppTypography {
     fontSize: 14,
     height: 1.57,
     fontWeight: FontWeight.w400,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle bodySmall = TextStyle(
@@ -64,6 +77,7 @@ abstract final class AppTypography {
     fontSize: 13,
     height: 1.46,
     fontWeight: FontWeight.w400,
+    fontFamilyFallback: _fallback,
   );
 
 
@@ -76,6 +90,7 @@ abstract final class AppTypography {
     fontSize: 12,
     height: 1.5,
     fontWeight: FontWeight.w400,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle inputLabel = TextStyle(
@@ -83,6 +98,7 @@ abstract final class AppTypography {
     fontSize: 12,
     height: 1.34,
     fontWeight: FontWeight.w600,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle inputText = TextStyle(
@@ -90,12 +106,14 @@ abstract final class AppTypography {
     fontSize: 14,
     height: 1.43,
     fontWeight: FontWeight.w400,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle buttonLabel = TextStyle(
     fontSize: 15,
     height: 1.34,
     fontWeight: FontWeight.w600,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle validationText = TextStyle(
@@ -103,12 +121,14 @@ abstract final class AppTypography {
     fontSize: 12,
     height: 1.5,
     fontWeight: FontWeight.w400,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle badgeText = TextStyle(
     fontSize: 11,
     height: 1.45,
     fontWeight: FontWeight.w600,
+    fontFamilyFallback: _fallback,
   );
 
   // ---------------------------------------------------------------------------
@@ -120,6 +140,7 @@ abstract final class AppTypography {
     height: 1.2,
     fontWeight: FontWeight.w800,
     letterSpacing: -0.5,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle statLabel = TextStyle(
@@ -127,6 +148,7 @@ abstract final class AppTypography {
     fontSize: 12,
     height: 1.35,
     fontWeight: FontWeight.w600,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle japaneseGlyph = TextStyle(
@@ -134,6 +156,7 @@ abstract final class AppTypography {
     fontSize: 32,
     height: 1.1,
     fontWeight: FontWeight.w700,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle japanesePhrase = TextStyle(
@@ -141,6 +164,7 @@ abstract final class AppTypography {
     fontSize: 15,
     height: 1.4,
     fontWeight: FontWeight.w600,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle motivationalTitle = TextStyle(
@@ -148,6 +172,7 @@ abstract final class AppTypography {
     fontSize: 15,
     height: 1.35,
     fontWeight: FontWeight.w700,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextStyle motivationalBody = TextStyle(
@@ -155,6 +180,7 @@ abstract final class AppTypography {
     fontSize: 12,
     height: 1.45,
     fontWeight: FontWeight.w500,
+    fontFamilyFallback: _fallback,
   );
 
   static const TextTheme textTheme = TextTheme(

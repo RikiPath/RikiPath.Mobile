@@ -19,6 +19,9 @@ class UserProfileDto {
     this.placementDecision = 'NOT_TAKEN',
     required this.dailyStudyMinutes,
     this.targetExamDate,
+    this.learningGoalVersion = 0,
+    this.certifiedJlptLevelId,
+    this.certifiedJlptLevelName,
     required this.emailNotificationsEnabled,
     required this.systemNotificationsEnabled,
   });
@@ -53,6 +56,9 @@ class UserProfileDto {
           _optionalString(json, 'placementDecision') ?? 'NOT_TAKEN',
       dailyStudyMinutes: _requiredInt(json, 'dailyStudyMinutes'),
       targetExamDate: _optionalDateTime(json, 'targetExamDate'),
+      learningGoalVersion: _optionalInt(json, 'learningGoalVersion') ?? 0,
+      certifiedJlptLevelId: _optionalInt(json, 'certifiedJlptLevelId'),
+      certifiedJlptLevelName: _optionalString(json, 'certifiedJlptLevelName'),
       emailNotificationsEnabled: _requiredBool(
         json,
         'emailNotificationsEnabled',
@@ -83,6 +89,9 @@ class UserProfileDto {
   final String placementDecision;
   final int dailyStudyMinutes;
   final DateTime? targetExamDate;
+  final int learningGoalVersion;
+  final int? certifiedJlptLevelId;
+  final String? certifiedJlptLevelName;
   final bool emailNotificationsEnabled;
   final bool systemNotificationsEnabled;
 }
@@ -107,16 +116,47 @@ class SetJlptGoalRequestDto {
     required this.targetJlptLevelId,
     required this.dailyStudyMinutes,
     this.targetExamDate,
+    this.clearTargetExamDate = false,
   });
 
   final int targetJlptLevelId;
   final int dailyStudyMinutes;
   final DateTime? targetExamDate;
+  final bool clearTargetExamDate;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'targetJlptLevelId': targetJlptLevelId,
     'dailyStudyMinutes': dailyStudyMinutes,
     if (targetExamDate != null) 'targetExamDate': _dateOnlyIso(targetExamDate!),
+    if (clearTargetExamDate) 'clearTargetExamDate': true,
+  };
+}
+
+class SetLearningGoalRequestDto {
+  const SetLearningGoalRequestDto({
+    required this.currentStudyLevelId,
+    required this.targetJlptLevelId,
+    required this.dailyStudyMinutes,
+    required this.targetExamDate,
+    required this.certifiedJlptLevelId,
+    required this.expectedVersion,
+  });
+
+  final int currentStudyLevelId;
+  final int targetJlptLevelId;
+  final int dailyStudyMinutes;
+  final DateTime? targetExamDate;
+  final int? certifiedJlptLevelId;
+  final int expectedVersion;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'currentStudyLevelId': currentStudyLevelId,
+    'targetJlptLevelId': targetJlptLevelId,
+    'dailyStudyMinutes': dailyStudyMinutes,
+    'targetExamDate': targetExamDate == null ? null : _dateOnlyIso(targetExamDate!),
+    'hasJlptCertificate': certifiedJlptLevelId != null,
+    'certifiedJlptLevelId': certifiedJlptLevelId,
+    'expectedVersion': expectedVersion,
   };
 }
 
@@ -185,8 +225,16 @@ DateTime? _optionalDateTime(Map<String, Object?> json, String field) {
   final value = json[field];
   if (value == null) return null;
   if (value is String) {
-    final parsed = DateTime.tryParse(value);
-    if (parsed != null) return parsed.toLocal();
+    final datePart = RegExp(r'^\d{4}-\d{2}-\d{2}').stringMatch(value);
+    if (datePart != null && DateTime.tryParse(value) != null) {
+      final year = int.parse(datePart.substring(0, 4));
+      final month = int.parse(datePart.substring(5, 7));
+      final day = int.parse(datePart.substring(8, 10));
+      final date = DateTime(year, month, day);
+      if (date.year == year && date.month == month && date.day == day) {
+        return date;
+      }
+    }
   }
   throw FormatException('Expected a nullable ISO-8601 field named $field.');
 }

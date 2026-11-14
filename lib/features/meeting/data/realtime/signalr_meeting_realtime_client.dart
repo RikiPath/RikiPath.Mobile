@@ -258,7 +258,10 @@ class SignalRMeetingRealtimeClient implements MeetingRealtimeClient {
       _emit(_snapshot.copyWith(isMicOn: false));
       await _broadcastMediaState();
     });
-    hub.on('PresentationForceStopped', (_) {});
+    hub.on('PresentationForceStopped', (_) {
+      _emit(_snapshot.copyWith(mediaWarning: 'presentationForceStopped'));
+      unawaited(_broadcastMediaState());
+    });
     hub.onreconnecting(({error}) {
       if (_leaving || _disposed) return;
       _emit(_snapshot.copyWith(status: MeetingConnectionStatus.reconnecting));

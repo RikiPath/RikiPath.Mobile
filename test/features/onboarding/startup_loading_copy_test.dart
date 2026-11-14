@@ -28,7 +28,7 @@ void main() {
 
     expect(find.byType(RikiBrandLockup), findsNothing);
     expect(
-      find.byKey(const ValueKey('riki_study_loader_logo')),
+      find.byKey(const ValueKey('sakura_loading_indicator')),
       findsOneWidget,
     );
     expect(find.text('Đang mở RikiPath...'), findsOneWidget);

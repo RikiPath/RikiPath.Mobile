@@ -209,7 +209,7 @@ class _PracticeAttemptSheetState extends State<_PracticeAttemptSheet> {
               Text(
                 result.scorePercent >= 70
                     ? 'Bạn đã đạt mức 70%. Quay lại lộ trình để hoàn thành ngày học.'
-                    : 'Cần đạt ít nhất 70% để hoàn thành ngày học AI.',
+                    : 'Cần đạt ít nhất 70% để hoàn thành ngày học trong lộ trình.',
               ),
             ] else ...[
               for (

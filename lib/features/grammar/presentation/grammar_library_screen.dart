@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
@@ -24,7 +25,7 @@ class GrammarLibraryScreen extends ConsumerWidget {
       appBar: LearningHeader.detail(
         title: context.l10n.grammar,
         subtitle: context.l10n.library,
-        onBack: context.pop,
+        onBack: () => popOrGo(context, AppRoutes.learn),
       ),
       body: SafeArea(
         top: false,

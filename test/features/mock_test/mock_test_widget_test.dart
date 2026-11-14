@@ -135,6 +135,13 @@ void main() {
       find.byKey(const ValueKey<String>('mock_test_library_loading')),
       findsOneWidget,
     );
+    expect(find.text('Đang tải danh sách'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('sakura_loading_indicator')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('sakura_bouncing_dots')), findsOneWidget);
+    expect(find.byKey(const ValueKey('app_loading_scrim')), findsNothing);
     completer.complete(const <LiveMockTestSummary>[]);
     await tester.pump();
   });

@@ -31,6 +31,8 @@ import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_snapshot.dart';
 import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
 import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
+import 'package:rikipath_mobile/features/learning/presentation/learning_roadmap_screen.dart';
+import 'package:rikipath_mobile/features/learning/presentation/lesson_screen.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_day_tracker.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/learner_calendar_screen.dart';
@@ -152,10 +154,13 @@ void main() {
           )
           .onPressed!();
       await _pumpFrames(tester);
+      final lessonFinder = find.byType(LessonScreen);
+      expect(lessonFinder, findsOneWidget);
       expect(
-        harness.router.routeInformationProvider.value.uri.path,
+        GoRouterState.of(tester.element(lessonFinder)).uri.path,
         AppRoutes.lesson(FixtureLessonRepository.lesson19RouteId),
       );
+      expect(harness.router.canPop(), isTrue);
       harness.dispose();
     });
 
@@ -206,10 +211,13 @@ void main() {
         find.descendant(of: roadmapCard, matching: find.text(roadmapLabel)),
       );
       await _pumpFrames(tester);
+      final roadmapFinder = find.byType(LearningRoadmapScreen);
+      expect(roadmapFinder, findsOneWidget);
       expect(
-        harness.router.routeInformationProvider.value.uri.path,
+        GoRouterState.of(tester.element(roadmapFinder)).uri.path,
         AppRoutes.learnRoadmap,
       );
+      expect(harness.router.canPop(), isTrue);
       harness.dispose();
     });
 
@@ -413,10 +421,13 @@ void main() {
           )
           .onPressed!();
       await _pumpFrames(tester);
+      final lessonFinder = find.byType(LessonScreen);
+      expect(lessonFinder, findsOneWidget);
       expect(
-        harness.router.routeInformationProvider.value.uri.path,
+        GoRouterState.of(tester.element(lessonFinder)).uri.path,
         startsWith('/learn/lesson/'),
       );
+      expect(harness.router.canPop(), isTrue);
       harness.dispose();
     });
 
@@ -780,9 +791,10 @@ void main() {
       );
       await _pumpFrames(tester);
       expect(
-        harness.router.routeInformationProvider.value.uri.path,
+        harness.router.routerDelegate.currentConfiguration.matches.last.matchedLocation,
         '/practice/review',
       );
+      expect(harness.router.canPop(), isTrue);
       harness.dispose();
     });
 

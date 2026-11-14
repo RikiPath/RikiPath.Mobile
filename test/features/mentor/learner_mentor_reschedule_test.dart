@@ -25,8 +25,12 @@ class _MockLearnerMentorRepository implements LearnerMentorRepository {
         id: 101,
         mentorId: 1,
         mentorName: 'Sensei One',
-        startTime: MentorTimestamp.parse('2026-11-12T09:00:00Z'),
-        endTime: MentorTimestamp.parse('2026-11-12T10:30:00Z'),
+        startTime: MentorTimestamp.parse(
+          DateTime.now().toUtc().add(const Duration(days: 4)).toIso8601String(),
+        ),
+        endTime: MentorTimestamp.parse(
+          DateTime.now().toUtc().add(const Duration(days: 4, minutes: 90)).toIso8601String(),
+        ),
         isBooked: true,
       ),
       // Eligible slot (id 102) - future open slot
@@ -34,8 +38,12 @@ class _MockLearnerMentorRepository implements LearnerMentorRepository {
         id: 102,
         mentorId: 1,
         mentorName: 'Sensei One',
-        startTime: MentorTimestamp.parse('2026-11-18T09:00:00Z'),
-        endTime: MentorTimestamp.parse('2026-11-18T10:30:00Z'),
+        startTime: MentorTimestamp.parse(
+          DateTime.now().toUtc().add(const Duration(days: 6)).toIso8601String(),
+        ),
+        endTime: MentorTimestamp.parse(
+          DateTime.now().toUtc().add(const Duration(days: 6, minutes: 90)).toIso8601String(),
+        ),
         isBooked: false,
       ),
       // Ineligible slot (id 103) - past slot (<24h)
@@ -43,8 +51,12 @@ class _MockLearnerMentorRepository implements LearnerMentorRepository {
         id: 103,
         mentorId: 1,
         mentorName: 'Sensei One',
-        startTime: MentorTimestamp.parse('2026-11-06T02:00:00Z'),
-        endTime: MentorTimestamp.parse('2026-11-06T03:30:00Z'),
+        startTime: MentorTimestamp.parse(
+          DateTime.now().toUtc().add(const Duration(hours: 1)).toIso8601String(),
+        ),
+        endTime: MentorTimestamp.parse(
+          DateTime.now().toUtc().add(const Duration(hours: 2, minutes: 30)).toIso8601String(),
+        ),
         isBooked: false,
       ),
     ];
@@ -78,7 +90,9 @@ void main() {
     mentorId: 1,
     mentorName: 'Sensei One',
     mentorAvailabilityId: 101,
-    scheduledAt: MentorTimestamp.parse('2026-11-12T09:00:00Z'),
+    scheduledAt: MentorTimestamp.parse(
+      DateTime.now().toUtc().add(const Duration(days: 4)).toIso8601String(),
+    ),
     jlptLevel: 'N3',
   );
 

@@ -407,7 +407,7 @@ abstract class AppLocalizations {
   /// No description provided for @authPromotion.
   ///
   /// In vi, this message translates to:
-  /// **'Học tiếng Nhật cá nhân hoá cùng AI'**
+  /// **'Học tiếng Nhật theo lộ trình cá nhân hóa'**
   String get authPromotion;
 
   /// No description provided for @loginWelcome.
@@ -473,8 +473,14 @@ abstract class AppLocalizations {
   /// No description provided for @loggingIn.
   ///
   /// In vi, this message translates to:
-  /// **'Đang đăng nhập...'**
+  /// **'Đang đăng nhập'**
   String get loggingIn;
+
+  /// No description provided for @loggingInSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang xác thực tài khoản của bạn'**
+  String get loggingInSubtitle;
 
   /// No description provided for @loggingInSemantics.
   ///
@@ -1691,7 +1697,7 @@ abstract class AppLocalizations {
   /// No description provided for @newLoginEmailSubtitle.
   ///
   /// In vi, this message translates to:
-  /// **'Sau khi cập nhật, máy chủ sẽ gửi mã xác thực tới email mới.'**
+  /// **'Sau khi cập nhật, hệ thống sẽ gửi mã xác thực tới email mới.'**
   String get newLoginEmailSubtitle;
 
   /// No description provided for @missingSessionTitle.
@@ -1733,7 +1739,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordContractHint.
   ///
   /// In vi, this message translates to:
-  /// **'Mật khẩu mới phải có ít nhất 6 ký tự theo hợp đồng hiện tại.'**
+  /// **'Mật khẩu mới phải có ít nhất 6 ký tự.'**
   String get passwordContractHint;
 
   /// No description provided for @currentPasswordHint.
@@ -1919,7 +1925,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingCurrentStudyLevelDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Lộ trình chuẩn hiện hỗ trợ từ N5 đến N3.'**
+  /// **'Lộ trình chuẩn hiện hỗ trợ N5–N3; N2 vẫn có thể chọn làm mục tiêu JLPT.'**
   String get onboardingCurrentStudyLevelDescription;
 
   /// No description provided for @onboardingTargetJlptTitle.
@@ -1939,6 +1945,138 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Bạn vẫn có thể làm bài đánh giá sau trong Hồ sơ.'**
   String get onboardingPlacementCanTakeLater;
+
+  /// No description provided for @onboardingCurrentLevelStepTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn đang học cấp độ nào?'**
+  String get onboardingCurrentLevelStepTitle;
+
+  /// No description provided for @onboardingCurrentLevelStepDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn trình độ hiện tại để RikiPath gợi ý nội dung phù hợp. Lộ trình chuẩn hỗ trợ N5–N3.'**
+  String get onboardingCurrentLevelStepDescription;
+
+  /// No description provided for @onboardingTargetLevelStepTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn muốn đạt JLPT nào?'**
+  String get onboardingTargetLevelStepTitle;
+
+  /// No description provided for @onboardingTargetLevelStepDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn mục tiêu bạn đang hướng đến. Bạn có thể thay đổi sau.'**
+  String get onboardingTargetLevelStepDescription;
+
+  /// No description provided for @onboardingDailyPlanStepTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mỗi ngày, bạn muốn học bao lâu?'**
+  String get onboardingDailyPlanStepTitle;
+
+  /// No description provided for @onboardingExamPlanStepTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn dự định thi JLPT vào kỳ nào?'**
+  String get onboardingExamPlanStepTitle;
+
+  /// No description provided for @onboardingExamPlanStepDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn kỳ thi dự kiến hoặc để trống nếu chưa có kế hoạch.'**
+  String get onboardingExamPlanStepDescription;
+
+  /// No description provided for @onboardingExamSessionCardTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kỳ thi JLPT dự kiến'**
+  String get onboardingExamSessionCardTitle;
+
+  /// No description provided for @onboardingExamYear.
+  ///
+  /// In vi, this message translates to:
+  /// **'Năm dự thi'**
+  String get onboardingExamYear;
+
+  /// No description provided for @onboardingExamSessionLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kỳ thi'**
+  String get onboardingExamSessionLabel;
+
+  /// No description provided for @onboardingJulySession.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kỳ tháng 7'**
+  String get onboardingJulySession;
+
+  /// No description provided for @onboardingDecemberSession.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kỳ tháng 12'**
+  String get onboardingDecemberSession;
+
+  /// No description provided for @onboardingEstimatedDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dự kiến: {date}'**
+  String onboardingEstimatedDate(String date);
+
+  /// No description provided for @onboardingSavedExamDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày đã lưu: {date}'**
+  String onboardingSavedExamDate(String date);
+
+  /// No description provided for @onboardingExamDisclaimer.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày thi chỉ mang tính dự kiến; hãy kiểm tra thông báo chính thức tại nơi bạn đăng ký.'**
+  String get onboardingExamDisclaimer;
+
+  /// No description provided for @onboardingSelectedPlan.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kế hoạch đã chọn'**
+  String get onboardingSelectedPlan;
+
+  /// No description provided for @onboardingConfirmExamSession.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận kỳ thi'**
+  String get onboardingConfirmExamSession;
+
+  /// No description provided for @onboardingNoExamSession.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa xác định kỳ thi'**
+  String get onboardingNoExamSession;
+
+  /// No description provided for @onboardingClearExamSession.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa kỳ thi dự kiến'**
+  String get onboardingClearExamSession;
+
+  /// No description provided for @onboardingDefer.
+  ///
+  /// In vi, this message translates to:
+  /// **'Để sau'**
+  String get onboardingDefer;
+
+  /// No description provided for @onboardingStepOfFour.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bước {step} / 4'**
+  String onboardingStepOfFour(int step);
+
+  /// No description provided for @onboardingProgressOfFour.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tiến độ thiết lập: bước {step} trên 4'**
+  String onboardingProgressOfFour(int step);
 
   /// No description provided for @standardRoadmapTitle.
   ///
@@ -1961,19 +2099,19 @@ abstract class AppLocalizations {
   /// No description provided for @aiPersonalizedPathTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Lộ trình cá nhân hóa bằng AI'**
+  /// **'Lộ trình cá nhân hóa'**
   String get aiPersonalizedPathTitle;
 
   /// No description provided for @aiPlacementRequired.
   ///
   /// In vi, this message translates to:
-  /// **'Hoàn thành bài Placement để mở khóa tạo lộ trình AI. Bạn vẫn có thể tiếp tục học theo lộ trình chuẩn.'**
+  /// **'Hoàn thành bài đánh giá năng lực để mở khóa tạo lộ trình cá nhân hóa. Bạn vẫn có thể tiếp tục học theo lộ trình chuẩn.'**
   String get aiPlacementRequired;
 
   /// No description provided for @aiLearningGoalRequired.
   ///
   /// In vi, this message translates to:
-  /// **'Placement đã hoàn tất. Hãy lưu mục tiêu JLPT và thông tin học tập hợp lệ để tạo lộ trình AI.'**
+  /// **'Đã hoàn thành đánh giá năng lực. Hãy lưu mục tiêu JLPT và thông tin học tập hợp lệ để tạo lộ trình cá nhân hóa.'**
   String get aiLearningGoalRequired;
 
   /// No description provided for @changeStudyLevelTitle.
@@ -2087,7 +2225,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingStudyTimeDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Chọn thời lượng học phù hợp với lịch sinh hoạt của bạn.'**
+  /// **'Chọn thời lượng phù hợp với lịch sinh hoạt của bạn.'**
   String get onboardingStudyTimeDescription;
 
   /// No description provided for @onboardingCustomMinutesLabel.
@@ -2099,7 +2237,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingCustomMinutesHelper.
   ///
   /// In vi, this message translates to:
-  /// **'Từ 1 đến 1.440 phút theo giới hạn hồ sơ.'**
+  /// **'Từ 1 đến 1.440 phút mỗi ngày.'**
   String get onboardingCustomMinutesHelper;
 
   /// No description provided for @onboardingCustomMinutesError.
@@ -2137,6 +2275,24 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Chuyên sâu'**
   String get studyPaceIntensive;
+
+  /// No description provided for @studyPaceFocused.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chuyên tâm'**
+  String get studyPaceFocused;
+
+  /// No description provided for @onboardingCustomTimeCardTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thời gian tùy chỉnh'**
+  String get onboardingCustomTimeCardTitle;
+
+  /// No description provided for @onboardingCustomTimeCardSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tự thiết lập số phút học mỗi ngày'**
+  String get onboardingCustomTimeCardSubtitle;
 
   /// No description provided for @finishSetup.
   ///
@@ -2231,7 +2387,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiGrading.
   ///
   /// In vi, this message translates to:
-  /// **'Chấm bài AI'**
+  /// **'Đánh giá bài viết'**
   String get aiGrading;
 
   /// No description provided for @writingAndKanjiPractice.
@@ -2927,7 +3083,7 @@ abstract class AppLocalizations {
   /// No description provided for @notebookEmptyMessage.
   ///
   /// In vi, this message translates to:
-  /// **'Tạo danh sách đầu tiên để lưu từ vựng.'**
+  /// **'Tạo danh sách đầu tiên để lưu và phân loại từ vựng, Hán tự theo chủ đề học tập của bạn.'**
   String get notebookEmptyMessage;
 
   /// No description provided for @noMatchingWord.
@@ -2999,7 +3155,7 @@ abstract class AppLocalizations {
   /// No description provided for @learningPathRequirements.
   ///
   /// In vi, this message translates to:
-  /// **'Để tạo lộ trình cá nhân hóa bằng AI, hãy hoàn thành bài đánh giá đầu vào và thiết lập mục tiêu JLPT. Bạn vẫn có thể học theo lộ trình chuẩn mà không cần đánh giá.'**
+  /// **'Để tạo lộ trình cá nhân hóa phù hợp, hãy hoàn thành bài đánh giá đầu vào và thiết lập mục tiêu JLPT (gợi ý lộ trình được tạo tự động có sử dụng AI). Bạn vẫn có thể học theo lộ trình chuẩn mà không cần đánh giá.'**
   String get learningPathRequirements;
 
   /// No description provided for @learningPathGenerateFailed.
@@ -3275,7 +3431,7 @@ abstract class AppLocalizations {
   /// No description provided for @continueLessonNineteen.
   ///
   /// In vi, this message translates to:
-  /// **'Học tiếp: Bài 19 – 〜たり〜たりする'**
+  /// **'Học tiếp bài hiện tại'**
   String get continueLessonNineteen;
 
   /// No description provided for @chapterNumberUpper.
@@ -4163,7 +4319,7 @@ abstract class AppLocalizations {
   /// No description provided for @systemNotificationsDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Nhận thông báo hệ thống của RikiPath.'**
+  /// **'Nhận thông báo quan trọng từ RikiPath.'**
   String get systemNotificationsDescription;
 
   /// No description provided for @notificationUpdateSuccess.
@@ -4229,7 +4385,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileErrorNetwork.
   ///
   /// In vi, this message translates to:
-  /// **'Không thể kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại.'**
+  /// **'Không thể kết nối mạng. Vui lòng kiểm tra đường truyền và thử lại.'**
   String get profileErrorNetwork;
 
   /// No description provided for @profileErrorValidation.
@@ -4241,7 +4397,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileErrorServer.
   ///
   /// In vi, this message translates to:
-  /// **'Máy chủ chưa thể xử lý yêu cầu hồ sơ. Vui lòng thử lại sau.'**
+  /// **'Chưa thể xử lý yêu cầu hồ sơ lúc này. Vui lòng thử lại sau.'**
   String get profileErrorServer;
 
   /// No description provided for @profileErrorUnknown.
@@ -4303,6 +4459,12 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đã đăng xuất'**
   String get logoutSuccessTitle;
+
+  /// No description provided for @logoutSuccessDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hẹn gặp lại trên hành trình học tiếng Nhật!'**
+  String get logoutSuccessDescription;
 
   /// No description provided for @logoutFailureTitle.
   ///
@@ -4787,7 +4949,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiWritingPractice.
   ///
   /// In vi, this message translates to:
-  /// **'Luyện viết cùng AI'**
+  /// **'Luyện viết bài'**
   String get aiWritingPractice;
 
   /// No description provided for @practiceAnswerLabel.
@@ -5765,7 +5927,7 @@ abstract class AppLocalizations {
   /// No description provided for @practiceSpeechDescription.
   ///
   /// In vi, this message translates to:
-  /// **'Luyện phát âm với nhận diện giọng nói AI.'**
+  /// **'Chuyển giọng nói tiếng Nhật thành văn bản để luyện đọc.'**
   String get practiceSpeechDescription;
 
   /// No description provided for @practiceSpeechStatus.
@@ -7163,7 +7325,7 @@ abstract class AppLocalizations {
   /// No description provided for @learningPathPreviewTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Bản xem trước lộ trình AI'**
+  /// **'Bản xem trước lộ trình học'**
   String get learningPathPreviewTitle;
 
   /// No description provided for @learningPathPreviewVersion.
@@ -7193,7 +7355,7 @@ abstract class AppLocalizations {
   /// No description provided for @placementIssueExamDateRequired.
   ///
   /// In vi, this message translates to:
-  /// **'Kết quả đánh giá năng lực đã được lưu. Trước khi tạo lộ trình học AI, vui lòng chọn ngày thi dự kiến trong mục Mục tiêu JLPT tại trang cá nhân.'**
+  /// **'Kết quả đánh giá năng lực đã được lưu. Trước khi tạo lộ trình cá nhân hóa, vui lòng chọn ngày thi dự kiến trong mục Mục tiêu JLPT tại trang cá nhân.'**
   String get placementIssueExamDateRequired;
 
   /// No description provided for @placementSetExamDate.
@@ -7621,6 +7783,1410 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Thêm từ đầu tiên'**
   String get addFirstWordAction;
+
+  /// No description provided for @loadingOverlayProcessingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang xử lý'**
+  String get loadingOverlayProcessingTitle;
+
+  /// No description provided for @loadingOverlayWaitSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng chờ trong giây lát'**
+  String get loadingOverlayWaitSubtitle;
+
+  /// No description provided for @loadingOverlayCompletingSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hệ thống đang hoàn tất yêu cầu'**
+  String get loadingOverlayCompletingSubtitle;
+
+  /// No description provided for @loadingOverlaySavingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang lưu thay đổi'**
+  String get loadingOverlaySavingTitle;
+
+  /// No description provided for @loadingOverlayOnboardingSavingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang lưu thông tin'**
+  String get loadingOverlayOnboardingSavingTitle;
+
+  /// No description provided for @loadingOverlayUpdatingSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang cập nhật thông tin mới nhất'**
+  String get loadingOverlayUpdatingSubtitle;
+
+  /// No description provided for @loadingOverlayRoadmapTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tạo lộ trình'**
+  String get loadingOverlayRoadmapTitle;
+
+  /// No description provided for @onboardingPlacementSyncErrorMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã lưu mục tiêu học tập nhưng chưa thể đồng bộ trạng thái thiết lập. Vui lòng nhấn thử lại.'**
+  String get onboardingPlacementSyncErrorMessage;
+
+  /// No description provided for @loadingOverlayDataTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tải dữ liệu'**
+  String get loadingOverlayDataTitle;
+
+  /// No description provided for @loadingOverlayListTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tải danh sách'**
+  String get loadingOverlayListTitle;
+
+  /// No description provided for @loadingOverlayBookingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang xác nhận lịch hẹn'**
+  String get loadingOverlayBookingTitle;
+
+  /// No description provided for @loadingOverlaySyncTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang đồng bộ dữ liệu'**
+  String get loadingOverlaySyncTitle;
+
+  /// No description provided for @loadingOverlayLoggingOutTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang đăng xuất'**
+  String get loadingOverlayLoggingOutTitle;
+
+  /// No description provided for @loadingOverlaySubmittingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang gửi yêu cầu'**
+  String get loadingOverlaySubmittingTitle;
+
+  /// No description provided for @meetingPresentationForceStopped.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quản trị viên hoặc chủ phòng đã dừng chia sẻ màn hình.'**
+  String get meetingPresentationForceStopped;
+
+  /// No description provided for @mentorNavHome.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trang chủ'**
+  String get mentorNavHome;
+
+  /// No description provided for @mentorNavCalendar.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lịch dạy'**
+  String get mentorNavCalendar;
+
+  /// No description provided for @mentorNavMeetings.
+  ///
+  /// In vi, this message translates to:
+  /// **'Buổi tư vấn'**
+  String get mentorNavMeetings;
+
+  /// No description provided for @mentorNavAvailability.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lịch trống'**
+  String get mentorNavAvailability;
+
+  /// No description provided for @mentorNavProfile.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cá nhân'**
+  String get mentorNavProfile;
+
+  /// No description provided for @mentorHomeAttentionTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cần xử lý ngay'**
+  String get mentorHomeAttentionTitle;
+
+  /// No description provided for @mentorHomeAttentionEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mọi việc đều ổn định. Không có mục nào đang chờ xử lý.'**
+  String get mentorHomeAttentionEmpty;
+
+  /// No description provided for @mentorHomeQuickActionsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Truy cập nhanh nghiệp vụ'**
+  String get mentorHomeQuickActionsTitle;
+
+  /// No description provided for @mentorHomeMetricUpcoming.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sắp diễn ra'**
+  String get mentorHomeMetricUpcoming;
+
+  /// No description provided for @mentorHomeMetricUnreadChat.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tin chưa đọc'**
+  String get mentorHomeMetricUnreadChat;
+
+  /// No description provided for @mentorHomeMetricOpenDisputes.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khiếu nại mở'**
+  String get mentorHomeMetricOpenDisputes;
+
+  /// No description provided for @mentorHomeMetricUnrepliedReviews.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đánh giá chờ reply'**
+  String get mentorHomeMetricUnrepliedReviews;
+
+  /// No description provided for @mentorHomeMetricOpenSlots.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khung giờ trống'**
+  String get mentorHomeMetricOpenSlots;
+
+  /// No description provided for @mentorHomeMetricCompleted.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã hoàn thành'**
+  String get mentorHomeMetricCompleted;
+
+  /// No description provided for @mentorHomePartialFailureBanner.
+  ///
+  /// In vi, this message translates to:
+  /// **'Một số dữ liệu phụ tạm thời chưa tải được. Vẫn hiển thị dữ liệu hiện có.'**
+  String get mentorHomePartialFailureBanner;
+
+  /// No description provided for @mentorHomeHeroTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sẵn sàng đồng hành cùng học viên hôm nay'**
+  String get mentorHomeHeroTitle;
+
+  /// No description provided for @mentorHomeHeroSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quản lý lịch dạy, chuẩn bị giáo án và giữ chất lượng 1-1 ổn định.'**
+  String get mentorHomeHeroSubtitle;
+
+  /// No description provided for @mentorHomeNextSessionCta.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vào phòng chuẩn bị'**
+  String get mentorHomeNextSessionCta;
+
+  /// No description provided for @mentorActionChat.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tin nhắn 1-1'**
+  String get mentorActionChat;
+
+  /// No description provided for @mentorActionReviews.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đánh giá'**
+  String get mentorActionReviews;
+
+  /// No description provided for @mentorActionDisputes.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khiếu nại'**
+  String get mentorActionDisputes;
+
+  /// No description provided for @mentorActionCompensation.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thù lao'**
+  String get mentorActionCompensation;
+
+  /// No description provided for @mentorActionBankAccount.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngân hàng'**
+  String get mentorActionBankAccount;
+
+  /// No description provided for @mentorActionSchedulePolicy.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lịch làm việc định kỳ'**
+  String get mentorActionSchedulePolicy;
+
+  /// No description provided for @mentorActionSessionPrep.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chuẩn bị buổi'**
+  String get mentorActionSessionPrep;
+
+  /// No description provided for @mentorMeetingsSearchHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tìm theo học viên, câu hỏi hoặc mã #ID...'**
+  String get mentorMeetingsSearchHint;
+
+  /// No description provided for @mentorMeetingsFilterAll.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tất cả'**
+  String get mentorMeetingsFilterAll;
+
+  /// No description provided for @mentorMeetingsFilterUpcoming.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sắp tới'**
+  String get mentorMeetingsFilterUpcoming;
+
+  /// No description provided for @mentorMeetingsFilterCompleted.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hoàn thành'**
+  String get mentorMeetingsFilterCompleted;
+
+  /// No description provided for @mentorMeetingsFilterCancelled.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã hủy'**
+  String get mentorMeetingsFilterCancelled;
+
+  /// No description provided for @mentorMeetingsCancelledApiNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu ý: Danh sách hiện tại chỉ hiển thị các buổi tư vấn đang hoạt động (chưa bao gồm buổi đã hủy).'**
+  String get mentorMeetingsCancelledApiNotice;
+
+  /// No description provided for @mentorMeetingsSortSchedule.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sắp xếp: Giờ hẹn'**
+  String get mentorMeetingsSortSchedule;
+
+  /// No description provided for @mentorMeetingsSortNewest.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sắp xếp: Mới nhất'**
+  String get mentorMeetingsSortNewest;
+
+  /// No description provided for @mentorMeetingsFilterEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tìm thấy buổi tư vấn phù hợp bộ lọc hiện tại.'**
+  String get mentorMeetingsFilterEmpty;
+
+  /// No description provided for @mentorMeetingJlptLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình độ JLPT'**
+  String get mentorMeetingJlptLevel;
+
+  /// No description provided for @mentorMeetingLearnerQuestion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu hỏi chuẩn bị của học viên'**
+  String get mentorMeetingLearnerQuestion;
+
+  /// No description provided for @mentorMeetingNoQuestion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học viên chưa gửi câu hỏi trước buổi học.'**
+  String get mentorMeetingNoQuestion;
+
+  /// No description provided for @mentorMeetingAttendanceTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Theo dõi điểm danh phòng họp'**
+  String get mentorMeetingAttendanceTitle;
+
+  /// No description provided for @mentorMeetingAttendanceEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa ghi nhận dữ liệu điểm danh vào phòng.'**
+  String get mentorMeetingAttendanceEmpty;
+
+  /// No description provided for @mentorMeetingCancellationPolicyTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chính sách hủy lịch hẹn'**
+  String get mentorMeetingCancellationPolicyTitle;
+
+  /// No description provided for @mentorMeetingCancellationAllowed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có thể hủy lịch theo chính sách hiện hành.'**
+  String get mentorMeetingCancellationAllowed;
+
+  /// No description provided for @mentorMeetingCancellationBlocked.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể hủy lúc này.'**
+  String get mentorMeetingCancellationBlocked;
+
+  /// No description provided for @mentorMeetingReplyReviewButton.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phản hồi đánh giá'**
+  String get mentorMeetingReplyReviewButton;
+
+  /// No description provided for @mentorMeetingRespondDisputeButton.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giải trình khiếu nại'**
+  String get mentorMeetingRespondDisputeButton;
+
+  /// No description provided for @mentorMeetingReviewNotFound.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa tìm thấy đánh giá cho buổi tư vấn này.'**
+  String get mentorMeetingReviewNotFound;
+
+  /// No description provided for @mentorMeetingDisputeNotFound.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa tìm thấy hồ sơ khiếu nại cho buổi tư vấn này.'**
+  String get mentorMeetingDisputeNotFound;
+
+  /// No description provided for @mentorMeetingOpenChat.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhắn tin 1-1 với học viên'**
+  String get mentorMeetingOpenChat;
+
+  /// No description provided for @mentorMeetingOpenPrep.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chuẩn bị buổi tư vấn'**
+  String get mentorMeetingOpenPrep;
+
+  /// No description provided for @mentorMeetingOpenDisputeDetail.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem hồ sơ khiếu nại'**
+  String get mentorMeetingOpenDisputeDetail;
+
+  /// No description provided for @mentorPrepScreenTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chuẩn bị buổi tư vấn'**
+  String get mentorPrepScreenTitle;
+
+  /// No description provided for @mentorPrepSelectBookingHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn một buổi tư vấn sắp tới để xem câu hỏi học viên và kiểm tra phòng học.'**
+  String get mentorPrepSelectBookingHint;
+
+  /// No description provided for @mentorPrepChecklistTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Danh sách kiểm tra trước giờ dạy'**
+  String get mentorPrepChecklistTitle;
+
+  /// No description provided for @mentorPrepCheckAudio.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kiểm tra micro và kết nối mạng ổn định'**
+  String get mentorPrepCheckAudio;
+
+  /// No description provided for @mentorPrepCheckQuestion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đọc kỹ câu hỏi JLPT của học viên bên dưới'**
+  String get mentorPrepCheckQuestion;
+
+  /// No description provided for @mentorPrepCheckRoomReady.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận quyền vào phòng tư vấn trực tuyến sẵn sàng'**
+  String get mentorPrepCheckRoomReady;
+
+  /// No description provided for @mentorPrepRoomAccessTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trạng thái phòng họp'**
+  String get mentorPrepRoomAccessTitle;
+
+  /// No description provided for @mentorPrepRoomReady.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phòng đã sẵn sàng truy cập'**
+  String get mentorPrepRoomReady;
+
+  /// No description provided for @mentorPrepRoomNotReady.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phòng chưa mở hoặc chưa đến khung giờ'**
+  String get mentorPrepRoomNotReady;
+
+  /// No description provided for @mentorPrepNotesReadOnlyBanner.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hiện chưa hỗ trợ lưu ghi chú chuẩn bị trực tuyến; màn hình chỉ hiển thị thông tin đặt lịch từ học viên.'**
+  String get mentorPrepNotesReadOnlyBanner;
+
+  /// No description provided for @mentorScheduleV3Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lịch làm việc định kỳ'**
+  String get mentorScheduleV3Title;
+
+  /// No description provided for @mentorScheduleV3Subtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thiết lập ca cố định hằng tuần (khung giờ 90 phút + 15 phút nghỉ) và công bố tự động.'**
+  String get mentorScheduleV3Subtitle;
+
+  /// No description provided for @mentorScheduleV3ApprovalRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ Cố vấn cần ở trạng thái Đã phê duyệt mới có thể xem trước và công bố lịch trống.'**
+  String get mentorScheduleV3ApprovalRequired;
+
+  /// No description provided for @mentorScheduleV3AddRule.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm quy tắc ca'**
+  String get mentorScheduleV3AddRule;
+
+  /// No description provided for @mentorScheduleV3SaveRules.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu lịch làm việc'**
+  String get mentorScheduleV3SaveRules;
+
+  /// No description provided for @mentorScheduleV3Preview.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem trước 7 ngày'**
+  String get mentorScheduleV3Preview;
+
+  /// No description provided for @mentorScheduleV3Publish.
+  ///
+  /// In vi, this message translates to:
+  /// **'Công bố 7 ngày tới'**
+  String get mentorScheduleV3Publish;
+
+  /// No description provided for @mentorScheduleV3AutoPublish.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tự động công bố lịch định kỳ'**
+  String get mentorScheduleV3AutoPublish;
+
+  /// No description provided for @mentorScheduleV3DisableSlot.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đóng khung giờ này'**
+  String get mentorScheduleV3DisableSlot;
+
+  /// No description provided for @mentorScheduleV3DeleteSlot.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa khung giờ'**
+  String get mentorScheduleV3DeleteSlot;
+
+  /// No description provided for @mentorScheduleV3RequestCancel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Yêu cầu hủy khung giờ'**
+  String get mentorScheduleV3RequestCancel;
+
+  /// No description provided for @mentorScheduleV3RequestChange.
+  ///
+  /// In vi, this message translates to:
+  /// **'Yêu cầu đổi ca tuần'**
+  String get mentorScheduleV3RequestChange;
+
+  /// No description provided for @mentorScheduleV3ReasonHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập lý do chi tiết (tối thiểu 5 ký tự)...'**
+  String get mentorScheduleV3ReasonHint;
+
+  /// No description provided for @mentorScheduleSlotApproved.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã duyệt'**
+  String get mentorScheduleSlotApproved;
+
+  /// No description provided for @mentorScheduleSlotPending.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chờ duyệt'**
+  String get mentorScheduleSlotPending;
+
+  /// No description provided for @mentorScheduleSlotRejected.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bị từ chối'**
+  String get mentorScheduleSlotRejected;
+
+  /// No description provided for @mentorScheduleSlotCancelRequested.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang xin hủy'**
+  String get mentorScheduleSlotCancelRequested;
+
+  /// No description provided for @mentorScheduleSlotBookedCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã đặt'**
+  String get mentorScheduleSlotBookedCount;
+
+  /// No description provided for @mentorProfileViewDocument.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem chứng chỉ đã tải lên'**
+  String get mentorProfileViewDocument;
+
+  /// No description provided for @mentorProfileDocumentLoading.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tải chứng chỉ bảo vệ...'**
+  String get mentorProfileDocumentLoading;
+
+  /// No description provided for @mentorProfileDocumentError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không mở được chứng chỉ lúc này. Vui lòng thử lại sau.'**
+  String get mentorProfileDocumentError;
+
+  /// No description provided for @mentorProfileDocumentPdfReady.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chứng chỉ PDF đã sẵn sàng ({sizeKb} KB).'**
+  String mentorProfileDocumentPdfReady(int sizeKb);
+
+  /// No description provided for @mentorProfileDocumentOpenExternal.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mở bằng trình xem tài liệu'**
+  String get mentorProfileDocumentOpenExternal;
+
+  /// No description provided for @mentorProfilePendingLockedNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ đang chờ xét duyệt. Tạm thời không thể chỉnh sửa cho đến khi có kết quả.'**
+  String get mentorProfilePendingLockedNotice;
+
+  /// No description provided for @mentorProfileApprovedLockedNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ đã được phê duyệt. Chuyên môn, trình độ JLPT, kinh nghiệm, nơi công tác và chứng chỉ được khóa để bảo toàn xác minh.'**
+  String get mentorProfileApprovedLockedNotice;
+
+  /// No description provided for @mentorProfileAccountReadOnlyNote.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thông tin tài khoản cơ bản (họ tên, số điện thoại, ảnh đại diện) và cài đặt thông báo được quản lý ở cấp tài khoản, chưa hỗ trợ chỉnh sửa trực tiếp tại hồ sơ Cố vấn.'**
+  String get mentorProfileAccountReadOnlyNote;
+
+  /// No description provided for @mentorChatThreadsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tin nhắn 1-1 với học viên'**
+  String get mentorChatThreadsTitle;
+
+  /// No description provided for @mentorChatThreadsEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có cuộc trò chuyện nào gắn với lịch hẹn tư vấn.'**
+  String get mentorChatThreadsEmpty;
+
+  /// No description provided for @mentorChatReadOnlyBanner.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phiên tư vấn đã kết thúc hoặc bị hủy — cuộc trò chuyện hiện ở chế độ chỉ đọc.'**
+  String get mentorChatReadOnlyBanner;
+
+  /// No description provided for @mentorChatInputHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập tin nhắn gửi học viên...'**
+  String get mentorChatInputHint;
+
+  /// No description provided for @mentorChatLoadOlder.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tải tin nhắn cũ hơn'**
+  String get mentorChatLoadOlder;
+
+  /// No description provided for @mentorChatReconnect.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết nối lại'**
+  String get mentorChatReconnect;
+
+  /// No description provided for @mentorChatConnecting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang kết nối trò chuyện...'**
+  String get mentorChatConnecting;
+
+  /// No description provided for @mentorChatReconnecting.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang khôi phục kết nối...'**
+  String get mentorChatReconnecting;
+
+  /// No description provided for @mentorChatDisconnected.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mất kết nối — bấm để thử lại'**
+  String get mentorChatDisconnected;
+
+  /// No description provided for @mentorChatEmptyMessages.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có tin nhắn nào. Hãy gửi lời chào hoặc hướng dẫn chuẩn bị cho học viên.'**
+  String get mentorChatEmptyMessages;
+
+  /// No description provided for @mentorReviewsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đánh giá từ học viên'**
+  String get mentorReviewsTitle;
+
+  /// No description provided for @mentorReviewsEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có đánh giá nào từ học viên.'**
+  String get mentorReviewsEmpty;
+
+  /// No description provided for @mentorReviewsAverageLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Điểm trung bình'**
+  String get mentorReviewsAverageLabel;
+
+  /// No description provided for @mentorReviewsTotalLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tổng đánh giá'**
+  String get mentorReviewsTotalLabel;
+
+  /// No description provided for @mentorReviewsPositiveRate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tỷ lệ tích cực'**
+  String get mentorReviewsPositiveRate;
+
+  /// No description provided for @mentorReviewsReplyLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phản hồi của Mentor'**
+  String get mentorReviewsReplyLabel;
+
+  /// No description provided for @mentorReviewsEditReplyAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sửa phản hồi'**
+  String get mentorReviewsEditReplyAction;
+
+  /// No description provided for @mentorReviewsReplyHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập phản hồi chuyên nghiệp (1–1000 ký tự)...'**
+  String get mentorReviewsReplyHint;
+
+  /// No description provided for @mentorReviewsSubmitReply.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi phản hồi'**
+  String get mentorReviewsSubmitReply;
+
+  /// No description provided for @mentorDisputesTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quản lý khiếu nại'**
+  String get mentorDisputesTitle;
+
+  /// No description provided for @mentorDisputesEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không có khiếu nại nào liên quan đến bạn.'**
+  String get mentorDisputesEmpty;
+
+  /// No description provided for @mentorDisputeDetailTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiết khiếu nại #{id}'**
+  String mentorDisputeDetailTitle(int id);
+
+  /// No description provided for @mentorDisputeLearnerReason.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lý do từ học viên'**
+  String get mentorDisputeLearnerReason;
+
+  /// No description provided for @mentorDisputeEvidenceTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bằng chứng đính kèm'**
+  String get mentorDisputeEvidenceTitle;
+
+  /// No description provided for @mentorDisputeAttendanceEvidence.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bằng chứng điểm danh phòng họp'**
+  String get mentorDisputeAttendanceEvidence;
+
+  /// No description provided for @mentorDisputeTimelineTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhật ký xử lý tranh chấp'**
+  String get mentorDisputeTimelineTitle;
+
+  /// No description provided for @mentorDisputeYourResponse.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bản giải trình của bạn'**
+  String get mentorDisputeYourResponse;
+
+  /// No description provided for @mentorDisputeResponseHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình bày rõ bối cảnh buổi học và bằng chứng (1–2000 ký tự)...'**
+  String get mentorDisputeResponseHint;
+
+  /// No description provided for @mentorDisputeSubmitResponse.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi giải trình'**
+  String get mentorDisputeSubmitResponse;
+
+  /// No description provided for @mentorDisputeLockedNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ khiếu nại đã đóng hoặc đã có giải trình trước đó.'**
+  String get mentorDisputeLockedNotice;
+
+  /// No description provided for @mentorDisputeAdminDecision.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết luận của Quản trị viên'**
+  String get mentorDisputeAdminDecision;
+
+  /// No description provided for @mentorCompHourlyRatesTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bảng mức thù lao theo giờ'**
+  String get mentorCompHourlyRatesTitle;
+
+  /// No description provided for @mentorCompQualificationsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ năng lực được công nhận'**
+  String get mentorCompQualificationsTitle;
+
+  /// No description provided for @mentorCompPayrollDetailTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiết kỳ lương'**
+  String get mentorCompPayrollDetailTitle;
+
+  /// No description provided for @mentorCompPayoutDetailTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiết lần chi trả'**
+  String get mentorCompPayoutDetailTitle;
+
+  /// No description provided for @mentorBankPopularPresetsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn nhanh ngân hàng Việt Nam'**
+  String get mentorBankPopularPresetsTitle;
+
+  /// No description provided for @mentorBankCustomCodeHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hoặc nhập mã BIN / ngân hàng khác'**
+  String get mentorBankCustomCodeHint;
+
+  /// No description provided for @mentorCommonCancel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đóng'**
+  String get mentorCommonCancel;
+
+  /// No description provided for @mentorCommonSave.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu'**
+  String get mentorCommonSave;
+
+  /// No description provided for @mentorCommonConfirm.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận'**
+  String get mentorCommonConfirm;
+
+  /// No description provided for @mentorCommonRetry.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử lại'**
+  String get mentorCommonRetry;
+
+  /// No description provided for @onboardingPlanPreviewEyebrow.
+  ///
+  /// In vi, this message translates to:
+  /// **'KẾ HOẠCH HỌC TẬP CỦA BẠN'**
+  String get onboardingPlanPreviewEyebrow;
+
+  /// No description provided for @onboardingPlanHeroTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chinh phục JLPT {level}'**
+  String onboardingPlanHeroTitle(String level);
+
+  /// No description provided for @onboardingPlanHeroSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Một hành trình mới đang chờ bạn!'**
+  String get onboardingPlanHeroSubtitle;
+
+  /// No description provided for @onboardingPlanCurrentLevelLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình độ hiện tại'**
+  String get onboardingPlanCurrentLevelLabel;
+
+  /// No description provided for @onboardingPlanTargetLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu'**
+  String get onboardingPlanTargetLabel;
+
+  /// No description provided for @onboardingPlanDailyStudyLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Học mỗi ngày'**
+  String get onboardingPlanDailyStudyLabel;
+
+  /// No description provided for @onboardingPlanDailyMinutesValue.
+  ///
+  /// In vi, this message translates to:
+  /// **'{minutes} phút'**
+  String onboardingPlanDailyMinutesValue(int minutes);
+
+  /// No description provided for @onboardingPlanCertificateLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chứng chỉ đã đạt'**
+  String get onboardingPlanCertificateLabel;
+
+  /// No description provided for @onboardingPlanCertificateNone.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có'**
+  String get onboardingPlanCertificateNone;
+
+  /// No description provided for @onboardingPlanCertificateUnspecified.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa cung cấp thông tin'**
+  String get onboardingPlanCertificateUnspecified;
+
+  /// No description provided for @onboardingPlanExamSummaryLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kỳ thi dự kiến'**
+  String get onboardingPlanExamSummaryLabel;
+
+  /// No description provided for @onboardingPlanExamMonthYear.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tháng {month}, {year}'**
+  String onboardingPlanExamMonthYear(int month, int year);
+
+  /// No description provided for @onboardingPlanNoExamTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa chọn kỳ thi'**
+  String get onboardingPlanNoExamTitle;
+
+  /// No description provided for @onboardingPlanNoExamSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn có thể bổ sung sau.'**
+  String get onboardingPlanNoExamSubtitle;
+
+  /// No description provided for @discardChangesTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hủy thay đổi?'**
+  String get discardChangesTitle;
+
+  /// No description provided for @discardChangesMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị hủy.'**
+  String get discardChangesMessage;
+
+  /// No description provided for @discardChangesStay.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ở lại'**
+  String get discardChangesStay;
+
+  /// No description provided for @discardChangesLeave.
+  ///
+  /// In vi, this message translates to:
+  /// **'Rời đi'**
+  String get discardChangesLeave;
+
+  /// No description provided for @mentorRoleBadge.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cố vấn'**
+  String get mentorRoleBadge;
+
+  /// No description provided for @mentorProfileSectionProfile.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ'**
+  String get mentorProfileSectionProfile;
+
+  /// No description provided for @mentorProfileEditSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cập nhật thông tin cá nhân và chuyên môn.'**
+  String get mentorProfileEditSubtitle;
+
+  /// No description provided for @mentorProfileSectionActivity.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hoạt động cố vấn'**
+  String get mentorProfileSectionActivity;
+
+  /// No description provided for @mentorProfileChatSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trao đổi trực tiếp 1-1 theo từng lịch hẹn.'**
+  String get mentorProfileChatSubtitle;
+
+  /// No description provided for @mentorProfileReviewsSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem điểm đánh giá và phản hồi từ học viên.'**
+  String get mentorProfileReviewsSubtitle;
+
+  /// No description provided for @mentorProfileDisputesSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Theo dõi khiếu nại và gửi giải trình.'**
+  String get mentorProfileDisputesSubtitle;
+
+  /// No description provided for @mentorProfilePrepSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kiểm tra câu hỏi học viên và chuẩn bị buổi tư vấn.'**
+  String get mentorProfilePrepSubtitle;
+
+  /// No description provided for @mentorProfileSectionServices.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dịch vụ & Thù lao'**
+  String get mentorProfileSectionServices;
+
+  /// No description provided for @mentorProfileEarningsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu nhập của tôi'**
+  String get mentorProfileEarningsTitle;
+
+  /// No description provided for @mentorProfileEarningsSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem kỳ lương, buổi tư vấn và lịch sử chi trả.'**
+  String get mentorProfileEarningsSubtitle;
+
+  /// No description provided for @mentorProfileBankTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tài khoản nhận thù lao'**
+  String get mentorProfileBankTitle;
+
+  /// No description provided for @mentorProfileBankSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cập nhật và theo dõi trạng thái xác minh ngân hàng.'**
+  String get mentorProfileBankSubtitle;
+
+  /// No description provided for @mentorVerificationApproved.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xác minh'**
+  String get mentorVerificationApproved;
+
+  /// No description provided for @mentorVerificationApprovedDetail.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xác minh (Hoạt động)'**
+  String get mentorVerificationApprovedDetail;
+
+  /// No description provided for @mentorVerificationPending.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang chờ duyệt'**
+  String get mentorVerificationPending;
+
+  /// No description provided for @mentorVerificationChangesRequested.
+  ///
+  /// In vi, this message translates to:
+  /// **'Yêu cầu bổ sung'**
+  String get mentorVerificationChangesRequested;
+
+  /// No description provided for @mentorVerificationRejected.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ bị từ chối'**
+  String get mentorVerificationRejected;
+
+  /// No description provided for @mentorVerificationUnverified.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa nộp hồ sơ'**
+  String get mentorVerificationUnverified;
+
+  /// No description provided for @mentorVerificationPendingNote.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ của bạn đã được gửi tới Quản trị viên và đang trong quá trình xét duyệt.'**
+  String get mentorVerificationPendingNote;
+
+  /// No description provided for @mentorVerificationRejectionReason.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lý do từ chối: {reason}'**
+  String mentorVerificationRejectionReason(String reason);
+
+  /// No description provided for @mentorVerificationReviewNotes.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi chú yêu cầu: {notes}'**
+  String mentorVerificationReviewNotes(String notes);
+
+  /// No description provided for @mentorProfileErrorLoad.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể tải thông tin hồ sơ chuyên gia.'**
+  String get mentorProfileErrorLoad;
+
+  /// No description provided for @mentorProfilePersonalNameLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Họ và tên'**
+  String get mentorProfilePersonalNameLabel;
+
+  /// No description provided for @mentorProfilePersonalEmailLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Email'**
+  String get mentorProfilePersonalEmailLabel;
+
+  /// No description provided for @mentorProfilePersonalPhoneLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Số điện thoại'**
+  String get mentorProfilePersonalPhoneLabel;
+
+  /// No description provided for @mentorProfileBioLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giới thiệu bản thân *'**
+  String get mentorProfileBioLabel;
+
+  /// No description provided for @mentorProfileBioHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kinh nghiệm giảng dạy, phương pháp hướng dẫn...'**
+  String get mentorProfileBioHint;
+
+  /// No description provided for @mentorProfileExpertiseLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lĩnh vực chuyên môn *'**
+  String get mentorProfileExpertiseLabel;
+
+  /// No description provided for @mentorProfileExpertiseHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'JLPT N1, N2, Giao tiếp thương mại...'**
+  String get mentorProfileExpertiseHint;
+
+  /// No description provided for @mentorProfileJlptLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trình độ tiếng Nhật *'**
+  String get mentorProfileJlptLabel;
+
+  /// No description provided for @mentorProfileJlptNativeOption.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bản ngữ (Native)'**
+  String get mentorProfileJlptNativeOption;
+
+  /// No description provided for @mentorProfileExpLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Số năm kinh nghiệm'**
+  String get mentorProfileExpLabel;
+
+  /// No description provided for @mentorProfileExpHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ví dụ: 5'**
+  String get mentorProfileExpHint;
+
+  /// No description provided for @mentorProfileExpErrorInvalid.
+  ///
+  /// In vi, this message translates to:
+  /// **'Số năm kinh nghiệm phải là số nguyên từ 0 đến 50.'**
+  String get mentorProfileExpErrorInvalid;
+
+  /// No description provided for @mentorProfileWorkplaceLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nơi công tác / Đơn vị hiện tại'**
+  String get mentorProfileWorkplaceLabel;
+
+  /// No description provided for @mentorProfileWorkplaceHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ví dụ: Đại học FPT / Riki Nihongo'**
+  String get mentorProfileWorkplaceHint;
+
+  /// No description provided for @mentorProfileVideoLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Link video giới thiệu (YouTube / Drive)'**
+  String get mentorProfileVideoLabel;
+
+  /// No description provided for @mentorProfileVideoErrorInvalid.
+  ///
+  /// In vi, this message translates to:
+  /// **'Link video cần là URL http(s) hợp lệ.'**
+  String get mentorProfileVideoErrorInvalid;
+
+  /// No description provided for @mentorProfileCertificateSection.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chứng chỉ xác minh *'**
+  String get mentorProfileCertificateSection;
+
+  /// No description provided for @mentorProfileDocumentUploadedNote.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã tải chứng chỉ xác minh lên kho riêng tư.'**
+  String get mentorProfileDocumentUploadedNote;
+
+  /// No description provided for @mentorProfileDocumentRequiredNote.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bắt buộc: tải chứng chỉ PDF, JPEG hoặc PNG (tối đa 5 MB) trước khi gửi.'**
+  String get mentorProfileDocumentRequiredNote;
+
+  /// No description provided for @mentorProfileDocumentReplace.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn lại chứng chỉ khác'**
+  String get mentorProfileDocumentReplace;
+
+  /// No description provided for @mentorProfileSaveButton.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu cập nhật hồ sơ'**
+  String get mentorProfileSaveButton;
+
+  /// No description provided for @mentorProfileSaveDraftButton.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu thông tin'**
+  String get mentorProfileSaveDraftButton;
+
+  /// No description provided for @mentorProfileSavingButton.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang lưu...'**
+  String get mentorProfileSavingButton;
+
+  /// No description provided for @mentorProfileSaveSuccessTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cập nhật thành công'**
+  String get mentorProfileSaveSuccessTitle;
+
+  /// No description provided for @mentorProfileSaveSuccessDesc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ chuyên gia của bạn đã được lưu.'**
+  String get mentorProfileSaveSuccessDesc;
+
+  /// No description provided for @mentorProfileSaveErrorTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cập nhật thất bại'**
+  String get mentorProfileSaveErrorTitle;
+
+  /// No description provided for @mentorProfileSaveErrorDesc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể lưu hồ sơ. Vui lòng kiểm tra lại.'**
+  String get mentorProfileSaveErrorDesc;
+
+  /// No description provided for @mentorProfileSubmitDialogTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nộp hồ sơ xét duyệt'**
+  String get mentorProfileSubmitDialogTitle;
+
+  /// No description provided for @mentorProfileSubmitDialogBody.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thông tin chuyên môn và chứng chỉ đã tải lên sẽ được gửi để Quản trị viên xét duyệt.'**
+  String get mentorProfileSubmitDialogBody;
+
+  /// No description provided for @mentorProfileSubmitDialogNotesLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi chú cho Quản trị viên'**
+  String get mentorProfileSubmitDialogNotesLabel;
+
+  /// No description provided for @mentorProfileSubmitDialogNotesHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chứng chỉ JLPT N1 năm 2024, kinh nghiệm 3 năm...'**
+  String get mentorProfileSubmitDialogNotesHint;
+
+  /// No description provided for @mentorProfileSubmitConfirmAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi xét duyệt'**
+  String get mentorProfileSubmitConfirmAction;
+
+  /// No description provided for @mentorProfileSubmitSuccessTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nộp hồ sơ thành công'**
+  String get mentorProfileSubmitSuccessTitle;
+
+  /// No description provided for @mentorProfileSubmitSuccessDesc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hồ sơ của bạn đã được gửi tới Quản trị viên để xét duyệt.'**
+  String get mentorProfileSubmitSuccessDesc;
+
+  /// No description provided for @mentorProfileSubmitErrorTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nộp hồ sơ thất bại'**
+  String get mentorProfileSubmitErrorTitle;
+
+  /// No description provided for @mentorProfileSubmitErrorDesc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể gửi hồ sơ xét duyệt. Vui lòng thử lại.'**
+  String get mentorProfileSubmitErrorDesc;
+
+  /// No description provided for @mentorProfileValidationMissingTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa điền thông tin'**
+  String get mentorProfileValidationMissingTitle;
+
+  /// No description provided for @mentorProfileValidationBioRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập Giới thiệu bản thân (*).'**
+  String get mentorProfileValidationBioRequired;
+
+  /// No description provided for @mentorProfileValidationExpertiseRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập Lĩnh vực chuyên môn (*).'**
+  String get mentorProfileValidationExpertiseRequired;
+
+  /// No description provided for @mentorProfileValidationJlptRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng chọn Trình độ tiếng Nhật (*).'**
+  String get mentorProfileValidationJlptRequired;
+
+  /// No description provided for @mentorProfileValidationCertRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng chọn và tải chứng chỉ trước khi gửi hồ sơ.'**
+  String get mentorProfileValidationCertRequired;
+
+  /// No description provided for @mentorProfileDocInvalidTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tài liệu không hợp lệ'**
+  String get mentorProfileDocInvalidTitle;
+
+  /// No description provided for @mentorProfileDocTooLarge.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chứng chỉ phải nhỏ hơn 5 MB.'**
+  String get mentorProfileDocTooLarge;
+
+  /// No description provided for @mentorProfileDocUploadedTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã tải chứng chỉ'**
+  String get mentorProfileDocUploadedTitle;
+
+  /// No description provided for @mentorProfileDocUploadedDesc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tài liệu được lưu trong kho riêng tư.'**
+  String get mentorProfileDocUploadedDesc;
+
+  /// No description provided for @mentorProfileDocUploadFailedTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể tải chứng chỉ'**
+  String get mentorProfileDocUploadFailedTitle;
+
+  /// No description provided for @mentorProfileDocUploadFailedDesc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng thử lại hoặc liên hệ hỗ trợ.'**
+  String get mentorProfileDocUploadFailedDesc;
+
+  /// No description provided for @mentorProfileDocOpenFailedTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể mở tài liệu'**
+  String get mentorProfileDocOpenFailedTitle;
+
+  /// No description provided for @mentorProfileDocOpenFailedDesc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng chọn lại PDF, JPEG hoặc PNG.'**
+  String get mentorProfileDocOpenFailedDesc;
+
+  /// No description provided for @mentorNotificationChannelUnsupportedNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Máy chủ hiện chưa hỗ trợ bật/tắt riêng từng kênh thông báo (Email/Hệ thống) cho tài khoản Cố vấn. Các thông báo lịch hẹn mới, hủy lịch, duyệt lịch trống và tin nhắn học viên vẫn được gửi qua Trung tâm thông báo.'**
+  String get mentorNotificationChannelUnsupportedNotice;
+
+  /// No description provided for @mentorOpenNotificationCenter.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trung tâm thông báo'**
+  String get mentorOpenNotificationCenter;
+
+  /// No description provided for @mentorOpenNotificationCenterSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem lịch hẹn mới, duyệt lịch, khiếu nại và tin nhắn từ học viên.'**
+  String get mentorOpenNotificationCenterSubtitle;
 }
 
 class _AppLocalizationsDelegate

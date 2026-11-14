@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
@@ -45,10 +46,26 @@ class LearnerMentorMeetingsScreen extends ConsumerWidget {
           AsyncLoading() => const MentorListSkeleton(
             key: Key('learner_mentor_plans_loading'),
           ),
-          AsyncError() => Center(
+          AsyncError(:final error) => Center(
             child: MentorErrorState(
               key: const Key('learner_mentor_plans_error'),
-              message: context.l10n.learnerMentorPlansError,
+              title: switch (error) {
+                NetworkError() => 'Chưa thể kết nối',
+                UnauthorizedError() => 'Phiên đăng nhập đã hết hạn',
+                ForbiddenError() => 'Bạn chưa có quyền xem gói tư vấn',
+                ServerError() => 'Tạm thời chưa tải được gói tư vấn',
+                _ => 'Chưa tải được gói tư vấn',
+              },
+              message: switch (error) {
+                NetworkError() =>
+                  'Không tải được các gói tư vấn. Vui lòng kiểm tra kết nối và thử lại.',
+                UnauthorizedError() => 'Vui lòng đăng nhập lại để tiếp tục.',
+                ForbiddenError() =>
+                  'Tài khoản hiện không được phép truy cập danh sách này.',
+                ServerError() =>
+                  'Dịch vụ đang gặp sự cố. Vui lòng thử lại sau.',
+                _ => context.l10n.learnerMentorPlansError,
+              },
               onRetry: ref
                   .read(learnerMentorPlansControllerProvider.notifier)
                   .retry,
@@ -199,8 +216,9 @@ class _PlansBodyState extends State<_PlansBody> {
                   MentorEmptyState(
                     key: const Key('learner_mentor_plans_empty'),
                     icon: Icons.support_agent_outlined,
-                    title: context.l10n.learnerMentorPlansTitle,
-                    description: context.l10n.learnerMentorPlansEmpty,
+                    title: 'Chưa có gói tư vấn',
+                    description:
+                        'Hiện chưa có gói tư vấn 1-1 khả dụng. Bạn có thể quay lại khám phá sau.',
                   )
                 else
                   for (var index = 0; index < widget.plans.length; index++) ...[

@@ -195,7 +195,7 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
                   Expanded(
                     child: _BentoMetricTile(
                       icon: Icons.videocam_outlined,
-                      title: 'WebRTC',
+                      title: 'Trực tuyến',
                       subtitle: 'Riki Classroom',
                     ),
                   ),

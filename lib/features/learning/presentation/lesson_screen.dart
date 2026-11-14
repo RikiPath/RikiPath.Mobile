@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_loading.dart';
 import 'package:rikipath_mobile/features/learning/application/lesson_controller.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_session.dart';
@@ -30,20 +32,39 @@ class LessonScreen extends ConsumerWidget {
     final session = lessonState.value;
     final controller = ref.read(lessonControllerProvider(lessonId).notifier);
 
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: LearningHeader.detail(
-        title: _title(context, session),
-        subtitle: _subtitle(context, session),
-        onBack: () => _handleBack(context, controller, session),
-      ),
-      body: SafeArea(
-        top: false,
-        child: lessonState.when(
-          loading: () => const LessonLoadingView(),
-          error: (_, _) => LessonLoadErrorView(onRetry: controller.retry),
-          data: (data) => _body(context, ref, controller, data),
-        ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop || session?.isCompleting == true) {
+          return;
+        }
+        _handleBack(context, controller, session);
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Scaffold(
+            backgroundColor: AppColors.learnerBackground,
+            appBar: LearningHeader.detail(
+              title: _title(context, session),
+              subtitle: _subtitle(context, session),
+              onBack: () => _handleBack(context, controller, session),
+            ),
+            body: SafeArea(
+              top: false,
+              child: lessonState.when(
+                loading: () => const LessonLoadingView(),
+                error: (_, _) => LessonLoadErrorView(onRetry: controller.retry),
+                data: (data) => _body(context, ref, controller, data),
+              ),
+            ),
+          ),
+          AppLoadingOverlay(
+            visible: session?.isCompleting == true,
+            title: context.l10n.loadingOverlaySavingTitle,
+            subtitle: context.l10n.loadingOverlayCompletingSubtitle,
+          ),
+        ],
       ),
     );
   }
@@ -60,7 +81,9 @@ class LessonScreen extends ConsumerWidget {
         lesson: lesson,
         onContinuePrerequisite: lesson.prerequisite == null
             ? null
-            : () => context.go(AppRoutes.lesson(lesson.prerequisite!.routeId)),
+            : () => context.pushReplacement(
+                AppRoutes.lesson(lesson.prerequisite!.routeId),
+              ),
         onBackToRoadmap: () => context.go(AppRoutes.learnRoadmap),
       );
     }
@@ -113,7 +136,9 @@ class LessonScreen extends ConsumerWidget {
         lesson: lesson,
         onNextLesson: lesson.nextLesson == null
             ? null
-            : () => context.go(AppRoutes.lesson(lesson.nextLesson!.routeId)),
+            : () => context.pushReplacement(
+                AppRoutes.lesson(lesson.nextLesson!.routeId),
+              ),
         onBackToRoadmap: () => context.go(AppRoutes.learnRoadmap),
       ),
     };
@@ -294,10 +319,6 @@ class LessonScreen extends ConsumerWidget {
       controller.showDetail();
       return;
     }
-    if (context.canPop()) {
-      context.pop();
-      return;
-    }
-    context.go(AppRoutes.learnRoadmap);
+    popOrGo(context, AppRoutes.learnRoadmap);
   }
 }

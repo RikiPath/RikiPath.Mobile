@@ -214,6 +214,7 @@ void main() {
 
       expect(find.byType(OnboardingScreen), findsOneWidget);
 
+      // Placement is offered on Step 1 (current study level step).
       final placementButton = find.byKey(
         const ValueKey<String>('onboarding_placement_test_button'),
       );
@@ -380,7 +381,7 @@ void main() {
       await tester.tap(examDate);
       await tester.pumpAndSettle();
       expect(
-        router.routeInformationProvider.value.uri.path,
+        router.routerDelegate.currentConfiguration.uri.path,
         AppRoutes.profileJlptGoal,
       );
     },

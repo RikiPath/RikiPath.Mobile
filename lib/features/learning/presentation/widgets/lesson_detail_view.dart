@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_shared_widgets.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_practice_section.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class LessonDetailView extends StatelessWidget {
+class LessonDetailView extends ConsumerWidget {
   const LessonDetailView({
     required this.lesson,
     required this.onStart,
@@ -24,7 +26,7 @@ class LessonDetailView extends StatelessWidget {
   final ValueChanged<int> onToggleGrammar;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ListView(
       key: const ValueKey<String>('lesson_detail_view'),
       padding: const EdgeInsets.fromLTRB(
@@ -109,7 +111,8 @@ class LessonDetailView extends StatelessWidget {
           const SizedBox(height: AppSpacing.space4),
           OutlinedButton.icon(
             key: const ValueKey<String>('lesson_attachment_button'),
-            onPressed: () => _openAttachment(context, lesson.attachmentUrl!),
+            onPressed: () =>
+                _openAttachment(context, ref, lesson.attachmentUrl!),
             icon: const Icon(Icons.attach_file),
             label: Text(context.l10n.lessonAttachment),
           ),
@@ -136,12 +139,16 @@ class LessonDetailView extends StatelessWidget {
     );
   }
 
-  Future<void> _openAttachment(BuildContext context, Uri uri) async {
+  Future<void> _openAttachment(
+    BuildContext context,
+    WidgetRef ref,
+    Uri uri,
+  ) async {
     final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!opened && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.openAttachmentFailed)),
-      );
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .error(title: context.l10n.openAttachmentFailed);
     }
   }
 }

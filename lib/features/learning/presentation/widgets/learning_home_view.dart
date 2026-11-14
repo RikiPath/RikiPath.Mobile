@@ -163,10 +163,7 @@ class _JlptLevelSelector extends StatelessWidget {
           const SizedBox(height: AppSpacing.space2),
           catalog.when(
             loading: () => const Center(
-              child: SizedBox.square(
-                dimension: 22,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
+              child: SakuraLoadingIndicator(size: 22),
             ),
             error: (_, _) => Row(
               children: [

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
@@ -75,10 +76,15 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final shouldLeave = await _confirmLeave();
-        if (shouldLeave && context.mounted) context.pop();
+        if (shouldLeave && context.mounted) {
+          popOrGo(context, AppRoutes.practice);
+        }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.learnerBackground,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Scaffold(
+            backgroundColor: AppColors.learnerBackground,
         appBar: AppBar(
           title: Text(context.l10n.mockTestTitle),
           leading: IconButton(
@@ -88,7 +94,9 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
                   !await _confirmLeave()) {
                 return;
               }
-              if (context.mounted) context.pop();
+              if (context.mounted) {
+                popOrGo(context, AppRoutes.practice);
+              }
             },
             icon: const Icon(Icons.arrow_back),
           ),
@@ -150,6 +158,15 @@ class _MockTestScreenState extends ConsumerState<MockTestScreen> {
             );
           },
         ),
+          ),
+          AppLoadingOverlay(
+            visible: active?.isStarting == true || active?.isSubmitting == true,
+            title: active?.isSubmitting == true
+                ? context.l10n.loadingOverlaySubmittingTitle
+                : context.l10n.loadingOverlayProcessingTitle,
+            subtitle: context.l10n.loadingOverlayCompletingSubtitle,
+          ),
+        ],
       ),
     );
   }

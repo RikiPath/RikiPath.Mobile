@@ -4,15 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
-import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_scroll_scaffold.dart';
 import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.dart';
-import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
+import 'package:rikipath_mobile/features/onboarding/application/onboarding_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
@@ -75,28 +74,9 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
 
   Future<void> _confirmLogout(BuildContext context) async {
     if (_signingOut) return;
-    final l10n = context.l10n;
-    final confirmed = await showProfileConfirmationSheet(
-      context: context,
-      icon: Icons.logout_rounded,
-      colorfulIcon: SakuraColorfulIconType.logout,
-      title: l10n.logoutConfirmationTitle,
-      message: l10n.logoutConfirmationMessage,
-      confirmLabel: l10n.logout,
-      cancelLabel: l10n.logoutStay,
-      confirmKey: const ValueKey<String>('profile_logout_confirm_button'),
-      destructive: true,
-    );
-    if (!confirmed || !mounted || _signingOut) return;
     setState(() => _signingOut = true);
-    final toast = ref.read(rikiToastServiceProvider.notifier);
-    final session = ref.read(authSessionControllerProvider);
-    toast.clear();
     try {
-      await session.signOut();
-      toast.success(title: l10n.logoutSuccessTitle);
-    } catch (_) {
-      toast.error(title: l10n.logoutFailureTitle);
+      await confirmAndPerformLogout(context: context, ref: ref);
     } finally {
       if (mounted) setState(() => _signingOut = false);
     }
@@ -208,7 +188,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
             onEdit: () => context.push(AppRoutes.profileEdit),
           ),
         ),
-        const SizedBox(height: AppSpacing.space6),
+        const SizedBox(height: 30),
         _entrance(
           begin: 0.34,
           end: 0.82,
@@ -223,7 +203,34 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
                 title: l10n.jlptGoalSettings,
                 subtitle: l10n.jlptGoalSettingsSubtitle,
                 emphasized: true,
-                onTap: () => context.push(AppRoutes.profileJlptGoal),
+                onTap: () async {
+                  final currentProfile =
+                      ref.read(userProfileControllerProvider).value?.profile ??
+                      profile;
+                  final hasGoal =
+                      currentProfile.targetJlptLevelId != null &&
+                      currentProfile.currentStudyLevelId != null &&
+                      currentProfile.dailyStudyMinutes > 0;
+                  if (!hasGoal) {
+                    ref
+                        .read(onboardingControllerProvider.notifier)
+                        .startCreateFromProfile(
+                          origin: OnboardingOrigin.profile,
+                          returnTo: AppRoutes.profile,
+                        );
+                    final created = await context.push<bool>(
+                      AppRoutes.onboardingWithOrigin(
+                        OnboardingOrigin.profile,
+                        returnTo: AppRoutes.profile,
+                      ),
+                    );
+                    if (created == true && context.mounted) {
+                      await context.push(AppRoutes.profileJlptGoal);
+                    }
+                    return;
+                  }
+                  await context.push(AppRoutes.profileJlptGoal);
+                },
               ),
               ProfileActionTile(
                 key: const ValueKey<String>('profile_placement_test_action'),
@@ -246,7 +253,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.space6),
+        const SizedBox(height: 30),
         _entrance(
           begin: 0.42,
           end: 0.9,
@@ -265,7 +272,7 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.space6),
+        const SizedBox(height: 30),
         _entrance(
           begin: 0.5,
           end: 1,

@@ -3,6 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/features/auth/presentation/widgets/sakura_auth_background.dart';
+
+export 'sakura_auth_background.dart' show SakuraAuthBackgroundVariant;
 
 class AuthPage extends StatefulWidget {
   const AuthPage({
@@ -10,6 +13,7 @@ class AuthPage extends StatefulWidget {
     this.compact = false,
     this.animateEntrance = true,
     this.topContentOffset = 0,
+    this.backgroundVariant = SakuraAuthBackgroundVariant.standard,
     super.key,
   });
 
@@ -17,6 +21,7 @@ class AuthPage extends StatefulWidget {
   final bool compact;
   final bool animateEntrance;
   final double topContentOffset;
+  final SakuraAuthBackgroundVariant backgroundVariant;
 
   @override
   State<AuthPage> createState() => _AuthPageState();
@@ -69,18 +74,20 @@ class _AuthPageState extends State<AuthPage>
 
     return Scaffold(
       backgroundColor: AppColors.authBackground,
-      resizeToAvoidBottomInset: true,
+      // Keep the background locked to the full viewport so software keyboards
+      // never squash or jump the top/bottom Sakura artwork behind inputs.
+      resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const _AuthSakuraBackground(),
+          SakuraAuthBackground(variant: widget.backgroundVariant),
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final verticalPadding = topPadding + AppSpacing.space5;
                 final minimumHeight = math.max(
                   0.0,
-                  constraints.maxHeight - verticalPadding,
+                  constraints.maxHeight - verticalPadding - keyboardInset,
                 );
 
                 return SingleChildScrollView(
@@ -114,49 +121,6 @@ class _AuthPageState extends State<AuthPage>
                   ),
                 );
               },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AuthSakuraBackground extends StatelessWidget {
-  const _AuthSakuraBackground();
-
-  static const assetPath = 'assets/images/auth/auth_sakura_background.webp';
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ExcludeSemantics(
-            child: Image.asset(
-              assetPath,
-              key: const ValueKey<String>('auth_sakura_background'),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              filterQuality: FilterQuality.medium,
-            ),
-          ),
-          const DecoratedBox(
-            key: ValueKey<String>('auth_sakura_scrim'),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: <double>[0, 0.2, 0.52, 0.8, 1],
-                colors: <Color>[
-                  Color(0xC7FFFCFC),
-                  Color(0xDDFFF9FA),
-                  Color(0xF0FFFCFC),
-                  Color(0xE3FFF9FA),
-                  Color(0xC2FFFCFC),
-                ],
-              ),
             ),
           ),
         ],

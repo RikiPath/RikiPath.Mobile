@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/notifications/domain/app_notification.dart';
 import 'package:rikipath_mobile/features/notifications/domain/push_notification_payload.dart';
@@ -17,10 +21,29 @@ class NotificationsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(notificationControllerProvider);
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(
-        title: Text(context.l10n.notifications),
+    final isMentor =
+        ref.watch(authSessionControllerProvider).currentRole ==
+        BackendUserRole.mentor;
+    final fallbackRoute = isMentor ? AppRoutes.mentor : AppRoutes.home;
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ?? Navigator.of(context).canPop();
+
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          popOrGo(context, fallbackRoute);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.learnerBackground,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            onPressed: () => popOrGo(context, fallbackRoute),
+          ),
+          title: Text(context.l10n.notifications),
         actions: [
           TextButton(
             onPressed:
@@ -66,27 +89,34 @@ class NotificationsScreen extends ConsumerWidget {
                   ),
                 ),
               Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(AppSpacing.space4),
-                  itemBuilder: (context, index) => _NotificationTile(
-                    notification: data.items[index],
-                    onTap: data.isMutating
-                        ? null
-                        : () => _openNotification(
-                            context,
-                            ref,
-                            data.items[index],
-                          ),
+                child: RefreshIndicator(
+                  color: AppColors.brandPrimary,
+                  onRefresh: () =>
+                      ref.read(notificationControllerProvider.notifier).retry(),
+                  child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(AppSpacing.space4),
+                    itemBuilder: (context, index) => _NotificationTile(
+                      notification: data.items[index],
+                      onTap: data.isMutating
+                          ? null
+                          : () => _openNotification(
+                              context,
+                              ref,
+                              data.items[index],
+                            ),
+                    ),
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.space3),
+                    itemCount: data.items.length,
                   ),
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.space3),
-                  itemCount: data.items.length,
                 ),
               ),
             ],
           );
         },
       ),
+    ),
     );
   }
 
@@ -108,6 +138,7 @@ class NotificationsScreen extends ConsumerWidget {
       }
     }
     if (!context.mounted) return;
+    final role = ref.read(authSessionControllerProvider).currentRole?.apiValue;
     final destination = ref
         .read(pushNotificationServiceProvider)
         .resolveDeepLink(
@@ -118,8 +149,11 @@ class NotificationsScreen extends ConsumerWidget {
             type: notification.type,
             linkUrl: notification.linkUrl,
           ),
+          role: role,
         );
-    if (destination != AppRoutes.notifications) context.go(destination);
+    if (destination != AppRoutes.notifications) {
+      navigateContextAware(context, destination);
+    }
   }
 
   Future<void> _markAllRead(BuildContext context, WidgetRef ref) async {
@@ -187,11 +221,26 @@ class _NotificationTile extends StatelessWidget {
             ),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: AppSpacing.space1),
-              child: Text(
-                notification.message,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodySmall,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    notification.message,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodySmall,
+                  ),
+                  if (notification.createdAt != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat('dd/MM/yyyy · HH:mm')
+                          .format(notification.createdAt!.toLocal()),
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
             trailing: notification.isRead

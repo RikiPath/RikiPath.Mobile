@@ -12,12 +12,16 @@ class SakuraAgendaView extends StatelessWidget {
     required this.events,
     required this.onSelectEvent,
     this.onAddEventAction,
+    this.addEventLabel,
+    this.dataIncomplete = false,
   });
 
   final DateTime selectedDate;
   final List<SakuraCalendarEvent> events;
   final ValueChanged<SakuraCalendarEvent> onSelectEvent;
   final VoidCallback? onAddEventAction;
+  final String? addEventLabel;
+  final bool dataIncomplete;
 
   String _formatWeekday(DateTime dt) {
     const weekdays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
@@ -36,9 +40,13 @@ class SakuraAgendaView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (events.isEmpty) {
       return SakuraCalendarEmptyState(
-        title: 'Chưa có hoạt động nào',
-        message: 'Chưa có hoạt động nào được lên lịch trong khoảng thời gian này.',
-        actionLabel: onAddEventAction != null ? 'Đặt lịch ngay' : null,
+        title: dataIncomplete ? 'Chưa tải đủ lịch' : 'Chưa có hoạt động nào',
+        message: dataIncomplete
+            ? 'Một số nguồn lịch chưa được cập nhật. Hãy thử tải lại hoặc kiểm tra bộ lọc.'
+            : 'Chưa có hoạt động nào được lên lịch trong khoảng thời gian này.',
+        actionLabel: onAddEventAction != null
+            ? (addEventLabel ?? 'Đặt lịch ngay')
+            : null,
         onAction: onAddEventAction,
       );
     }

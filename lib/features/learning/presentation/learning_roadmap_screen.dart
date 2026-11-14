@@ -6,6 +6,7 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_loading.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_path_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
 import 'package:rikipath_mobile/features/learning/domain/learning_path_repository.dart';
@@ -46,8 +47,11 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
         placement?.hasCompletedPlacementTest == true &&
         placement?.isReadyForLearningPath == true;
 
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Scaffold(
+          backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
         title: widget.aiOnly
             ? context.l10n.aiPersonalizedPathTitle
@@ -105,6 +109,13 @@ class _LearningRoadmapScreenState extends ConsumerState<LearningRoadmapScreen> {
           ),
         ),
       ),
+        ),
+        AppLoadingOverlay(
+          visible: pathState.isLoading || _isPreparingPreview,
+          title: context.l10n.loadingOverlayRoadmapTitle,
+          subtitle: context.l10n.loadingOverlayCompletingSubtitle,
+        ),
+      ],
     );
   }
 
@@ -271,12 +282,19 @@ class _LearningPathPreviewDialogState
       _error = null;
     });
     try {
-      if (confirm) {
-        await widget.repository.confirmPreview(pathId);
-      } else {
-        await widget.repository.cancelPreview(pathId);
-      }
-      widget.onChanged();
+      await runWithAppLoadingOverlay<void>(
+        context,
+        title: context.l10n.loadingOverlayProcessingTitle,
+        subtitle: context.l10n.loadingOverlayCompletingSubtitle,
+        action: () async {
+          if (confirm) {
+            await widget.repository.confirmPreview(pathId);
+          } else {
+            await widget.repository.cancelPreview(pathId);
+          }
+          widget.onChanged();
+        },
+      );
       if (mounted) Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
@@ -319,10 +337,6 @@ class _LearningPathPreviewDialogState
               if (_error case final message?) ...[
                 const SizedBox(height: AppSpacing.space2),
                 Text(message, style: TextStyle(color: AppColors.error)),
-              ],
-              if (_busy) ...[
-                const SizedBox(height: AppSpacing.space2),
-                const LinearProgressIndicator(),
               ],
             ],
           ),

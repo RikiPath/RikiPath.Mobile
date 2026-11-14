@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_loading.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/meeting/application/meeting_controller.dart';
 import 'package:rikipath_mobile/features/meeting/application/meeting_pip_controller.dart';
 import 'package:rikipath_mobile/features/meeting/data/realtime/meeting_realtime_client.dart';
@@ -114,7 +118,20 @@ class _MeetingRoomScreenState extends ConsumerState<MeetingRoomScreen>
     if (!mounted) return;
     setState(() => _allowPop = true);
     final navigator = Navigator.of(context);
-    if (navigator.canPop()) navigator.pop();
+    if (navigator.canPop()) {
+      navigator.pop();
+      return;
+    }
+    final router = GoRouter.maybeOf(context);
+    if (router != null) {
+      final role = ref.read(authSessionControllerProvider).currentRole;
+      final fallback = role == BackendUserRole.mentor
+          ? AppRoutes.mentor
+          : role == BackendUserRole.learner
+          ? AppRoutes.home
+          : AppRoutes.meetingJoin;
+      router.go(fallback);
+    }
   }
 
   Future<void> _requestLeave() async {
@@ -567,14 +584,7 @@ class _ConnectionOverlay extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Color(0xFFE05A7A),
-                      ),
-                    ),
+                    const SakuraLoadingIndicator(size: 20),
                     const SizedBox(width: 12),
                     Flexible(
                       child: Text(
@@ -819,6 +829,7 @@ class _MediaWarning extends StatelessWidget {
       'microphoneDenied' => context.l10n.meetingNativeMicrophoneDenied,
       'permissionPermanentlyDenied' ||
       'cameraAndMicrophoneDenied' => context.l10n.meetingNativePermissionDenied,
+      'presentationForceStopped' => context.l10n.meetingPresentationForceStopped,
       _ => context.l10n.meetingNativeMediaUnavailable,
     };
     return Container(

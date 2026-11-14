@@ -4,6 +4,7 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_loading.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/writing_practice/application/essay_writing_controller.dart';
@@ -72,11 +73,14 @@ class _EssayWritingScreenState extends ConsumerState<EssayWritingScreen> {
   Widget build(BuildContext context) {
     final levels = ref.watch(jlptCatalogControllerProvider);
     final profile = ref.watch(userProfileControllerProvider).value?.profile;
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(title: Text(context.l10n.essayWritingTitle)),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Scaffold(
+          backgroundColor: AppColors.learnerBackground,
+          appBar: AppBar(title: Text(context.l10n.essayWritingTitle)),
       body: levels.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: SakuraLoadingIndicator()),
         error: (error, _) => Center(
           child: TextButton(
             onPressed: () =>
@@ -175,6 +179,13 @@ class _EssayWritingScreenState extends ConsumerState<EssayWritingScreen> {
           );
         },
       ),
+        ),
+        AppLoadingOverlay(
+          visible: _submitting,
+          title: context.l10n.loadingOverlaySubmittingTitle,
+          subtitle: context.l10n.loadingOverlayCompletingSubtitle,
+        ),
+      ],
     );
   }
 }

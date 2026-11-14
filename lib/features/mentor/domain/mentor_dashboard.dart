@@ -47,6 +47,16 @@ class MentorAvailabilitySlot {
     required this.isBooked,
     this.isApproved = true,
     this.bookedCount = 0,
+    this.maxLearners = 1,
+    this.rejectedAt,
+    this.rejectionReason,
+    this.cancelRequestedAt,
+    this.cancelReason,
+    this.cancelRejectedAt,
+    this.cancelRejectionReason,
+    this.changeRequestReason,
+    this.changeRequestedAt,
+    this.changeResolution,
   });
 
   final int id;
@@ -55,6 +65,21 @@ class MentorAvailabilitySlot {
   final bool isBooked;
   final bool isApproved;
   final int bookedCount;
+  final int maxLearners;
+  final MentorTimestamp? rejectedAt;
+  final String? rejectionReason;
+  final MentorTimestamp? cancelRequestedAt;
+  final String? cancelReason;
+  final MentorTimestamp? cancelRejectedAt;
+  final String? cancelRejectionReason;
+  final String? changeRequestReason;
+  final MentorTimestamp? changeRequestedAt;
+  final String? changeResolution;
+
+  bool get isRejected => rejectedAt != null;
+  bool get isPendingApproval => !isApproved && rejectedAt == null;
+  bool get hasCancelRequest => cancelRequestedAt != null;
+  bool get hasChangeRequest => changeRequestedAt != null;
 }
 
 @immutable
@@ -138,6 +163,17 @@ class MentorMeetingSummary {
     this.hasDispute = false,
     this.disputeReason,
     this.disputeResponse,
+    this.userSubscriptionId,
+    this.mentorAvailabilityId,
+    this.mentorId,
+    this.mentorName,
+    this.learnerId,
+    this.jlptLevel,
+    this.paymentStatus,
+    this.roomId,
+    this.question,
+    this.endsAt,
+    this.createdAt,
   });
 
   final int id;
@@ -151,6 +187,17 @@ class MentorMeetingSummary {
   final bool hasDispute;
   final String? disputeReason;
   final String? disputeResponse;
+  final int? userSubscriptionId;
+  final int? mentorAvailabilityId;
+  final int? mentorId;
+  final String? mentorName;
+  final int? learnerId;
+  final String? jlptLevel;
+  final String? paymentStatus;
+  final String? roomId;
+  final String? question;
+  final MentorTimestamp? endsAt;
+  final MentorTimestamp? createdAt;
 
   Uri? get safeMeetingUri {
     return parseSafeExternalHttpUri(meetingLink);

@@ -1,57 +1,123 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
-import 'package:rikipath_mobile/core/localization/localization.dart';
 
-/// Sakura Floating Curved Navigation Bar.
+/// Backward-compatible alias preserved for existing Learner call sites/tests.
+typedef RikiBottomNavigationBar = SakuraBottomNavigation;
+
+/// Semantic alias matching the shared [SakuraBottomNavigation] component name.
+typedef SakuraNavigationDestination = RikiNavigationDestination;
+
+/// Sakura Floating Curved Navigation Bar shared across Learner and Mentor roles.
 ///
-/// Designed in accordance with the Sakura Design System and PO directive:
-/// - Warm white navigation surface flush with the bottom edge (including safe area)
-/// - Symmetrical dynamic curved dome that glides horizontally to the active tab
-/// - Floating circular active indicator in Sakura Coral Pink gradient with soft glow
-/// - White active icon inside the floating circle
-/// - Neutral grey inactive icons and labels with smooth crossfade
-/// - Bold Sakura Pink active label on a shared baseline
-/// - Zero clipping at edge tabs (Tab 0 and Tab 4)
-/// - Accessible button semantics for all five learner destinations
-class RikiBottomNavigationBar extends StatefulWidget {
-  const RikiBottomNavigationBar({
+/// Role destinations, icons, and labels are injected via [destinations] (e.g.
+/// `LearnerNavigationConfiguration` / `MentorNavigationConfiguration`) so this
+/// shared presentation component holds zero role-specific route tables.
+///
+/// Features:
+/// - Warm white navigation surface flush with bottom SafeArea
+/// - Smoothly damped curved dome + coral-pink gradient floating circle
+/// - Compact circle & icon sizing aligned cleanly on the active tab center
+/// - Non-overlapping active/inactive icon handoff (never shows duplicate icons
+///   for the same tab) and synchronized label color/weight transitions
+/// - Responsive equal-width item geometry bounded safely within 360dp / 393dp / 412dp+
+/// - Accessible >= 48dp tap targets, reduced-motion snap, and 2x text-scale expansion
+class SakuraBottomNavigation extends StatefulWidget {
+  const SakuraBottomNavigation({
+    required this.destinations,
     required this.selectedIndex,
     required this.onDestinationSelected,
+    this.activeIconColor = Colors.white,
+    this.inactiveIconColor = AppColors.textSecondary,
+    this.activeLabelColor = AppColors.brandPrimary,
+    this.inactiveLabelColor = AppColors.textSecondary,
+    this.activeIndicatorGradient = const [
+      AppColors.sakura400,
+      AppColors.brandPrimary,
+    ],
+    this.backgroundColor = AppColors.cardWarmWhite,
+    this.shadowColor = const Color(0x18000000),
     super.key,
-  }) : assert(selectedIndex >= 0 && selectedIndex < destinationCount);
+  }) : assert(destinations.length >= 2),
+       assert(selectedIndex >= 0 && selectedIndex < destinations.length);
 
+  final List<RikiNavigationDestination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
-
-  static const int destinationCount = 5;
+  final Color activeIconColor;
+  final Color inactiveIconColor;
+  final Color activeLabelColor;
+  final Color inactiveLabelColor;
+  final List<Color> activeIndicatorGradient;
+  final Color backgroundColor;
+  final Color shadowColor;
 
   @override
-  State<RikiBottomNavigationBar> createState() =>
-      _RikiBottomNavigationBarState();
+  State<SakuraBottomNavigation> createState() => _SakuraBottomNavigationState();
 }
 
-class _RikiBottomNavigationBarState extends State<RikiBottomNavigationBar>
+class _SakuraBottomNavigationState extends State<SakuraBottomNavigation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  late int _previousIndex;
+  late int _displayedTargetIndex;
+  late double _transitionStartPos;
 
-  static const _indicatorDiameter = 48.0;
+  static const _indicatorDiameter = 40.0;
   static const _maximumMotionVelocity = 18.0; // Tab widths per second.
 
   @override
   void initState() {
     super.initState();
+    _previousIndex = widget.selectedIndex;
+    _displayedTargetIndex = widget.selectedIndex;
+    _transitionStartPos = widget.selectedIndex.toDouble();
     _controller = AnimationController.unbounded(
       vsync: this,
       value: widget.selectedIndex.toDouble(),
-    );
+    )..addStatusListener(_handleAnimationStatus);
+  }
+
+  void _handleAnimationStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed &&
+        status != AnimationStatus.dismissed) {
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+    final targetPos = widget.selectedIndex.toDouble();
+    if (_previousIndex != widget.selectedIndex ||
+        _displayedTargetIndex != widget.selectedIndex ||
+        _transitionStartPos != targetPos) {
+      setState(() {
+        _previousIndex = widget.selectedIndex;
+        _displayedTargetIndex = widget.selectedIndex;
+        _transitionStartPos = targetPos;
+      });
+    }
+  }
+
+  double _transitionProgressFor(double animPos) {
+    if (_previousIndex == _displayedTargetIndex) {
+      return 1.0;
+    }
+    final delta = _displayedTargetIndex - _transitionStartPos;
+    if (delta.abs() < 0.05) {
+      return 1.0;
+    }
+    return ((animPos - _transitionStartPos) / delta).clamp(0.0, 1.0);
   }
 
   @override
-  void didUpdateWidget(covariant RikiBottomNavigationBar oldWidget) {
+  void didUpdateWidget(covariant SakuraBottomNavigation oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedIndex != widget.selectedIndex) {
-      final targetPosition = widget.selectedIndex.toDouble();
+    final maxIndex = (widget.destinations.length - 1).toDouble();
+    final targetPosition = widget.selectedIndex.toDouble().clamp(0.0, maxIndex);
+    if (oldWidget.selectedIndex != widget.selectedIndex ||
+        oldWidget.destinations.length != widget.destinations.length) {
+      final currentPos = _controller.value.clamp(0.0, maxIndex);
+      final currentProgress = _transitionProgressFor(currentPos);
       final mediaQuery = MediaQuery.maybeOf(context);
       final disableAnimations =
           (mediaQuery?.disableAnimations ?? false) ||
@@ -59,28 +125,44 @@ class _RikiBottomNavigationBarState extends State<RikiBottomNavigationBar>
       if (disableAnimations) {
         _controller.stop();
         _controller.value = targetPosition;
+        _previousIndex = widget.selectedIndex;
+        _displayedTargetIndex = widget.selectedIndex;
+        _transitionStartPos = targetPosition;
       } else {
-        // Re-target the same simulation from its current position and velocity.
-        // No completion callback may overwrite a newer tab selection.
-        final distance = (targetPosition - _controller.value).abs();
+        // Keep the icon currently visible inside the floating circle as the
+        // outgoing index so rapid reversals never spawn duplicate icons.
+        final currentCircleIndex =
+            currentProgress < 0.48 ? _previousIndex : _displayedTargetIndex;
+        _previousIndex = currentCircleIndex.clamp(
+          0,
+          widget.destinations.length - 1,
+        );
+        _displayedTargetIndex = widget.selectedIndex;
+        _transitionStartPos = currentPos;
+
+        // Critically damped glide settles cleanly onto the exact tab center
+        // without bounce or overshooting past edge items.
+        final distance = (targetPosition - currentPos).abs();
         final spring = SpringDescription.withDampingRatio(
           mass: 1,
           stiffness: distance >= 3
-              ? 150
+              ? 280
               : distance >= 1.5
-              ? 190
-              : 230,
-          ratio: 0.87,
+              ? 310
+              : 340,
+          ratio: 1.0,
         );
         _controller.animateWith(
           SpringSimulation(
             spring,
-            _controller.value,
+            currentPos,
             targetPosition,
-            _controller.velocity.clamp(
-              -_maximumMotionVelocity,
-              _maximumMotionVelocity,
-            ),
+            _controller.isAnimating
+                ? _controller.velocity.clamp(
+                    -_maximumMotionVelocity,
+                    _maximumMotionVelocity,
+                  )
+                : 0.0,
             tolerance: const Tolerance(distance: 0.001, velocity: 0.01),
           ),
         );
@@ -90,21 +172,25 @@ class _RikiBottomNavigationBarState extends State<RikiBottomNavigationBar>
 
   @override
   void dispose() {
+    _controller.removeStatusListener(_handleAnimationStatus);
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final destinations = widget.destinations;
+    final itemCount = destinations.length;
     final textScaler = MediaQuery.textScalerOf(context);
     final scaledLabelSize = textScaler.scale(11);
     final largeText = scaledLabelSize >= 17;
 
-    // Dimensions
-    final bumpHeight = largeText ? 12.0 : 15.0;
-    final baselineOffset = largeText ? 14.0 : 18.0;
+    // Compact shared visual geometry matching Learner & Mentor 1:1.
+    // Keeps the 40dp active circle and dome strictly inside navigationHeight.
+    final bumpHeight = largeText ? 10.0 : 12.0;
+    final baselineOffset = largeText ? 12.0 : 14.0;
     const circleRadius = _indicatorDiameter / 2;
-    final circleCenterY = baselineOffset + 4.0;
+    final circleCenterY = baselineOffset + 9.0;
 
     final navigationHeight = largeText
         ? 112.0
@@ -112,104 +198,121 @@ class _RikiBottomNavigationBarState extends State<RikiBottomNavigationBar>
     final safeAreaBottom = MediaQuery.paddingOf(context).bottom;
     final totalHeight = navigationHeight + safeAreaBottom;
 
-    final l10n = context.l10n;
-    final destinations = <RikiNavigationDestination>[
-      RikiNavigationDestination(
-        label: l10n.navigationHome,
-        icon: Icons.home_outlined,
-        selectedIcon: Icons.home,
-      ),
-      RikiNavigationDestination(
-        label: l10n.navigationLearn,
-        icon: Icons.menu_book_outlined,
-        selectedIcon: Icons.menu_book,
-      ),
-      RikiNavigationDestination(
-        label: l10n.navigationPractice,
-        icon: Icons.quiz_outlined,
-        selectedIcon: Icons.quiz,
-      ),
-      RikiNavigationDestination(
-        label: l10n.navigationNotebook,
-        icon: Icons.style_outlined,
-        selectedIcon: Icons.style,
-      ),
-      RikiNavigationDestination(
-        label: l10n.navigationProfile,
-        icon: Icons.person_outline,
-        selectedIcon: Icons.person,
-      ),
-    ];
-
     return SizedBox(
       height: totalHeight,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth;
-          final itemWidth = width / RikiBottomNavigationBar.destinationCount;
+          final itemWidth = width / itemCount;
 
           return AnimatedBuilder(
             animation: _controller,
             builder: (context, _) {
-              final animPos = _controller.value.clamp(
-                0.0,
-                (RikiBottomNavigationBar.destinationCount - 1).toDouble(),
-              );
+              final maxIndex = (itemCount - 1).toDouble();
               final reduceMotion =
                   MediaQuery.disableAnimationsOf(context) ||
                   MediaQuery.accessibleNavigationOf(context);
-              final velocity = _controller.isAnimating && !reduceMotion
-                  ? _controller.velocity
-                  : 0.0;
-              final activeCenterX = (animPos + 0.5) * itemWidth;
-              final motionAmount = (velocity.abs() * itemWidth / 850).clamp(
-                0.0,
-                1.0,
+              final isAnimating = _controller.isAnimating && !reduceMotion;
+              final animPos = (isAnimating
+                      ? _controller.value
+                      : widget.selectedIndex.toDouble())
+                  .clamp(0.0, maxIndex);
+              final velocity = isAnimating ? _controller.velocity : 0.0;
+              final edgeInset = width >= _indicatorDiameter ? circleRadius : 0.0;
+              final activeCenterX = ((animPos + 0.5) * itemWidth).clamp(
+                edgeInset,
+                width - edgeInset,
               );
+
+              final isSettled =
+                  !isAnimating || _previousIndex == _displayedTargetIndex;
+              final progress = isSettled ? 1.0 : _transitionProgressFor(animPos);
+              final showingOutgoing = !isSettled && progress < 0.48;
+              final int circleIconIndex = (showingOutgoing
+                      ? _previousIndex
+                      : _displayedTargetIndex)
+                  .clamp(0, itemCount - 1);
+              final double circleIconOpacity = isSettled
+                  ? 1.0
+                  : showingOutgoing
+                  ? Curves.easeOut.transform(
+                      ((0.48 - progress) / 0.28).clamp(0.0, 1.0),
+                    )
+                  : Curves.easeIn.transform(
+                      ((progress - 0.48) / 0.28).clamp(0.0, 1.0),
+                    );
+
               return Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  // 1. Curved Background with top ambient shadow
+                  // 1. Curved surface with soft top ambient shadow
                   Positioned.fill(
                     child: RepaintBoundary(
                       child: CustomPaint(
                         painter: SakuraCurvedNavigationPainter(
                           activePosition: animPos,
                           velocity: velocity,
-                          itemCount: RikiBottomNavigationBar.destinationCount,
-                          backgroundColor: AppColors.cardWarmWhite,
+                          itemCount: itemCount,
+                          backgroundColor: widget.backgroundColor,
                           bumpHeight: bumpHeight,
                           baselineOffset: baselineOffset,
-                          bumpHalfWidth: 36.0,
-                          shadowColor: const Color(0x18000000),
+                          bumpHalfWidth: 34.0,
+                          shadowColor: widget.shadowColor,
+                          minEdgeInset: edgeInset,
                         ),
                       ),
                     ),
                   ),
 
-                  // 2. Tab Items Row (Touch targets, inactive icons, and labels)
+                  // 2. Equal-width tab targets (>= 48dp height) + labels + inactive icons
                   Positioned(
-                    top: baselineOffset,
+                    top: 0,
                     left: 0,
                     right: 0,
                     bottom: safeAreaBottom,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: List<Widget>.generate(destinations.length, (
-                        index,
-                      ) {
+                      children: List<Widget>.generate(itemCount, (index) {
                         final destination = destinations[index];
                         final isSelected = widget.selectedIndex == index;
                         final distance = (animPos - index).abs();
-                        final iconOpacity = (distance * 1.6).clamp(0.0, 1.0);
+                        final proximityOpacity = Curves.easeInOutCubic
+                            .transform(((distance - 0.15) / 0.65).clamp(0.0, 1.0));
+
+                        // Strict mutual exclusion: never render a tab's inactive
+                        // icon while that tab's active icon can be visible inside
+                        // the floating circle (including mid-transition).
+                        final double handoffOpacity;
+                        if (isSettled) {
+                          handoffOpacity = isSelected ? 0.0 : 1.0;
+                        } else if (index == _displayedTargetIndex) {
+                          handoffOpacity = (1.0 - (progress - 0.05) / 0.30)
+                              .clamp(0.0, 1.0);
+                        } else if (index == _previousIndex) {
+                          handoffOpacity = ((progress - 0.55) / 0.30).clamp(
+                            0.0,
+                            1.0,
+                          );
+                        } else {
+                          handoffOpacity = 1.0;
+                        }
+
+                        final iconOpacity = (proximityOpacity * handoffOpacity)
+                            .clamp(0.0, 1.0);
+                        final selectionProgress = Curves.easeInOutCubic
+                            .transform((1 - distance).clamp(0.0, 1.0));
 
                         return Expanded(
                           child: _NavigationTabItem(
                             destination: destination,
                             isSelected: isSelected,
                             iconOpacity: iconOpacity,
-                            selectionProgress: (1 - distance).clamp(0.0, 1.0),
+                            selectionProgress: selectionProgress,
+                            baselineOffset: baselineOffset,
                             largeText: largeText,
+                            activeLabelColor: widget.activeLabelColor,
+                            inactiveLabelColor: widget.inactiveLabelColor,
+                            inactiveIconColor: widget.inactiveIconColor,
                             onPressed: () =>
                                 widget.onDestinationSelected(index),
                           ),
@@ -218,66 +321,44 @@ class _RikiBottomNavigationBarState extends State<RikiBottomNavigationBar>
                     ),
                   ),
 
-                  // 3. Floating Active Circle Indicator
+                  // 3. Compact Floating Active Circle Indicator (fixed scale, exact center)
                   Positioned(
                     left: activeCenterX - circleRadius,
                     top: circleCenterY - circleRadius,
                     child: IgnorePointer(
-                      child: Transform.scale(
-                        scaleX: 1 + 0.035 * motionAmount,
-                        scaleY: 1 - 0.025 * motionAmount,
-                        child: Container(
-                          key: const ValueKey<String>(
-                            'sakura_floating_active_indicator',
+                      child: Container(
+                        key: const ValueKey<String>(
+                          'sakura_floating_active_indicator',
+                        ),
+                        width: _indicatorDiameter,
+                        height: _indicatorDiameter,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: widget.activeIndicatorGradient,
                           ),
-                          width: _indicatorDiameter,
-                          height: _indicatorDiameter,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                AppColors.sakura400, // Toned-down sakura coral (Color(0xFFEE6F8E))
-                                AppColors.brandPrimary, // Signature brand sakura rose (Color(0xFFE05A7A))
-                              ],
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x33E05A7A),
+                              blurRadius: 8,
+                              offset: Offset(0, 3),
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0x33E05A7A),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                              const BoxShadow(
-                                color: Color(0x14000000),
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: AnimatedSwitcher(
-                              duration: reduceMotion
-                                  ? Duration.zero
-                                  : const Duration(milliseconds: 180),
-                              transitionBuilder: (child, animation) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: ScaleTransition(
-                                    scale: Tween<double>(
-                                      begin: 0.82,
-                                      end: 1.0,
-                                    ).animate(animation),
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: Icon(
-                                destinations[widget.selectedIndex].selectedIcon,
-                                key: ValueKey<int>(widget.selectedIndex),
-                                color: Colors.white,
-                                size: 24,
-                              ),
+                            BoxShadow(
+                              color: Color(0x14000000),
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Opacity(
+                            opacity: circleIconOpacity,
+                            child: Icon(
+                              destinations[circleIconIndex].selectedIcon,
+                              color: widget.activeIconColor,
+                              size: largeText ? 18 : 20,
                             ),
                           ),
                         ),
@@ -309,7 +390,7 @@ class SakuraNotchGeometry {
   final double pull;
 }
 
-/// A curved surface whose leading edge stretches with the circle's velocity.
+/// A curved surface whose leading edge stretches softly with the circle's velocity.
 class SakuraCurvedNavigationPainter extends CustomPainter {
   const SakuraCurvedNavigationPainter({
     required this.activePosition,
@@ -320,6 +401,7 @@ class SakuraCurvedNavigationPainter extends CustomPainter {
     required this.baselineOffset,
     required this.bumpHalfWidth,
     required this.shadowColor,
+    this.minEdgeInset = 0.0,
   });
 
   final double activePosition;
@@ -330,10 +412,15 @@ class SakuraCurvedNavigationPainter extends CustomPainter {
   final double baselineOffset;
   final double bumpHalfWidth;
   final Color shadowColor;
+  final double minEdgeInset;
 
   SakuraNotchGeometry geometryFor(Size size) {
     final itemWidth = size.width / itemCount;
-    final centerX = ((activePosition + 0.5) * itemWidth).clamp(0.0, size.width);
+    final edgeInset = size.width >= minEdgeInset * 2 ? minEdgeInset : 0.0;
+    final centerX = ((activePosition + 0.5) * itemWidth).clamp(
+      edgeInset,
+      size.width - edgeInset,
+    );
     // Velocity, not a separate timeline, stretches the leading edge. The
     // shape is exactly symmetrical once the floating circle settles.
     final pull = (velocity * itemWidth / 850).clamp(-1.0, 1.0);
@@ -406,35 +493,44 @@ class SakuraCurvedNavigationPainter extends CustomPainter {
   bool shouldRepaint(covariant SakuraCurvedNavigationPainter oldDelegate) {
     return oldDelegate.activePosition != activePosition ||
         oldDelegate.velocity != velocity ||
+        oldDelegate.itemCount != itemCount ||
         oldDelegate.backgroundColor != backgroundColor ||
         oldDelegate.bumpHeight != bumpHeight ||
         oldDelegate.baselineOffset != baselineOffset ||
         oldDelegate.bumpHalfWidth != bumpHalfWidth ||
-        oldDelegate.shadowColor != shadowColor;
+        oldDelegate.shadowColor != shadowColor ||
+        oldDelegate.minEdgeInset != minEdgeInset;
   }
 }
 
-/// Destination data container.
+/// Destination metadata container consumed by [SakuraBottomNavigation].
 class RikiNavigationDestination {
   const RikiNavigationDestination({
     required this.label,
     required this.icon,
     required this.selectedIcon,
+    this.tooltip,
   });
 
   final String label;
   final IconData icon;
   final IconData selectedIcon;
+  final String? tooltip;
 }
 
-/// Individual navigation tab item containing the touch area, inactive icon, and label.
+/// Individual navigation tab item containing the >=48dp touch area, inactive icon,
+/// and synchronized Sakura label transition.
 class _NavigationTabItem extends StatelessWidget {
   const _NavigationTabItem({
     required this.destination,
     required this.isSelected,
     required this.iconOpacity,
     required this.selectionProgress,
+    required this.baselineOffset,
     required this.largeText,
+    required this.activeLabelColor,
+    required this.inactiveLabelColor,
+    required this.inactiveIconColor,
     required this.onPressed,
   });
 
@@ -442,14 +538,18 @@ class _NavigationTabItem extends StatelessWidget {
   final bool isSelected;
   final double iconOpacity;
   final double selectionProgress;
+  final double baselineOffset;
   final bool largeText;
+  final Color activeLabelColor;
+  final Color inactiveLabelColor;
+  final Color inactiveIconColor;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     final labelColor = Color.lerp(
-      AppColors.textSecondary,
-      AppColors.brandPrimary,
+      inactiveLabelColor,
+      activeLabelColor,
       selectionProgress,
     )!;
 
@@ -457,7 +557,7 @@ class _NavigationTabItem extends StatelessWidget {
       key: ValueKey<String>('bottom_navigation_item_${destination.label}'),
       button: true,
       selected: isSelected,
-      label: destination.label,
+      label: destination.tooltip ?? destination.label,
       child: Material(
         color: Colors.transparent,
         child: InkResponse(
@@ -465,46 +565,50 @@ class _NavigationTabItem extends StatelessWidget {
           containedInkWell: true,
           highlightShape: BoxShape.rectangle,
           splashColor: AppColors.brandTint.withValues(alpha: 0.3),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Inactive Icon area (fades out when active circle glides on top)
-              SizedBox(
-                height: largeText ? 22 : 28,
-                child: iconOpacity > 0.01
-                    ? Opacity(
-                        opacity: iconOpacity,
-                        child: Icon(
-                          destination.icon,
-                          color: AppColors.textSecondary,
-                          size: largeText ? 20 : 23,
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              SizedBox(height: largeText ? 1 : 3),
+          child: Padding(
+            padding: EdgeInsets.only(top: baselineOffset),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Inactive Icon area (cleanly hidden whenever the active circle
+                // covers or displays this tab)
+                SizedBox(
+                  height: largeText ? 22 : 26,
+                  child: iconOpacity > 0.01
+                      ? Opacity(
+                          opacity: iconOpacity,
+                          child: Icon(
+                            destination.icon,
+                            color: inactiveIconColor,
+                            size: largeText ? 18 : 20,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                SizedBox(height: largeText ? 1 : 3),
 
-              // Destination Label
-              Flexible(
-                child: Text(
-                  destination.label,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.badgeText.copyWith(
-                    color: labelColor,
-                    fontSize: 11,
-                    fontWeight: FontWeight.lerp(
-                      FontWeight.w600,
-                      FontWeight.w700,
-                      selectionProgress,
+                // Destination Label
+                Flexible(
+                  child: Text(
+                    destination.label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.badgeText.copyWith(
+                      color: labelColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.lerp(
+                        FontWeight.w500,
+                        FontWeight.w600,
+                        selectionProgress,
+                      ),
+                      letterSpacing: 0.15,
                     ),
-                    letterSpacing: 0.15,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

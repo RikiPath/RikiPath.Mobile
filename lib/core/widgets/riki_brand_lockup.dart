@@ -14,7 +14,11 @@ class RikiBrandLockup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final markSize = compact ? 36.0 : 44.0;
+    final markSize = compact ? 36.0 : 48.0;
+    final logoGap = compact ? AppSpacing.space2 : 10.0;
+    final wordmarkStyle = compact
+        ? AppTypography.brandWordmark.copyWith(fontSize: 20, height: 1.2)
+        : AppTypography.brandWordmark;
 
     return Semantics(
       container: true,
@@ -22,6 +26,7 @@ class RikiBrandLockup extends StatelessWidget {
       excludeSemantics: true,
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             key: const ValueKey<String>('riki_brand_mark'),
@@ -36,7 +41,7 @@ class RikiBrandLockup extends StatelessWidget {
               filterQuality: FilterQuality.high,
             ),
           ),
-          const SizedBox(width: AppSpacing.space2),
+          SizedBox(width: logoGap),
           Flexible(
             child: Text(
               'RikiPath',
@@ -44,7 +49,7 @@ class RikiBrandLockup extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.fade,
               softWrap: false,
-              style: AppTypography.brandWordmark,
+              style: wordmarkStyle,
             ),
           ),
           if (level != null) ...[

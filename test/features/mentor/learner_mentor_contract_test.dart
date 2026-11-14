@@ -479,6 +479,8 @@ void main() {
         find.byKey(const Key('learner_mentor_plans_empty')),
         findsOneWidget,
       );
+      expect(find.text('Chưa có gói tư vấn'), findsOneWidget);
+      expect(find.byKey(const Key('learner_mentor_plans_error')), findsNothing);
     });
 
     testWidgets('plan error is visible and retryable', (tester) async {
@@ -486,13 +488,32 @@ void main() {
         tester,
         const LearnerMentorMeetingsScreen(),
         repository: _TestLearnerMentorRepository(
-          planResults: [const NetworkError()],
+          planResults: [const NetworkError(), <MentorMeetingPlan>[_plan()]],
         ),
       );
       expect(
         find.byKey(const Key('learner_mentor_plans_error')),
         findsOneWidget,
       );
+      expect(find.text('Chưa thể kết nối'), findsOneWidget);
+      await tester.tap(find.text('Thử lại'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey<String>('learner_mentor_plan_1')),
+          findsOneWidget);
+    });
+
+    testWidgets('server failure is not presented as an empty package list', (
+      tester,
+    ) async {
+      await _pumpLearnerMentor(
+        tester,
+        const LearnerMentorMeetingsScreen(),
+        repository: _TestLearnerMentorRepository(
+          planResults: [const ServerError(statusCode: 500)],
+        ),
+      );
+      expect(find.text('Tạm thời chưa tải được gói tư vấn'), findsOneWidget);
+      expect(find.byKey(const Key('learner_mentor_plans_empty')), findsNothing);
     });
 
     testWidgets('401 booking response stays an error state', (tester) async {

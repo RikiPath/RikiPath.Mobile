@@ -64,7 +64,7 @@ class LoginController extends Notifier<LoginState> {
       ref.read(rikiToastServiceProvider.notifier).clear();
       ref
           .read(rikiToastServiceProvider.notifier)
-          .celebrate(
+          .success(
             title: l10n.toastLoginSuccessTitle,
             description: l10n.toastLoginSuccessDescription,
           );

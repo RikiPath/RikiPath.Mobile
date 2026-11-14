@@ -10,7 +10,6 @@ import 'package:rikipath_mobile/core/widgets/sakura_app_header.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_library_home.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
-import 'package:rikipath_mobile/features/notebook/domain/notebook.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/widgets/notebook_view.dart';
 import 'package:rikipath_mobile/features/shared_bank/presentation/shared_bank_screen.dart';
 import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';

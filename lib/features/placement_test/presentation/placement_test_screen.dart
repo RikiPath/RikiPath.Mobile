@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
@@ -60,28 +61,37 @@ class _PlacementTestScreenState extends ConsumerState<PlacementTestScreen> {
     final controller = ref.read(placementTestControllerProvider.notifier);
     _syncClockTimer(asyncState.asData?.value.hasActiveAttempt == true);
 
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        leading: IconButton(
-          key: const ValueKey<String>('placement_test_back_button'),
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              final status = asyncState.value?.status;
-              context.go(
-                status?.targetJlptLevelId != null &&
-                        status?.targetExamDate != null
-                    ? AppRoutes.home
-                    : AppRoutes.onboarding,
-              );
-            }
-          },
-        ),
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ?? Navigator.of(context).canPop();
+    void handleBack() {
+      final status = asyncState.value?.status;
+      final fallback =
+          status?.targetJlptLevelId != null && status?.targetExamDate != null
+          ? AppRoutes.home
+          : AppRoutes.onboardingWithOrigin(OnboardingOrigin.auth);
+      popOrGo(context, fallback);
+    }
+
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          handleBack();
+        }
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Scaffold(
+            backgroundColor: AppColors.learnerBackground,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          elevation: 0,
+          leading: IconButton(
+            key: const ValueKey<String>('placement_test_back_button'),
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: handleBack,
+          ),
         title: Text(
           context.l10n.placementTitle,
           style: AppTypography.sectionTitle,
@@ -134,7 +144,8 @@ class _PlacementTestScreenState extends ConsumerState<PlacementTestScreen> {
                   context.go(AppRoutes.learnRoadmap);
                 }
               },
-              onSetExamDate: () => context.go(AppRoutes.profileJlptGoal),
+              onSetExamDate: () =>
+                  navigateContextAware(context, AppRoutes.profileJlptGoal),
               onOpenStandardRoadmap: () => context.go(AppRoutes.learnRoadmap),
             );
           }
@@ -166,6 +177,14 @@ class _PlacementTestScreenState extends ConsumerState<PlacementTestScreen> {
           );
         },
       ),
+        ),
+        AppLoadingOverlay(
+          visible: asyncState.value?.isSubmitting == true,
+          title: context.l10n.loadingOverlaySubmittingTitle,
+          subtitle: context.l10n.loadingOverlayCompletingSubtitle,
+        ),
+      ],
+    ),
     );
   }
 }
@@ -600,7 +619,7 @@ class _PlacementQuestionImage extends StatelessWidget {
               ? child
               : const SizedBox(
                   height: 160,
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: SakuraLoadingIndicator()),
                 ),
           errorBuilder: (_, _, _) => Container(
             key: ValueKey<String>(

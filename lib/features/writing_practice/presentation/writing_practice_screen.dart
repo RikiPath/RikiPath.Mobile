@@ -124,7 +124,7 @@ class _WritingScriptTabs extends StatelessWidget {
               key: ValueKey<String>('writing_tab_${script.name}'),
               label: _scriptLabel(context, script),
               selected: script == selected,
-              onPressed: () => context.go(_scriptRoute(script)),
+              onPressed: () => context.pushReplacement(_scriptRoute(script)),
             ),
           ),
       ],

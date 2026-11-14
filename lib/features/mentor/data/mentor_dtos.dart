@@ -9,6 +9,16 @@ class MentorAvailabilityDto {
     required this.isBooked,
     this.isApproved = true,
     this.bookedCount = 0,
+    this.maxLearners = 1,
+    this.rejectedAt,
+    this.rejectionReason,
+    this.cancelRequestedAt,
+    this.cancelReason,
+    this.cancelRejectedAt,
+    this.cancelRejectionReason,
+    this.changeRequestReason,
+    this.changeRequestedAt,
+    this.changeResolution,
   });
 
   factory MentorAvailabilityDto.fromJson(Map<String, Object?> json) {
@@ -19,6 +29,16 @@ class MentorAvailabilityDto {
       isBooked: _requiredBool(json, 'isBooked'),
       isApproved: json['isApproved'] as bool? ?? true,
       bookedCount: (json['bookedCount'] as num?)?.toInt() ?? 0,
+      maxLearners: (json['maxLearners'] as num?)?.toInt() ?? 1,
+      rejectedAt: _optionalTimestamp(json, 'rejectedAt'),
+      rejectionReason: _optionalString(json, 'rejectionReason'),
+      cancelRequestedAt: _optionalTimestamp(json, 'cancelRequestedAt'),
+      cancelReason: _optionalString(json, 'cancelReason'),
+      cancelRejectedAt: _optionalTimestamp(json, 'cancelRejectedAt'),
+      cancelRejectionReason: _optionalString(json, 'cancelRejectionReason'),
+      changeRequestReason: _optionalString(json, 'changeRequestReason'),
+      changeRequestedAt: _optionalTimestamp(json, 'changeRequestedAt'),
+      changeResolution: _optionalString(json, 'changeResolution'),
     );
   }
 
@@ -28,6 +48,16 @@ class MentorAvailabilityDto {
   final bool isBooked;
   final bool isApproved;
   final int bookedCount;
+  final int maxLearners;
+  final MentorTimestamp? rejectedAt;
+  final String? rejectionReason;
+  final MentorTimestamp? cancelRequestedAt;
+  final String? cancelReason;
+  final MentorTimestamp? cancelRejectedAt;
+  final String? cancelRejectionReason;
+  final String? changeRequestReason;
+  final MentorTimestamp? changeRequestedAt;
+  final String? changeResolution;
 
   MentorAvailabilitySlot toDomain() => MentorAvailabilitySlot(
     id: id,
@@ -36,6 +66,16 @@ class MentorAvailabilityDto {
     isBooked: isBooked,
     isApproved: isApproved,
     bookedCount: bookedCount,
+    maxLearners: maxLearners,
+    rejectedAt: rejectedAt,
+    rejectionReason: rejectionReason,
+    cancelRequestedAt: cancelRequestedAt,
+    cancelReason: cancelReason,
+    cancelRejectedAt: cancelRejectedAt,
+    cancelRejectionReason: cancelRejectionReason,
+    changeRequestReason: changeRequestReason,
+    changeRequestedAt: changeRequestedAt,
+    changeResolution: changeResolution,
   );
 }
 
@@ -88,16 +128,24 @@ class MentorMeetingDto {
     this.hasDispute = false,
     this.disputeReason,
     this.disputeResponse,
+    this.userSubscriptionId,
+    this.mentorAvailabilityId,
+    this.mentorId,
+    this.mentorName,
+    this.learnerId,
+    this.jlptLevel,
+    this.paymentStatus,
+    this.roomId,
+    this.question,
+    this.endsAt,
+    this.createdAt,
   });
 
   factory MentorMeetingDto.fromJson(Map<String, Object?> json) {
     return MentorMeetingDto(
       id: _requiredPositiveInt(json, 'id'),
       learnerName: _optionalString(json, 'learnerName'),
-      scheduledAt: switch (_optionalString(json, 'scheduledAt')) {
-        final value? => MentorTimestamp.parse(value),
-        null => null,
-      },
+      scheduledAt: _optionalTimestamp(json, 'scheduledAt'),
       status: MentorMeetingStatus.fromApiValue(_requiredString(json, 'status')),
       meetingLink: _optionalString(json, 'meetingLink'),
       reviewRating: (json['reviewRating'] as num?)?.toInt(),
@@ -106,6 +154,17 @@ class MentorMeetingDto {
       hasDispute: json['hasDispute'] as bool? ?? false,
       disputeReason: _optionalString(json, 'disputeReason'),
       disputeResponse: _optionalString(json, 'disputeResponse'),
+      userSubscriptionId: (json['userSubscriptionId'] as num?)?.toInt(),
+      mentorAvailabilityId: (json['mentorAvailabilityId'] as num?)?.toInt(),
+      mentorId: (json['mentorId'] as num?)?.toInt(),
+      mentorName: _optionalString(json, 'mentorName'),
+      learnerId: (json['learnerId'] as num?)?.toInt(),
+      jlptLevel: _optionalString(json, 'jlptLevel'),
+      paymentStatus: json['paymentStatus']?.toString(),
+      roomId: _optionalString(json, 'roomId'),
+      question: _optionalString(json, 'question'),
+      endsAt: _optionalTimestamp(json, 'endsAt'),
+      createdAt: _optionalTimestamp(json, 'createdAt'),
     );
   }
 
@@ -120,6 +179,17 @@ class MentorMeetingDto {
   final bool hasDispute;
   final String? disputeReason;
   final String? disputeResponse;
+  final int? userSubscriptionId;
+  final int? mentorAvailabilityId;
+  final int? mentorId;
+  final String? mentorName;
+  final int? learnerId;
+  final String? jlptLevel;
+  final String? paymentStatus;
+  final String? roomId;
+  final String? question;
+  final MentorTimestamp? endsAt;
+  final MentorTimestamp? createdAt;
 
   MentorMeetingSummary toDomain() => MentorMeetingSummary(
     id: id,
@@ -133,6 +203,17 @@ class MentorMeetingDto {
     hasDispute: hasDispute,
     disputeReason: disputeReason,
     disputeResponse: disputeResponse,
+    userSubscriptionId: userSubscriptionId,
+    mentorAvailabilityId: mentorAvailabilityId,
+    mentorId: mentorId,
+    mentorName: mentorName,
+    learnerId: learnerId,
+    jlptLevel: jlptLevel,
+    paymentStatus: paymentStatus,
+    roomId: roomId,
+    question: question,
+    endsAt: endsAt,
+    createdAt: createdAt,
   );
 }
 
@@ -293,6 +374,11 @@ String? _optionalString(Map<String, Object?> json, String key) {
   if (value is! String) throw FormatException('Expected a string field: $key.');
   final normalized = value.trim();
   return normalized.isEmpty ? null : normalized;
+}
+
+MentorTimestamp? _optionalTimestamp(Map<String, Object?> json, String key) {
+  final value = _optionalString(json, key);
+  return value == null ? null : MentorTimestamp.parse(value);
 }
 
 bool _requiredBool(Map<String, Object?> json, String key) {

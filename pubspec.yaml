@@ -49,7 +49,6 @@ flutter:
     - assets/flags/vi.svg
     - assets/flags/ja.svg
     - assets/images/auth/auth_sakura_background.webp
-    - assets/images/auth/sakura_hourglass.png
     - assets/images/auth/sakura_onboarding_complete.png
     - assets/images/mascot/
     - assets/images/icons_3d/

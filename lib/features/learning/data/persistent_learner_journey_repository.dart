@@ -7,15 +7,20 @@ import 'package:rikipath_mobile/features/learning/domain/learner_journey_reposit
 import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 
 class PersistentLearnerJourneyRepository implements LearnerJourneyRepository {
-  PersistentLearnerJourneyRepository(this._store);
+  PersistentLearnerJourneyRepository(this._store, [this._userId]);
 
   static const storageKey = 'r3_learner_journey_v1';
 
   final JsonPreferenceStore _store;
+  final int? _userId;
+
+  String get activeStorageKey => _userId == null
+      ? storageKey
+      : 'r3_learner_journey_u${_userId}_v1';
 
   @override
   Future<LearnerJourneyState> load() async {
-    final encoded = await _store.read(storageKey);
+    final encoded = await _store.read(activeStorageKey);
     if (encoded == null) return const LearnerJourneyState();
 
     final decoded = jsonDecode(encoded);
@@ -30,7 +35,7 @@ class PersistentLearnerJourneyRepository implements LearnerJourneyRepository {
     final encodedHasSelectedLevel = decoded['hasSelectedLevel'];
     final hasSelectedLevel = encodedHasSelectedLevel is bool
         ? encodedHasSelectedLevel
-        : selectedLevel != null;
+        : false;
     final dailyStudyMinutes = decoded['dailyStudyMinutes'];
     final encodedProgress = decoded['lessonProgress'];
     if (selectedLevel == null ||
@@ -75,11 +80,11 @@ class PersistentLearnerJourneyRepository implements LearnerJourneyRepository {
           },
       },
     });
-    return _store.write(storageKey, encoded);
+    return _store.write(activeStorageKey, encoded);
   }
 
   @override
-  Future<void> reset() => _store.remove(storageKey);
+  Future<void> reset() => _store.remove(activeStorageKey);
 
   LessonProgress _decodeProgress(Map<String, dynamic> json) {
     final progressPercent = json['progressPercent'];

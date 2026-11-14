@@ -17,6 +17,7 @@ class SakuraCalendarHeader extends StatelessWidget {
     this.onNext,
     this.onSearchPressed,
     this.onBackPressed,
+    this.showBackButton = true,
   });
 
   final DateTime selectedDate;
@@ -29,6 +30,7 @@ class SakuraCalendarHeader extends StatelessWidget {
   final VoidCallback? onNext;
   final VoidCallback? onSearchPressed;
   final VoidCallback? onBackPressed;
+  final bool showBackButton;
 
   String _formatMonthYear(DateTime dt) {
     return currentViewMode == SakuraCalendarViewMode.year
@@ -89,27 +91,29 @@ class SakuraCalendarHeader extends StatelessWidget {
           Row(
             children: [
               // 1. Left Back Button (38x38 rounded container)
-              InkWell(
-                key: const Key('calendar_back_button'),
-                onTap: onBackPressed ?? () => Navigator.of(context).maybePop(),
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: const Icon(
-                    Icons.chevron_left,
-                    color: AppColors.primary,
-                    size: 22,
+              if (showBackButton) ...[
+                InkWell(
+                  key: const Key('calendar_back_button'),
+                  onTap: onBackPressed ?? () => Navigator.of(context).maybePop(),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: const Icon(
+                      Icons.chevron_left,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
                   ),
                 ),
-              ),
 
-              const SizedBox(width: AppSpacing.space2),
+                const SizedBox(width: AppSpacing.space2),
+              ],
 
               // 2. Month & Year Title with dropdown arrow + Today quick-jump
               Expanded(

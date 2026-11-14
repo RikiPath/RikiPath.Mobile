@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
@@ -48,23 +49,36 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         email: state.submittedEmail!,
         onReturnToLogin: () {
           ref.read(forgotPasswordControllerProvider.notifier).reset();
-          context.go(AppRoutes.login);
+          popOrGo(context, AppRoutes.login);
         },
       );
     }
 
-    return AuthPage(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ??
+        (ModalRoute.of(context)?.canPop ?? true);
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          popOrGo(context, AppRoutes.login);
+        }
+      },
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              RikiAuthHeader(
-                onBack: () => context.go(AppRoutes.login),
-                backSemanticLabel: l10n.returnToLogin,
-              ),
+          AuthPage(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                RikiAuthHeader(
+                  onBack: () => popOrGo(context, AppRoutes.login),
+                  backSemanticLabel: l10n.returnToLogin,
+                ),
               const SizedBox(height: AppSpacing.space10),
               Center(
                 child: Container(
@@ -138,7 +152,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 leadingIcon: Icons.arrow_back,
                 onPressed: state.isLoading
                     ? null
-                    : () => context.go(AppRoutes.login),
+                    : () => popOrGo(context, AppRoutes.login),
               ),
             ],
           ),
@@ -148,6 +162,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           ),
         ],
       ),
+        ),
+        AppLoadingOverlay(
+          visible: state.isLoading,
+          title: l10n.loadingOverlayProcessingTitle,
+          subtitle: l10n.loadingOverlayWaitSubtitle,
+        ),
+      ],
+    ),
     );
   }
 }
@@ -164,7 +186,14 @@ class _ForgotPasswordSuccess extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return AuthPage(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          onReturnToLogin();
+        }
+      },
+      child: AuthPage(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -226,6 +255,7 @@ class _ForgotPasswordSuccess extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

@@ -11,7 +11,9 @@ class ApiUserProfileRepository
     implements
         UserProfileRepository,
         TargetExamDateProfileRepository,
-        StudyLevelProfileRepository {
+        ClearTargetExamDateProfileRepository,
+        StudyLevelProfileRepository,
+        AtomicLearningGoalProfileRepository {
   const ApiUserProfileRepository(this._apiClient);
 
   final ApiClient _apiClient;
@@ -89,6 +91,23 @@ class ApiUserProfileRepository
   }
 
   @override
+  Future<UserProfile> clearJlptGoalExamDate({
+    required int targetJlptLevelId,
+    required int dailyStudyMinutes,
+  }) async {
+    final request = SetJlptGoalRequestDto(
+      targetJlptLevelId: targetJlptLevelId,
+      dailyStudyMinutes: dailyStudyMinutes,
+      clearTargetExamDate: true,
+    );
+    final response = await _apiClient.post<Object?>(
+      UserProfileApiPaths.jlptGoal,
+      data: request.toJson(),
+    );
+    return _readProfile(response.data);
+  }
+
+  @override
   Future<UserProfile> switchStudyLevel({
     required int currentStudyLevelId,
   }) async {
@@ -98,6 +117,30 @@ class ApiUserProfileRepository
         'currentStudyLevelId': currentStudyLevelId,
         'confirmed': true,
       },
+    );
+    return _readProfile(response.data);
+  }
+
+  @override
+  Future<UserProfile> saveLearningGoal({
+    required int currentStudyLevelId,
+    required int targetJlptLevelId,
+    required int dailyStudyMinutes,
+    required DateTime? targetExamDate,
+    required int? certifiedJlptLevelId,
+    required int expectedVersion,
+  }) async {
+    final request = SetLearningGoalRequestDto(
+      currentStudyLevelId: currentStudyLevelId,
+      targetJlptLevelId: targetJlptLevelId,
+      dailyStudyMinutes: dailyStudyMinutes,
+      targetExamDate: targetExamDate,
+      certifiedJlptLevelId: certifiedJlptLevelId,
+      expectedVersion: expectedVersion,
+    );
+    final response = await _apiClient.put<Object?>(
+      UserProfileApiPaths.learningGoal,
+      data: request.toJson(),
     );
     return _readProfile(response.data);
   }

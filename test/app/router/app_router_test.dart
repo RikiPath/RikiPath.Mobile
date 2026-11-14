@@ -5,6 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/main_shell.dart';
+import 'package:rikipath_mobile/app/router/navigation_configuration.dart';
+import 'package:rikipath_mobile/app/router/riki_path_app_shell.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/storage/token_storage.dart';
@@ -29,7 +32,12 @@ import 'package:rikipath_mobile/features/mentor/application/mentor_controller.da
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_repository.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_meetings_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_profile_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shell.dart';
+import 'package:rikipath_mobile/features/calendar/presentation/mentor_calendar_screen.dart';
 import 'package:rikipath_mobile/features/notebook/presentation/notebook_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:rikipath_mobile/features/onboarding/presentation/learner_startup_screen.dart';
@@ -38,7 +46,6 @@ import 'package:rikipath_mobile/features/placement_test/domain/placement_test.da
 import 'package:rikipath_mobile/features/placement_test/domain/placement_test_repository.dart';
 import 'package:rikipath_mobile/features/profile/presentation/profile_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/edit_profile_screen.dart';
-import 'package:rikipath_mobile/features/profile/presentation/jlpt_goal_screen.dart';
 import 'package:rikipath_mobile/features/profile/presentation/notification_settings_screen.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
@@ -286,7 +293,7 @@ void main() {
 
     router.go(AppRoutes.profileJlptGoal);
     await tester.pumpAndSettle();
-    expect(find.byType(JlptGoalScreen), findsOneWidget);
+    expect(find.byType(OnboardingScreen), findsOneWidget);
 
     router.go(AppRoutes.profileNotifications);
     await tester.pumpAndSettle();
@@ -443,7 +450,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(MentorHomeScreen), findsOneWidget);
-    expect(find.byType(RikiBottomNavigationBar), findsNothing);
+    expect(find.byType(MainShell), findsNothing);
+    expect(find.byKey(const Key('mentor_bottom_navigation_bar')), findsOneWidget);
   });
 
   testWidgets('authenticated Mentor is isolated from the learner shell', (
@@ -460,7 +468,35 @@ void main() {
 
     expect(find.byType(MentorHomeScreen), findsOneWidget);
     expect(find.byType(HomeScreen), findsNothing);
-    expect(find.byType(RikiBottomNavigationBar), findsNothing);
+    expect(find.byType(MainShell), findsNothing);
+    expect(find.byKey(const Key('mentor_bottom_navigation_bar')), findsOneWidget);
+  });
+
+  test('authenticated Mentor can access notifications and security routes', () {
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.mentor,
+        matchedLocation: AppRoutes.notifications,
+      ),
+      isNull,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.mentor,
+        matchedLocation: AppRoutes.mentorChangePassword,
+      ),
+      isNull,
+    );
+    expect(
+      authRouteRedirect(
+        authState: AuthSessionState.authenticated,
+        role: BackendUserRole.mentor,
+        matchedLocation: AppRoutes.mentorChangeEmail,
+      ),
+      isNull,
+    );
   });
 
   testWidgets('Mentor profile navigation never loads Learner-only profile', (
@@ -696,6 +732,283 @@ void main() {
 
     expect(tester.element(find.byType(HomeScreen)), same(originalHomeElement));
   });
+
+  testWidgets(
+    'each mentor destination renders inside shared RikiPathAppShell without duplicate bottom bars',
+    (tester) async {
+      final session = createTestAuthSession(role: BackendUserRole.mentor);
+      final router = await _pumpRouter(
+        tester,
+        initialLocation: AppRoutes.mentor,
+        authSession: session,
+      );
+      await tester.pumpAndSettle();
+
+      const destinations = <({String path, Type screen, int index})>[
+        (path: AppRoutes.mentor, screen: MentorHomeScreen, index: 0),
+        (
+          path: AppRoutes.mentorCalendar,
+          screen: MentorCalendarScreen,
+          index: 1,
+        ),
+        (
+          path: AppRoutes.mentorMeetings,
+          screen: MentorMeetingsScreen,
+          index: 2,
+        ),
+        (
+          path: AppRoutes.mentorAvailability,
+          screen: MentorAvailabilityScreen,
+          index: 3,
+        ),
+        (
+          path: AppRoutes.mentorProfile,
+          screen: MentorProfileScreen,
+          index: 4,
+        ),
+      ];
+
+      expect(find.byType(MentorShell), findsOneWidget);
+      expect(find.byType(RikiPathAppShell), findsOneWidget);
+      expect(find.byType(SakuraShellBranchContainer), findsOneWidget);
+
+      for (final label in const <String>[
+        'Trang chủ',
+        'Lịch dạy',
+        'Buổi tư vấn',
+        'Lịch trống',
+        'Cá nhân',
+      ]) {
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('mentor_bottom_navigation_bar')),
+            matching: find.text(label),
+          ),
+          findsOneWidget,
+        );
+      }
+
+      for (final destination in destinations) {
+        router.go(destination.path);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(destination.screen), findsOneWidget);
+        // Must always render ONE shared bottom bar across all Mentor tabs.
+        expect(find.byType(SakuraBottomNavigation), findsOneWidget);
+        final navigationBar = tester.widget<SakuraBottomNavigation>(
+          find.byType(SakuraBottomNavigation),
+        );
+        expect(navigationBar.selectedIndex, destination.index);
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
+
+  testWidgets(
+    'mentor tab taps animate shared indicator, preserve branch state, and keep header/FAB inside shell',
+    (tester) async {
+      final session = createTestAuthSession(role: BackendUserRole.mentor);
+      await _pumpRouter(
+        tester,
+        initialLocation: AppRoutes.mentor,
+        authSession: session,
+      );
+      await tester.pumpAndSettle();
+
+      final originalMentorHome = tester.element(find.byType(MentorHomeScreen));
+
+      // Tap tab 2 (Buổi tư vấn) directly on shared SakuraBottomNavigation
+      await tester.tap(
+        find.descendant(
+          of: find.byType(SakuraBottomNavigation),
+          matching: find.text('Buổi tư vấn'),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      // Branch crossfade runs synchronously without errors during transition.
+      expect(find.byType(SakuraBottomNavigation), findsOneWidget);
+
+      await tester.pumpAndSettle();
+      expect(find.byType(MentorMeetingsScreen), findsOneWidget);
+      expect(
+        tester
+            .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
+            .selectedIndex,
+        2,
+      );
+
+      // Header calendar button on Buổi tư vấn navigates to MentorCalendar (tab 1)
+      // inside MentorShell (never pushing Learner calendar or outside shell).
+      await tester.tap(find.byTooltip('Lịch giảng dạy'));
+      await tester.pumpAndSettle();
+      expect(find.byType(MentorCalendarScreen), findsOneWidget);
+      expect(find.byType(SakuraBottomNavigation), findsOneWidget);
+      expect(
+        tester
+            .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
+            .selectedIndex,
+        1,
+      );
+
+      // Verify Home branch Element identity was preserved across transitions.
+      final offstageHome = tester.element(
+        find.byType(MentorHomeScreen, skipOffstage: false),
+      );
+      expect(identical(offstageHome, originalMentorHome), isTrue);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(SakuraBottomNavigation),
+          matching: find.text('Trang chủ'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.element(find.byType(MentorHomeScreen)),
+        same(originalMentorHome),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'deep linking directly to a secondary mentor tab selects the matching index',
+    (tester) async {
+      final session = createTestAuthSession(role: BackendUserRole.mentor);
+      await _pumpRouter(
+        tester,
+        initialLocation: AppRoutes.mentorAvailability,
+        authSession: session,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MentorAvailabilityScreen), findsOneWidget);
+      expect(find.byType(SakuraBottomNavigation), findsOneWidget);
+      expect(
+        tester
+            .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
+            .selectedIndex,
+        MentorNavigationConfiguration.tabRoutes.indexOf(
+          AppRoutes.mentorAvailability,
+        ),
+      );
+    },
+  );
+
+  testWidgets(
+    'Android system back from non-zero tab returns cleanly to tab 0 on both roles',
+    (tester) async {
+      // Learner back from Cá nhân (tab 4) -> Trang chủ (tab 0)
+      final learnerSession = createTestAuthSession(role: BackendUserRole.learner);
+      await _pumpRouter(
+        tester,
+        initialLocation: AppRoutes.profile,
+        authSession: learnerSession,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
+            .selectedIndex,
+        4,
+      );
+
+      expect(await tester.binding.handlePopRoute(), isTrue);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
+            .selectedIndex,
+        0,
+      );
+
+      // Mentor back from Lịch trống (tab 3) -> Trang chủ (tab 0)
+      final mentorSession = createTestAuthSession(role: BackendUserRole.mentor);
+      await _pumpRouter(
+        tester,
+        initialLocation: AppRoutes.mentorAvailability,
+        authSession: mentorSession,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
+            .selectedIndex,
+        3,
+      );
+
+      expect(await tester.binding.handlePopRoute(), isTrue);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
+            .selectedIndex,
+        0,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'role switching between Mentor and Learner resets bottom navigation cleanly',
+    (tester) async {
+      final session = createTestAuthSession(role: BackendUserRole.mentor);
+      final router = await _pumpRouter(
+        tester,
+        initialLocation: AppRoutes.mentorProfile,
+        authSession: session,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('mentor_bottom_navigation_bar')), findsOneWidget);
+
+      await session.signOut();
+      await tester.pumpAndSettle();
+      expect(find.byType(SakuraBottomNavigation), findsNothing);
+
+      session.markAuthenticated(userId: 99, role: BackendUserRole.learner);
+      await tester.pumpAndSettle();
+      router.go(AppRoutes.home);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('learner_bottom_navigation_bar')), findsOneWidget);
+      expect(find.byKey(const Key('mentor_bottom_navigation_bar')), findsNothing);
+      expect(
+        tester
+            .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
+            .selectedIndex,
+        0,
+      );
+
+      // Navigate Learner to Cá nhân (tab 4), logout, then sign in as Mentor.
+      router.go(AppRoutes.profile);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
+            .selectedIndex,
+        4,
+      );
+
+      await session.signOut();
+      await tester.pumpAndSettle();
+      expect(find.byType(SakuraBottomNavigation), findsNothing);
+
+      session.markAuthenticated(userId: 77, role: BackendUserRole.mentor);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('mentor_bottom_navigation_bar')), findsOneWidget);
+      expect(find.byKey(const Key('learner_bottom_navigation_bar')), findsNothing);
+      expect(
+        tester
+            .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
+            .selectedIndex,
+        0,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 Future<GoRouter> _pumpRouter(

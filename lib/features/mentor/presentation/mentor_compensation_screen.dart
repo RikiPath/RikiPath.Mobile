@@ -4,8 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/errors/app_error_message.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_compensation_controller.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_parity_components.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
 
 String formatCompensationVnd(num amount) => NumberFormat.currency(
@@ -124,7 +128,7 @@ Widget _asyncBody<T>({
     AsyncError() => Center(
       child: MentorErrorState(message: errorMessage, onRetry: onRetry),
     ),
-    _ => const Center(child: CircularProgressIndicator()),
+    _ => const Center(child: SakuraLoadingIndicator()),
   };
 }
 
@@ -139,7 +143,11 @@ class _OverviewTab extends ConsumerWidget {
       onRetry: () => ref.invalidate(mentorCompensationOverviewProvider),
       errorMessage: 'Chưa thể tải tổng quan thu nhập. Vui lòng thử lại.',
       builder: (overview) => RefreshIndicator(
-        onRefresh: () => ref.refresh(mentorCompensationOverviewProvider.future),
+        onRefresh: () {
+          ref.invalidate(mentorHourlyRatesProvider);
+          ref.invalidate(mentorQualificationsProvider);
+          return ref.refresh(mentorCompensationOverviewProvider.future);
+        },
         child: ListView(
           key: const Key('mentor_compensation_overview'),
           padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
@@ -210,6 +218,10 @@ class _OverviewTab extends ConsumerWidget {
                 ],
               ),
             ),
+            const SizedBox(height: AppSpacing.space4),
+            const _HourlyRatesHistoryCard(),
+            const SizedBox(height: AppSpacing.space3),
+            const _QualificationsHistoryCard(),
             const SizedBox(height: AppSpacing.space3),
             Text(
               'Thù lao do hệ thống tính dựa trên đơn giá và hệ số trình độ đã chốt tại thời điểm đặt lịch, '
@@ -342,70 +354,99 @@ class _PayrollsTab extends ConsumerWidget {
               0,
               (sum, l) => sum + l.approvedEligibleMinutes,
             );
-            return RikiCard(
-              key: ValueKey('mentor_payroll_${p.id}'),
-              backgroundColor: AppColors.cardWarmWhite,
-              borderColor: AppColors.cardBorderMuted,
-              boxShadow: AppShadows.sakuraSubtle,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Kỳ lương tháng ${p.periodMonth}/${p.periodYear}',
-                          style: AppTypography.cardTitle,
+            return InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) =>
+                    _PayrollDetailSheet(payrollId: p.id, fallback: p),
+              ),
+              child: RikiCard(
+                key: ValueKey('mentor_payroll_${p.id}'),
+                backgroundColor: AppColors.cardWarmWhite,
+                borderColor: AppColors.cardBorderMuted,
+                boxShadow: AppShadows.sakuraSubtle,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Kỳ lương tháng ${p.periodMonth}/${p.periodYear}',
+                            style: AppTypography.cardTitle,
+                          ),
                         ),
-                      ),
-                      Text(
-                        payrollStatusLabel(p.status),
-                        style: AppTypography.metadata.copyWith(
-                          color: approved
-                              ? AppColors.success
-                              : AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
+                        Text(
+                          payrollStatusLabel(p.status),
+                          style: AppTypography.metadata.copyWith(
+                            color: approved
+                                ? AppColors.success
+                                : AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.space2),
-                  _InfoRow(
-                    label: 'Số buổi hoàn thành',
-                    value: '${p.lines.length} buổi',
-                  ),
-                  _InfoRow(
-                    label: 'Thời lượng được duyệt',
-                    value:
-                        '$minutes phút (${(minutes / 60).toStringAsFixed(2)} giờ)',
-                  ),
-                  _InfoRow(
-                    label: 'Thù lao buổi tư vấn',
-                    value: formatCompensationVnd(p.totalEarningsAmountVnd),
-                  ),
-                  _InfoRow(
-                    label: 'Điều chỉnh',
-                    value: formatCompensationVnd(p.totalAdjustmentsAmountVnd),
-                  ),
-                  for (final adj in p.adjustments)
-                    Padding(
-                      padding: const EdgeInsets.only(left: AppSpacing.space3),
-                      child: Text(
-                        '• ${adj.reason}: ${formatCompensationVnd(adj.amountVnd)}',
-                        style: AppTypography.metadata.copyWith(
-                          color: AppColors.textMuted,
-                        ),
-                      ),
+                      ],
                     ),
-                  const Divider(),
-                  _InfoRow(
-                    label: approved
-                        ? 'Số tiền được duyệt chi trả'
-                        : 'Tổng tạm tính (chưa phê duyệt)',
-                    value: formatCompensationVnd(p.grossPayableAmountVnd),
-                    emphasize: true,
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.space2),
+                    _InfoRow(
+                      label: 'Số buổi hoàn thành',
+                      value: '${p.lines.length} buổi',
+                    ),
+                    _InfoRow(
+                      label: 'Thời lượng được duyệt',
+                      value:
+                          '$minutes phút (${(minutes / 60).toStringAsFixed(2)} giờ)',
+                    ),
+                    _InfoRow(
+                      label: 'Thù lao buổi tư vấn',
+                      value: formatCompensationVnd(p.totalEarningsAmountVnd),
+                    ),
+                    _InfoRow(
+                      label: 'Điều chỉnh',
+                      value: formatCompensationVnd(p.totalAdjustmentsAmountVnd),
+                    ),
+                    for (final adj in p.adjustments)
+                      Padding(
+                        padding: const EdgeInsets.only(left: AppSpacing.space3),
+                        child: Text(
+                          '• ${adj.reason}: ${formatCompensationVnd(adj.amountVnd)}',
+                          style: AppTypography.metadata.copyWith(
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ),
+                    const Divider(),
+                    _InfoRow(
+                      label: approved
+                          ? 'Số tiền được duyệt chi trả'
+                          : 'Tổng tạm tính (chưa phê duyệt)',
+                      value: formatCompensationVnd(p.grossPayableAmountVnd),
+                      emphasize: true,
+                    ),
+                    const SizedBox(height: AppSpacing.space1),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          context.l10n.mentorCompPayrollDetailTitle,
+                          style: AppTypography.metadata.copyWith(
+                            color: AppColors.brandPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          size: 16,
+                          color: AppColors.brandPrimary,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -443,62 +484,77 @@ class _PayoutsTab extends ConsumerWidget {
           separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.space3),
           itemBuilder: (context, index) {
             final o = items[index];
-            return RikiCard(
-              key: ValueKey('mentor_payout_${o.id}'),
-              backgroundColor: AppColors.cardWarmWhite,
-              borderColor: AppColors.cardBorderMuted,
-              boxShadow: AppShadows.sakuraSubtle,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        o.isPaid
-                            ? Icons.check_circle_outline
-                            : Icons.schedule_outlined,
-                        color: o.isPaid
-                            ? AppColors.success
-                            : AppColors.brandPrimary,
-                      ),
-                      const SizedBox(width: AppSpacing.space2),
-                      Expanded(
-                        child: Text(
-                          payoutStatusLabel(o.status),
-                          key: ValueKey('mentor_payout_status_${o.id}'),
-                          style: AppTypography.cardTitle,
+            return InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) =>
+                    _PayoutDetailSheet(obligationId: o.id, fallback: o),
+              ),
+              child: RikiCard(
+                key: ValueKey('mentor_payout_${o.id}'),
+                backgroundColor: AppColors.cardWarmWhite,
+                borderColor: AppColors.cardBorderMuted,
+                boxShadow: AppShadows.sakuraSubtle,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          o.isPaid
+                              ? Icons.check_circle_outline
+                              : Icons.schedule_outlined,
+                          color: o.isPaid
+                              ? AppColors.success
+                              : AppColors.brandPrimary,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.space2),
-                  _InfoRow(
-                    label: 'Số tiền được duyệt',
-                    value: formatCompensationVnd(o.payableAmountVnd),
-                  ),
-                  _InfoRow(
-                    label: 'Đã nhận',
-                    value: formatCompensationVnd(
-                      o.isPaid ? o.paidAmountVnd : 0,
+                        const SizedBox(width: AppSpacing.space2),
+                        Expanded(
+                          child: Text(
+                            payoutStatusLabel(o.status),
+                            key: ValueKey('mentor_payout_status_${o.id}'),
+                            style: AppTypography.cardTitle,
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          size: 18,
+                          color: AppColors.textMuted,
+                        ),
+                      ],
                     ),
-                    emphasize: o.isPaid,
-                  ),
-                  _InfoRow(
-                    label: 'Phương thức',
-                    value: payoutMethodLabel(o.selectedExecutionMethod),
-                  ),
-                  _InfoRow(
-                    label: 'Tài khoản nhận',
-                    value:
-                        '${o.recipientBankShortNameSnapshot} ${o.recipientMaskedAccountSnapshot}'
-                            .trim(),
-                  ),
-                  if (o.isPaid)
+                    const SizedBox(height: AppSpacing.space2),
                     _InfoRow(
-                      label: 'Ngày chi trả',
-                      value: _dateLabel(o.paidAtUtc),
+                      label: 'Số tiền được duyệt',
+                      value: formatCompensationVnd(o.payableAmountVnd),
                     ),
-                ],
+                    _InfoRow(
+                      label: 'Đã nhận',
+                      value: formatCompensationVnd(
+                        o.isPaid ? o.paidAmountVnd : 0,
+                      ),
+                      emphasize: o.isPaid,
+                    ),
+                    _InfoRow(
+                      label: 'Phương thức',
+                      value: payoutMethodLabel(o.selectedExecutionMethod),
+                    ),
+                    _InfoRow(
+                      label: 'Tài khoản nhận',
+                      value:
+                          '${o.recipientBankShortNameSnapshot} ${o.recipientMaskedAccountSnapshot}'
+                              .trim(),
+                    ),
+                    if (o.isPaid)
+                      _InfoRow(
+                        label: 'Ngày chi trả',
+                        value: _dateLabel(o.paidAtUtc),
+                      ),
+                  ],
+                ),
               ),
             );
           },
@@ -620,6 +676,466 @@ class _InfoRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HourlyRatesHistoryCard extends ConsumerWidget {
+  const _HourlyRatesHistoryCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final ratesAsync = ref.watch(mentorHourlyRatesProvider);
+
+    return RikiCard(
+      key: const Key('mentor_comp_hourly_rates_card'),
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.cardBorderMuted,
+      boxShadow: AppShadows.sakuraSubtle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.mentorCompHourlyRatesTitle, style: AppTypography.sectionTitle),
+          const SizedBox(height: AppSpacing.space2),
+          switch (ratesAsync) {
+            AsyncLoading() => const RikiSkeleton(height: 52),
+            AsyncError(:final error) => MentorErrorState(
+              message: appErrorMessage(error, l10n),
+              onRetry: () => ref.invalidate(mentorHourlyRatesProvider),
+            ),
+            AsyncData(:final value) => value.isEmpty
+                ? Text(
+                    'Chưa có lịch sử đơn giá thù lao.',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                  )
+                : Column(
+                    children: value.map((rate) {
+                      final active = rate.isActive;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.space2),
+                        padding: const EdgeInsets.all(AppSpacing.space3),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceSubtle,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    '${formatCompensationVnd(rate.hourlyRateVnd)}/giờ',
+                                    style: AppTypography.cardTitle.copyWith(
+                                      color: active
+                                          ? AppColors.brandPrimary
+                                          : AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                                MentorStatusBadge(
+                                  label: active ? 'Đang áp dụng' : 'Hết hiệu lực',
+                                  color: active
+                                      ? AppColors.success
+                                      : AppColors.textSecondary,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Từ ${_dateLabel(rate.effectiveFromUtc)}'
+                              '${rate.effectiveToUtc != null ? ' đến ${_dateLabel(rate.effectiveToUtc)}' : ''}',
+                              style: AppTypography.metadata.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            if (rate.reason?.trim().isNotEmpty == true)
+                              Text(
+                                rate.reason!.trim(),
+                                style: AppTypography.metadata.copyWith(
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          },
+        ],
+      ),
+    );
+  }
+}
+
+class _QualificationsHistoryCard extends ConsumerWidget {
+  const _QualificationsHistoryCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final qualAsync = ref.watch(mentorQualificationsProvider);
+
+    return RikiCard(
+      key: const Key('mentor_comp_qualifications_card'),
+      backgroundColor: AppColors.cardWarmWhite,
+      borderColor: AppColors.cardBorderMuted,
+      boxShadow: AppShadows.sakuraSubtle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.mentorCompQualificationsTitle,
+            style: AppTypography.sectionTitle,
+          ),
+          const SizedBox(height: AppSpacing.space2),
+          switch (qualAsync) {
+            AsyncLoading() => const RikiSkeleton(height: 52),
+            AsyncError(:final error) => MentorErrorState(
+              message: appErrorMessage(error, l10n),
+              onRetry: () => ref.invalidate(mentorQualificationsProvider),
+            ),
+            AsyncData(:final value) => value.isEmpty
+                ? Text(
+                    'Chưa có chứng nhận năng lực giảng dạy JLPT.',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                  )
+                : Column(
+                    children: value.map((qual) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.space2),
+                        padding: const EdgeInsets.all(AppSpacing.space3),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceSubtle,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                _LevelChip(level: qual.jlptLevel),
+                                const Spacer(),
+                                MentorStatusBadge(
+                                  label: qual.isActive
+                                      ? 'Hiệu lực'
+                                      : 'Đã thu hồi',
+                                  color: qual.isActive
+                                      ? AppColors.success
+                                      : AppColors.error,
+                                ),
+                              ],
+                            ),
+                            if (qual.approvedAtUtc != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'Cấp ngày: ${_dateLabel(qual.approvedAtUtc)}',
+                                style: AppTypography.metadata.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                            if (qual.notes?.trim().isNotEmpty == true)
+                              Text(
+                                qual.notes!.trim(),
+                                style: AppTypography.metadata.copyWith(
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          },
+        ],
+      ),
+    );
+  }
+}
+
+class _PayrollDetailSheet extends ConsumerWidget {
+  const _PayrollDetailSheet({
+    required this.payrollId,
+    required this.fallback,
+  });
+
+  final int payrollId;
+  final MentorPayrollPeriodItem fallback;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final async = ref.watch(mentorPayrollDetailProvider(payrollId));
+    final data = async.value ?? fallback;
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        margin: const EdgeInsets.all(AppSpacing.space3),
+        padding: const EdgeInsets.all(AppSpacing.space5),
+        decoration: BoxDecoration(
+          color: AppColors.cardWarmWhite,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${l10n.mentorCompPayrollDetailTitle} (${data.periodMonth}/${data.periodYear})',
+                style: AppTypography.sectionTitle,
+              ),
+              const SizedBox(height: AppSpacing.space1),
+              Text(
+                payrollStatusLabel(data.status),
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.brandPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (async.isLoading) ...[
+                const SizedBox(height: AppSpacing.space2),
+                const LinearProgressIndicator(),
+              ] else if (async.hasError) ...[
+                const SizedBox(height: AppSpacing.space2),
+                RikiInfoBanner(
+                  message: appErrorMessage(async.error!, l10n),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.space3),
+              _InfoRow(
+                label: 'Thù lao buổi tư vấn',
+                value: formatCompensationVnd(data.totalEarningsAmountVnd),
+              ),
+              _InfoRow(
+                label: 'Điều chỉnh',
+                value: formatCompensationVnd(data.totalAdjustmentsAmountVnd),
+              ),
+              _InfoRow(
+                label: 'Tổng kỳ lương',
+                value: formatCompensationVnd(data.grossPayableAmountVnd),
+                emphasize: true,
+              ),
+              if (data.approvedAtUtc != null)
+                _InfoRow(
+                  label: 'Ngày phê duyệt',
+                  value: _dateLabel(data.approvedAtUtc),
+                ),
+              if (data.lines.isNotEmpty) ...[
+                const Divider(height: AppSpacing.space5),
+                Text('Chi tiết buổi trong kỳ', style: AppTypography.cardTitle),
+                const SizedBox(height: AppSpacing.space2),
+                ...data.lines.map(
+                  (line) => Container(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.space2),
+                    padding: const EdgeInsets.all(AppSpacing.space3),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceSubtle,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            _LevelChip(level: line.jlptLevel),
+                            const SizedBox(width: AppSpacing.space2),
+                            Expanded(
+                              child: Text(
+                                'Buổi #${line.mentorBookingId}',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              formatCompensationVnd(line.lineAmountVnd),
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.brandPrimary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${line.approvedEligibleMinutes} phút · ${formatCompensationVnd(line.frozenHourlyRateVnd)}/giờ × ${line.frozenLevelCoefficient.toStringAsFixed(2)}',
+                          style: AppTypography.metadata.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.space3),
+              OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.mentorCommonCancel),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PayoutDetailSheet extends ConsumerWidget {
+  const _PayoutDetailSheet({
+    required this.obligationId,
+    required this.fallback,
+  });
+
+  final int obligationId;
+  final MentorPayoutObligationItem fallback;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final async = ref.watch(mentorPayoutDetailProvider(obligationId));
+    final data = async.value ?? fallback;
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        margin: const EdgeInsets.all(AppSpacing.space3),
+        padding: const EdgeInsets.all(AppSpacing.space5),
+        decoration: BoxDecoration(
+          color: AppColors.cardWarmWhite,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.mentorCompPayoutDetailTitle,
+                style: AppTypography.sectionTitle,
+              ),
+              const SizedBox(height: AppSpacing.space1),
+              Text(
+                payoutStatusLabel(data.status),
+                style: AppTypography.bodySmall.copyWith(
+                  color: data.isPaid ? AppColors.success : AppColors.brandPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (async.isLoading) ...[
+                const SizedBox(height: AppSpacing.space2),
+                const LinearProgressIndicator(),
+              ] else if (async.hasError) ...[
+                const SizedBox(height: AppSpacing.space2),
+                RikiInfoBanner(
+                  message: appErrorMessage(async.error!, l10n),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.space3),
+              _InfoRow(
+                label: 'Số tiền được duyệt',
+                value: formatCompensationVnd(data.payableAmountVnd),
+              ),
+              _InfoRow(
+                label: 'Đã nhận',
+                value: formatCompensationVnd(data.isPaid ? data.paidAmountVnd : 0),
+                emphasize: data.isPaid,
+              ),
+              _InfoRow(
+                label: 'Phương thức',
+                value: payoutMethodLabel(data.selectedExecutionMethod),
+              ),
+              _InfoRow(
+                label: 'Tài khoản nhận',
+                value:
+                    '${data.recipientBankShortNameSnapshot} ${data.recipientMaskedAccountSnapshot} (${data.recipientAccountHolderSnapshot})'
+                        .trim(),
+              ),
+              if (data.paidAtUtc != null)
+                _InfoRow(
+                  label: 'Ngày chi trả',
+                  value: _dateLabel(data.paidAtUtc),
+                ),
+              if (data.failureReason?.trim().isNotEmpty == true)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.space2),
+                  child: Text(
+                    'Ghi chú sự cố: ${data.failureReason!.trim()}',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.error,
+                    ),
+                  ),
+                ),
+              if (data.attempts.isNotEmpty) ...[
+                const Divider(height: AppSpacing.space5),
+                Text('Lịch sử lệnh chuyển tiền', style: AppTypography.cardTitle),
+                const SizedBox(height: AppSpacing.space2),
+                ...data.attempts.map(
+                  (attempt) => Container(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.space2),
+                    padding: const EdgeInsets.all(AppSpacing.space3),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceSubtle,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Lần ${attempt.attemptNumber} · ${payoutMethodLabel(attempt.executionMethod)}',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              attempt.status,
+                              style: AppTypography.metadata.copyWith(
+                                color: AppColors.brandPrimary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${formatCompensationVnd(attempt.amountVnd)} · ${_dateLabel(attempt.initiatedAtUtc)}',
+                          style: AppTypography.metadata.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        if (attempt.transferReference?.trim().isNotEmpty == true)
+                          Text(
+                            'Mã giao dịch: ${attempt.transferReference!.trim()}',
+                            style: AppTypography.metadata.copyWith(
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.space3),
+              OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.mentorCommonCancel),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

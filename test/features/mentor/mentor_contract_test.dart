@@ -15,6 +15,7 @@ import 'package:rikipath_mobile/core/errors/api_error_mapper.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
+import 'package:rikipath_mobile/features/auth/presentation/account_settings_screen.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
@@ -863,7 +864,7 @@ void main() {
       },
     );
 
-    testWidgets('37. Mentor logout clears the session', (tester) async {
+    testWidgets('37. Mentor logout opens shared confirmation sheet and clears the session on confirm', (tester) async {
       final session = createTestAuthSession(role: BackendUserRole.mentor);
 
       await _pumpMentor(
@@ -874,10 +875,28 @@ void main() {
       );
       await tester.scrollUntilVisible(
         find.byKey(const Key('mentor_logout_button')),
-        100,
+        200,
         scrollable: find.byType(Scrollable).first,
       );
+      await tester.ensureVisible(find.byKey(const Key('mentor_logout_button')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('mentor_logout_button')));
+      await tester.pumpAndSettle();
+
+      // Shared confirmation sheet is presented first; cancelling keeps session active
+      expect(find.text('Bạn muốn đăng xuất?'), findsOneWidget);
+      await tester.tap(
+        find.byKey(const ValueKey<String>('profile_logout_cancel_button')),
+      );
+      await tester.pumpAndSettle();
+      expect(session.value, AuthSessionState.authenticated);
+
+      // Re-open and confirm logout
+      await tester.tap(find.byKey(const Key('mentor_logout_button')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey<String>('profile_logout_confirm_button')),
+      );
       await tester.pumpAndSettle();
 
       expect(session.value, AuthSessionState.unauthenticated);
@@ -976,6 +995,148 @@ void main() {
               .single
               .id,
           33,
+        );
+      },
+    );
+
+    testWidgets(
+      '41. Mentor screens reuse SakuraAppHeader without Learner streak pill and render MentorBottomNavigationBar',
+      (tester) async {
+        await _pumpMentor(
+          tester,
+          const MentorHomeScreen(),
+          repository: _TestMentorRepository.empty(),
+        );
+
+        expect(
+          find.byKey(const ValueKey<String>('home_notification_bell_button')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey<String>('home_calendar_button')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('mentor_bottom_navigation_bar')),
+          findsOneWidget,
+        );
+        expect(find.text('Trang chủ'), findsOneWidget);
+        expect(find.text('Lịch dạy'), findsOneWidget);
+        expect(find.text('Buổi tư vấn'), findsWidgets);
+        expect(find.text('Lịch trống'), findsWidgets);
+        expect(find.text('Cá nhân'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      '42. Mentor Home renders greeting, Sakura hero banner, KPI strip, and unified recovery banner when both sources fail',
+      (tester) async {
+        final repository = _TestMentorRepository(
+          availabilityResults: [const UnknownError()],
+          meetingResults: [const UnknownError()],
+        );
+
+        await _pumpMentor(
+          tester,
+          const MentorHomeScreen(),
+          repository: repository,
+        );
+
+        expect(find.byKey(const Key('mentor_greeting_header')), findsOneWidget);
+        expect(
+          find.byKey(const Key('mentor_sakura_hero_banner')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('mentor_home_kpi_strip')), findsOneWidget);
+        expect(
+          find.byKey(const Key('mentor_home_both_error_banner')),
+          findsOneWidget,
+        );
+        // Never fake 0 on API failure
+        expect(find.text('—'), findsNWidgets(3));
+      },
+    );
+
+    testWidgets(
+      '43. Mentor Profile renders compact shared sections, Account Settings & supports shared logout confirmation',
+      (tester) async {
+        final session = createTestAuthSession(role: BackendUserRole.mentor);
+
+        await _pumpMentor(
+          tester,
+          const MentorProfileScreen(),
+          repository: _TestMentorRepository.empty(),
+          session: session,
+        );
+
+        expect(find.byType(TextField), findsNothing);
+        expect(
+          find.byKey(const Key('mentor_profile_edit_action')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('mentor_profile_verification_status_action')),
+          findsOneWidget,
+        );
+
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('mentor_profile_logout_action')),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+
+        expect(
+          find.byKey(const Key('mentor_profile_compensation_action')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('mentor_profile_bank_action')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('mentor_profile_settings_action')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('mentor_profile_logout_action')),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.byKey(const Key('mentor_profile_logout_action')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Bạn muốn đăng xuất?'), findsOneWidget);
+        await tester.tap(
+          find.byKey(const ValueKey<String>('profile_logout_confirm_button')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(session.value, AuthSessionState.unauthenticated);
+
+        // Shared AccountSettingsScreen.mentor() provides security & preferences
+        await _pumpMentor(
+          tester,
+          const AccountSettingsScreen.mentor(),
+          repository: _TestMentorRepository.empty(),
+          session: createTestAuthSession(role: BackendUserRole.mentor),
+        );
+        expect(
+          find.byKey(const ValueKey<String>('account_change_password_action')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey<String>('account_change_email_action')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey<String>('account_language_settings_action')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(
+            const ValueKey<String>('account_notification_settings_action'),
+          ),
+          findsOneWidget,
         );
       },
     );

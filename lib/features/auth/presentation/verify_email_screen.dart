@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
@@ -10,6 +11,7 @@ import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/verify_email_controller.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_page.dart';
 import 'package:rikipath_mobile/features/auth/presentation/widgets/auth_success_illustration.dart';
 
@@ -91,11 +93,15 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
               : l10n.toastVerifyEmailSuccessDescription,
         );
     ref.read(verifyEmailControllerProvider.notifier).reset();
-    context.go(
-      session.value == AuthSessionState.authenticated
-          ? AppRoutes.profileAccount
-          : AppRoutes.login,
-    );
+    if (session.value == AuthSessionState.authenticated) {
+      context.go(
+        session.currentRole == BackendUserRole.mentor
+            ? AppRoutes.mentorProfile
+            : AppRoutes.profileAccount,
+      );
+      return;
+    }
+    popOrGo(context, AppRoutes.login);
   }
 
   @override
@@ -107,9 +113,17 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
     });
     final l10n = context.l10n;
     final state = ref.watch(verifyEmailControllerProvider);
+    final session = ref.watch(authSessionControllerProvider);
     final maskedEmail = _maskEmail(widget.email);
     if (state.succeeded) {
-      return AuthPage(
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) {
+            _finish();
+          }
+        },
+        child: AuthPage(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -145,11 +159,31 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
             ),
           ],
         ),
+        ),
       );
     }
 
     final isBlocked = widget.userId == null || widget.userId! <= 0;
-    return AuthPage(
+    final isAuthenticated = session.value == AuthSessionState.authenticated;
+    final backFallback = isAuthenticated
+        ? (session.currentRole == BackendUserRole.mentor
+              ? AppRoutes.mentorProfile
+              : AppRoutes.profileAccount)
+        : AppRoutes.login;
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ??
+        (ModalRoute.of(context)?.canPop ?? true);
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          popOrGo(context, backFallback);
+        }
+      },
+      child: Stack(
+      fit: StackFit.expand,
+      children: [
+        AuthPage(
       compact: true,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -323,17 +357,26 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.space8),
-            child: AuthNavigationPrompt(
-              message: l10n.verifiedPrompt,
-              actionLabel: l10n.login,
-              onPressed: state.isBusy
-                  ? null
-                  : () => context.go(AppRoutes.login),
+          if (!isAuthenticated)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.space8),
+              child: AuthNavigationPrompt(
+                message: l10n.verifiedPrompt,
+                actionLabel: l10n.login,
+                onPressed: state.isBusy
+                    ? null
+                    : () => popOrGo(context, AppRoutes.login),
+              ),
             ),
-          ),
         ],
+      ),
+        ),
+        AppLoadingOverlay(
+          visible: state.isLoading,
+          title: l10n.verifying,
+          subtitle: l10n.loadingOverlayCompletingSubtitle,
+        ),
+      ],
       ),
     );
   }

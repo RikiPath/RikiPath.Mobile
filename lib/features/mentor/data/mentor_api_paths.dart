@@ -23,6 +23,18 @@ abstract final class MentorApiPaths {
   static const String compensationBankAccounts =
       '/api/mentor/compensation/bank-accounts';
   static const String compensationPayouts = '/api/mentor/compensation/payouts';
+  static const String verificationDocumentContent =
+      '/api/mentor/profile/verification-document/content';
+  static const String mentorChatThreads = '/api/mentor-chat/threads';
+  static const String mentorChatHub = '/hubs/mentor-chat';
+  static const String scheduleV3 = '/api/mentors/me/schedule';
+  static const String scheduleV3Rules = '/api/mentors/me/schedule/rules';
+  static const String scheduleV3PreviewSlots =
+      '/api/mentors/me/schedule/preview-slots';
+  static const String scheduleV3PublishSlots =
+      '/api/mentors/me/schedule/publish-slots';
+  static const String requestCancelAvailability =
+      '/api/mentor/availability/request-cancel';
 
   static String compensationPayrollDetail(int payrollPeriodId) =>
       '$compensationPayrolls/$payrollPeriodId';
@@ -36,10 +48,37 @@ abstract final class MentorApiPaths {
     return '$weeklySchedule?weekStart=$d';
   }
 
+  static String bookingDetail(int bookingId) =>
+      '/api/mentor-bookings/$bookingId';
+  static String cancellationEligibility(int bookingId) =>
+      '/api/mentor-bookings/$bookingId/cancellation-eligibility';
+  static String bookingAttendance(int bookingId) =>
+      '/api/mentor-meetings/bookings/$bookingId/attendance';
+  static String roomAccess(String roomId) =>
+      '/api/mentor-meetings/rooms/$roomId/access';
   static String cancelBooking(int bookingId) =>
       '/api/mentor-bookings/$bookingId/cancel';
+  static String mentorRatingSummary(int mentorId) =>
+      '/api/mentors/$mentorId/rating-summary';
+  static String mentorReviews(int mentorId) =>
+      '/api/mentors/$mentorId/reviews';
   static String replyReview(int reviewId) =>
       '/api/mentor-reviews/$reviewId/reply';
+  static String disputeDetail(int disputeId) =>
+      '/api/mentor-disputes/$disputeId';
   static String respondDispute(int disputeId) =>
       '/api/mentor-disputes/$disputeId/respond';
+  static String mentorChatThread(int bookingId) =>
+      '$mentorChatThreads/$bookingId';
+  static String mentorChatMessages(int bookingId) =>
+      '$mentorChatThreads/$bookingId/messages';
+  static String mentorChatRead(int bookingId) =>
+      '$mentorChatThreads/$bookingId/read';
+  static String scheduleV3DisableSlot(int slotId) =>
+      '$scheduleV3/slots/$slotId/disable';
+  static String scheduleV3DeleteSlot(int slotId) =>
+      '$scheduleV3/slots/$slotId';
+  static String deleteAvailability(int id) => '$availability/$id';
+  static String requestSlotChange(int slotId) =>
+      '/api/mentor-schedule/slots/$slotId/change';
 }

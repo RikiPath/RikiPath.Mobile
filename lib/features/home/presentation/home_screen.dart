@@ -82,14 +82,14 @@ class HomeScreen extends ConsumerWidget {
               return;
             }
             if (!learning.hasCurrentLesson) {
-              context.go(AppRoutes.learnRoadmap);
+              context.push(AppRoutes.learnRoadmap);
               return;
             }
-            context.go(AppRoutes.lesson(learning.currentLesson.routeId));
+            context.push(AppRoutes.lesson(learning.currentLesson.routeId));
           },
           onOpenRoadmap: () {
             if (journeyState.value?.hasSelectedLevel == true) {
-              context.go(AppRoutes.learnRoadmap);
+              context.push(AppRoutes.learnRoadmap);
             } else {
               context.go(AppRoutes.learn);
             }
@@ -98,7 +98,7 @@ class HomeScreen extends ConsumerWidget {
           onOpenPractice: () {
             context.go(AppRoutes.practice);
           },
-          onOpenReview: () => context.go(AppRoutes.dailyReview),
+          onOpenReview: () => context.push(AppRoutes.dailyReview),
           onOpenAnalytics: () => context.push(AppRoutes.analytics),
           onOpenCalendarDate: (date) =>
               context.push(AppRoutes.calendarOn(date)),
@@ -106,9 +106,9 @@ class HomeScreen extends ConsumerWidget {
           onOpenMeetingDetail: (bookingId) =>
               context.push(AppRoutes.learnerMentorBookingDetail(bookingId)),
           onJoinMeeting: (uri) => _openMeeting(ref, context, uri),
-          onOpenVocabulary: () => context.go(AppRoutes.vocabulary),
-          onOpenGrammar: () => context.go(AppRoutes.grammar),
-          onOpenWriting: () => context.go(AppRoutes.writing),
+          onOpenVocabulary: () => context.push(AppRoutes.vocabulary),
+          onOpenGrammar: () => context.push(AppRoutes.grammar),
+          onOpenWriting: () => context.push(AppRoutes.writingHiragana),
         ),
       ),
     );

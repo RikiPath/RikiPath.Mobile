@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
 import 'package:rikipath_mobile/features/mock_test/application/mock_test_library_controller.dart';
@@ -22,9 +24,9 @@ class MockTestLibraryScreen extends ConsumerWidget {
       await ref.read(mockTestControllerProvider.future);
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.mockLibraryOpenFailed)),
-        );
+        ref
+            .read(rikiToastServiceProvider.notifier)
+            .error(title: context.l10n.mockLibraryOpenFailed);
       }
       return;
     }
@@ -32,9 +34,9 @@ class MockTestLibraryScreen extends ConsumerWidget {
     if (!ref
         .read(mockTestControllerProvider.notifier)
         .selectLibraryTest(test)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.mockLibraryActiveAttempt)),
-      );
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .warning(title: context.l10n.mockLibraryActiveAttempt);
       return;
     }
     final flow = ref.read(mockTestControllerProvider).value;
@@ -62,7 +64,7 @@ class MockTestLibraryScreen extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () => popOrGo(context, AppRoutes.practice),
         ),
         title: Text(
           context.l10n.mockLibraryTitle,
@@ -75,10 +77,9 @@ class MockTestLibraryScreen extends ConsumerWidget {
         centerTitle: false,
       ),
       body: catalog.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(
-            key: ValueKey<String>('mock_test_library_loading'),
-          ),
+        loading: () => SakuraSectionLoading(
+          key: const ValueKey<String>('mock_test_library_loading'),
+          title: context.l10n.loadingOverlayListTitle,
         ),
         error: (error, _) => RikiErrorState(
           key: const ValueKey<String>('mock_test_library_error'),

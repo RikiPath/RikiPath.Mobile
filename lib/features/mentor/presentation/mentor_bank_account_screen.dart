@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_compensation_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
@@ -17,6 +21,19 @@ class MentorBankAccountScreen extends ConsumerStatefulWidget {
       _MentorBankAccountScreenState();
 }
 
+const List<({String bin, String shortName})> _vnBankPresets = [
+  (bin: '970436', shortName: 'Vietcombank'),
+  (bin: '970407', shortName: 'Techcombank'),
+  (bin: '970422', shortName: 'MBBank'),
+  (bin: '970416', shortName: 'ACB'),
+  (bin: '970418', shortName: 'BIDV'),
+  (bin: '970415', shortName: 'VietinBank'),
+  (bin: '970423', shortName: 'TPBank'),
+  (bin: '970432', shortName: 'VPBank'),
+  (bin: '970403', shortName: 'Sacombank'),
+  (bin: '970405', shortName: 'Agribank'),
+];
+
 class _MentorBankAccountScreenState
     extends ConsumerState<MentorBankAccountScreen> {
   final _binController = TextEditingController();
@@ -24,11 +41,40 @@ class _MentorBankAccountScreenState
   final _accountController = TextEditingController();
   final _holderController = TextEditingController();
   bool _submitting = false;
+  bool _hasDirtyChanges = false;
+  bool _ignoreFieldNotifications = false;
   String? _error;
   String? _success;
 
   @override
+  void initState() {
+    super.initState();
+    _binController.addListener(_onFieldChanged);
+    _bankNameController.addListener(_onFieldChanged);
+    _accountController.addListener(_onFieldChanged);
+    _holderController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    if (_ignoreFieldNotifications) return;
+    final dirty =
+        _binController.text.trim().isNotEmpty ||
+        _bankNameController.text.trim().isNotEmpty ||
+        _accountController.text.trim().isNotEmpty ||
+        _holderController.text.trim().isNotEmpty;
+    if (dirty != _hasDirtyChanges || mounted) {
+      if (mounted) {
+        setState(() => _hasDirtyChanges = dirty);
+      }
+    }
+  }
+
+  @override
   void dispose() {
+    _binController.removeListener(_onFieldChanged);
+    _bankNameController.removeListener(_onFieldChanged);
+    _accountController.removeListener(_onFieldChanged);
+    _holderController.removeListener(_onFieldChanged);
     _binController.dispose();
     _bankNameController.dispose();
     _accountController.dispose();
@@ -65,9 +111,12 @@ class _MentorBankAccountScreenState
             accountHolderName: _holderController.text,
           );
       if (!mounted) return;
+      _ignoreFieldNotifications = true;
       _accountController.clear();
+      _ignoreFieldNotifications = false;
       setState(() {
         _submitting = false;
+        _hasDirtyChanges = false;
         _success =
             'Đã gửi tài khoản. Quản trị viên sẽ xác minh trước khi chi trả.';
       });
@@ -85,10 +134,41 @@ class _MentorBankAccountScreenState
   @override
   Widget build(BuildContext context) {
     final accounts = ref.watch(mentorBankAccountsProvider);
-    return Scaffold(
-      key: const Key('mentor_bank_account_screen'),
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(title: const Text('Tài khoản nhận thù lao')),
+    final hasUnsavedChanges = _hasDirtyChanges && !_submitting;
+    final hasGoRouter = GoRouter.maybeOf(context) != null;
+    final canPopRoute =
+        !hasUnsavedChanges &&
+        (GoRouter.maybeOf(context)?.canPop() ??
+            (ModalRoute.of(context)?.canPop ?? true));
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          handleProtectedBackNavigation(
+            context: context,
+            hasUnsavedChanges: hasUnsavedChanges,
+            fallbackRoute: AppRoutes.mentorCompensation,
+          );
+        }
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Scaffold(
+            key: const Key('mentor_bank_account_screen'),
+            backgroundColor: AppColors.learnerBackground,
+        appBar: AppBar(
+          leading: (hasGoRouter || hasUnsavedChanges)
+              ? BackButton(
+                  onPressed: () => handleProtectedBackNavigation(
+                    context: context,
+                    hasUnsavedChanges: hasUnsavedChanges,
+                    fallbackRoute: AppRoutes.mentorCompensation,
+                  ),
+                )
+              : null,
+          title: const Text('Tài khoản nhận thù lao'),
+        ),
       body: SafeArea(
         top: false,
         child: ListView(
@@ -100,7 +180,7 @@ class _MentorBankAccountScreenState
                 message: 'Chưa thể tải tài khoản ngân hàng.',
                 onRetry: () => ref.invalidate(mentorBankAccountsProvider),
               ),
-              _ => const Center(child: CircularProgressIndicator()),
+              _ => const Center(child: SakuraLoadingIndicator()),
             },
             const SizedBox(height: AppSpacing.space4),
             RikiCard(
@@ -120,12 +200,42 @@ class _MentorBankAccountScreenState
                     ),
                   ),
                   const SizedBox(height: AppSpacing.space3),
+                  Text(
+                    context.l10n.mentorBankPopularPresetsTitle,
+                    style: AppTypography.bodySmall.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.space2),
+                  Wrap(
+                    spacing: AppSpacing.space2,
+                    runSpacing: AppSpacing.space1,
+                    children: _vnBankPresets.map((preset) {
+                      final selected =
+                          _binController.text.trim() == preset.bin;
+                      return ChoiceChip(
+                        key: Key('mentor_bank_preset_${preset.bin}'),
+                        label: Text(preset.shortName),
+                        selected: selected,
+                        onSelected: (_) {
+                          setState(() {
+                            _binController.text = preset.bin;
+                            _bankNameController.text = preset.shortName;
+                            _error = null;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: AppSpacing.space3),
                   TextField(
                     key: const Key('mentor_bank_bin_field'),
                     controller: _binController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Mã BIN ngân hàng (6 số)',
+                      helperText: context.l10n.mentorBankCustomCodeHint,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.space2),
@@ -187,6 +297,14 @@ class _MentorBankAccountScreenState
             ),
           ],
         ),
+      ),
+        ),
+        AppLoadingOverlay(
+          visible: _submitting,
+          title: context.l10n.loadingOverlaySavingTitle,
+          subtitle: context.l10n.loadingOverlayUpdatingSubtitle,
+        ),
+      ],
       ),
     );
   }

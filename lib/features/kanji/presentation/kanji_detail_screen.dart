@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
@@ -24,20 +26,35 @@ class KanjiDetailScreen extends ConsumerWidget {
     final data = state.value;
     final entry = data?.entry;
     final showingStrokes = data?.showStrokeOrder ?? false;
+    final canPopDirect =
+        !showingStrokes &&
+        (GoRouter.maybeOf(context)?.canPop() ?? Navigator.of(context).canPop());
 
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: LearningHeader.detail(
-        title: showingStrokes
-            ? context.l10n.strokeOrder
-            : context.l10n.kanjiDetail,
-        subtitle: entry == null
-            ? context.l10n.library
-            : '${entry.character} • ${entry.sinoVietnamese ?? entry.meaning}',
-        onBack: showingStrokes
-            ? controller.closeStrokeOrder
-            : () => context.pop(),
-      ),
+    return PopScope(
+      canPop: canPopDirect,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) {
+          return;
+        }
+        if (showingStrokes) {
+          controller.closeStrokeOrder();
+        } else {
+          popOrGo(context, AppRoutes.kanji);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.learnerBackground,
+        appBar: LearningHeader.detail(
+          title: showingStrokes
+              ? context.l10n.strokeOrder
+              : context.l10n.kanjiDetail,
+          subtitle: entry == null
+              ? context.l10n.library
+              : '${entry.character} • ${entry.sinoVietnamese ?? entry.meaning}',
+          onBack: showingStrokes
+              ? controller.closeStrokeOrder
+              : () => popOrGo(context, AppRoutes.kanji),
+        ),
       body: SafeArea(
         top: false,
         child: state.when(
@@ -60,6 +77,7 @@ class KanjiDetailScreen extends ConsumerWidget {
                 ),
         ),
       ),
+    ),
     );
   }
 

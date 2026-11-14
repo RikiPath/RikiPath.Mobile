@@ -7,22 +7,37 @@ import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_toast_host.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/calendar/application/mentor_calendar_controller.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_chat_controller.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_compensation_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_operations_controller.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_schedule_v3_controller.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/notifications/application/push_notification_service.dart';
 import 'package:rikipath_mobile/features/notifications/domain/push_notification_payload.dart';
 
-class RikiPathApp extends ConsumerWidget {
+class RikiPathApp extends ConsumerStatefulWidget {
   const RikiPathApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RikiPathApp> createState() => _RikiPathAppState();
+}
+
+class _RikiPathAppState extends ConsumerState<RikiPathApp> {
+  int? _bootstrappedPushUserId;
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
     final locale = ref.watch(localeControllerProvider);
 
     final authenticatedUserId = ref.watch(authenticatedUserIdProvider);
 
     void onForegroundNotification(PushNotificationPayload payload) {
+      ref
+          .read(notificationBellTriggerProvider.notifier)
+          .onRealtimeNotification(payload);
       if (payload.title.isNotEmpty || payload.body.isNotEmpty) {
         ref
             .read(rikiToastServiceProvider.notifier)
@@ -33,6 +48,12 @@ class RikiPathApp extends ConsumerWidget {
       }
       ref.invalidate(notificationControllerProvider);
       ref.invalidate(mentorMeetingsControllerProvider);
+      ref.invalidate(mentorAvailabilityControllerProvider);
+      ref.invalidate(mentorCalendarEventsProvider);
+      ref.invalidate(mentorChatThreadsControllerProvider);
+      ref.invalidate(mentorReviewsControllerProvider);
+      ref.invalidate(mentorDisputesControllerProvider);
+      ref.invalidate(mentorScheduleV3ControllerProvider);
       if (payload.type == 'MentorVerificationResult' ||
           (payload.title.isEmpty && payload.body.isEmpty)) {
         ref.invalidate(mentorProfileControllerProvider);
@@ -40,10 +61,32 @@ class RikiPathApp extends ConsumerWidget {
     }
 
     ref.listen<int?>(authenticatedUserIdProvider, (previous, next) {
+      if (previous != next) {
+        ref.read(rikiToastServiceProvider.notifier).clear();
+        // Controllers that watch [authenticatedUserIdProvider] directly
+        // (`notificationControllerProvider`, `notificationBellTriggerProvider`,
+        // `mentorScheduleV3ControllerProvider`,
+        // `mentorChatThreadsControllerProvider`,
+        // `mentorReviewsControllerProvider`, `mentorDisputesControllerProvider`)
+        // rebuild once automatically on identity change; invalidating them
+        // manually here causes a same-frame double rebuild in Riverpod 3.
+        ref.invalidate(mentorAvailabilityControllerProvider);
+        ref.invalidate(mentorMeetingsControllerProvider);
+        ref.invalidate(mentorProfileControllerProvider);
+        ref.invalidate(mentorWeeklyScheduleControllerProvider);
+        ref.invalidate(mentorCompensationOverviewProvider);
+        ref.invalidate(mentorEarningsProvider);
+        ref.invalidate(mentorPayrollsProvider);
+        ref.invalidate(mentorPayoutsProvider);
+        ref.invalidate(mentorBankAccountsProvider);
+        ref.invalidate(mentorCalendarEventsProvider);
+      }
       if (next != null) {
-        ref.read(pushNotificationServiceProvider).connectForegroundNotifications(
-          onNotification: onForegroundNotification,
-        );
+        ref
+            .read(pushNotificationServiceProvider)
+            .connectForegroundNotifications(
+              onNotification: onForegroundNotification,
+            );
         ref
             .read(pushNotificationServiceProvider)
             .initializeFirebaseMessaging(
@@ -51,16 +94,24 @@ class RikiPathApp extends ConsumerWidget {
               onForegroundNotification: onForegroundNotification,
             );
       } else {
-        ref.read(pushNotificationServiceProvider).disconnectForegroundNotifications();
+        ref
+            .read(pushNotificationServiceProvider)
+            .disconnectForegroundNotifications();
         ref.read(pushNotificationServiceProvider).unregisterDeviceToken();
       }
     });
 
-    if (authenticatedUserId != null) {
+    if (authenticatedUserId == null) {
+      _bootstrappedPushUserId = null;
+    } else if (_bootstrappedPushUserId != authenticatedUserId) {
+      _bootstrappedPushUserId = authenticatedUserId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(pushNotificationServiceProvider).connectForegroundNotifications(
-          onNotification: onForegroundNotification,
-        );
+        if (!mounted) return;
+        ref
+            .read(pushNotificationServiceProvider)
+            .connectForegroundNotifications(
+              onNotification: onForegroundNotification,
+            );
         ref
             .read(pushNotificationServiceProvider)
             .initializeFirebaseMessaging(

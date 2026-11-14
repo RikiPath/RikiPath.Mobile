@@ -9,6 +9,7 @@ class SakuraMonthView extends StatefulWidget {
     super.key,
     required this.selectedDate,
     required this.events,
+    this.dataIncomplete = false,
     required this.onSelectDate,
     required this.onSelectEvent,
     this.onPreviousMonth,
@@ -17,6 +18,7 @@ class SakuraMonthView extends StatefulWidget {
 
   final DateTime selectedDate;
   final List<SakuraCalendarEvent> events;
+  final bool dataIncomplete;
   final ValueChanged<DateTime> onSelectDate;
   final ValueChanged<SakuraCalendarEvent> onSelectEvent;
   final VoidCallback? onPreviousMonth;
@@ -123,12 +125,16 @@ class _SakuraMonthViewState extends State<SakuraMonthView> {
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 7,
-                    mainAxisExtent: (constraints.maxWidth / 7).clamp(46.0, 64.0),
+                    mainAxisExtent: (constraints.maxWidth / 7).clamp(
+                      46.0,
+                      64.0,
+                    ),
                   ),
                   itemCount: days.length,
                   itemBuilder: (context, index) {
                     final day = days[index];
-                    final isCurrentMonth = day.month == widget.selectedDate.month;
+                    final isCurrentMonth =
+                        day.month == widget.selectedDate.month;
                     final isToday = _isSameDay(day, today);
                     final isSelected = _isSameDay(day, widget.selectedDate);
                     final dayEvents = _eventsForDay(day);
@@ -188,7 +194,9 @@ class _SakuraMonthViewState extends State<SakuraMonthView> {
                     const SizedBox(width: AppSpacing.space2),
                     Expanded(
                       child: Text(
-                        '${widget.selectedDate.day} tháng ${widget.selectedDate.month} — ${selectedDayEvents.length} sự kiện',
+                        widget.dataIncomplete
+                            ? '${widget.selectedDate.day} tháng ${widget.selectedDate.month} — ${selectedDayEvents.length} hoạt động đã tải'
+                            : '${widget.selectedDate.day} tháng ${widget.selectedDate.month} — ${selectedDayEvents.length} sự kiện',
                         style: AppTypography.cardTitle.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -201,7 +209,9 @@ class _SakuraMonthViewState extends State<SakuraMonthView> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Text(
-                      'Chưa có hoạt động nào trong ngày này.',
+                      widget.dataIncomplete
+                          ? 'Một số lịch chưa được cập nhật. Hãy thử lại để xem đầy đủ hoạt động.'
+                          : 'Chưa có hoạt động nào trong ngày này.',
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -275,8 +285,8 @@ class _MonthDayCell extends StatelessWidget {
                   color: isToday
                       ? AppColors.primary
                       : (isSelected
-                          ? const Color(0xFFFFF1F2)
-                          : Colors.transparent),
+                            ? const Color(0xFFFFF1F2)
+                            : Colors.transparent),
                   borderRadius: isToday ? null : BorderRadius.circular(7),
                   shape: isToday ? BoxShape.circle : BoxShape.rectangle,
                   border: isSelected && !isToday
@@ -402,9 +412,7 @@ class _MonthDayPreviewCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: event.statusBadgeBgColor,
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: event.statusBadgeBorderColor,
-                        ),
+                        border: Border.all(color: event.statusBadgeBorderColor),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

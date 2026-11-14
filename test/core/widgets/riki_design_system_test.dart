@@ -1,4 +1,8 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,11 +16,17 @@ void main() {
     final vietnamese = await AppLocalizations.delegate.load(const Locale('vi'));
     final japanese = await AppLocalizations.delegate.load(const Locale('ja'));
 
-    expect(
-      vietnamese.preparingLearningContent,
-      'Đang mở RikiPath...',
-    );
+    expect(vietnamese.preparingLearningContent, 'Đang mở RikiPath...');
     expect(japanese.preparingLearningContent, 'RikiPathを開いています…');
+    expect(vietnamese.loadingOverlayDataTitle, 'Đang tải dữ liệu');
+    expect(vietnamese.loadingOverlayListTitle, 'Đang tải danh sách');
+    expect(vietnamese.loadingOverlayBookingTitle, 'Đang xác nhận lịch hẹn');
+    expect(vietnamese.loadingOverlaySavingTitle, 'Đang lưu thay đổi');
+    expect(
+      vietnamese.loadingOverlayOnboardingSavingTitle,
+      'Đang lưu thông tin',
+    );
+    expect(japanese.loadingOverlayOnboardingSavingTitle, '情報を保存中');
   });
 
   test('theme exposes the canonical brand and focused input tokens', () {
@@ -362,16 +372,9 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey<String>('riki_study_loader_logo')),
+      find.byKey(const ValueKey<String>('sakura_loading_indicator')),
       findsOneWidget,
     );
-    final loaderLogo = tester.widget<Image>(
-      find.descendant(
-        of: find.byKey(const ValueKey<String>('riki_study_loader_logo')),
-        matching: find.byType(Image),
-      ),
-    );
-    expect((loaderLogo.image as AssetImage).assetName, rikiBrandLogoAsset);
     expect(
       find.text('RikiPath đang chuẩn bị bài học cho bạn...'),
       findsOneWidget,
@@ -379,6 +382,277 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  test(
+    'SakuraBloomPainter renders clean blossom without circular halo or orbiting petals',
+    () async {
+      const size = 100.0;
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      const SakuraBloomPainter(
+        progress: 0.25,
+      ).paint(canvas, const Size.square(size));
+      final picture = recorder.endRecording();
+      final image = await picture.toImage(size.toInt(), size.toInt());
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      expect(bytes, isNotNull);
+
+      int alphaAt(int x, int y) {
+        final offset = (y * size.toInt() + x) * 4;
+        return bytes!.getUint8(offset + 3);
+      }
+
+      // Center cream disc & top petal stay opaque.
+      expect(alphaAt(50, 50), 255);
+      expect(alphaAt(50, 22), greaterThan(200));
+
+      // All 5 outer inter-petal gaps have zero circular halo or orbiting petals.
+      for (var i = 0; i < 5; i++) {
+        final angle = (36 + i * 72) * math.pi / 180;
+        final x = (50 + math.sin(angle) * 44).round();
+        final y = (50 - math.cos(angle) * 44).round();
+        expect(alphaAt(x, y), 0, reason: 'Unexpected halo/orbit pixel at ($x, $y)');
+      }
+    },
+  );
+
+  testWidgets(
+    'SakuraLoadingOverlay has a solid white card, plain bloom, inline dots and no subtitle',
+    (tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(
+              viewInsets: EdgeInsets.only(bottom: 240),
+            ),
+            child: const Stack(
+              children: [
+                SizedBox.expand(),
+                SakuraLoadingOverlay(
+                  visible: true,
+                  title: 'Đang đăng nhập...',
+                  subtitle: 'Đang xác thực tài khoản của bạn…',
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 240));
+
+      expect(
+        find.byKey(const ValueKey<String>('sakura_loading_overlay')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('app_loading_scrim')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('app_loading_glass_panel')),
+        findsOneWidget,
+      );
+      expect(find.byType(BackdropFilter), findsNothing);
+      final surface = tester.widget<DecoratedBox>(
+        find.byKey(const ValueKey<String>('app_loading_glass_surface')),
+      );
+      final surfaceDecoration = surface.decoration as BoxDecoration;
+      expect(surfaceDecoration.color, Colors.white);
+      expect(surfaceDecoration.gradient, isNull);
+      final barrier = tester.widget<ModalBarrier>(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('app_loading_scrim')),
+          matching: find.byType(ModalBarrier),
+        ),
+      );
+      expect(barrier.color, const Color(0x6B1C1420));
+      expect(
+        find.byKey(const ValueKey<String>('sakura_loading_indicator')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('sakura_loading_indicator')),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is CustomPaint && widget.painter is SakuraBloomPainter,
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('sakura_bouncing_dots')),
+        findsOneWidget,
+      );
+      expect(find.text('Đang đăng nhập'), findsOneWidget);
+      expect(find.text('Đang xác thực tài khoản của bạn'), findsNothing);
+      expect(find.text('Đang đăng nhập...'), findsNothing);
+      final bloomBottom = tester
+          .getBottomLeft(
+            find.byKey(const ValueKey<String>('sakura_loading_indicator')),
+          )
+          .dy;
+      final titleTop = tester.getTopLeft(find.text('Đang đăng nhập')).dy;
+      final titleBottom = tester.getBottomLeft(find.text('Đang đăng nhập')).dy;
+      final dots = find.byKey(const ValueKey<String>('sakura_bouncing_dots'));
+      final dotsTop = tester.getTopLeft(dots).dy;
+      expect(titleTop, greaterThan(bloomBottom));
+      expect(dotsTop, inInclusiveRange(titleTop, titleBottom));
+      expect(
+        tester.getTopLeft(dots).dx,
+        greaterThan(tester.getTopRight(find.text('Đang đăng nhập')).dx),
+      );
+
+      final titleRichText = tester.widget<RichText>(
+        find.descendant(
+          of: find.text('Đang đăng nhập'),
+          matching: find.byType(RichText),
+        ),
+      );
+      expect(
+        titleRichText.text.style?.decoration,
+        anyOf(isNull, equals(TextDecoration.none)),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'AppLoadingOverlay blocks background touches while visible and fits compact high-textScale viewports',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(320, 640));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      var taps = 0;
+      Widget buildHarness(bool visible) {
+        return MaterialApp(
+          theme: AppTheme.light,
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(320, 640),
+              textScaler: TextScaler.linear(2.0),
+              disableAnimations: true,
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Scaffold(
+                  body: Center(
+                    child: ElevatedButton(
+                      key: const ValueKey<String>('underlying_action_btn'),
+                      onPressed: () => taps += 1,
+                      child: const Text('Tap'),
+                    ),
+                  ),
+                ),
+                AppLoadingOverlay(
+                  visible: visible,
+                  title: 'Đang tạo lộ trình học',
+                  subtitle: 'Đang đồng bộ dữ liệu cho bạn',
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildHarness(true));
+      await tester.pump();
+      await tester.tap(
+        find.byKey(const ValueKey<String>('underlying_action_btn')),
+        warnIfMissed: false,
+      );
+      expect(taps, 0);
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpWidget(buildHarness(false));
+      await tester.pump(const Duration(milliseconds: 220));
+      await tester.tap(
+        find.byKey(const ValueKey<String>('underlying_action_btn')),
+      );
+      expect(taps, 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'runWithAppLoadingOverlay mounts Sakura content on root overlay and dismisses cleanly',
+    (tester) async {
+      late BuildContext hostContext;
+      final gate = Completer<String>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Builder(
+            builder: (context) {
+              hostContext = context;
+              return const Scaffold(body: SizedBox.expand());
+            },
+          ),
+        ),
+      );
+
+      final resultFuture = runWithAppLoadingOverlay<String>(
+        hostContext,
+        title: 'Đang xử lý',
+        subtitle: 'Vui lòng chờ trong giây lát',
+        action: () => gate.future,
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 220));
+
+      expect(
+        find.byKey(const ValueKey<String>('sakura_loading_overlay')),
+        findsOneWidget,
+      );
+      expect(find.text('Đang xử lý'), findsOneWidget);
+
+      gate.complete('ok');
+      final outcome = await resultFuture;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 240));
+
+      expect(outcome, 'ok');
+      expect(
+        find.byKey(const ValueKey<String>('sakura_loading_overlay')),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'runWithAppLoadingOverlay settles cleanly even when action finishes before first overlay frame',
+    (tester) async {
+      late BuildContext capturedContext;
+      await tester.pumpWidget(
+        _testHost(
+          Builder(
+            builder: (context) {
+              capturedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      final quickResult = await runWithAppLoadingOverlay<int>(
+        capturedContext,
+        title: 'Đang xử lý',
+        action: () => Future<int>.value(42),
+      );
+      await tester.pumpAndSettle();
+
+      expect(quickResult, 42);
+      expect(
+        find.byKey(const ValueKey<String>('sakura_loading_overlay')),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'section skeleton preserves content structure without a spinner',

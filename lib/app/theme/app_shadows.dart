@@ -92,4 +92,14 @@ abstract final class AppShadows {
       blurRadius: 6,
     ),
   ];
+
+  /// Soft neutral elevation for borderless white profile cards (opacity ~0.043, blur 15, offset Y 4).
+  static const List<BoxShadow> profileCard = <BoxShadow>[
+    BoxShadow(
+      color: Color(0x0B000000),
+      offset: Offset(0, 4),
+      blurRadius: 15,
+      spreadRadius: 0,
+    ),
+  ];
 }

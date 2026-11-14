@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
-import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
+import 'package:rikipath_mobile/core/widgets/riki_learner_header.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_glass_notification.dart';
 
+/// Shared Sakura Glass notification overlay host for both Learner and Mentor
+/// experiences.
 class RikiToastHost extends ConsumerWidget {
   const RikiToastHost({required this.child, super.key});
 
@@ -14,10 +18,15 @@ class RikiToastHost extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final toasts = ref.watch(rikiToastServiceProvider);
+    final viewPadding = MediaQuery.viewPaddingOf(context);
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    // Clear the 64dp Sakura header / 56dp AppBar with breathing space below
+    // header controls (bell, calendar, streak badge, back button).
     final topInset =
-        MediaQuery.viewPaddingOf(context).top +
-        kToolbarHeight +
-        AppSpacing.space2;
+        viewPadding.top + RikiLearnerHeader.height + AppSpacing.space2;
+    final horizontalLeft = math.max(viewPadding.left, AppSpacing.space4);
+    final horizontalRight = math.max(viewPadding.right, AppSpacing.space4);
+
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -25,25 +34,34 @@ class RikiToastHost extends ConsumerWidget {
         if (toasts.isNotEmpty && toasts.first.type == RikiToastType.celebration)
           Positioned.fill(
             child: IgnorePointer(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 340),
-                  child: _RikiToastCard(
-                    key: ValueKey<int>(toasts.first.id),
-                    toast: toasts.first,
-                    onDismiss: () => ref
-                        .read(rikiToastServiceProvider.notifier)
-                        .dismiss(toasts.first.id),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalLeft,
+                  viewPadding.top + AppSpacing.space4,
+                  horizontalRight,
+                  math.max(viewPadding.bottom, AppSpacing.space4) +
+                      keyboardInset,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 340),
+                    child: _RikiToastCard(
+                      key: ValueKey<int>(toasts.first.id),
+                      toast: toasts.first,
+                      onDismiss: () => ref
+                          .read(rikiToastServiceProvider.notifier)
+                          .dismiss(toasts.first.id),
+                    ),
                   ),
                 ),
               ),
             ),
           )
-        else
+        else if (toasts.isNotEmpty)
           Positioned(
             top: topInset,
-            left: AppSpacing.space4,
-            right: AppSpacing.space4,
+            left: horizontalLeft,
+            right: horizontalRight,
             child: Align(
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
@@ -90,8 +108,13 @@ class _RikiToastCardState extends State<_RikiToastCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 220),
-    reverseDuration: const Duration(milliseconds: 170),
+    duration: const Duration(milliseconds: 280),
+    reverseDuration: const Duration(milliseconds: 220),
+  );
+  late final CurvedAnimation _animation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
   );
   Timer? _dismissTimer;
   bool _reduceMotion = false;
@@ -111,11 +134,13 @@ class _RikiToastCardState extends State<_RikiToastCard>
     _reduceMotion =
         (mediaQuery?.disableAnimations ?? false) ||
         (mediaQuery?.accessibleNavigation ?? false);
-    if (_started) return;
-    _started = true;
     if (_reduceMotion) {
       _controller.value = 1;
-    } else {
+      _started = true;
+      return;
+    }
+    if (!_started) {
+      _started = true;
       unawaited(_controller.forward());
     }
   }
@@ -131,83 +156,46 @@ class _RikiToastCardState extends State<_RikiToastCard>
   @override
   void dispose() {
     _dismissTimer?.cancel();
+    _animation.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final visual = _ToastVisual.forType(widget.toast.type);
-    final animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-      reverseCurve: Curves.easeInCubic,
-    );
     final description = widget.toast.description;
+    final hasDescription = description != null && description.isNotEmpty;
+    final semanticsLabel = hasDescription
+        ? '${widget.toast.title}. $description'
+        : widget.toast.title;
+    final cardKey = ValueKey<String>('riki_toast_${widget.toast.type.name}');
+    final iconKey = ValueKey<String>(
+      'riki_toast_icon_${widget.toast.type.name}',
+    );
+    final closeKey = ValueKey<String>('riki_toast_close_${widget.toast.id}');
 
     if (widget.toast.type == RikiToastType.celebration) {
       return FadeTransition(
-        opacity: animation,
-        child: ScaleTransition(
-          scale: Tween<double>(begin: 0.94, end: 1).animate(animation),
+        opacity: _animation,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, -0.06),
+            end: Offset.zero,
+          ).animate(_animation),
           child: Semantics(
             container: true,
             liveRegion: true,
-            label: description == null
-                ? widget.toast.title
-                : '${widget.toast.title}. $description',
-            child: Material(
-              key: const ValueKey<String>('riki_toast_celebration'),
-              color: Colors.transparent,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF30243B), Color(0xFF51304B)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  border: Border.all(color: const Color(0xFFEBA3BD)),
-                  borderRadius: BorderRadius.circular(AppRadius.card),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.brandPrimary.withValues(alpha: 0.22),
-                      blurRadius: 24,
-                      spreadRadius: 3,
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.space5),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.spa_rounded,
-                        size: 44,
-                        color: Color(0xFFFFA9C7),
-                      ),
-                      const SizedBox(height: AppSpacing.space2),
-                      Text(
-                        widget.toast.title,
-                        textAlign: TextAlign.center,
-                        style: AppTypography.sectionTitle.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                      if (description != null && description.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.space1),
-                        Text(
-                          description,
-                          textAlign: TextAlign.center,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: const Color(0xFFF7E4EC),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
+            label: semanticsLabel,
+            child: SakuraGlassNotification(
+              type: widget.toast.type,
+              title: widget.toast.title,
+              description: description,
+              showCloseButton: false,
+              centered: true,
+              borderRadius:
+                  SakuraGlassNotificationTokens.celebrationBorderRadius,
+              cardKey: cardKey,
+              iconKey: iconKey,
             ),
           ),
         ),
@@ -215,143 +203,35 @@ class _RikiToastCardState extends State<_RikiToastCard>
     }
 
     return FadeTransition(
-      opacity: animation,
+      opacity: _animation,
       child: SlideTransition(
         position: Tween<Offset>(
-          begin: const Offset(0, -0.14),
+          begin: const Offset(0, -0.10),
           end: Offset.zero,
-        ).animate(animation),
-        child: ScaleTransition(
-          scale: Tween<double>(begin: 0.98, end: 1).animate(animation),
+        ).animate(_animation),
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onVerticalDragEnd: (details) {
+            if ((details.primaryVelocity ?? 0) < -160) {
+              unawaited(_dismiss());
+            }
+          },
           child: Semantics(
             container: true,
             liveRegion: true,
-            label: description == null
-                ? widget.toast.title
-                : '${widget.toast.title}. $description',
-            child: Material(
-              key: ValueKey<String>('riki_toast_${widget.toast.type.name}'),
-              color: Colors.transparent,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.banner),
-                  border: Border.all(
-                    color: visual.accent.withValues(alpha: 0.28),
-                  ),
-                  boxShadow: AppShadows.cardSoft,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.space4,
-                    AppSpacing.space3,
-                    AppSpacing.space2,
-                    AppSpacing.space3,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: visual.background,
-                        ),
-                        child: Icon(
-                          visual.icon,
-                          key: ValueKey<String>(
-                            'riki_toast_icon_${widget.toast.type.name}',
-                          ),
-                          size: 20,
-                          color: visual.accent,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.space3),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 1),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                widget.toast.title,
-                                style: AppTypography.cardTitle,
-                              ),
-                              if (description != null &&
-                                  description.isNotEmpty) ...[
-                                const SizedBox(height: AppSpacing.space1),
-                                Text(
-                                  description,
-                                  style: AppTypography.bodySmall,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                      Semantics(
-                        button: true,
-                        label: context.l10n.close,
-                        child: IconButton(
-                          key: ValueKey<String>(
-                            'riki_toast_close_${widget.toast.id}',
-                          ),
-                          visualDensity: VisualDensity.compact,
-                          onPressed: _dismiss,
-                          icon: const Icon(Icons.close, size: 18),
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            label: semanticsLabel,
+            child: SakuraGlassNotification(
+              type: widget.toast.type,
+              title: widget.toast.title,
+              description: description,
+              onClose: _dismiss,
+              cardKey: cardKey,
+              iconKey: iconKey,
+              closeButtonKey: closeKey,
             ),
           ),
         ),
       ),
     );
   }
-}
-
-class _ToastVisual {
-  const _ToastVisual({
-    required this.accent,
-    required this.background,
-    required this.icon,
-  });
-
-  final Color accent;
-  final Color background;
-  final IconData icon;
-
-  factory _ToastVisual.forType(RikiToastType type) => switch (type) {
-    RikiToastType.success => const _ToastVisual(
-      accent: AppColors.success,
-      background: AppColors.successBackgroundSoft,
-      icon: Icons.check_circle_outline_rounded,
-    ),
-    RikiToastType.error => const _ToastVisual(
-      accent: AppColors.error,
-      background: AppColors.errorBackground,
-      icon: Icons.error_outline_rounded,
-    ),
-    RikiToastType.warning => const _ToastVisual(
-      accent: AppColors.warning,
-      background: AppColors.warningBackground,
-      icon: Icons.warning_amber_rounded,
-    ),
-    RikiToastType.info => const _ToastVisual(
-      accent: AppColors.info,
-      background: AppColors.infoBackground,
-      icon: Icons.info_outline_rounded,
-    ),
-    RikiToastType.celebration => const _ToastVisual(
-      accent: AppColors.brandPrimary,
-      background: AppColors.brandTint,
-      icon: Icons.spa_rounded,
-    ),
-  };
 }

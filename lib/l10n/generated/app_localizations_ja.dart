@@ -164,7 +164,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get splashTagline => '日本語学習 • JLPT対策';
 
   @override
-  String get authPromotion => 'AIで自分に合った日本語学習';
+  String get authPromotion => '自分に合った日本語学習プラン';
 
   @override
   String get loginWelcome => 'おかえりなさい！';
@@ -197,7 +197,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get login => 'ログイン';
 
   @override
-  String get loggingIn => 'ログイン中...';
+  String get loggingIn => 'ログイン中';
+
+  @override
+  String get loggingInSubtitle => 'アカウントを確認しています';
 
   @override
   String get loggingInSemantics => 'ログイン中';
@@ -855,7 +858,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get protectAccountTitle => 'アカウントを保護';
 
   @override
-  String get passwordContractHint => '現在の仕様では、新しいパスワードは6文字以上必要です。';
+  String get passwordContractHint => '新しいパスワードは6文字以上で入力してください。';
 
   @override
   String get currentPasswordHint => '現在のパスワードを入力';
@@ -977,6 +980,83 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingPlacementCanTakeLater => 'プロフィールから後でレベル診断を受けることもできます。';
 
   @override
+  String get onboardingCurrentLevelStepTitle => '現在の学習レベル';
+
+  @override
+  String get onboardingCurrentLevelStepDescription =>
+      '学習中のレベルを選び、あなたに合う学習プランを始めましょう。';
+
+  @override
+  String get onboardingTargetLevelStepTitle => 'JLPTの目標';
+
+  @override
+  String get onboardingTargetLevelStepDescription =>
+      '目指すJLPTレベルを選んでください。現在の学習レベルとは別に設定できます。';
+
+  @override
+  String get onboardingDailyPlanStepTitle => '1日にどのくらい学習しますか？';
+
+  @override
+  String get onboardingExamPlanStepTitle => 'どのJLPT試験期を目指しますか？';
+
+  @override
+  String get onboardingExamPlanStepDescription =>
+      '目標とする試験期を選択してください。後から変更・追加できます。';
+
+  @override
+  String get onboardingExamSessionCardTitle => '予定しているJLPT試験';
+
+  @override
+  String get onboardingExamYear => '受験年';
+
+  @override
+  String get onboardingExamSessionLabel => '試験期';
+
+  @override
+  String get onboardingJulySession => '7月の試験期';
+
+  @override
+  String get onboardingDecemberSession => '12月の試験期';
+
+  @override
+  String onboardingEstimatedDate(String date) {
+    return '予定日: $date';
+  }
+
+  @override
+  String onboardingSavedExamDate(String date) {
+    return '保存済みの日付: $date';
+  }
+
+  @override
+  String get onboardingExamDisclaimer => '試験日は目安です。受験地の公式発表をご確認ください。';
+
+  @override
+  String get onboardingSelectedPlan => '選択した学習プラン';
+
+  @override
+  String get onboardingConfirmExamSession => '試験期を確定';
+
+  @override
+  String get onboardingNoExamSession => '試験期は未定';
+
+  @override
+  String get onboardingClearExamSession => '予定日を削除';
+
+  @override
+  String get onboardingDefer => 'あとで';
+
+  @override
+  String onboardingStepOfFour(int step) {
+    return 'ステップ $step / 4';
+  }
+
+  @override
+  String onboardingProgressOfFour(int step) {
+    return '設定の進捗: 全4ステップ中$stepステップ目';
+  }
+
+  @override
   String get standardRoadmapTitle => '標準学習ロードマップ';
 
   @override
@@ -988,15 +1068,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get standardRoadmapNextLesson => '次のレッスン';
 
   @override
-  String get aiPersonalizedPathTitle => 'AIパーソナライズ学習プラン';
+  String get aiPersonalizedPathTitle => 'パーソナライズ学習プラン';
 
   @override
   String get aiPlacementRequired =>
-      'AI学習プランを有効にするにはレベル診断を完了してください。標準ロードマップで学習を続けられます。';
+      'パーソナライズ学習プランを作成するにはレベル診断を完了してください。標準ロードマップで学習を続けられます。';
 
   @override
   String get aiLearningGoalRequired =>
-      'レベル診断は完了しています。AIプラン作成にはJLPT目標と学習情報を設定してください。';
+      'レベル診断は完了しています。パーソナライズ学習プラン作成にはJLPT目標と学習情報を設定してください。';
 
   @override
   String get changeStudyLevelTitle => '学習中のレベルを変更しますか？';
@@ -1063,8 +1143,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingCustomMinutesLabel => '1日の学習時間を入力';
 
   @override
-  String get onboardingCustomMinutesHelper =>
-      'プロフィールで許可される1～1,440分の範囲で入力してください。';
+  String get onboardingCustomMinutesHelper => '1日1〜1,440分の範囲で入力してください。';
 
   @override
   String get onboardingCustomMinutesError => '1～1,440分を入力してください。';
@@ -1085,6 +1164,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get studyPaceIntensive => '集中';
+
+  @override
+  String get studyPaceFocused => '徹底集中';
+
+  @override
+  String get onboardingCustomTimeCardTitle => 'カスタム学習時間';
+
+  @override
+  String get onboardingCustomTimeCardSubtitle => '1日の学習時間（分）を自由に設定';
 
   @override
   String get finishSetup => '設定を完了';
@@ -1138,7 +1226,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get view => '見る';
 
   @override
-  String get aiGrading => 'AI採点';
+  String get aiGrading => '作文評価';
 
   @override
   String get writingAndKanjiPractice => '作文・漢字練習';
@@ -1555,7 +1643,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get learningPathRequirements =>
-      'AI個別学習プランには、完了したレベル診断とJLPT目標が必要です。診断なしでも標準学習プランで学べます。';
+      'パーソナライズ学習プランを作成するには、レベル診断の完了とJLPT目標の設定が必要です（AIが学習計画を提案します）。診断なしでも標準学習プランで学べます。';
 
   @override
   String get learningPathGenerateFailed => '個別学習プランを作成できませんでした。もう一度お試しください。';
@@ -1735,7 +1823,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reviewResults => '結果を確認';
 
   @override
-  String get continueLessonNineteen => '続き: レッスン19 – 〜たり〜たりする';
+  String get continueLessonNineteen => '現在のレッスンを続ける';
 
   @override
   String chapterNumberUpper(int number) {
@@ -2247,7 +2335,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get systemNotifications => 'アプリ内通知';
 
   @override
-  String get systemNotificationsDescription => 'RikiPathのシステム通知を受け取ります。';
+  String get systemNotificationsDescription => 'RikiPathからの重要なお知らせを受け取ります。';
 
   @override
   String get notificationUpdateSuccess => '通知設定を更新しました。';
@@ -2281,7 +2369,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get profileErrorForbidden => 'このアカウントでは学習者プロフィールにアクセスできません。';
 
   @override
-  String get profileErrorNetwork => 'サーバーに接続できません。通信環境を確認してもう一度お試しください。';
+  String get profileErrorNetwork => '通信接続に失敗しました。ネットワーク環境を確認してもう一度お試しください。';
 
   @override
   String get profileErrorValidation => 'プロフィール情報が正しくありません。入力内容を確認してください。';
@@ -2318,6 +2406,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get logoutSuccessTitle => 'ログアウトしました';
+
+  @override
+  String get logoutSuccessDescription => 'また日本語学習の旅でお会いしましょう！';
 
   @override
   String get logoutFailureTitle => '端末のログイン情報を削除できませんでした。もう一度お試しください。';
@@ -2591,7 +2682,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get additionalPractice => '追加練習';
 
   @override
-  String get aiWritingPractice => 'AIと作文練習';
+  String get aiWritingPractice => '作文練習';
 
   @override
   String get practiceAnswerLabel => '練習の回答';
@@ -3115,7 +3206,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get practiceSpeechTitle => '日本語スピーキング練習';
 
   @override
-  String get practiceSpeechDescription => 'AI音声認識で発音をリアルタイム練習します。';
+  String get practiceSpeechDescription => '話した日本語をテキスト化して読み上げ練習を行います。';
 
   @override
   String get practiceSpeechStatus => 'リアルタイム認識';
@@ -3856,7 +3947,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get learningPathPreviewTitle => 'AI学習計画のプレビュー';
+  String get learningPathPreviewTitle => '学習プランのプレビュー';
 
   @override
   String learningPathPreviewVersion(int version) {
@@ -3878,7 +3969,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get placementIssueExamDateRequired =>
-      '診断結果は保存されました。AI学習計画を作成する前に、プロフィールのJLPT目標で受験予定日を選択してください。';
+      '診断結果は保存されました。パーソナライズ学習プランを作成する前に、プロフィールのJLPT目標で受験予定日を選択してください。';
 
   @override
   String get placementSetExamDate => 'プロフィールで受験予定日を選択';
@@ -4110,4 +4201,734 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get addFirstWordAction => '最初の単語を追加';
+
+  @override
+  String get loadingOverlayProcessingTitle => '処理中';
+
+  @override
+  String get loadingOverlayWaitSubtitle => 'しばらくお待ちください';
+
+  @override
+  String get loadingOverlayCompletingSubtitle => 'リクエストを完了しています';
+
+  @override
+  String get loadingOverlaySavingTitle => '変更を保存中';
+
+  @override
+  String get loadingOverlayOnboardingSavingTitle => '情報を保存中';
+
+  @override
+  String get loadingOverlayUpdatingSubtitle => '最新情報を更新しています';
+
+  @override
+  String get loadingOverlayRoadmapTitle => '学習プランを作成中';
+
+  @override
+  String get onboardingPlacementSyncErrorMessage =>
+      '学習目標は保存されましたが、設定状態の同期に失敗しました。もう一度お試しください。';
+
+  @override
+  String get loadingOverlayDataTitle => 'データを読み込み中';
+
+  @override
+  String get loadingOverlayListTitle => '一覧を読み込み中';
+
+  @override
+  String get loadingOverlayBookingTitle => '予約を確認中';
+
+  @override
+  String get loadingOverlaySyncTitle => 'データを同期中';
+
+  @override
+  String get loadingOverlayLoggingOutTitle => 'ログアウト中';
+
+  @override
+  String get loadingOverlaySubmittingTitle => '送信中';
+
+  @override
+  String get meetingPresentationForceStopped => '管理者またはホストによって画面共有が停止されました。';
+
+  @override
+  String get mentorNavHome => 'ホーム';
+
+  @override
+  String get mentorNavCalendar => '指導予定';
+
+  @override
+  String get mentorNavMeetings => '相談一覧';
+
+  @override
+  String get mentorNavAvailability => '空き枠';
+
+  @override
+  String get mentorNavProfile => 'マイページ';
+
+  @override
+  String get mentorHomeAttentionTitle => '要対応事項';
+
+  @override
+  String get mentorHomeAttentionEmpty => 'すべて順調です。現在対応待ちの項目はありません。';
+
+  @override
+  String get mentorHomeQuickActionsTitle => 'メンター機能メニュー';
+
+  @override
+  String get mentorHomeMetricUpcoming => '予定';
+
+  @override
+  String get mentorHomeMetricUnreadChat => '未読メッセージ';
+
+  @override
+  String get mentorHomeMetricOpenDisputes => '対応中異議';
+
+  @override
+  String get mentorHomeMetricUnrepliedReviews => '未返信レビュー';
+
+  @override
+  String get mentorHomeMetricOpenSlots => '空き枠';
+
+  @override
+  String get mentorHomeMetricCompleted => '完了済み';
+
+  @override
+  String get mentorHomePartialFailureBanner =>
+      '一部の補助データが一時的に読み込めませんでした。取得済みの情報を表示しています。';
+
+  @override
+  String get mentorHomeHeroTitle => '今日も学習者との1対1相談を始めましょう';
+
+  @override
+  String get mentorHomeHeroSubtitle => '指導スケジュール管理・事前準備・フィードバックをここで一元管理できます。';
+
+  @override
+  String get mentorHomeNextSessionCta => '事前準備画面へ';
+
+  @override
+  String get mentorActionChat => '1対1チャット';
+
+  @override
+  String get mentorActionReviews => '評価レビュー';
+
+  @override
+  String get mentorActionDisputes => '異議申立て';
+
+  @override
+  String get mentorActionCompensation => '報酬明細';
+
+  @override
+  String get mentorActionBankAccount => '受取口座';
+
+  @override
+  String get mentorActionSchedulePolicy => '定期シフト設定';
+
+  @override
+  String get mentorActionSessionPrep => '事前準備';
+
+  @override
+  String get mentorMeetingsSearchHint => '学習者名・質問・#IDで検索...';
+
+  @override
+  String get mentorMeetingsFilterAll => 'すべて';
+
+  @override
+  String get mentorMeetingsFilterUpcoming => '予定';
+
+  @override
+  String get mentorMeetingsFilterCompleted => '完了';
+
+  @override
+  String get mentorMeetingsFilterCancelled => 'キャンセル';
+
+  @override
+  String get mentorMeetingsCancelledApiNotice =>
+      '注記：現在の一覧には有効な相談のみ表示されます（キャンセル済みは含まれません）。';
+
+  @override
+  String get mentorMeetingsSortSchedule => '並び替え：開始日時';
+
+  @override
+  String get mentorMeetingsSortNewest => '並び替え：新着順';
+
+  @override
+  String get mentorMeetingsFilterEmpty => '条件に一致する相談予約が見つかりません。';
+
+  @override
+  String get mentorMeetingJlptLevel => 'JLPTレベル';
+
+  @override
+  String get mentorMeetingLearnerQuestion => '学習者からの事前質問';
+
+  @override
+  String get mentorMeetingNoQuestion => '事前質問はまだ登録されていません。';
+
+  @override
+  String get mentorMeetingAttendanceTitle => '入室・出席ログ';
+
+  @override
+  String get mentorMeetingAttendanceEmpty => '出席データがまだ記録されていません。';
+
+  @override
+  String get mentorMeetingCancellationPolicyTitle => 'キャンセルポリシー状況';
+
+  @override
+  String get mentorMeetingCancellationAllowed => '現在のポリシーに基づきキャンセル可能です。';
+
+  @override
+  String get mentorMeetingCancellationBlocked => '現在はキャンセルできません。';
+
+  @override
+  String get mentorMeetingReplyReviewButton => 'レビューに返信';
+
+  @override
+  String get mentorMeetingRespondDisputeButton => '異議へ回答';
+
+  @override
+  String get mentorMeetingReviewNotFound => 'この相談のレビューがまだ見つかりません。';
+
+  @override
+  String get mentorMeetingDisputeNotFound => 'この相談の異議申し立てデータがまだ見つかりません。';
+
+  @override
+  String get mentorMeetingOpenChat => '学習者と1対1チャット';
+
+  @override
+  String get mentorMeetingOpenPrep => '相談の事前準備';
+
+  @override
+  String get mentorMeetingOpenDisputeDetail => '異議詳細を確認';
+
+  @override
+  String get mentorPrepScreenTitle => '相談セッション事前準備';
+
+  @override
+  String get mentorPrepSelectBookingHint => '今後の相談を選択して、学習者の質問やルーム状態を確認してください。';
+
+  @override
+  String get mentorPrepChecklistTitle => '開始前チェックリスト';
+
+  @override
+  String get mentorPrepCheckAudio => 'マイクと安定したネットワーク接続を確認';
+
+  @override
+  String get mentorPrepCheckQuestion => '以下のJLPT目標と質問内容を確認';
+
+  @override
+  String get mentorPrepCheckRoomReady => 'オンライン相談ルームの入室準備を確認';
+
+  @override
+  String get mentorPrepRoomAccessTitle => 'ルーム状態';
+
+  @override
+  String get mentorPrepRoomReady => '入室準備完了';
+
+  @override
+  String get mentorPrepRoomNotReady => 'ルーム未オープンまたは時間外です';
+
+  @override
+  String get mentorPrepNotesReadOnlyBanner =>
+      '準備メモの保存には現在未対応のため、受講者からの予約情報のみ表示しています。';
+
+  @override
+  String get mentorScheduleV3Title => '定期シフト設定';
+
+  @override
+  String get mentorScheduleV3Subtitle => '毎週の固定シフト（90分枠＋15分休憩）を設定して公開できます。';
+
+  @override
+  String get mentorScheduleV3ApprovalRequired =>
+      '定期枠のプレビュー・公開には、メンタープロフィールの承認が必要です。';
+
+  @override
+  String get mentorScheduleV3AddRule => 'シフトルールを追加';
+
+  @override
+  String get mentorScheduleV3SaveRules => '勤務シフトを保存';
+
+  @override
+  String get mentorScheduleV3Preview => '7日間プレビュー';
+
+  @override
+  String get mentorScheduleV3Publish => '今後7日間を公開';
+
+  @override
+  String get mentorScheduleV3AutoPublish => '定期スケジュールを自動公開する';
+
+  @override
+  String get mentorScheduleV3DisableSlot => 'この枠を閉じる';
+
+  @override
+  String get mentorScheduleV3DeleteSlot => '空き枠を削除';
+
+  @override
+  String get mentorScheduleV3RequestCancel => 'キャンセル申請';
+
+  @override
+  String get mentorScheduleV3RequestChange => 'シフト変更申請';
+
+  @override
+  String get mentorScheduleV3ReasonHint => '詳細な理由を入力してください（5文字以上）...';
+
+  @override
+  String get mentorScheduleSlotApproved => '承認済み';
+
+  @override
+  String get mentorScheduleSlotPending => '審査待ち';
+
+  @override
+  String get mentorScheduleSlotRejected => '却下';
+
+  @override
+  String get mentorScheduleSlotCancelRequested => '取消申請中';
+
+  @override
+  String get mentorScheduleSlotBookedCount => '予約済み';
+
+  @override
+  String get mentorProfileViewDocument => 'アップロード済み証明書を見る';
+
+  @override
+  String get mentorProfileDocumentLoading => '証明書を読み込み中...';
+
+  @override
+  String get mentorProfileDocumentError => '証明書を開けませんでした。しばらくしてからもう一度お試しください。';
+
+  @override
+  String mentorProfileDocumentPdfReady(int sizeKb) {
+    return 'PDF証明書の準備ができました ($sizeKb KB)。';
+  }
+
+  @override
+  String get mentorProfileDocumentOpenExternal => 'ドキュメントビューアーで開く';
+
+  @override
+  String get mentorProfilePendingLockedNotice =>
+      'プロフィールは現在審査中のため、結果確定まで編集できません。';
+
+  @override
+  String get mentorProfileApprovedLockedNotice =>
+      'プロフィール承認済みのため、専門分野・JLPTレベル・経験年数・勤務先および証明書は固定されています。';
+
+  @override
+  String get mentorProfileAccountReadOnlyNote =>
+      '氏名・電話番号・アバター・通知設定などの基本アカウント情報は、現在メンタープロフィール画面からの直接編集に対応していません。';
+
+  @override
+  String get mentorChatThreadsTitle => '学習者との1対1チャット';
+
+  @override
+  String get mentorChatThreadsEmpty => '相談予約に紐づくチャットはまだありません。';
+
+  @override
+  String get mentorChatReadOnlyBanner => '相談完了またはキャンセル済みのため、閲覧専用モードです。';
+
+  @override
+  String get mentorChatInputHint => '学習者へメッセージを入力...';
+
+  @override
+  String get mentorChatLoadOlder => '以前のメッセージを読み込む';
+
+  @override
+  String get mentorChatReconnect => '再接続';
+
+  @override
+  String get mentorChatConnecting => 'チャットに接続中...';
+
+  @override
+  String get mentorChatReconnecting => '再接続しています...';
+
+  @override
+  String get mentorChatDisconnected => '接続が切断されました — タップして再接続';
+
+  @override
+  String get mentorChatEmptyMessages => 'メッセージはまだありません。挨拶や事前案内を送ってみましょう。';
+
+  @override
+  String get mentorReviewsTitle => '学習者からの評価レビュー';
+
+  @override
+  String get mentorReviewsEmpty => 'まだレビューがありません。';
+
+  @override
+  String get mentorReviewsAverageLabel => '平均評価';
+
+  @override
+  String get mentorReviewsTotalLabel => '総レビュー数';
+
+  @override
+  String get mentorReviewsPositiveRate => '高評価率';
+
+  @override
+  String get mentorReviewsReplyLabel => 'メンターからの返信';
+
+  @override
+  String get mentorReviewsEditReplyAction => '返信を編集';
+
+  @override
+  String get mentorReviewsReplyHint => '丁寧な返信を入力してください（1〜1000文字）...';
+
+  @override
+  String get mentorReviewsSubmitReply => '返信を送信';
+
+  @override
+  String get mentorDisputesTitle => '異議申立て管理';
+
+  @override
+  String get mentorDisputesEmpty => 'あなたに関連する異議申立てはありません。';
+
+  @override
+  String mentorDisputeDetailTitle(int id) {
+    return '異議詳細 #$id';
+  }
+
+  @override
+  String get mentorDisputeLearnerReason => '学習者の申立て理由';
+
+  @override
+  String get mentorDisputeEvidenceTitle => '添付証拠';
+
+  @override
+  String get mentorDisputeAttendanceEvidence => 'ルーム入室出席ログ証拠';
+
+  @override
+  String get mentorDisputeTimelineTitle => '対応履歴タイムライン';
+
+  @override
+  String get mentorDisputeYourResponse => 'あなたの説明回答';
+
+  @override
+  String get mentorDisputeResponseHint => 'セッション状況と事実を記入してください（1〜2000文字）...';
+
+  @override
+  String get mentorDisputeSubmitResponse => '回答を送信';
+
+  @override
+  String get mentorDisputeLockedNotice => 'この異議案件は解決済みまたは既に回答済みです。';
+
+  @override
+  String get mentorDisputeAdminDecision => '管理者による決定';
+
+  @override
+  String get mentorCompHourlyRatesTitle => '時間単価テーブル';
+
+  @override
+  String get mentorCompQualificationsTitle => '認定スキル・保有資格';
+
+  @override
+  String get mentorCompPayrollDetailTitle => '給与締め明細';
+
+  @override
+  String get mentorCompPayoutDetailTitle => '振込支払い詳細';
+
+  @override
+  String get mentorBankPopularPresetsTitle => 'ベトナム主要銀行を選択';
+
+  @override
+  String get mentorBankCustomCodeHint => 'または銀行BINコードを手入力';
+
+  @override
+  String get mentorCommonCancel => '閉じる';
+
+  @override
+  String get mentorCommonSave => '保存';
+
+  @override
+  String get mentorCommonConfirm => '確定';
+
+  @override
+  String get mentorCommonRetry => '再試行';
+
+  @override
+  String get onboardingPlanPreviewEyebrow => 'あなたの学習プラン';
+
+  @override
+  String onboardingPlanHeroTitle(String level) {
+    return 'JLPT $level 合格を目指す';
+  }
+
+  @override
+  String get onboardingPlanHeroSubtitle => '新しい学びの旅が待っています！';
+
+  @override
+  String get onboardingPlanCurrentLevelLabel => '現在のレベル';
+
+  @override
+  String get onboardingPlanTargetLabel => '目標レベル';
+
+  @override
+  String get onboardingPlanDailyStudyLabel => '1日の学習時間';
+
+  @override
+  String onboardingPlanDailyMinutesValue(int minutes) {
+    return '$minutes分';
+  }
+
+  @override
+  String get onboardingPlanCertificateLabel => '取得済み資格';
+
+  @override
+  String get onboardingPlanCertificateNone => 'まだなし';
+
+  @override
+  String get onboardingPlanCertificateUnspecified => '未入力';
+
+  @override
+  String get onboardingPlanExamSummaryLabel => '受験予定期';
+
+  @override
+  String onboardingPlanExamMonthYear(int month, int year) {
+    return '$year年$month月期';
+  }
+
+  @override
+  String get onboardingPlanNoExamTitle => '試験期未選択';
+
+  @override
+  String get onboardingPlanNoExamSubtitle => '後から追加・変更できます。';
+
+  @override
+  String get discardChangesTitle => '変更を破棄しますか？';
+
+  @override
+  String get discardChangesMessage => '保存されていない変更があります。この画面を離れると変更内容は破棄されます。';
+
+  @override
+  String get discardChangesStay => '留まる';
+
+  @override
+  String get discardChangesLeave => '離れる';
+
+  @override
+  String get mentorRoleBadge => 'メンター';
+
+  @override
+  String get mentorProfileSectionProfile => 'プロフィール';
+
+  @override
+  String get mentorProfileEditSubtitle => '個人情報と専門情報を更新します。';
+
+  @override
+  String get mentorProfileSectionActivity => 'メンター活動';
+
+  @override
+  String get mentorProfileChatSubtitle => '予約ごとの1対1メッセージを確認します。';
+
+  @override
+  String get mentorProfileReviewsSubtitle => '受講者からの評価とコメントを確認します。';
+
+  @override
+  String get mentorProfileDisputesSubtitle => '異議申し立ての状況確認と回答を管理します。';
+
+  @override
+  String get mentorProfilePrepSubtitle => '受講者の質問を確認し、セッションの準備をします。';
+
+  @override
+  String get mentorProfileSectionServices => 'サービス・報酬';
+
+  @override
+  String get mentorProfileEarningsTitle => '報酬・収益';
+
+  @override
+  String get mentorProfileEarningsSubtitle => '給与締切期間と支払い履歴を確認します。';
+
+  @override
+  String get mentorProfileBankTitle => '振込先口座';
+
+  @override
+  String get mentorProfileBankSubtitle => '振込口座情報と認証状況を確認・更新します。';
+
+  @override
+  String get mentorVerificationApproved => '認証済み';
+
+  @override
+  String get mentorVerificationApprovedDetail => '認証済み（公開中）';
+
+  @override
+  String get mentorVerificationPending => '審査中';
+
+  @override
+  String get mentorVerificationChangesRequested => '追加修正が必要';
+
+  @override
+  String get mentorVerificationRejected => '却下されました';
+
+  @override
+  String get mentorVerificationUnverified => '未提出';
+
+  @override
+  String get mentorVerificationPendingNote => 'プロフィールは管理者へ提出され、現在審査中です。';
+
+  @override
+  String mentorVerificationRejectionReason(String reason) {
+    return '却下理由: $reason';
+  }
+
+  @override
+  String mentorVerificationReviewNotes(String notes) {
+    return '修正依頼メモ: $notes';
+  }
+
+  @override
+  String get mentorProfileErrorLoad => 'メンタープロフィール情報を読み込めませんでした。';
+
+  @override
+  String get mentorProfilePersonalNameLabel => '氏名';
+
+  @override
+  String get mentorProfilePersonalEmailLabel => 'メール';
+
+  @override
+  String get mentorProfilePersonalPhoneLabel => '電話番号';
+
+  @override
+  String get mentorProfileBioLabel => '自己紹介 *';
+
+  @override
+  String get mentorProfileBioHint => '指導経験や指導スタイルなどを入力してください...';
+
+  @override
+  String get mentorProfileExpertiseLabel => '専門分野 *';
+
+  @override
+  String get mentorProfileExpertiseHint => 'JLPT N1・N2、ビジネス日本語など...';
+
+  @override
+  String get mentorProfileJlptLabel => '日本語レベル *';
+
+  @override
+  String get mentorProfileJlptNativeOption => 'ネイティブ';
+
+  @override
+  String get mentorProfileExpLabel => '経験年数';
+
+  @override
+  String get mentorProfileExpHint => '例: 5';
+
+  @override
+  String get mentorProfileExpErrorInvalid => '経験年数は0〜50の整数で入力してください。';
+
+  @override
+  String get mentorProfileWorkplaceLabel => '勤務先・所属';
+
+  @override
+  String get mentorProfileWorkplaceHint => '例: Riki Nihongo';
+
+  @override
+  String get mentorProfileVideoLabel => '紹介動画URL (YouTube / Drive)';
+
+  @override
+  String get mentorProfileVideoErrorInvalid => '動画URLは有効な http(s) 形式で入力してください。';
+
+  @override
+  String get mentorProfileCertificateSection => '資格証明書 *';
+
+  @override
+  String get mentorProfileDocumentUploadedNote => '証明書はプライベートストレージにアップロード済みです。';
+
+  @override
+  String get mentorProfileDocumentRequiredNote =>
+      '必須: 提出前にPDF・JPEG・PNG形式（最大5MB）の証明書をアップロードしてください。';
+
+  @override
+  String get mentorProfileDocumentReplace => '別の証明書を選択';
+
+  @override
+  String get mentorProfileSaveButton => '変更を保存';
+
+  @override
+  String get mentorProfileSaveDraftButton => '入力内容を保存';
+
+  @override
+  String get mentorProfileSavingButton => '保存中...';
+
+  @override
+  String get mentorProfileSaveSuccessTitle => '更新しました';
+
+  @override
+  String get mentorProfileSaveSuccessDesc => 'メンタープロフィールを保存しました。';
+
+  @override
+  String get mentorProfileSaveErrorTitle => '更新に失敗しました';
+
+  @override
+  String get mentorProfileSaveErrorDesc => '保存できませんでした。入力内容をご確認のうえ再試行してください。';
+
+  @override
+  String get mentorProfileSubmitDialogTitle => '審査を提出';
+
+  @override
+  String get mentorProfileSubmitDialogBody =>
+      '専門情報とアップロード済みの証明書を管理者へ送信して審査を受けます。';
+
+  @override
+  String get mentorProfileSubmitDialogNotesLabel => '管理者へのメモ';
+
+  @override
+  String get mentorProfileSubmitDialogNotesHint =>
+      '例: 2024年JLPT N1合格、指導経験3年...';
+
+  @override
+  String get mentorProfileSubmitConfirmAction => '審査へ提出';
+
+  @override
+  String get mentorProfileSubmitSuccessTitle => '提出しました';
+
+  @override
+  String get mentorProfileSubmitSuccessDesc => '審査のため管理者へプロフィールを送信しました。';
+
+  @override
+  String get mentorProfileSubmitErrorTitle => '提出に失敗しました';
+
+  @override
+  String get mentorProfileSubmitErrorDesc => '審査提出を完了できませんでした。再試行してください。';
+
+  @override
+  String get mentorProfileValidationMissingTitle => '未入力の項目があります';
+
+  @override
+  String get mentorProfileValidationBioRequired => '自己紹介（*）を入力してください。';
+
+  @override
+  String get mentorProfileValidationExpertiseRequired => '専門分野（*）を入力してください。';
+
+  @override
+  String get mentorProfileValidationJlptRequired => '日本語レベル（*）を選択してください。';
+
+  @override
+  String get mentorProfileValidationCertRequired =>
+      '提出前に資格証明書を選択してアップロードしてください。';
+
+  @override
+  String get mentorProfileDocInvalidTitle => '無効なファイルです';
+
+  @override
+  String get mentorProfileDocTooLarge => '証明書ファイルは5MB未満にしてください。';
+
+  @override
+  String get mentorProfileDocUploadedTitle => '証明書をアップロードしました';
+
+  @override
+  String get mentorProfileDocUploadedDesc => 'ドキュメントはプライベートストレージに保存されました。';
+
+  @override
+  String get mentorProfileDocUploadFailedTitle => '証明書をアップロードできません';
+
+  @override
+  String get mentorProfileDocUploadFailedDesc => '再試行するかサポートにお問い合わせください。';
+
+  @override
+  String get mentorProfileDocOpenFailedTitle => 'ファイルを開けませんでした';
+
+  @override
+  String get mentorProfileDocOpenFailedDesc => 'PDF・JPEG・PNGファイルをもう一度選択してください。';
+
+  @override
+  String get mentorNotificationChannelUnsupportedNotice =>
+      '現在、サーバー側ではメンターアカウント向けのメール・システム通知チャンネルの個別オン／オフ設定に対応していません。新規予約・キャンセル・空き枠承認・受講者からのメッセージ通知は通知センターに届きます。';
+
+  @override
+  String get mentorOpenNotificationCenter => '通知センター';
+
+  @override
+  String get mentorOpenNotificationCenterSubtitle =>
+      '新規予約、空き枠承認、異議対応、受講者メッセージを確認します。';
 }

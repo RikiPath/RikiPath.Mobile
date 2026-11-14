@@ -174,7 +174,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get splashTagline => 'Học tiếng Nhật • Luyện thi JLPT';
 
   @override
-  String get authPromotion => 'Học tiếng Nhật cá nhân hoá cùng AI';
+  String get authPromotion => 'Học tiếng Nhật theo lộ trình cá nhân hóa';
 
   @override
   String get loginWelcome => 'Chào mừng trở lại!';
@@ -208,7 +208,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get login => 'Đăng nhập';
 
   @override
-  String get loggingIn => 'Đang đăng nhập...';
+  String get loggingIn => 'Đang đăng nhập';
+
+  @override
+  String get loggingInSubtitle => 'Đang xác thực tài khoản của bạn';
 
   @override
   String get loggingInSemantics => 'Đang đăng nhập';
@@ -890,7 +893,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get newLoginEmailSubtitle =>
-      'Sau khi cập nhật, máy chủ sẽ gửi mã xác thực tới email mới.';
+      'Sau khi cập nhật, hệ thống sẽ gửi mã xác thực tới email mới.';
 
   @override
   String get missingSessionTitle => 'Thiếu thông tin phiên';
@@ -913,8 +916,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get protectAccountTitle => 'Bảo vệ tài khoản';
 
   @override
-  String get passwordContractHint =>
-      'Mật khẩu mới phải có ít nhất 6 ký tự theo hợp đồng hiện tại.';
+  String get passwordContractHint => 'Mật khẩu mới phải có ít nhất 6 ký tự.';
 
   @override
   String get currentPasswordHint => 'Nhập mật khẩu hiện tại';
@@ -1025,7 +1027,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get onboardingCurrentStudyLevelDescription =>
-      'Lộ trình chuẩn hiện hỗ trợ từ N5 đến N3.';
+      'Lộ trình chuẩn hiện hỗ trợ N5–N3; N2 vẫn có thể chọn làm mục tiêu JLPT.';
 
   @override
   String get onboardingTargetJlptTitle => 'Mục tiêu JLPT';
@@ -1039,6 +1041,84 @@ class AppLocalizationsVi extends AppLocalizations {
       'Bạn vẫn có thể làm bài đánh giá sau trong Hồ sơ.';
 
   @override
+  String get onboardingCurrentLevelStepTitle => 'Bạn đang học cấp độ nào?';
+
+  @override
+  String get onboardingCurrentLevelStepDescription =>
+      'Chọn trình độ hiện tại để RikiPath gợi ý nội dung phù hợp. Lộ trình chuẩn hỗ trợ N5–N3.';
+
+  @override
+  String get onboardingTargetLevelStepTitle => 'Bạn muốn đạt JLPT nào?';
+
+  @override
+  String get onboardingTargetLevelStepDescription =>
+      'Chọn mục tiêu bạn đang hướng đến. Bạn có thể thay đổi sau.';
+
+  @override
+  String get onboardingDailyPlanStepTitle => 'Mỗi ngày, bạn muốn học bao lâu?';
+
+  @override
+  String get onboardingExamPlanStepTitle => 'Bạn dự định thi JLPT vào kỳ nào?';
+
+  @override
+  String get onboardingExamPlanStepDescription =>
+      'Chọn kỳ thi dự kiến hoặc để trống nếu chưa có kế hoạch.';
+
+  @override
+  String get onboardingExamSessionCardTitle => 'Kỳ thi JLPT dự kiến';
+
+  @override
+  String get onboardingExamYear => 'Năm dự thi';
+
+  @override
+  String get onboardingExamSessionLabel => 'Kỳ thi';
+
+  @override
+  String get onboardingJulySession => 'Kỳ tháng 7';
+
+  @override
+  String get onboardingDecemberSession => 'Kỳ tháng 12';
+
+  @override
+  String onboardingEstimatedDate(String date) {
+    return 'Dự kiến: $date';
+  }
+
+  @override
+  String onboardingSavedExamDate(String date) {
+    return 'Ngày đã lưu: $date';
+  }
+
+  @override
+  String get onboardingExamDisclaimer =>
+      'Ngày thi chỉ mang tính dự kiến; hãy kiểm tra thông báo chính thức tại nơi bạn đăng ký.';
+
+  @override
+  String get onboardingSelectedPlan => 'Kế hoạch đã chọn';
+
+  @override
+  String get onboardingConfirmExamSession => 'Xác nhận kỳ thi';
+
+  @override
+  String get onboardingNoExamSession => 'Chưa xác định kỳ thi';
+
+  @override
+  String get onboardingClearExamSession => 'Xóa kỳ thi dự kiến';
+
+  @override
+  String get onboardingDefer => 'Để sau';
+
+  @override
+  String onboardingStepOfFour(int step) {
+    return 'Bước $step / 4';
+  }
+
+  @override
+  String onboardingProgressOfFour(int step) {
+    return 'Tiến độ thiết lập: bước $step trên 4';
+  }
+
+  @override
   String get standardRoadmapTitle => 'Lộ trình học chuẩn';
 
   @override
@@ -1050,15 +1130,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get standardRoadmapNextLesson => 'Bài tiếp theo';
 
   @override
-  String get aiPersonalizedPathTitle => 'Lộ trình cá nhân hóa bằng AI';
+  String get aiPersonalizedPathTitle => 'Lộ trình cá nhân hóa';
 
   @override
   String get aiPlacementRequired =>
-      'Hoàn thành bài Placement để mở khóa tạo lộ trình AI. Bạn vẫn có thể tiếp tục học theo lộ trình chuẩn.';
+      'Hoàn thành bài đánh giá năng lực để mở khóa tạo lộ trình cá nhân hóa. Bạn vẫn có thể tiếp tục học theo lộ trình chuẩn.';
 
   @override
   String get aiLearningGoalRequired =>
-      'Placement đã hoàn tất. Hãy lưu mục tiêu JLPT và thông tin học tập hợp lệ để tạo lộ trình AI.';
+      'Đã hoàn thành đánh giá năng lực. Hãy lưu mục tiêu JLPT và thông tin học tập hợp lệ để tạo lộ trình cá nhân hóa.';
 
   @override
   String get changeStudyLevelTitle => 'Đổi cấp độ đang học?';
@@ -1119,14 +1199,13 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get onboardingStudyTimeDescription =>
-      'Chọn thời lượng học phù hợp với lịch sinh hoạt của bạn.';
+      'Chọn thời lượng phù hợp với lịch sinh hoạt của bạn.';
 
   @override
   String get onboardingCustomMinutesLabel => 'Số phút khác mỗi ngày';
 
   @override
-  String get onboardingCustomMinutesHelper =>
-      'Từ 1 đến 1.440 phút theo giới hạn hồ sơ.';
+  String get onboardingCustomMinutesHelper => 'Từ 1 đến 1.440 phút mỗi ngày.';
 
   @override
   String get onboardingCustomMinutesError =>
@@ -1148,6 +1227,16 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get studyPaceIntensive => 'Chuyên sâu';
+
+  @override
+  String get studyPaceFocused => 'Chuyên tâm';
+
+  @override
+  String get onboardingCustomTimeCardTitle => 'Thời gian tùy chỉnh';
+
+  @override
+  String get onboardingCustomTimeCardSubtitle =>
+      'Tự thiết lập số phút học mỗi ngày';
 
   @override
   String get finishSetup => 'Hoàn tất thiết lập';
@@ -1204,7 +1293,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get view => 'Xem';
 
   @override
-  String get aiGrading => 'Chấm bài AI';
+  String get aiGrading => 'Đánh giá bài viết';
 
   @override
   String get writingAndKanjiPractice => 'Luyện viết & Kanji';
@@ -1594,7 +1683,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get notebookEmptyTitle => 'Sổ từ của bạn đang trống';
 
   @override
-  String get notebookEmptyMessage => 'Tạo danh sách đầu tiên để lưu từ vựng.';
+  String get notebookEmptyMessage =>
+      'Tạo danh sách đầu tiên để lưu và phân loại từ vựng, Hán tự theo chủ đề học tập của bạn.';
 
   @override
   String get noMatchingWord => 'Không tìm thấy từ phù hợp';
@@ -1633,7 +1723,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get learningPathRequirements =>
-      'Để tạo lộ trình cá nhân hóa bằng AI, hãy hoàn thành bài đánh giá đầu vào và thiết lập mục tiêu JLPT. Bạn vẫn có thể học theo lộ trình chuẩn mà không cần đánh giá.';
+      'Để tạo lộ trình cá nhân hóa phù hợp, hãy hoàn thành bài đánh giá đầu vào và thiết lập mục tiêu JLPT (gợi ý lộ trình được tạo tự động có sử dụng AI). Bạn vẫn có thể học theo lộ trình chuẩn mà không cần đánh giá.';
 
   @override
   String get learningPathGenerateFailed =>
@@ -1814,7 +1904,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get reviewResults => 'Xem lại kết quả';
 
   @override
-  String get continueLessonNineteen => 'Học tiếp: Bài 19 – 〜たり〜たりする';
+  String get continueLessonNineteen => 'Học tiếp bài hiện tại';
 
   @override
   String chapterNumberUpper(int number) {
@@ -2346,7 +2436,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get systemNotificationsDescription =>
-      'Nhận thông báo hệ thống của RikiPath.';
+      'Nhận thông báo quan trọng từ RikiPath.';
 
   @override
   String get notificationUpdateSuccess => 'Cài đặt thông báo đã được cập nhật.';
@@ -2385,7 +2475,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get profileErrorNetwork =>
-      'Không thể kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại.';
+      'Không thể kết nối mạng. Vui lòng kiểm tra đường truyền và thử lại.';
 
   @override
   String get profileErrorValidation =>
@@ -2393,7 +2483,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get profileErrorServer =>
-      'Máy chủ chưa thể xử lý yêu cầu hồ sơ. Vui lòng thử lại sau.';
+      'Chưa thể xử lý yêu cầu hồ sơ lúc này. Vui lòng thử lại sau.';
 
   @override
   String get profileErrorUnknown =>
@@ -2426,6 +2516,10 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get logoutSuccessTitle => 'Đã đăng xuất';
+
+  @override
+  String get logoutSuccessDescription =>
+      'Hẹn gặp lại trên hành trình học tiếng Nhật!';
 
   @override
   String get logoutFailureTitle =>
@@ -2716,7 +2810,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get additionalPractice => 'Luyện tập bổ sung';
 
   @override
-  String get aiWritingPractice => 'Luyện viết cùng AI';
+  String get aiWritingPractice => 'Luyện viết bài';
 
   @override
   String get practiceAnswerLabel => 'Câu trả lời luyện tập';
@@ -3272,7 +3366,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get practiceSpeechDescription =>
-      'Luyện phát âm với nhận diện giọng nói AI.';
+      'Chuyển giọng nói tiếng Nhật thành văn bản để luyện đọc.';
 
   @override
   String get practiceSpeechStatus => 'Nhận dạng trực tiếp';
@@ -4071,7 +4165,7 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get learningPathPreviewTitle => 'Bản xem trước lộ trình AI';
+  String get learningPathPreviewTitle => 'Bản xem trước lộ trình học';
 
   @override
   String learningPathPreviewVersion(int version) {
@@ -4093,7 +4187,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get placementIssueExamDateRequired =>
-      'Kết quả đánh giá năng lực đã được lưu. Trước khi tạo lộ trình học AI, vui lòng chọn ngày thi dự kiến trong mục Mục tiêu JLPT tại trang cá nhân.';
+      'Kết quả đánh giá năng lực đã được lưu. Trước khi tạo lộ trình cá nhân hóa, vui lòng chọn ngày thi dự kiến trong mục Mục tiêu JLPT tại trang cá nhân.';
 
   @override
   String get placementSetExamDate => 'Chọn ngày thi trong trang cá nhân';
@@ -4333,4 +4427,785 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get addFirstWordAction => 'Thêm từ đầu tiên';
+
+  @override
+  String get loadingOverlayProcessingTitle => 'Đang xử lý';
+
+  @override
+  String get loadingOverlayWaitSubtitle => 'Vui lòng chờ trong giây lát';
+
+  @override
+  String get loadingOverlayCompletingSubtitle =>
+      'Hệ thống đang hoàn tất yêu cầu';
+
+  @override
+  String get loadingOverlaySavingTitle => 'Đang lưu thay đổi';
+
+  @override
+  String get loadingOverlayOnboardingSavingTitle => 'Đang lưu thông tin';
+
+  @override
+  String get loadingOverlayUpdatingSubtitle =>
+      'Đang cập nhật thông tin mới nhất';
+
+  @override
+  String get loadingOverlayRoadmapTitle => 'Đang tạo lộ trình';
+
+  @override
+  String get onboardingPlacementSyncErrorMessage =>
+      'Đã lưu mục tiêu học tập nhưng chưa thể đồng bộ trạng thái thiết lập. Vui lòng nhấn thử lại.';
+
+  @override
+  String get loadingOverlayDataTitle => 'Đang tải dữ liệu';
+
+  @override
+  String get loadingOverlayListTitle => 'Đang tải danh sách';
+
+  @override
+  String get loadingOverlayBookingTitle => 'Đang xác nhận lịch hẹn';
+
+  @override
+  String get loadingOverlaySyncTitle => 'Đang đồng bộ dữ liệu';
+
+  @override
+  String get loadingOverlayLoggingOutTitle => 'Đang đăng xuất';
+
+  @override
+  String get loadingOverlaySubmittingTitle => 'Đang gửi yêu cầu';
+
+  @override
+  String get meetingPresentationForceStopped =>
+      'Quản trị viên hoặc chủ phòng đã dừng chia sẻ màn hình.';
+
+  @override
+  String get mentorNavHome => 'Trang chủ';
+
+  @override
+  String get mentorNavCalendar => 'Lịch dạy';
+
+  @override
+  String get mentorNavMeetings => 'Buổi tư vấn';
+
+  @override
+  String get mentorNavAvailability => 'Lịch trống';
+
+  @override
+  String get mentorNavProfile => 'Cá nhân';
+
+  @override
+  String get mentorHomeAttentionTitle => 'Cần xử lý ngay';
+
+  @override
+  String get mentorHomeAttentionEmpty =>
+      'Mọi việc đều ổn định. Không có mục nào đang chờ xử lý.';
+
+  @override
+  String get mentorHomeQuickActionsTitle => 'Truy cập nhanh nghiệp vụ';
+
+  @override
+  String get mentorHomeMetricUpcoming => 'Sắp diễn ra';
+
+  @override
+  String get mentorHomeMetricUnreadChat => 'Tin chưa đọc';
+
+  @override
+  String get mentorHomeMetricOpenDisputes => 'Khiếu nại mở';
+
+  @override
+  String get mentorHomeMetricUnrepliedReviews => 'Đánh giá chờ reply';
+
+  @override
+  String get mentorHomeMetricOpenSlots => 'Khung giờ trống';
+
+  @override
+  String get mentorHomeMetricCompleted => 'Đã hoàn thành';
+
+  @override
+  String get mentorHomePartialFailureBanner =>
+      'Một số dữ liệu phụ tạm thời chưa tải được. Vẫn hiển thị dữ liệu hiện có.';
+
+  @override
+  String get mentorHomeHeroTitle => 'Sẵn sàng đồng hành cùng học viên hôm nay';
+
+  @override
+  String get mentorHomeHeroSubtitle =>
+      'Quản lý lịch dạy, chuẩn bị giáo án và giữ chất lượng 1-1 ổn định.';
+
+  @override
+  String get mentorHomeNextSessionCta => 'Vào phòng chuẩn bị';
+
+  @override
+  String get mentorActionChat => 'Tin nhắn 1-1';
+
+  @override
+  String get mentorActionReviews => 'Đánh giá';
+
+  @override
+  String get mentorActionDisputes => 'Khiếu nại';
+
+  @override
+  String get mentorActionCompensation => 'Thù lao';
+
+  @override
+  String get mentorActionBankAccount => 'Ngân hàng';
+
+  @override
+  String get mentorActionSchedulePolicy => 'Lịch làm việc định kỳ';
+
+  @override
+  String get mentorActionSessionPrep => 'Chuẩn bị buổi';
+
+  @override
+  String get mentorMeetingsSearchHint =>
+      'Tìm theo học viên, câu hỏi hoặc mã #ID...';
+
+  @override
+  String get mentorMeetingsFilterAll => 'Tất cả';
+
+  @override
+  String get mentorMeetingsFilterUpcoming => 'Sắp tới';
+
+  @override
+  String get mentorMeetingsFilterCompleted => 'Hoàn thành';
+
+  @override
+  String get mentorMeetingsFilterCancelled => 'Đã hủy';
+
+  @override
+  String get mentorMeetingsCancelledApiNotice =>
+      'Lưu ý: Danh sách hiện tại chỉ hiển thị các buổi tư vấn đang hoạt động (chưa bao gồm buổi đã hủy).';
+
+  @override
+  String get mentorMeetingsSortSchedule => 'Sắp xếp: Giờ hẹn';
+
+  @override
+  String get mentorMeetingsSortNewest => 'Sắp xếp: Mới nhất';
+
+  @override
+  String get mentorMeetingsFilterEmpty =>
+      'Không tìm thấy buổi tư vấn phù hợp bộ lọc hiện tại.';
+
+  @override
+  String get mentorMeetingJlptLevel => 'Trình độ JLPT';
+
+  @override
+  String get mentorMeetingLearnerQuestion => 'Câu hỏi chuẩn bị của học viên';
+
+  @override
+  String get mentorMeetingNoQuestion =>
+      'Học viên chưa gửi câu hỏi trước buổi học.';
+
+  @override
+  String get mentorMeetingAttendanceTitle => 'Theo dõi điểm danh phòng họp';
+
+  @override
+  String get mentorMeetingAttendanceEmpty =>
+      'Chưa ghi nhận dữ liệu điểm danh vào phòng.';
+
+  @override
+  String get mentorMeetingCancellationPolicyTitle => 'Chính sách hủy lịch hẹn';
+
+  @override
+  String get mentorMeetingCancellationAllowed =>
+      'Có thể hủy lịch theo chính sách hiện hành.';
+
+  @override
+  String get mentorMeetingCancellationBlocked => 'Không thể hủy lúc này.';
+
+  @override
+  String get mentorMeetingReplyReviewButton => 'Phản hồi đánh giá';
+
+  @override
+  String get mentorMeetingRespondDisputeButton => 'Giải trình khiếu nại';
+
+  @override
+  String get mentorMeetingReviewNotFound =>
+      'Chưa tìm thấy đánh giá cho buổi tư vấn này.';
+
+  @override
+  String get mentorMeetingDisputeNotFound =>
+      'Chưa tìm thấy hồ sơ khiếu nại cho buổi tư vấn này.';
+
+  @override
+  String get mentorMeetingOpenChat => 'Nhắn tin 1-1 với học viên';
+
+  @override
+  String get mentorMeetingOpenPrep => 'Chuẩn bị buổi tư vấn';
+
+  @override
+  String get mentorMeetingOpenDisputeDetail => 'Xem hồ sơ khiếu nại';
+
+  @override
+  String get mentorPrepScreenTitle => 'Chuẩn bị buổi tư vấn';
+
+  @override
+  String get mentorPrepSelectBookingHint =>
+      'Chọn một buổi tư vấn sắp tới để xem câu hỏi học viên và kiểm tra phòng học.';
+
+  @override
+  String get mentorPrepChecklistTitle => 'Danh sách kiểm tra trước giờ dạy';
+
+  @override
+  String get mentorPrepCheckAudio => 'Kiểm tra micro và kết nối mạng ổn định';
+
+  @override
+  String get mentorPrepCheckQuestion =>
+      'Đọc kỹ câu hỏi JLPT của học viên bên dưới';
+
+  @override
+  String get mentorPrepCheckRoomReady =>
+      'Xác nhận quyền vào phòng tư vấn trực tuyến sẵn sàng';
+
+  @override
+  String get mentorPrepRoomAccessTitle => 'Trạng thái phòng họp';
+
+  @override
+  String get mentorPrepRoomReady => 'Phòng đã sẵn sàng truy cập';
+
+  @override
+  String get mentorPrepRoomNotReady => 'Phòng chưa mở hoặc chưa đến khung giờ';
+
+  @override
+  String get mentorPrepNotesReadOnlyBanner =>
+      'Hiện chưa hỗ trợ lưu ghi chú chuẩn bị trực tuyến; màn hình chỉ hiển thị thông tin đặt lịch từ học viên.';
+
+  @override
+  String get mentorScheduleV3Title => 'Lịch làm việc định kỳ';
+
+  @override
+  String get mentorScheduleV3Subtitle =>
+      'Thiết lập ca cố định hằng tuần (khung giờ 90 phút + 15 phút nghỉ) và công bố tự động.';
+
+  @override
+  String get mentorScheduleV3ApprovalRequired =>
+      'Hồ sơ Cố vấn cần ở trạng thái Đã phê duyệt mới có thể xem trước và công bố lịch trống.';
+
+  @override
+  String get mentorScheduleV3AddRule => 'Thêm quy tắc ca';
+
+  @override
+  String get mentorScheduleV3SaveRules => 'Lưu lịch làm việc';
+
+  @override
+  String get mentorScheduleV3Preview => 'Xem trước 7 ngày';
+
+  @override
+  String get mentorScheduleV3Publish => 'Công bố 7 ngày tới';
+
+  @override
+  String get mentorScheduleV3AutoPublish => 'Tự động công bố lịch định kỳ';
+
+  @override
+  String get mentorScheduleV3DisableSlot => 'Đóng khung giờ này';
+
+  @override
+  String get mentorScheduleV3DeleteSlot => 'Xóa khung giờ';
+
+  @override
+  String get mentorScheduleV3RequestCancel => 'Yêu cầu hủy khung giờ';
+
+  @override
+  String get mentorScheduleV3RequestChange => 'Yêu cầu đổi ca tuần';
+
+  @override
+  String get mentorScheduleV3ReasonHint =>
+      'Nhập lý do chi tiết (tối thiểu 5 ký tự)...';
+
+  @override
+  String get mentorScheduleSlotApproved => 'Đã duyệt';
+
+  @override
+  String get mentorScheduleSlotPending => 'Chờ duyệt';
+
+  @override
+  String get mentorScheduleSlotRejected => 'Bị từ chối';
+
+  @override
+  String get mentorScheduleSlotCancelRequested => 'Đang xin hủy';
+
+  @override
+  String get mentorScheduleSlotBookedCount => 'Đã đặt';
+
+  @override
+  String get mentorProfileViewDocument => 'Xem chứng chỉ đã tải lên';
+
+  @override
+  String get mentorProfileDocumentLoading => 'Đang tải chứng chỉ bảo vệ...';
+
+  @override
+  String get mentorProfileDocumentError =>
+      'Không mở được chứng chỉ lúc này. Vui lòng thử lại sau.';
+
+  @override
+  String mentorProfileDocumentPdfReady(int sizeKb) {
+    return 'Chứng chỉ PDF đã sẵn sàng ($sizeKb KB).';
+  }
+
+  @override
+  String get mentorProfileDocumentOpenExternal => 'Mở bằng trình xem tài liệu';
+
+  @override
+  String get mentorProfilePendingLockedNotice =>
+      'Hồ sơ đang chờ xét duyệt. Tạm thời không thể chỉnh sửa cho đến khi có kết quả.';
+
+  @override
+  String get mentorProfileApprovedLockedNotice =>
+      'Hồ sơ đã được phê duyệt. Chuyên môn, trình độ JLPT, kinh nghiệm, nơi công tác và chứng chỉ được khóa để bảo toàn xác minh.';
+
+  @override
+  String get mentorProfileAccountReadOnlyNote =>
+      'Thông tin tài khoản cơ bản (họ tên, số điện thoại, ảnh đại diện) và cài đặt thông báo được quản lý ở cấp tài khoản, chưa hỗ trợ chỉnh sửa trực tiếp tại hồ sơ Cố vấn.';
+
+  @override
+  String get mentorChatThreadsTitle => 'Tin nhắn 1-1 với học viên';
+
+  @override
+  String get mentorChatThreadsEmpty =>
+      'Chưa có cuộc trò chuyện nào gắn với lịch hẹn tư vấn.';
+
+  @override
+  String get mentorChatReadOnlyBanner =>
+      'Phiên tư vấn đã kết thúc hoặc bị hủy — cuộc trò chuyện hiện ở chế độ chỉ đọc.';
+
+  @override
+  String get mentorChatInputHint => 'Nhập tin nhắn gửi học viên...';
+
+  @override
+  String get mentorChatLoadOlder => 'Tải tin nhắn cũ hơn';
+
+  @override
+  String get mentorChatReconnect => 'Kết nối lại';
+
+  @override
+  String get mentorChatConnecting => 'Đang kết nối trò chuyện...';
+
+  @override
+  String get mentorChatReconnecting => 'Đang khôi phục kết nối...';
+
+  @override
+  String get mentorChatDisconnected => 'Mất kết nối — bấm để thử lại';
+
+  @override
+  String get mentorChatEmptyMessages =>
+      'Chưa có tin nhắn nào. Hãy gửi lời chào hoặc hướng dẫn chuẩn bị cho học viên.';
+
+  @override
+  String get mentorReviewsTitle => 'Đánh giá từ học viên';
+
+  @override
+  String get mentorReviewsEmpty => 'Chưa có đánh giá nào từ học viên.';
+
+  @override
+  String get mentorReviewsAverageLabel => 'Điểm trung bình';
+
+  @override
+  String get mentorReviewsTotalLabel => 'Tổng đánh giá';
+
+  @override
+  String get mentorReviewsPositiveRate => 'Tỷ lệ tích cực';
+
+  @override
+  String get mentorReviewsReplyLabel => 'Phản hồi của Mentor';
+
+  @override
+  String get mentorReviewsEditReplyAction => 'Sửa phản hồi';
+
+  @override
+  String get mentorReviewsReplyHint =>
+      'Nhập phản hồi chuyên nghiệp (1–1000 ký tự)...';
+
+  @override
+  String get mentorReviewsSubmitReply => 'Gửi phản hồi';
+
+  @override
+  String get mentorDisputesTitle => 'Quản lý khiếu nại';
+
+  @override
+  String get mentorDisputesEmpty => 'Không có khiếu nại nào liên quan đến bạn.';
+
+  @override
+  String mentorDisputeDetailTitle(int id) {
+    return 'Chi tiết khiếu nại #$id';
+  }
+
+  @override
+  String get mentorDisputeLearnerReason => 'Lý do từ học viên';
+
+  @override
+  String get mentorDisputeEvidenceTitle => 'Bằng chứng đính kèm';
+
+  @override
+  String get mentorDisputeAttendanceEvidence =>
+      'Bằng chứng điểm danh phòng họp';
+
+  @override
+  String get mentorDisputeTimelineTitle => 'Nhật ký xử lý tranh chấp';
+
+  @override
+  String get mentorDisputeYourResponse => 'Bản giải trình của bạn';
+
+  @override
+  String get mentorDisputeResponseHint =>
+      'Trình bày rõ bối cảnh buổi học và bằng chứng (1–2000 ký tự)...';
+
+  @override
+  String get mentorDisputeSubmitResponse => 'Gửi giải trình';
+
+  @override
+  String get mentorDisputeLockedNotice =>
+      'Hồ sơ khiếu nại đã đóng hoặc đã có giải trình trước đó.';
+
+  @override
+  String get mentorDisputeAdminDecision => 'Kết luận của Quản trị viên';
+
+  @override
+  String get mentorCompHourlyRatesTitle => 'Bảng mức thù lao theo giờ';
+
+  @override
+  String get mentorCompQualificationsTitle => 'Hồ sơ năng lực được công nhận';
+
+  @override
+  String get mentorCompPayrollDetailTitle => 'Chi tiết kỳ lương';
+
+  @override
+  String get mentorCompPayoutDetailTitle => 'Chi tiết lần chi trả';
+
+  @override
+  String get mentorBankPopularPresetsTitle => 'Chọn nhanh ngân hàng Việt Nam';
+
+  @override
+  String get mentorBankCustomCodeHint => 'Hoặc nhập mã BIN / ngân hàng khác';
+
+  @override
+  String get mentorCommonCancel => 'Đóng';
+
+  @override
+  String get mentorCommonSave => 'Lưu';
+
+  @override
+  String get mentorCommonConfirm => 'Xác nhận';
+
+  @override
+  String get mentorCommonRetry => 'Thử lại';
+
+  @override
+  String get onboardingPlanPreviewEyebrow => 'KẾ HOẠCH HỌC TẬP CỦA BẠN';
+
+  @override
+  String onboardingPlanHeroTitle(String level) {
+    return 'Chinh phục JLPT $level';
+  }
+
+  @override
+  String get onboardingPlanHeroSubtitle => 'Một hành trình mới đang chờ bạn!';
+
+  @override
+  String get onboardingPlanCurrentLevelLabel => 'Trình độ hiện tại';
+
+  @override
+  String get onboardingPlanTargetLabel => 'Mục tiêu';
+
+  @override
+  String get onboardingPlanDailyStudyLabel => 'Học mỗi ngày';
+
+  @override
+  String onboardingPlanDailyMinutesValue(int minutes) {
+    return '$minutes phút';
+  }
+
+  @override
+  String get onboardingPlanCertificateLabel => 'Chứng chỉ đã đạt';
+
+  @override
+  String get onboardingPlanCertificateNone => 'Chưa có';
+
+  @override
+  String get onboardingPlanCertificateUnspecified => 'Chưa cung cấp thông tin';
+
+  @override
+  String get onboardingPlanExamSummaryLabel => 'Kỳ thi dự kiến';
+
+  @override
+  String onboardingPlanExamMonthYear(int month, int year) {
+    return 'Tháng $month, $year';
+  }
+
+  @override
+  String get onboardingPlanNoExamTitle => 'Chưa chọn kỳ thi';
+
+  @override
+  String get onboardingPlanNoExamSubtitle => 'Bạn có thể bổ sung sau.';
+
+  @override
+  String get discardChangesTitle => 'Hủy thay đổi?';
+
+  @override
+  String get discardChangesMessage =>
+      'Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị hủy.';
+
+  @override
+  String get discardChangesStay => 'Ở lại';
+
+  @override
+  String get discardChangesLeave => 'Rời đi';
+
+  @override
+  String get mentorRoleBadge => 'Cố vấn';
+
+  @override
+  String get mentorProfileSectionProfile => 'Hồ sơ';
+
+  @override
+  String get mentorProfileEditSubtitle =>
+      'Cập nhật thông tin cá nhân và chuyên môn.';
+
+  @override
+  String get mentorProfileSectionActivity => 'Hoạt động cố vấn';
+
+  @override
+  String get mentorProfileChatSubtitle =>
+      'Trao đổi trực tiếp 1-1 theo từng lịch hẹn.';
+
+  @override
+  String get mentorProfileReviewsSubtitle =>
+      'Xem điểm đánh giá và phản hồi từ học viên.';
+
+  @override
+  String get mentorProfileDisputesSubtitle =>
+      'Theo dõi khiếu nại và gửi giải trình.';
+
+  @override
+  String get mentorProfilePrepSubtitle =>
+      'Kiểm tra câu hỏi học viên và chuẩn bị buổi tư vấn.';
+
+  @override
+  String get mentorProfileSectionServices => 'Dịch vụ & Thù lao';
+
+  @override
+  String get mentorProfileEarningsTitle => 'Thu nhập của tôi';
+
+  @override
+  String get mentorProfileEarningsSubtitle =>
+      'Xem kỳ lương, buổi tư vấn và lịch sử chi trả.';
+
+  @override
+  String get mentorProfileBankTitle => 'Tài khoản nhận thù lao';
+
+  @override
+  String get mentorProfileBankSubtitle =>
+      'Cập nhật và theo dõi trạng thái xác minh ngân hàng.';
+
+  @override
+  String get mentorVerificationApproved => 'Đã xác minh';
+
+  @override
+  String get mentorVerificationApprovedDetail => 'Đã xác minh (Hoạt động)';
+
+  @override
+  String get mentorVerificationPending => 'Đang chờ duyệt';
+
+  @override
+  String get mentorVerificationChangesRequested => 'Yêu cầu bổ sung';
+
+  @override
+  String get mentorVerificationRejected => 'Hồ sơ bị từ chối';
+
+  @override
+  String get mentorVerificationUnverified => 'Chưa nộp hồ sơ';
+
+  @override
+  String get mentorVerificationPendingNote =>
+      'Hồ sơ của bạn đã được gửi tới Quản trị viên và đang trong quá trình xét duyệt.';
+
+  @override
+  String mentorVerificationRejectionReason(String reason) {
+    return 'Lý do từ chối: $reason';
+  }
+
+  @override
+  String mentorVerificationReviewNotes(String notes) {
+    return 'Ghi chú yêu cầu: $notes';
+  }
+
+  @override
+  String get mentorProfileErrorLoad =>
+      'Không thể tải thông tin hồ sơ chuyên gia.';
+
+  @override
+  String get mentorProfilePersonalNameLabel => 'Họ và tên';
+
+  @override
+  String get mentorProfilePersonalEmailLabel => 'Email';
+
+  @override
+  String get mentorProfilePersonalPhoneLabel => 'Số điện thoại';
+
+  @override
+  String get mentorProfileBioLabel => 'Giới thiệu bản thân *';
+
+  @override
+  String get mentorProfileBioHint =>
+      'Kinh nghiệm giảng dạy, phương pháp hướng dẫn...';
+
+  @override
+  String get mentorProfileExpertiseLabel => 'Lĩnh vực chuyên môn *';
+
+  @override
+  String get mentorProfileExpertiseHint =>
+      'JLPT N1, N2, Giao tiếp thương mại...';
+
+  @override
+  String get mentorProfileJlptLabel => 'Trình độ tiếng Nhật *';
+
+  @override
+  String get mentorProfileJlptNativeOption => 'Bản ngữ (Native)';
+
+  @override
+  String get mentorProfileExpLabel => 'Số năm kinh nghiệm';
+
+  @override
+  String get mentorProfileExpHint => 'Ví dụ: 5';
+
+  @override
+  String get mentorProfileExpErrorInvalid =>
+      'Số năm kinh nghiệm phải là số nguyên từ 0 đến 50.';
+
+  @override
+  String get mentorProfileWorkplaceLabel => 'Nơi công tác / Đơn vị hiện tại';
+
+  @override
+  String get mentorProfileWorkplaceHint => 'Ví dụ: Đại học FPT / Riki Nihongo';
+
+  @override
+  String get mentorProfileVideoLabel =>
+      'Link video giới thiệu (YouTube / Drive)';
+
+  @override
+  String get mentorProfileVideoErrorInvalid =>
+      'Link video cần là URL http(s) hợp lệ.';
+
+  @override
+  String get mentorProfileCertificateSection => 'Chứng chỉ xác minh *';
+
+  @override
+  String get mentorProfileDocumentUploadedNote =>
+      'Đã tải chứng chỉ xác minh lên kho riêng tư.';
+
+  @override
+  String get mentorProfileDocumentRequiredNote =>
+      'Bắt buộc: tải chứng chỉ PDF, JPEG hoặc PNG (tối đa 5 MB) trước khi gửi.';
+
+  @override
+  String get mentorProfileDocumentReplace => 'Chọn lại chứng chỉ khác';
+
+  @override
+  String get mentorProfileSaveButton => 'Lưu cập nhật hồ sơ';
+
+  @override
+  String get mentorProfileSaveDraftButton => 'Lưu thông tin';
+
+  @override
+  String get mentorProfileSavingButton => 'Đang lưu...';
+
+  @override
+  String get mentorProfileSaveSuccessTitle => 'Cập nhật thành công';
+
+  @override
+  String get mentorProfileSaveSuccessDesc =>
+      'Hồ sơ chuyên gia của bạn đã được lưu.';
+
+  @override
+  String get mentorProfileSaveErrorTitle => 'Cập nhật thất bại';
+
+  @override
+  String get mentorProfileSaveErrorDesc =>
+      'Không thể lưu hồ sơ. Vui lòng kiểm tra lại.';
+
+  @override
+  String get mentorProfileSubmitDialogTitle => 'Nộp hồ sơ xét duyệt';
+
+  @override
+  String get mentorProfileSubmitDialogBody =>
+      'Thông tin chuyên môn và chứng chỉ đã tải lên sẽ được gửi để Quản trị viên xét duyệt.';
+
+  @override
+  String get mentorProfileSubmitDialogNotesLabel => 'Ghi chú cho Quản trị viên';
+
+  @override
+  String get mentorProfileSubmitDialogNotesHint =>
+      'Chứng chỉ JLPT N1 năm 2024, kinh nghiệm 3 năm...';
+
+  @override
+  String get mentorProfileSubmitConfirmAction => 'Gửi xét duyệt';
+
+  @override
+  String get mentorProfileSubmitSuccessTitle => 'Nộp hồ sơ thành công';
+
+  @override
+  String get mentorProfileSubmitSuccessDesc =>
+      'Hồ sơ của bạn đã được gửi tới Quản trị viên để xét duyệt.';
+
+  @override
+  String get mentorProfileSubmitErrorTitle => 'Nộp hồ sơ thất bại';
+
+  @override
+  String get mentorProfileSubmitErrorDesc =>
+      'Không thể gửi hồ sơ xét duyệt. Vui lòng thử lại.';
+
+  @override
+  String get mentorProfileValidationMissingTitle => 'Chưa điền thông tin';
+
+  @override
+  String get mentorProfileValidationBioRequired =>
+      'Vui lòng nhập Giới thiệu bản thân (*).';
+
+  @override
+  String get mentorProfileValidationExpertiseRequired =>
+      'Vui lòng nhập Lĩnh vực chuyên môn (*).';
+
+  @override
+  String get mentorProfileValidationJlptRequired =>
+      'Vui lòng chọn Trình độ tiếng Nhật (*).';
+
+  @override
+  String get mentorProfileValidationCertRequired =>
+      'Vui lòng chọn và tải chứng chỉ trước khi gửi hồ sơ.';
+
+  @override
+  String get mentorProfileDocInvalidTitle => 'Tài liệu không hợp lệ';
+
+  @override
+  String get mentorProfileDocTooLarge => 'Chứng chỉ phải nhỏ hơn 5 MB.';
+
+  @override
+  String get mentorProfileDocUploadedTitle => 'Đã tải chứng chỉ';
+
+  @override
+  String get mentorProfileDocUploadedDesc =>
+      'Tài liệu được lưu trong kho riêng tư.';
+
+  @override
+  String get mentorProfileDocUploadFailedTitle => 'Không thể tải chứng chỉ';
+
+  @override
+  String get mentorProfileDocUploadFailedDesc =>
+      'Vui lòng thử lại hoặc liên hệ hỗ trợ.';
+
+  @override
+  String get mentorProfileDocOpenFailedTitle => 'Không thể mở tài liệu';
+
+  @override
+  String get mentorProfileDocOpenFailedDesc =>
+      'Vui lòng chọn lại PDF, JPEG hoặc PNG.';
+
+  @override
+  String get mentorNotificationChannelUnsupportedNotice =>
+      'Máy chủ hiện chưa hỗ trợ bật/tắt riêng từng kênh thông báo (Email/Hệ thống) cho tài khoản Cố vấn. Các thông báo lịch hẹn mới, hủy lịch, duyệt lịch trống và tin nhắn học viên vẫn được gửi qua Trung tâm thông báo.';
+
+  @override
+  String get mentorOpenNotificationCenter => 'Trung tâm thông báo';
+
+  @override
+  String get mentorOpenNotificationCenterSubtitle =>
+      'Xem lịch hẹn mới, duyệt lịch, khiếu nại và tin nhắn từ học viên.';
 }

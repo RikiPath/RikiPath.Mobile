@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_colors.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_loading.dart';
 import 'package:rikipath_mobile/features/calendar/application/learner_calendar_controller.dart';
 import 'package:rikipath_mobile/features/calendar/application/sakura_calendar_controller.dart';
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
@@ -42,7 +44,7 @@ class _LearnerCalendarScreenState extends ConsumerState<LearnerCalendarScreen> {
       return 'Kết nối lịch quá thời gian. Vui lòng thử lại.';
     }
     if (error is ServerError) {
-      return 'Máy chủ chưa tải được dữ liệu lịch. Vui lòng thử lại sau.';
+      return 'Hệ thống chưa tải được dữ liệu lịch. Vui lòng thử lại sau.';
     }
     return appErrorMessage(error, context.l10n);
   }
@@ -119,6 +121,8 @@ class _LearnerCalendarScreenState extends ConsumerState<LearnerCalendarScreen> {
 
     Widget calendar(List<SakuraCalendarEvent> events) => SakuraCalendarShell(
       events: events,
+      onBackPressed: () => popOrGo(context, AppRoutes.home),
+      dataIncomplete: failedSources.isNotEmpty || loading,
       roleName: 'Học viên RikiPath',
       fabLabel: context.l10n.mentorFinderTitle,
       fabIcon: Icons.calendar_month_outlined,
@@ -149,48 +153,58 @@ class _LearnerCalendarScreenState extends ConsumerState<LearnerCalendarScreen> {
           );
           if (mounted) retry();
         } else if (event.type == SakuraCalendarEventType.learningPlan) {
-          await context.push(AppRoutes.learnRoadmap);
-          if (mounted) ref.invalidate(learnerCalendarLearningEventsProvider);
+          navigateContextAware(context, AppRoutes.learnRoadmap);
         } else {
           SakuraEventDetailSheet.show(context, event: event);
         }
       },
     );
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          calendar(combinedEvents),
-          if (sessionExpired)
-            _CalendarNotice(
-              message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
-            )
-          else if (allFailed)
-            _CalendarNotice(
-              message: _loadError(
-                eventsAsync.error ??
-                    slotsAsync.error ??
-                    srsAsync.error ??
-                    learningAsync.error!,
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ??
+        (ModalRoute.of(context)?.canPop ?? true);
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          popOrGo(context, AppRoutes.home);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Stack(
+          children: [
+            calendar(combinedEvents),
+            if (sessionExpired)
+              _CalendarNotice(
+                message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+              )
+            else if (allFailed)
+              _CalendarNotice(
+                message: _loadError(
+                  eventsAsync.error ??
+                      slotsAsync.error ??
+                      srsAsync.error ??
+                      learningAsync.error!,
+                ),
+                onRetry: retry,
+              )
+            else if (failedSources.isNotEmpty)
+              _CalendarNotice(
+                message:
+                    'Chưa đồng bộ được ${failedSources.join(', ')}. '
+                    '${_loadError(eventsAsync.error ?? slotsAsync.error ?? srsAsync.error ?? learningAsync.error!)}',
+                onRetry: retry,
+              )
+            else if (loading)
+              _CalendarNotice(
+                message: combinedEvents.isEmpty
+                    ? 'Đang tải lịch học...'
+                    : 'Đang đồng bộ lịch...',
+                loading: true,
               ),
-              onRetry: retry,
-            )
-          else if (failedSources.isNotEmpty)
-            _CalendarNotice(
-              message:
-                  'Chưa đồng bộ được ${failedSources.join(', ')}. '
-                  '${_loadError(eventsAsync.error ?? slotsAsync.error ?? srsAsync.error ?? learningAsync.error!)}',
-              onRetry: retry,
-            )
-          else if (loading)
-            _CalendarNotice(
-              message: combinedEvents.isEmpty
-                  ? 'Đang tải lịch học...'
-                  : 'Đang đồng bộ lịch...',
-              loading: true,
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -221,10 +235,7 @@ class _CalendarNotice extends StatelessWidget {
         child: Row(
           children: [
             if (loading) ...[
-              const SizedBox.square(
-                dimension: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
+              const SakuraLoadingIndicator(size: 18),
               const SizedBox(width: 10),
             ],
             Expanded(child: Text(message, maxLines: 2)),

@@ -38,7 +38,8 @@ class LearnerStartupScreen extends ConsumerWidget {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!context.mounted) return;
             context.go(switch (target) {
-              LearnerStartupDestination.onboarding => AppRoutes.onboarding,
+              LearnerStartupDestination.onboarding =>
+                AppRoutes.onboardingWithOrigin(OnboardingOrigin.auth),
               LearnerStartupDestination.placementTest =>
                 AppRoutes.placementTest,
               LearnerStartupDestination.home => AppRoutes.home,

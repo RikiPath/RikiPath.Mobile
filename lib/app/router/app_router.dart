@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/router/main_shell.dart';
+import 'package:rikipath_mobile/app/router/riki_path_app_shell.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/presentation/account_settings_screen.dart';
@@ -35,9 +36,15 @@ import 'package:rikipath_mobile/features/meeting/presentation/meeting_room_scree
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_bank_account_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_chat_screens.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_compensation_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_disputes_screens.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_edit_profile_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_profile_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_reviews_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_session_prep_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shell.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_availability_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_booking_detail_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_bookings_screen.dart';
@@ -84,8 +91,10 @@ GoRouter createAppRouter({
   required AuthSessionController authSession,
   String initialLocation = AppRoutes.splash,
 }) {
+  final rootNavigatorKey = GlobalKey<NavigatorState>();
   String? pendingLocation;
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: initialLocation,
     refreshListenable: authSession,
     redirect: (context, state) {
@@ -141,17 +150,7 @@ GoRouter createAppRouter({
       ),
       GoRoute(
         path: AppRoutes.verifyEmail,
-        builder: (context, state) {
-          final arguments = state.extra;
-          return VerifyEmailScreen(
-            userId: switch (arguments) {
-              VerifyEmailArguments(:final userId) => userId,
-              int userId => userId,
-              _ => null,
-            },
-            email: arguments is VerifyEmailArguments ? arguments.email : null,
-          );
-        },
+        builder: (context, state) => _buildVerifyEmailScreen(state),
       ),
       GoRoute(
         path: AppRoutes.unsupportedRole,
@@ -183,47 +182,164 @@ GoRouter createAppRouter({
       ),
       GoRoute(
         path: '/meetings/:meetingId',
-        redirect: (context, state) => '/mentor/meetings/',
+        redirect: (context, state) {
+          final id = int.tryParse(state.pathParameters['meetingId'] ?? '');
+          if (id != null && id > 0) {
+            return AppRoutes.mentorMeetingDetail(id);
+          }
+          return AppRoutes.mentorMeetings;
+        },
       ),
-      GoRoute(
-        path: AppRoutes.mentor,
-        builder: (context, state) => const MentorHomeScreen(),
-        routes: [
-          GoRoute(
-            path: AppRoutes.mentorProfileSegment,
-            builder: (context, state) => const MentorProfileScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.mentorAvailabilitySegment,
-            builder: (context, state) => const MentorAvailabilityScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.mentorCompensationSegment,
-            builder: (context, state) => const MentorCompensationScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.mentorBankAccountSegment,
-            builder: (context, state) => const MentorBankAccountScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.mentorCalendarSegment,
-            builder: (context, state) => const MentorCalendarScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.mentorMeetingsSegment,
-            builder: (context, state) => const MentorMeetingsScreen(),
+      StatefulShellRoute(
+        navigatorContainerBuilder: sakuraShellBranchContainerBuilder,
+        builder: (context, state, navigationShell) {
+          return MentorShell(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.mentorMeetingDetailSegment,
-                builder: (context, state) => MentorMeetingDetailScreen(
-                  meetingId: int.tryParse(
-                    state.pathParameters['meetingId'] ?? '',
+                path: AppRoutes.mentor,
+                builder: (context, state) => const MentorHomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.mentorCalendar,
+                builder: (context, state) => const MentorCalendarScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.mentorMeetings,
+                builder: (context, state) => const MentorMeetingsScreen(),
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.mentorMeetingDetailSegment,
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (context, state) => MentorMeetingDetailScreen(
+                      meetingId: int.tryParse(
+                        state.pathParameters['meetingId'] ?? '',
+                      ),
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: AppRoutes.mentorMeetingPrepSegment,
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (context, state) => MentorSessionPrepScreen(
+                          bookingId: int.tryParse(
+                            state.pathParameters['meetingId'] ?? '',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.mentorAvailability,
+                builder: (context, state) => const MentorAvailabilityScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.mentorProfile,
+                builder: (context, state) => const MentorProfileScreen(),
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.mentorProfileEditSegment,
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: const MentorEditProfileScreen(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.mentorSettingsSegment,
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: const AccountSettingsScreen.mentor(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.mentorNotificationsSegment,
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: const NotificationSettingsScreen(forMentor: true),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.mentorCompensation,
+        builder: (context, state) => const MentorCompensationScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.mentorBankAccount,
+        builder: (context, state) => const MentorBankAccountScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.mentorChangePassword,
+        pageBuilder: (context, state) => _profileDetailPage(
+          state: state,
+          child: const ChangePasswordScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.mentorChangeEmail,
+        pageBuilder: (context, state) => _profileDetailPage(
+          state: state,
+          child: const UpdateEmailScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.mentorVerifyEmail,
+        builder: (context, state) => _buildVerifyEmailScreen(state),
+      ),
+      GoRoute(
+        path: AppRoutes.mentorChat,
+        builder: (context, state) => const MentorChatThreadsScreen(),
+        routes: [
+          GoRoute(
+            path: AppRoutes.mentorChatRoomSegment,
+            builder: (context, state) => MentorChatRoomScreen(
+              bookingId: int.tryParse(state.pathParameters['bookingId'] ?? ''),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.mentorReviews,
+        builder: (context, state) => const MentorReviewsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.mentorDisputes,
+        builder: (context, state) => const MentorDisputesScreen(),
+        routes: [
+          GoRoute(
+            path: AppRoutes.mentorDisputeDetailSegment,
+            builder: (context, state) => MentorDisputeDetailScreen(
+              disputeId: int.tryParse(state.pathParameters['disputeId'] ?? ''),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.mentorPrep,
+        builder: (context, state) => const MentorSessionPrepScreen(),
       ),
       GoRoute(
         path: AppRoutes.mentorApplication,
@@ -323,7 +439,12 @@ GoRouter createAppRouter({
       ),
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (context, state) => const OnboardingScreen(),
+        builder: (context, state) => OnboardingScreen(
+          origin: OnboardingOrigin.fromQuery(
+            state.uri.queryParameters['from'],
+          ),
+          returnTo: state.uri.queryParameters['returnTo'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.placementTest,
@@ -349,7 +470,8 @@ GoRouter createAppRouter({
           return LearnerCalendarScreen(initialDate: parsedDate);
         },
       ),
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
+        navigatorContainerBuilder: sakuraShellBranchContainerBuilder,
         builder: (context, state, navigationShell) {
           return MainShell(navigationShell: navigationShell);
         },
@@ -464,6 +586,7 @@ GoRouter createAppRouter({
                 routes: [
                   GoRoute(
                     path: AppRoutes.reviewSegment,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) => const DailyReviewScreen(),
                   ),
                   GoRoute(
@@ -472,6 +595,7 @@ GoRouter createAppRouter({
                   ),
                   GoRoute(
                     path: AppRoutes.essayWritingSegment,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) => const EssayWritingScreen(),
                   ),
                   GoRoute(
@@ -497,25 +621,30 @@ GoRouter createAppRouter({
                   ),
                   GoRoute(
                     path: AppRoutes.speechSegment,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) => const SpeechToTextScreen(),
                   ),
                   GoRoute(
                     path: AppRoutes.textScanSegment,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) => const TextScanScreen(),
                   ),
                   GoRoute(
                     path: AppRoutes.mockTestSegment,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) =>
                         MockTestScreen(testId: state.pathParameters['testId']!),
                     routes: [
                       GoRoute(
                         path: AppRoutes.mockResultSegment,
+                        parentNavigatorKey: rootNavigatorKey,
                         builder: (context, state) => MockTestResultScreen(
                           testId: state.pathParameters['testId']!,
                         ),
                         routes: [
                           GoRoute(
                             path: AppRoutes.mockDetailedReviewSegment,
+                            parentNavigatorKey: rootNavigatorKey,
                             builder: (context, state) =>
                                 MockTestDetailedReviewScreen(
                                   testId: state.pathParameters['testId']!,
@@ -605,6 +734,13 @@ GoRouter createAppRouter({
                       child: const ChangePasswordScreen(),
                     ),
                   ),
+                  GoRoute(
+                    path: AppRoutes.profileVerifyEmailSegment,
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: _buildVerifyEmailScreen(state),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -615,6 +751,18 @@ GoRouter createAppRouter({
     errorBuilder: (context, state) => Scaffold(
       body: Center(child: Text(context.l10n.pageNotFound('${state.uri}'))),
     ),
+  );
+}
+
+Widget _buildVerifyEmailScreen(GoRouterState state) {
+  final arguments = state.extra;
+  return VerifyEmailScreen(
+    userId: switch (arguments) {
+      VerifyEmailArguments(:final userId) => userId,
+      int userId => userId,
+      _ => null,
+    },
+    email: arguments is VerifyEmailArguments ? arguments.email : null,
   );
 }
 
@@ -726,7 +874,11 @@ String? _authenticatedRoleRedirect({
     if (matchedLocation == AppRoutes.mentorApplication) {
       return AppRoutes.mentorProfile;
     }
-    return isMentorRoute || isMeetingRoute ? null : AppRoutes.mentor;
+    return isMentorRoute ||
+            isMeetingRoute ||
+            matchedLocation == AppRoutes.notifications
+        ? null
+        : AppRoutes.mentor;
   }
 
   return matchedLocation == AppRoutes.unsupportedRole

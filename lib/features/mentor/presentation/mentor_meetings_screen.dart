@@ -5,40 +5,49 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_app_header.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_parity_components.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
+
+enum _MeetingFilterTab { all, upcoming, completed, cancelled }
+
+enum _MeetingSortMode { schedule, newest }
 
 class MentorMeetingsScreen extends ConsumerWidget {
   const MentorMeetingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(mentorMeetingsControllerProvider);
+    final meetingsState = ref.watch(mentorMeetingsControllerProvider);
+
     return Scaffold(
       key: const Key('mentor_meetings_screen'),
       backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(
-        title: Text(context.l10n.mentorMeetingsTitle),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: AppSpacing.space3),
-            child: RikiLanguageSwitcher(),
-          ),
-        ],
+      appBar: SakuraAppHeader(
+        showStreak: false,
+        calendarTooltip: 'Lịch giảng dạy',
+        onNotificationsPressed: () =>
+            mentorNavigate(context, AppRoutes.notifications),
+        onCalendarPressed: () =>
+            mentorNavigate(context, AppRoutes.mentorCalendar),
       ),
+      bottomNavigationBar: MentorShellScope.hasShell(context)
+          ? null
+          : const MentorBottomNavigationBar(selectedIndex: 2),
       body: SafeArea(
         top: false,
-        child: switch (state) {
-          AsyncLoading() => const MentorListSkeleton(
-            key: Key('mentor_meetings_loading'),
+        child: switch (meetingsState) {
+          AsyncLoading() => const Padding(
+            padding: EdgeInsets.all(AppSpacing.screenHorizontal),
+            child: MentorListSkeleton(key: Key('mentor_meetings_loading')),
           ),
           AsyncError() => _RefreshableMeetingBody(
-            key: const Key('mentor_meetings_error'),
-            onRefresh: ref
-                .read(mentorMeetingsControllerProvider.notifier)
-                .retry,
+            onRefresh: () =>
+                ref.read(mentorMeetingsControllerProvider.notifier).retry(),
             child: MentorErrorState(
+              key: const Key('mentor_meetings_error'),
               message: context.l10n.mentorMeetingsError,
               onRetry: ref
                   .read(mentorMeetingsControllerProvider.notifier)
@@ -47,9 +56,8 @@ class MentorMeetingsScreen extends ConsumerWidget {
           ),
           AsyncData(:final value) => _MeetingList(
             meetings: value,
-            onRefresh: ref
-                .read(mentorMeetingsControllerProvider.notifier)
-                .retry,
+            onRefresh: () =>
+                ref.read(mentorMeetingsControllerProvider.notifier).retry(),
           ),
         },
       ),
@@ -68,38 +76,83 @@ class _MeetingList extends StatefulWidget {
 }
 
 class _MeetingListState extends State<_MeetingList> {
-  int _selectedTabIndex =
-      0; // 0: Tất cả, 1: Chờ xác nhận, 2: Đã xác nhận, 3: Đã hoàn thành
+  final TextEditingController _searchController = TextEditingController();
+  _MeetingFilterTab _selectedTab = _MeetingFilterTab.all;
+  _MeetingSortMode _sortMode = _MeetingSortMode.schedule;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<MentorMeetingSummary> _applyFilters() {
+    final query = _searchController.text.trim().toLowerCase();
+    final tabFiltered = switch (_selectedTab) {
+      _MeetingFilterTab.all => widget.meetings,
+      _MeetingFilterTab.upcoming => widget.meetings.where(
+          (m) =>
+              m.status == MentorMeetingStatus.assigned ||
+              m.status == MentorMeetingStatus.accepted ||
+              m.status == MentorMeetingStatus.pendingAssignment,
+        ),
+      _MeetingFilterTab.completed => widget.meetings.where(
+          (m) => m.status == MentorMeetingStatus.completed,
+        ),
+      _MeetingFilterTab.cancelled => widget.meetings.where(
+          (m) => m.status == MentorMeetingStatus.cancelled,
+        ),
+    };
+
+    final searched = tabFiltered.where((m) {
+      if (query.isEmpty) return true;
+      final hay = [
+        m.learnerName ?? '',
+        '#${m.id}',
+        '${m.id}',
+        m.jlptLevel ?? '',
+        m.question ?? '',
+      ].join(' ').toLowerCase();
+      return hay.contains(query);
+    }).toList();
+
+    searched.sort((a, b) {
+      if (_sortMode == _MeetingSortMode.newest) {
+        return b.id.compareTo(a.id);
+      }
+      final aTime = a.scheduledAt?.value;
+      final bTime = b.scheduledAt?.value;
+      if (aTime == null && bTime == null) return b.id.compareTo(a.id);
+      if (aTime == null) return 1;
+      if (bTime == null) return -1;
+      return aTime.compareTo(bTime);
+    });
+
+    return searched;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final assignedCount = widget.meetings
-        .where((m) => m.status == MentorMeetingStatus.assigned)
-        .length;
-    final acceptedCount = widget.meetings
-        .where((m) => m.status == MentorMeetingStatus.accepted)
+    final l10n = context.l10n;
+    final upcomingCount = widget.meetings
+        .where(
+          (m) =>
+              m.status == MentorMeetingStatus.assigned ||
+              m.status == MentorMeetingStatus.accepted ||
+              m.status == MentorMeetingStatus.pendingAssignment,
+        )
         .length;
     final completedCount = widget.meetings
         .where((m) => m.status == MentorMeetingStatus.completed)
         .length;
+    final cancelledCount = widget.meetings
+        .where((m) => m.status == MentorMeetingStatus.cancelled)
+        .length;
 
-    final filteredMeetings = switch (_selectedTabIndex) {
-      1 =>
-        widget.meetings
-            .where((m) => m.status == MentorMeetingStatus.assigned)
-            .toList(),
-      2 =>
-        widget.meetings
-            .where((m) => m.status == MentorMeetingStatus.accepted)
-            .toList(),
-      3 =>
-        widget.meetings
-            .where((m) => m.status == MentorMeetingStatus.completed)
-            .toList(),
-      _ => widget.meetings,
-    };
+    final filteredMeetings = _applyFilters();
 
     return RefreshIndicator(
+      color: AppColors.brandPrimary,
       onRefresh: widget.onRefresh,
       child: ListView(
         key: const Key('mentor_meetings_list'),
@@ -107,45 +160,105 @@ class _MeetingListState extends State<_MeetingList> {
         padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
         children: [
           MentorPageHeader(
-            title: context.l10n.mentorMeetingsTitle,
-            subtitle: context.l10n.mentorMeetingsDescription,
+            title: l10n.mentorMeetingsTitle,
+            subtitle: l10n.mentorMeetingsDescription,
           ),
           const SizedBox(height: AppSpacing.space3),
-
-          // Tabs lọc trạng thái theo chuẩn Screen 16
           if (widget.meetings.isNotEmpty) ...[
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterTab(0, 'Tất cả (${widget.meetings.length})'),
-                  const SizedBox(width: AppSpacing.space2),
-                  _buildFilterTab(1, 'Chờ xác nhận ($assignedCount)'),
-                  const SizedBox(width: AppSpacing.space2),
-                  _buildFilterTab(2, 'Đã xác nhận ($acceptedCount)'),
-                  const SizedBox(width: AppSpacing.space2),
-                  _buildFilterTab(3, 'Đã học ($completedCount)'),
-                ],
+            TextField(
+              key: const Key('mentor_meetings_search_input'),
+              controller: _searchController,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: l10n.mentorMeetingsSearchHint,
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        onPressed: () => setState(_searchController.clear),
+                        icon: const Icon(Icons.close),
+                      ),
               ),
             ),
+            const SizedBox(height: AppSpacing.space3),
+            Row(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildFilterTab(
+                          _MeetingFilterTab.all,
+                          '${l10n.mentorMeetingsFilterAll} (${widget.meetings.length})',
+                        ),
+                        const SizedBox(width: AppSpacing.space2),
+                        _buildFilterTab(
+                          _MeetingFilterTab.upcoming,
+                          '${l10n.mentorMeetingsFilterUpcoming} ($upcomingCount)',
+                        ),
+                        const SizedBox(width: AppSpacing.space2),
+                        _buildFilterTab(
+                          _MeetingFilterTab.completed,
+                          '${l10n.mentorMeetingsFilterCompleted} ($completedCount)',
+                        ),
+                        const SizedBox(width: AppSpacing.space2),
+                        _buildFilterTab(
+                          _MeetingFilterTab.cancelled,
+                          '${l10n.mentorMeetingsFilterCancelled} ($cancelledCount)',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.space2),
+                ActionChip(
+                  avatar: const Icon(
+                    Icons.swap_vert_rounded,
+                    size: 16,
+                    color: AppColors.brandPrimary,
+                  ),
+                  label: Text(
+                    _sortMode == _MeetingSortMode.schedule
+                        ? l10n.mentorMeetingsSortSchedule
+                        : l10n.mentorMeetingsSortNewest,
+                    style: AppTypography.caption.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _sortMode = _sortMode == _MeetingSortMode.schedule
+                          ? _MeetingSortMode.newest
+                          : _MeetingSortMode.schedule;
+                    });
+                  },
+                ),
+              ],
+            ),
+            if (_selectedTab == _MeetingFilterTab.cancelled &&
+                cancelledCount == 0) ...[
+              const SizedBox(height: AppSpacing.space3),
+              RikiInfoBanner(message: l10n.mentorMeetingsCancelledApiNotice),
+            ],
             const SizedBox(height: AppSpacing.space4),
           ] else ...[
             const SizedBox(height: AppSpacing.space2),
           ],
-
           if (widget.meetings.isEmpty)
             MentorEmptyState(
               key: const Key('mentor_meetings_empty'),
               icon: Icons.video_call_outlined,
-              title: context.l10n.mentorMeetingsTitle,
-              description: context.l10n.mentorMeetingsEmpty,
+              title: l10n.mentorMeetingsTitle,
+              description: l10n.mentorMeetingsEmpty,
             )
           else if (filteredMeetings.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.space5),
               child: Center(
                 child: Text(
-                  'Không có lịch học nào trong mục này.',
+                  l10n.mentorMeetingsFilterEmpty,
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.textMuted,
                   ),
@@ -154,13 +267,16 @@ class _MeetingListState extends State<_MeetingList> {
             )
           else
             for (var index = 0; index < filteredMeetings.length; index++) ...[
-              MentorMeetingCard(
+              _EnhancedMeetingListTile(
                 key: ValueKey<String>(
                   'mentor_meeting_${filteredMeetings[index].id}',
                 ),
                 meeting: filteredMeetings[index],
                 onTap: () => context.push(
                   AppRoutes.mentorMeetingDetail(filteredMeetings[index].id),
+                ),
+                onOpenPrep: () => context.push(
+                  AppRoutes.mentorMeetingPrep(filteredMeetings[index].id),
                 ),
               ),
               if (index < filteredMeetings.length - 1)
@@ -171,8 +287,8 @@ class _MeetingListState extends State<_MeetingList> {
     );
   }
 
-  Widget _buildFilterTab(int index, String label) {
-    final isSelected = _selectedTabIndex == index;
+  Widget _buildFilterTab(_MeetingFilterTab tab, String label) {
+    final isSelected = _selectedTab == tab;
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
@@ -185,7 +301,78 @@ class _MeetingListState extends State<_MeetingList> {
       side: BorderSide(
         color: isSelected ? AppColors.brandPrimary : AppColors.border,
       ),
-      onSelected: (_) => setState(() => _selectedTabIndex = index),
+      onSelected: (_) => setState(() => _selectedTab = tab),
+    );
+  }
+}
+
+class _EnhancedMeetingListTile extends StatelessWidget {
+  const _EnhancedMeetingListTile({
+    required this.meeting,
+    required this.onTap,
+    required this.onOpenPrep,
+    super.key,
+  });
+
+  final MentorMeetingSummary meeting;
+  final VoidCallback onTap;
+  final VoidCallback onOpenPrep;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final hasExtraContext =
+        meeting.jlptLevel != null ||
+        (meeting.question?.trim().isNotEmpty ?? false) ||
+        meeting.status == MentorMeetingStatus.accepted ||
+        meeting.status == MentorMeetingStatus.assigned;
+
+    if (!hasExtraContext) {
+      return MentorMeetingCard(meeting: meeting, onTap: onTap);
+    }
+
+    return MentorMeetingCard(
+      meeting: meeting,
+      onTap: onTap,
+      footer: Row(
+        children: [
+          if (meeting.jlptLevel != null) ...[
+            MentorStatusBadge(
+              label: meeting.jlptLevel!,
+              color: AppColors.brandPrimary,
+            ),
+            const SizedBox(width: AppSpacing.space2),
+          ],
+          if (meeting.question?.trim().isNotEmpty ?? false)
+            Expanded(
+              child: Text(
+                meeting.question!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            )
+          else
+            const Spacer(),
+          if (meeting.status == MentorMeetingStatus.accepted ||
+              meeting.status == MentorMeetingStatus.assigned)
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.space2,
+                  vertical: 4,
+                ),
+                minimumSize: Size.zero,
+              ),
+              onPressed: onOpenPrep,
+              icon: const Icon(Icons.checklist_rtl_rounded, size: 16),
+              label: Text(l10n.mentorActionSessionPrep),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -194,7 +381,6 @@ class _RefreshableMeetingBody extends StatelessWidget {
   const _RefreshableMeetingBody({
     required this.onRefresh,
     required this.child,
-    super.key,
   });
 
   final Future<void> Function() onRefresh;

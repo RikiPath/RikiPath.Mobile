@@ -392,11 +392,17 @@ void main() {
       await _tapVisible(tester, find.byKey(const Key('login_submit_button')));
       await tester.pump();
 
-      expect(find.text('Đang đăng nhập...'), findsOneWidget);
+      expect(find.text('Đang đăng nhập'), findsOneWidget);
+      expect(find.text('Đang xác thực tài khoản của bạn'), findsNothing);
       expect(
-        find.byKey(const ValueKey<String>('sakura_hourglass_overlay')),
+        find.byKey(const ValueKey('sakura_bouncing_dots')),
         findsOneWidget,
       );
+      expect(
+        find.byKey(const ValueKey<String>('sakura_loading_overlay')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('riki_inline_loader')), findsNothing);
       expect(
         find.text('Đang kết nối an toàn với tài khoản của bạn...'),
         findsNothing,
@@ -421,6 +427,14 @@ void main() {
       expect(find.byType(HomeScreen), findsOneWidget);
       expect(find.text('Đăng nhập thành công'), findsOneWidget);
       expect(find.text('Chào mừng bạn trở lại với RikiPath.'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('riki_toast_success')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('riki_toast_celebration')),
+        findsNothing,
+      );
     });
 
     testWidgets('forgot-password action opens the canonical route', (
@@ -725,6 +739,11 @@ void main() {
       await tester.pump();
 
       expect(find.text('Đang tạo tài khoản...'), findsOneWidget);
+      expect(find.text('Đang tạo tài khoản'), findsOneWidget);
+      expect(
+        find.text('Đang tạo tài khoản học viên và gửi email xác thực...'),
+        findsNothing,
+      );
       expect(
         tester
             .widget<RikiPrimaryButton>(
@@ -938,6 +957,69 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(LoginScreen), findsOneWidget);
+    });
+
+    for (final size in <Size>[
+      const Size(360, 800),
+      const Size(393, 873),
+      const Size(412, 915),
+    ]) {
+      testWidgets(
+        'keeps compact footer spacing without overflow at ${size.width}x${size.height}',
+        (tester) async {
+          await _pumpAuthRoute(
+            tester,
+            AppRoutes.register,
+            _FakeAuthRepository(),
+            physicalSize: size,
+          );
+          await tester.pumpAndSettle();
+
+          final submitRect = tester.getRect(
+            find.byKey(const Key('register_submit_button')),
+          );
+          final promptTextRect = tester.getRect(find.text('Đã có tài khoản?'));
+          final securityRect = tester.getRect(
+            find.text('Bảo mật chuẩn mã hóa Riki Learning'),
+          );
+
+          expect(
+            promptTextRect.top - submitRect.bottom,
+            inInclusiveRange(24, 32),
+          );
+          expect(
+            securityRect.top - promptTextRect.bottom,
+            inInclusiveRange(12, 16),
+          );
+
+          await tester.ensureVisible(
+            find.text('Bảo mật chuẩn mã hóa Riki Learning'),
+          );
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+
+    testWidgets('remains scrollable with the keyboard open', (tester) async {
+      await _pumpAuthRoute(
+        tester,
+        AppRoutes.register,
+        _FakeAuthRepository(),
+        physicalSize: const Size(360, 800),
+      );
+      tester.view.viewInsets = const FakeViewPadding(bottom: 260);
+      addTearDown(tester.view.resetViewInsets);
+
+      await tester.showKeyboard(_textField('register_confirm_password_field'));
+      await tester.pumpAndSettle();
+
+      final securityFooter = find.text('Bảo mật chuẩn mã hóa Riki Learning');
+      await tester.ensureVisible(securityFooter);
+      await tester.pumpAndSettle();
+
+      expect(securityFooter.hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 

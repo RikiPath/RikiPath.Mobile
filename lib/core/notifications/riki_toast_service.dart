@@ -1,7 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum RikiToastType { success, error, warning, info, celebration }
+enum RikiToastType {
+  success,
+  error,
+  warning,
+  info,
+  loading,
+  confirmation,
+  celebration,
+}
 
 @immutable
 class RikiToastData {
@@ -30,6 +38,8 @@ class RikiToastService extends Notifier<List<RikiToastData>> {
   static const infoDuration = Duration(milliseconds: 3000);
   static const warningDuration = Duration(milliseconds: 3600);
   static const errorDuration = Duration(milliseconds: 4000);
+  static const loadingDuration = Duration(milliseconds: 4500);
+  static const confirmationDuration = Duration(milliseconds: 3600);
   static const celebrationDuration = Duration(milliseconds: 1600);
   static const _maximumQueuedToasts = 2;
 
@@ -91,6 +101,32 @@ class RikiToastService extends Notifier<List<RikiToastData>> {
     );
   }
 
+  int loading({
+    required String title,
+    String? description,
+    Duration duration = loadingDuration,
+  }) {
+    return show(
+      type: RikiToastType.loading,
+      title: title,
+      description: description,
+      duration: duration,
+    );
+  }
+
+  int confirmation({
+    required String title,
+    String? description,
+    Duration duration = confirmationDuration,
+  }) {
+    return show(
+      type: RikiToastType.confirmation,
+      title: title,
+      description: description,
+      duration: duration,
+    );
+  }
+
   int celebrate({required String title, String? description}) => show(
     type: RikiToastType.celebration,
     title: title,
@@ -141,9 +177,11 @@ class RikiToastService extends Notifier<List<RikiToastData>> {
   }
 
   int _priority(RikiToastType type) => switch (type) {
-    RikiToastType.error => 3,
+    RikiToastType.error => 4,
+    RikiToastType.confirmation => 3,
     RikiToastType.warning => 2,
     RikiToastType.celebration => 2,
+    RikiToastType.loading => 2,
     RikiToastType.success => 1,
     RikiToastType.info => 0,
   };
@@ -153,6 +191,8 @@ class RikiToastService extends Notifier<List<RikiToastData>> {
     RikiToastType.error => errorDuration,
     RikiToastType.warning => warningDuration,
     RikiToastType.info => infoDuration,
+    RikiToastType.loading => loadingDuration,
+    RikiToastType.confirmation => confirmationDuration,
     RikiToastType.celebration => celebrationDuration,
   };
 }

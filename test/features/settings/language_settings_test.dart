@@ -24,17 +24,19 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.light,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            appBar: HomeHeader(
-              streakDays: 5,
-              isStreakLoading: false,
-              unreadNotificationCount: 2,
-              onNotificationsPressed: () {},
-              onCalendarPressed: () {},
+        ProviderScope(
+          child: MaterialApp(
+            theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              appBar: HomeHeader(
+                streakDays: 5,
+                isStreakLoading: false,
+                unreadNotificationCount: 2,
+                onNotificationsPressed: () {},
+                onCalendarPressed: () {},
+              ),
             ),
           ),
         ),

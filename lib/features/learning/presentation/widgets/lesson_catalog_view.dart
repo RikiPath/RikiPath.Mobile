@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_loading.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
@@ -33,7 +35,7 @@ class LessonCatalogView extends ConsumerWidget {
         .profile
         .currentStudyLevelId;
     return catalogState.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: SakuraLoadingIndicator()),
       error: (_, _) => _CatalogState(
         message: 'Không thể tải các cấp độ JLPT.',
         onRetry: () => ref.invalidate(jlptCatalogControllerProvider),
@@ -121,17 +123,29 @@ class LessonCatalogView extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               if (profileLevelId != selected.id)
-                OutlinedButton(
-                  key: const ValueKey('learning_set_study_level'),
-                  onPressed: () => onSetStudyLevel(selected),
-                  child: Text('Đặt ${selected.code} làm cấp độ đang học'),
-                ),
+                if (selected.level == JlptLevel.n2 ||
+                    selected.level == JlptLevel.n1)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      'Cấp độ ${selected.code} chỉ hỗ trợ xem học liệu tham khảo; lộ trình học chính thức hiện hỗ trợ N5–N3.',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  )
+                else
+                  OutlinedButton(
+                    key: const ValueKey('learning_set_study_level'),
+                    onPressed: () => onSetStudyLevel(selected),
+                    child: Text('Đặt ${selected.code} làm cấp độ đang học'),
+                  ),
               lessonsState.when(
-                loading: () => const Padding(
+                loading: () => Padding(
                   padding: EdgeInsets.all(32),
-                  child: Center(
-                    key: ValueKey('learning_catalog_loading'),
-                    child: CircularProgressIndicator(),
+                  child: SakuraSectionLoading(
+                    key: const ValueKey('learning_catalog_loading'),
+                    title: context.l10n.loadingOverlayListTitle,
                   ),
                 ),
                 error: (_, _) => _CatalogState(

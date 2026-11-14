@@ -708,15 +708,76 @@ class _EmptyNotebook extends StatelessWidget {
                 style: AppTypography.sectionTitle,
               ),
               const SizedBox(height: AppSpacing.space3),
-              SizedBox(
-                width: double.infinity,
-                child: RikiPrimaryButton(
-                  key: const ValueKey<String>(
-                    'notebook_empty_create_collection_button',
-                  ),
-                  label: context.l10n.createFirstCollectionAction,
-                  leadingIcon: Icons.add,
-                  onPressed: onCreateCollection,
+              RikiCard(
+                key: const ValueKey<String>('notebook_empty_collections_card'),
+                backgroundColor: AppColors.cardWarmWhite,
+                borderColor: AppColors.cardBorderMuted,
+                boxShadow: AppShadows.sakuraSubtle,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.space5,
+                  vertical: AppSpacing.space6,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 88,
+                      height: 88,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const RadialGradient(
+                          colors: [
+                            Color(0xFFFFF3F6),
+                            Color(0xFFFFE4EC),
+                          ],
+                        ),
+                        border: Border.all(
+                          color: const Color(0xFFFFD1DF),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Sakura3DIcon(
+                          type: Sakura3DIconType.notebook,
+                          size: 54,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.space4),
+                    Text(
+                      context.l10n.notebookEmptyTitle,
+                      style: AppTypography.cardTitle.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.learnerTextPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.space2),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 300),
+                      child: Text(
+                        context.l10n.notebookEmptyMessage,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.learnerTextSecondary,
+                          height: 1.45,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.space5),
+                    SizedBox(
+                      width: double.infinity,
+                      child: RikiPrimaryButton(
+                        key: const ValueKey<String>(
+                          'notebook_empty_create_collection_button',
+                        ),
+                        label: context.l10n.createFirstCollectionAction,
+                        leadingIcon: Icons.add,
+                        onPressed: onCreateCollection,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

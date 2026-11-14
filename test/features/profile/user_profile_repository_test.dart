@@ -27,6 +27,9 @@ void main() {
       expect(dto.targetJlptLevelName, 'N3');
       expect(dto.dailyStudyMinutes, 30);
       expect(dto.targetExamDate, DateTime(2030, 12, 1));
+      expect(dto.learningGoalVersion, 4);
+      expect(dto.certifiedJlptLevelId, 52);
+      expect(dto.certifiedJlptLevelName, 'N4');
       expect(dto.emailNotificationsEnabled, isTrue);
       expect(dto.systemNotificationsEnabled, isFalse);
     });
@@ -136,6 +139,44 @@ void main() {
       });
     });
 
+    test('complete learning goal sends one atomic PUT with certificate and version', () async {
+      final client = _RecordingApiClient();
+      final repository = ApiUserProfileRepository(client);
+      await repository.saveLearningGoal(
+        currentStudyLevelId: 11,
+        targetJlptLevelId: 73,
+        dailyStudyMinutes: 45,
+        targetExamDate: DateTime(2030, 12, 1),
+        certifiedJlptLevelId: 52,
+        expectedVersion: 4,
+      );
+      expect(client.calls, <String>['PUT ${UserProfileApiPaths.learningGoal}']);
+      expect(client.lastData, <String, Object?>{
+        'currentStudyLevelId': 11,
+        'targetJlptLevelId': 73,
+        'dailyStudyMinutes': 45,
+        'targetExamDate': '2030-12-01T00:00:00',
+        'hasJlptCertificate': true,
+        'certifiedJlptLevelId': 52,
+        'expectedVersion': 4,
+      });
+    });
+
+    test('omitted exam and certificate are explicitly cleared by complete PUT', () async {
+      final client = _RecordingApiClient();
+      await ApiUserProfileRepository(client).saveLearningGoal(
+        currentStudyLevelId: 11,
+        targetJlptLevelId: 73,
+        dailyStudyMinutes: 30,
+        targetExamDate: null,
+        certifiedJlptLevelId: null,
+        expectedVersion: 5,
+      );
+      expect(client.lastData, containsPair('targetExamDate', null));
+      expect(client.lastData, containsPair('hasJlptCertificate', false));
+      expect(client.lastData, containsPair('certifiedJlptLevelId', null));
+    });
+
     test('JLPT goal sends the existing target exam date field', () async {
       final client = _RecordingApiClient();
       final repository = ApiUserProfileRepository(client);
@@ -151,6 +192,37 @@ void main() {
         'dailyStudyMinutes': 45,
         'targetExamDate': '2030-12-01T00:00:00',
       });
+    });
+
+    test(
+      'clearing an exam date uses the explicit Backend clear flag',
+      () async {
+        final client = _RecordingApiClient();
+        final repository = ApiUserProfileRepository(client);
+
+        await repository.clearJlptGoalExamDate(
+          targetJlptLevelId: 73,
+          dailyStudyMinutes: 45,
+        );
+
+        expect(client.calls, <String>['POST ${UserProfileApiPaths.jlptGoal}']);
+        expect(client.lastData, <String, Object?>{
+          'targetJlptLevelId': 73,
+          'dailyStudyMinutes': 45,
+          'clearTargetExamDate': true,
+        });
+      },
+    );
+
+    test('exam date preserves its calendar day across UTC offsets', () {
+      final body = _profileEnvelope();
+      final result = body['result']! as Map<String, Object?>;
+      result['targetExamDate'] = '2027-12-05T00:00:00+07:00';
+
+      expect(
+        UserProfileDto.fromEnvelope(body).targetExamDate,
+        DateTime(2027, 12, 5),
+      );
     });
 
     test('notification update uses only the two supported booleans', () async {
@@ -245,6 +317,10 @@ Map<String, Object?> _profileEnvelope({
       'targetJlptLevelName': targetName,
       'dailyStudyMinutes': 30,
       'targetExamDate': '2030-12-01T00:00:00',
+      'learningGoalVersion': 4,
+      'hasJlptCertificate': true,
+      'certifiedJlptLevelId': 52,
+      'certifiedJlptLevelName': 'N4',
       'emailNotificationsEnabled': true,
       'systemNotificationsEnabled': false,
     },

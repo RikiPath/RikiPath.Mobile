@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
@@ -18,15 +19,24 @@ class MockTestResultScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final flow = ref.watch(mockTestControllerProvider);
     final expectedTestId = int.tryParse(testId);
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(
-        title: Text(context.l10n.mockResultTitle),
-        leading: IconButton(
-          onPressed: () => context.go(AppRoutes.practice),
-          icon: const Icon(Icons.close),
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ?? Navigator.of(context).canPop();
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          popOrGo(context, AppRoutes.practice);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.learnerBackground,
+        appBar: AppBar(
+          title: Text(context.l10n.mockResultTitle),
+          leading: IconButton(
+            onPressed: () => popOrGo(context, AppRoutes.practice),
+            icon: const Icon(Icons.close),
+          ),
         ),
-      ),
       body: flow.when(
         loading: () =>
             RikiFullScreenLoader(title: context.l10n.mockLoadingTitle),
@@ -44,7 +54,7 @@ class MockTestResultScreen extends ConsumerWidget {
               title: context.l10n.mockResultTitle,
               message: context.l10n.mockResultUnavailable,
               actionLabel: context.l10n.backToPractice,
-              onAction: () => context.go(AppRoutes.practice),
+              onAction: () => popOrGo(context, AppRoutes.practice),
             );
           }
           final test = state.selectedTest;
@@ -167,18 +177,19 @@ class MockTestResultScreen extends ConsumerWidget {
                 leadingIcon: Icons.replay,
                 onPressed: () {
                   ref.read(mockTestControllerProvider.notifier).prepareRetake();
-                  context.go(AppRoutes.mockTest(testId));
+                  context.pushReplacement(AppRoutes.mockTest(testId));
                 },
               ),
               const SizedBox(height: AppSpacing.space2),
               RikiSecondaryButton(
                 label: context.l10n.backToPractice,
-                onPressed: () => context.go(AppRoutes.practice),
+                onPressed: () => popOrGo(context, AppRoutes.practice),
               ),
             ],
           );
         },
       ),
+    ),
     );
   }
 }
@@ -209,9 +220,25 @@ class _MockTestDetailedReviewScreenState
   Widget build(BuildContext context) {
     final flow = ref.watch(mockTestControllerProvider);
     final expectedTestId = int.tryParse(widget.testId);
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(title: Text(context.l10n.detailedReview)),
+    final fallbackRoute = AppRoutes.mockTestResult(widget.testId);
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ?? Navigator.of(context).canPop();
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          popOrGo(context, fallbackRoute);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.learnerBackground,
+        appBar: AppBar(
+          title: Text(context.l10n.detailedReview),
+          leading: IconButton(
+            onPressed: () => popOrGo(context, fallbackRoute),
+            icon: const Icon(Icons.arrow_back),
+          ),
+        ),
       body: flow.when(
         loading: () =>
             RikiFullScreenLoader(title: context.l10n.mockLoadingTitle),
@@ -254,6 +281,7 @@ class _MockTestDetailedReviewScreenState
           );
         },
       ),
+    ),
     );
   }
 }

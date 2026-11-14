@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
@@ -39,7 +41,7 @@ class _LessonCatalogScreenState extends ConsumerState<LessonCatalogScreen> {
       appBar: LearningHeader.detail(
         title: 'Bài học tiếng Nhật',
         subtitle: 'Khám phá bài học theo trình độ JLPT',
-        onBack: context.pop,
+        onBack: () => popOrGo(context, AppRoutes.learn),
       ),
       body: SafeArea(
         top: false,
@@ -92,11 +94,9 @@ class _LessonCatalogScreenState extends ConsumerState<LessonCatalogScreen> {
       ref.invalidate(standardRoadmapProvider);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Không thể đổi cấp độ học. Vui lòng thử lại.'),
-        ),
-      );
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .error(title: 'Không thể đổi cấp độ học. Vui lòng thử lại.');
     }
   }
 }

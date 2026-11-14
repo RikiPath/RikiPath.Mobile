@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 
 class ProfileDetailHeader extends StatelessWidget
     implements PreferredSizeWidget {
@@ -10,6 +15,7 @@ class ProfileDetailHeader extends StatelessWidget
     required this.title,
     this.subtitle,
     this.onBack,
+    this.fallbackRoute,
     this.actions,
     super.key,
   });
@@ -17,6 +23,7 @@ class ProfileDetailHeader extends StatelessWidget
   final String title;
   final String? subtitle;
   final VoidCallback? onBack;
+  final String? fallbackRoute;
   final List<Widget>? actions;
 
   @override
@@ -24,13 +31,18 @@ class ProfileDetailHeader extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    final effectiveOnBack =
+        onBack ??
+        (fallbackRoute != null && GoRouter.maybeOf(context) != null
+            ? () => popOrGo(context, fallbackRoute!)
+            : null);
     return AppBar(
       backgroundColor: AppColors.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
       toolbarHeight: preferredSize.height,
-      leading: BackButton(onPressed: onBack),
+      leading: BackButton(onPressed: effectiveOnBack),
       titleSpacing: 0,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,7 +52,10 @@ class ProfileDetailHeader extends StatelessWidget
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.compactPageTitle.copyWith(fontSize: 19),
+            style:
+                (Theme.of(context).textTheme.titleLarge ??
+                        AppTypography.compactPageTitle)
+                    .copyWith(fontSize: 19),
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 1),
@@ -90,6 +105,7 @@ class ProfileDetailIntro extends StatelessWidget {
             background: iconBackground,
             size: 48,
             colorfulIcon: colorfulIcon,
+            useEmoji: false,
           ),
           const SizedBox(width: AppSpacing.space3),
           Expanded(
@@ -117,7 +133,7 @@ class ProfileSurface extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(AppSpacing.space4),
     this.backgroundColor = AppColors.surface,
-    this.shadow = AppShadows.cardSoft,
+    this.shadow = AppShadows.profileCard,
     super.key,
   });
 
@@ -131,7 +147,7 @@ class ProfileSurface extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(AppRadius.card),
+        borderRadius: BorderRadius.circular(19),
         boxShadow: shadow,
       ),
       child: Padding(padding: padding, child: child),
@@ -173,27 +189,27 @@ class ProfileSettingsGroup extends StatelessWidget {
       children: [
         if (label != null) ...[
           ProfileSectionLabel(label!),
-          const SizedBox(height: AppSpacing.space2),
+          const SizedBox(height: 13),
         ],
         DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            boxShadow: AppShadows.cardSoft,
+            borderRadius: BorderRadius.circular(19),
+            boxShadow: AppShadows.profileCard,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.card),
+            borderRadius: BorderRadius.circular(19),
             child: Column(
               children: [
                 for (var index = 0; index < children.length; index++) ...[
                   children[index],
                   if (index < children.length - 1)
                     const Divider(
-                      height: 0.5,
-                      thickness: 0.5,
-                      indent: 72,
+                      height: 0.7,
+                      thickness: 0.7,
+                      indent: 70,
                       endIndent: AppSpacing.space4,
-                      color: AppColors.border,
+                      color: Color(0xFFEFEDEE),
                     ),
                 ],
               ],
@@ -255,27 +271,32 @@ class _ProfileSettingsTileState extends State<ProfileSettingsTile> {
         : widget.emphasized
         ? AppColors.brandTint
         : AppColors.profileBackground;
+    final pressedBackground = widget.destructive
+        ? const Color(0xFFFFF2F3)
+        : AppColors.sakura50;
 
     return Semantics(
       button: widget.onTap != null,
       enabled: widget.onTap != null,
-      child: AnimatedScale(
-        scale: !reduceMotion && _pressed ? 0.985 : 1,
+      child: AnimatedContainer(
         duration: reduceMotion
             ? Duration.zero
-            : const Duration(milliseconds: 100),
+            : const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
+        color: _pressed ? pressedBackground : Colors.transparent,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: widget.onTap,
+            highlightColor: pressedBackground.withValues(alpha: 0.75),
+            splashColor: AppColors.brandPrimary.withValues(alpha: 0.05),
             onHighlightChanged: widget.onTap == null
                 ? null
                 : (pressed) => setState(() => _pressed = pressed),
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.space4,
-                vertical: AppSpacing.space3,
+                vertical: 14,
               ),
               child: Row(
                 children: [
@@ -697,6 +718,52 @@ Future<bool> showProfileConfirmationSheet({
   return result ?? false;
 }
 
+/// Shared logout confirmation sheet, overlay, session sign-out, and Sakura
+/// Glass toast feedback reused across Learner Profile, Onboarding Step 1, and
+/// Mentor logout flows.
+Future<bool> confirmAndPerformLogout({
+  required BuildContext context,
+  required WidgetRef ref,
+  VoidCallback? onBeforeSignOut,
+}) async {
+  final l10n = context.l10n;
+  final confirmed = await showProfileConfirmationSheet(
+    context: context,
+    icon: Icons.logout_rounded,
+    colorfulIcon: SakuraColorfulIconType.logout,
+    title: l10n.logoutConfirmationTitle,
+    message: l10n.logoutConfirmationMessage,
+    confirmLabel: l10n.logout,
+    cancelLabel: l10n.logoutStay,
+    confirmKey: const ValueKey<String>('profile_logout_confirm_button'),
+    cancelKey: const ValueKey<String>('profile_logout_cancel_button'),
+    destructive: true,
+  );
+  if (!confirmed || !context.mounted) return false;
+
+  final toast = ref.read(rikiToastServiceProvider.notifier);
+  final session = ref.read(authSessionControllerProvider);
+  toast.clear();
+  onBeforeSignOut?.call();
+
+  try {
+    await runWithAppLoadingOverlay(
+      context,
+      title: l10n.loadingOverlayLoggingOutTitle,
+      subtitle: l10n.loadingOverlayWaitSubtitle,
+      action: session.signOut,
+    );
+    toast.success(
+      title: l10n.logoutSuccessTitle,
+      description: l10n.logoutSuccessDescription,
+    );
+    return true;
+  } catch (_) {
+    toast.error(title: l10n.logoutFailureTitle);
+    return false;
+  }
+}
+
 class _ProfileIconBox extends StatelessWidget {
   const _ProfileIconBox({
     required this.icon,
@@ -704,6 +771,7 @@ class _ProfileIconBox extends StatelessWidget {
     required this.background,
     this.size = 42,
     this.colorfulIcon,
+    this.useEmoji = true,
   });
 
   final IconData icon;
@@ -711,6 +779,7 @@ class _ProfileIconBox extends StatelessWidget {
   final Color background;
   final double size;
   final SakuraColorfulIconType? colorfulIcon;
+  final bool useEmoji;
 
   @override
   Widget build(BuildContext context) {
@@ -721,7 +790,7 @@ class _ProfileIconBox extends StatelessWidget {
           child: SakuraColorfulIcon(
             type: colorfulIcon!,
             size: size * 0.8,
-            useEmoji: true,
+            useEmoji: useEmoji,
           ),
         ),
       );

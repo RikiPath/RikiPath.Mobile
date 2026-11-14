@@ -93,155 +93,16 @@ class LearnerMentorBookingDetailScreen extends ConsumerWidget {
         );
   }
 
-  void _showCancellationDialog(
+  Future<void> _showCancellationDialog(
     BuildContext context,
     WidgetRef ref,
     LearnerMentorBooking booking,
-  ) {
-    final now = DateTime.now().toUtc();
-    final start = booking.scheduledAt?.value ?? now;
-    final hoursUntil = start.difference(now).inHours;
-    final isEligibleForRefund = hoursUntil >= 24;
-
-    final reasonController = TextEditingController();
-    final exceptionController = TextEditingController();
-    var requestException = false;
-
-    showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            title: const Text('Hủy lịch hẹn tư vấn'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.space3),
-                    decoration: BoxDecoration(
-                      color: isEligibleForRefund
-                          ? AppColors.brandTint
-                          : AppColors.error.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppRadius.card),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          isEligibleForRefund
-                              ? Icons.info_outline
-                              : Icons.warning_amber_rounded,
-                          color: isEligibleForRefund
-                              ? AppColors.brandPrimary
-                              : AppColors.error,
-                        ),
-                        const SizedBox(width: AppSpacing.space2),
-                        Expanded(
-                          child: Text(
-                            isEligibleForRefund
-                                ? 'Hủy trước ≥ 24 giờ: Bạn sẽ được hoàn lại 1 vé tư vấn vào tài khoản.'
-                                : 'Hủy muộn (< 24 giờ): Theo chính sách, không được tự động hoàn vé tư vấn.',
-                            style: AppTypography.metadata.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: isEligibleForRefund
-                                  ? AppColors.brandPrimary
-                                  : AppColors.error,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.space3),
-                  TextField(
-                    key: const Key('cancellation_reason_input'),
-                    controller: reasonController,
-                    decoration: const InputDecoration(
-                      labelText: 'Lý do hủy lịch',
-                      hintText: 'Nhập lý do hủy buổi hẹn...',
-                    ),
-                  ),
-                  if (!isEligibleForRefund) ...[
-                    const SizedBox(height: AppSpacing.space2),
-                    CheckboxListTile(
-                      key: const Key('cancellation_exception_checkbox'),
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text(
-                        'Yêu cầu xem xét hoàn vé ngoại lệ',
-                        style: TextStyle(fontSize: 13),
-                      ),
-                      value: requestException,
-                      onChanged: (val) {
-                        setDialogState(() => requestException = val ?? false);
-                      },
-                    ),
-                    if (requestException)
-                      TextField(
-                        key: const Key('cancellation_exception_reason_input'),
-                        controller: exceptionController,
-                        decoration: const InputDecoration(
-                          labelText: 'Lý do xem xét ngoại lệ',
-                          hintText: 'Trường hợp bất khả kháng, sự cố mạng...',
-                        ),
-                      ),
-                  ],
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogCtx).pop(),
-                child: const Text('Đóng'),
-              ),
-              ElevatedButton(
-                key: const Key('confirm_cancel_booking_button'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.error,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () async {
-                  final reason = reasonController.text.trim();
-                  if (reason.isEmpty) {
-                    ref
-                        .read(rikiToastServiceProvider.notifier)
-                        .error(title: 'Vui lòng nhập lý do hủy lịch');
-                    return;
-                  }
-                  Navigator.of(dialogCtx).pop();
-                  final ok = await ref
-                      .read(learnerMentorMutationControllerProvider.notifier)
-                      .cancelBooking(
-                        bookingId: booking.id,
-                        reason: reason,
-                        requestException: requestException,
-                        exceptionReason: exceptionController.text.trim(),
-                      );
-                  if (ok) {
-                    ref
-                        .read(rikiToastServiceProvider.notifier)
-                        .success(
-                          title: 'Hủy lịch hẹn thành công',
-                          description: isEligibleForRefund
-                              ? '1 vé tư vấn đã được hoàn trả.'
-                              : 'Yêu cầu hủy đã được ghi nhận.',
-                        );
-                    ref.invalidate(learnerMentorBookingsControllerProvider);
-                  } else {
-                    ref
-                        .read(rikiToastServiceProvider.notifier)
-                        .error(
-                          title: 'Không thể hủy lịch hẹn',
-                          description: 'Vui lòng thử lại sau.',
-                        );
-                  }
-                },
-                child: const Text('Xác nhận hủy'),
-              ),
-            ],
-          );
-        },
-      ),
+  ) async {
+    await showLearnerBookingCancellationDialog(
+      context,
+      ref,
+      bookingId: booking.id,
+      scheduledAtUtc: booking.scheduledAt?.value,
     );
   }
 
@@ -344,14 +205,6 @@ class LearnerMentorBookingDetailScreen extends ConsumerWidget {
     final reasonController = TextEditingController();
     final evidenceController = TextEditingController();
 
-    final categories = [
-      (1, 'Chất lượng tư vấn không như cam kết'),
-      (2, 'Cố vấn vắng mặt không báo trước'),
-      (3, 'Sự cố kết nối kỹ thuật phòng học'),
-      (4, 'Vấn đề ứng xử của cố vấn'),
-      (5, 'Lý do khác'),
-    ];
-
     showDialog<void>(
       context: context,
       builder: (dialogCtx) => StatefulBuilder(
@@ -378,16 +231,19 @@ class LearnerMentorBookingDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   DropdownButtonFormField<int>(
+                    isExpanded: true,
                     initialValue: selectedCategory,
                     decoration: const InputDecoration(
                       labelText: 'Danh mục khiếu nại',
                     ),
-                    items: categories
+                    items: learnerMentorDisputeCategories
                         .map(
                           (c) => DropdownMenuItem(
                             value: c.$1,
                             child: Text(
                               c.$2,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 13),
                             ),
                           ),
@@ -622,7 +478,9 @@ class _DetailBody extends StatelessWidget {
           ),
 
         // 5. Nút Dời lịch hẹn & Hủy lịch hẹn cho Learner khi buổi học chưa diễn ra
-        if (isAssigned || isAccepted) ...[
+        if ((isAssigned || isAccepted) &&
+            (value.scheduledAt == null ||
+                value.scheduledAt!.value.toUtc().isAfter(DateTime.now().toUtc()))) ...[
           const SizedBox(height: AppSpacing.space3),
           Row(
             children: [

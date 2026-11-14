@@ -696,7 +696,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Tiến độ chuẩn: 1/2 bài'), findsNWidgets(2));
-    expect(find.textContaining('Placement để mở khóa'), findsOneWidget);
+    expect(find.textContaining('Hoàn thành bài đánh giá năng lực'), findsOneWidget);
     expect(
       find.byKey(const ValueKey<String>('ai_learning_path_generate_button')),
       findsNothing,

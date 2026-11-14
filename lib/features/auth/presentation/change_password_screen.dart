@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/change_password_controller.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
@@ -20,9 +24,31 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _hasUnsavedChanges = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPasswordController.addListener(_syncUnsavedState);
+    _newPasswordController.addListener(_syncUnsavedState);
+    _confirmPasswordController.addListener(_syncUnsavedState);
+  }
+
+  void _syncUnsavedState() {
+    final dirty =
+        _currentPasswordController.text.isNotEmpty ||
+        _newPasswordController.text.isNotEmpty ||
+        _confirmPasswordController.text.isNotEmpty;
+    if (dirty != _hasUnsavedChanges && mounted) {
+      setState(() => _hasUnsavedChanges = dirty);
+    }
+  }
 
   @override
   void dispose() {
+    _currentPasswordController.removeListener(_syncUnsavedState);
+    _newPasswordController.removeListener(_syncUnsavedState);
+    _confirmPasswordController.removeListener(_syncUnsavedState);
     _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
@@ -48,11 +74,41 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final state = ref.watch(changePasswordControllerProvider);
-    final userId = ref.watch(authSessionControllerProvider).currentUserId;
+    final session = ref.watch(authSessionControllerProvider);
+    final userId = session.currentUserId;
+    final backFallback = session.currentRole == BackendUserRole.mentor
+        ? AppRoutes.mentorProfile
+        : AppRoutes.profileAccount;
+    final hasUnsavedChanges = _hasUnsavedChanges && !state.isLoading;
+    final canPopRoute =
+        !hasUnsavedChanges &&
+        (GoRouter.maybeOf(context)?.canPop() ??
+            (ModalRoute.of(context)?.canPop ?? true));
 
-    return Scaffold(
-      backgroundColor: AppColors.profileBackground,
-      appBar: ProfileDetailHeader(title: l10n.changePassword),
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          handleProtectedBackNavigation(
+            context: context,
+            hasUnsavedChanges: hasUnsavedChanges,
+            fallbackRoute: backFallback,
+          );
+        }
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Scaffold(
+        backgroundColor: AppColors.profileBackground,
+        appBar: ProfileDetailHeader(
+          title: l10n.changePassword,
+          onBack: () => handleProtectedBackNavigation(
+            context: context,
+            hasUnsavedChanges: hasUnsavedChanges,
+            fallbackRoute: backFallback,
+          ),
+        ),
       body: ProfileAnimatedEntrance(
         child: ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -175,6 +231,14 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
             ),
           ],
         ),
+      ),
+        ),
+        AppLoadingOverlay(
+          visible: state.isLoading,
+          title: l10n.loadingOverlaySavingTitle,
+          subtitle: l10n.loadingOverlayUpdatingSubtitle,
+        ),
+      ],
       ),
     );
   }

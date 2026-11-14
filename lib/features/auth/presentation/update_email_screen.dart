@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/update_email_controller.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/auth/domain/verify_email_arguments.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
 
@@ -20,9 +23,24 @@ class UpdateEmailScreen extends ConsumerStatefulWidget {
 
 class _UpdateEmailScreenState extends ConsumerState<UpdateEmailScreen> {
   final _emailController = TextEditingController();
+  bool _hasDraft = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_onEmailChanged);
+  }
+
+  void _onEmailChanged() {
+    final hasDraft = _emailController.text.trim().isNotEmpty;
+    if (hasDraft != _hasDraft && mounted) {
+      setState(() => _hasDraft = hasDraft);
+    }
+  }
 
   @override
   void dispose() {
+    _emailController.removeListener(_onEmailChanged);
     _emailController.dispose();
     super.dispose();
   }
@@ -38,16 +56,40 @@ class _UpdateEmailScreenState extends ConsumerState<UpdateEmailScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final state = ref.watch(updateEmailControllerProvider);
-    final userId = ref.watch(authSessionControllerProvider).currentUserId;
-    final currentEmail = ref
-        .watch(userProfileControllerProvider)
-        .value
-        ?.profile
-        .email;
+    final session = ref.watch(authSessionControllerProvider);
+    final userId = session.currentUserId;
+    final currentEmail = session.currentRole == BackendUserRole.mentor
+        ? ref.watch(mentorProfileControllerProvider).value?.email
+        : ref.watch(userProfileControllerProvider).value?.profile.email;
+    final backFallback = session.currentRole == BackendUserRole.mentor
+        ? AppRoutes.mentorProfile
+        : AppRoutes.profileAccount;
+    final hasUnsavedChanges = _hasDraft && !state.succeeded && !state.isLoading;
 
-    return Scaffold(
-      backgroundColor: AppColors.profileBackground,
-      appBar: ProfileDetailHeader(title: l10n.changeEmail),
+    return PopScope(
+      canPop: !hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          handleProtectedBackNavigation(
+            context: context,
+            hasUnsavedChanges: hasUnsavedChanges,
+            fallbackRoute: backFallback,
+          );
+        }
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Scaffold(
+        backgroundColor: AppColors.profileBackground,
+        appBar: ProfileDetailHeader(
+          title: l10n.changeEmail,
+          onBack: () => handleProtectedBackNavigation(
+            context: context,
+            hasUnsavedChanges: hasUnsavedChanges,
+            fallbackRoute: backFallback,
+          ),
+        ),
       body: ProfileAnimatedEntrance(
         child: ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -140,7 +182,9 @@ class _UpdateEmailScreenState extends ConsumerState<UpdateEmailScreen> {
                 label: l10n.enterVerificationCode,
                 trailingIcon: Icons.arrow_forward,
                 onPressed: () => context.push(
-                  AppRoutes.verifyEmail,
+                  session.currentRole == BackendUserRole.mentor
+                      ? AppRoutes.mentorVerifyEmail
+                      : AppRoutes.profileVerifyEmail,
                   extra: VerifyEmailArguments(
                     userId: userId,
                     email: _emailController.text.trim(),
@@ -150,6 +194,14 @@ class _UpdateEmailScreenState extends ConsumerState<UpdateEmailScreen> {
             ],
           ],
         ),
+      ),
+        ),
+        AppLoadingOverlay(
+          visible: state.isLoading,
+          title: l10n.loadingOverlaySavingTitle,
+          subtitle: l10n.loadingOverlayUpdatingSubtitle,
+        ),
+      ],
       ),
     );
   }

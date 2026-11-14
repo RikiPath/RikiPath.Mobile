@@ -29,6 +29,32 @@ final mentorPayoutsProvider =
       (ref) => ref.watch(mentorCompensationRepositoryProvider).loadPayouts(),
     );
 
+final mentorHourlyRatesProvider =
+    FutureProvider.autoDispose<List<MentorHourlyRateItem>>(
+      (ref) =>
+          ref.watch(mentorCompensationRepositoryProvider).loadHourlyRates(),
+    );
+
+final mentorQualificationsProvider =
+    FutureProvider.autoDispose<List<MentorTeachingQualificationItem>>(
+      (ref) =>
+          ref.watch(mentorCompensationRepositoryProvider).loadQualifications(),
+    );
+
+final mentorPayrollDetailProvider = FutureProvider.autoDispose
+    .family<MentorPayrollPeriodItem, int>(
+      (ref, payrollPeriodId) => ref
+          .watch(mentorCompensationRepositoryProvider)
+          .loadPayrollDetail(payrollPeriodId),
+    );
+
+final mentorPayoutDetailProvider = FutureProvider.autoDispose
+    .family<MentorPayoutObligationItem, int>(
+      (ref, obligationId) => ref
+          .watch(mentorCompensationRepositoryProvider)
+          .loadPayoutDetail(obligationId),
+    );
+
 final mentorBankAccountsProvider =
     FutureProvider.autoDispose<List<MentorBankAccountItem>>(
       (ref) =>

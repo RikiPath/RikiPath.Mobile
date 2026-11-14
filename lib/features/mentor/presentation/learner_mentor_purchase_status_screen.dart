@@ -13,6 +13,7 @@ import 'package:rikipath_mobile/features/mentor/application/learner_mentor_contr
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Màn hình kiểm tra trạng thái thanh toán gói học Mentor và tự động hoàn tất đặt lịch.
 class LearnerMentorPurchaseStatusScreen extends ConsumerStatefulWidget {
@@ -70,7 +71,8 @@ class _LearnerMentorPurchaseStatusScreenState
           .read(learnerMentorMutationControllerProvider.notifier)
           .bookWithCredit(
             slotId: intent.slot!.id,
-            operationKey: 'booking_',
+            operationKey:
+                'booking_auto_${widget.subscriptionId ?? 0}_${intent.slot!.id}',
             notes: intent.question,
             jlptLevel: intent.jlptLevel ?? intent.plan?.jlptLevel,
           );
@@ -128,6 +130,8 @@ class _LearnerMentorPurchaseStatusScreenState
 
       // Khi thanh toán chuyển sang Paid, kiểm tra và tự động đối soát đặt lịch nếu có intent
       if (status?.paymentStatus == MentorPaymentStatus.paid &&
+          status!.bookings.isEmpty &&
+          status.remainingSessions > 0 &&
           !_autoBookingAttempted &&
           !_isAutoBooking) {
         final intent = ref.read(learnerBookingIntentProvider);
@@ -143,6 +147,8 @@ class _LearnerMentorPurchaseStatusScreenState
     ref.listen(learnerBookingIntentProvider, (_, nextIntent) {
       final status = ref.read(provider).value;
       if (status?.paymentStatus == MentorPaymentStatus.paid &&
+          status!.bookings.isEmpty &&
+          status.remainingSessions > 0 &&
           !_autoBookingAttempted &&
           !_isAutoBooking &&
           nextIntent != null &&
@@ -157,6 +163,8 @@ class _LearnerMentorPurchaseStatusScreenState
       final status = ref.read(provider).value;
       final intent = ref.read(learnerBookingIntentProvider);
       if (status?.paymentStatus == MentorPaymentStatus.paid &&
+          status!.bookings.isEmpty &&
+          status.remainingSessions > 0 &&
           !_autoBookingAttempted &&
           !_isAutoBooking &&
           intent != null &&
@@ -284,11 +292,7 @@ class _PurchaseStatusBody extends ConsumerWidget {
               padding: const EdgeInsets.all(AppSpacing.space3),
               child: Row(
                 children: [
-                  const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  ),
+                  const SakuraLoadingIndicator(size: 24),
                   const SizedBox(width: AppSpacing.space3),
                   Expanded(
                     child: Text(
@@ -529,8 +533,43 @@ class _PurchaseStatusBody extends ConsumerWidget {
             label: context.l10n.learnerMentorOpenPayOs,
             leadingIcon: Icons.open_in_new,
             onPressed: () async {
+              final checkoutUri =
+                  safeExternalHttpUri(
+                    intent?.subscriptionId == status.subscriptionId
+                        ? intent?.checkoutUrl
+                        : null,
+                  ) ??
+                  ref
+                      .read(learnerMentorMutationControllerProvider)
+                      .purchase
+                      ?.safeCheckoutUri;
+              if (checkoutUri != null) {
+                try {
+                  await launchUrl(
+                    checkoutUri,
+                    mode: LaunchMode.externalApplication,
+                  );
+                } catch (_) {
+                  if (context.mounted) {
+                    ref
+                        .read(rikiToastServiceProvider.notifier)
+                        .warning(
+                          title: 'Không mở được liên kết thanh toán',
+                          description:
+                              'Vui lòng thử lại hoặc kiểm tra trình duyệt mặc định.',
+                        );
+                  }
+                }
+              } else if (context.mounted) {
+                ref
+                    .read(rikiToastServiceProvider.notifier)
+                    .info(
+                      title: 'Đang đồng bộ trạng thái thanh toán',
+                      description:
+                          'Liên kết thanh toán trước đó không còn lưu trên thiết bị.',
+                    );
+              }
               try {
-                // Tự động đồng bộ trước khi mở lại
                 await onRefresh();
               } catch (_) {}
             },

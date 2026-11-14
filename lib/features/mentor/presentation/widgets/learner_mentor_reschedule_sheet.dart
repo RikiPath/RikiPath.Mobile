@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/calendar/application/learner_calendar_controller.dart';
@@ -45,12 +46,17 @@ class _LearnerMentorRescheduleSheetState
     setState(() => _isSubmitting = true);
 
     try {
-      final success = await ref
-          .read(learnerMentorMutationControllerProvider.notifier)
-          .rescheduleBooking(
-            bookingId: widget.booking.id,
-            newSlotId: _selectedSlot!.id,
-          );
+      final success = await runWithAppLoadingOverlay<bool>(
+        context,
+        title: context.l10n.loadingOverlayProcessingTitle,
+        subtitle: context.l10n.loadingOverlayUpdatingSubtitle,
+        action: () => ref
+            .read(learnerMentorMutationControllerProvider.notifier)
+            .rescheduleBooking(
+              bookingId: widget.booking.id,
+              newSlotId: _selectedSlot!.id,
+            ),
+      );
 
       if (!mounted) return;
       setState(() => _isSubmitting = false);
@@ -103,7 +109,11 @@ class _LearnerMentorRescheduleSheetState
     final timeFormat = DateFormat('HH:mm', locale);
 
     final nowUtc = DateTime.now().toUtc();
-    final minLeadTime = nowUtc.add(const Duration(hours: 24));
+    final minLeadTime = nowUtc.add(const Duration(hours: 2));
+    final oldScheduledUtc = widget.booking.scheduledAt?.value.toUtc();
+    final canRescheduleCurrentBooking =
+        oldScheduledUtc == null ||
+        oldScheduledUtc.difference(nowUtc) >= const Duration(hours: 24);
 
     // Old scheduled times
     final oldStart = widget.booking.scheduledAt?.value.toLocal();
@@ -266,18 +276,32 @@ class _LearnerMentorRescheduleSheetState
               vertical: AppSpacing.space2,
             ),
             decoration: BoxDecoration(
-              color: AppColors.brandTint,
+              color: canRescheduleCurrentBooking
+                  ? AppColors.brandTint
+                  : AppColors.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Row(
               children: [
-                const Icon(Icons.info_outline, size: 16, color: AppColors.brandPrimary),
+                Icon(
+                  canRescheduleCurrentBooking
+                      ? Icons.info_outline
+                      : Icons.warning_amber_rounded,
+                  size: 16,
+                  color: canRescheduleCurrentBooking
+                      ? AppColors.brandPrimary
+                      : AppColors.error,
+                ),
                 const SizedBox(width: AppSpacing.space2),
                 Expanded(
                   child: Text(
-                    'Dời lịch trước ≥ 24 giờ hoàn toàn miễn phí. Khung giờ cũ sẽ được giải phóng ngay lập tức.',
+                    canRescheduleCurrentBooking
+                        ? 'Có thể dời lịch trước giờ học ≥ 24 giờ sang khung giờ mới cách hiện tại ít nhất 2 giờ.'
+                        : 'Buổi tư vấn diễn ra trong vòng < 24 giờ tới, hiện không đủ điều kiện dời lịch.',
                     style: AppTypography.metadata.copyWith(
-                      color: AppColors.brandPrimary,
+                      color: canRescheduleCurrentBooking
+                          ? AppColors.brandPrimary
+                          : AppColors.error,
                       fontSize: 11.5,
                     ),
                   ),
@@ -298,22 +322,37 @@ class _LearnerMentorRescheduleSheetState
 
           // Slots List
           Expanded(
-            child: switch (state) {
-              AsyncLoading() => const Center(child: CircularProgressIndicator.adaptive()),
-              AsyncError(:final error) => Center(
-                child: Text(
-                  'Không thể tải danh sách khung giờ: $error',
-                  style: const TextStyle(color: AppColors.error),
-                ),
-              ),
-              AsyncData(:final value) => _buildSlotsList(
-                value: value,
-                currentSlotId: widget.booking.mentorAvailabilityId,
-                minLeadTime: minLeadTime,
-                dateFormat: dateFormat,
-                timeFormat: timeFormat,
-              ),
-            },
+            child: !canRescheduleCurrentBooking
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.space4),
+                      child: Text(
+                        'Bạn vẫn có thể xem thông tin buổi học hoặc liên hệ hủy ngoại lệ trong chi tiết lịch hẹn nếu có việc đột xuất.',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  )
+                : switch (state) {
+                    AsyncLoading() => const Center(
+                      child: SakuraLoadingIndicator(),
+                    ),
+                    AsyncError(:final error) => Center(
+                      child: Text(
+                        'Không thể tải danh sách khung giờ: $error',
+                        style: const TextStyle(color: AppColors.error),
+                      ),
+                    ),
+                    AsyncData(:final value) => _buildSlotsList(
+                      value: value,
+                      currentSlotId: widget.booking.mentorAvailabilityId,
+                      minLeadTime: minLeadTime,
+                      dateFormat: dateFormat,
+                      timeFormat: timeFormat,
+                    ),
+                  },
           ),
           const SizedBox(height: AppSpacing.space3),
 
@@ -326,7 +365,10 @@ class _LearnerMentorRescheduleSheetState
                     ? 'Xác nhận dời lịch sang giờ này'
                     : 'Vui lòng chọn khung giờ mới'),
             leadingIcon: Icons.check,
-            onPressed: (_isSubmitting || _selectedSlot == null)
+            onPressed:
+                (_isSubmitting ||
+                    !canRescheduleCurrentBooking ||
+                    _selectedSlot == null)
                 ? null
                 : _handleConfirmReschedule,
           ),
@@ -351,7 +393,7 @@ class _LearnerMentorRescheduleSheetState
     // Filter eligible future slots of this mentor:
     // 1. Not the current slot
     // 2. Not already booked
-    // 3. At least 24h from now
+    // 3. At least 2h from now (Backend MinimumBookingLeadHours)
     final eligibleSlots = value.where((slot) {
       if (slot.id == currentSlotId) return false;
       if (slot.isBooked) return false;
@@ -376,7 +418,7 @@ class _LearnerMentorRescheduleSheetState
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                'Hiện chưa có khung giờ trống nào khác sau 24 giờ tới cho cố vấn này.',
+                'Hiện chưa có khung giờ trống nào khả dụng (cách hiện tại ít nhất 2 giờ) cho cố vấn này.',
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,

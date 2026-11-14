@@ -14,6 +14,25 @@ import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_ti
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_calendar_empty_state.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_event_detail_sheet.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
+import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
+import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
+import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_repository.dart';
+
+class _CancellationRepository implements LearnerMentorRepository {
+  @override
+  Future<CancellationEligibility> checkCancellationEligibility(int bookingId) async =>
+      const CancellationEligibility(
+        isEligible: true,
+        tier: 'early',
+        expectedRefundPercent: 100,
+        refundAmountCredits: 1,
+        canReschedule: true,
+        cutoffHours: 24,
+      );
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 Widget createTestApp(Widget child) {
   return ProviderScope(
@@ -458,6 +477,7 @@ void main() {
         participantName: 'Nguyễn Văn Minh',
         jlptLevel: 'N2',
         meetingLink: 'https://meet.google.com/abc-defg-hij',
+        roomId: '11111111-1111-4111-8111-111111111111',
         notes: 'Chuẩn bị từ vựng Choukai bài 5',
       );
 
@@ -523,21 +543,34 @@ void main() {
     });
 
     testWidgets('SakuraEventDetailSheet displays cancellation button and opens confirmation dialog', (tester) async {
+      final startTime = DateTime.now().add(const Duration(days: 3));
       final activeBooking = SakuraCalendarEvent(
         id: 'active-1',
         bookingId: 9901,
         title: 'Tư vấn JLPT N2 với Sensei',
-        startTime: DateTime(2026, 11, 10, 14, 0),
-        endTime: DateTime(2026, 11, 10, 15, 30),
+        startTime: startTime,
+        endTime: startTime.add(const Duration(minutes: 90)),
         type: SakuraCalendarEventType.consultation,
         status: MentorMeetingStatus.accepted,
         participantName: 'Sensei Tanaka',
         meetingLink: 'https://meet.google.com/test-room',
+        roomId: '22222222-2222-4222-8222-222222222222',
       );
 
       await tester.pumpWidget(
-        createTestApp(
-          SakuraEventDetailSheet(event: activeBooking),
+        ProviderScope(
+          overrides: [
+            learnerMentorRepositoryProvider.overrideWithValue(
+              _CancellationRepository(),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('vi'),
+            home: Scaffold(body: SakuraEventDetailSheet(event: activeBooking)),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -559,8 +592,8 @@ void main() {
       await tester.tap(find.text('Hủy buổi tư vấn này'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Xác nhận hủy buổi tư vấn?'), findsOneWidget);
-      expect(find.text('Quay lại'), findsOneWidget);
+      expect(find.text('Hủy lịch hẹn tư vấn'), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'Đóng'), findsOneWidget);
       expect(find.text('Xác nhận hủy'), findsOneWidget);
     });
 

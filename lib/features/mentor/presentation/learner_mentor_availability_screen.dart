@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
@@ -639,16 +640,16 @@ class _LearnerMentorAvailabilityScreenState
           .toList(growable: false);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.mentorFinderPlansError)),
-      );
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .error(title: context.l10n.mentorFinderPlansError);
       return;
     }
     if (!mounted) return;
     if (plans.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(context.l10n.mentorFinderNoPlans)));
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .info(title: context.l10n.mentorFinderNoPlans);
       ref.invalidate(learnerMentorPlansControllerProvider);
       return;
     }
@@ -1239,21 +1240,19 @@ class _LearnerMentorAvailabilityScreenState
           !view.canBook(current) ||
           current.startTime.value != slot.startTime.value ||
           current.endTime.value != slot.endTime.value) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lịch đã thay đổi hoặc bị trùng. Vui lòng chọn lại.'),
-          ),
-        );
+        ref
+            .read(rikiToastServiceProvider.notifier)
+            .warning(
+              title: 'Lịch đã thay đổi hoặc bị trùng. Vui lòng chọn lại.',
+            );
         setState(() => _selectedSlotId = null);
         return;
       }
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Không thể kiểm tra lịch mới nhất. Vui lòng thử lại.'),
-        ),
-      );
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .error(title: 'Không thể kiểm tra lịch mới nhất. Vui lòng thử lại.');
       return;
     } finally {
       if (mounted) setState(() => _checkingSlot = false);

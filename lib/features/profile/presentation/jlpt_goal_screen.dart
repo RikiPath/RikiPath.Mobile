@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
-import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
+import 'package:rikipath_mobile/features/onboarding/application/onboarding_controller.dart';
+import 'package:rikipath_mobile/features/onboarding/domain/jlpt_exam_session.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_error_message.dart';
 import 'package:rikipath_mobile/features/profile/presentation/widgets/profile_detail_components.dart';
 
+/// Goal summary. Create and Edit both use the four-step onboarding wizard.
 class JlptGoalScreen extends ConsumerStatefulWidget {
   const JlptGoalScreen({super.key});
 
@@ -19,27 +23,26 @@ class JlptGoalScreen extends ConsumerStatefulWidget {
 }
 
 class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
-  JlptLevelCatalogItem? _selectedLevel;
-  int? _selectedMinutes;
-  DateTime? _selectedExamDate;
-  bool _initialized = false;
+  bool _didAutoOpenOnboarding = false;
 
-  void _initialize(
-    JlptLevelCatalogItem level,
-    int minutes,
-    DateTime? targetExamDate,
-  ) {
-    if (_initialized) return;
-    _selectedLevel = level;
-    _selectedMinutes = minutes > 0 ? minutes : null;
-    _selectedExamDate = targetExamDate;
-    _initialized = true;
+  void _openCreateGoalOnboarding() {
+    ref
+        .read(onboardingControllerProvider.notifier)
+        .startCreateFromProfile(
+          origin: OnboardingOrigin.profile,
+          returnTo: AppRoutes.profileJlptGoal,
+        );
+    context.push(
+      AppRoutes.onboardingWithOrigin(
+        OnboardingOrigin.profile,
+        returnTo: AppRoutes.profileJlptGoal,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final profileValue = ref.watch(userProfileControllerProvider);
-    final localJourneyValue = ref.watch(learnerJourneyControllerProvider);
     final catalogValue = ref.watch(jlptCatalogControllerProvider);
     return Scaffold(
       backgroundColor: AppColors.profileBackground,
@@ -53,44 +56,108 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.space5),
-            child: RikiErrorBanner(
-              title: context.l10n.profileLoadFailedTitle,
-              message: userProfileErrorMessage(error, context.l10n),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RikiErrorBanner(
+                  title: context.l10n.profileLoadFailedTitle,
+                  message: userProfileErrorMessage(error, context.l10n),
+                ),
+                TextButton(
+                  onPressed: ref
+                      .read(userProfileControllerProvider.notifier)
+                      .retry,
+                  child: Text(context.l10n.retry),
+                ),
+              ],
             ),
           ),
         ),
         data: (profileState) {
-          final localJourney = localJourneyValue.value;
-          if (localJourney == null) {
-            return const ProfileDetailSkeleton(
-              key: ValueKey<String>('profile_jlpt_local_loading_view'),
-              groupCount: 3,
-              rowsPerGroup: 1,
-            );
-          }
           final profile = profileState.profile;
-          final levels = catalogValue.value;
-          JlptLevelCatalogItem? selected;
-          if (levels != null && levels.isNotEmpty) {
-            selected = levels
-                .where(
-                  (item) =>
-                      item.id == profile.targetJlptLevelId ||
-                      (profile.targetJlptLevelId == null &&
-                          item.id == localJourney.selectedLevelId) ||
-                      (profile.targetJlptLevelId == null &&
-                          localJourney.selectedLevelId == null &&
-                          item.level == localJourney.selectedLevel),
-                )
-                .firstOrNull;
-            if (selected != null) {
-              _initialize(
-                selected,
-                localJourney.dailyStudyMinutes,
-                profile.targetExamDate,
+          if (profile.targetJlptLevelId == null ||
+              profile.currentStudyLevelId == null ||
+              profile.dailyStudyMinutes <= 0) {
+            if (!_didAutoOpenOnboarding) {
+              _didAutoOpenOnboarding = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!context.mounted) return;
+                _openCreateGoalOnboarding();
+              });
+              return const ProfileDetailSkeleton(
+                key: ValueKey<String>('profile_jlpt_create_redirect'),
+                groupCount: 1,
+                rowsPerGroup: 1,
               );
             }
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.space5),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const RikiEmptyState(
+                      icon: Icons.flag_outlined,
+                      title: 'Chưa có mục tiêu JLPT',
+                      message:
+                          'Thiết lập trình độ hiện tại, mục tiêu JLPT và thời gian học mỗi ngày để tạo lộ trình cá nhân hóa.',
+                    ),
+                    const SizedBox(height: AppSpacing.space5),
+                    RikiPrimaryButton(
+                      key: const ValueKey<String>(
+                        'jlpt_goal_setup_button',
+                      ),
+                      label: 'Thiết lập mục tiêu JLPT',
+                      onPressed: _openCreateGoalOnboarding,
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
+
+          final levels = catalogValue.value;
+          if (levels == null) {
+            return Center(
+              child: catalogValue.isLoading
+                  ? SakuraSectionLoading(
+                      title: context.l10n.loadingOverlayDataTitle,
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(context.l10n.jlptCatalogLoadFailed),
+                        TextButton(
+                          onPressed: ref
+                              .read(jlptCatalogControllerProvider.notifier)
+                              .retry,
+                          child: Text(context.l10n.retry),
+                        ),
+                      ],
+                    ),
+            );
+          }
+
+          JlptLevelCatalogItem? byId(int? id) =>
+              levels.where((item) => item.id == id).firstOrNull;
+          final current = byId(profile.currentStudyLevelId);
+          final target = byId(profile.targetJlptLevelId);
+          final certified = byId(profile.certifiedJlptLevelId);
+          final examSession = JlptExamCalendar.fromStoredDate(
+            profile.targetExamDate,
+          );
+          if (current == null ||
+              target == null ||
+              (profile.hasJlptCertificate && certified == null)) {
+            return Center(
+              child: RikiErrorBanner(
+                title: 'Chưa thể chỉnh sửa mục tiêu',
+                message:
+                    'Cấp độ đã lưu không còn trong danh mục. Vui lòng tải lại hoặc liên hệ hỗ trợ.',
+              ),
+            );
+          }
+
           return ProfileAnimatedEntrance(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(
@@ -111,176 +178,69 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
                   label: context.l10n.learningProfile,
                   children: [
                     ProfileSettingsTile(
-                      icon: Icons.flag_outlined,
-                      title: context.l10n.currentJlptGoal,
-                      subtitle: selected != null
-                          ? selected.level.label
-                          : context.l10n.notConfigured,
+                      icon: Icons.school_outlined,
+                      title: context.l10n.onboardingCurrentStudyLevelTitle,
+                      subtitle: current.code,
                       onTap: null,
-                      trailing: selected != null
-                          ? JlptBadge(selected.level)
-                          : null,
                     ),
                     ProfileSettingsTile(
-                      icon: Icons.event_outlined,
-                      title: context.l10n.expectedExam(
-                        profile.targetExamDate == null
-                            ? context.l10n.notConfigured
-                            : MaterialLocalizations.of(
-                                context,
-                              ).formatMediumDate(profile.targetExamDate!),
-                      ),
-                      subtitle: profile.targetExamDate == null
-                          ? context.l10n.notConfigured
-                          : MaterialLocalizations.of(
-                              context,
-                            ).formatMediumDate(profile.targetExamDate!),
+                      icon: Icons.flag_outlined,
+                      title: context.l10n.currentJlptGoal,
+                      subtitle: target.code,
                       onTap: null,
                     ),
                     ProfileSettingsTile(
                       icon: Icons.schedule_outlined,
                       title: context.l10n.currentDailyStudyTime,
                       subtitle: context.l10n.studyMinutesPerDay(
-                        localJourney.dailyStudyMinutes,
+                        profile.dailyStudyMinutes,
                       ),
                       onTap: null,
-                      trailing: Text(
-                        context.l10n.studyMinutesPerDay(
-                          localJourney.dailyStudyMinutes,
-                        ),
-                        style: AppTypography.cardTitle,
-                      ),
+                    ),
+                    ProfileSettingsTile(
+                      icon: Icons.event_outlined,
+                      title: context.l10n.onboardingExamSessionCardTitle,
+                      subtitle: profile.targetExamDate == null
+                          ? context.l10n.notConfigured
+                          : examSession == null
+                          ? MaterialLocalizations.of(
+                              context,
+                            ).formatMediumDate(profile.targetExamDate!)
+                          : 'Tháng ${examSession.month}, ${examSession.year} · Dự kiến',
+                      onTap: null,
+                    ),
+                    ProfileSettingsTile(
+                      icon: Icons.workspace_premium_outlined,
+                      title: 'Chứng chỉ JLPT tự khai báo',
+                      subtitle: certified?.code ?? 'Chưa có',
+                      onTap: null,
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.space6),
-                ProfileFormSection(
-                  title: context.l10n.jlptSelectionTitle,
-                  child: Wrap(
-                    spacing: AppSpacing.space2,
-                    runSpacing: AppSpacing.space2,
-                    children: [
-                      ...catalogValue.when(
-                        loading: () => <Widget>[
-                          const CircularProgressIndicator(strokeWidth: 2),
-                        ],
-                        error: (_, _) => <Widget>[
-                          Text(
-                            context.l10n.jlptCatalogLoadFailed,
-                            style: AppTypography.validationText,
-                          ),
-                          TextButton(
-                            onPressed: ref
-                                .read(jlptCatalogControllerProvider.notifier)
-                                .retry,
-                            child: Text(context.l10n.retry),
-                          ),
-                        ],
-                        data: (levels) {
-                          final supportedLevels = levels
-                              .where((item) => item.level != JlptLevel.n1)
-                              .toList(growable: false);
-                          return supportedLevels.isEmpty
-                              ? <Widget>[Text(context.l10n.jlptCatalogEmpty)]
-                              : <Widget>[
-                                  for (final item in supportedLevels)
-                                    ChoiceChip(
-                                      key: ValueKey<String>(
-                                        'jlpt_goal_choice_${item.code}',
-                                      ),
-                                      label: Text(item.code),
-                                      selected: _selectedLevel?.id == item.id,
-                                      onSelected: (_) =>
-                                          setState(() => _selectedLevel = item),
-                                      selectedColor: const Color(0xFFFDEBF0),
-                                      backgroundColor: Colors.white,
-                                      side: BorderSide(
-                                        color: _selectedLevel?.id == item.id
-                                            ? AppColors.primary
-                                            : const Color(0xFFFFCCD8),
-                                        width: _selectedLevel?.id == item.id ? 1.5 : 1.0,
-                                      ),
-                                      labelStyle: TextStyle(
-                                        color: _selectedLevel?.id == item.id
-                                            ? AppColors.primary
-                                            : const Color(0xFFC73D65),
-                                        fontWeight: _selectedLevel?.id == item.id
-                                            ? FontWeight.w700
-                                            : FontWeight.w600,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                ];
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.space6),
-                ProfileFormSection(
-                  title: context.l10n.dailyStudySelectionTitle,
-                  child: Wrap(
-                    spacing: AppSpacing.space2,
-                    runSpacing: AppSpacing.space2,
-                    children: [
-                      for (final minutes in const [15, 30, 45, 60, 90])
-                        ChoiceChip(
-                          key: ValueKey<String>('daily_study_choice_$minutes'),
-                          label: Text(context.l10n.studyMinutesPerDay(minutes)),
-                          selected: _selectedMinutes == minutes,
-                          onSelected: (_) =>
-                              setState(() => _selectedMinutes = minutes),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.space6),
-                ProfileFormSection(
-                  title: context.l10n.expectedExam(
-                    _selectedExamDate == null
-                        ? context.l10n.notConfigured
-                        : MaterialLocalizations.of(
-                            context,
-                          ).formatMediumDate(_selectedExamDate!),
-                  ),
-                  child: OutlinedButton.icon(
-                    key: const ValueKey<String>('jlpt_goal_exam_date_button'),
-                    onPressed: _selectExamDate,
-                    icon: const Icon(Icons.calendar_month_outlined),
-                    label: Text(
-                      _selectedExamDate == null
-                          ? context.l10n.notConfigured
-                          : MaterialLocalizations.of(
-                              context,
-                            ).formatMediumDate(_selectedExamDate!),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.space5),
                 RikiPrimaryButton(
-                  key: const ValueKey<String>('jlpt_goal_save_button'),
-                  label: context.l10n.saveChanges,
-                  onPressed:
-                      _selectedLevel == null ||
-                          _selectedMinutes == null ||
-                          _selectedExamDate == null
-                      ? null
-                      : () async {
-                          final updated = await ref
-                              .read(userProfileControllerProvider.notifier)
-                              .setJlptGoal(
-                                targetJlptLevelId: _selectedLevel!.id,
-                                dailyStudyMinutes: _selectedMinutes!,
-                                targetExamDate: _selectedExamDate,
-                              );
-                          if (!updated) return;
-                          await ref
-                              .read(learnerJourneyControllerProvider.notifier)
-                              .setCatalogPreferences(
-                                item: _selectedLevel!,
-                                dailyStudyMinutes: _selectedMinutes!,
-                              );
-                        },
+                  key: const ValueKey<String>('jlpt_goal_edit_button'),
+                  label: 'Chỉnh sửa mục tiêu',
+                  onPressed: () {
+                    ref
+                        .read(onboardingControllerProvider.notifier)
+                        .startEditFromProfile(
+                          currentStudyLevel: current,
+                          targetLevel: target,
+                          dailyMinutes: profile.dailyStudyMinutes,
+                          targetExamDate: profile.targetExamDate,
+                          certifiedJlptLevel: certified,
+                          goalVersion: profile.learningGoalVersion,
+                          origin: OnboardingOrigin.profileGoal,
+                          returnTo: AppRoutes.profileJlptGoal,
+                        );
+                    context.push(
+                      AppRoutes.onboardingWithOrigin(
+                        OnboardingOrigin.profileGoal,
+                        returnTo: AppRoutes.profileJlptGoal,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -288,22 +248,5 @@ class _JlptGoalScreenState extends ConsumerState<JlptGoalScreen> {
         },
       ),
     );
-  }
-
-  Future<void> _selectExamDate() async {
-    final today = DateUtils.dateOnly(DateTime.now());
-    final firstDate = today.add(const Duration(days: 1));
-    final selected = await showDatePicker(
-      context: context,
-      initialDate:
-          _selectedExamDate == null || _selectedExamDate!.isBefore(firstDate)
-          ? firstDate.add(const Duration(days: 179))
-          : _selectedExamDate!,
-      firstDate: firstDate,
-      lastDate: DateTime(today.year + 5, 12, 31),
-    );
-    if (selected != null) {
-      setState(() => _selectedExamDate = DateUtils.dateOnly(selected));
-    }
   }
 }

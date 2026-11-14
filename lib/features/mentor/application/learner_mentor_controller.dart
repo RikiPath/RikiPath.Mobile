@@ -223,6 +223,7 @@ class LearnerBookingIntent {
     this.slot,
     this.question,
     this.jlptLevel,
+    this.checkoutUrl,
   });
 
   final int? planId;
@@ -232,6 +233,7 @@ class LearnerBookingIntent {
   final LearnerMentorAvailability? slot;
   final String? question;
   final String? jlptLevel;
+  final String? checkoutUrl;
 
   Map<String, dynamic> toJson() => {
     'planId': planId,
@@ -240,6 +242,7 @@ class LearnerBookingIntent {
     if (slot != null) 'slot': slot!.toJson(),
     'question': question,
     'jlptLevel': jlptLevel,
+    'checkoutUrl': checkoutUrl,
   };
 
   factory LearnerBookingIntent.fromJson(Map<String, dynamic> json) =>
@@ -254,6 +257,7 @@ class LearnerBookingIntent {
             : null,
         question: json['question'] as String?,
         jlptLevel: json['jlptLevel'] as String?,
+        checkoutUrl: json['checkoutUrl'] as String?,
       );
 
   LearnerBookingIntent copyWith({
@@ -264,6 +268,7 @@ class LearnerBookingIntent {
     LearnerMentorAvailability? slot,
     String? question,
     String? jlptLevel,
+    String? checkoutUrl,
   }) => LearnerBookingIntent(
     planId: planId ?? this.planId,
     plan: plan ?? this.plan,
@@ -272,6 +277,7 @@ class LearnerBookingIntent {
     slot: slot ?? this.slot,
     question: question ?? this.question,
     jlptLevel: jlptLevel ?? this.jlptLevel,
+    checkoutUrl: checkoutUrl ?? this.checkoutUrl,
   );
 }
 

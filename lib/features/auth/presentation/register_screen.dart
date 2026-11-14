@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
@@ -91,23 +92,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         },
         onReturnToLogin: () {
           ref.read(registerControllerProvider.notifier).reset();
-          context.go(AppRoutes.login);
+          popOrGo(context, AppRoutes.login);
         },
       );
     }
 
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ??
+        (ModalRoute.of(context)?.canPop ?? true);
     return PopScope(
+      canPop: canPopRoute,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop && widget.mentorRegistration) {
+        if (widget.mentorRegistration) {
           unawaited(ref.read(mentorRegistrationIntentProvider).clear());
         }
+        if (!didPop) {
+          popOrGo(context, AppRoutes.login);
+        }
       },
-      child: AuthPage(
-        compact: true,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          AuthPage(
+            compact: true,
+            topContentOffset: AppSpacing.space4,
+            backgroundVariant: SakuraAuthBackgroundVariant.register,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -277,23 +290,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   isLoading: state.isLoading,
                   onPressed: _submit,
                 ),
-                if (state.isLoading) ...[
-                  const SizedBox(height: AppSpacing.space4),
-                  RikiWarningBanner(
-                    icon: Icons.hourglass_bottom,
-                    message: widget.mentorRegistration
-                        ? l10n.mentorCreatingAccountMessage
-                        : l10n.creatingAccountMessage,
-                  ),
-                  const SizedBox(height: AppSpacing.space3),
-                  RikiProgressIndicator(
-                    semanticsLabel: l10n.creatingAccountSemantics,
-                  ),
-                ],
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.space8),
+              padding: const EdgeInsets.only(top: AppSpacing.space3),
               child: Column(
                 children: [
                   AuthNavigationPrompt(
@@ -310,7 +310,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   .read(mentorRegistrationIntentProvider)
                                   .mark();
                             }
-                            if (context.mounted) context.go(AppRoutes.login);
+                            if (context.mounted) popOrGo(context, AppRoutes.login);
                           },
                   ),
                   const AuthSecurityFooter(),
@@ -319,6 +319,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
           ],
         ),
+          ),
+          AppLoadingOverlay(
+            visible: state.isLoading,
+            title: l10n.creatingAccount,
+            subtitle: widget.mentorRegistration
+                ? l10n.mentorCreatingAccountMessage
+                : l10n.creatingAccountMessage,
+          ),
+        ],
       ),
     );
   }
@@ -397,7 +406,14 @@ class _RegisterSuccessState extends State<_RegisterSuccess>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return AuthPage(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          widget.onReturnToLogin();
+        }
+      },
+      child: AuthPage(
       animateEntrance: false,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -486,6 +502,7 @@ class _RegisterSuccessState extends State<_RegisterSuccess>
             ),
           ),
         ],
+      ),
       ),
     );
   }

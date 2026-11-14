@@ -25,7 +25,7 @@ UpcomingMeeting? selectUpcomingMeeting(
                 booking.status == MentorMeetingStatus.accepted) &&
             booking.safeMeetingUri != null &&
             scheduledAt != null &&
-            !scheduledAt.isBefore(now);
+            scheduledAt.add(const Duration(minutes: 90)).isAfter(now);
       }).toList()..sort(
         (left, right) => left.scheduledAt!.displayValue.compareTo(
           right.scheduledAt!.displayValue,

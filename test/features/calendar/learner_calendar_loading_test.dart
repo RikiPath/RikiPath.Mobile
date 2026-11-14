@@ -223,6 +223,7 @@ void main() {
     expect(find.byType(SakuraCalendarShell), findsOneWidget);
     expect(find.textContaining('Tư vấn JLPT với Cố vấn An'), findsWidgets);
     expect(find.textContaining('Chưa đồng bộ được lịch hẹn'), findsOneWidget);
+    expect(find.textContaining('hoạt động đã tải'), findsWidgets);
   });
 
   testWidgets('expired session never displays cached learner events', (

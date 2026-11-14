@@ -6,7 +6,6 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
-import 'package:rikipath_mobile/core/widgets/sakura_hourglass_overlay.dart';
 import 'package:rikipath_mobile/features/auth/application/login_controller.dart';
 import 'package:rikipath_mobile/features/auth/application/mentor_registration_intent.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
@@ -96,6 +95,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       children: [
         AuthPage(
           topContentOffset: AppSpacing.space12,
+          backgroundVariant: SakuraAuthBackgroundVariant.login,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -229,9 +229,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ],
           ),
         ),
-        SakuraHourglassOverlay(
+        SakuraLoadingOverlay(
           visible: state.isLoading,
-          message: l10n.loggingIn,
+          title: l10n.loggingIn,
+          subtitle: l10n.loggingInSubtitle,
         ),
       ],
     );

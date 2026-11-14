@@ -1,31 +1,68 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_app_header.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_schedule_v3_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_schedule_v3_section.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
 
-class MentorAvailabilityScreen extends ConsumerWidget {
+class MentorAvailabilityScreen extends ConsumerStatefulWidget {
   const MentorAvailabilityScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MentorAvailabilityScreen> createState() =>
+      _MentorAvailabilityScreenState();
+}
+
+class _MentorAvailabilityScreenState
+    extends ConsumerState<MentorAvailabilityScreen> {
+  bool _hasScheduleV3DirtyChanges = false;
+
+  void _onScheduleV3DirtyChanged(bool dirty) {
+    if (dirty != _hasScheduleV3DirtyChanges && mounted) {
+      setState(() => _hasScheduleV3DirtyChanges = dirty);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(mentorAvailabilityControllerProvider);
-    return Scaffold(
-      key: const Key('mentor_availability_screen'),
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(
-        title: Text(context.l10n.mentorAvailabilityTitle),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: AppSpacing.space3),
-            child: RikiLanguageSwitcher(),
-          ),
-        ],
+    final isSavingSchedule = ref.watch(
+      mentorWeeklyScheduleControllerProvider.select((s) => s.isSaving),
+    );
+    final inShell = MentorShellScope.hasShell(context);
+    final hasUnsavedChanges =
+        !inShell && _hasScheduleV3DirtyChanges && !isSavingSchedule;
+    final canPopRoute =
+        inShell ||
+        (!hasUnsavedChanges &&
+            (GoRouter.maybeOf(context)?.canPop() ??
+                (ModalRoute.of(context)?.canPop ?? true)));
+    final content = Stack(
+      fit: StackFit.expand,
+      children: [
+        Scaffold(
+          key: const Key('mentor_availability_screen'),
+          backgroundColor: AppColors.learnerBackground,
+      appBar: SakuraAppHeader(
+        showStreak: false,
+        calendarTooltip: 'Lịch giảng dạy',
+        onNotificationsPressed: () =>
+            mentorNavigate(context, AppRoutes.notifications),
+        onCalendarPressed: () => mentorNavigate(context, AppRoutes.mentorCalendar),
       ),
+      bottomNavigationBar: inShell
+          ? null
+          : const MentorBottomNavigationBar(selectedIndex: 3),
       body: SafeArea(
         top: false,
         child: switch (state) {
@@ -46,7 +83,9 @@ class MentorAvailabilityScreen extends ConsumerWidget {
           ),
           AsyncData(:final value) => _AvailabilityList(
             slots: value,
+            onScheduleV3DirtyChanged: _onScheduleV3DirtyChanged,
             onRefresh: () async {
+              ref.invalidate(mentorScheduleV3ControllerProvider);
               await ref
                   .read(mentorAvailabilityControllerProvider.notifier)
                   .retry();
@@ -57,15 +96,45 @@ class MentorAvailabilityScreen extends ConsumerWidget {
           ),
         },
       ),
+        ),
+        AppLoadingOverlay(
+          visible: isSavingSchedule,
+          title: context.l10n.loadingOverlaySavingTitle,
+          subtitle: context.l10n.loadingOverlayUpdatingSubtitle,
+        ),
+      ],
+    );
+
+    if (inShell) {
+      return content;
+    }
+
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          handleProtectedBackNavigation(
+            context: context,
+            hasUnsavedChanges: hasUnsavedChanges,
+            fallbackRoute: AppRoutes.mentorCalendar,
+          );
+        }
+      },
+      child: content,
     );
   }
 }
 
 class _AvailabilityList extends ConsumerWidget {
-  const _AvailabilityList({required this.slots, required this.onRefresh});
+  const _AvailabilityList({
+    required this.slots,
+    required this.onRefresh,
+    required this.onScheduleV3DirtyChanged,
+  });
 
   final List<MentorAvailabilitySlot> slots;
   final Future<void> Function() onRefresh;
+  final ValueChanged<bool> onScheduleV3DirtyChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -108,7 +177,7 @@ class _AvailabilityList extends ConsumerWidget {
               ),
               const SizedBox(width: AppSpacing.space2),
               Text(
-                '${slots.length} tiết',
+                '${slots.length} khung giờ',
                 style: AppTypography.metadata.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w600,
@@ -118,7 +187,7 @@ class _AvailabilityList extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.space1),
           const Text(
-            'Các tiết học Admin đã xếp từ các buổi rảnh và công bố cho học viên đặt.',
+            'Các khung giờ tư vấn đã công bố để học viên đặt lịch.',
             style: AppTypography.bodySmall,
           ),
           const SizedBox(height: AppSpacing.space3),
@@ -131,33 +200,35 @@ class _AvailabilityList extends ConsumerWidget {
               description: context.l10n.mentorAvailabilityEmpty,
             )
           else
-            for (var index = 0; index < slots.length; index++) ...[
-              MentorAvailabilityCard(
-                key: ValueKey<String>('mentor_availability_$index'),
+            for (var index = 0; index < slots.length; index++)
+              MentorAvailabilitySlotItemCard(
                 slot: slots[index],
+                index: index,
               ),
-              if (index < slots.length - 1)
-                const SizedBox(height: AppSpacing.space3),
-            ],
 
           const SizedBox(height: AppSpacing.space6),
 
           // 2. Weekly Schedule Registration Box
           _WeeklyScheduleCard(state: weeklyState, notifier: weeklyNotifier),
+
+          const SizedBox(height: AppSpacing.space5),
+
+          // 3. Policy v3 Recurring Rules, Preview & Publish
+          MentorScheduleV3Card(onDirtyChanged: onScheduleV3DirtyChanged),
         ],
       ),
     );
   }
 }
 
-class _WeeklyScheduleCard extends StatelessWidget {
+class _WeeklyScheduleCard extends ConsumerWidget {
   const _WeeklyScheduleCard({required this.state, required this.notifier});
 
   final MentorWeeklyScheduleState state;
   final MentorWeeklyScheduleController notifier;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final start = state.selectedWeekMonday;
     final end = start.add(const Duration(days: 6));
     final dateFormat = DateFormat('dd/MM');
@@ -415,15 +486,12 @@ class _WeeklyScheduleCard extends StatelessWidget {
                   : () async {
                       final ok = await notifier.saveSchedule();
                       if (context.mounted && ok) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Đã lưu đăng ký lịch dạy thành công! Chờ Admin xếp tiết.',
-                            ),
-                            backgroundColor: Color(0xFF2E7D32),
-                            duration: Duration(seconds: 4),
-                          ),
-                        );
+                        ref
+                            .read(rikiToastServiceProvider.notifier)
+                            .success(
+                              title: 'Đã lưu đăng ký lịch dạy',
+                              description: 'Lịch của bạn đã được cập nhật.',
+                            );
                       }
                     },
             ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
+import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
@@ -15,26 +17,36 @@ class DailyReviewScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final practice = ref.watch(dailyReviewControllerProvider);
-    return Scaffold(
-      backgroundColor: AppColors.learnerBackground,
-      appBar: AppBar(
-        title: Text(context.l10n.dailyReviewTitle),
-        leading: IconButton(
-          onPressed: context.pop,
-          icon: const Icon(Icons.arrow_back),
+    final canPopRoute =
+        GoRouter.maybeOf(context)?.canPop() ?? Navigator.of(context).canPop();
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          popOrGo(context, AppRoutes.practice);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.learnerBackground,
+        appBar: AppBar(
+          title: Text(context.l10n.dailyReviewTitle),
+          leading: IconButton(
+            onPressed: () => popOrGo(context, AppRoutes.practice),
+            icon: const Icon(Icons.arrow_back),
+          ),
         ),
-      ),
-      body: practice.when(
-        loading: () =>
-            RikiFullScreenLoader(title: context.l10n.reviewLoadingTitle),
-        error: (_, _) => _ReviewError(
-          onRetry: ref.read(dailyReviewControllerProvider.notifier).retry,
+        body: practice.when(
+          loading: () =>
+              RikiFullScreenLoader(title: context.l10n.reviewLoadingTitle),
+          error: (_, _) => _ReviewError(
+            onRetry: ref.read(dailyReviewControllerProvider.notifier).retry,
+          ),
+          data: (state) => state.cards.isEmpty
+              ? const _ReviewEmpty()
+              : state.isComplete
+              ? _ReviewSummary(state: state)
+              : _ReviewCardView(state: state),
         ),
-        data: (state) => state.cards.isEmpty
-            ? const _ReviewEmpty()
-            : state.isComplete
-            ? _ReviewSummary(state: state)
-            : _ReviewCardView(state: state),
       ),
     );
   }
@@ -339,7 +351,7 @@ class _ReviewSummary extends ConsumerWidget {
         const SizedBox(height: AppSpacing.space2),
         RikiPrimaryButton(
           label: context.l10n.backToPractice,
-          onPressed: context.pop,
+          onPressed: () => popOrGo(context, AppRoutes.practice),
         ),
       ],
     );

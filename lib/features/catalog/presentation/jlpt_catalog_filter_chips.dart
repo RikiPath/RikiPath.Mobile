@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_loading.dart';
 import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 
 class JlptCatalogFilterChips extends StatelessWidget {
@@ -30,10 +31,7 @@ class JlptCatalogFilterChips extends StatelessWidget {
         key: ValueKey<String>('${keyPrefix}_loading'),
         height: 40,
         child: const Center(
-          child: SizedBox.square(
-            dimension: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
+          child: SakuraLoadingIndicator(size: 20),
         ),
       ),
       error: (_, _) => Padding(

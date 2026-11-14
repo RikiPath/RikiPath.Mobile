@@ -71,22 +71,44 @@ class ProfileAvatar extends StatelessWidget {
 
 class ProfileHeroCard extends StatelessWidget {
   const ProfileHeroCard({
-    required this.profile,
+    this.profile,
     required this.displayName,
     required this.onEdit,
     this.avatarPulse,
+    this.avatarUrl,
+    this.email,
+    this.badges,
+    this.editIcon = Icons.photo_camera_outlined,
+    this.editTooltip,
     super.key,
-  });
+  }) : assert(
+         profile != null || email != null,
+         'Either profile or email must be provided',
+       );
 
-  final UserProfile profile;
+  final UserProfile? profile;
   final String displayName;
   final VoidCallback onEdit;
   final Animation<double>? avatarPulse;
+  final String? avatarUrl;
+  final String? email;
+  final List<Widget>? badges;
+  final IconData editIcon;
+  final String? editTooltip;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final level = profile.supportedJlptLevel;
+    final resolvedAvatarUrl = profile?.avatarUrl ?? avatarUrl;
+    final resolvedEmail = profile?.email ?? email ?? '';
+    final level = profile?.supportedJlptLevel;
+    final resolvedBadges =
+        badges ??
+        <Widget>[
+          if (profile != null)
+            _VerificationPill(verified: profile!.isEmailVerified),
+          if (level != null) JlptBadge(level),
+        ];
     final pulse = avatarPulse;
 
     return Semantics(
@@ -96,10 +118,9 @@ class ProfileHeroCard extends StatelessWidget {
         key: const ValueKey<String>('profile_hero_card'),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: AppColors.cardWarmWhite,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: AppColors.borderSubtlePink),
-          boxShadow: AppShadows.sakuraSubtle,
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(19),
+          boxShadow: AppShadows.profileCard,
         ),
         child: Stack(
           children: [
@@ -128,7 +149,7 @@ class ProfileHeroCard extends StatelessWidget {
                           child: child,
                         ),
                         child: ProfileAvatar(
-                          avatarUrl: profile.avatarUrl,
+                          avatarUrl: resolvedAvatarUrl,
                           radius: 42,
                           showRing: true,
                           semanticsLabel: displayName,
@@ -139,7 +160,7 @@ class ProfileHeroCard extends StatelessWidget {
                         bottom: -7,
                         child: Semantics(
                           button: true,
-                          label: l10n.editAvatar,
+                          label: editTooltip ?? l10n.editAvatar,
                           child: Material(
                             color: Colors.transparent,
                             child: InkWell(
@@ -169,9 +190,9 @@ class ProfileHeroCard extends StatelessWidget {
                                         ),
                                       ],
                                     ),
-                                    child: const Center(
+                                    child: Center(
                                       child: Icon(
-                                        Icons.photo_camera_outlined,
+                                        editIcon,
                                         size: 13,
                                         color: AppColors.surface,
                                       ),
@@ -200,23 +221,20 @@ class ProfileHeroCard extends StatelessWidget {
                         ),
                         const SizedBox(height: AppSpacing.space1),
                         Text(
-                          profile.email,
+                          resolvedEmail,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodySmall,
                         ),
-                        const SizedBox(height: AppSpacing.space3),
-                        Wrap(
-                          spacing: AppSpacing.space2,
-                          runSpacing: AppSpacing.space2,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            _VerificationPill(
-                              verified: profile.isEmailVerified,
-                            ),
-                            if (level != null) JlptBadge(level),
-                          ],
-                        ),
+                        if (resolvedBadges.isNotEmpty) ...[
+                          const SizedBox(height: AppSpacing.space3),
+                          Wrap(
+                            spacing: AppSpacing.space2,
+                            runSpacing: AppSpacing.space2,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: resolvedBadges,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -251,6 +269,51 @@ class _HeroDecoration extends StatelessWidget {
   }
 }
 
+/// Shared status pill used on Profile hero cards across Learner and Mentor.
+class ProfileStatusBadge extends StatelessWidget {
+  const ProfileStatusBadge({
+    required this.icon,
+    required this.label,
+    required this.foregroundColor,
+    required this.backgroundColor,
+    super.key,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color foregroundColor;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space2,
+        vertical: AppSpacing.space1,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: foregroundColor),
+          const SizedBox(width: AppSpacing.space1),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.badgeText.copyWith(color: foregroundColor),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _VerificationPill extends StatelessWidget {
   const _VerificationPill({required this.verified});
 
@@ -262,39 +325,14 @@ class _VerificationPill extends StatelessWidget {
     final background = verified
         ? AppColors.successBackgroundSoft
         : AppColors.inputProcessing;
-    return Container(
+    return ProfileStatusBadge(
       key: ValueKey<String>(
         verified ? 'profile_verified_status' : 'profile_unverified_status',
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space2,
-        vertical: AppSpacing.space1,
-      ),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            verified
-                ? Icons.verified_rounded
-                : Icons.mark_email_unread_outlined,
-            size: 14,
-            color: color,
-          ),
-          const SizedBox(width: AppSpacing.space1),
-          Flexible(
-            child: Text(
-              verified ? context.l10n.verified : context.l10n.unverified,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.badgeText.copyWith(color: color),
-            ),
-          ),
-        ],
-      ),
+      icon: verified ? Icons.verified_rounded : Icons.mark_email_unread_outlined,
+      label: verified ? context.l10n.verified : context.l10n.unverified,
+      foregroundColor: color,
+      backgroundColor: background,
     );
   }
 }
@@ -309,33 +347,38 @@ class ProfileSection extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
+  static const double _cardRadius = 19;
+  static const Color _dividerColor = Color(0xFFEFEDEE);
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: AppTypography.sectionTitle),
-        const SizedBox(height: AppSpacing.space3),
+        Padding(
+          padding: const EdgeInsets.only(left: 2),
+          child: Text(title, style: AppTypography.sectionTitle),
+        ),
+        const SizedBox(height: 13),
         DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.cardWarmWhite,
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            border: Border.all(color: AppColors.borderSubtlePink),
-            boxShadow: AppShadows.sakuraSubtle,
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(_cardRadius),
+            boxShadow: AppShadows.profileCard,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.card),
+            borderRadius: BorderRadius.circular(_cardRadius),
             child: Column(
               children: [
                 for (var index = 0; index < children.length; index++) ...[
                   children[index],
                   if (index < children.length - 1)
                     const Divider(
-                      height: 0.5,
-                      thickness: 0.5,
+                      height: 0.7,
+                      thickness: 0.7,
                       indent: 70,
                       endIndent: AppSpacing.space4,
-                      color: AppColors.borderSubtlePink,
+                      color: _dividerColor,
                     ),
                 ],
               ],
@@ -395,28 +438,33 @@ class _ProfileActionTileState extends State<ProfileActionTile> {
         : widget.emphasized
         ? AppColors.brandTint
         : AppColors.profileBackground;
+    final pressedBackground = widget.destructive
+        ? const Color(0xFFFFF2F3)
+        : AppColors.sakura50;
     return Semantics(
       button: true,
       enabled: enabled,
       label: widget.title,
-      child: AnimatedScale(
-        scale: !reduceMotion && _pressed ? 0.985 : 1,
+      child: AnimatedContainer(
         duration: reduceMotion
             ? Duration.zero
-            : const Duration(milliseconds: 100),
+            : const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
+        color: _pressed ? pressedBackground : Colors.transparent,
         child: Material(
           color: Colors.transparent,
           surfaceTintColor: Colors.transparent,
           child: InkWell(
             onTap: widget.onTap,
+            highlightColor: pressedBackground.withValues(alpha: 0.75),
+            splashColor: AppColors.brandPrimary.withValues(alpha: 0.05),
             onHighlightChanged: enabled
                 ? (value) => setState(() => _pressed = value)
                 : null,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.space4,
-                vertical: AppSpacing.space3,
+                vertical: 14,
               ),
               child: Row(
                 children: [
@@ -520,13 +568,13 @@ class ProfileSkeleton extends StatelessWidget {
         ),
         children: const [
           _ProfileHeroSkeleton(),
-          SizedBox(height: AppSpacing.space6),
+          SizedBox(height: 30),
           RikiSkeleton(width: 92, height: 18),
-          SizedBox(height: AppSpacing.space3),
+          SizedBox(height: 13),
           _ProfileActionGroupSkeleton(itemCount: 2),
-          SizedBox(height: AppSpacing.space6),
+          SizedBox(height: 30),
           RikiSkeleton(width: 112, height: 18),
-          SizedBox(height: AppSpacing.space3),
+          SizedBox(height: 13),
           _ProfileActionGroupSkeleton(itemCount: 2),
         ],
       ),
@@ -545,15 +593,8 @@ class _ProfileHeroSkeleton extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.space5),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: AppColors.neutralShadow,
-            offset: Offset(0, 8),
-            blurRadius: 28,
-            spreadRadius: -9,
-          ),
-        ],
+        borderRadius: BorderRadius.circular(19),
+        boxShadow: AppShadows.profileCard,
       ),
       child: const Row(
         children: [
@@ -592,22 +633,22 @@ class _ProfileActionGroupSkeleton extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        boxShadow: AppShadows.cardSoft,
+        borderRadius: BorderRadius.circular(19),
+        boxShadow: AppShadows.profileCard,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.card),
+        borderRadius: BorderRadius.circular(19),
         child: Column(
           children: [
             for (var index = 0; index < itemCount; index++) ...[
               const _ProfileActionRowSkeleton(),
               if (index < itemCount - 1)
                 const Divider(
-                  height: 0.5,
-                  thickness: 0.5,
+                  height: 0.7,
+                  thickness: 0.7,
                   indent: 70,
                   endIndent: AppSpacing.space4,
-                  color: AppColors.border,
+                  color: Color(0xFFEFEDEE),
                 ),
             ],
           ],

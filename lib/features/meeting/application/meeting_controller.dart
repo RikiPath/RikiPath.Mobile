@@ -5,11 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart' show ChangeNotifierProvider;
 import 'package:rikipath_mobile/core/config/app_config.dart';
 import 'package:rikipath_mobile/core/storage/token_storage.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/meeting/data/realtime/meeting_realtime_client.dart';
 import 'package:rikipath_mobile/features/meeting/data/realtime/signalr_meeting_realtime_client.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/meeting/domain/participant_role.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
+import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
 
 typedef MeetingRealtimeClientFactory = MeetingRealtimeClient Function();
 
@@ -35,6 +39,42 @@ final meetingControllerProvider = ChangeNotifierProvider.autoDispose
         client: ref.watch(meetingRealtimeClientFactoryProvider)(),
         tokenStorage: ref.watch(tokenStorageProvider),
         browserLauncher: ref.watch(mentorMeetingLinkLauncherProvider),
+        resolveDisplayName: (role) async {
+          try {
+            final authRole =
+                ref.read(authSessionControllerProvider).currentRole;
+            if (authRole == BackendUserRole.mentor ||
+                role == MeetingParticipantRole.mentor) {
+              final loaded = ref
+                  .read(mentorProfileControllerProvider)
+                  .asData
+                  ?.value
+                  .fullName
+                  .trim();
+              if (loaded != null && loaded.isNotEmpty) return loaded;
+              final profile = await ref
+                  .read(mentorRepositoryProvider)
+                  .loadProfile();
+              final name = profile.fullName.trim();
+              if (name.isNotEmpty) return name;
+              return 'Mentor';
+            }
+            final loaded = ref
+                .read(userProfileControllerProvider)
+                .asData
+                ?.value
+                .profile
+                .fullName
+                .trim();
+            if (loaded != null && loaded.isNotEmpty) return loaded;
+            final profile = await ref
+                .read(userProfileRepositoryProvider)
+                .loadProfile();
+            final name = profile.fullName.trim();
+            if (name.isNotEmpty) return name;
+          } catch (_) {}
+          return role == MeetingParticipantRole.mentor ? 'Mentor' : 'Learner';
+        },
       );
       unawaited(controller.start());
       return controller;
@@ -46,6 +86,7 @@ class MeetingController extends ChangeNotifier {
     required MeetingRealtimeClient client,
     required this.tokenStorage,
     required this.browserLauncher,
+    this.resolveDisplayName,
   }) : _client = client,
        _state = client.currentSnapshot {
     _subscription = _client.snapshots.listen((snapshot) {
@@ -58,6 +99,8 @@ class MeetingController extends ChangeNotifier {
   final MeetingRealtimeClient _client;
   final TokenStorage tokenStorage;
   final MentorMeetingLinkLauncher browserLauncher;
+  final Future<String> Function(MeetingParticipantRole role)?
+  resolveDisplayName;
   late final StreamSubscription<MeetingRealtimeSnapshot> _subscription;
   MeetingRealtimeSnapshot _state;
   bool _isDisposed = false;
@@ -73,7 +116,17 @@ class MeetingController extends ChangeNotifier {
     try {
       final storedRole = await tokenStorage.readAuthenticatedRole();
       final role = MeetingParticipantRole.fromApi(storedRole);
-      await _client.connect(room: room, displayName: 'RikiPath', role: role);
+      var displayName = role == MeetingParticipantRole.mentor
+          ? 'Mentor'
+          : 'Learner';
+      final resolver = resolveDisplayName;
+      if (resolver != null) {
+        final resolved = (await resolver(role)).trim();
+        if (resolved.isNotEmpty) {
+          displayName = resolved;
+        }
+      }
+      await _client.connect(room: room, displayName: displayName, role: role);
     } catch (_) {
       // The realtime client emits a sanitized failed state for presentation.
     } finally {

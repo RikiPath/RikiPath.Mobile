@@ -20,7 +20,14 @@ enum SakuraColorfulIconType {
   language('🌐'),
   email('📨'),
   examDate('📆'),
-  studyTime('⏱️');
+  studyTime('⏱️'),
+  studySprout('🌱'),
+  studyBalance('⚖️'),
+  studyFlame('🔥'),
+  studyBook('📖'),
+  studyLightning('⚡'),
+  studyCustomClock('🕒'),
+  certificateMedal('🏅');
 
   const SakuraColorfulIconType(this.glyph);
 
@@ -58,6 +65,12 @@ class SakuraColorfulIcon extends StatelessWidget {
                   style: TextStyle(
                     fontSize: fontSize ?? (size * 0.94),
                     height: 1,
+                    fontFamilyFallback: const <String>[
+                      'Segoe UI Emoji',
+                      'Segoe UI Symbol',
+                      'Noto Color Emoji',
+                      'Apple Color Emoji',
+                    ],
                   ),
                 ),
               )

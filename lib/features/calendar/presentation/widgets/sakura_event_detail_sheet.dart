@@ -1,21 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_colors.dart';
 import 'package:rikipath_mobile/app/theme/app_spacing.dart';
 import 'package:rikipath_mobile/app/theme/app_typography.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/network/safe_external_http_uri.dart';
+import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
-import 'package:rikipath_mobile/features/calendar/application/learner_calendar_controller.dart';
-import 'package:rikipath_mobile/features/calendar/application/mentor_calendar_controller.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
+import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_reschedule_sheet.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart'
+    show showLearnerBookingCancellationDialog;
 
 class SakuraEventDetailSheet extends ConsumerWidget {
-
   Future<void> _showRescheduleSheet(BuildContext context, WidgetRef ref) async {
-    final bookings = await ref.read(learnerMentorBookingsControllerProvider.future);
+    final canReschedule =
+        event.startTime.toUtc().difference(DateTime.now().toUtc()) >=
+        const Duration(hours: 24);
+    if (!canReschedule) {
+      ref.read(rikiToastServiceProvider.notifier).warning(
+            title: 'Không thể dời lịch hẹn',
+            description:
+                'Buổi tư vấn diễn ra trong vòng dưới 24 giờ tới, hiện không đủ điều kiện dời lịch.',
+          );
+      return;
+    }
+    final bookings = await ref.read(
+      learnerMentorBookingsControllerProvider.future,
+    );
     final booking = bookings.where((b) => b.id == event.bookingId).firstOrNull;
     if (booking == null) return;
     if (context.mounted) {
@@ -25,53 +44,16 @@ class SakuraEventDetailSheet extends ConsumerWidget {
   }
 
   Future<void> _showCancelDialog(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Xác nhận hủy buổi tư vấn?'),
-        content: const Text(
-          'Theo chính sách của RikiPath, bạn có thể hủy lịch hẹn trước giờ bắt đầu. Vé tư vấn (ticket) hoặc số dư sẽ được hoàn lại vào tài khoản theo quy định.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Quay lại'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xác nhận hủy'),
-          ),
-        ],
-      ),
+    final bookingId = event.bookingId;
+    if (bookingId == null) return;
+    final didCancel = await showLearnerBookingCancellationDialog(
+      context,
+      ref,
+      bookingId: bookingId,
+      scheduledAtUtc: event.startTime.toUtc(),
     );
-
-    if (confirmed == true && event.bookingId != null) {
-      final success = await ref
-          .read(learnerMentorMutationControllerProvider.notifier)
-          .cancelBooking(
-            bookingId: event.bookingId!,
-            reason: 'Người dùng yêu cầu hủy từ lịch',
-          );
-
-      if (context.mounted) {
-        ref.invalidate(learnerCalendarEventsProvider);
-        ref.invalidate(mentorCalendarEventsProvider);
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? 'Đã hủy lịch hẹn và cập nhật trạng thái hoàn vé thành công.'
-                  : 'Không thể hủy lịch hẹn hoặc lịch đã được xử lý.',
-            ),
-            backgroundColor: success ? AppColors.success : AppColors.error,
-          ),
-        );
-      }
+    if (didCancel && context.mounted) {
+      Navigator.of(context).pop();
     }
   }
 
@@ -179,9 +161,7 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color: event.statusBadgeBgColor,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: event.statusBadgeBorderColor,
-                        ),
+                        border: Border.all(color: event.statusBadgeBorderColor),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -270,7 +250,11 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                         ),
                         if (event.jlptLevel != null)
                           JlptBadge(
-                            JlptLevel.tryParse(event.jlptLevel?.replaceAll('JLPT ', '') ?? 'N3') ?? JlptLevel.n3,
+                            JlptLevel.tryParse(
+                                  event.jlptLevel?.replaceAll('JLPT ', '') ??
+                                      'N3',
+                                ) ??
+                                JlptLevel.n3,
                             backgroundColor: event.levelChipBgColor,
                             borderColor: event.levelChipBorderColor,
                             foregroundColor: event.levelChipTextColor,
@@ -370,26 +354,39 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                 ),
               ],
 
-              // Online Meeting Room Action (Strict validation, no fake links, hidden when cancelled per 08_Chi_Tiet_Da_Huy)
-              if (event.meetingLink != null &&
-                  event.meetingLink!.isNotEmpty &&
-                  event.status != MentorMeetingStatus.cancelled) ...[
+              // Online Meeting Room Action (Strict validation, hidden when cancelled/assigned/completed)
+              if (event.status != MentorMeetingStatus.cancelled &&
+                  event.status != MentorMeetingStatus.assigned &&
+                  event.status != MentorMeetingStatus.completed &&
+                  ((event.meetingLink != null &&
+                          event.meetingLink!.isNotEmpty) ||
+                      (MeetingNativeRollout.isEnabled &&
+                          event.roomId != null &&
+                          event.roomId!.isNotEmpty))) ...[
                 Builder(
                   builder: (context) {
-                    final uri = Uri.tryParse(event.meetingLink!);
-                    final isValidUrl = uri != null &&
-                        uri.hasScheme &&
-                        (uri.scheme == 'http' || uri.scheme == 'https');
+                    final safeUri = parseSafeExternalHttpUri(event.meetingLink);
+                    final nativeRoom = MeetingRoomReference.resolve(
+                      roomId: event.roomId,
+                      webUri: safeUri,
+                    );
+                    final canJoin = MeetingNativeRollout.isEnabled
+                        ? nativeRoom != null
+                        : safeUri != null;
 
                     return Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(AppSpacing.space4),
                       margin: const EdgeInsets.only(bottom: AppSpacing.space3),
                       decoration: BoxDecoration(
-                        color: isValidUrl ? const Color(0xFFFFF1F2) : const Color(0xFFF9FAFB),
+                        color: canJoin
+                            ? const Color(0xFFFFF1F2)
+                            : const Color(0xFFF9FAFB),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isValidUrl ? const Color(0xFFFFE4E6) : AppColors.border,
+                          color: canJoin
+                              ? const Color(0xFFFFE4E6)
+                              : AppColors.border,
                         ),
                       ),
                       child: Column(
@@ -399,16 +396,23 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                             children: [
                               Icon(
                                 Icons.videocam_outlined,
-                                color: isValidUrl ? AppColors.primary : AppColors.textSecondary,
+                                color: canJoin
+                                    ? AppColors.primary
+                                    : AppColors.textSecondary,
                               ),
                               const SizedBox(width: AppSpacing.space2),
                               Expanded(
                                 child: Text(
-                                  isValidUrl
-                                      ? 'Phòng học trực tuyến Google Meet / RikiPath'
+                                  canJoin
+                                      ? (MeetingNativeRollout.isEnabled &&
+                                                nativeRoom != null
+                                            ? 'Phòng học trực tuyến RikiPath'
+                                            : 'Phòng học trực tuyến Google Meet / RikiPath')
                                       : 'Chưa có link phòng học trực tuyến',
                                   style: AppTypography.bodySmall.copyWith(
-                                    color: isValidUrl ? AppColors.primary : AppColors.textSecondary,
+                                    color: canJoin
+                                        ? AppColors.primary
+                                        : AppColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                   maxLines: 1,
@@ -417,17 +421,44 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          if (isValidUrl) ...[
+                          if (canJoin) ...[
                             const SizedBox(height: AppSpacing.space3),
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton.icon(
-                                onPressed: () {
-                                  ref
+                                onPressed: () async {
+                                  if (MeetingNativeRollout.isEnabled) {
+                                    if (nativeRoom == null) {
+                                      ref
+                                          .read(
+                                            rikiToastServiceProvider.notifier,
+                                          )
+                                          .error(
+                                            title: context
+                                                .l10n
+                                                .mentorJoinFailedTitle,
+                                            description:
+                                                context.l10n.meetingLinkInvalid,
+                                          );
+                                      return;
+                                    }
+                                    final router = GoRouter.maybeOf(context);
+                                    Navigator.of(context).pop();
+                                    await router?.push(
+                                      AppRoutes.meetingRoom(nativeRoom.roomId),
+                                      extra: nativeRoom,
+                                    );
+                                    return;
+                                  }
+                                  await ref
                                       .read(mentorMeetingLinkLauncherProvider)
-                                      .open(uri);
+                                      .open(safeUri!);
                                 },
-                                icon: const Icon(Icons.open_in_new, size: 18, color: Colors.white),
+                                icon: const Icon(
+                                  Icons.open_in_new,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
                                 label: const Text(
                                   'Tham gia phòng học',
                                   style: TextStyle(
@@ -440,7 +471,9 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                                   backgroundColor: const Color(0xFFE5577F),
                                   foregroundColor: Colors.white,
                                   elevation: 2,
-                                  shadowColor: const Color(0xFFE5577F).withValues(alpha: 0.35),
+                                  shadowColor: const Color(
+                                    0xFFE5577F,
+                                  ).withValues(alpha: 0.35),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -462,7 +495,8 @@ class SakuraEventDetailSheet extends ConsumerWidget {
               if (event.bookingId != null &&
                   event.type == SakuraCalendarEventType.consultation &&
                   event.status != MentorMeetingStatus.cancelled &&
-                  event.status != MentorMeetingStatus.completed) ...[
+                  event.status != MentorMeetingStatus.completed &&
+                  event.startTime.isAfter(DateTime.now())) ...[
                 Row(
                   children: [
                     Expanded(

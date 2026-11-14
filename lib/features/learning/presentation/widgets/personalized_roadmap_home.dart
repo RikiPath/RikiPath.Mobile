@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/sakura_loading.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_path_controller.dart';
@@ -21,7 +23,8 @@ class PersonalizedRoadmapHome extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pathState = ref.watch(activeLearningPathProvider);
     return pathState.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () =>
+          SakuraSectionLoading(title: context.l10n.loadingOverlayDataTitle),
       error: (_, _) => _RoadmapMessage(
         title: 'Chưa tải được lộ trình',
         description:
@@ -36,7 +39,8 @@ class PersonalizedRoadmapHome extends ConsumerWidget {
         }
         final placementState = ref.watch(placementTestStatusProvider);
         return placementState.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () =>
+              SakuraSectionLoading(title: context.l10n.loadingOverlayDataTitle),
           error: (_, _) => _RoadmapMessage(
             title: 'Chưa tải được trạng thái đánh giá',
             description:
@@ -77,7 +81,8 @@ class _NoActiveRoadmap extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final latestState = ref.watch(learningPathControllerProvider);
     return latestState.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () =>
+          SakuraSectionLoading(title: context.l10n.loadingOverlayDataTitle),
       error: (_, _) => _RoadmapMessage(
         title: 'Chưa tải được bản xem trước',
         description: 'Vui lòng kiểm tra kết nối rồi thử lại.',
@@ -331,9 +336,11 @@ class _ActiveRoadmap extends ConsumerWidget {
             ),
           if (levelsState.isLoading ||
               catalogStates.values.any((state) => state.isLoading))
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator()),
+              child: SakuraSectionLoading(
+                title: context.l10n.loadingOverlayListTitle,
+              ),
             ),
           if (levelsState.hasError ||
               catalogStates.values.any((state) => state.hasError))

@@ -216,6 +216,74 @@ void main() {
       expect(find.text('Khám phá'), findsNothing);
     });
 
+    testWidgets(
+      'profile menu cards use borderless white surfaces, soft elevation, and neutral dividers',
+      (tester) async {
+        await _pump(
+          tester,
+          const ProfileScreen(),
+          repository: _ProfileRepository(),
+        );
+        await tester.pumpAndSettle();
+
+        final heroContainer = tester.widget<Container>(
+          find.byKey(const ValueKey<String>('profile_hero_card')),
+        );
+        final heroDecoration = heroContainer.decoration! as BoxDecoration;
+        expect(heroDecoration.color, AppColors.surface);
+        expect(heroDecoration.border, isNull);
+        expect(heroDecoration.borderRadius, BorderRadius.circular(19));
+        expect(heroDecoration.boxShadow, AppShadows.profileCard);
+
+        final sectionFinders = find.byType(ProfileSection);
+        expect(sectionFinders, findsWidgets);
+        for (final element in sectionFinders.evaluate()) {
+          final decoratedBox = tester.widget<DecoratedBox>(
+            find
+                .descendant(
+                  of: find.byWidget(element.widget),
+                  matching: find.byType(DecoratedBox),
+                )
+                .first,
+          );
+          final boxDecoration = decoratedBox.decoration as BoxDecoration;
+          expect(boxDecoration.color, AppColors.surface);
+          expect(boxDecoration.border, isNull);
+          expect(boxDecoration.borderRadius, BorderRadius.circular(19));
+          expect(boxDecoration.boxShadow, AppShadows.profileCard);
+        }
+
+        final dividers = tester.widgetList<Divider>(find.byType(Divider));
+        for (final divider in dividers) {
+          expect(divider.color, const Color(0xFFEFEDEE));
+          expect(divider.thickness, 0.7);
+          expect(divider.indent, 70);
+        }
+      },
+    );
+
+    for (final width in <double>[360, 393, 412]) {
+      testWidgets(
+        'profile menu cards render cleanly without overflow at ${width.toInt()}dp',
+        (tester) async {
+          await _pump(
+            tester,
+            const ProfileScreen(),
+            repository: _ProfileRepository(),
+            size: Size(width, 852),
+          );
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          await tester.drag(
+            find.byKey(const ValueKey<String>('profile_success_view')),
+            const Offset(0, -600),
+          );
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+
     testWidgets('error state retries without exposing raw exception text', (
       tester,
     ) async {
@@ -356,6 +424,15 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(signedOut, isTrue);
+        expect(
+          find.byKey(const ValueKey<String>('riki_toast_success')),
+          findsOneWidget,
+        );
+        expect(find.text('Đã đăng xuất'), findsOneWidget);
+        expect(
+          find.text('Hẹn gặp lại trên hành trình học tiếng Nhật!'),
+          findsOneWidget,
+        );
       },
     );
   });
@@ -459,7 +536,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Không thể kết nối máy chủ'), findsOneWidget);
+      expect(find.textContaining('Không thể kết nối mạng'), findsOneWidget);
       expect(find.textContaining('raw avatar error'), findsNothing);
     });
 
@@ -612,7 +689,7 @@ void main() {
             .value,
         isTrue,
       );
-      expect(find.textContaining('Không thể kết nối máy chủ'), findsOneWidget);
+      expect(find.textContaining('Không thể kết nối mạng'), findsOneWidget);
     });
 
     testWidgets('Japanese preferences fit a narrow 320px screen', (
@@ -633,90 +710,104 @@ void main() {
   });
 
   group('JlptGoalScreen', () {
-    testWidgets('offers N5 through N2 (excluding N1) and submits the selected Backend ID', (
+    testWidgets('missing persisted goal opens create onboarding', (
       tester,
     ) async {
-      final repository = _ProfileRepository();
+      final repository = _ProfileRepository(
+        profile: _profile(targetJlptLevelId: null, targetJlptLevelName: null),
+      );
+      final router = GoRouter(
+        initialLocation: AppRoutes.profileJlptGoal,
+        routes: [
+          GoRoute(
+            path: AppRoutes.profileJlptGoal,
+            builder: (context, state) => const JlptGoalScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.onboarding,
+            builder: (context, state) =>
+                const Scaffold(body: Text('create-onboarding-route')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            userProfileRepositoryProvider.overrideWithValue(repository),
+          ],
+          child: MaterialApp.router(
+            theme: AppTheme.light,
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: supportedAppLocales,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('create-onboarding-route'), findsOneWidget);
+      expect(find.byType(JlptGoalScreen), findsNothing);
+      expect(repository.jlptCalls, 0);
+    });
+    testWidgets('valid goal shows a read-only summary and one edit entry', (
+      tester,
+    ) async {
+      final repository = _ProfileRepository(profile: _profile(noTargetExamDate: true));
       await _pump(tester, const JlptGoalScreen(), repository: repository);
       await tester.pumpAndSettle();
 
-      // The profile target is N3; the independent current study level may be N5.
-      final currentGoal = find.ancestor(
-        of: find.text('Mục tiêu hiện tại'),
-        matching: find.byType(ProfileSettingsTile),
-      );
-      expect(
-        find.descendant(of: currentGoal, matching: find.text('N3')),
-        findsWidgets,
-      );
-
-      for (final level in <String>['N5', 'N4', 'N3', 'N2']) {
-        expect(
-          find.byKey(ValueKey<String>('jlpt_goal_choice_$level')),
-          findsOneWidget,
-        );
-      }
-      expect(
-        find.byKey(const ValueKey<String>('jlpt_goal_choice_N1')),
-        findsNothing,
-      );
-      expect(
-        find.byKey(const ValueKey<String>('daily_study_choice_90')),
-        findsOneWidget,
-      );
-      await tester.tap(
-        find.byKey(const ValueKey<String>('jlpt_goal_choice_N4')),
-      );
-      await tester.pump();
-      expect(
-        tester
-            .widget<ChoiceChip>(
-              find.byKey(const ValueKey<String>('jlpt_goal_choice_N4')),
-            )
-            .selected,
-        isTrue,
-      );
-      expect(repository.jlptCalls, 0);
+      expect(find.text('Chưa thiết lập'), findsWidgets);
       await tester.scrollUntilVisible(
-        find.byKey(const ValueKey<String>('jlpt_goal_save_button')),
-        260,
+        find.byKey(const ValueKey<String>('jlpt_goal_edit_button')),
+        240,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(
-        tester
-            .widget<RikiPrimaryButton>(
-              find.byKey(const ValueKey<String>('jlpt_goal_save_button')),
-            )
-            .onPressed,
-        isNotNull,
-      );
-      await tester.drag(find.byType(Scrollable).first, const Offset(0, -80));
-      await tester.pump();
-      await tester.tap(
-        find.byKey(const ValueKey<String>('jlpt_goal_save_button')),
-      );
-      await tester.pumpAndSettle();
-      expect(repository.jlptCalls, 1);
-      expect(repository.lastJlptLevelId, 204);
-      expect(repository.lastDailyStudyMinutes, 30);
+      expect(find.byKey(const ValueKey<String>('jlpt_goal_edit_button')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('jlpt_goal_save_button')), findsNothing);
+      expect(repository.jlptCalls, 0);
     });
 
-    testWidgets('Japanese selectors do not overflow at 320px', (tester) async {
+    testWidgets(
+      'profile load error shows Error State and Retry without redirecting to create wizard',
+      (tester) async {
+        final repository = _ProfileRepository(
+          loadErrors: <Object>[const NetworkError(message: 'timeout')],
+        );
+        await _pump(tester, const JlptGoalScreen(), repository: repository);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(RikiErrorBanner), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey<String>('profile_jlpt_create_redirect')),
+          findsNothing,
+        );
+
+        await tester.tap(find.text('Thử lại'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(RikiErrorBanner), findsNothing);
+        expect(
+          find.byKey(const ValueKey<String>('jlpt_goal_edit_button')),
+          findsOneWidget,
+        );
+        expect(repository.loadCalls, 2);
+      },
+    );
+
+    testWidgets('goal summary remains usable at 320px', (tester) async {
       await _pump(
         tester,
         const JlptGoalScreen(),
         repository: _ProfileRepository(),
-        locale: const Locale('ja'),
         size: const Size(320, 700),
       );
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.byKey(const ValueKey<String>('jlpt_goal_save_button')),
+        find.byKey(const ValueKey<String>('jlpt_goal_edit_button')),
         220,
         scrollable: find.byType(Scrollable).first,
       );
-
-      expect(find.text('JLPT目標を選択'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });
@@ -872,6 +963,7 @@ UserProfile _profile({
   String? targetJlptLevelName = 'N3',
   int dailyStudyMinutes = 30,
   DateTime? targetExamDate,
+  bool noTargetExamDate = false,
   bool emailNotifications = true,
   bool systemNotifications = false,
   String? avatarUrl,
@@ -886,8 +978,12 @@ UserProfile _profile({
     isEmailVerified: isEmailVerified,
     targetJlptLevelId: targetJlptLevelId,
     targetJlptLevelName: targetJlptLevelName,
+    currentStudyLevelId: 101,
+    currentStudyLevelName: 'N5',
     dailyStudyMinutes: dailyStudyMinutes,
-    targetExamDate: targetExamDate ?? DateTime(2030, 12, 1),
+    targetExamDate: noTargetExamDate
+        ? null
+        : targetExamDate ?? DateTime(2030, 12, 1),
     emailNotificationsEnabled: emailNotifications,
     systemNotificationsEnabled: systemNotifications,
   );
@@ -912,7 +1008,8 @@ class _AvatarPicker implements ProfileAvatarPicker {
   Future<ProfileAvatarUpload?> pickFromGallery() async => upload;
 }
 
-class _ProfileRepository implements UserProfileRepository {
+class _ProfileRepository
+    implements UserProfileRepository, ClearTargetExamDateProfileRepository {
   _ProfileRepository({
     this.profile,
     this.loadCompleter,
@@ -934,6 +1031,7 @@ class _ProfileRepository implements UserProfileRepository {
   int uploadCalls = 0;
   int notificationCalls = 0;
   int jlptCalls = 0;
+  int clearExamDateCalls = 0;
   int? lastJlptLevelId;
   int? lastDailyStudyMinutes;
   String? lastFirstName;
@@ -986,6 +1084,24 @@ class _ProfileRepository implements UserProfileRepository {
       targetJlptLevelId: targetJlptLevelId,
       targetJlptLevelName: level?.code,
       dailyStudyMinutes: dailyStudyMinutes,
+      noTargetExamDate: profile != null && profile!.targetExamDate == null,
+    );
+  }
+
+  @override
+  Future<UserProfile> clearJlptGoalExamDate({
+    required int targetJlptLevelId,
+    required int dailyStudyMinutes,
+  }) async {
+    clearExamDateCalls++;
+    final level = testJlptCatalog
+        .where((item) => item.id == targetJlptLevelId)
+        .firstOrNull;
+    return _profile(
+      targetJlptLevelId: targetJlptLevelId,
+      targetJlptLevelName: level?.code,
+      dailyStudyMinutes: dailyStudyMinutes,
+      noTargetExamDate: true,
     );
   }
 

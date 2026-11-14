@@ -1,3 +1,4 @@
+export 'animated_notification_bell.dart';
 export 'app_section_card.dart';
 export 'jlpt_badge.dart';
 export 'riki_auth_header.dart';
@@ -22,8 +23,10 @@ export 'sakura_3d_icon.dart';
 export 'sakura_category_shortcut.dart';
 export 'sakura_day_tracker.dart';
 export 'sakura_educational_banner.dart';
+export 'sakura_glass_notification.dart';
 export 'sakura_hero_banner.dart';
 export 'sakura_icon_mapper.dart';
+export 'sakura_loading.dart';
 export 'sakura_mascot.dart';
 export 'sakura_motivation_banner.dart';
 export 'sakura_motifs.dart';

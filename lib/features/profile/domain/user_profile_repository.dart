@@ -29,6 +29,24 @@ abstract interface class TargetExamDateProfileRepository {
   });
 }
 
+abstract interface class ClearTargetExamDateProfileRepository {
+  Future<UserProfile> clearJlptGoalExamDate({
+    required int targetJlptLevelId,
+    required int dailyStudyMinutes,
+  });
+}
+
 abstract interface class StudyLevelProfileRepository {
   Future<UserProfile> switchStudyLevel({required int currentStudyLevelId});
+}
+
+abstract interface class AtomicLearningGoalProfileRepository {
+  Future<UserProfile> saveLearningGoal({
+    required int currentStudyLevelId,
+    required int targetJlptLevelId,
+    required int dailyStudyMinutes,
+    required DateTime? targetExamDate,
+    required int? certifiedJlptLevelId,
+    required int expectedVersion,
+  });
 }

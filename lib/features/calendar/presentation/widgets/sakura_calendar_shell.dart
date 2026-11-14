@@ -16,6 +16,7 @@ class SakuraCalendarShell extends ConsumerStatefulWidget {
     super.key,
     required this.events,
     required this.roleName,
+    this.dataIncomplete = false,
     this.isMentor = false,
     this.fabLabel,
     this.fabIcon = Icons.add,
@@ -23,9 +24,12 @@ class SakuraCalendarShell extends ConsumerStatefulWidget {
     this.onEventSelected,
     this.initialMode = SakuraCalendarViewMode.month,
     this.initialDate,
+    this.showBackButton = true,
+    this.onBackPressed,
   });
 
   final List<SakuraCalendarEvent> events;
+  final bool dataIncomplete;
   final String roleName;
   final bool isMentor;
   final String? fabLabel;
@@ -34,6 +38,8 @@ class SakuraCalendarShell extends ConsumerStatefulWidget {
   final ValueChanged<SakuraCalendarEvent>? onEventSelected;
   final SakuraCalendarViewMode initialMode;
   final DateTime? initialDate;
+  final bool showBackButton;
+  final VoidCallback? onBackPressed;
 
   @override
   ConsumerState<SakuraCalendarShell> createState() =>
@@ -56,13 +62,13 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref
-          .read(sakuraCalendarControllerProvider.notifier)
-          .setViewMode(widget.initialMode);
+      final notifier = ref.read(sakuraCalendarControllerProvider.notifier);
+      if (ref.read(sakuraCalendarControllerProvider).viewMode !=
+          widget.initialMode) {
+        notifier.setViewMode(widget.initialMode);
+      }
       if (widget.initialDate != null) {
-        ref
-            .read(sakuraCalendarControllerProvider.notifier)
-            .setSelectedDate(widget.initialDate!);
+        notifier.setSelectedDate(widget.initialDate!);
       }
     });
   }
@@ -133,7 +139,9 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
               onPrevious: () => controller.previous(),
               onNext: () => controller.next(),
               onSearchPressed: () => setState(() => _searchOpen = !_searchOpen),
-              onBackPressed: () => Navigator.of(context).maybePop(),
+              showBackButton: widget.showBackButton,
+              onBackPressed:
+                  widget.onBackPressed ?? () => Navigator.of(context).maybePop(),
             ),
             if (_searchOpen)
               Padding(
@@ -144,7 +152,9 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
                     isDense: true,
-                    hintText: 'Tìm sự kiện, Cố vấn, ngày...',
+                    hintText: widget.isMentor
+                        ? 'Tìm sự kiện, Học viên, ngày...'
+                        : 'Tìm sự kiện, Cố vấn, ngày...',
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchController.text.isEmpty
                         ? null
@@ -159,7 +169,10 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
               ),
             if (upcoming.isNotEmpty && query.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 child: InkWell(
                   key: const Key('calendar_next_event'),
                   onTap: () {
@@ -205,9 +218,40 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Icon(Icons.chevron_right, size: 16, color: AppColors.primary),
+                        const Icon(
+                          Icons.chevron_right,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
                       ],
                     ),
+                  ),
+                ),
+              ),
+
+            if (widget.dataIncomplete &&
+                widget.isMentor &&
+                (calendarState.viewMode == SakuraCalendarViewMode.agenda ||
+                    calendarState.viewMode == SakuraCalendarViewMode.day ||
+                    calendarState.viewMode == SakuraCalendarViewMode.week))
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFFED7AA)),
+                ),
+                child: const Text(
+                  'Một số dữ liệu lịch chưa tải đầy đủ. Hãy tải lại để xem đầy đủ hoạt động.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF9A3412),
                   ),
                 ),
               ),
@@ -221,6 +265,7 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
                     key: ValueKey('year_${calendarState.selectedDate.year}'),
                     selectedDate: calendarState.selectedDate,
                     events: filteredEvents,
+                    dataIncomplete: widget.dataIncomplete,
                     onSelectMonth: (date) {
                       controller.setSelectedDate(date);
                       controller.setViewMode(SakuraCalendarViewMode.month);
@@ -234,6 +279,7 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
                     key: ValueKey('month_${calendarState.selectedDate.month}'),
                     selectedDate: calendarState.selectedDate,
                     events: filteredEvents,
+                    dataIncomplete: widget.dataIncomplete,
                     onSelectDate: (d) => controller.setSelectedDate(d),
                     onSelectEvent: _onEventSelected,
                     onPreviousMonth: () => controller.previous(),
@@ -243,6 +289,8 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
                     key: const ValueKey('agenda_view'),
                     selectedDate: calendarState.selectedDate,
                     events: filteredEvents,
+                    dataIncomplete: widget.dataIncomplete,
+                    addEventLabel: widget.fabLabel,
                     onSelectEvent: _onEventSelected,
                     onAddEventAction: widget.onFabPressed,
                   ),
