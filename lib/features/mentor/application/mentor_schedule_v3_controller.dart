@@ -58,13 +58,6 @@ class MentorScheduleV3Controller extends AsyncNotifier<MentorScheduleV3> {
     return result;
   }
 
-  Future<void> disableSlot(int slotId, {String? reason}) async {
-    await ref
-        .read(mentorScheduleV3RepositoryProvider)
-        .disableSlot(slotId, reason: reason);
-    ref.invalidate(mentorAvailabilityControllerProvider);
-  }
-
   Future<void> deleteAvailability(int availabilityId) async {
     await ref
         .read(mentorScheduleV3RepositoryProvider)

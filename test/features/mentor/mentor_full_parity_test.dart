@@ -15,7 +15,7 @@ import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_chat_controller.dart';
-import 'package:rikipath_mobile/features/mentor/application/mentor_compensation_controller.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_kpi_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_operations_controller.dart';
@@ -27,17 +27,16 @@ import 'package:rikipath_mobile/features/mentor/data/mentor_operations_repositor
 import 'package:rikipath_mobile/features/mentor/data/mentor_schedule_v3_dtos.dart';
 import 'package:rikipath_mobile/features/mentor/data/mentor_schedule_v3_repository.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_chat.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation_repository.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_kpi.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_kpi_repository.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_operations.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_repository.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_schedule_v3.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_attendance_kpi_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_bank_account_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_chat_screens.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_compensation_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_disputes_screens.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_edit_profile_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_meeting_detail_screen.dart';
@@ -662,8 +661,10 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('mentor_slot_actions_501')));
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('mentor_slot_delete_501')), findsOneWidget);
-      expect(find.byKey(const Key('mentor_slot_disable_501')), findsOneWidget);
+      expect(find.byKey(const Key('mentor_slot_delete_501')), findsNothing);
+      expect(find.byKey(const Key('mentor_slot_disable_501')), findsNothing);
+      expect(find.byKey(const Key('mentor_slot_cancel_501')), findsOneWidget);
+      expect(find.byKey(const Key('mentor_slot_change_501')), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -745,52 +746,35 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('MentorCompensationScreen & MentorBankAccountScreen render full history, sheets & VN BIN presets', (tester) async {
-      final compRepo = _FakeMentorCompensationRepository();
+    testWidgets('MentorAttendanceKpiScreen renders KPI stats, period toggle & zero payroll/VND text', (tester) async {
+      final kpiRepo = _FakeMentorKpiRepository();
 
       await _pumpWidget(
         tester,
-        const MentorCompensationScreen(),
-        compensationRepo: compRepo,
+        const MentorAttendanceKpiScreen(),
+        kpiRepo: kpiRepo,
       );
 
+      expect(
+        find.byKey(const Key('mentor_attendance_kpi_screen')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('kpi_assigned_sessions')), findsOneWidget);
+      expect(find.byKey(const Key('kpi_completed_sessions')), findsOneWidget);
+
       await tester.scrollUntilVisible(
-        find.byKey(const Key('mentor_comp_hourly_rates_card')),
+        find.textContaining('2026-10'),
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(
-        find.byKey(const Key('mentor_comp_hourly_rates_card')),
-        findsOneWidget,
-      );
-      await tester.scrollUntilVisible(
-        find.byKey(const Key('mentor_comp_qualifications_card')),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      expect(
-        find.byKey(const Key('mentor_comp_qualifications_card')),
-        findsOneWidget,
-      );
+      expect(find.textContaining('2026-10'), findsOneWidget);
+      expect(find.textContaining('₫'), findsNothing);
 
-      // Bank account screen preset chip auto-fills BIN and short name
-      await _pumpWidget(
-        tester,
-        const MentorBankAccountScreen(),
-        compensationRepo: compRepo,
-      );
-
-      await tester.tap(find.byKey(const Key('mentor_bank_preset_970436')));
+      await tester.ensureVisible(find.text('Tuần'));
       await tester.pumpAndSettle();
-
-      final binField = tester.widget<TextField>(
-        find.byKey(const Key('mentor_bank_bin_field')),
-      );
-      final nameField = tester.widget<TextField>(
-        find.byKey(const Key('mentor_bank_name_field')),
-      );
-      expect(binField.controller?.text, '970436');
-      expect(nameField.controller?.text, 'Vietcombank');
+      await tester.tap(find.text('Tuần'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('W45'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -928,7 +912,7 @@ Future<void> _pumpWidget(
   _FakeMentorScheduleV3Repository? scheduleV3Repo,
   _FakeMentorChatRepository? chatRepo,
   _FakeMentorChatRealtimeClient? chatRealtimeClient,
-  _FakeMentorCompensationRepository? compensationRepo,
+  _FakeMentorKpiRepository? kpiRepo,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -960,8 +944,8 @@ Future<void> _pumpWidget(
         mentorChatRealtimeClientFactoryProvider.overrideWithValue(
           () => effectiveRealtime,
         ),
-        mentorCompensationRepositoryProvider.overrideWithValue(
-          compensationRepo ?? _FakeMentorCompensationRepository(),
+        mentorKpiRepositoryProvider.overrideWithValue(
+          kpiRepo ?? _FakeMentorKpiRepository(),
         ),
         mentorMeetingLinkLauncherProvider.overrideWithValue(
           _NoopMeetingLinkLauncher(),
@@ -1019,8 +1003,8 @@ Future<GoRouter> _pumpMentorRouter(
         mentorChatRealtimeClientFactoryProvider.overrideWithValue(
           _FakeMentorChatRealtimeClient.new,
         ),
-        mentorCompensationRepositoryProvider.overrideWithValue(
-          _FakeMentorCompensationRepository(),
+        mentorKpiRepositoryProvider.overrideWithValue(
+          _FakeMentorKpiRepository(),
         ),
       ],
       child: MaterialApp.router(
@@ -1102,12 +1086,6 @@ class _FakeMentorRepository implements MentorRepository {
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(
     DateTime weekStart,
   ) async => const [];
-
-  @override
-  Future<bool> saveWeeklySchedule({
-    required DateTime weekStart,
-    required List<WeeklyPeriodItem> periods,
-  }) async => true;
 
   @override
   Future<bool> cancelMeeting(int bookingId, String reason) async => true;
@@ -1387,9 +1365,6 @@ class _FakeMentorScheduleV3Repository implements MentorScheduleV3Repository {
   );
 
   @override
-  Future<void> disableSlot(int slotId, {String? reason}) async {}
-
-  @override
   Future<void> deleteAvailability(int availabilityId) async {}
 
   @override
@@ -1508,136 +1483,63 @@ class _FakeMentorChatRealtimeClient implements MentorChatRealtimeClient {
   }
 }
 
-class _FakeMentorCompensationRepository
-    implements MentorCompensationRepository {
+class _FakeMentorKpiRepository implements MentorKpiRepository {
   @override
-  Future<MentorCompensationOverview> loadOverview() async =>
-      MentorCompensationOverview(
-        mentorUserId: 5,
-        totalEligibleUnassignedVnd: 562500,
-        totalLockedInPayrollVnd: 1125000,
-        totalPaidVnd: 2250000,
-        currentHourlyRate: MentorHourlyRateItem(
-          id: 1,
-          mentorUserId: 5,
-          hourlyRateVnd: 250000,
-          currency: 'VND',
-          effectiveFromUtc: DateTime.utc(2026, 10, 1),
-          isActive: true,
-        ),
-        activeQualifications: [
-          MentorTeachingQualificationItem(
-            id: 1,
-            mentorUserId: 5,
-            jlptLevel: 'N2',
-            isActive: true,
-            approvedAtUtc: DateTime.utc(2026, 10, 1),
+  Future<MentorKpiSummary> loadSummary({
+    String? fromDate,
+    String? toDate,
+  }) async =>
+      MentorKpiSummary(
+        mentorId: 5,
+        mentorName: 'Tanaka Taro',
+        fromDate: fromDate ?? '2026-09-01',
+        toDate: toDate ?? '2026-11-16',
+        teachingJlptLevels: const ['N2'],
+        totalAssignedSessions: 4,
+        assignedBookingsCount: 3,
+        assignedCourseSessionsCount: 1,
+        completedValidSessions: 3,
+        confirmedTeachingMinutes: 240,
+        scheduledCompletedMinutes: 270,
+        weeklyBreakdown: const [
+          MentorKpiPeriodItem(
+            periodKey: 'W45 (02/11)',
+            periodStart: '2026-11-02',
+            periodEnd: '2026-11-08',
+            totalAssignedSessions: 2,
+            completedValidSessions: 2,
+            confirmedTeachingMinutes: 150,
+            scheduledCompletedMinutes: 180,
+            cancelledSessionsCount: 0,
+            missedOrNoShowSessionsCount: 0,
+            upcomingOrIncompleteSessionsCount: 0,
+            homeworkAssignedCount: 1,
+            homeworkSubmittedCount: 1,
+            homeworkGradedCount: 1,
+            feedbackTurnaroundSampleCount: 1,
+            reviewsCount: 1,
+            disputesCount: 0,
+          ),
+        ],
+        monthlyBreakdown: const [
+          MentorKpiPeriodItem(
+            periodKey: '2026-10',
+            periodStart: '2026-10-01',
+            periodEnd: '2026-10-31',
+            totalAssignedSessions: 4,
+            completedValidSessions: 3,
+            confirmedTeachingMinutes: 240,
+            scheduledCompletedMinutes: 270,
+            cancelledSessionsCount: 1,
+            missedOrNoShowSessionsCount: 0,
+            upcomingOrIncompleteSessionsCount: 0,
+            homeworkAssignedCount: 2,
+            homeworkSubmittedCount: 1,
+            homeworkGradedCount: 1,
+            feedbackTurnaroundSampleCount: 1,
+            reviewsCount: 2,
+            disputesCount: 0,
           ),
         ],
       );
-
-  @override
-  Future<List<MentorHourlyRateItem>> loadHourlyRates() async => [
-    MentorHourlyRateItem(
-      id: 1,
-      mentorUserId: 5,
-      hourlyRateVnd: 250000,
-      currency: 'VND',
-      effectiveFromUtc: DateTime.utc(2026, 10, 1),
-      isActive: true,
-      reason: 'Base approved mentor rate',
-    ),
-  ];
-
-  @override
-  Future<List<MentorTeachingQualificationItem>> loadQualifications() async => [
-    MentorTeachingQualificationItem(
-      id: 1,
-      mentorUserId: 5,
-      jlptLevel: 'N2',
-      isActive: true,
-      approvedAtUtc: DateTime.utc(2026, 10, 1),
-      notes: 'Verified JLPT N2 certificate',
-    ),
-  ];
-
-  @override
-  Future<List<MentorEarningEntryItem>> loadEarnings() async => const [];
-
-  @override
-  Future<List<MentorPayrollPeriodItem>> loadPayrolls({
-    int? year,
-    int? month,
-  }) async => [
-    MentorPayrollPeriodItem(
-      id: 10,
-      mentorUserId: 5,
-      periodYear: 2026,
-      periodMonth: 10,
-      status: 'Paid',
-      totalEarningsAmountVnd: 2250000,
-      totalAdjustmentsAmountVnd: 0,
-      grossPayableAmountVnd: 2250000,
-      currency: 'VND',
-      approvedAtUtc: DateTime.utc(2026, 11, 2),
-      payoutObligationId: 20,
-    ),
-  ];
-
-  @override
-  Future<MentorPayrollPeriodItem> loadPayrollDetail(int payrollPeriodId) async =>
-      (await loadPayrolls()).single;
-
-  @override
-  Future<List<MentorBankAccountItem>> loadBankAccounts() async => const [
-    MentorBankAccountItem(
-      id: 3,
-      mentorUserId: 5,
-      bankBin: '970436',
-      bankShortName: 'Vietcombank',
-      maskedAccountNumber: '****6789',
-      accountHolderName: 'TANAKA TARO',
-      verificationStatus: 'Verified',
-      accountVersion: 1,
-      isCurrent: true,
-    ),
-  ];
-
-  @override
-  Future<MentorBankAccountItem> upsertBankAccount({
-    required String bankBin,
-    required String bankShortName,
-    required String accountNumber,
-    required String accountHolderName,
-  }) async => MentorBankAccountItem(
-    id: 4,
-    mentorUserId: 5,
-    bankBin: bankBin,
-    bankShortName: bankShortName,
-    maskedAccountNumber: '****${accountNumber.substring(accountNumber.length - 4)}',
-    accountHolderName: accountHolderName,
-    verificationStatus: 'PendingVerification',
-    accountVersion: 2,
-    isCurrent: true,
-  );
-
-  @override
-  Future<List<MentorPayoutObligationItem>> loadPayouts() async => const [
-    MentorPayoutObligationItem(
-      id: 20,
-      mentorPayrollPeriodId: 10,
-      mentorUserId: 5,
-      status: 'Paid',
-      payableAmountVnd: 2250000,
-      paidAmountVnd: 2250000,
-      currency: 'VND',
-      recipientBankShortNameSnapshot: 'Vietcombank',
-      recipientMaskedAccountSnapshot: '****6789',
-      recipientAccountHolderSnapshot: 'TANAKA TARO',
-    ),
-  ];
-
-  @override
-  Future<MentorPayoutObligationItem> loadPayoutDetail(int obligationId) async =>
-      (await loadPayouts()).single;
 }

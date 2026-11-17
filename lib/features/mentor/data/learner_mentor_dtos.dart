@@ -166,6 +166,8 @@ class LearnerMentorAvailabilityDto {
     required this.startTime,
     required this.endTime,
     required this.isBooked,
+    this.bookedCount = 0,
+    this.maxLearners = 1,
   });
 
   factory LearnerMentorAvailabilityDto.fromJson(Map<String, Object?> json) {
@@ -176,6 +178,8 @@ class LearnerMentorAvailabilityDto {
       startTime: MentorTimestamp.parse(_requiredString(json, 'startTime')),
       endTime: MentorTimestamp.parse(_requiredString(json, 'endTime')),
       isBooked: _requiredBool(json, 'isBooked'),
+      bookedCount: (json['bookedCount'] as num?)?.toInt() ?? 0,
+      maxLearners: (json['maxLearners'] as num?)?.toInt() ?? 1,
     );
   }
 
@@ -185,6 +189,8 @@ class LearnerMentorAvailabilityDto {
   final MentorTimestamp startTime;
   final MentorTimestamp endTime;
   final bool isBooked;
+  final int bookedCount;
+  final int maxLearners;
 
   LearnerMentorAvailability toDomain() => LearnerMentorAvailability(
     id: id,
@@ -193,6 +199,8 @@ class LearnerMentorAvailabilityDto {
     startTime: startTime,
     endTime: endTime,
     isBooked: isBooked,
+    bookedCount: bookedCount,
+    maxLearners: maxLearners,
   );
 }
 

@@ -44,30 +44,6 @@ class ApiMentorRepository implements MentorRepository {
   }
 
   @override
-  Future<bool> saveWeeklySchedule({
-    required DateTime weekStart,
-    required List<WeeklyPeriodItem> periods,
-  }) async {
-    final weekStartStr =
-        '${weekStart.year.toString().padLeft(4, '0')}-${weekStart.month.toString().padLeft(2, '0')}-${weekStart.day.toString().padLeft(2, '0')}';
-    final payload = {
-      'weekStart': weekStartStr,
-      'periods': periods
-          .map((p) => {'date': p.formattedDate, 'period': p.period})
-          .toList(growable: false),
-    };
-    final response = await _apiClient.put<Object?>(
-      MentorApiPaths.weeklySchedule,
-      data: payload,
-    );
-    if (response.data is Map<Object?, Object?>) {
-      final map = response.data as Map<Object?, Object?>;
-      return map['isSuccess'] == true;
-    }
-    return true;
-  }
-
-  @override
   Future<bool> cancelMeeting(int bookingId, String reason) async {
     final response = await _apiClient.post<Object?>(
       MentorApiPaths.cancelBooking(bookingId),

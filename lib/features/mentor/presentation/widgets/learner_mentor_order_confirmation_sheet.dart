@@ -12,7 +12,7 @@ import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/availability_conflicts.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
+import 'package:rikipath_mobile/features/mentor/domain/consultation_jlpt_policy.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';

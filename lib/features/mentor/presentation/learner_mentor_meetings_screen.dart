@@ -210,6 +210,13 @@ class _PlansBodyState extends State<_PlansBody> {
                   onPressed: () =>
                       context.push(AppRoutes.learnerMentorBookings),
                 ),
+                const SizedBox(height: AppSpacing.space2),
+                RikiSecondaryButton(
+                  key: const Key('learner_mentor_cohorts_button'),
+                  label: 'Lớp ôn JLPT theo nhóm & Lớp của tôi',
+                  leadingIcon: Icons.groups_outlined,
+                  onPressed: () => context.push(AppRoutes.learnerCohorts),
+                ),
                 const SizedBox(height: AppSpacing.space4),
 
                 if (widget.plans.isEmpty)

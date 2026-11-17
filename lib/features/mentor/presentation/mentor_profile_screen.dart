@@ -137,6 +137,14 @@ class _MentorProfileHomeView extends ConsumerWidget {
             title: l10n.mentorProfileSectionActivity,
             children: [
               ProfileActionTile(
+                key: const Key('mentor_profile_cohorts_action'),
+                icon: Icons.groups_outlined,
+                colorfulIcon: SakuraColorfulIconType.mentorApplication,
+                title: 'Lớp nhóm của tôi',
+                subtitle: 'Lịch lớp, học viên, bài tập và yêu cầu dời lịch.',
+                onTap: () => mentorNavigate(context, AppRoutes.mentorCohorts),
+              ),
+              ProfileActionTile(
                 key: const Key('mentor_profile_chat_action'),
                 icon: Icons.chat_bubble_outline_rounded,
                 colorfulIcon: SakuraColorfulIconType.consultation,
@@ -168,34 +176,18 @@ class _MentorProfileHomeView extends ConsumerWidget {
                 subtitle: l10n.mentorProfilePrepSubtitle,
                 onTap: () => mentorNavigate(context, AppRoutes.mentorPrep),
               ),
+              ProfileActionTile(
+                key: const Key('mentor_profile_attendance_kpi_action'),
+                icon: Icons.analytics_outlined,
+                colorfulIcon: SakuraColorfulIconType.learningProgress,
+                title: 'Chấm công & KPI',
+                subtitle: 'Xem lịch dạy, điểm danh, bài tập và đánh giá.',
+                onTap: () =>
+                    mentorNavigate(context, AppRoutes.mentorAttendanceKpi),
+              ),
             ],
           ),
           const SizedBox(height: 30),
-
-          // 3. Services & Payouts
-          ProfileSection(
-            title: l10n.mentorProfileSectionServices,
-            children: [
-              ProfileActionTile(
-                key: const Key('mentor_profile_compensation_action'),
-                icon: Icons.payments_outlined,
-                colorfulIcon: SakuraColorfulIconType.learningProgress,
-                title: l10n.mentorProfileEarningsTitle,
-                subtitle: l10n.mentorProfileEarningsSubtitle,
-                onTap: () =>
-                    mentorNavigate(context, AppRoutes.mentorCompensation),
-              ),
-              ProfileActionTile(
-                key: const Key('mentor_profile_bank_action'),
-                icon: Icons.account_balance_outlined,
-                colorfulIcon: SakuraColorfulIconType.mentorApplication,
-                title: l10n.mentorProfileBankTitle,
-                subtitle: l10n.mentorProfileBankSubtitle,
-                onTap: () =>
-                    mentorNavigate(context, AppRoutes.mentorBankAccount),
-              ),
-            ],
-          ),
           const SizedBox(height: 30),
 
           // 4. Account (Settings & Logout — identical structure to Learner)

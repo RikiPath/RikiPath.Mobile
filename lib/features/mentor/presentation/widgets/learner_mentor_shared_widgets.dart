@@ -46,13 +46,14 @@ Future<bool> showLearnerBookingCancellationDialog(
     policyMessage = eligibility.message;
   } catch (_) {
     final start = scheduledAtUtc ?? now;
-    isEligibleForRefund =
-        start.difference(now) >= const Duration(hours: 24);
+    isEligibleForRefund = start.difference(now) >= const Duration(hours: 24);
   }
 
   if (!hostContext.mounted) return false;
   if (!canCancel) {
-    ref.read(rikiToastServiceProvider.notifier).warning(
+    ref
+        .read(rikiToastServiceProvider.notifier)
+        .warning(
           title: 'Không thể hủy lịch hẹn',
           description: policyMessage?.isNotEmpty == true
               ? policyMessage!
@@ -388,7 +389,9 @@ class LearnerMentorAvailabilityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return RikiSelectionCard(
       title: slot.mentorName,
-      description: learnerMentorTimeRangeLabel(slot, context),
+      description: slot.maxLearners > 1
+          ? '${learnerMentorTimeRangeLabel(slot, context)} · Còn ${slot.remainingSeats}/${slot.maxLearners} chỗ'
+          : learnerMentorTimeRangeLabel(slot, context),
       leading: _AccentIcon(
         icon: Icons.schedule_outlined,
         color: selected ? AppColors.brandPrimary : AppColors.success,

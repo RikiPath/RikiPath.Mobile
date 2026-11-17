@@ -4,7 +4,7 @@ import 'package:rikipath_mobile/features/mentor/data/mentor_json_helpers.dart';
 import 'package:rikipath_mobile/features/mentor/data/mentor_schedule_v3_dtos.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_schedule_v3.dart';
 
-/// Repository for Policy v3 recurring schedule rules + preview/publish/disable,
+/// Repository for Policy v3 recurring schedule rules + preview/publish,
 /// plus direct availability cancellation and weekly slot change requests.
 abstract interface class MentorScheduleV3Repository {
   Future<MentorScheduleV3> loadSchedule();
@@ -20,8 +20,6 @@ abstract interface class MentorScheduleV3Repository {
     required DateTime startDate,
     required DateTime endDate,
   });
-
-  Future<void> disableSlot(int slotId, {String? reason});
 
   Future<void> deleteAvailability(int availabilityId);
 
@@ -83,16 +81,6 @@ class ApiMentorScheduleV3Repository implements MentorScheduleV3Repository {
     );
     return MentorScheduleV3Dto.publishFromJson(
       readMentorEnvelopeObject(response.data),
-    );
-  }
-
-  @override
-  Future<void> disableSlot(int slotId, {String? reason}) async {
-    await _apiClient.patch<Object?>(
-      MentorApiPaths.scheduleV3DisableSlot(slotId),
-      data: {
-        if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
-      },
     );
   }
 

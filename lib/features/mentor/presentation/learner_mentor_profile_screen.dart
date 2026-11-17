@@ -5,6 +5,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/widgets/cohort_summary_facts.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
@@ -274,6 +275,8 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.space4),
+              _MentorPublishedCohortsSection(mentorId: mentorId),
+              const SizedBox(height: AppSpacing.space4),
 
               // Cấp độ hỗ trợ
               RikiCard(
@@ -386,6 +389,64 @@ class _BentoMetricTile extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Lớp nhóm đang mở của Mentor — cùng thẻ hiển thị với màn Tìm lớp (cường độ hiển thị ngay).
+class _MentorPublishedCohortsSection extends ConsumerWidget {
+  const _MentorPublishedCohortsSection({required this.mentorId});
+
+  final int mentorId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cohorts = ref.watch(mentorPublishedCohortsProvider(mentorId));
+    return RikiCard(
+      key: const Key('mentor_profile_cohorts_section'),
+      borderColor: AppColors.border,
+      padding: const EdgeInsets.all(AppSpacing.space4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Lớp nhóm đang mở', style: AppTypography.sectionTitle),
+          const SizedBox(height: AppSpacing.space2),
+          switch (cohorts) {
+            AsyncData(:final value) when value.isEmpty => Text(
+              'Mentor chưa có lớp nhóm đang mở đăng ký.',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            AsyncData(:final value) => Column(
+              children: [
+                for (final cohort in value) ...[
+                  RikiCard(
+                    key: ValueKey('mentor_profile_cohort_${cohort.id}'),
+                    backgroundColor: AppColors.cardWarmWhite,
+                    borderColor: AppColors.cardBorderMuted,
+                    padding: const EdgeInsets.all(AppSpacing.space3),
+                    child: CohortSummaryFacts(cohort: cohort),
+                  ),
+                  const SizedBox(height: AppSpacing.space2),
+                ],
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: RikiSecondaryButton(
+                    label: 'Xem & đăng ký lớp',
+                    onPressed: () => context.push(AppRoutes.learnerCohorts),
+                  ),
+                ),
+              ],
+            ),
+            AsyncError() => Text(
+              'Chưa tải được danh sách lớp. Vui lòng thử lại.',
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+            ),
+            _ => const LinearProgressIndicator(),
+          },
         ],
       ),
     );

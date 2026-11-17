@@ -10,7 +10,7 @@ import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/availability_conflicts.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
+import 'package:rikipath_mobile/features/mentor/domain/consultation_jlpt_policy.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_order_confirmation_sheet.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
@@ -302,7 +302,6 @@ class _LearnerMentorAvailabilityScreenState
               .difference(slot.startTime.value)
               .inMinutes;
           return conflicts.canBook(slot) &&
-              !slot.isBooked &&
               start.isAfter(now) &&
               minutes == 90 &&
               DateUtils.isSameDay(start, selectedDate) &&
@@ -568,7 +567,6 @@ class _LearnerMentorAvailabilityScreenState
           (slot) =>
               slot.id == _selectedSlotId &&
               conflictView.canBook(slot) &&
-              !slot.isBooked &&
               slot.startTime.displayValue.isAfter(DateTime.now()) &&
               slot.endTime.value.difference(slot.startTime.value).inMinutes ==
                   90,
@@ -683,7 +681,7 @@ class _LearnerMentorAvailabilityScreenState
   Widget _buildContent(List<LearnerMentorAvailability> allSlots) {
     final conflictView = AvailabilityConflictView(allSlots);
     final availableSlots = conflictView.displaySlots
-        .where((slot) => !slot.isBooked)
+        .where((slot) => slot.hasAvailableSeat)
         .toList(growable: false);
 
     final dates = <DateTime>[];

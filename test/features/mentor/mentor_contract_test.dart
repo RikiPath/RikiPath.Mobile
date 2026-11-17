@@ -1086,12 +1086,16 @@ void main() {
         );
 
         expect(
-          find.byKey(const Key('mentor_profile_compensation_action')),
+          find.byKey(const Key('mentor_profile_attendance_kpi_action')),
           findsOneWidget,
         );
         expect(
+          find.byKey(const Key('mentor_profile_compensation_action')),
+          findsNothing,
+        );
+        expect(
           find.byKey(const Key('mentor_profile_bank_action')),
-          findsOneWidget,
+          findsNothing,
         );
         expect(
           find.byKey(const Key('mentor_profile_settings_action')),
@@ -1102,6 +1106,10 @@ void main() {
           findsOneWidget,
         );
 
+        await tester.ensureVisible(
+          find.byKey(const Key('mentor_profile_logout_action')),
+        );
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('mentor_profile_logout_action')));
         await tester.pumpAndSettle();
 
@@ -1290,7 +1298,6 @@ class _TestMentorRepository implements MentorRepository {
   }
 
   int weeklyScheduleCalls = 0;
-  int saveWeeklyScheduleCalls = 0;
 
   @override
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(
@@ -1298,15 +1305,6 @@ class _TestMentorRepository implements MentorRepository {
   ) async {
     weeklyScheduleCalls++;
     return const <WeeklyAvailabilityItem>[];
-  }
-
-  @override
-  Future<bool> saveWeeklySchedule({
-    required DateTime weekStart,
-    required List<WeeklyPeriodItem> periods,
-  }) async {
-    saveWeeklyScheduleCalls++;
-    return true;
   }
 
   @override

@@ -1,5 +1,10 @@
 import 'package:rikipath_mobile/features/calendar/presentation/learner_calendar_screen.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/mentor_calendar_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/learner_cohort_detail_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/learner_cohorts_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/learner_my_courses_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/mentor_cohort_detail_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/mentor_cohorts_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,10 +39,9 @@ import 'package:rikipath_mobile/features/meeting/presentation/meeting_join_scree
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_landing_screen.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_room_screen.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_attendance_kpi_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_bank_account_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_chat_screens.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_compensation_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_disputes_screens.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_edit_profile_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_profile_screen.dart';
@@ -284,12 +288,16 @@ GoRouter createAppRouter({
         ],
       ),
       GoRoute(
+        path: AppRoutes.mentorAttendanceKpi,
+        builder: (context, state) => const MentorAttendanceKpiScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.mentorCompensation,
-        builder: (context, state) => const MentorCompensationScreen(),
+        redirect: (context, state) => AppRoutes.mentorAttendanceKpi,
       ),
       GoRoute(
         path: AppRoutes.mentorBankAccount,
-        builder: (context, state) => const MentorBankAccountScreen(),
+        redirect: (context, state) => AppRoutes.mentorProfile,
       ),
       GoRoute(
         path: AppRoutes.mentorChangePassword,
@@ -340,6 +348,19 @@ GoRouter createAppRouter({
       GoRoute(
         path: AppRoutes.mentorPrep,
         builder: (context, state) => const MentorSessionPrepScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.mentorCohorts,
+        builder: (context, state) => const MentorCohortsScreen(),
+        routes: [
+          GoRoute(
+            path: AppRoutes.mentorCohortDetailSegment,
+            builder: (context, state) => MentorCohortDetailScreen(
+              cohortId:
+                  int.tryParse(state.pathParameters['cohortId'] ?? '') ?? 0,
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.mentorApplication,
@@ -429,6 +450,23 @@ GoRouter createAppRouter({
               subscriptionId: int.tryParse(
                 state.pathParameters['subscriptionId'] ?? '',
               ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.learnerCohorts,
+        builder: (context, state) => const LearnerCohortsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.learnerMyCourses,
+        builder: (context, state) => const LearnerMyCoursesScreen(),
+        routes: [
+          GoRoute(
+            path: AppRoutes.learnerCohortDetailSegment,
+            builder: (context, state) => LearnerCohortDetailScreen(
+              courseId:
+                  int.tryParse(state.pathParameters['courseId'] ?? '') ?? 1,
             ),
           ),
         ],

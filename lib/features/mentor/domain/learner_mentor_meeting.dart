@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:rikipath_mobile/core/network/safe_external_http_uri.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
+import 'package:rikipath_mobile/features/mentor/domain/consultation_jlpt_policy.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 
 @immutable
@@ -73,6 +73,8 @@ class LearnerMentorAvailability {
     required this.startTime,
     required this.endTime,
     required this.isBooked,
+    this.bookedCount = 0,
+    this.maxLearners = 1,
   });
 
   final int id;
@@ -81,6 +83,12 @@ class LearnerMentorAvailability {
   final MentorTimestamp startTime;
   final MentorTimestamp endTime;
   final bool isBooked;
+  final int bookedCount;
+  final int maxLearners;
+
+  int get remainingSeats => (maxLearners - bookedCount).clamp(0, maxLearners);
+  bool get hasAvailableSeat =>
+      !isBooked && maxLearners > 0 && remainingSeats > 0;
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -89,6 +97,8 @@ class LearnerMentorAvailability {
     'startTime': startTime.rawValue,
     'endTime': endTime.rawValue,
     'isBooked': isBooked,
+    'bookedCount': bookedCount,
+    'maxLearners': maxLearners,
   };
 
   factory LearnerMentorAvailability.fromJson(Map<String, dynamic> json) =>
@@ -99,6 +109,8 @@ class LearnerMentorAvailability {
         startTime: MentorTimestamp.parse(json['startTime'] as String),
         endTime: MentorTimestamp.parse(json['endTime'] as String),
         isBooked: json['isBooked'] as bool? ?? false,
+        bookedCount: (json['bookedCount'] as num?)?.toInt() ?? 0,
+        maxLearners: (json['maxLearners'] as num?)?.toInt() ?? 1,
       );
 }
 

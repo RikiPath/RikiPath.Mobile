@@ -222,47 +222,6 @@ class MentorWeeklyScheduleController
     }
     state = state.copyWith(registeredPeriods: updated, clearMessages: true);
   }
-
-  Future<bool> saveSchedule() async {
-    if (state.registeredPeriods.length < 3) {
-      state = state.copyWith(
-        errorMessage:
-            'Vui lòng chọn tối thiểu 3 buổi rảnh mỗi tuần (Sáng / Chiều / Tối).',
-      );
-      return false;
-    }
-    state = state.copyWith(isSaving: true, clearMessages: true);
-    try {
-      final repository = ref.read(mentorRepositoryProvider);
-      final success = await repository.saveWeeklySchedule(
-        weekStart: state.selectedWeekMonday,
-        periods: state.registeredPeriods.toList(),
-      );
-      if (success) {
-        state = state.copyWith(
-          isSaving: false,
-          successMessage:
-              'Đã lưu đăng ký lịch dạy thành công! Chờ Admin xếp tiết và công bố.',
-        );
-        await loadSchedule(clearMessages: false);
-        ref.invalidate(mentorAvailabilityControllerProvider);
-        return true;
-      } else {
-        state = state.copyWith(
-          isSaving: false,
-          errorMessage: 'Không thể lưu đăng ký lịch dạy. Vui lòng thử lại.',
-        );
-        return false;
-      }
-    } catch (_) {
-      state = state.copyWith(
-        isSaving: false,
-        errorMessage:
-            'Không thể lưu đăng ký lịch dạy. Vui lòng thử lại hoặc kiểm tra kết nối.',
-      );
-      return false;
-    }
-  }
 }
 
 class MentorAvailabilityController

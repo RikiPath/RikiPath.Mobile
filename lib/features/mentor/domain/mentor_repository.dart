@@ -9,11 +9,6 @@ abstract interface class MentorRepository {
 
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(DateTime weekStart);
 
-  Future<bool> saveWeeklySchedule({
-    required DateTime weekStart,
-    required List<WeeklyPeriodItem> periods,
-  });
-
   Future<bool> cancelMeeting(int bookingId, String reason);
 
   Future<bool> replyReview(int reviewId, String reply);

@@ -115,6 +115,10 @@ abstract final class AppRoutes {
   static const String mentorNotificationsSegment = 'notifications';
   static const String mentorNotifications =
       '$mentorProfile/$mentorNotificationsSegment';
+  static const String mentorAttendanceKpiSegment = 'attendance-kpi';
+  static const String mentorAttendanceKpi =
+      '$mentor/$mentorAttendanceKpiSegment';
+  // Legacy route constants kept solely for safe redirect into non-financial destinations.
   static const String mentorCompensationSegment = 'compensation';
   static const String mentorCompensation = '$mentor/$mentorCompensationSegment';
   static const String mentorBankAccountSegment = 'bank-account';
@@ -139,6 +143,16 @@ abstract final class AppRoutes {
   static const String mentorPrepSegment = 'prep';
   static const String mentorPrep = '$mentor/$mentorPrepSegment';
   static const String mentorMeetingPrepSegment = 'prep';
+  static const String mentorCohortsSegment = 'cohorts';
+  static const String mentorCohortDetailSegment = ':cohortId';
+  static const String mentorCohorts = '$mentor/$mentorCohortsSegment';
+
+  static String mentorCohortDetail(int cohortId) {
+    if (cohortId <= 0) {
+      throw ArgumentError.value(cohortId, 'cohortId', 'Must be positive');
+    }
+    return '$mentorCohorts/$cohortId';
+  }
 
   static String mentorMeetingDetail(int meetingId) {
     if (meetingId <= 0) {
@@ -256,6 +270,16 @@ abstract final class AppRoutes {
       );
     }
     return '$learnerMentorMeetings/purchases/$subscriptionId';
+  }
+
+  static const String learnerCohorts = '/cohorts';
+  static const String learnerMyCourses = '/my-courses';
+  static const String learnerCohortDetailSegment = ':courseId';
+  static String learnerCohortDetail(int courseId) {
+    if (courseId <= 0) {
+      throw ArgumentError.value(courseId, 'courseId', 'Must be positive');
+    }
+    return '$learnerMyCourses/$courseId';
   }
 
   static const String home = '/home';

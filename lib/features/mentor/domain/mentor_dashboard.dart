@@ -57,6 +57,8 @@ class MentorAvailabilitySlot {
     this.changeRequestReason,
     this.changeRequestedAt,
     this.changeResolution,
+    this.isInCohort = false,
+    this.cohortId,
   });
 
   final int id;
@@ -75,6 +77,8 @@ class MentorAvailabilitySlot {
   final String? changeRequestReason;
   final MentorTimestamp? changeRequestedAt;
   final String? changeResolution;
+  final bool isInCohort;
+  final int? cohortId;
 
   bool get isRejected => rejectedAt != null;
   bool get isPendingApproval => !isApproved && rejectedAt == null;

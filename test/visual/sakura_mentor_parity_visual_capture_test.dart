@@ -121,12 +121,6 @@ class _VisualMentorRepo implements MentorRepository {
   ) async => const <WeeklyAvailabilityItem>[];
 
   @override
-  Future<bool> saveWeeklySchedule({
-    required DateTime weekStart,
-    required List<WeeklyPeriodItem> periods,
-  }) async => true;
-
-  @override
   Future<bool> cancelMeeting(int bookingId, String reason) async => true;
 
   @override

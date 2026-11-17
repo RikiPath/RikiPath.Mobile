@@ -23,7 +23,7 @@ class AvailabilityConflictView {
   }
 
   bool canBook(LearnerMentorAvailability slot) =>
-      !slot.isBooked && !conflictingIds.contains(slot.id);
+      slot.hasAvailableSeat && !conflictingIds.contains(slot.id);
 
   static List<LearnerMentorAvailability> _uniqueById(
     List<LearnerMentorAvailability> slots,

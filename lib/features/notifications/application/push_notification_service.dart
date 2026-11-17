@@ -518,8 +518,12 @@ class PushNotificationService {
       if (lower == AppRoutes.mentorReviews) {
         return AppRoutes.mentorReviews;
       }
-      if (lower == AppRoutes.mentorCompensation) {
-        return AppRoutes.mentorCompensation;
+      if (lower == AppRoutes.mentorAttendanceKpi ||
+          lower == AppRoutes.mentorCompensation) {
+        return AppRoutes.mentorAttendanceKpi;
+      }
+      if (lower == AppRoutes.mentorBankAccount) {
+        return AppRoutes.mentorProfile;
       }
       final chatMatch = RegExp(r'^/mentor/chat/(\d+)').firstMatch(lower);
       if (chatMatch != null) {

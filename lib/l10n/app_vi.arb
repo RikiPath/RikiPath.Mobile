@@ -1799,7 +1799,7 @@
   "homeDailyMotivation": "Học mỗi ngày",
   "homeDailyMotivationSubtitle": "Mỗi ngày một chút, chạm mục tiêu JLPT.",
   "homeTargetGoalTitle": "Mục tiêu JLPT",
-  "commonErrorNetwork": "Không thể kết nối tới RikiPath. Vui lòng kiểm tra mạng và thử lại.",
+  "commonErrorNetwork": "Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng và thử lại.",
   "commonErrorUnauthorized": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
   "commonErrorForbidden": "Bạn không có quyền thực hiện thao tác này.",
   "commonErrorNotFound": "Nội dung này không còn khả dụng.",

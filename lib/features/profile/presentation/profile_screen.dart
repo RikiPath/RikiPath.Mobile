@@ -269,6 +269,13 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
                 emphasized: true,
                 onTap: () => context.push(AppRoutes.learnerMentorMeetings),
               ),
+              ProfileActionTile(
+                key: const ValueKey<String>('profile_cohorts_action'),
+                icon: Icons.groups_outlined,
+                title: 'Lớp ôn JLPT theo nhóm',
+                subtitle: 'Khám phá lớp nhóm, BTVN và phòng học chung',
+                onTap: () => context.push(AppRoutes.learnerCohorts),
+              ),
             ],
           ),
         ),

@@ -20,6 +20,7 @@ import 'package:rikipath_mobile/features/mentor/data/api_learner_mentor_reposito
 import 'package:rikipath_mobile/features/mentor/data/learner_mentor_api_paths.dart';
 import 'package:rikipath_mobile/features/mentor/data/learner_mentor_dtos.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
+import 'package:rikipath_mobile/features/mentor/domain/availability_conflicts.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_repository.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_availability_screen.dart';
@@ -27,6 +28,7 @@ import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_book
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_bookings_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_meetings_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_purchase_status_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations.dart';
 import 'package:rikipath_mobile/l10n/generated/app_localizations_vi.dart';
 
@@ -97,6 +99,34 @@ void main() {
   });
 
   group('Learner Mentor Meeting DTO and repository contract', () {
+    test('availability uses Backend capacity and rejects a full session', () {
+      const base = <String, Object?>{
+        'id': 12,
+        'mentorId': 5,
+        'mentorName': 'Sato Haru',
+        'startTime': '2026-10-12T02:00:00Z',
+        'endTime': '2026-10-12T03:30:00Z',
+        'isBooked': false,
+        'maxLearners': 4,
+      };
+      final threeBooked = LearnerMentorAvailabilityDto.fromJson({
+        ...base,
+        'bookedCount': 3,
+      }).toDomain();
+      final full = LearnerMentorAvailabilityDto.fromJson({
+        ...base,
+        'bookedCount': 4,
+      }).toDomain();
+
+      expect(threeBooked.remainingSeats, 1);
+      expect(
+        AvailabilityConflictView([threeBooked]).canBook(threeBooked),
+        isTrue,
+      );
+      expect(full.remainingSeats, 0);
+      expect(AvailabilityConflictView([full]).canBook(full), isFalse);
+    });
+
     test('mentor metadata absent from Backend remains unknown', () {
       const mentor = BookableMentor(id: 42, name: 'QA Mentor');
       expect(mentor.jlptLevels, isEmpty);
@@ -453,6 +483,37 @@ void main() {
   });
 
   group('Learner Mentor Meeting presentation', () {
+    testWidgets('group session card shows remaining seats from Backend', (
+      tester,
+    ) async {
+      final slot = LearnerMentorAvailabilityDto.fromJson(const {
+        'id': 12,
+        'mentorId': 5,
+        'mentorName': 'Sato Haru',
+        'startTime': '2026-10-12T02:00:00Z',
+        'endTime': '2026-10-12T03:30:00Z',
+        'isBooked': false,
+        'bookedCount': 3,
+        'maxLearners': 4,
+      }).toDomain();
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: LearnerMentorAvailabilityCard(
+              slot: slot,
+              selected: false,
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.textContaining('Còn 1/4 chỗ'), findsOneWidget);
+    });
+
     testWidgets('plans render success and empty states', (tester) async {
       await _pumpLearnerMentor(
         tester,
@@ -488,7 +549,10 @@ void main() {
         tester,
         const LearnerMentorMeetingsScreen(),
         repository: _TestLearnerMentorRepository(
-          planResults: [const NetworkError(), <MentorMeetingPlan>[_plan()]],
+          planResults: [
+            const NetworkError(),
+            <MentorMeetingPlan>[_plan()],
+          ],
         ),
       );
       expect(
@@ -498,8 +562,10 @@ void main() {
       expect(find.text('Chưa thể kết nối'), findsOneWidget);
       await tester.tap(find.text('Thử lại'));
       await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey<String>('learner_mentor_plan_1')),
-          findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('learner_mentor_plan_1')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('server failure is not presented as an empty package list', (

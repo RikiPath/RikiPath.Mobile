@@ -3043,7 +3043,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get commonErrorNetwork =>
-      'Không thể kết nối tới RikiPath. Vui lòng kiểm tra mạng và thử lại.';
+      'Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng và thử lại.';
 
   @override
   String get commonErrorUnauthorized =>

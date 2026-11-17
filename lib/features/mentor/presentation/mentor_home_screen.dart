@@ -966,6 +966,12 @@ class _QuickOperationsSection extends StatelessWidget {
         0;
 
     final tiles = [
+      const _QuickOpTileData(
+        icon: Icons.groups_outlined,
+        label: 'Lớp nhóm',
+        badgeCount: 0,
+        route: AppRoutes.mentorCohorts,
+      ),
       _QuickOpTileData(
         icon: Icons.chat_bubble_outline_rounded,
         label: l10n.mentorActionChat,
@@ -997,10 +1003,10 @@ class _QuickOperationsSection extends StatelessWidget {
         route: AppRoutes.mentorAvailability,
       ),
       _QuickOpTileData(
-        icon: Icons.account_balance_outlined,
-        label: l10n.mentorActionBankAccount,
+        icon: Icons.fact_check_outlined,
+        label: 'Chấm công & KPI',
         badgeCount: 0,
-        route: AppRoutes.mentorBankAccount,
+        route: AppRoutes.mentorAttendanceKpi,
       ),
     ];
 
@@ -1076,12 +1082,6 @@ class _QuickOperationsSection extends StatelessWidget {
             },
           ),
           const SizedBox(height: AppSpacing.space3),
-          RikiSecondaryButton(
-            key: const Key('mentor_home_compensation_button'),
-            label: 'Thu nhập của tôi',
-            leadingIcon: Icons.payments_outlined,
-            onPressed: () => mentorNavigate(context, AppRoutes.mentorCompensation),
-          ),
           const SizedBox(height: AppSpacing.space3),
           RikiSecondaryButton(
             key: const Key('mentor_home_profile_button'),

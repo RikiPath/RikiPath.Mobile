@@ -9,7 +9,7 @@ import 'package:rikipath_mobile/core/widgets/riki_toast_host.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/calendar/application/mentor_calendar_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_chat_controller.dart';
-import 'package:rikipath_mobile/features/mentor/application/mentor_compensation_controller.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_kpi_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_operations_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_schedule_v3_controller.dart';
@@ -74,11 +74,7 @@ class _RikiPathAppState extends ConsumerState<RikiPathApp> {
         ref.invalidate(mentorMeetingsControllerProvider);
         ref.invalidate(mentorProfileControllerProvider);
         ref.invalidate(mentorWeeklyScheduleControllerProvider);
-        ref.invalidate(mentorCompensationOverviewProvider);
-        ref.invalidate(mentorEarningsProvider);
-        ref.invalidate(mentorPayrollsProvider);
-        ref.invalidate(mentorPayoutsProvider);
-        ref.invalidate(mentorBankAccountsProvider);
+        ref.invalidate(mentorKpiSummaryProvider);
         ref.invalidate(mentorCalendarEventsProvider);
       }
       if (next != null) {

@@ -605,9 +605,19 @@ class MentorAvailabilitySlotItemCard extends ConsumerWidget {
     final l10n = context.l10n;
     final statusBadge = _slotStatusInfo(slot, l10n);
     final canDelete =
-        !slot.isBooked && slot.bookedCount == 0 && !slot.hasCancelRequest;
+        !slot.isApproved &&
+        !slot.isRejected &&
+        !slot.isBooked &&
+        slot.bookedCount == 0 &&
+        !slot.hasCancelRequest &&
+        !slot.isInCohort;
     final canRequestCancel =
-        !slot.isBooked && !slot.isRejected && !slot.hasCancelRequest;
+        slot.isApproved &&
+        !slot.isBooked &&
+        slot.bookedCount == 0 &&
+        !slot.isRejected &&
+        !slot.hasCancelRequest &&
+        !slot.isInCohort;
     final canRequestChange = !slot.isRejected && !slot.hasChangeRequest;
     final hasActions = canDelete || canRequestCancel || canRequestChange;
 
@@ -677,6 +687,13 @@ class MentorAvailabilitySlotItemCard extends ConsumerWidget {
                                 '${l10n.mentorScheduleSlotBookedCount}: ${slot.bookedCount}/${slot.maxLearners}',
                             color: AppColors.info,
                           ),
+                          if (slot.isInCohort)
+                            MentorStatusBadge(
+                              label: slot.cohortId != null
+                                  ? 'Lớp #${slot.cohortId}'
+                                  : 'Lớp nhóm',
+                              color: AppColors.brandPrimary,
+                            ),
                         ],
                       ),
                     ],
@@ -699,21 +716,6 @@ class MentorAvailabilitySlotItemCard extends ConsumerWidget {
                           action: () => ref
                               .read(mentorScheduleV3ControllerProvider.notifier)
                               .deleteAvailability(slot.id),
-                        );
-                      } else if (action == 'disable') {
-                        final reason = await _promptReason(
-                          context,
-                          l10n.mentorScheduleV3DisableSlot,
-                        );
-                        if (reason == null || !context.mounted) return;
-                        await _runMutation(
-                          context,
-                          ref,
-                          loadingTitle: l10n.mentorScheduleV3DisableSlot,
-                          successTitle: 'Đã đóng khung giờ.',
-                          action: () => ref
-                              .read(mentorScheduleV3ControllerProvider.notifier)
-                              .disableSlot(slot.id, reason: reason),
                         );
                       } else if (action == 'cancel') {
                         final reason = await _promptReason(
@@ -756,12 +758,6 @@ class MentorAvailabilitySlotItemCard extends ConsumerWidget {
                           key: Key('mentor_slot_delete_${slot.id}'),
                           value: 'delete',
                           child: Text(l10n.mentorScheduleV3DeleteSlot),
-                        ),
-                      if (canDelete)
-                        PopupMenuItem<String>(
-                          key: Key('mentor_slot_disable_${slot.id}'),
-                          value: 'disable',
-                          child: Text(l10n.mentorScheduleV3DisableSlot),
                         ),
                       if (canRequestCancel)
                         PopupMenuItem<String>(

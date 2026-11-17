@@ -9,20 +9,10 @@ abstract final class MentorApiPaths {
       '/api/mentor/profile/verification-document';
   static const String mentorDisputes = '/api/mentor/mentor-disputes';
 
-  // Mentor Self-Service Compensation & Bank Account (Mentor Compensation Milestone)
-  static const String compensationOverview =
-      '/api/mentor/compensation/overview';
-  static const String compensationHourlyRates =
-      '/api/mentor/compensation/hourly-rates';
-  static const String compensationQualifications =
+  // Mentor Teaching Qualifications & Non-Financial Attendance/KPI
+  static const String teachingQualifications =
       '/api/mentor/compensation/qualifications';
-  static const String compensationEarnings =
-      '/api/mentor/compensation/earnings';
-  static const String compensationPayrolls =
-      '/api/mentor/compensation/payrolls';
-  static const String compensationBankAccounts =
-      '/api/mentor/compensation/bank-accounts';
-  static const String compensationPayouts = '/api/mentor/compensation/payouts';
+  static const String kpiSummary = '/api/mentor/kpi/summary';
   static const String verificationDocumentContent =
       '/api/mentor/profile/verification-document/content';
   static const String mentorChatThreads = '/api/mentor-chat/threads';
@@ -35,12 +25,6 @@ abstract final class MentorApiPaths {
       '/api/mentors/me/schedule/publish-slots';
   static const String requestCancelAvailability =
       '/api/mentor/availability/request-cancel';
-
-  static String compensationPayrollDetail(int payrollPeriodId) =>
-      '$compensationPayrolls/$payrollPeriodId';
-
-  static String compensationPayoutDetail(int obligationId) =>
-      '$compensationPayouts/$obligationId';
 
   static String weeklyScheduleUrl(DateTime weekStart) {
     final d =
@@ -74,8 +58,6 @@ abstract final class MentorApiPaths {
       '$mentorChatThreads/$bookingId/messages';
   static String mentorChatRead(int bookingId) =>
       '$mentorChatThreads/$bookingId/read';
-  static String scheduleV3DisableSlot(int slotId) =>
-      '$scheduleV3/slots/$slotId/disable';
   static String scheduleV3DeleteSlot(int slotId) =>
       '$scheduleV3/slots/$slotId';
   static String deleteAvailability(int id) => '$availability/$id';

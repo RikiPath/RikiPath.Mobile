@@ -57,7 +57,7 @@ import 'package:rikipath_mobile/features/meeting/application/upcoming_meeting_pr
 import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_chat_controller.dart';
-import 'package:rikipath_mobile/features/mentor/application/mentor_compensation_controller.dart';
+import 'package:rikipath_mobile/features/mentor/application/mentor_kpi_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_operations_controller.dart';
@@ -68,17 +68,16 @@ import 'package:rikipath_mobile/features/mentor/data/mentor_schedule_v3_reposito
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart'
     hide MentorRatingSummary, MentorReviewItem;
 import 'package:rikipath_mobile/features/mentor/domain/mentor_chat.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_compensation_repository.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_kpi.dart';
+import 'package:rikipath_mobile/features/mentor/domain/mentor_kpi_repository.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_operations.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_repository.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_schedule_v3.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_booking_detail_screen.dart';
+import 'package:rikipath_mobile/features/mentor/presentation/mentor_attendance_kpi_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_bank_account_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_compensation_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_disputes_screens.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_meeting_detail_screen.dart';
@@ -1170,28 +1169,25 @@ void main() {
     );
 
     testWidgets(
-      'MentorBankAccountScreen & MentorDisputeDetailScreen guard dirty form changes',
+      'Legacy compensation & bank routes redirect safely and MentorDisputeDetailScreen guards dirty form changes',
       (tester) async {
         final session = createTestAuthSession(role: BackendUserRole.mentor);
 
-        // Bank account dirty check
+        // Legacy /mentor/compensation redirects to MentorAttendanceKpiScreen
+        await _pumpRegressionRouter(
+          tester,
+          initialLocation: AppRoutes.mentorCompensation,
+          authSession: session,
+        );
+        expect(find.byType(MentorAttendanceKpiScreen), findsOneWidget);
+
+        // Legacy /mentor/bank-account redirects to MentorProfileScreen
         await _pumpRegressionRouter(
           tester,
           initialLocation: AppRoutes.mentorBankAccount,
           authSession: session,
         );
-        expect(find.byType(MentorBankAccountScreen), findsOneWidget);
-        final binField = find.byKey(const Key('mentor_bank_bin_field'));
-        await tester.ensureVisible(binField);
-        await tester.enterText(binField, '970436');
-        await tester.pumpAndSettle();
-
-        await tester.binding.handlePopRoute();
-        await tester.pumpAndSettle();
-        expect(find.text('Hủy thay đổi?'), findsOneWidget);
-        await tester.tap(find.text('Rời đi'));
-        await tester.pumpAndSettle();
-        expect(find.byType(MentorCompensationScreen), findsOneWidget);
+        expect(find.byType(MentorProfileScreen), findsOneWidget);
 
         // Dispute detail dirty check
         await _pumpRegressionRouter(
@@ -1441,8 +1437,8 @@ Future<void> _pumpScopedRouter(
         mentorChatRealtimeClientFactoryProvider.overrideWithValue(
           _RegMentorChatRealtimeClient.new,
         ),
-        mentorCompensationRepositoryProvider.overrideWithValue(
-          _RegMentorCompensationRepository(),
+        mentorKpiRepositoryProvider.overrideWithValue(
+          _RegMentorKpiRepository(),
         ),
         mentorMeetingLinkLauncherProvider.overrideWithValue(
           _NoopMeetingLinkLauncher(),
@@ -1899,12 +1895,6 @@ class _RegMentorRepository implements MentorRepository {
   Future<bool> respondDispute(int disputeId, String responseText) async => true;
 
   @override
-  Future<bool> saveWeeklySchedule({
-    required DateTime weekStart,
-    required List<WeeklyPeriodItem> periods,
-  }) async => true;
-
-  @override
   Future<MentorProfileData> submitVerification({
     String? verificationDocumentUrl,
     String? notes,
@@ -2035,9 +2025,6 @@ class _RegMentorScheduleV3Repository implements MentorScheduleV3Repository {
   Future<void> deleteAvailability(int availabilityId) async {}
 
   @override
-  Future<void> disableSlot(int slotId, {String? reason}) async {}
-
-  @override
   Future<MentorScheduleV3> loadSchedule() async => MentorScheduleV3(
     scheduleId: 15,
     mentorId: 5,
@@ -2158,62 +2145,16 @@ class _RegMentorChatRealtimeClient implements MentorChatRealtimeClient {
   Future<void> sendMessage(int bookingId, String text) async {}
 }
 
-class _RegMentorCompensationRepository
-    implements MentorCompensationRepository {
+class _RegMentorKpiRepository implements MentorKpiRepository {
   @override
-  Future<List<MentorBankAccountItem>> loadBankAccounts() async => const [];
-
-  @override
-  Future<List<MentorEarningEntryItem>> loadEarnings() async => const [];
-
-  @override
-  Future<List<MentorHourlyRateItem>> loadHourlyRates() async => const [];
-
-  @override
-  Future<MentorCompensationOverview> loadOverview() async =>
-      const MentorCompensationOverview(
-        mentorUserId: 5,
-        totalEligibleUnassignedVnd: 0,
-        totalLockedInPayrollVnd: 0,
-        totalPaidVnd: 0,
+  Future<MentorKpiSummary> loadSummary({
+    String? fromDate,
+    String? toDate,
+  }) async =>
+      MentorKpiSummary(
+        mentorId: 5,
+        mentorName: 'Tanaka Sensei',
+        fromDate: fromDate ?? '2026-10-01',
+        toDate: toDate ?? '2026-11-16',
       );
-
-  @override
-  Future<MentorPayrollPeriodItem> loadPayrollDetail(int payrollPeriodId) =>
-      throw UnimplementedError();
-
-  @override
-  Future<List<MentorPayrollPeriodItem>> loadPayrolls({
-    int? year,
-    int? month,
-  }) async => const [];
-
-  @override
-  Future<MentorPayoutObligationItem> loadPayoutDetail(int obligationId) =>
-      throw UnimplementedError();
-
-  @override
-  Future<List<MentorPayoutObligationItem>> loadPayouts() async => const [];
-
-  @override
-  Future<List<MentorTeachingQualificationItem>> loadQualifications() async =>
-      const [];
-
-  @override
-  Future<MentorBankAccountItem> upsertBankAccount({
-    required String bankBin,
-    required String bankShortName,
-    required String accountNumber,
-    required String accountHolderName,
-  }) async => MentorBankAccountItem(
-    id: 4,
-    mentorUserId: 5,
-    bankBin: bankBin,
-    bankShortName: bankShortName,
-    maskedAccountNumber: '****6789',
-    accountHolderName: accountHolderName,
-    verificationStatus: 'PendingVerification',
-    accountVersion: 1,
-    isCurrent: true,
-  );
 }

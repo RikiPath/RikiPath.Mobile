@@ -19,6 +19,8 @@ class MentorAvailabilityDto {
     this.changeRequestReason,
     this.changeRequestedAt,
     this.changeResolution,
+    this.isInCohort = false,
+    this.cohortId,
   });
 
   factory MentorAvailabilityDto.fromJson(Map<String, Object?> json) {
@@ -39,6 +41,8 @@ class MentorAvailabilityDto {
       changeRequestReason: _optionalString(json, 'changeRequestReason'),
       changeRequestedAt: _optionalTimestamp(json, 'changeRequestedAt'),
       changeResolution: _optionalString(json, 'changeResolution'),
+      isInCohort: json['isInCohort'] as bool? ?? false,
+      cohortId: (json['cohortId'] as num?)?.toInt(),
     );
   }
 
@@ -58,6 +62,8 @@ class MentorAvailabilityDto {
   final String? changeRequestReason;
   final MentorTimestamp? changeRequestedAt;
   final String? changeResolution;
+  final bool isInCohort;
+  final int? cohortId;
 
   MentorAvailabilitySlot toDomain() => MentorAvailabilitySlot(
     id: id,
@@ -76,6 +82,8 @@ class MentorAvailabilityDto {
     changeRequestReason: changeRequestReason,
     changeRequestedAt: changeRequestedAt,
     changeResolution: changeResolution,
+    isInCohort: isInCohort,
+    cohortId: cohortId,
   );
 }
 

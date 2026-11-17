@@ -5363,7 +5363,7 @@ abstract class AppLocalizations {
   /// No description provided for @commonErrorNetwork.
   ///
   /// In vi, this message translates to:
-  /// **'Không thể kết nối tới RikiPath. Vui lòng kiểm tra mạng và thử lại.'**
+  /// **'Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng và thử lại.'**
   String get commonErrorNetwork;
 
   /// No description provided for @commonErrorUnauthorized.
