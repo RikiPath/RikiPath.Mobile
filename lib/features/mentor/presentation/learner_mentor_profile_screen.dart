@@ -3,17 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
-import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/cohorts/presentation/widgets/cohort_summary_facts.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
 
-/// Màn hình thông tin chi tiết Mentor (Screen 03 theo chuẩn Neo-Japoniste Sakura).
+/// Màn hình thông tin chi tiết Mentor cho Lớp học nhóm (theo chuẩn Neo-Japoniste Sakura).
 class LearnerMentorProfileScreen extends ConsumerWidget {
   const LearnerMentorProfileScreen({
-    required this.planId,
+    this.planId = 0,
     required this.mentorId,
     this.initialDate,
     super.key,
@@ -142,7 +141,7 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Tư vấn 1-1',
+                                'Học nhóm JLPT',
                                 style: AppTypography.metadata.copyWith(
                                   color: AppColors.brandPrimary,
                                   fontWeight: FontWeight.w600,
@@ -188,8 +187,8 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
                   Expanded(
                     child: _BentoMetricTile(
                       icon: Icons.people_outline,
-                      title: '1 kèm 1',
-                      subtitle: 'Đồng hành trực tiếp',
+                      title: '1–4 học viên',
+                      subtitle: 'Lớp học nhóm cố định',
                     ),
                   ),
                   const SizedBox(width: AppSpacing.space2),
@@ -335,13 +334,10 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
             border: const Border(top: BorderSide(color: AppColors.border)),
           ),
           child: RikiPrimaryButton(
-            key: const Key('learner_mentor_view_availability_button'),
-            label: context.l10n.mentorFinderTitle,
-            trailingIcon: Icons.calendar_month_outlined,
-            onPressed: () => context.push(
-              AppRoutes.learnerMentorFindSlots(mentorId: mentor.id),
-              extra: initialDate,
-            ),
+            key: const Key('learner_mentor_view_cohorts_button'),
+            label: 'Xem & đăng ký lớp nhóm',
+            trailingIcon: Icons.groups_outlined,
+            onPressed: () => context.push(AppRoutes.learnerCohorts),
           ),
         ),
       ],

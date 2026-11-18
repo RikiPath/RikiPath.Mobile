@@ -14,25 +14,6 @@ import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_ti
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_calendar_empty_state.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_event_detail_sheet.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
-import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
-import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
-import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_repository.dart';
-
-class _CancellationRepository implements LearnerMentorRepository {
-  @override
-  Future<CancellationEligibility> checkCancellationEligibility(int bookingId) async =>
-      const CancellationEligibility(
-        isEligible: true,
-        tier: 'early',
-        expectedRefundPercent: 100,
-        refundAmountCredits: 1,
-        canReschedule: true,
-        cutoffHours: 24,
-      );
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
 
 Widget createTestApp(Widget child) {
   return ProviderScope(
@@ -542,12 +523,12 @@ void main() {
       expect(find.text('23:00'), findsOneWidget);
     });
 
-    testWidgets('SakuraEventDetailSheet displays cancellation button and opens confirmation dialog', (tester) async {
+    testWidgets('SakuraEventDetailSheet displays Join Room and opens cohort detail action without 1-1 reschedule/cancel buttons', (tester) async {
       final startTime = DateTime.now().add(const Duration(days: 3));
       final activeBooking = SakuraCalendarEvent(
         id: 'active-1',
         bookingId: 9901,
-        title: 'Tư vấn JLPT N2 với Sensei',
+        title: 'Lớp nhóm JLPT N2 · Buổi 1',
         startTime: startTime,
         endTime: startTime.add(const Duration(minutes: 90)),
         type: SakuraCalendarEventType.consultation,
@@ -558,43 +539,17 @@ void main() {
       );
 
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            learnerMentorRepositoryProvider.overrideWithValue(
-              _CancellationRepository(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            locale: const Locale('vi'),
-            home: Scaffold(body: SakuraEventDetailSheet(event: activeBooking)),
-          ),
-        ),
+        createTestApp(SakuraEventDetailSheet(event: activeBooking)),
       );
       await tester.pumpAndSettle();
 
       expect(find.text('Tham gia phòng học'), findsOneWidget);
-      expect(find.text('Dời lịch hẹn'), findsOneWidget);
-      expect(find.text('Hủy buổi tư vấn này'), findsOneWidget);
+      expect(find.text('Mở chi tiết lớp học'), findsOneWidget);
+      expect(find.text('Dời lịch hẹn'), findsNothing);
+      expect(find.text('Hủy buổi tư vấn này'), findsNothing);
 
       final joinButton = tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, 'Tham gia phòng học'));
       expect(joinButton.style?.backgroundColor?.resolve({}), const Color(0xFFE5577F));
-
-      final rescheduleButton = tester.widget<OutlinedButton>(find.byKey(const Key('sakura_event_reschedule_button')));
-      expect(rescheduleButton.style?.backgroundColor?.resolve({}), const Color(0xFFEAF6FF));
-      expect(rescheduleButton.style?.foregroundColor?.resolve({}), const Color(0xFF0284C7));
-
-      final cancelButton = tester.widget<OutlinedButton>(find.byKey(const Key('sakura_event_cancel_button')));
-      expect(cancelButton.style?.foregroundColor?.resolve({}), const Color(0xFFDC3545));
-
-      await tester.tap(find.text('Hủy buổi tư vấn này'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Hủy lịch hẹn tư vấn'), findsOneWidget);
-      expect(find.widgetWithText(TextButton, 'Đóng'), findsOneWidget);
-      expect(find.text('Xác nhận hủy'), findsOneWidget);
     });
 
     testWidgets('SakuraEventDetailSheet renders cancelled state when meeting is cancelled', (tester) async {

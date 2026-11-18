@@ -4,15 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
-import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
+import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/features/calendar/application/learner_calendar_controller.dart';
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/learner_calendar_screen.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_calendar_shell.dart';
-import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
-import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
+import 'package:rikipath_mobile/features/cohorts/application/cohort_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
 
 void main() {
   Future<void> pumpCalendar(
@@ -24,9 +23,6 @@ void main() {
       ProviderScope(
         overrides: [
           learnerCalendarEventsProvider.overrideWith((ref) => load()),
-          learnerCalendarAvailableSlotsProvider.overrideWith(
-            (ref) async => const [],
-          ),
           learnerCalendarSrsEventsProvider.overrideWith(
             (ref) async => const [],
           ),
@@ -68,17 +64,14 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          learnerCalendarAvailableSlotsProvider.overrideWith(
-            (ref) async => const [],
-          ),
           learnerCalendarSrsEventsProvider.overrideWith(
             (ref) async => const [],
           ),
           learnerCalendarLearningEventsProvider.overrideWith(
             (ref) async => const [],
           ),
-          learnerMentorBookingsControllerProvider.overrideWith(
-            () => _TestBookingsController(() async {
+          learnerMyCoursesProvider.overrideWith(
+            () => _TestCoursesController(() async {
               requests++;
               if (requests == 1) throw StateError('offline');
               return const [];
@@ -118,29 +111,25 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // The date is visible in the shared Sakura calendar, not another screen.
     expect(find.byType(SakuraCalendarShell), findsOneWidget);
     expect(find.text('Tháng 12, 2026'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('a hanging bookings request becomes a retryable timeout', (
+  testWidgets('a hanging cohort courses request becomes a retryable timeout', (
     tester,
   ) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          learnerCalendarAvailableSlotsProvider.overrideWith(
-            (ref) async => const [],
-          ),
           learnerCalendarSrsEventsProvider.overrideWith(
             (ref) async => const [],
           ),
           learnerCalendarLearningEventsProvider.overrideWith(
             (ref) async => const [],
           ),
-          learnerMentorBookingsControllerProvider.overrideWith(
-            _PendingBookingsController.new,
+          learnerMyCoursesProvider.overrideWith(
+            _PendingCoursesController.new,
           ),
         ],
         child: MaterialApp(
@@ -167,33 +156,61 @@ void main() {
     expect(find.byType(SakuraCalendarShell), findsOneWidget);
   });
 
-  testWidgets('failed refresh preserves previously loaded bookings', (
+  testWidgets('failed refresh preserves previously loaded cohort sessions', (
     tester,
   ) async {
     var requests = 0;
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          learnerCalendarAvailableSlotsProvider.overrideWith(
-            (ref) async => const [],
-          ),
           learnerCalendarSrsEventsProvider.overrideWith(
             (ref) async => const [],
           ),
           learnerCalendarLearningEventsProvider.overrideWith(
             (ref) async => const [],
           ),
-          learnerMentorBookingsControllerProvider.overrideWith(
-            () => _TestBookingsController(() async {
+          learnerMyCoursesProvider.overrideWith(
+            () => _TestCoursesController(() async {
               requests++;
               if (requests > 1) throw StateError('offline');
               return [
-                LearnerMentorBooking(
+                LearnerStudyCourseDetail(
                   id: 17,
-                  userSubscriptionId: 1,
-                  status: MentorMeetingStatus.accepted,
-                  scheduledAt: MentorTimestamp.parse('2026-11-10T09:00:00Z'),
+                  name: 'Lớp N3 Tối',
+                  planId: 1,
+                  cohortId: 10,
+                  sessionType: 'Group',
+                  level: 'N3',
+                  mentorId: 5,
                   mentorName: 'Cố vấn An',
+                  durationMonths: 2,
+                  sessionsPerWeek: 3,
+                  totalSessions: 30,
+                  sessionMinutes: 90,
+                  amount: 2000000,
+                  paymentStatus: 'Paid',
+                  status: 'Active',
+                  startsAt: DateTime.utc(2026, 11, 10, 9),
+                  endsAt: DateTime.utc(2027, 1, 19, 9),
+                  completedAt: null,
+                  eligibility: const CourseEligibilitySummary(
+                    canClaim: false,
+                    passedOnTimeHomework: 0,
+                    requiredHomework: 0,
+                    absentSessions: 0,
+                    countedSessions: 0,
+                    reasons: [],
+                  ),
+                  sessions: [
+                    CourseSessionItem(
+                      id: 101,
+                      number: 1,
+                      attempt: 1,
+                      scheduledAt: DateTime.utc(2026, 11, 10, 9),
+                      status: 'Scheduled',
+                    ),
+                  ],
+                  requests: const [],
                 ),
               ];
             }),
@@ -211,19 +228,16 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('Tư vấn JLPT với Cố vấn An'), findsWidgets);
+    expect(find.textContaining('Lớp N3 Tối'), findsWidgets);
 
     final context = tester.element(find.byType(LearnerCalendarScreen));
-    ProviderScope.containerOf(
-      context,
-    ).invalidate(learnerMentorBookingsControllerProvider);
+    ProviderScope.containerOf(context).invalidate(learnerMyCoursesProvider);
     await tester.pumpAndSettle();
 
     expect(requests, 2);
     expect(find.byType(SakuraCalendarShell), findsOneWidget);
-    expect(find.textContaining('Tư vấn JLPT với Cố vấn An'), findsWidgets);
-    expect(find.textContaining('Chưa đồng bộ được lịch hẹn'), findsOneWidget);
-    expect(find.textContaining('hoạt động đã tải'), findsWidgets);
+    expect(find.textContaining('Lớp N3 Tối'), findsWidgets);
+    expect(find.textContaining('Chưa đồng bộ được lịch lớp nhóm'), findsOneWidget);
   });
 
   testWidgets('expired session never displays cached learner events', (
@@ -235,21 +249,16 @@ void main() {
           learnerCalendarEventsProvider.overrideWith(
             (ref) async => throw const UnauthorizedError(),
           ),
-          learnerCalendarAvailableSlotsProvider.overrideWith(
+          learnerCalendarSrsEventsProvider.overrideWith(
             (ref) async => [
               SakuraCalendarEvent(
-                id: 'private_slot',
-                title: 'Còn chỗ: Cố vấn An',
-                startTime: DateTime.now().add(const Duration(days: 1)),
-                endTime: DateTime.now().add(
-                  const Duration(days: 1, minutes: 90),
-                ),
-                type: SakuraCalendarEventType.availableSlot,
+                id: 'cached_srs',
+                title: 'Ôn tập đã lưu tạm',
+                startTime: DateTime.now(),
+                endTime: DateTime.now().add(const Duration(hours: 1)),
+                type: SakuraCalendarEventType.srsReview,
               ),
             ],
-          ),
-          learnerCalendarSrsEventsProvider.overrideWith(
-            (ref) async => const [],
           ),
           learnerCalendarLearningEventsProvider.overrideWith(
             (ref) async => const [],
@@ -268,67 +277,21 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('Phiên đăng nhập đã hết hạn'), findsOneWidget);
-    expect(find.textContaining('Còn chỗ: Cố vấn An'), findsNothing);
-  });
-
-  testWidgets('failed slot refresh removes stale bookable availability', (
-    tester,
-  ) async {
-    var slotLoads = 0;
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          learnerCalendarEventsProvider.overrideWith((ref) async => const []),
-          learnerCalendarAvailableSlotsProvider.overrideWith((ref) async {
-            slotLoads++;
-            if (slotLoads > 1) throw const NetworkError();
-            return [
-              SakuraCalendarEvent(
-                id: 'slot_12',
-                title: 'Còn chỗ: Cố vấn An',
-                startTime: DateTime.now().add(const Duration(days: 1)),
-                endTime: DateTime.now().add(const Duration(days: 1, minutes: 90)),
-                type: SakuraCalendarEventType.availableSlot,
-              ),
-            ];
-          }),
-          learnerCalendarSrsEventsProvider.overrideWith((ref) async => const []),
-          learnerCalendarLearningEventsProvider.overrideWith((ref) async => const []),
-        ],
-        child: MaterialApp(
-          theme: AppTheme.light,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('vi'),
-          home: LearnerCalendarScreen(
-            initialDate: DateTime.utc(2026, 11, 10, 9),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Còn chỗ: Cố vấn An'), findsWidgets);
-
-    final context = tester.element(find.byType(LearnerCalendarScreen));
-    ProviderScope.containerOf(context).invalidate(learnerCalendarAvailableSlotsProvider);
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining('Còn chỗ: Cố vấn An'), findsNothing);
-    expect(find.textContaining('Chưa đồng bộ được lịch trống'), findsOneWidget);
+    expect(find.textContaining('Ôn tập đã lưu tạm'), findsNothing);
   });
 }
 
-class _PendingBookingsController extends LearnerMentorBookingsController {
+class _PendingCoursesController extends LearnerMyCoursesController {
   @override
-  Future<List<LearnerMentorBooking>> build() =>
-      Completer<List<LearnerMentorBooking>>().future;
+  Future<List<LearnerStudyCourseDetail>> build() =>
+      Completer<List<LearnerStudyCourseDetail>>().future;
 }
 
-class _TestBookingsController extends LearnerMentorBookingsController {
-  _TestBookingsController(this.load);
+class _TestCoursesController extends LearnerMyCoursesController {
+  _TestCoursesController(this.load);
 
-  final Future<List<LearnerMentorBooking>> Function() load;
+  final Future<List<LearnerStudyCourseDetail>> Function() load;
 
   @override
-  Future<List<LearnerMentorBooking>> build() => load();
+  Future<List<LearnerStudyCourseDetail>> build() => load();
 }

@@ -77,7 +77,7 @@ class LearnerNavigationConfiguration extends RikiPathNavigationConfiguration {
       buildDestinations(l10n);
 }
 
-/// Mentor 5-tab navigation configuration (Trang chủ, Lịch dạy, Buổi tư vấn, Lịch trống, Cá nhân).
+/// Mentor 5-tab navigation configuration (Trang chủ, Lịch dạy, Lớp nhóm, Lịch trống, Cá nhân).
 class MentorNavigationConfiguration extends RikiPathNavigationConfiguration {
   const MentorNavigationConfiguration();
 
@@ -88,7 +88,7 @@ class MentorNavigationConfiguration extends RikiPathNavigationConfiguration {
   static const List<String> tabRoutes = <String>[
     AppRoutes.mentor,
     AppRoutes.mentorCalendar,
-    AppRoutes.mentorMeetings,
+    AppRoutes.mentorCohorts,
     AppRoutes.mentorAvailability,
     AppRoutes.mentorProfile,
   ];
@@ -106,10 +106,10 @@ class MentorNavigationConfiguration extends RikiPathNavigationConfiguration {
       icon: Icons.calendar_month_outlined,
       selectedIcon: Icons.calendar_month,
     ),
-    RikiNavigationDestination(
-      label: l10n.mentorNavMeetings,
-      icon: Icons.video_camera_front_outlined,
-      selectedIcon: Icons.video_camera_front,
+    const RikiNavigationDestination(
+      label: 'Lớp nhóm',
+      icon: Icons.groups_outlined,
+      selectedIcon: Icons.groups,
     ),
     RikiNavigationDestination(
       label: l10n.mentorNavAvailability,

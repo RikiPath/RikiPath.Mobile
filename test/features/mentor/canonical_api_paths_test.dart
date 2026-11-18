@@ -8,21 +8,19 @@ void main() {
     test('uses unversioned Backend operation paths', () {
       final paths = <String>[
         LearnerMentorApiPaths.discoveryMentors,
-        LearnerMentorApiPaths.creditBalance,
-        LearnerMentorApiPaths.creditStatement,
-        LearnerMentorApiPaths.cancellationEligibility(42),
-        LearnerMentorApiPaths.cancelBooking(42),
-        LearnerMentorApiPaths.rescheduleBooking(42),
-        LearnerMentorApiPaths.reviews,
-        LearnerMentorApiPaths.mentorReviews(42),
-        LearnerMentorApiPaths.mentorReviewSummary(42),
-        LearnerMentorApiPaths.disputes,
-        LearnerMentorApiPaths.myDisputes,
-        LearnerMentorApiPaths.mentorDisputes,
-        MentorApiPaths.mentorDisputes,
-        MentorApiPaths.cancelBooking(42),
-        MentorApiPaths.replyReview(42),
-        MentorApiPaths.respondDispute(42),
+        LearnerMentorApiPaths.mentors,
+        MentorApiPaths.availability,
+        MentorApiPaths.weeklySchedule,
+        MentorApiPaths.profile,
+        MentorApiPaths.submitVerification,
+        MentorApiPaths.verificationDocument,
+        MentorApiPaths.verificationDocumentContent,
+        MentorApiPaths.kpiSummary,
+        MentorApiPaths.scheduleV3,
+        MentorApiPaths.scheduleV3Rules,
+        MentorApiPaths.scheduleV3PreviewSlots,
+        MentorApiPaths.scheduleV3PublishSlots,
+        MentorApiPaths.roomAccess('room-1'),
         NotificationApiPaths.registerDeviceToken,
         NotificationApiPaths.refreshDeviceToken,
         NotificationApiPaths.unregisterDeviceToken,
@@ -31,13 +29,15 @@ void main() {
       expect(paths, everyElement(isNot(contains('/api/v1/'))));
     });
 
-    test('maps credit and public-review paths to Backend-owned routes', () {
-      expect(LearnerMentorApiPaths.creditBalance, '/api/learner/credits/balance');
-      expect(LearnerMentorApiPaths.creditStatement, '/api/learner/credits/history');
-      expect(LearnerMentorApiPaths.mentorReviews(42), '/api/mentors/42/reviews');
-      expect(LearnerMentorApiPaths.mentorReviewSummary(42), '/api/mentors/42/rating-summary');
-      expect(LearnerMentorApiPaths.myDisputes, '/api/learner/mentor-disputes');
-      expect(LearnerMentorApiPaths.mentorDisputes, '/api/mentor/mentor-disputes');
+    test('maps Mentor discovery, availability, KPI and room endpoints to Backend routes', () {
+      expect(LearnerMentorApiPaths.discoveryMentors, '/api/mentors');
+      expect(MentorApiPaths.availability, '/api/mentor/availability');
+      expect(MentorApiPaths.kpiSummary, '/api/mentor/kpi/summary');
+      expect(
+        MentorApiPaths.roomAccess('room-1'),
+        '/api/mentor-meetings/rooms/room-1/access',
+      );
+      expect(MentorApiPaths.scheduleV3, '/api/mentors/me/schedule');
     });
   });
 }

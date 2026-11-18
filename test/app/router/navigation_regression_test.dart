@@ -53,21 +53,20 @@ import 'package:rikipath_mobile/features/learning/domain/recommended_learning_pa
 import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
 import 'package:rikipath_mobile/features/learning/presentation/learning_roadmap_screen.dart';
 import 'package:rikipath_mobile/features/learning/presentation/lesson_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/application/cohort_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/application/mentor_cohort_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/learner_my_courses_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/mentor_cohorts_screen.dart';
 import 'package:rikipath_mobile/features/meeting/application/upcoming_meeting_provider.dart';
 import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
-import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
-import 'package:rikipath_mobile/features/mentor/application/mentor_chat_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_kpi_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_operations_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_schedule_v3_controller.dart';
-import 'package:rikipath_mobile/features/mentor/data/mentor_chat_repository.dart';
 import 'package:rikipath_mobile/features/mentor/data/mentor_operations_repository.dart';
 import 'package:rikipath_mobile/features/mentor/data/mentor_schedule_v3_repository.dart';
-import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart'
-    hide MentorRatingSummary, MentorReviewItem;
-import 'package:rikipath_mobile/features/mentor/domain/mentor_chat.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_kpi.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_kpi_repository.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
@@ -75,14 +74,9 @@ import 'package:rikipath_mobile/features/mentor/domain/mentor_operations.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_repository.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_schedule_v3.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_booking_detail_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_attendance_kpi_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_disputes_screens.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_meeting_detail_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_profile_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_session_prep_screen.dart';
 import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
 import 'package:rikipath_mobile/features/mock_test/presentation/practice_screen.dart';
 import 'package:rikipath_mobile/features/notebook/application/demo_notebook_controller.dart';
@@ -846,9 +840,9 @@ void main() {
           }),
         );
         await tester.pumpAndSettle();
-        expect(find.byType(LearnerMentorBookingDetailScreen), findsOneWidget);
+        expect(find.byType(LearnerMyCoursesScreen), findsOneWidget);
 
-        // Mentor role resolves to Mentor routes
+        // Mentor role resolves to canonical Mentor cohort routes
         await storage.saveAuthenticatedSession(
           accessToken: createTestJwt(userId: 5, role: 'Mentor'),
           userId: 5,
@@ -865,82 +859,17 @@ void main() {
         await pushService.handleNotificationTap(
           mentorRouter,
           PushNotificationPayload.fromMap({
-            'notification': {'title': 'Booking', 'body': 'Confirmed'},
+            'notification': {'title': 'Cohort', 'body': 'Confirmed'},
             'data': {'screen': 'booking_detail', 'bookingId': '88'},
           }),
         );
         await tester.pumpAndSettle();
-        expect(find.byType(MentorMeetingDetailScreen), findsOneWidget);
-
-        await pushService.handleNotificationTap(
-          mentorRouter,
-          PushNotificationPayload.fromMap({
-            'notification': {'title': 'Dispute', 'body': 'Action required'},
-            'data': {'screen': 'mentor_disputes', 'disputeId': '301'},
-          }),
-        );
-        await tester.pumpAndSettle();
-        expect(find.byType(MentorDisputeDetailScreen), findsOneWidget);
+        expect(find.byType(MentorCohortsScreen), findsOneWidget);
       },
     );
   });
 
-  group('Mentor Prep Anti-Loop & Auth Subflow Back Parity', () {
-    testWidgets(
-      'MentorSessionPrepScreen pops to existing Detail on stack without creating Prep <-> Detail cycle',
-      (tester) async {
-        final session = createTestAuthSession(role: BackendUserRole.mentor);
-        final router = await _pumpRegressionRouter(
-          tester,
-          initialLocation: AppRoutes.mentorMeetings,
-          authSession: session,
-        );
-
-        router.push(AppRoutes.mentorMeetingDetail(88));
-        await tester.pumpAndSettle();
-        expect(find.byType(MentorMeetingDetailScreen), findsOneWidget);
-
-        router.push(AppRoutes.mentorMeetingPrep(88));
-        await tester.pumpAndSettle();
-        expect(find.byType(MentorSessionPrepScreen), findsOneWidget);
-
-        // Scroll to & tap "Chi tiết" button inside Prep -> pops back cleanly
-        final detailBtn = find.text('Chi tiết');
-        final verticalScrollable = find.byWidgetPredicate(
-          (widget) =>
-              widget is Scrollable &&
-              widget.axisDirection == AxisDirection.down,
-        );
-        if (detailBtn.evaluate().isNotEmpty) {
-          for (var i = 0; i < 6; i++) {
-            final dy = tester.getCenter(detailBtn.last).dy;
-            if (dy >= 60 && dy <= 760) {
-              break;
-            }
-            if (verticalScrollable.evaluate().isNotEmpty) {
-              await tester.drag(
-                verticalScrollable.first,
-                const Offset(0, -250),
-              );
-              await tester.pumpAndSettle();
-            } else {
-              break;
-            }
-          }
-          await tester.ensureVisible(detailBtn.last);
-          await tester.pumpAndSettle();
-          await tester.tap(detailBtn.last);
-          await tester.pumpAndSettle();
-          expect(find.byType(MentorMeetingDetailScreen), findsOneWidget);
-          expect(find.byType(MentorSessionPrepScreen), findsNothing);
-        } else {
-          // Verify standalone Prep deep link replaces instead of leaving Prep below
-          await tester.binding.handlePopRoute();
-          await tester.pumpAndSettle();
-          expect(find.byType(MentorMeetingDetailScreen), findsOneWidget);
-        }
-      },
-    );
+  group('Auth Subflow Back Parity', () {
 
     testWidgets(
       'Auth subflows Back parity: Register, deep-linked ForgotPassword & VerifyEmail -> Login, authenticated VerifyEmail hides login link',
@@ -1169,54 +1098,6 @@ void main() {
     );
 
     testWidgets(
-      'Legacy compensation & bank routes redirect safely and MentorDisputeDetailScreen guards dirty form changes',
-      (tester) async {
-        final session = createTestAuthSession(role: BackendUserRole.mentor);
-
-        // Legacy /mentor/compensation redirects to MentorAttendanceKpiScreen
-        await _pumpRegressionRouter(
-          tester,
-          initialLocation: AppRoutes.mentorCompensation,
-          authSession: session,
-        );
-        expect(find.byType(MentorAttendanceKpiScreen), findsOneWidget);
-
-        // Legacy /mentor/bank-account redirects to MentorProfileScreen
-        await _pumpRegressionRouter(
-          tester,
-          initialLocation: AppRoutes.mentorBankAccount,
-          authSession: session,
-        );
-        expect(find.byType(MentorProfileScreen), findsOneWidget);
-
-        // Dispute detail dirty check
-        await _pumpRegressionRouter(
-          tester,
-          initialLocation: AppRoutes.mentorDisputeDetail(301),
-          authSession: session,
-        );
-        expect(find.byType(MentorDisputeDetailScreen), findsOneWidget);
-        final responseField = find.byType(TextField);
-        await tester.scrollUntilVisible(
-          responseField,
-          250,
-          scrollable: find.byType(Scrollable).first,
-        );
-        await tester.ensureVisible(responseField.first);
-        await tester.pumpAndSettle();
-        await tester.enterText(responseField.first, 'Phản hồi kiểm thử');
-        await tester.pumpAndSettle();
-
-        await tester.binding.handlePopRoute();
-        await tester.pumpAndSettle();
-        expect(find.text('Hủy thay đổi?'), findsOneWidget);
-        await tester.tap(find.text('Rời đi'));
-        await tester.pumpAndSettle();
-        expect(find.byType(MentorDisputesScreen), findsOneWidget);
-      },
-    );
-
-    testWidgets(
       'MentorProfileScreen(applicationMode: true) & standalone MentorAvailabilityScreen guard dirty changes',
       (tester) async {
         // Standalone MentorProfileScreen(applicationMode: true) with Learner role
@@ -1418,24 +1299,16 @@ Future<void> _pumpScopedRouter(
           SessionDemoNotebookRepository(),
         ),
         notebookRepositoryProvider.overrideWithValue(_RegNotebookRepository()),
-        learnerMentorBookingsControllerProvider.overrideWith(
-          _StubLearnerBookingsController.new,
+        learnerMyCoursesProvider.overrideWith(
+          _StubLearnerMyCoursesController.new,
         ),
-        learnerMentorAvailabilityControllerProvider.overrideWith(
-          _StubLearnerAvailabilityController.new,
-        ),
+        mentorAssignedCohortsProvider.overrideWith((ref) async => const []),
         mentorRepositoryProvider.overrideWithValue(_RegMentorRepository()),
         mentorOperationsRepositoryProvider.overrideWithValue(
           _RegMentorOperationsRepository(),
         ),
         mentorScheduleV3RepositoryProvider.overrideWithValue(
           _RegMentorScheduleV3Repository(),
-        ),
-        mentorChatRepositoryProvider.overrideWithValue(
-          _RegMentorChatRepository(),
-        ),
-        mentorChatRealtimeClientFactoryProvider.overrideWithValue(
-          _RegMentorChatRealtimeClient.new,
         ),
         mentorKpiRepositoryProvider.overrideWithValue(
           _RegMentorKpiRepository(),
@@ -1830,15 +1703,9 @@ class _RegNotebookRepository implements NotebookRepository {
   Stream<Set<String>> watchSavedVocabularyKeys() => Stream.value(const {});
 }
 
-class _StubLearnerBookingsController extends LearnerMentorBookingsController {
+class _StubLearnerMyCoursesController extends LearnerMyCoursesController {
   @override
-  Future<List<LearnerMentorBooking>> build() async => const [];
-}
-
-class _StubLearnerAvailabilityController
-    extends LearnerMentorAvailabilityController {
-  @override
-  Future<List<LearnerMentorAvailability>> build() async => const [];
+  Future<List<LearnerStudyCourseDetail>> build() async => const [];
 }
 
 class _RegMentorRepository implements MentorRepository {
@@ -1854,9 +1721,6 @@ class _RegMentorRepository implements MentorRepository {
   );
 
   @override
-  Future<bool> cancelMeeting(int bookingId, String reason) async => true;
-
-  @override
   Future<List<MentorAvailabilitySlot>> loadAvailability() async => [
     MentorAvailabilitySlot(
       id: 501,
@@ -1868,31 +1732,12 @@ class _RegMentorRepository implements MentorRepository {
   ];
 
   @override
-  Future<List<MentorMeetingSummary>> loadMeetings() async => [
-    MentorMeetingSummary(
-      id: 88,
-      learnerName: 'Minh Anh',
-      scheduledAt: MentorTimestamp.parse('2026-11-20T19:00:00+07:00'),
-      status: MentorMeetingStatus.accepted,
-      jlptLevel: 'N3',
-      roomId: 'r-88',
-      meetingLink: 'https://meet.rikipath.local/rooms/r-88',
-    ),
-  ];
-
-  @override
   Future<MentorProfileData> loadProfile() async => _profile;
 
   @override
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(
     DateTime weekStart,
   ) async => const [];
-
-  @override
-  Future<bool> replyReview(int reviewId, String reply) async => true;
-
-  @override
-  Future<bool> respondDispute(int disputeId, String responseText) async => true;
 
   @override
   Future<MentorProfileData> submitVerification({
@@ -1919,98 +1764,9 @@ class _RegMentorRepository implements MentorRepository {
 }
 
 class _RegMentorOperationsRepository implements MentorOperationsRepository {
-  static final _dispute = MentorDisputeItem(
-    id: 301,
-    mentorBookingId: 88,
-    learnerId: 99,
-    learnerName: 'Quang Huy',
-    mentorId: 5,
-    mentorName: 'Tanaka Sensei',
-    category: MentorDisputeCategory.mediaRoomIssue,
-    status: MentorDisputeStatus.awaitingResponse,
-    reason: 'Âm thanh bị gián đoạn 10 phút đầu.',
-    evidenceUrls: 'https://cdn.rikipath.local/evidence-1.png',
-    creditRefunded: false,
-    createdAtUtc: MentorTimestamp.parse('2026-11-12T10:00:00Z'),
-    updatedAtUtc: MentorTimestamp.parse('2026-11-12T10:00:00Z'),
-  );
-
-  @override
-  Future<MentorCancellationEligibility> checkCancellationEligibility(
-    int bookingId,
-  ) async => const MentorCancellationEligibility(
-    bookingId: 88,
-    canCancel: true,
-    canReschedule: false,
-    eligibleForFullRefund: true,
-    hoursUntilStart: 48.0,
-    tier: 'Early',
-    message: 'Còn trên 24h trước buổi tư vấn.',
-  );
-
   @override
   Future<MentorRoomAccessStatus> checkRoomAccess(String roomId) async =>
       MentorRoomAccessStatus(roomId: roomId, canAccess: true, isRoomReady: true);
-
-  @override
-  Future<List<MentorAttendanceRecord>> loadBookingAttendance(
-    int bookingId,
-  ) async => const [];
-
-  @override
-  Future<MentorBookingDetail> loadBookingDetail(int bookingId) async =>
-      MentorBookingDetail(
-        id: bookingId,
-        userSubscriptionId: 12,
-        mentorId: 5,
-        mentorName: 'Tanaka Sensei',
-        learnerId: 99,
-        learnerName: 'Minh Anh',
-        jlptLevel: 'N3',
-        status: MentorMeetingStatus.accepted,
-        scheduledAt: MentorTimestamp.parse('2026-11-20T19:00:00+07:00'),
-        endsAt: MentorTimestamp.parse('2026-11-20T20:30:00+07:00'),
-        roomId: 'r-88',
-        meetingLink: 'https://meet.rikipath.local/rooms/r-88',
-        question: 'Em hay nhầm ~ようにする với ~ことにする ạ.',
-      );
-
-  @override
-  Future<MentorDisputeDetail> loadDisputeDetail(int disputeId) async =>
-      MentorDisputeDetail(
-        dispute: _dispute,
-        bookingScheduledAt: MentorTimestamp.parse('2026-11-11T10:00:00Z'),
-        bookingStatus: MentorMeetingStatus.completed,
-        attendanceTotalDurationSeconds: 4800,
-        attendanceReconnectionCount: 1,
-        attendanceFirstJoinedAtUtc: MentorTimestamp.parse('2026-11-11T10:00:00Z'),
-        isCancelled: false,
-        creditAlreadyRefunded: false,
-        histories: const [],
-      );
-
-  @override
-  Future<List<MentorDisputeItem>> loadDisputes({
-    int page = 1,
-    int pageSize = 20,
-  }) async => [_dispute];
-
-  @override
-  Future<MentorRatingSummary> loadRatingSummary(int mentorId) async =>
-      const MentorRatingSummary(
-        mentorId: 5,
-        totalReviews: 10,
-        averageRating: 4.8,
-        ratingBreakdown: {5: 10},
-        positiveRatePercent: 100.0,
-      );
-
-  @override
-  Future<List<MentorReviewItem>> loadReviews(
-    int mentorId, {
-    int page = 1,
-    int pageSize = 20,
-  }) async => const [];
 
   @override
   Future<MentorVerificationDocumentData> loadVerificationDocument() async =>
@@ -2088,61 +1844,6 @@ class _RegMentorScheduleV3Repository implements MentorScheduleV3Repository {
   Future<MentorScheduleV3> updateSchedule(
     UpdateMentorScheduleV3Request request,
   ) async => loadSchedule();
-}
-
-class _RegMentorChatRepository implements MentorChatRepository {
-  @override
-  Future<List<MentorChatMessage>> loadMessages(
-    int bookingId, {
-    int? beforeMessageId,
-    int pageSize = 50,
-  }) async => const [];
-
-  @override
-  Future<MentorChatThread> loadThread(int bookingId) async => MentorChatThread(
-    bookingId: bookingId,
-    learnerId: 99,
-    learnerName: 'Minh Anh',
-    mentorId: 5,
-    mentorName: 'Tanaka Sensei',
-    scheduledAt: MentorTimestamp.parse('2026-11-20T19:00:00+07:00'),
-    bookingStatus: 'Accepted',
-    canSendMessages: true,
-    unreadCount: 0,
-  );
-
-  @override
-  Future<List<MentorChatThread>> loadThreads() async => const [];
-
-  @override
-  Future<void> markRead(int bookingId) async {}
-}
-
-class _RegMentorChatRealtimeClient implements MentorChatRealtimeClient {
-  @override
-  Future<void> connectAndJoin(int bookingId) async {}
-
-  @override
-  Stream<MentorChatConnectionStatus> get connectionStates =>
-      const Stream.empty();
-
-  @override
-  Future<void> dispose() async {}
-
-  @override
-  Stream<MentorChatMessage> get incomingMessages => const Stream.empty();
-
-  @override
-  Future<void> leave(int bookingId) async {}
-
-  @override
-  Future<void> markRead(int bookingId) async {}
-
-  @override
-  Stream<int> get readReceipts => const Stream.empty();
-
-  @override
-  Future<void> sendMessage(int bookingId, String text) async {}
 }
 
 class _RegMentorKpiRepository implements MentorKpiRepository {

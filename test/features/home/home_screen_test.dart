@@ -14,6 +14,9 @@ import 'package:rikipath_mobile/features/analytics/application/analytics_control
 import 'package:rikipath_mobile/features/analytics/domain/analytics_repository.dart';
 import 'package:rikipath_mobile/features/analytics/domain/learner_analytics.dart';
 import 'package:rikipath_mobile/features/analytics/presentation/learner_analytics_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/application/cohort_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/learner_my_courses_screen.dart';
 import 'package:rikipath_mobile/features/home/application/home_controller.dart';
 import 'package:rikipath_mobile/features/home/data/fixture_home_repository.dart';
 import 'package:rikipath_mobile/features/home/domain/home_dashboard.dart';
@@ -24,7 +27,6 @@ import 'package:rikipath_mobile/features/learning/application/learning_controlle
 import 'package:rikipath_mobile/features/learning/data/fixture_learning_repository.dart';
 import 'package:rikipath_mobile/features/meeting/application/upcoming_meeting_provider.dart';
 import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
-import 'package:rikipath_mobile/features/meeting/presentation/meeting_join_screen.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/notifications/domain/app_notification.dart';
 import 'package:rikipath_mobile/features/notifications/domain/notification_repository.dart';
@@ -158,7 +160,7 @@ void main() {
     await tester.tap(card.hitTestable());
     await tester.pumpAndSettle();
 
-    expect(find.byType(MeetingJoinScreen), findsOneWidget);
+    expect(find.byType(LearnerMyCoursesScreen), findsOneWidget);
   });
 
   testWidgets('progress action opens the shared Analytics screen', (
@@ -261,11 +263,19 @@ Future<GoRouter> _pumpHome(
         upcomingMeetingProvider.overrideWithValue(
           const AsyncData<UpcomingMeeting?>(null),
         ),
+        learnerMyCoursesProvider.overrideWith(
+          _StubLearnerMyCoursesController.new,
+        ),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
   );
   return router;
+}
+
+class _StubLearnerMyCoursesController extends LearnerMyCoursesController {
+  @override
+  Future<List<LearnerStudyCourseDetail>> build() async => const [];
 }
 
 class _AnalyticsRepository implements AnalyticsRepository {

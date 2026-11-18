@@ -16,12 +16,6 @@ final mentorAvailabilityControllerProvider =
       List<MentorAvailabilitySlot>
     >(MentorAvailabilityController.new, retry: (_, _) => null);
 
-final mentorMeetingsControllerProvider =
-    AsyncNotifierProvider<MentorMeetingsController, List<MentorMeetingSummary>>(
-      MentorMeetingsController.new,
-      retry: (_, _) => null,
-    );
-
 final mentorProfileControllerProvider =
     AsyncNotifierProvider<MentorProfileController, MentorProfileData>(
       MentorProfileController.new,
@@ -237,52 +231,6 @@ class MentorAvailabilityController
   }
 }
 
-class MentorMeetingsController
-    extends AsyncNotifier<List<MentorMeetingSummary>> {
-  @override
-  Future<List<MentorMeetingSummary>> build() {
-    return ref.watch(mentorRepositoryProvider).loadMeetings();
-  }
-
-  Future<void> retry() async {
-    state = const AsyncLoading<List<MentorMeetingSummary>>();
-    state = await AsyncValue.guard(build);
-  }
-
-  /// Mentor hủy lịch hẹn tư vấn: tự động hoàn 1 lượt tín dụng cho học viên.
-  Future<bool> cancelMeeting(int bookingId, String reason) async {
-    try {
-      final ok = await ref.read(mentorRepositoryProvider).cancelMeeting(bookingId, reason);
-      if (ok) ref.invalidateSelf();
-      return ok;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  /// Mentor gửi phản hồi cho đánh giá của học viên.
-  Future<bool> replyReview(int reviewId, String reply) async {
-    try {
-      final ok = await ref.read(mentorRepositoryProvider).replyReview(reviewId, reply);
-      if (ok) ref.invalidateSelf();
-      return ok;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  /// Mentor gửi giải trình phản hồi khiếu nại của học viên.
-  Future<bool> respondDispute(int disputeId, String responseText) async {
-    try {
-      final ok = await ref.read(mentorRepositoryProvider).respondDispute(disputeId, responseText);
-      if (ok) ref.invalidateSelf();
-      return ok;
-    } catch (_) {
-      return false;
-    }
-  }
-}
-
 class MentorProfileController extends AsyncNotifier<MentorProfileData> {
   @override
   Future<MentorProfileData> build() {
@@ -362,7 +310,6 @@ Future<void> refreshMentorReadModels(WidgetRef ref) async {
 
   await Future.wait(<Future<void>>[
     settle(ref.refresh(mentorAvailabilityControllerProvider.future)),
-    settle(ref.refresh(mentorMeetingsControllerProvider.future)),
     settle(
       ref.read(mentorWeeklyScheduleControllerProvider.notifier).loadSchedule(),
     ),

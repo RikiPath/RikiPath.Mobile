@@ -32,9 +32,9 @@ import 'package:rikipath_mobile/features/mentor/application/mentor_controller.da
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_repository.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/mentor_cohorts_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_meetings_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_profile_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shell.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/mentor_calendar_screen.dart';
@@ -71,8 +71,8 @@ void main() {
     expect(AppRoutes.meetingJoin, '/meeting/join');
     expect(AppRoutes.mentor, '/mentor');
     expect(AppRoutes.mentorAvailability, '/mentor/availability');
-    expect(AppRoutes.mentorMeetings, '/mentor/meetings');
-    expect(AppRoutes.mentorMeetingDetail(17), '/mentor/meetings/17');
+    expect(AppRoutes.mentorCohorts, '/mentor/cohorts');
+    expect(AppRoutes.mentorCohortDetail(17), '/mentor/cohorts/17');
     expect(AppRoutes.home, '/home');
     expect(AppRoutes.learn, '/learn');
     expect(AppRoutes.practice, '/practice');
@@ -551,7 +551,7 @@ void main() {
       authRouteRedirect(
         authState: AuthSessionState.authenticated,
         role: BackendUserRole.mentor,
-        matchedLocation: AppRoutes.mentorMeetings,
+        matchedLocation: AppRoutes.mentorCohorts,
       ),
       isNull,
     );
@@ -752,8 +752,8 @@ void main() {
           index: 1,
         ),
         (
-          path: AppRoutes.mentorMeetings,
-          screen: MentorMeetingsScreen,
+          path: AppRoutes.mentorCohorts,
+          screen: MentorCohortsScreen,
           index: 2,
         ),
         (
@@ -775,7 +775,7 @@ void main() {
       for (final label in const <String>[
         'Trang chủ',
         'Lịch dạy',
-        'Buổi tư vấn',
+        'Lớp nhóm',
         'Lịch trống',
         'Cá nhân',
       ]) {
@@ -817,11 +817,11 @@ void main() {
 
       final originalMentorHome = tester.element(find.byType(MentorHomeScreen));
 
-      // Tap tab 2 (Buổi tư vấn) directly on shared SakuraBottomNavigation
+      // Tap tab 2 (Lớp nhóm) directly on shared SakuraBottomNavigation
       await tester.tap(
         find.descendant(
           of: find.byType(SakuraBottomNavigation),
-          matching: find.text('Buổi tư vấn'),
+          matching: find.text('Lớp nhóm'),
         ),
       );
       await tester.pump();
@@ -830,7 +830,7 @@ void main() {
       expect(find.byType(SakuraBottomNavigation), findsOneWidget);
 
       await tester.pumpAndSettle();
-      expect(find.byType(MentorMeetingsScreen), findsOneWidget);
+      expect(find.byType(MentorCohortsScreen), findsOneWidget);
       expect(
         tester
             .widget<SakuraBottomNavigation>(find.byType(SakuraBottomNavigation))
@@ -838,9 +838,13 @@ void main() {
         2,
       );
 
-      // Header calendar button on Buổi tư vấn navigates to MentorCalendar (tab 1)
-      // inside MentorShell (never pushing Learner calendar or outside shell).
-      await tester.tap(find.byTooltip('Lịch giảng dạy'));
+      // Tapping Lịch dạy tab switches to MentorCalendar (tab 1) inside MentorShell.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(SakuraBottomNavigation),
+          matching: find.text('Lịch dạy'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(MentorCalendarScreen), findsOneWidget);
       expect(find.byType(SakuraBottomNavigation), findsOneWidget);
@@ -1077,21 +1081,9 @@ class _RouterMentorRepository implements MentorRepository {
   Future<List<MentorAvailabilitySlot>> loadAvailability() async => const [];
 
   @override
-  Future<List<MentorMeetingSummary>> loadMeetings() async => const [];
-
-  @override
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(
     DateTime weekStart,
   ) async => const [];
-
-  @override
-  Future<bool> cancelMeeting(int bookingId, String reason) async => true;
-
-  @override
-  Future<bool> replyReview(int reviewId, String reply) async => true;
-
-  @override
-  Future<bool> respondDispute(int disputeId, String responseText) async => true;
 
   @override
   Future<MentorProfileData> loadProfile() async => const MentorProfileData(

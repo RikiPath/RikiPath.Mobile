@@ -12,51 +12,10 @@ import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
-import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_reschedule_sheet.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/widgets/learner_mentor_shared_widgets.dart'
-    show showLearnerBookingCancellationDialog;
 
 class SakuraEventDetailSheet extends ConsumerWidget {
-  Future<void> _showRescheduleSheet(BuildContext context, WidgetRef ref) async {
-    final canReschedule =
-        event.startTime.toUtc().difference(DateTime.now().toUtc()) >=
-        const Duration(hours: 24);
-    if (!canReschedule) {
-      ref.read(rikiToastServiceProvider.notifier).warning(
-            title: 'Không thể dời lịch hẹn',
-            description:
-                'Buổi tư vấn diễn ra trong vòng dưới 24 giờ tới, hiện không đủ điều kiện dời lịch.',
-          );
-      return;
-    }
-    final bookings = await ref.read(
-      learnerMentorBookingsControllerProvider.future,
-    );
-    final booking = bookings.where((b) => b.id == event.bookingId).firstOrNull;
-    if (booking == null) return;
-    if (context.mounted) {
-      Navigator.of(context).pop();
-      await LearnerMentorRescheduleSheet.show(context, booking: booking);
-    }
-  }
-
-  Future<void> _showCancelDialog(BuildContext context, WidgetRef ref) async {
-    final bookingId = event.bookingId;
-    if (bookingId == null) return;
-    final didCancel = await showLearnerBookingCancellationDialog(
-      context,
-      ref,
-      bookingId: bookingId,
-      scheduledAtUtc: event.startTime.toUtc(),
-    );
-    if (didCancel && context.mounted) {
-      Navigator.of(context).pop();
-    }
-  }
-
   const SakuraEventDetailSheet({
     super.key,
     required this.event,
@@ -491,80 +450,30 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                 ),
               ],
 
-              // Booking Reschedule & Cancellation Actions (Policy-compliant with confirmation)
               if (event.bookingId != null &&
-                  event.type == SakuraCalendarEventType.consultation &&
-                  event.status != MentorMeetingStatus.cancelled &&
-                  event.status != MentorMeetingStatus.completed &&
-                  event.startTime.isAfter(DateTime.now())) ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        key: const Key('sakura_event_reschedule_button'),
-                        onPressed: () => _showRescheduleSheet(context, ref),
-                        icon: const Icon(
-                          Icons.edit_calendar_outlined,
-                          size: 18,
-                          color: Color(0xFF0284C7),
-                        ),
-                        label: const Text(
-                          'Dời lịch hẹn',
-                          style: TextStyle(
-                            color: Color(0xFF0284C7),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: const Color(0xFFEAF6FF),
-                          foregroundColor: const Color(0xFF0284C7),
-                          side: const BorderSide(
-                            color: Color(0xFF7DD3FC),
-                            width: 1.2,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.space3,
-                          ),
-                        ),
+                  event.type == SakuraCalendarEventType.consultation) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      final courseId = event.bookingId!;
+                      final router = GoRouter.maybeOf(context);
+                      Navigator.of(context).pop();
+                      router?.push(AppRoutes.learnerCohortDetail(courseId));
+                    },
+                    icon: const Icon(Icons.school_outlined, size: 18),
+                    label: const Text('Mở chi tiết lớp học'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.brandPrimary,
+                      side: const BorderSide(color: AppColors.brandPrimary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.space3,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.space2),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        key: const Key('sakura_event_cancel_button'),
-                        onPressed: () => _showCancelDialog(context, ref),
-                        icon: const Icon(
-                          Icons.event_busy,
-                          size: 18,
-                          color: Color(0xFFDC3545),
-                        ),
-                        label: const Text(
-                          'Hủy buổi tư vấn này',
-                          style: TextStyle(
-                            color: Color(0xFFDC3545),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFFDC3545),
-                          side: const BorderSide(
-                            color: Color(0xFFF5C8CF),
-                            width: 1.2,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.space3,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.space3),
               ],

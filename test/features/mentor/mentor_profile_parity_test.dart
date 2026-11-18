@@ -15,6 +15,7 @@ import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
 import 'package:rikipath_mobile/features/auth/presentation/account_settings_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/change_password_screen.dart';
 import 'package:rikipath_mobile/features/auth/presentation/update_email_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/application/mentor_cohort_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_operations_controller.dart';
 import 'package:rikipath_mobile/features/mentor/data/mentor_operations_repository.dart';
@@ -423,8 +424,8 @@ void main() {
         expect(find.byType(UpdateEmailScreen), findsNothing);
         expect(find.byType(AccountSettingsScreen), findsOneWidget);
 
-        // Switching tab to Meetings & back to Profile preserves Settings in Profile branch!
-        await tester.tap(find.text('Buổi tư vấn'));
+        // Switching tab to Cohorts & back to Profile preserves Settings in Profile branch!
+        await tester.tap(find.text('Lớp nhóm'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Cá nhân'));
         await tester.pumpAndSettle();
@@ -605,6 +606,7 @@ Future<GoRouter> _pumpMentorParityRouter(
     ProviderScope(
       overrides: [
         authSessionControllerProvider.overrideWithValue(session),
+        mentorAssignedCohortsProvider.overrideWith((ref) async => const []),
         mentorRepositoryProvider.overrideWithValue(effectiveMentorRepo),
         mentorOperationsRepositoryProvider.overrideWithValue(
           _FakeParityMentorOperationsRepository(),
@@ -741,39 +743,13 @@ class _FakeParityMentorRepository implements MentorRepository {
   Future<List<MentorAvailabilitySlot>> loadAvailability() async => const [];
 
   @override
-  Future<List<MentorMeetingSummary>> loadMeetings() async => const [];
-
-  @override
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(
     DateTime weekStart,
   ) async => const [];
-
-  @override
-  Future<bool> cancelMeeting(int bookingId, String reason) async => true;
-
-  @override
-  Future<bool> replyReview(int reviewId, String reply) async => true;
-
-  @override
-  Future<bool> respondDispute(int disputeId, String responseText) async => true;
 }
 
 class _FakeParityMentorOperationsRepository
     implements MentorOperationsRepository {
-  @override
-  Future<MentorBookingDetail> loadBookingDetail(int bookingId) async =>
-      throw UnimplementedError();
-
-  @override
-  Future<MentorCancellationEligibility> checkCancellationEligibility(
-    int bookingId,
-  ) async => throw UnimplementedError();
-
-  @override
-  Future<List<MentorAttendanceRecord>> loadBookingAttendance(
-    int bookingId,
-  ) async => const [];
-
   @override
   Future<MentorRoomAccessStatus> checkRoomAccess(String roomId) async =>
       MentorRoomAccessStatus(roomId: roomId, canAccess: true, isRoomReady: true);
@@ -781,33 +757,6 @@ class _FakeParityMentorOperationsRepository
   @override
   Future<MentorVerificationDocumentData> loadVerificationDocument() async =>
       const MentorVerificationDocumentData();
-
-  @override
-  Future<MentorRatingSummary> loadRatingSummary(int mentorId) async =>
-      MentorRatingSummary(
-        mentorId: mentorId,
-        averageRating: 5,
-        totalReviews: 0,
-        ratingBreakdown: const {5: 0, 4: 0, 3: 0, 2: 0, 1: 0},
-        positiveRatePercent: 100,
-      );
-
-  @override
-  Future<List<MentorReviewItem>> loadReviews(
-    int mentorId, {
-    int page = 1,
-    int pageSize = 20,
-  }) async => const [];
-
-  @override
-  Future<List<MentorDisputeItem>> loadDisputes({
-    int page = 1,
-    int pageSize = 20,
-  }) async => const [];
-
-  @override
-  Future<MentorDisputeDetail> loadDisputeDetail(int disputeId) async =>
-      throw UnimplementedError();
 }
 
 class _FakeParityNotificationRepository implements NotificationRepository {

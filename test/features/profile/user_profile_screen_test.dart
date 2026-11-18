@@ -208,9 +208,9 @@ void main() {
       expect(find.textContaining('XP'), findsNothing);
       expect(find.textContaining('xếp hạng'), findsNothing);
       expect(find.textContaining('chuỗi học'), findsNothing);
-      expect(find.text('Tư vấn 1-1'), findsOneWidget);
+      expect(find.text('Lớp học nhóm của tôi'), findsOneWidget);
       expect(
-        find.text('Khám phá các gói tư vấn và lịch hẹn của bạn.'),
+        find.text('Xem lịch buổi học, bài tập về nhà và điểm danh'),
         findsOneWidget,
       );
       expect(find.text('Khám phá'), findsNothing);

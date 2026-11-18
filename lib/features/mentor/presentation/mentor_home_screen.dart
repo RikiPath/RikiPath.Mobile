@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_app_header.dart';
-import 'package:rikipath_mobile/features/mentor/application/mentor_chat_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/application/mentor_cohort_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/domain/cohort_operations.dart';
+import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
-import 'package:rikipath_mobile/features/mentor/application/mentor_operations_controller.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_chat.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
-import 'package:rikipath_mobile/features/mentor/domain/mentor_operations.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_parity_components.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
@@ -21,17 +21,14 @@ class MentorHomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final availabilityState = ref.watch(mentorAvailabilityControllerProvider);
-    final meetingsState = ref.watch(mentorMeetingsControllerProvider);
+    final cohortsState = ref.watch(mentorAssignedCohortsProvider);
     final profileState = ref.watch(mentorProfileControllerProvider);
-    final chatState = ref.watch(mentorChatThreadsControllerProvider);
-    final disputesState = ref.watch(mentorDisputesControllerProvider);
-    final reviewsState = ref.watch(mentorReviewsControllerProvider);
-    final bothFailed = availabilityState.hasError && meetingsState.hasError;
+    final complaintsState = ref.watch(mentorCohortComplaintsProvider);
+    final bothFailed = availabilityState.hasError && cohortsState.hasError;
     final secondaryFailed =
         !bothFailed &&
-        [chatState, disputesState, reviewsState].any(
-          (s) => s is AsyncError && s.error is! StateError,
-        );
+        complaintsState is AsyncError &&
+        complaintsState.error is! StateError;
 
     return Scaffold(
       key: const Key('mentor_home_screen'),
@@ -52,11 +49,9 @@ class MentorHomeScreen extends ConsumerWidget {
           color: AppColors.brandPrimary,
           onRefresh: () => Future.wait<void>([
             ref.read(mentorAvailabilityControllerProvider.notifier).retry(),
-            ref.read(mentorMeetingsControllerProvider.notifier).retry(),
+            ref.refresh(mentorAssignedCohortsProvider.future).catchError((_) => <StudyCohortSummary>[]),
             ref.read(mentorProfileControllerProvider.notifier).retry(),
-            ref.read(mentorChatThreadsControllerProvider.notifier).refresh().catchError((_) {}),
-            ref.read(mentorDisputesControllerProvider.notifier).refresh().catchError((_) {}),
-            ref.read(mentorReviewsControllerProvider.notifier).refresh().catchError((_) {}),
+            ref.refresh(mentorCohortComplaintsProvider.future).catchError((_) => <CohortComplaint>[]),
           ]),
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -78,7 +73,7 @@ class MentorHomeScreen extends ConsumerWidget {
 
               // 2. Full-bleed Sakura Mentoring Journey Hero Banner
               SakuraMentorHeroBanner(
-                onTap: () => mentorNavigate(context, AppRoutes.mentorMeetings),
+                onTap: () => mentorNavigate(context, AppRoutes.mentorCohorts),
               ),
               const SizedBox(height: AppSpacing.space4),
 
@@ -103,7 +98,7 @@ class MentorHomeScreen extends ConsumerWidget {
                     // 4. Compact KPI Summary Strip (Never fakes 0 on error)
                     _MentorKpiSummaryStrip(
                       availabilityState: availabilityState,
-                      meetingsState: meetingsState,
+                      cohortsState: cohortsState,
                     ),
                     const SizedBox(height: AppSpacing.space4),
 
@@ -114,19 +109,16 @@ class MentorHomeScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.space4),
                     ],
 
-                    if (meetingsState case AsyncData(:final value)) ...[
-                      _NextSessionSpotlight(meetings: value),
+                    if (cohortsState case AsyncData(:final value)) ...[
+                      _NextCohortSessionSpotlight(cohorts: value),
                     ],
 
                     _AttentionQueueCard(
-                      meetingsState: meetingsState,
-                      chatState: chatState,
-                      disputesState: disputesState,
-                      reviewsState: reviewsState,
+                      cohortsState: cohortsState,
+                      complaintsState: complaintsState,
                     ),
                     const SizedBox(height: AppSpacing.space4),
 
-                    // 5. Unified recovery banner when both sources fail simultaneously
                     if (bothFailed) ...[
                       RikiCard(
                         key: const Key('mentor_home_both_error_banner'),
@@ -143,7 +135,7 @@ class MentorHomeScreen extends ConsumerWidget {
                             const SizedBox(width: AppSpacing.space3),
                             Expanded(
                               child: Text(
-                                'Chưa thể đồng bộ dữ liệu lịch dạy và buổi tư vấn. Vui lòng kiểm tra kết nối và thử lại.',
+                                'Chưa thể đồng bộ dữ liệu lịch dạy và lớp nhóm. Vui lòng kiểm tra kết nối và thử lại.',
                                 style: AppTypography.bodySmall.copyWith(
                                   color: AppColors.errorText,
                                   fontWeight: FontWeight.w600,
@@ -160,11 +152,7 @@ class MentorHomeScreen extends ConsumerWidget {
                                           .notifier,
                                     )
                                     .retry();
-                                ref
-                                    .read(
-                                      mentorMeetingsControllerProvider.notifier,
-                                    )
-                                    .retry();
+                                ref.invalidate(mentorAssignedCohortsProvider);
                               },
                               child: Text(context.l10n.retry),
                             ),
@@ -237,15 +225,13 @@ class MentorHomeScreen extends ConsumerWidget {
                     _AvailabilitySummaryCard(state: availabilityState),
                     const SizedBox(height: AppSpacing.space4),
 
-                    // 8. Upcoming Meetings Summary Card
-                    _MeetingsSummaryCard(state: meetingsState),
+                    // 8. Cohorts Summary Card
+                    _CohortsSummaryCard(state: cohortsState),
                     const SizedBox(height: AppSpacing.space4),
 
                     // 9. Quick Operations Hub & Utilities
                     _QuickOperationsSection(
-                      chatState: chatState,
-                      disputesState: disputesState,
-                      reviewsState: reviewsState,
+                      complaintsState: complaintsState,
                     ),
                     const SizedBox(height: AppSpacing.space4),
 
@@ -350,11 +336,11 @@ class _MentorApprovalBanner extends StatelessWidget {
 class _MentorKpiSummaryStrip extends StatelessWidget {
   const _MentorKpiSummaryStrip({
     required this.availabilityState,
-    required this.meetingsState,
+    required this.cohortsState,
   });
 
   final AsyncValue<List<MentorAvailabilitySlot>> availabilityState;
-  final AsyncValue<List<MentorMeetingSummary>> meetingsState;
+  final AsyncValue<List<StudyCohortSummary>> cohortsState;
 
   @override
   Widget build(BuildContext context) {
@@ -364,15 +350,15 @@ class _MentorKpiSummaryStrip extends StatelessWidget {
       AsyncLoading() => '…',
       AsyncError() => '—',
     };
-    final upcomingMeetingsText = switch (meetingsState) {
+    final activeCohortsText = switch (cohortsState) {
       AsyncData(:final value) =>
-        '${value.where((m) => m.status == MentorMeetingStatus.assigned || m.status == MentorMeetingStatus.accepted).length}',
+        '${value.where((c) => c.status != 'Completed' && c.status != 'Cancelled').length}',
       AsyncLoading() => '…',
       AsyncError() => '—',
     };
-    final completedMeetingsText = switch (meetingsState) {
+    final completedCohortsText = switch (cohortsState) {
       AsyncData(:final value) =>
-        '${value.where((m) => m.status == MentorMeetingStatus.completed).length}',
+        '${value.where((c) => c.status == 'Completed').length}',
       AsyncLoading() => '…',
       AsyncError() => '—',
     };
@@ -384,9 +370,9 @@ class _MentorKpiSummaryStrip extends StatelessWidget {
         children: [
           Expanded(
             child: _KpiTile(
-              label: context.l10n.mentorHomeMetricUpcoming,
-              value: upcomingMeetingsText,
-              icon: Icons.video_camera_front_outlined,
+              label: 'Lớp đang dạy',
+              value: activeCohortsText,
+              icon: Icons.groups_outlined,
             ),
           ),
           const SizedBox(width: AppSpacing.space2),
@@ -400,8 +386,8 @@ class _MentorKpiSummaryStrip extends StatelessWidget {
           const SizedBox(width: AppSpacing.space2),
           Expanded(
             child: _KpiTile(
-              label: context.l10n.mentorHomeMetricCompleted,
-              value: completedMeetingsText,
+              label: 'Lớp đã xong',
+              value: completedCohortsText,
               icon: Icons.check_circle_outline_rounded,
             ),
           ),
@@ -556,15 +542,15 @@ class _AvailabilitySummaryBody extends StatelessWidget {
   }
 }
 
-class _MeetingsSummaryCard extends ConsumerWidget {
-  const _MeetingsSummaryCard({required this.state});
+class _CohortsSummaryCard extends ConsumerWidget {
+  const _CohortsSummaryCard({required this.state});
 
-  final AsyncValue<List<MentorMeetingSummary>> state;
+  final AsyncValue<List<StudyCohortSummary>> state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return RikiCard(
-      key: const Key('mentor_home_meetings_summary'),
+      key: const Key('mentor_home_cohorts_summary'),
       backgroundColor: AppColors.cardWarmWhite,
       borderColor: AppColors.cardBorderMuted,
       boxShadow: AppShadows.sakuraSubtle,
@@ -572,13 +558,13 @@ class _MeetingsSummaryCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            context.l10n.mentorMeetingsTitle,
+          const Text(
+            'Lớp học nhóm phụ trách',
             style: AppTypography.cardTitle,
           ),
           const SizedBox(height: AppSpacing.space1),
           Text(
-            context.l10n.mentorMeetingsDescription,
+            'Quản lý buổi học 90 phút, điểm danh, giao & chấm bài tập.',
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -586,24 +572,29 @@ class _MeetingsSummaryCard extends ConsumerWidget {
           const SizedBox(height: AppSpacing.space3),
           switch (state) {
             AsyncLoading() => const RikiSkeleton(
-              key: Key('mentor_home_meetings_loading'),
-              height: 76,
+              key: Key('mentor_home_cohorts_loading'),
+              height: 56,
             ),
             AsyncError() => MentorErrorState(
-              key: const Key('mentor_home_meetings_error'),
-              message: context.l10n.mentorMeetingsError,
-              onRetry: ref
-                  .read(mentorMeetingsControllerProvider.notifier)
-                  .retry,
+              key: const Key('mentor_home_cohorts_error'),
+              message: 'Chưa thể tải danh sách lớp nhóm.',
+              onRetry: () => ref.invalidate(mentorAssignedCohortsProvider),
             ),
-            AsyncData(:final value) => _MeetingsSummaryBody(meetings: value),
+            AsyncData(:final value) => Text(
+              value.isEmpty
+                  ? 'Chưa có lớp nhóm được phân công.'
+                  : 'Đang phụ trách ${value.length} lớp nhóm.',
+              style: AppTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           },
           const SizedBox(height: AppSpacing.space3),
           RikiPrimaryButton(
-            key: const Key('mentor_home_meetings_button'),
-            label: context.l10n.mentorViewMeetings,
-            leadingIcon: Icons.video_call_outlined,
-            onPressed: () => mentorNavigate(context, AppRoutes.mentorMeetings),
+            key: const Key('mentor_home_cohorts_button'),
+            label: 'Mở danh sách lớp nhóm',
+            leadingIcon: Icons.groups_outlined,
+            onPressed: () => mentorNavigate(context, AppRoutes.mentorCohorts),
           ),
         ],
       ),
@@ -611,82 +602,28 @@ class _MeetingsSummaryCard extends ConsumerWidget {
   }
 }
 
-class _MeetingsSummaryBody extends StatelessWidget {
-  const _MeetingsSummaryBody({required this.meetings});
+class _NextCohortSessionSpotlight extends StatelessWidget {
+  const _NextCohortSessionSpotlight({required this.cohorts});
 
-  final List<MentorMeetingSummary> meetings;
+  final List<StudyCohortSummary> cohorts;
 
   @override
   Widget build(BuildContext context) {
-    if (meetings.isEmpty) {
-      return Text(
-        context.l10n.mentorMeetingsEmpty,
-        style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
-      );
+    final now = DateTime.now();
+    ({StudyCohortSummary cohort, CohortSessionSlot session})? next;
+    for (final c in cohorts) {
+      if (c.status == 'Cancelled' || c.status == 'Completed') continue;
+      for (final s in c.sessions) {
+        if (s.endTime.isBefore(now)) continue;
+        if (next == null || s.startTime.isBefore(next.session.startTime)) {
+          next = (cohort: c, session: s);
+        }
+      }
     }
-
-    final spotlightId = _findNextSpotlightMeeting(meetings)?.id;
-    final preview = meetings.where((m) => m.id != spotlightId).firstOrNull;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.l10n.mentorMeetingsCount(meetings.length),
-          style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w700),
-        ),
-        if (preview != null) ...[
-          const SizedBox(height: AppSpacing.space2),
-          MentorMeetingCard(
-            meeting: preview,
-            onTap: () =>
-                mentorNavigate(context, AppRoutes.mentorMeetingDetail(preview.id)),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-MentorMeetingSummary? _findNextSpotlightMeeting(
-  List<MentorMeetingSummary> meetings, {
-  DateTime? now,
-}) {
-  final cutoff = (now ?? DateTime.now().toUtc()).subtract(
-    const Duration(minutes: 90),
-  );
-  final candidates = meetings
-      .where(
-        (m) =>
-            m.status == MentorMeetingStatus.accepted ||
-            m.status == MentorMeetingStatus.assigned,
-      )
-      .toList()
-    ..sort((a, b) {
-      final aTime = a.scheduledAt?.value;
-      final bTime = b.scheduledAt?.value;
-      if (aTime == null && bTime == null) return a.id.compareTo(b.id);
-      if (aTime == null) return 1;
-      if (bTime == null) return -1;
-      // Prefer active/upcoming sessions ahead of stale historical assigned rows.
-      final aUpcoming = !aTime.isBefore(cutoff);
-      final bUpcoming = !bTime.isBefore(cutoff);
-      if (aUpcoming != bUpcoming) return aUpcoming ? -1 : 1;
-      return aUpcoming ? aTime.compareTo(bTime) : bTime.compareTo(aTime);
-    });
-  return candidates.firstOrNull;
-}
-
-class _NextSessionSpotlight extends StatelessWidget {
-  const _NextSessionSpotlight({required this.meetings});
-
-  final List<MentorMeetingSummary> meetings;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final next = _findNextSpotlightMeeting(meetings);
     if (next == null) return const SizedBox.shrink();
 
+    final cohort = next.cohort;
+    final session = next.session;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.space4),
       child: RikiCard(
@@ -708,71 +645,35 @@ class _NextSessionSpotlight extends StatelessWidget {
                 const SizedBox(width: AppSpacing.space2),
                 Expanded(
                   child: Text(
-                    l10n.mentorHomeHeroTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    'Buổi dạy sắp tới · Buổi ${session.number}',
                     style: AppTypography.cardTitle.copyWith(
                       color: AppColors.brandPrimary,
                     ),
                   ),
                 ),
-                if (next.jlptLevel != null)
-                  MentorStatusBadge(
-                    label: next.jlptLevel!,
-                    color: AppColors.brandPrimary,
-                  ),
+                MentorStatusBadge(
+                  label: cohort.level,
+                  color: AppColors.brandPrimary,
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.space2),
-            Text(
-              next.learnerName ?? l10n.mentorLearnerUnknown,
-              style: AppTypography.sectionTitle,
-            ),
+            Text(cohort.name, style: AppTypography.sectionTitle),
             const SizedBox(height: 2),
             Text(
-              mentorTimeLabel(next.scheduledAt, context),
+              '${DateFormat('dd/MM/yyyy • HH:mm').format(session.startTime.toLocal())} · ${cohort.enrolledCount}/${cohort.capacity} học viên',
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
-            if (next.question?.trim().isNotEmpty ?? false) ...[
-              const SizedBox(height: AppSpacing.space2),
-              Text(
-                next.question!,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodySmall,
-              ),
-            ],
             const SizedBox(height: AppSpacing.space3),
-            Row(
-              children: [
-                Expanded(
-                  child: RikiPrimaryButton(
-                    label: l10n.mentorHomeNextSessionCta,
-                    leadingIcon: Icons.checklist_rtl_rounded,
-                    onPressed: () => mentorNavigate(
-                      context,
-                      AppRoutes.mentorMeetingPrep(next.id),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.space2),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 44),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                  ),
-                  onPressed: () => mentorNavigate(
-                    context,
-                    AppRoutes.mentorMeetingDetail(next.id),
-                  ),
-                  child: Text(l10n.detail),
-                ),
-              ],
+            RikiPrimaryButton(
+              label: 'Vào chi tiết lớp',
+              leadingIcon: Icons.groups_outlined,
+              onPressed: () => mentorNavigate(
+                context,
+                AppRoutes.mentorCohortDetail(cohort.id),
+              ),
             ),
           ],
         ),
@@ -783,70 +684,40 @@ class _NextSessionSpotlight extends StatelessWidget {
 
 class _AttentionQueueCard extends StatelessWidget {
   const _AttentionQueueCard({
-    required this.meetingsState,
-    required this.chatState,
-    required this.disputesState,
-    required this.reviewsState,
+    required this.cohortsState,
+    required this.complaintsState,
   });
 
-  final AsyncValue<List<MentorMeetingSummary>> meetingsState;
-  final AsyncValue<List<MentorChatThread>> chatState;
-  final AsyncValue<List<MentorDisputeItem>> disputesState;
-  final AsyncValue<MentorReviewsBundle> reviewsState;
+  final AsyncValue<List<StudyCohortSummary>> cohortsState;
+  final AsyncValue<List<CohortComplaint>> complaintsState;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final unreadChats = chatState.asData?.value.fold<int>(
-          0,
-          (sum, t) => sum + t.unreadCount,
-        ) ??
-        0;
-    final openDisputes = disputesState.asData?.value
-            .where((d) => d.canSubmitResponse || !d.status.isTerminal)
+    final openComplaints = complaintsState.asData?.value
+            .where((c) => c.mentorCanRespond)
             .length ??
         0;
-    final unrepliedReviews = reviewsState.asData?.value.reviews
-            .where((r) => !r.hasReply)
-            .length ??
-        0;
-    final assignedMeetings = meetingsState.asData?.value
-            .where((m) => m.status == MentorMeetingStatus.assigned)
+    final activeCohorts = cohortsState.asData?.value
+            .where((c) => c.status != 'Completed' && c.status != 'Cancelled')
             .length ??
         0;
 
     final entries = <_AttentionItem>[
-      if (unreadChats > 0)
-        _AttentionItem(
-          icon: Icons.chat_bubble_outline_rounded,
-          color: AppColors.brandPrimary,
-          label: l10n.mentorHomeMetricUnreadChat,
-          count: unreadChats,
-          route: AppRoutes.mentorChat,
-        ),
-      if (openDisputes > 0)
+      if (openComplaints > 0)
         _AttentionItem(
           icon: Icons.gavel_rounded,
           color: AppColors.error,
-          label: l10n.mentorHomeMetricOpenDisputes,
-          count: openDisputes,
-          route: AppRoutes.mentorDisputes,
+          label: 'Khiếu nại khóa học chờ giải trình',
+          count: openComplaints,
+          route: AppRoutes.mentorCohorts,
         ),
-      if (unrepliedReviews > 0)
+      if (activeCohorts > 0)
         _AttentionItem(
-          icon: Icons.rate_review_outlined,
-          color: AppColors.warning,
-          label: l10n.mentorHomeMetricUnrepliedReviews,
-          count: unrepliedReviews,
-          route: AppRoutes.mentorReviews,
-        ),
-      if (assignedMeetings > 0)
-        _AttentionItem(
-          icon: Icons.video_camera_front_outlined,
+          icon: Icons.groups_outlined,
           color: AppColors.brandPrimary,
-          label: l10n.mentorHomeMetricUpcoming,
-          count: assignedMeetings,
-          route: AppRoutes.mentorMeetings,
+          label: 'Lớp nhóm đang phụ trách',
+          count: activeCohorts,
+          route: AppRoutes.mentorCohorts,
         ),
     ];
 
@@ -859,11 +730,14 @@ class _AttentionQueueCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.mentorHomeAttentionTitle, style: AppTypography.sectionTitle),
+          Text(
+            context.l10n.mentorHomeAttentionTitle,
+            style: AppTypography.sectionTitle,
+          ),
           const SizedBox(height: AppSpacing.space3),
           if (entries.isEmpty)
             Text(
-              l10n.mentorHomeAttentionEmpty,
+              context.l10n.mentorHomeAttentionEmpty,
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -938,63 +812,24 @@ class _AttentionItem {
 }
 
 class _QuickOperationsSection extends StatelessWidget {
-  const _QuickOperationsSection({
-    required this.chatState,
-    required this.disputesState,
-    required this.reviewsState,
-  });
+  const _QuickOperationsSection({required this.complaintsState});
 
-  final AsyncValue<List<MentorChatThread>> chatState;
-  final AsyncValue<List<MentorDisputeItem>> disputesState;
-  final AsyncValue<MentorReviewsBundle> reviewsState;
+  final AsyncValue<List<CohortComplaint>> complaintsState;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final unreadChats = chatState.asData?.value.fold<int>(
-          0,
-          (sum, t) => sum + t.unreadCount,
-        ) ??
-        0;
-    final openDisputes = disputesState.asData?.value
-            .where((d) => d.canSubmitResponse || !d.status.isTerminal)
-            .length ??
-        0;
-    final unrepliedReviews = reviewsState.asData?.value.reviews
-            .where((r) => !r.hasReply)
+    final openComplaints = complaintsState.asData?.value
+            .where((c) => c.mentorCanRespond)
             .length ??
         0;
 
     final tiles = [
-      const _QuickOpTileData(
+      _QuickOpTileData(
         icon: Icons.groups_outlined,
         label: 'Lớp nhóm',
-        badgeCount: 0,
+        badgeCount: openComplaints,
         route: AppRoutes.mentorCohorts,
-      ),
-      _QuickOpTileData(
-        icon: Icons.chat_bubble_outline_rounded,
-        label: l10n.mentorActionChat,
-        badgeCount: unreadChats,
-        route: AppRoutes.mentorChat,
-      ),
-      _QuickOpTileData(
-        icon: Icons.star_outline_rounded,
-        label: l10n.mentorActionReviews,
-        badgeCount: unrepliedReviews,
-        route: AppRoutes.mentorReviews,
-      ),
-      _QuickOpTileData(
-        icon: Icons.gavel_outlined,
-        label: l10n.mentorActionDisputes,
-        badgeCount: openDisputes,
-        route: AppRoutes.mentorDisputes,
-      ),
-      _QuickOpTileData(
-        icon: Icons.fact_check_outlined,
-        label: l10n.mentorActionSessionPrep,
-        badgeCount: 0,
-        route: AppRoutes.mentorPrep,
       ),
       _QuickOpTileData(
         icon: Icons.calendar_view_week_outlined,
@@ -1002,7 +837,13 @@ class _QuickOperationsSection extends StatelessWidget {
         badgeCount: 0,
         route: AppRoutes.mentorAvailability,
       ),
-      _QuickOpTileData(
+      const _QuickOpTileData(
+        icon: Icons.calendar_month_outlined,
+        label: 'Lịch giảng dạy',
+        badgeCount: 0,
+        route: AppRoutes.mentorCalendar,
+      ),
+      const _QuickOpTileData(
         icon: Icons.fact_check_outlined,
         label: 'Chấm công & KPI',
         badgeCount: 0,
@@ -1081,7 +922,6 @@ class _QuickOperationsSection extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: AppSpacing.space3),
           const SizedBox(height: AppSpacing.space3),
           RikiSecondaryButton(
             key: const Key('mentor_home_profile_button'),

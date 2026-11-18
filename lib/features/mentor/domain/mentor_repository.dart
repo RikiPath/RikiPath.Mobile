@@ -1,19 +1,11 @@
+import 'dart:typed_data';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_profile.dart';
-import 'dart:typed_data';
 
 abstract interface class MentorRepository {
   Future<List<MentorAvailabilitySlot>> loadAvailability();
 
-  Future<List<MentorMeetingSummary>> loadMeetings();
-
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(DateTime weekStart);
-
-  Future<bool> cancelMeeting(int bookingId, String reason);
-
-  Future<bool> replyReview(int reviewId, String reply);
-
-  Future<bool> respondDispute(int disputeId, String responseText);
 
   Future<MentorProfileData> loadProfile();
 

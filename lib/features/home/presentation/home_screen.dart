@@ -12,8 +12,8 @@ import 'package:rikipath_mobile/features/home/presentation/widgets/home_header.d
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/standard_roadmap_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/application/cohort_controller.dart';
 import 'package:rikipath_mobile/features/meeting/application/upcoming_meeting_provider.dart';
-import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.dart';
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
@@ -102,9 +102,9 @@ class HomeScreen extends ConsumerWidget {
           onOpenAnalytics: () => context.push(AppRoutes.analytics),
           onOpenCalendarDate: (date) =>
               context.push(AppRoutes.calendarOn(date)),
-          onOpenMeeting: () => context.push(AppRoutes.meetingJoin),
-          onOpenMeetingDetail: (bookingId) =>
-              context.push(AppRoutes.learnerMentorBookingDetail(bookingId)),
+          onOpenMeeting: () => context.push(AppRoutes.learnerMyCourses),
+          onOpenMeetingDetail: (courseId) =>
+              context.push(AppRoutes.learnerCohortDetail(courseId)),
           onJoinMeeting: (uri) => _openMeeting(ref, context, uri),
           onOpenVocabulary: () => context.push(AppRoutes.vocabulary),
           onOpenGrammar: () => context.push(AppRoutes.grammar),
@@ -152,7 +152,7 @@ Future<void> _refreshLiveData(WidgetRef ref) async {
   await Future.wait(<Future<void>>[
     settle(ref.refresh(learnerAnalyticsControllerProvider.future)),
     settle(ref.refresh(notificationControllerProvider.future)),
-    settle(ref.refresh(learnerMentorBookingsControllerProvider.future)),
+    settle(ref.refresh(learnerMyCoursesProvider.future)),
     settle(ref.refresh(dailyReviewControllerProvider.future)),
   ]);
 }

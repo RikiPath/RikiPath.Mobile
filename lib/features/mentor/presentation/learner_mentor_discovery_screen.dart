@@ -8,10 +8,10 @@ import 'package:rikipath_mobile/features/mentor/application/learner_mentor_contr
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
 
-/// Màn hình chọn Mentor hướng dẫn 1-1 (Screen 02 theo chuẩn Neo-Japoniste Sakura).
+/// Màn hình chọn Mentor cho lớp học nhóm (theo chuẩn Neo-Japoniste Sakura).
 class LearnerMentorDiscoveryScreen extends ConsumerStatefulWidget {
   const LearnerMentorDiscoveryScreen({
-    required this.planId,
+    this.planId = 0,
     this.initialDate,
     super.key,
   });
@@ -173,19 +173,11 @@ class _LearnerMentorDiscoveryScreenState
                       return _MentorDiscoveryCard(
                         mentor: mentor,
                         onViewProfile: () => context.push(
-                          AppRoutes.learnerMentorProfile(
-                            widget.planId,
-                            mentor.id,
-                          ),
+                          AppRoutes.learnerMentorPublicProfile(mentor.id),
                           extra: widget.initialDate,
                         ),
-                        onSelectCalendar: () => context.push(
-                          AppRoutes.learnerMentorAvailability(
-                            widget.planId,
-                            mentorId: mentor.id,
-                          ),
-                          extra: widget.initialDate,
-                        ),
+                        onSelectCohorts: () =>
+                            context.push(AppRoutes.learnerCohorts),
                       );
                     },
                   ),
@@ -217,12 +209,12 @@ class _MentorDiscoveryCard extends StatelessWidget {
   const _MentorDiscoveryCard({
     required this.mentor,
     required this.onViewProfile,
-    required this.onSelectCalendar,
+    required this.onSelectCohorts,
   });
 
   final BookableMentor mentor;
   final VoidCallback onViewProfile;
-  final VoidCallback onSelectCalendar;
+  final VoidCallback onSelectCohorts;
 
   @override
   Widget build(BuildContext context) {
@@ -357,7 +349,7 @@ class _MentorDiscoveryCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.space3),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: onSelectCalendar,
+                  onPressed: onSelectCohorts,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.brandPrimary,
                     foregroundColor: Colors.white,
@@ -366,7 +358,7 @@ class _MentorDiscoveryCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppRadius.button),
                     ),
                   ),
-                  child: const Text('Xem lịch học'),
+                  child: const Text('Xem lớp nhóm'),
                 ),
               ),
             ],

@@ -41,24 +41,12 @@ import 'package:rikipath_mobile/features/meeting/presentation/meeting_room_scree
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_attendance_kpi_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_availability_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_chat_screens.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_disputes_screens.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_edit_profile_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_profile_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_reviews_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_session_prep_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/mentor_home_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shell.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_availability_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_booking_detail_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_bookings_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_discovery_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_meetings_screen.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_profile_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/learner_mentor_purchase_status_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/learner_session_completed_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_meeting_detail_screen.dart';
-import 'package:rikipath_mobile/features/mentor/presentation/mentor_meetings_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/daily_review_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/mock_test_result_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/mock_test_screen.dart';
@@ -184,16 +172,6 @@ GoRouter createAppRouter({
           ),
         ],
       ),
-      GoRoute(
-        path: '/meetings/:meetingId',
-        redirect: (context, state) {
-          final id = int.tryParse(state.pathParameters['meetingId'] ?? '');
-          if (id != null && id > 0) {
-            return AppRoutes.mentorMeetingDetail(id);
-          }
-          return AppRoutes.mentorMeetings;
-        },
-      ),
       StatefulShellRoute(
         navigatorContainerBuilder: sakuraShellBranchContainerBuilder,
         builder: (context, state, navigationShell) {
@@ -219,28 +197,17 @@ GoRouter createAppRouter({
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.mentorMeetings,
-                builder: (context, state) => const MentorMeetingsScreen(),
+                path: AppRoutes.mentorCohorts,
+                builder: (context, state) => const MentorCohortsScreen(),
                 routes: [
                   GoRoute(
-                    path: AppRoutes.mentorMeetingDetailSegment,
+                    path: AppRoutes.mentorCohortDetailSegment,
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (context, state) => MentorMeetingDetailScreen(
-                      meetingId: int.tryParse(
-                        state.pathParameters['meetingId'] ?? '',
-                      ),
+                    builder: (context, state) => MentorCohortDetailScreen(
+                      cohortId:
+                          int.tryParse(state.pathParameters['cohortId'] ?? '') ??
+                          0,
                     ),
-                    routes: [
-                      GoRoute(
-                        path: AppRoutes.mentorMeetingPrepSegment,
-                        parentNavigatorKey: rootNavigatorKey,
-                        builder: (context, state) => MentorSessionPrepScreen(
-                          bookingId: int.tryParse(
-                            state.pathParameters['meetingId'] ?? '',
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -292,14 +259,6 @@ GoRouter createAppRouter({
         builder: (context, state) => const MentorAttendanceKpiScreen(),
       ),
       GoRoute(
-        path: AppRoutes.mentorCompensation,
-        redirect: (context, state) => AppRoutes.mentorAttendanceKpi,
-      ),
-      GoRoute(
-        path: AppRoutes.mentorBankAccount,
-        redirect: (context, state) => AppRoutes.mentorProfile,
-      ),
-      GoRoute(
         path: AppRoutes.mentorChangePassword,
         pageBuilder: (context, state) => _profileDetailPage(
           state: state,
@@ -318,138 +277,24 @@ GoRouter createAppRouter({
         builder: (context, state) => _buildVerifyEmailScreen(state),
       ),
       GoRoute(
-        path: AppRoutes.mentorChat,
-        builder: (context, state) => const MentorChatThreadsScreen(),
-        routes: [
-          GoRoute(
-            path: AppRoutes.mentorChatRoomSegment,
-            builder: (context, state) => MentorChatRoomScreen(
-              bookingId: int.tryParse(state.pathParameters['bookingId'] ?? ''),
-            ),
-          ),
-        ],
-      ),
-      GoRoute(
-        path: AppRoutes.mentorReviews,
-        builder: (context, state) => const MentorReviewsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.mentorDisputes,
-        builder: (context, state) => const MentorDisputesScreen(),
-        routes: [
-          GoRoute(
-            path: AppRoutes.mentorDisputeDetailSegment,
-            builder: (context, state) => MentorDisputeDetailScreen(
-              disputeId: int.tryParse(state.pathParameters['disputeId'] ?? ''),
-            ),
-          ),
-        ],
-      ),
-      GoRoute(
-        path: AppRoutes.mentorPrep,
-        builder: (context, state) => const MentorSessionPrepScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.mentorCohorts,
-        builder: (context, state) => const MentorCohortsScreen(),
-        routes: [
-          GoRoute(
-            path: AppRoutes.mentorCohortDetailSegment,
-            builder: (context, state) => MentorCohortDetailScreen(
-              cohortId:
-                  int.tryParse(state.pathParameters['cohortId'] ?? '') ?? 0,
-            ),
-          ),
-        ],
-      ),
-      GoRoute(
         path: AppRoutes.mentorApplication,
         builder: (context, state) =>
             const MentorProfileScreen(applicationMode: true),
       ),
       GoRoute(
-        path: AppRoutes.learnerMentorMeetings,
-        builder: (context, state) => LearnerMentorMeetingsScreen(
+        path: AppRoutes.learnerMentors,
+        builder: (context, state) => LearnerMentorDiscoveryScreen(
           initialDate: state.extra is DateTime ? state.extra as DateTime : null,
         ),
         routes: [
           GoRoute(
-            path: AppRoutes.learnerMentorFindSlotsSegment,
-            builder: (context, state) => LearnerMentorAvailabilityScreen(
-              planId: null,
-              mentorId: int.tryParse(
-                state.uri.queryParameters['mentorId'] ?? '',
-              ),
-              initialDate: state.extra is DateTime
-                  ? state.extra as DateTime
-                  : null,
-              initialAvailabilityId: int.tryParse(
-                state.uri.queryParameters['availabilityId'] ?? '',
-              ),
-            ),
-          ),
-          GoRoute(
-            path: AppRoutes.learnerMentorDiscoverySegment,
-            builder: (context, state) => LearnerMentorDiscoveryScreen(
-              planId: int.tryParse(state.pathParameters['planId'] ?? '') ?? 1,
-              initialDate: state.extra is DateTime
-                  ? state.extra as DateTime
-                  : null,
-            ),
-          ),
-          GoRoute(
-            path: AppRoutes.learnerMentorProfileSegment,
+            path: AppRoutes.learnerMentorPublicProfileSegment,
             builder: (context, state) => LearnerMentorProfileScreen(
-              planId: int.tryParse(state.pathParameters['planId'] ?? '') ?? 1,
               mentorId:
                   int.tryParse(state.pathParameters['mentorId'] ?? '') ?? 1,
               initialDate: state.extra is DateTime
                   ? state.extra as DateTime
                   : null,
-            ),
-          ),
-          GoRoute(
-            path: AppRoutes.learnerMentorAvailabilitySegment,
-            builder: (context, state) => LearnerMentorAvailabilityScreen(
-              planId: int.tryParse(state.pathParameters['planId'] ?? ''),
-              initialDate: state.extra is DateTime
-                  ? state.extra as DateTime
-                  : null,
-              subscriptionId: int.tryParse(
-                state.uri.queryParameters['subscriptionId'] ?? '',
-              ),
-              mentorId: int.tryParse(
-                state.uri.queryParameters['mentorId'] ?? '',
-              ),
-            ),
-          ),
-          GoRoute(
-            path: AppRoutes.learnerSessionCompletedSegment,
-            builder: (context, state) => LearnerSessionCompletedScreen(
-              bookingId:
-                  int.tryParse(state.pathParameters['bookingId'] ?? '') ?? 1,
-            ),
-          ),
-          GoRoute(
-            path: AppRoutes.learnerMentorBookingsSegment,
-            builder: (context, state) => const LearnerMentorBookingsScreen(),
-            routes: [
-              GoRoute(
-                path: AppRoutes.learnerMentorBookingDetailSegment,
-                builder: (context, state) => LearnerMentorBookingDetailScreen(
-                  bookingId: int.tryParse(
-                    state.pathParameters['bookingId'] ?? '',
-                  ),
-                ),
-              ),
-            ],
-          ),
-          GoRoute(
-            path: AppRoutes.learnerMentorPurchaseStatusSegment,
-            builder: (context, state) => LearnerMentorPurchaseStatusScreen(
-              subscriptionId: int.tryParse(
-                state.pathParameters['subscriptionId'] ?? '',
-              ),
             ),
           ),
         ],

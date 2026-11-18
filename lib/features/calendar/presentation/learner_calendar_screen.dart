@@ -11,11 +11,10 @@ import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_loading.dart';
 import 'package:rikipath_mobile/features/calendar/application/learner_calendar_controller.dart';
-import 'package:rikipath_mobile/features/calendar/application/sakura_calendar_controller.dart';
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_calendar_shell.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_event_detail_sheet.dart';
-import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/application/cohort_controller.dart';
 
 class LearnerCalendarScreen extends ConsumerStatefulWidget {
   const LearnerCalendarScreen({
@@ -35,7 +34,6 @@ class LearnerCalendarScreen extends ConsumerStatefulWidget {
 class _LearnerCalendarScreenState extends ConsumerState<LearnerCalendarScreen> {
   // Scoped to this route: never share another learner's events across sessions.
   List<SakuraCalendarEvent>? _lastSuccessfulEvents;
-  List<SakuraCalendarEvent>? _lastAvailableSlots;
   List<SakuraCalendarEvent>? _lastSrsEvents;
   List<SakuraCalendarEvent>? _lastLearningEvents;
 
@@ -52,29 +50,21 @@ class _LearnerCalendarScreenState extends ConsumerState<LearnerCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final eventsAsync = ref.watch(learnerCalendarEventsProvider);
-    final slotsAsync = ref.watch(learnerCalendarAvailableSlotsProvider);
     final srsAsync = ref.watch(learnerCalendarSrsEventsProvider);
     final learningAsync = ref.watch(learnerCalendarLearningEventsProvider);
     final sessionExpired = [
       eventsAsync.error,
-      slotsAsync.error,
       srsAsync.error,
       learningAsync.error,
     ].any((error) => error is UnauthorizedError);
     if (sessionExpired) {
       _lastSuccessfulEvents = null;
-      _lastAvailableSlots = null;
       _lastSrsEvents = null;
       _lastLearningEvents = null;
     }
-    // Slot có thể đã được người khác đặt; không giữ slot cũ khi tải mới thất bại.
-    if (slotsAsync.hasError) _lastAvailableSlots = null;
     if (!sessionExpired) {
       if (eventsAsync case AsyncData(value: final events)) {
         _lastSuccessfulEvents = events;
-      }
-      if (slotsAsync case AsyncData(value: final slots)) {
-        _lastAvailableSlots = slots;
       }
       if (srsAsync case AsyncData(value: final srs)) {
         _lastSrsEvents = srs;
@@ -86,35 +76,28 @@ class _LearnerCalendarScreenState extends ConsumerState<LearnerCalendarScreen> {
 
     final combinedEvents = <SakuraCalendarEvent>[
       ...?_lastSuccessfulEvents,
-      ...?_lastAvailableSlots,
       ...?_lastSrsEvents,
       ...?_lastLearningEvents,
     ]..sort((a, b) => a.startTime.compareTo(b.startTime));
 
     final failedSources = <String>[
-      if (eventsAsync.hasError) 'lịch hẹn',
-      if (slotsAsync.hasError) 'lịch trống',
+      if (eventsAsync.hasError) 'lịch lớp nhóm',
       if (srsAsync.hasError) 'thẻ ôn tập',
       if (learningAsync.hasError) 'tiến độ học',
     ];
     final loading =
         eventsAsync.isLoading ||
-        slotsAsync.isLoading ||
         srsAsync.isLoading ||
         learningAsync.isLoading;
     final allFailed =
-        failedSources.length == 4 &&
+        failedSources.length == 3 &&
         _lastSuccessfulEvents == null &&
-        _lastAvailableSlots == null &&
         _lastSrsEvents == null &&
         _lastLearningEvents == null;
 
     void retry() {
-      _lastAvailableSlots = null;
-      ref.invalidate(learnerMentorBookingsControllerProvider);
-      ref.invalidate(learnerMentorAvailabilityControllerProvider);
+      ref.invalidate(learnerMyCoursesProvider);
       ref.invalidate(learnerCalendarEventsProvider);
-      ref.invalidate(learnerCalendarAvailableSlotsProvider);
       ref.invalidate(learnerCalendarSrsEventsProvider);
       ref.invalidate(learnerCalendarLearningEventsProvider);
     }
@@ -124,18 +107,12 @@ class _LearnerCalendarScreenState extends ConsumerState<LearnerCalendarScreen> {
       onBackPressed: () => popOrGo(context, AppRoutes.home),
       dataIncomplete: failedSources.isNotEmpty || loading,
       roleName: 'Học viên RikiPath',
-      fabLabel: context.l10n.mentorFinderTitle,
-      fabIcon: Icons.calendar_month_outlined,
+      fabLabel: 'Tìm lớp nhóm',
+      fabIcon: Icons.groups_outlined,
       initialMode: widget.initialMode,
       initialDate: widget.initialDate,
       onFabPressed: () async {
-        final selectedDate = ref
-            .read(sakuraCalendarControllerProvider)
-            .selectedDate;
-        await context.push(
-          AppRoutes.learnerMentorFindSlots(),
-          extra: selectedDate,
-        );
+        await context.push(AppRoutes.learnerCohorts);
         if (mounted) retry();
       },
       onEventSelected: (event) async {
@@ -144,14 +121,6 @@ class _LearnerCalendarScreenState extends ConsumerState<LearnerCalendarScreen> {
           if (mounted) {
             ref.invalidate(learnerCalendarSrsEventsProvider);
           }
-        } else if (event.type == SakuraCalendarEventType.availableSlot) {
-          await context.push(
-            AppRoutes.learnerMentorFindSlots(
-              availabilityId: event.availabilityId,
-            ),
-            extra: event.startTime,
-          );
-          if (mounted) retry();
         } else if (event.type == SakuraCalendarEventType.learningPlan) {
           navigateContextAware(context, AppRoutes.learnRoadmap);
         } else {
@@ -183,7 +152,6 @@ class _LearnerCalendarScreenState extends ConsumerState<LearnerCalendarScreen> {
               _CalendarNotice(
                 message: _loadError(
                   eventsAsync.error ??
-                      slotsAsync.error ??
                       srsAsync.error ??
                       learningAsync.error!,
                 ),
@@ -193,7 +161,7 @@ class _LearnerCalendarScreenState extends ConsumerState<LearnerCalendarScreen> {
               _CalendarNotice(
                 message:
                     'Chưa đồng bộ được ${failedSources.join(', ')}. '
-                    '${_loadError(eventsAsync.error ?? slotsAsync.error ?? srsAsync.error ?? learningAsync.error!)}',
+                    '${_loadError(eventsAsync.error ?? srsAsync.error ?? learningAsync.error!)}',
                 onRetry: retry,
               )
             else if (loading)

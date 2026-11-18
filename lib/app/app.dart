@@ -8,10 +8,10 @@ import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_toast_host.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/calendar/application/mentor_calendar_controller.dart';
-import 'package:rikipath_mobile/features/mentor/application/mentor_chat_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/application/cohort_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/application/mentor_cohort_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_kpi_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
-import 'package:rikipath_mobile/features/mentor/application/mentor_operations_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_schedule_v3_controller.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/notifications/application/push_notification_service.dart';
@@ -47,12 +47,10 @@ class _RikiPathAppState extends ConsumerState<RikiPathApp> {
             );
       }
       ref.invalidate(notificationControllerProvider);
-      ref.invalidate(mentorMeetingsControllerProvider);
       ref.invalidate(mentorAvailabilityControllerProvider);
       ref.invalidate(mentorCalendarEventsProvider);
-      ref.invalidate(mentorChatThreadsControllerProvider);
-      ref.invalidate(mentorReviewsControllerProvider);
-      ref.invalidate(mentorDisputesControllerProvider);
+      ref.invalidate(mentorAssignedCohortsProvider);
+      ref.invalidate(learnerMyCoursesProvider);
       ref.invalidate(mentorScheduleV3ControllerProvider);
       if (payload.type == 'MentorVerificationResult' ||
           (payload.title.isEmpty && payload.body.isEmpty)) {
@@ -63,19 +61,13 @@ class _RikiPathAppState extends ConsumerState<RikiPathApp> {
     ref.listen<int?>(authenticatedUserIdProvider, (previous, next) {
       if (previous != next) {
         ref.read(rikiToastServiceProvider.notifier).clear();
-        // Controllers that watch [authenticatedUserIdProvider] directly
-        // (`notificationControllerProvider`, `notificationBellTriggerProvider`,
-        // `mentorScheduleV3ControllerProvider`,
-        // `mentorChatThreadsControllerProvider`,
-        // `mentorReviewsControllerProvider`, `mentorDisputesControllerProvider`)
-        // rebuild once automatically on identity change; invalidating them
-        // manually here causes a same-frame double rebuild in Riverpod 3.
         ref.invalidate(mentorAvailabilityControllerProvider);
-        ref.invalidate(mentorMeetingsControllerProvider);
         ref.invalidate(mentorProfileControllerProvider);
         ref.invalidate(mentorWeeklyScheduleControllerProvider);
         ref.invalidate(mentorKpiSummaryProvider);
         ref.invalidate(mentorCalendarEventsProvider);
+        ref.invalidate(mentorAssignedCohortsProvider);
+        ref.invalidate(learnerMyCoursesProvider);
       }
       if (next != null) {
         ref

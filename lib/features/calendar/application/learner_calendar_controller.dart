@@ -1,101 +1,63 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
-import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/application/cohort_controller.dart';
+import 'package:rikipath_mobile/features/learning/application/learning_path_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
-import 'package:rikipath_mobile/features/learning/application/learning_path_controller.dart';
 
 final learnerCalendarEventsProvider =
     FutureProvider.autoDispose<List<SakuraCalendarEvent>>((ref) async {
-      final bookingsAsync = await ref
-          .watch(learnerMentorBookingsControllerProvider.future)
+      final courses = await ref
+          .watch(learnerMyCoursesProvider.future)
           .timeout(const Duration(seconds: 10));
 
       final events = <SakuraCalendarEvent>[];
 
-      for (final booking in bookingsAsync) {
-        if (booking.scheduledAt == null) continue;
+      for (final course in courses) {
+        if (course.status == 'Cancelled') continue;
+        final sessionMinutes =
+            course.sessionMinutes > 0 ? course.sessionMinutes : 90;
 
-        // Strictly convert UTC timestamp to user device local timezone (no hardcoded offset)
-        final start = booking.scheduledAt!.value.toLocal();
-        // Dùng thời điểm kết thúc Backend cung cấp để giữ đúng booking lịch sử.
-        final end =
-            booking.endsAt?.value.toLocal() ??
-            start.add(const Duration(minutes: 90));
+        for (final session in course.sessions) {
+          final start = session.scheduledAt.toLocal();
+          final end = start.add(Duration(minutes: sessionMinutes));
 
-        // Enforce N5, N4, N3, N2 only (disallow N1)
-        final validatedJlpt = SakuraCalendarEvent.normalizeConsultationLevel(
-          booking.jlptLevel,
-        );
-        final title = booking.mentorName != null
-            ? 'Tư vấn JLPT với ${booking.mentorName}'
-            : 'Buổi tư vấn JLPT';
+          final (status, statusText) = switch (session.status) {
+            'Completed' || 'Present' => (
+              MentorMeetingStatus.completed,
+              'Đã hoàn thành',
+            ),
+            'Cancelled' => (MentorMeetingStatus.cancelled, 'Đã hủy'),
+            _ => (MentorMeetingStatus.accepted, 'Đã lên lịch'),
+          };
 
-        final statusText = switch (booking.status) {
-          MentorMeetingStatus.accepted => 'Đã xác nhận',
-          MentorMeetingStatus.assigned => 'Đã phân công',
-          MentorMeetingStatus.pendingAssignment => 'Chờ phân công',
-          MentorMeetingStatus.awaitingPayment => 'Chờ thanh toán',
-          MentorMeetingStatus.completed => 'Đã hoàn thành',
-          MentorMeetingStatus.cancelled => 'Đã hủy',
-          _ => 'Lịch hẹn',
-        };
-
-        events.add(
-          SakuraCalendarEvent(
-            id: 'booking_${booking.id}',
-            title: title,
-            subtitle: booking.jlptLevel != null
-                ? 'Trình độ: ${booking.jlptLevel}'
-                : null,
-            startTime: start,
-            endTime: end,
-            type: SakuraCalendarEventType.consultation,
-            status: booking.status,
-            statusLabel: statusText,
-            participantName: booking.mentorName,
-            participantRole: 'Cố vấn chuyên môn',
-            jlptLevel: validatedJlpt == null ? null : 'JLPT $validatedJlpt',
-            meetingLink: booking.meetingLink,
-            roomId: booking.roomId,
-            bookingId: booking.id,
-            sourceProvider: 'learnerMentorBookingsControllerProvider',
-            sourceEntityId: booking.id.toString(),
-            notes: 'Vui lòng vào phòng học đúng giờ.',
-          ),
-        );
+          events.add(
+            SakuraCalendarEvent(
+              id: 'cohort_course_${course.id}_session_${session.id}',
+              title: '${course.name} · Buổi ${session.number}',
+              subtitle:
+                  course.level.isNotEmpty ? 'JLPT ${course.level}' : null,
+              startTime: start,
+              endTime: end,
+              type: SakuraCalendarEventType.consultation,
+              status: status,
+              statusLabel: statusText,
+              participantName: course.mentorName,
+              participantRole: 'Cố vấn lớp nhóm',
+              jlptLevel: course.level.isNotEmpty ? 'JLPT ${course.level}' : null,
+              meetingLink: session.meetingUrl,
+              roomId: session.roomId,
+              bookingId: course.id,
+              sourceProvider: 'learnerMyCoursesProvider',
+              sourceEntityId: '${course.id}:${session.id}',
+              notes: 'Vui lòng vào phòng học nhóm đúng giờ.',
+            ),
+          );
+        }
       }
 
-      // Sort chronologically
       events.sort((a, b) => a.startTime.compareTo(b.startTime));
       return events;
-    }, retry: (_, _) => null);
-
-/// Chỉ ánh xạ những slot công khai, còn chỗ do API Learner trả về.
-final learnerCalendarAvailableSlotsProvider =
-    FutureProvider.autoDispose<List<SakuraCalendarEvent>>((ref) async {
-      final slots = await ref
-          .watch(learnerMentorAvailabilityControllerProvider.future)
-          .timeout(const Duration(seconds: 10));
-      return [
-        for (final slot in slots)
-          if (!slot.isBooked)
-            SakuraCalendarEvent(
-              id: 'available_${slot.id}',
-              title: 'Còn chỗ: ${slot.mentorName}',
-              startTime: slot.startTime.value.toLocal(),
-              endTime: slot.endTime.value.toLocal(),
-              type: SakuraCalendarEventType.availableSlot,
-              statusLabel: 'Có thể đặt',
-              participantName: slot.mentorName,
-              participantRole: 'Cố vấn chuyên môn',
-              availabilityId: slot.id,
-              sourceProvider: 'learnerMentorAvailabilityControllerProvider',
-              sourceEntityId: slot.id.toString(),
-              notes:
-                  'Chọn gói tư vấn và trình độ JLPT để kiểm tra điều kiện đặt lịch.',
-            ),
-      ];
     }, retry: (_, _) => null);
 
 /// Daily queue chỉ có nghĩa cho ngày hiện tại, không suy diễn lịch SRS tương lai.

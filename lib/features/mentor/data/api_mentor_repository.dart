@@ -22,15 +22,6 @@ class ApiMentorRepository implements MentorRepository {
   }
 
   @override
-  Future<List<MentorMeetingSummary>> loadMeetings() async {
-    final response = await _apiClient.get<Object?>(MentorApiPaths.meetings);
-    return readMentorResultList(response.data)
-        .map(MentorMeetingDto.fromJson)
-        .map((dto) => dto.toDomain())
-        .toList(growable: false);
-  }
-
-  @override
   Future<List<WeeklyAvailabilityItem>> loadWeeklySchedule(
     DateTime weekStart,
   ) async {
@@ -41,45 +32,6 @@ class ApiMentorRepository implements MentorRepository {
         .map(WeeklyAvailabilityDto.fromJson)
         .map((dto) => dto.toDomain())
         .toList(growable: false);
-  }
-
-  @override
-  Future<bool> cancelMeeting(int bookingId, String reason) async {
-    final response = await _apiClient.post<Object?>(
-      MentorApiPaths.cancelBooking(bookingId),
-      data: {'reason': reason},
-    );
-    if (response.data is Map<Object?, Object?>) {
-      final map = response.data as Map<Object?, Object?>;
-      return map['isSuccess'] == true;
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> replyReview(int reviewId, String reply) async {
-    final response = await _apiClient.post<Object?>(
-      MentorApiPaths.replyReview(reviewId),
-      data: {'reply': reply},
-    );
-    if (response.data is Map<Object?, Object?>) {
-      final map = response.data as Map<Object?, Object?>;
-      return map['isSuccess'] == true;
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> respondDispute(int disputeId, String responseText) async {
-    final response = await _apiClient.post<Object?>(
-      MentorApiPaths.respondDispute(disputeId),
-      data: {'responseText': responseText},
-    );
-    if (response.data is Map<Object?, Object?>) {
-      final map = response.data as Map<Object?, Object?>;
-      return map['isSuccess'] == true;
-    }
-    return true;
   }
 
   @override

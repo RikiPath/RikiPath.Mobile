@@ -17,8 +17,8 @@ enum SakuraCalendarViewMode {
 }
 
 enum SakuraCalendarEventType {
-  consultation('consultation', 'Tư vấn 1-1'),
-  availableSlot('availableSlot', 'Lịch tư vấn còn trống'),
+  consultation('consultation', 'Lớp học nhóm'),
+  availableSlot('availableSlot', 'Lịch dạy còn trống'),
   studySession('studySession', 'Học tập'),
   srsReview('srsReview', 'Ôn tập'),
   learningPlan('learningPlan', 'Bài học'),

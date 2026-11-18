@@ -262,12 +262,12 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
             children: [
               ProfileActionTile(
                 key: const ValueKey<String>('profile_consultation_action'),
-                icon: Icons.support_agent_outlined,
+                icon: Icons.school_outlined,
                 colorfulIcon: SakuraColorfulIconType.consultation,
-                title: l10n.consultation,
-                subtitle: l10n.profileConsultationSubtitle,
+                title: 'Lớp học nhóm của tôi',
+                subtitle: 'Xem lịch buổi học, bài tập về nhà và điểm danh',
                 emphasized: true,
-                onTap: () => context.push(AppRoutes.learnerMentorMeetings),
+                onTap: () => context.push(AppRoutes.learnerMyCourses),
               ),
               ProfileActionTile(
                 key: const ValueKey<String>('profile_cohorts_action'),

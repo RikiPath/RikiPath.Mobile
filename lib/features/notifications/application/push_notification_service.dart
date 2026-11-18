@@ -459,41 +459,11 @@ class PushNotificationService {
 
     // 1. Direct screen parameter with ID
     if (payload.screen == 'booking_detail' && payload.bookingId != null) {
-      final id = int.tryParse(payload.bookingId!);
-      if (id != null && id > 0) {
-        return normalizedRole == 'mentor'
-            ? AppRoutes.mentorMeetingDetail(id)
-            : AppRoutes.learnerMentorBookingDetail(id);
-      }
+      return isLearner ? AppRoutes.learnerMyCourses : AppRoutes.mentorCohorts;
     }
 
     if (payload.screen == 'meeting_room') {
-      final id = int.tryParse(payload.meetingId ?? payload.bookingId ?? '');
-      if (id != null && id > 0) {
-        return isLearner
-            ? AppRoutes.learnerMentorBookingDetail(id)
-            : AppRoutes.mentorMeetingDetail(id);
-      }
-    }
-
-    if (payload.screen == 'mentor_chat') {
-      final bookingId = int.tryParse(payload.bookingId ?? '');
-      if (bookingId != null && bookingId > 0) {
-        return AppRoutes.mentorChatRoom(bookingId);
-      }
-      return AppRoutes.mentorChat;
-    }
-
-    if (payload.screen == 'mentor_disputes') {
-      final disputeId = int.tryParse(payload.disputeId ?? '');
-      if (disputeId != null && disputeId > 0) {
-        return AppRoutes.mentorDisputeDetail(disputeId);
-      }
-      return AppRoutes.mentorDisputes;
-    }
-
-    if (payload.screen == 'mentor_reviews') {
-      return AppRoutes.mentorReviews;
+      return isLearner ? AppRoutes.learnerMyCourses : AppRoutes.mentorCohorts;
     }
 
     // 2. Notification type & Link URL parsing
@@ -515,51 +485,26 @@ class PushNotificationService {
       if (lower == '/mentor/schedule' || lower == AppRoutes.mentorCalendar) {
         return AppRoutes.mentorCalendar;
       }
-      if (lower == AppRoutes.mentorReviews) {
-        return AppRoutes.mentorReviews;
-      }
       if (lower == AppRoutes.mentorAttendanceKpi ||
-          lower == AppRoutes.mentorCompensation) {
+          lower.startsWith('/mentor/compensation')) {
         return AppRoutes.mentorAttendanceKpi;
       }
-      if (lower == AppRoutes.mentorBankAccount) {
+      if (lower.startsWith('/mentor/bank-account')) {
         return AppRoutes.mentorProfile;
       }
-      final chatMatch = RegExp(r'^/mentor/chat/(\d+)').firstMatch(lower);
-      if (chatMatch != null) {
-        final id = int.tryParse(chatMatch.group(1)!);
-        if (id != null && id > 0) return AppRoutes.mentorChatRoom(id);
+      if (lower.startsWith('/cohorts') || lower.startsWith('/my-courses')) {
+        return isLearner ? AppRoutes.learnerMyCourses : AppRoutes.mentorCohorts;
       }
-      if (lower == AppRoutes.mentorChat) {
-        return AppRoutes.mentorChat;
+      if (lower.startsWith('/homework')) {
+        return isLearner ? AppRoutes.learnerMyCourses : AppRoutes.mentorCohorts;
       }
-      final disputeMatch = RegExp(r'^/mentor/disputes/(\d+)').firstMatch(lower);
-      if (disputeMatch != null) {
-        final id = int.tryParse(disputeMatch.group(1)!);
-        if (id != null && id > 0) return AppRoutes.mentorDisputeDetail(id);
+      final mentorCohortMatch = RegExp(r'^/mentor/cohorts/(\d+)').firstMatch(lower);
+      if (mentorCohortMatch != null) {
+        final id = int.tryParse(mentorCohortMatch.group(1)!);
+        if (id != null && id > 0) return AppRoutes.mentorCohortDetail(id);
       }
-      if (lower == AppRoutes.mentorDisputes) {
-        return AppRoutes.mentorDisputes;
-      }
-      final learnerBookingMatch = RegExp(
-        r'^/mentor-meetings/bookings/(\d+)',
-      ).firstMatch(lower);
-      if (learnerBookingMatch != null) {
-        final id = int.tryParse(learnerBookingMatch.group(1)!);
-        if (id != null && id > 0) {
-          return AppRoutes.learnerMentorBookingDetail(id);
-        }
-      }
-      final mentorBookingMatch = RegExp(
-        r'^/mentor/(?:bookings|meetings)/(\d+)',
-      ).firstMatch(lower);
-      if (mentorBookingMatch != null) {
-        final id = int.tryParse(mentorBookingMatch.group(1)!);
-        if (id != null && id > 0) {
-          return isLearner
-              ? AppRoutes.learnerMentorBookingDetail(id)
-              : AppRoutes.mentorMeetingDetail(id);
-        }
+      if (lower.startsWith('/mentor/cohorts')) {
+        return AppRoutes.mentorCohorts;
       }
     }
 

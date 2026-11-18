@@ -9,11 +9,14 @@ class UpcomingMeeting {
     required this.meetingUri,
     required this.status,
     this.mentorName,
+    this.courseName,
   });
 
+  /// Cohort enrollment course ID (`StudyCourse.Id`).
   final int bookingId;
   final MentorTimestamp scheduledAt;
   final Uri meetingUri;
   final MentorMeetingStatus status;
   final String? mentorName;
+  final String? courseName;
 }

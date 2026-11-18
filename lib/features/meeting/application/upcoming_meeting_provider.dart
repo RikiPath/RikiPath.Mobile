@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/network/safe_external_http_uri.dart';
+import 'package:rikipath_mobile/features/cohorts/application/cohort_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
 import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
-import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
-import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 
 final meetingNowProvider = Provider<DateTime>((ref) => DateTime.now());
@@ -9,35 +10,49 @@ final meetingNowProvider = Provider<DateTime>((ref) => DateTime.now());
 final upcomingMeetingProvider = Provider<AsyncValue<UpcomingMeeting?>>((ref) {
   final now = ref.watch(meetingNowProvider);
   return ref
-      .watch(learnerMentorBookingsControllerProvider)
-      .whenData((items) => selectUpcomingMeeting(items, now: now));
+      .watch(learnerMyCoursesProvider)
+      .whenData((courses) => selectUpcomingCohortMeeting(courses, now: now));
 });
 
-UpcomingMeeting? selectUpcomingMeeting(
-  List<LearnerMentorBooking> items, {
+UpcomingMeeting? selectUpcomingCohortMeeting(
+  List<LearnerStudyCourseDetail> courses, {
   required DateTime now,
 }) {
-  final eligible =
-      items.where((booking) {
-        final scheduledAt = booking.scheduledAt?.displayValue;
-        return booking.paymentStatus == MentorPaymentStatus.paid &&
-            (booking.status == MentorMeetingStatus.assigned ||
-                booking.status == MentorMeetingStatus.accepted) &&
-            booking.safeMeetingUri != null &&
-            scheduledAt != null &&
-            scheduledAt.add(const Duration(minutes: 90)).isAfter(now);
-      }).toList()..sort(
-        (left, right) => left.scheduledAt!.displayValue.compareTo(
-          right.scheduledAt!.displayValue,
-        ),
+  final candidates = <({
+    LearnerStudyCourseDetail course,
+    CourseSessionItem session,
+    Uri uri,
+  })>[];
+
+  for (final course in courses) {
+    if (course.status == 'Cancelled' || course.paymentStatus != 'Paid') {
+      continue;
+    }
+    for (final session in course.sessions) {
+      if (session.status != 'Scheduled') continue;
+      final sessionEnd = session.scheduledAt.add(
+        Duration(minutes: course.sessionMinutes > 0 ? course.sessionMinutes : 90),
       );
-  if (eligible.isEmpty) return null;
-  final booking = eligible.first;
+      if (!sessionEnd.isAfter(now)) continue;
+      final uri = parseSafeExternalHttpUri(session.meetingUrl);
+      if (uri == null) continue;
+      candidates.add((course: course, session: session, uri: uri));
+    }
+  }
+
+  if (candidates.isEmpty) return null;
+  candidates.sort(
+    (a, b) => a.session.scheduledAt.compareTo(b.session.scheduledAt),
+  );
+  final next = candidates.first;
   return UpcomingMeeting(
-    bookingId: booking.id,
-    scheduledAt: booking.scheduledAt!,
-    meetingUri: booking.safeMeetingUri!,
-    status: booking.status,
-    mentorName: booking.mentorName,
+    bookingId: next.course.id,
+    scheduledAt: MentorTimestamp.parse(
+      next.session.scheduledAt.toUtc().toIso8601String(),
+    ),
+    meetingUri: next.uri,
+    status: MentorMeetingStatus.accepted,
+    mentorName: next.course.mentorName,
+    courseName: next.course.name,
   );
 }

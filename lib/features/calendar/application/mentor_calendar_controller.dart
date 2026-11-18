@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
+import 'package:rikipath_mobile/features/cohorts/application/mentor_cohort_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 
 final mentorCalendarEventsProvider =
     FutureProvider.autoDispose<List<SakuraCalendarEvent>>((ref) async {
-      var meetings = const <MentorMeetingSummary>[];
+      var cohorts = const <StudyCohortSummary>[];
       var availability = const <MentorAvailabilitySlot>[];
       Object? firstError;
       var anySucceeded = false;
 
-      final meetingsFuture = ref
-          .watch(mentorMeetingsControllerProvider.future)
+      final cohortsFuture = ref
+          .watch(mentorAssignedCohortsProvider.future)
           .timeout(const Duration(seconds: 10));
       final availabilityFuture = ref
           .watch(mentorAvailabilityControllerProvider.future)
           .timeout(const Duration(seconds: 10));
 
       await Future.wait(<Future<void>>[
-        meetingsFuture
+        cohortsFuture
             .then((value) {
-              meetings = value;
+              cohorts = value;
               anySucceeded = true;
             })
             .catchError((Object err, StackTrace st) {
@@ -43,64 +45,39 @@ final mentorCalendarEventsProvider =
 
       final events = <SakuraCalendarEvent>[];
 
-      for (final meeting in meetings) {
-        if (meeting.scheduledAt == null) continue;
-
-        final start = meeting.scheduledAt!.value.toLocal();
-        final rawEnd = meeting.endsAt?.value.toLocal();
-        final end = (rawEnd != null && rawEnd.isAfter(start))
-            ? rawEnd
-            : start.add(const Duration(minutes: 90));
-        final durationMin = end.difference(start).inMinutes.clamp(15, 240);
-
-        final learner = meeting.learnerName?.trim().isNotEmpty == true
-            ? meeting.learnerName!.trim()
-            : 'Học viên';
-        final title = 'Tư vấn JLPT: $learner';
-
-        final statusText = switch (meeting.status) {
-          MentorMeetingStatus.accepted => 'Đã xác nhận',
-          MentorMeetingStatus.assigned => 'Đã nhận lịch',
-          MentorMeetingStatus.pendingAssignment => 'Chờ phân công',
-          MentorMeetingStatus.awaitingPayment => 'Chờ thanh toán',
-          MentorMeetingStatus.completed => 'Đã hoàn thành',
-          MentorMeetingStatus.cancelled => 'Đã hủy',
-          _ => 'Lịch tư vấn',
+      for (final cohort in cohorts) {
+        final (status, statusText) = switch (cohort.status) {
+          'Completed' => (MentorMeetingStatus.completed, 'Đã kết thúc'),
+          'Cancelled' => (MentorMeetingStatus.cancelled, 'Đã hủy'),
+          _ => (MentorMeetingStatus.accepted, 'Lớp nhóm'),
         };
 
-        final question = meeting.question?.trim();
-        final reviewComment = meeting.reviewComment?.trim();
-        final notes = (question != null && question.isNotEmpty)
-            ? question
-            : (reviewComment != null && reviewComment.isNotEmpty)
-            ? 'Đánh giá học viên: $reviewComment'
-            : null;
+        for (final session in cohort.sessions) {
+          final start = session.startTime.toLocal();
+          final end = session.endTime.toLocal();
+          final durationMin = end.difference(start).inMinutes.clamp(15, 240);
 
-        final levelPrefix = (meeting.jlptLevel?.trim().isNotEmpty == true)
-            ? 'JLPT ${meeting.jlptLevel!.trim()} · '
-            : '';
-
-        events.add(
-          SakuraCalendarEvent(
-            id: 'meeting_${meeting.id}',
-            title: title,
-            subtitle: '${levelPrefix}Thời lượng: $durationMin phút',
-            startTime: start,
-            endTime: end,
-            type: SakuraCalendarEventType.consultation,
-            status: meeting.status,
-            statusLabel: statusText,
-            participantName: learner,
-            participantRole: 'Học viên',
-            jlptLevel: meeting.jlptLevel,
-            meetingLink: meeting.meetingLink,
-            roomId: meeting.roomId,
-            bookingId: meeting.id,
-            sourceProvider: 'mentor',
-            sourceEntityId: '${meeting.id}',
-            notes: notes,
-          ),
-        );
+          events.add(
+            SakuraCalendarEvent(
+              id: 'cohort_${cohort.id}_session_${session.number}',
+              title: '${cohort.name} · Buổi ${session.number}',
+              subtitle: 'JLPT ${cohort.level} · $durationMin phút · ${cohort.enrolledCount}/${cohort.capacity} HV',
+              startTime: start,
+              endTime: end,
+              type: SakuraCalendarEventType.consultation,
+              status: status,
+              statusLabel: statusText,
+              participantName: '${cohort.enrolledCount}/${cohort.capacity} học viên',
+              participantRole: 'Lớp nhóm',
+              jlptLevel: cohort.level,
+              roomId: session.roomId,
+              bookingId: cohort.id,
+              sourceProvider: 'mentorAssignedCohortsProvider',
+              sourceEntityId: '${cohort.id}:${session.number}',
+              notes: 'Mở chi tiết lớp nhóm để xem danh sách học viên, bài tập và điểm danh.',
+            ),
+          );
+        }
       }
 
       for (final slot in availability) {
@@ -178,6 +155,6 @@ _resolveSlotStatusPresentation(MentorAvailabilitySlot slot) {
     label: 'Sẵn sàng',
     color: const Color(0xFF0F766E),
     backgroundColor: const Color(0xFFF0FDFA),
-    notes: 'Khung giờ đã được công bố cho học viên đặt lịch.',
+    notes: 'Khung giờ đã được công bố để Admin mở lớp nhóm.',
   );
 }

@@ -260,45 +260,11 @@ class MentorCalendarEventSheet extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.space2),
               ],
               if (isConsultation) ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(0, 44),
-                        ),
-                        onPressed: () => _pushRoute(
-                          context,
-                          AppRoutes.mentorMeetingDetail(bookingId),
-                        ),
-                        icon: const Icon(Icons.info_outline_rounded, size: 18),
-                        label: Text(l10n.mentorMeetingDetailTitle),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.space2),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(0, 44),
-                        ),
-                        onPressed: () => _pushRoute(
-                          context,
-                          AppRoutes.mentorMeetingPrep(bookingId),
-                        ),
-                        icon: const Icon(Icons.checklist_rtl_rounded, size: 18),
-                        label: Text(l10n.mentorHomeNextSessionCta),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.space2),
-                OutlinedButton.icon(
-                  onPressed: () => _pushRoute(
-                    context,
-                    AppRoutes.mentorChatRoom(bookingId),
-                  ),
-                  icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
-                  label: Text(l10n.mentorMeetingOpenChat),
+                RikiPrimaryButton(
+                  label: 'Mở chi tiết lớp nhóm',
+                  leadingIcon: Icons.groups_outlined,
+                  onPressed: () =>
+                      _pushRoute(context, AppRoutes.mentorCohortDetail(bookingId)),
                 ),
                 const SizedBox(height: AppSpacing.space2),
               ] else if (event.availabilityId != null) ...[

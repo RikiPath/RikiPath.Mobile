@@ -3,45 +3,77 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
 import 'package:rikipath_mobile/features/meeting/application/upcoming_meeting_provider.dart';
 import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_home_section.dart';
-import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 
 void main() {
   test(
-    'upcoming selection includes confirmed historical assigned bookings',
+    'upcoming selection picks next paid active cohort session',
     () {
-      final now = DateTime(2026, 10, 10, 8);
-      LearnerMentorBooking booking({
+      final now = DateTime.utc(2026, 10, 10, 8);
+      LearnerStudyCourseDetail course({
         required int id,
-        required String scheduledAt,
-        MentorMeetingStatus status = MentorMeetingStatus.assigned,
-        MentorPaymentStatus paymentStatus = MentorPaymentStatus.paid,
-        String? link = 'https://meet.example.com/room',
-      }) => LearnerMentorBooking(
+        required DateTime scheduledAt,
+        String status = 'Active',
+        String paymentStatus = 'Paid',
+        String sessionStatus = 'Scheduled',
+        String? meetingUrl = 'https://meet.example.com/room',
+      }) => LearnerStudyCourseDetail(
         id: id,
-        userSubscriptionId: 1,
-        status: status,
+        name: 'JLPT N3',
+        planId: 1,
+        cohortId: 10 + id,
+        sessionType: 'Group',
+        level: 'N3',
+        mentorId: 5,
+        mentorName: 'Sensei Aoi',
+        durationMonths: 2,
+        sessionsPerWeek: 3,
+        totalSessions: 30,
+        sessionMinutes: 90,
+        amount: 2000000,
         paymentStatus: paymentStatus,
-        scheduledAt: MentorTimestamp.parse(scheduledAt),
-        meetingLink: link,
+        status: status,
+        startsAt: scheduledAt,
+        endsAt: scheduledAt.add(const Duration(days: 70)),
+        completedAt: null,
+        eligibility: const CourseEligibilitySummary(
+          canClaim: false,
+          passedOnTimeHomework: 0,
+          requiredHomework: 0,
+          absentSessions: 0,
+          countedSessions: 0,
+          reasons: [],
+        ),
+        sessions: [
+          CourseSessionItem(
+            id: id * 10,
+            number: 1,
+            attempt: 1,
+            scheduledAt: scheduledAt,
+            status: sessionStatus,
+            meetingUrl: meetingUrl,
+          ),
+        ],
+        requests: const [],
       );
 
-      final result = selectUpcomingMeeting([
-        booking(id: 1, scheduledAt: '2026-10-09T08:00:00'),
-        booking(
+      final result = selectUpcomingCohortMeeting([
+        course(id: 1, scheduledAt: DateTime.utc(2026, 10, 9, 8)),
+        course(
           id: 2,
-          scheduledAt: '2026-10-11T08:00:00',
-          paymentStatus: MentorPaymentStatus.pending,
+          scheduledAt: DateTime.utc(2026, 10, 11, 8),
+          paymentStatus: 'Pending',
         ),
-        booking(
+        course(
           id: 3,
-          scheduledAt: '2026-10-12T08:00:00',
-          status: MentorMeetingStatus.cancelled,
+          scheduledAt: DateTime.utc(2026, 10, 12, 8),
+          status: 'Cancelled',
         ),
-        booking(id: 4, scheduledAt: '2026-10-11T09:00:00'),
+        course(id: 4, scheduledAt: DateTime.utc(2026, 10, 11, 9)),
       ], now: now);
 
       expect(result?.bookingId, 4);

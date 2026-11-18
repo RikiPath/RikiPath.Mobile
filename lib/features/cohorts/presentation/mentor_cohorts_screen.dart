@@ -45,7 +45,8 @@ class MentorCohortsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(mentorAssignedCohortsProvider);
-    final hasRouter = GoRouter.maybeOf(context) != null;
+    final inShell = MentorShellScope.hasShell(context);
+    final hasRouter = !inShell && GoRouter.maybeOf(context) != null;
 
     return Scaffold(
       key: const Key('mentor_cohorts_screen'),

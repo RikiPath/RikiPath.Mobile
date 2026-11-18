@@ -12,6 +12,7 @@ import 'package:rikipath_mobile/features/calendar/application/mentor_calendar_co
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/mentor_calendar_event_sheet.dart';
 import 'package:rikipath_mobile/features/calendar/presentation/widgets/sakura_calendar_shell.dart';
+import 'package:rikipath_mobile/features/cohorts/application/mentor_cohort_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
 
@@ -24,7 +25,7 @@ class MentorCalendarScreen extends ConsumerWidget {
   final SakuraCalendarViewMode initialMode;
 
   void _reloadCalendar(WidgetRef ref) {
-    ref.invalidate(mentorMeetingsControllerProvider);
+    ref.invalidate(mentorAssignedCohortsProvider);
     ref.invalidate(mentorAvailabilityControllerProvider);
     ref.invalidate(mentorCalendarEventsProvider);
   }
@@ -32,7 +33,7 @@ class MentorCalendarScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final eventsAsync = ref.watch(mentorCalendarEventsProvider);
-    final meetingsErr = ref.watch(mentorMeetingsControllerProvider).hasError;
+    final cohortsErr = ref.watch(mentorAssignedCohortsProvider).hasError;
     final availabilityErr = ref
         .watch(mentorAvailabilityControllerProvider)
         .hasError;
@@ -56,7 +57,7 @@ class MentorCalendarScreen extends ConsumerWidget {
         data: (events) {
           return SakuraCalendarShell(
             events: events,
-            dataIncomplete: meetingsErr || availabilityErr,
+            dataIncomplete: cohortsErr || availabilityErr,
             roleName: 'Cố vấn RikiPath',
             isMentor: true,
             showBackButton: !inShell,

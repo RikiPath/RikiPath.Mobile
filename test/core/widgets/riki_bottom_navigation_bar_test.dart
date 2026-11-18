@@ -313,7 +313,7 @@ void main() {
         for (final label in const <String>[
           'Trang chủ',
           'Lịch dạy',
-          'Buổi tư vấn',
+          'Lớp nhóm',
           'Lịch trống',
           'Cá nhân',
         ]) {
@@ -323,7 +323,7 @@ void main() {
           expect(itemFinder, findsOneWidget);
           expect(tester.getSize(itemFinder).height, greaterThanOrEqualTo(48));
         }
-        expect(find.byIcon(Icons.video_camera_front), findsOneWidget);
+        expect(find.byIcon(Icons.groups), findsOneWidget);
         expect(tester.takeException(), isNull);
       }
     },
@@ -589,8 +589,8 @@ void main() {
       await tester.pump();
       expect(find.byIcon(Icons.home), findsOneWidget);
       expect(find.byIcon(Icons.home_outlined), findsNothing);
-      expect(find.byIcon(Icons.video_camera_front), findsNothing);
-      expect(find.byIcon(Icons.video_camera_front_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.groups), findsNothing);
+      expect(find.byIcon(Icons.groups_outlined), findsOneWidget);
 
       await tester.pumpAndSettle();
       final indicatorFinder = find.byKey(
@@ -610,8 +610,8 @@ void main() {
             .size,
         20,
       );
-      expect(find.byIcon(Icons.video_camera_front), findsOneWidget);
-      expect(find.byIcon(Icons.video_camera_front_outlined), findsNothing);
+      expect(find.byIcon(Icons.groups), findsOneWidget);
+      expect(find.byIcon(Icons.groups_outlined), findsNothing);
     },
   );
 }

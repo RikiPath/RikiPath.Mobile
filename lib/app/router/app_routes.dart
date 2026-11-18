@@ -48,7 +48,8 @@ abstract final class AppRoutes {
     final path = Uri.tryParse(uriOrPath)?.path ?? uriOrPath;
     if (path == mentor ||
         path == mentorCalendar ||
-        path == mentorMeetings ||
+        path == mentorCohorts ||
+        path.startsWith('$mentorCohorts/') ||
         path == mentorAvailability ||
         path == mentorProfile ||
         path.startsWith('$mentorProfile/')) {
@@ -83,7 +84,7 @@ abstract final class AppRoutes {
     final path = Uri.tryParse(uriOrPath)?.path ?? uriOrPath;
     return path == mentor ||
         path == mentorCalendar ||
-        path == mentorMeetings ||
+        path == mentorCohorts ||
         path == mentorAvailability ||
         path == mentorProfile;
   }
@@ -101,10 +102,7 @@ abstract final class AppRoutes {
   static const String mentor = '/mentor';
   static const String mentorApplication = '/mentor-application';
   static const String mentorAvailabilitySegment = 'availability';
-  static const String mentorMeetingsSegment = 'meetings';
-  static const String mentorMeetingDetailSegment = ':meetingId';
   static const String mentorAvailability = '$mentor/$mentorAvailabilitySegment';
-  static const String mentorMeetings = '$mentor/$mentorMeetingsSegment';
   static const String mentorProfileSegment = 'profile';
   static const String mentorProfile = '$mentor/$mentorProfileSegment';
   static const String mentorProfileEditSegment = 'edit';
@@ -118,11 +116,6 @@ abstract final class AppRoutes {
   static const String mentorAttendanceKpiSegment = 'attendance-kpi';
   static const String mentorAttendanceKpi =
       '$mentor/$mentorAttendanceKpiSegment';
-  // Legacy route constants kept solely for safe redirect into non-financial destinations.
-  static const String mentorCompensationSegment = 'compensation';
-  static const String mentorCompensation = '$mentor/$mentorCompensationSegment';
-  static const String mentorBankAccountSegment = 'bank-account';
-  static const String mentorBankAccount = '$mentor/$mentorBankAccountSegment';
   static const String mentorCalendarSegment = 'calendar';
   static const String mentorCalendar = '$mentor/$mentorCalendarSegment';
   static const String mentorChangePasswordSegment = 'change-password';
@@ -132,17 +125,6 @@ abstract final class AppRoutes {
   static const String mentorChangeEmail = '$mentor/$mentorChangeEmailSegment';
   static const String mentorVerifyEmailSegment = 'verify-email';
   static const String mentorVerifyEmail = '$mentor/$mentorVerifyEmailSegment';
-  static const String mentorChatSegment = 'chat';
-  static const String mentorChatRoomSegment = ':bookingId';
-  static const String mentorChat = '$mentor/$mentorChatSegment';
-  static const String mentorReviewsSegment = 'reviews';
-  static const String mentorReviews = '$mentor/$mentorReviewsSegment';
-  static const String mentorDisputesSegment = 'disputes';
-  static const String mentorDisputeDetailSegment = ':disputeId';
-  static const String mentorDisputes = '$mentor/$mentorDisputesSegment';
-  static const String mentorPrepSegment = 'prep';
-  static const String mentorPrep = '$mentor/$mentorPrepSegment';
-  static const String mentorMeetingPrepSegment = 'prep';
   static const String mentorCohortsSegment = 'cohorts';
   static const String mentorCohortDetailSegment = ':cohortId';
   static const String mentorCohorts = '$mentor/$mentorCohortsSegment';
@@ -154,122 +136,13 @@ abstract final class AppRoutes {
     return '$mentorCohorts/$cohortId';
   }
 
-  static String mentorMeetingDetail(int meetingId) {
-    if (meetingId <= 0) {
-      throw ArgumentError.value(meetingId, 'meetingId', 'Must be positive');
+  static const String learnerMentors = '/mentors';
+  static const String learnerMentorPublicProfileSegment = ':mentorId';
+  static String learnerMentorPublicProfile(int mentorId) {
+    if (mentorId <= 0) {
+      throw ArgumentError.value(mentorId, 'mentorId', 'Must be positive');
     }
-    return '$mentorMeetings/$meetingId';
-  }
-
-  static String mentorMeetingPrep(int meetingId) {
-    if (meetingId <= 0) {
-      throw ArgumentError.value(meetingId, 'meetingId', 'Must be positive');
-    }
-    return '${mentorMeetingDetail(meetingId)}/$mentorMeetingPrepSegment';
-  }
-
-  static String mentorChatRoom(int bookingId) {
-    if (bookingId <= 0) {
-      throw ArgumentError.value(bookingId, 'bookingId', 'Must be positive');
-    }
-    return '$mentorChat/$bookingId';
-  }
-
-  static String mentorDisputeDetail(int disputeId) {
-    if (disputeId <= 0) {
-      throw ArgumentError.value(disputeId, 'disputeId', 'Must be positive');
-    }
-    return '$mentorDisputes/$disputeId';
-  }
-
-  static const String learnerMentorMeetings = '/mentor-meetings';
-  static const String learnerMentorFindSlotsSegment = 'find-slots';
-  static String learnerMentorFindSlots({int? availabilityId, int? mentorId}) {
-    final base = '$learnerMentorMeetings/$learnerMentorFindSlotsSegment';
-    final params = <String, String>{};
-    if (availabilityId != null && availabilityId > 0) {
-      params['availabilityId'] = availabilityId.toString();
-    }
-    if (mentorId != null && mentorId > 0) {
-      params['mentorId'] = mentorId.toString();
-    }
-    return params.isEmpty
-        ? base
-        : '$base?${Uri(queryParameters: params).query}';
-  }
-
-  static const String learnerMentorDiscoverySegment = 'plans/:planId/mentors';
-  static const String learnerMentorProfileSegment =
-      'plans/:planId/mentors/:mentorId';
-  static const String learnerMentorAvailabilitySegment =
-      'plans/:planId/availability';
-  static const String learnerMentorBookingsSegment = 'bookings';
-  static const String learnerMentorBookingDetailSegment = ':bookingId';
-  static const String learnerMentorPurchaseStatusSegment =
-      'purchases/:subscriptionId';
-  static const String learnerSessionCompletedSegment = 'completed/:bookingId';
-  static const String learnerMentorBookings =
-      '$learnerMentorMeetings/$learnerMentorBookingsSegment';
-
-  static String learnerMentorDiscovery(int planId) {
-    if (planId <= 0) {
-      throw ArgumentError.value(planId, 'planId', 'Must be positive');
-    }
-    return '$learnerMentorMeetings/plans/$planId/mentors';
-  }
-
-  static String learnerMentorProfile(int planId, int mentorId) {
-    if (planId <= 0 || mentorId <= 0) {
-      throw ArgumentError('planId and mentorId must be positive');
-    }
-    return '$learnerMentorMeetings/plans/$planId/mentors/$mentorId';
-  }
-
-  static String learnerMentorAvailability(
-    int planId, {
-    int? subscriptionId,
-    int? mentorId,
-  }) {
-    if (planId <= 0) {
-      throw ArgumentError.value(planId, 'planId', 'Must be positive');
-    }
-    final base = '$learnerMentorMeetings/plans/$planId/availability';
-    final params = <String, String>{};
-    if (subscriptionId != null && subscriptionId > 0) {
-      params['subscriptionId'] = subscriptionId.toString();
-    }
-    if (mentorId != null && mentorId > 0) {
-      params['mentorId'] = mentorId.toString();
-    }
-    if (params.isNotEmpty) {
-      return '$base?${Uri(queryParameters: params).query}';
-    }
-    return base;
-  }
-
-  static String learnerSessionCompleted(int bookingId) {
-    if (bookingId <= 0) {
-      throw ArgumentError.value(bookingId, 'bookingId', 'Must be positive');
-    }
-    return '$learnerMentorMeetings/completed/$bookingId';
-  }
-
-  static String learnerMentorBookingDetail(int bookingId) {
-    if (bookingId <= 0) {
-      throw ArgumentError.value(bookingId, 'bookingId', 'Must be positive');
-    }
-    return '$learnerMentorBookings/$bookingId';
-  }
-
-  static String learnerMentorPurchaseStatus(int subscriptionId) {
-    if (subscriptionId <= 0) {
-      throw ArgumentError.value(
-        subscriptionId,
-        'subscriptionId',
-        'Must be positive',
-      );
-    }
-    return '$learnerMentorMeetings/purchases/$subscriptionId';
+    return '$learnerMentors/$mentorId';
   }
 
   static const String learnerCohorts = '/cohorts';

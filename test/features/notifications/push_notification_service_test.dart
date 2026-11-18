@@ -167,11 +167,11 @@ void main() {
     final service = PushNotificationService(apiClient: _FakePushApiClient());
 
     test(
-      'resolves booking_detail screen to learnerMentorBookingDetail route',
+      'resolves booking_detail screen to learnerMyCourses for learner role',
       () {
         final payload = PushNotificationPayload.fromMap({
           'notification': {
-            'title': 'Booking Confirmed',
+            'title': 'Cohort Confirmed',
             'body': 'Session scheduled',
           },
           'data': {
@@ -181,12 +181,12 @@ void main() {
           },
         });
 
-        final route = service.resolveDeepLink(payload);
-        expect(route, equals(AppRoutes.learnerMentorBookingDetail(45)));
+        final route = service.resolveDeepLink(payload, role: 'Learner');
+        expect(route, equals(AppRoutes.learnerMyCourses));
       },
     );
 
-    test('resolves meeting_room screen to mentorMeetingDetail route', () {
+    test('resolves meeting_room screen to mentorCohorts for mentor role', () {
       final payload = PushNotificationPayload.fromMap({
         'notification': {'title': 'Meeting Ready', 'body': 'Join room now'},
         'data': {
@@ -196,8 +196,8 @@ void main() {
         },
       });
 
-      final route = service.resolveDeepLink(payload);
-      expect(route, equals(AppRoutes.mentorMeetingDetail(12)));
+      final route = service.resolveDeepLink(payload, role: 'Mentor');
+      expect(route, equals(AppRoutes.mentorCohorts));
     });
 
     test('resolves direct linkUrl when screen is not specified', () {
@@ -281,8 +281,8 @@ void main() {
       expect(payload.screen, equals('booking_detail'));
       expect(payload.bookingId, equals('77'));
 
-      final deepLink = service.resolveDeepLink(payload);
-      expect(deepLink, equals(AppRoutes.learnerMentorBookingDetail(77)));
+      final deepLink = service.resolveDeepLink(payload, role: 'Learner');
+      expect(deepLink, equals(AppRoutes.learnerMyCourses));
     });
 
     test('initializeFirebaseMessaging completes gracefully when Firebase unconfigured', () async {
