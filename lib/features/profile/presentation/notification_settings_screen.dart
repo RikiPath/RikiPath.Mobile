@@ -133,9 +133,20 @@ class NotificationSettingsScreen extends ConsumerWidget {
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.space5),
-            child: RikiErrorBanner(
-              title: context.l10n.profileLoadFailedTitle,
-              message: userProfileErrorMessage(error, context.l10n),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RikiErrorBanner(
+                  title: context.l10n.profileLoadFailedTitle,
+                  message: userProfileErrorMessage(error, context.l10n),
+                ),
+                const SizedBox(height: AppSpacing.space3),
+                RikiSecondaryButton(
+                  label: context.l10n.retry,
+                  onPressed: () =>
+                      ref.read(userProfileControllerProvider.notifier).retry(),
+                ),
+              ],
             ),
           ),
         ),

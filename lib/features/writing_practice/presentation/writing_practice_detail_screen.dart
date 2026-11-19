@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
@@ -10,6 +12,7 @@ import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/writing_practice/application/writing_practice_controller.dart';
+import 'package:rikipath_mobile/features/writing_practice/data/api_writing_practice_repository.dart';
 import 'package:rikipath_mobile/features/writing_practice/domain/writing_practice.dart';
 import 'package:rikipath_mobile/features/writing_practice/engine/writing_practice_engine.dart';
 
@@ -62,18 +65,56 @@ class WritingPracticeDetailScreen extends ConsumerWidget {
                 .retry(),
           ),
           data: (state) {
-            final item = state.items
+            final dueItem = state.items
                 .where((entry) => entry.id == id)
                 .firstOrNull;
-            if (item == null) {
-              return _InvalidWritingCharacterScreen(script: script);
+            if (dueItem != null) {
+              return _WritingPracticeSession(
+                key: ValueKey<String>('writing_session_${script.name}_$id'),
+                request: request,
+                state: state,
+                character: dueItem,
+              );
             }
-            return _WritingPracticeSession(
-              key: ValueKey<String>('writing_session_${script.name}_$id'),
-              request: request,
-              state: state,
-              character: item,
-            );
+            if (script != WritingScript.kanji) {
+              final allRequest = WritingQueueRequest(
+                script: script,
+                kanjiCollection: KanjiWritingCollection.all,
+              );
+              final allQueue = ref.watch(
+                writingPracticeControllerProvider(allRequest),
+              );
+              return allQueue.when(
+                loading: () => RikiFullScreenLoader(
+                  title: context.l10n.writingLoadingStrokeData,
+                ),
+                error: (error, _) => RikiErrorState(
+                  title: context.l10n.writingLoadFailed,
+                  message: appErrorMessage(error, context.l10n),
+                  actionLabel: context.l10n.retry,
+                  onAction: () => ref
+                      .read(
+                        writingPracticeControllerProvider(allRequest).notifier,
+                      )
+                      .retry(),
+                ),
+                data: (allState) {
+                  final allItem = allState.items
+                      .where((entry) => entry.id == id)
+                      .firstOrNull;
+                  if (allItem == null) {
+                    return _InvalidWritingCharacterScreen(script: script);
+                  }
+                  return _WritingPracticeSession(
+                    key: ValueKey<String>('writing_session_${script.name}_$id'),
+                    request: allRequest,
+                    state: allState,
+                    character: allItem,
+                  );
+                },
+              );
+            }
+            return _InvalidWritingCharacterScreen(script: script);
           },
         ),
       ),
@@ -104,6 +145,10 @@ class _WritingPracticeSessionState
   late final WritingPracticeEngine _engine;
   WritingPracticeResult? _handledResult;
   final Set<int> _activeWritingPointers = <int>{};
+  final GlobalKey _canvasBoundaryKey = GlobalKey();
+  bool _recognizing = false;
+  List<String>? _recognizedCandidates;
+  String? _recognitionError;
 
   bool get _isWritingGestureActive => _activeWritingPointers.isNotEmpty;
 
@@ -128,7 +173,54 @@ class _WritingPracticeSessionState
     if (oldWidget.character.id != widget.character.id) {
       _releaseWritingGestureLock();
       _handledResult = null;
+      _recognizing = false;
+      _recognizedCandidates = null;
+      _recognitionError = null;
       unawaited(_loadCharacter());
+    }
+  }
+
+  Future<void> _recognizeCanvas() async {
+    if (_recognizing) return;
+    final repo = ref.read(writingPracticeRepositoryProvider);
+    if (repo is! ApiWritingPracticeRepository) return;
+    final boundary =
+        _canvasBoundaryKey.currentContext?.findRenderObject()
+            as RenderRepaintBoundary?;
+    if (boundary == null) return;
+    setState(() {
+      _recognizing = true;
+      _recognitionError = null;
+    });
+    try {
+      final image = await boundary.toImage(pixelRatio: 2.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        if (!mounted) return;
+        setState(() {
+          _recognizing = false;
+          _recognitionError = 'Không đọc được ảnh nét vẽ từ khung luyện viết.';
+        });
+        return;
+      }
+      final candidates = await repo.recognizeKanjiPng(
+        byteData.buffer.asUint8List(),
+      );
+      if (!mounted) return;
+      setState(() {
+        _recognizing = false;
+        _recognizedCandidates = candidates;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _recognizing = false;
+        _recognitionError = appErrorMessage(
+          error,
+          context.l10n,
+          fallback: 'Chưa nhận dạng được nét chữ. Hãy vẽ rõ nét hơn và thử lại.',
+        );
+      });
     }
   }
 
@@ -233,6 +325,7 @@ class _WritingPracticeSessionState
         const SizedBox(height: AppSpacing.space4),
         _WritingCanvasCard(
           engine: _engine,
+          canvasBoundaryKey: _canvasBoundaryKey,
           guided:
               effectiveState.practiceMode == WritingPracticeMode.guided ||
               widget.character.script != WritingScript.kanji,
@@ -242,6 +335,66 @@ class _WritingPracticeSessionState
           onPointerCancel: _handleWritingPointerEnd,
           onRetry: _loadCharacter,
         ),
+        if (widget.character.script == WritingScript.kanji) ...[
+          const SizedBox(height: AppSpacing.space3),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              key: const ValueKey<String>('kanji_recognize_button'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 42),
+              ),
+              onPressed: _recognizing ? null : _recognizeCanvas,
+              icon: _recognizing
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.auto_fix_high_outlined, size: 18),
+              label: const Text('Nhận dạng nét vẽ AI'),
+            ),
+          ),
+          if (_recognitionError != null) ...[
+            const SizedBox(height: AppSpacing.space2),
+            RikiErrorBanner(message: _recognitionError!),
+          ] else if (_recognizedCandidates != null) ...[
+            const SizedBox(height: AppSpacing.space2),
+            RikiCard(
+              padding: const EdgeInsets.all(AppSpacing.space3),
+              child: _recognizedCandidates!.isEmpty
+                  ? const Text(
+                      'AI chưa nhận diện được Kanji nào. Hãy viết thêm nét rồi thử lại.',
+                      style: AppTypography.bodySmall,
+                    )
+                  : Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        const Text(
+                          'AI nhận diện:',
+                          style: AppTypography.bodySmall,
+                        ),
+                        for (final c in _recognizedCandidates!)
+                          Chip(
+                            label: Text(
+                              c == widget.character.character ? '$c ✓' : c,
+                              style: AppTypography.cardTitle.copyWith(
+                                color: c == widget.character.character
+                                    ? AppColors.success
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                            backgroundColor: c == widget.character.character
+                                ? AppColors.successBackground
+                                : AppColors.brandTint,
+                          ),
+                      ],
+                    ),
+            ),
+          ],
+        ],
         const SizedBox(height: AppSpacing.space4),
         _WritingControls(
           engine: _engine,
@@ -455,6 +608,7 @@ class _ModeControl extends StatelessWidget {
 class _WritingCanvasCard extends StatelessWidget {
   const _WritingCanvasCard({
     required this.engine,
+    required this.canvasBoundaryKey,
     required this.guided,
     required this.isWritingGestureActive,
     required this.onPointerDown,
@@ -464,6 +618,7 @@ class _WritingCanvasCard extends StatelessWidget {
   });
 
   final WritingPracticeEngine engine;
+  final GlobalKey canvasBoundaryKey;
   final bool guided;
   final bool isWritingGestureActive;
   final PointerDownEventListener onPointerDown;
@@ -520,30 +675,38 @@ class _WritingCanvasCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(
                               AppRadius.input,
                             ),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                const CustomPaint(
-                                  painter: _WritingGridPainter(),
+                            child: RepaintBoundary(
+                              key: canvasBoundaryKey,
+                              child: ColoredBox(
+                                color: AppColors.surface,
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    const CustomPaint(
+                                      painter: _WritingGridPainter(),
+                                    ),
+                                    if (snapshot.hasCanvas)
+                                      engine.buildCanvas(
+                                        size: Size.square(extent),
+                                        key: ValueKey<String>(
+                                          'writing_engine_${snapshot.character}',
+                                        ),
+                                      ),
+                                    if (snapshot.phase ==
+                                        WritingEnginePhase.loading)
+                                      Center(
+                                        child: RikiInlineLoader(
+                                          semanticsLabel: context
+                                              .l10n
+                                              .writingLoadingStrokeData,
+                                        ),
+                                      ),
+                                    if (snapshot.phase ==
+                                        WritingEnginePhase.failed)
+                                      _StrokeLoadFailure(onRetry: onRetry),
+                                  ],
                                 ),
-                                if (snapshot.hasCanvas)
-                                  engine.buildCanvas(
-                                    size: Size.square(extent),
-                                    key: ValueKey<String>(
-                                      'writing_engine_${snapshot.character}',
-                                    ),
-                                  ),
-                                if (snapshot.phase ==
-                                    WritingEnginePhase.loading)
-                                  Center(
-                                    child: RikiInlineLoader(
-                                      semanticsLabel:
-                                          context.l10n.writingLoadingStrokeData,
-                                    ),
-                                  ),
-                                if (snapshot.phase == WritingEnginePhase.failed)
-                                  _StrokeLoadFailure(onRetry: onRetry),
-                              ],
+                              ),
                             ),
                           ),
                         ),

@@ -194,3 +194,39 @@ class MentorPublishSlotsResult {
   final DateTime generatedThrough;
   final List<MentorPublishedSlotItem> publishedSlots;
 }
+
+class MentorTeachingConflictItem {
+  const MentorTeachingConflictItem({
+    required this.code,
+    this.sessionNumber,
+    required this.proposedStartUtc,
+    required this.proposedEndUtc,
+    required this.commitmentKind,
+    this.cohortId,
+    this.cohortName,
+    this.commitmentStartUtc,
+    this.commitmentEndUtc,
+    required this.message,
+  });
+
+  final String code;
+  final int? sessionNumber;
+  final DateTime proposedStartUtc;
+  final DateTime proposedEndUtc;
+  final String commitmentKind;
+  final int? cohortId;
+  final String? cohortName;
+  final DateTime? commitmentStartUtc;
+  final DateTime? commitmentEndUtc;
+  final String message;
+}
+
+class MentorTeachingConflictReport {
+  const MentorTeachingConflictReport({
+    required this.isValid,
+    required this.conflicts,
+  });
+
+  final bool isValid;
+  final List<MentorTeachingConflictItem> conflicts;
+}

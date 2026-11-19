@@ -12,7 +12,6 @@ import 'package:rikipath_mobile/features/learning/domain/standard_roadmap.dart';
 import 'package:rikipath_mobile/features/meeting/domain/upcoming_meeting.dart';
 import 'package:rikipath_mobile/features/meeting/presentation/meeting_home_section.dart';
 import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
-import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
 
 class HomeDashboardView extends StatelessWidget {
   const HomeDashboardView({
@@ -21,14 +20,13 @@ class HomeDashboardView extends StatelessWidget {
     required this.learningState,
     required this.analyticsState,
     this.roadmapState,
-    required this.practiceState,
     required this.dailyReviewState,
     required this.upcomingMeetingState,
     required this.onRefreshLive,
     required this.onRetryHome,
     required this.onRetryLearning,
     required this.onRetryAnalytics,
-    required this.onRetryPractice,
+    this.onRetryPractice,
     required this.onOpenLearning,
     required this.onOpenRoadmap,
     required this.onOpenNotebook,
@@ -50,14 +48,13 @@ class HomeDashboardView extends StatelessWidget {
   final AsyncValue<LearningSnapshot> learningState;
   final AsyncValue<LearnerAnalytics> analyticsState;
   final AsyncValue<StandardRoadmap>? roadmapState;
-  final AsyncValue<DemoPracticeState> practiceState;
   final AsyncValue<DailyReviewState> dailyReviewState;
   final AsyncValue<UpcomingMeeting?> upcomingMeetingState;
   final Future<void> Function() onRefreshLive;
   final VoidCallback onRetryHome;
   final VoidCallback onRetryLearning;
   final VoidCallback onRetryAnalytics;
-  final VoidCallback onRetryPractice;
+  final VoidCallback? onRetryPractice;
   final VoidCallback onOpenLearning;
   final VoidCallback onOpenRoadmap;
   final VoidCallback onOpenNotebook;
@@ -180,11 +177,9 @@ class HomeDashboardView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
             child: _PracticeSections(
-              state: practiceState,
               dailyReviewState: dailyReviewState,
               onOpenReview: onOpenReview,
               onOpenPractice: onOpenPractice,
-              onRetry: onRetryPractice,
             ),
           ),
           const SizedBox(height: AppSpacing.space3),
@@ -1143,31 +1138,17 @@ class _CompletionMetricTile extends StatelessWidget {
 
 class _PracticeSections extends StatelessWidget {
   const _PracticeSections({
-    required this.state,
     required this.dailyReviewState,
     required this.onOpenReview,
     required this.onOpenPractice,
-    required this.onRetry,
   });
 
-  final AsyncValue<DemoPracticeState> state;
   final AsyncValue<DailyReviewState> dailyReviewState;
   final VoidCallback onOpenReview;
   final VoidCallback onOpenPractice;
-  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    if (state.isLoading) {
-      return const _SectionSkeleton(key: ValueKey('home_practice_loading'));
-    }
-    if (state.hasError) {
-      return _CompactError(
-        key: const ValueKey<String>('home_practice_error'),
-        title: context.l10n.practiceLoadFailed,
-        onRetry: onRetry,
-      );
-    }
     final dailyReview = dailyReviewState.value;
     final cards = <Widget>[
       SakuraNavigationCard(

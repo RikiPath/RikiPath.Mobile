@@ -1015,6 +1015,7 @@ void main() {
       );
       final harness = await _pumpHome(tester, journeyRepository: journey);
       await _pumpFrames(tester);
+      await harness.container.read(demoPracticeControllerProvider.future);
       await tester
           .widget<HomeDashboardView>(find.byType(HomeDashboardView))
           .onRefreshLive();
@@ -1042,6 +1043,7 @@ void main() {
         sessionRepository: repository,
       );
       await _pumpFrames(tester);
+      await harness.container.read(demoPracticeControllerProvider.future);
       await tester
           .widget<HomeDashboardView>(find.byType(HomeDashboardView))
           .onRefreshLive();
@@ -1102,6 +1104,7 @@ void main() {
         sessions: _sessions(active: _activeAttempt()),
       );
       await _pumpFrames(tester);
+      await harness.container.read(demoPracticeControllerProvider.future);
       harness.router.go(AppRoutes.practice);
       await _pumpFrames(tester);
       harness.router.go(AppRoutes.home);

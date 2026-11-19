@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart' show ChangeNotifierProvider;
 import 'package:rikipath_mobile/core/config/app_config.dart';
+import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/core/storage/token_storage.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/auth/domain/backend_user_role.dart';
@@ -13,7 +14,53 @@ import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/meeting/domain/participant_role.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_meeting_link_launcher.dart';
+import 'package:rikipath_mobile/features/mentor/data/mentor_api_paths.dart';
+import 'package:rikipath_mobile/features/mentor/data/mentor_json_helpers.dart';
 import 'package:rikipath_mobile/features/profile/application/user_profile_controller.dart';
+
+typedef MeetingRoomTelemetry = ({
+  bool isReady,
+  bool isMentorOnline,
+  int onlineParticipantsCount,
+  int attendanceRecordsCount,
+});
+
+final meetingRoomTelemetryProvider = FutureProvider.autoDispose
+    .family<MeetingRoomTelemetry, String>((ref, roomId) async {
+      final api = ref.watch(apiClientProvider);
+      var isReady = false;
+      var mentorOnline = false;
+      var onlineCount = 0;
+      var attendanceCount = 0;
+      await Future.wait([
+        api
+            .get<Object?>(MentorApiPaths.roomPresence(roomId))
+            .then((res) {
+              final data = readMentorEnvelopeObject(res.data);
+              isReady = readBoolOrFalse(data, 'isRoomReady');
+              mentorOnline = readBoolOrFalse(data, 'isMentorOnline');
+              onlineCount = readIntOrZero(data, 'onlineParticipantsCount');
+            })
+            .catchError((_) {}),
+        api
+            .get<Object?>(MentorApiPaths.roomAttendance(roomId))
+            .then((res) {
+              final data = res.data;
+              if (data is Map && data['result'] is List) {
+                attendanceCount = (data['result'] as List).length;
+              } else if (data is List) {
+                attendanceCount = data.length;
+              }
+            })
+            .catchError((_) {}),
+      ]);
+      return (
+        isReady: isReady,
+        isMentorOnline: mentorOnline,
+        onlineParticipantsCount: onlineCount,
+        attendanceRecordsCount: attendanceCount,
+      );
+    });
 
 typedef MeetingRealtimeClientFactory = MeetingRealtimeClient Function();
 
@@ -145,6 +192,13 @@ class MeetingController extends ChangeNotifier {
   Future<void> toggleRaiseHand() => _client.toggleRaiseHand();
 
   Future<void> sendChatMessage(String text) => _client.sendChatMessage(text);
+
+  Future<void> muteParticipant(String targetConnectionId) =>
+      _client.muteParticipant(targetConnectionId);
+
+  Future<void> startPresenting() => _client.startPresenting();
+
+  Future<void> stopPresenting() => _client.stopPresenting();
 
   Future<void> pause() => _client.pause();
 

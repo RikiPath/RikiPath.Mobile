@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,10 +32,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  late final TapGestureRecognizer _termsRecognizer = TapGestureRecognizer()
+    ..onTap = () => _showLegalPolicyDialog(isPrivacy: false);
+  late final TapGestureRecognizer _privacyRecognizer = TapGestureRecognizer()
+    ..onTap = () => _showLegalPolicyDialog(isPrivacy: true);
   bool _acceptedTerms = true;
 
   @override
   void dispose() {
+    _termsRecognizer.dispose();
+    _privacyRecognizer.dispose();
     _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -63,6 +70,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   void _clearFeedback() {
     ref.read(registerControllerProvider.notifier).clearFeedback();
+  }
+
+  Future<void> _showLegalPolicyDialog({required bool isPrivacy}) {
+    final l10n = context.l10n;
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(isPrivacy ? l10n.privacyPolicy : l10n.termsOfService),
+        content: Text(
+          isPrivacy
+              ? 'RikiPath bảo mật thông tin tài khoản, dữ liệu luyện tập JLPT và lịch học nhóm của bạn theo chính sách bảo mật nền tảng.'
+              : 'Khi đăng ký tài khoản RikiPath, bạn đồng ý tuân thủ quy định học tập, ghi danh lớp nhóm và tiêu chuẩn cộng đồng của hệ thống.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Đã hiểu'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -174,9 +202,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       : l10n.emailHint,
                   controller: _emailController,
                   prefixIcon: Icons.mail_outline,
-                  suffixIcon: state.isLoading
-                      ? const Icon(Icons.check, color: AppColors.success)
-                      : null,
                   errorText: state.emailError,
                   enabled: !state.isLoading,
                   keyboardType: TextInputType.emailAddress,
@@ -246,16 +271,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         TextSpan(text: l10n.termsPrefix),
                         TextSpan(
                           text: l10n.termsOfService,
+                          recognizer: _termsRecognizer,
                           style: AppTypography.metadata.copyWith(
-                            color: AppColors.textPrimary,
+                            color: AppColors.brandPrimary,
                             decoration: TextDecoration.underline,
                           ),
                         ),
                         TextSpan(text: l10n.termsJoiner),
                         TextSpan(
                           text: l10n.privacyPolicy,
+                          recognizer: _privacyRecognizer,
                           style: AppTypography.metadata.copyWith(
-                            color: AppColors.textPrimary,
+                            color: AppColors.brandPrimary,
                             decoration: TextDecoration.underline,
                           ),
                         ),

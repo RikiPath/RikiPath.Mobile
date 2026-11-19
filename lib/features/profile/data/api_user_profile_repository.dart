@@ -25,14 +25,8 @@ class ApiUserProfileRepository
   }
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) async {
-    final request = UpdateProfileRequestDto(
-      firstName: firstName,
-      lastName: lastName,
-    );
+  Future<UserProfile> updateProfile({required String fullName}) async {
+    final request = UpdateProfileRequestDto(fullName: fullName);
     final response = await _apiClient.put<Object?>(
       UserProfileApiPaths.me,
       data: request.toJson(),

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/features/subscriptions/domain/subscription_models.dart';
 import 'package:rikipath_mobile/features/text_scan/data/api_text_scan_repository.dart';
 import 'package:rikipath_mobile/features/text_scan/data/gallery_text_scan_image_picker.dart';
 import 'package:rikipath_mobile/features/text_scan/domain/text_scan.dart';
@@ -60,6 +61,7 @@ class TextScanController extends Notifier<TextScanState> {
     state = state.copyWith(
       status: TextScanStatus.scanning,
       clearInputError: true,
+      subscriptionRequired: false,
     );
     try {
       final result = await ref
@@ -69,6 +71,7 @@ class TextScanController extends Notifier<TextScanState> {
       state = state.copyWith(
         status: TextScanStatus.completed,
         recognizedText: result.text,
+        subscriptionRequired: false,
       );
     } catch (error) {
       if (!ref.mounted) return;
@@ -76,6 +79,7 @@ class TextScanController extends Notifier<TextScanState> {
         status: error is NetworkError
             ? TextScanStatus.networkError
             : TextScanStatus.providerError,
+        subscriptionRequired: isSubscriptionOrAiGateError(error),
       );
     }
   }

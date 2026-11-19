@@ -240,3 +240,47 @@ class LiveMockTestDetailedResult {
   final double totalScore;
   final List<LiveMockTestQuestionReview> questions;
 }
+
+@immutable
+class MockTestHistoryRecord {
+  const MockTestHistoryRecord({
+    required this.attemptId,
+    required this.mockTestId,
+    required this.title,
+    required this.jlptLevelName,
+    required this.submittedAt,
+    required this.totalScore,
+  });
+
+  final int attemptId;
+  final int mockTestId;
+  final String title;
+  final String jlptLevelName;
+  final DateTime submittedAt;
+  final double totalScore;
+}
+
+@immutable
+class MockTestWrongQuestionCard {
+  const MockTestWrongQuestionCard({
+    required this.questionId,
+    required this.questionText,
+    this.questionType = 'SingleChoice',
+    this.response,
+    this.answerKey,
+    required this.options,
+    this.selectedOptionId,
+    this.explanation,
+    required this.timesAnsweredWrong,
+  });
+
+  final int questionId;
+  final String questionText;
+  final String questionType;
+  final Object? response;
+  final Object? answerKey;
+  final List<LiveMockTestReviewOption> options;
+  final int? selectedOptionId;
+  final String? explanation;
+  final int timesAnsweredWrong;
+}

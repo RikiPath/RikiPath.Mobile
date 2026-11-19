@@ -9,6 +9,7 @@ import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
 import 'package:rikipath_mobile/features/mock_test/domain/mock_test.dart';
 import 'package:rikipath_mobile/features/mock_test/domain/mock_test_display_title.dart';
+import 'package:rikipath_mobile/features/mock_test/presentation/widgets/mock_test_review_sheets.dart';
 
 class MockTestResultScreen extends ConsumerWidget {
   const MockTestResultScreen({required this.testId, super.key});
@@ -170,6 +171,22 @@ class MockTestResultScreen extends ConsumerWidget {
                 onPressed: () =>
                     context.push(AppRoutes.mockTestDetailedReview(testId)),
               ),
+              if (result.wrongQuestionIds.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.space2),
+                RikiSecondaryButton(
+                  key: const ValueKey<String>(
+                    'mock_result_wrong_questions_button',
+                  ),
+                  label: 'Ôn lại ${result.wrongQuestionIds.length} câu làm sai',
+                  leadingIcon: Icons.quiz_outlined,
+                  onPressed: () => showMockTestWrongQuestionsSheet(
+                    context,
+                    ref,
+                    practiceTestId: result.mockTestId,
+                    title: test?.title,
+                  ),
+                ),
+              ],
               const SizedBox(height: AppSpacing.space2),
               RikiSecondaryButton(
                 key: const ValueKey<String>('mock_test_retake_button'),

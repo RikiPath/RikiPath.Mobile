@@ -76,8 +76,7 @@ void main() {
         email: 'learner@example.com',
         password: 'secret',
         confirmPassword: 'secret',
-        firstName: 'Minh Anh',
-        lastName: 'Nguyễn',
+        fullName: 'Nguyễn Minh Anh',
       );
       final secureStore = TestSecureKeyValueStore();
       final tokenStorage = TokenStorage(secureStore);

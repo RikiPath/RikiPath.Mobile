@@ -801,10 +801,8 @@ class _AccountProfileRepository implements UserProfileRepository {
   }) async => _profile;
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) async => _profile;
+  Future<UserProfile> updateProfile({required String fullName}) async =>
+      _profile;
 
   @override
   Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) async =>

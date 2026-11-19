@@ -229,6 +229,7 @@ class MentorProfileDto {
   const MentorProfileDto({
     required this.mentorId,
     required this.email,
+    this.fullName,
     this.firstName,
     this.lastName,
     this.phoneNumber,
@@ -254,6 +255,7 @@ class MentorProfileDto {
     return MentorProfileDto(
       mentorId: (json['mentorId'] as num?)?.toInt() ?? 0,
       email: _requiredString(json, 'email'),
+      fullName: _optionalString(json, 'fullName'),
       firstName: _optionalString(json, 'firstName'),
       lastName: _optionalString(json, 'lastName'),
       phoneNumber: _optionalString(json, 'phoneNumber'),
@@ -284,6 +286,7 @@ class MentorProfileDto {
 
   final int mentorId;
   final String email;
+  final String? fullName;
   final String? firstName;
   final String? lastName;
   final String? phoneNumber;
@@ -307,6 +310,7 @@ class MentorProfileDto {
   MentorProfileData toDomain() => MentorProfileData(
     mentorId: mentorId,
     email: email,
+    fullName: fullName,
     firstName: firstName,
     lastName: lastName,
     phoneNumber: phoneNumber,

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/calendar/domain/sakura_calendar_models.dart';
 import 'package:rikipath_mobile/features/cohorts/application/mentor_cohort_controller.dart';
 import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
 import 'package:rikipath_mobile/features/mentor/application/mentor_controller.dart';
+import 'package:rikipath_mobile/features/mentor/data/mentor_api_paths.dart';
+import 'package:rikipath_mobile/features/mentor/data/mentor_json_helpers.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_dashboard.dart';
 
 final mentorCalendarEventsProvider =
     FutureProvider.autoDispose<List<SakuraCalendarEvent>>((ref) async {
+      ref.watch(authenticatedUserIdProvider);
       var cohorts = const <StudyCohortSummary>[];
       var availability = const <MentorAvailabilitySlot>[];
       Object? firstError;
@@ -157,4 +162,69 @@ _resolveSlotStatusPresentation(MentorAvailabilitySlot slot) {
     backgroundColor: const Color(0xFFF0FDFA),
     notes: 'Khung giờ đã được công bố để Admin mở lớp nhóm.',
   );
+}
+
+@immutable
+class MentorGoogleCalendarStatus {
+  const MentorGoogleCalendarStatus({
+    required this.configured,
+    required this.connected,
+    this.lastSyncedAt,
+  });
+
+  final bool configured;
+  final bool connected;
+  final DateTime? lastSyncedAt;
+}
+
+final mentorGoogleCalendarControllerProvider = AsyncNotifierProvider.autoDispose<
+  MentorGoogleCalendarController,
+  MentorGoogleCalendarStatus
+>(MentorGoogleCalendarController.new);
+
+class MentorGoogleCalendarController
+    extends AsyncNotifier<MentorGoogleCalendarStatus> {
+  @override
+  Future<MentorGoogleCalendarStatus> build() async {
+    ref.watch(authenticatedUserIdProvider);
+    return _fetchStatus();
+  }
+
+  Future<MentorGoogleCalendarStatus> _fetchStatus() async {
+    final res = await ref
+        .read(apiClientProvider)
+        .get<Object?>(MentorApiPaths.mentorCalendar);
+    final map = readMapOrEmpty(res.data);
+    final result = map['result'] is Map ? readMapOrEmpty(map['result']) : map;
+    return MentorGoogleCalendarStatus(
+      configured: readBoolOrFalse(result, 'configured'),
+      connected: readBoolOrFalse(result, 'connected'),
+      lastSyncedAt: readOptionalTimestamp(result, 'lastSyncedAt')?.value,
+    );
+  }
+
+  Future<String?> connect() async {
+    final res = await ref
+        .read(apiClientProvider)
+        .post<Object?>(MentorApiPaths.mentorCalendarConnect);
+    final map = readMapOrEmpty(res.data);
+    final result = map['result'] is Map ? readMapOrEmpty(map['result']) : map;
+    return readOptionalString(result, 'url');
+  }
+
+  Future<void> syncNow() async {
+    await ref
+        .read(apiClientProvider)
+        .post<Object?>(MentorApiPaths.mentorCalendarSync);
+    if (!ref.mounted) return;
+    ref.invalidateSelf();
+  }
+
+  Future<void> disconnect() async {
+    await ref
+        .read(apiClientProvider)
+        .delete<Object?>(MentorApiPaths.mentorCalendar);
+    if (!ref.mounted) return;
+    ref.invalidateSelf();
+  }
 }

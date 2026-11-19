@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
@@ -6,18 +7,27 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_header.dart';
+import 'package:rikipath_mobile/features/vocabulary/presentation/widgets/japanese_dictionary_sheet.dart';
 
-class SharedBankScreen extends StatelessWidget {
+class SharedBankScreen extends ConsumerWidget {
   const SharedBankScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.learnerBackground,
       appBar: LearningHeader.detail(
         title: 'Ngân hàng kiến thức',
         subtitle: 'Chọn tài nguyên bạn muốn khám phá',
         onBack: () => popOrGo(context, AppRoutes.learn),
+        actions: [
+          IconButton(
+            key: const ValueKey<String>('shared_bank_kana_dict_button'),
+            tooltip: 'Từ điển Kana → Kanji',
+            icon: const Icon(Icons.translate_rounded),
+            onPressed: () => showJapaneseDictionarySheet(context, ref),
+          ),
+        ],
       ),
       body: SafeArea(
         top: false,

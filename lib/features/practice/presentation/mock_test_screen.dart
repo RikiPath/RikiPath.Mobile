@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/riki_audio_player.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
 import 'package:rikipath_mobile/features/mock_test/domain/mock_test.dart';
@@ -388,13 +389,26 @@ class _MockQuestionView extends ConsumerWidget {
               Text(question.content, style: AppTypography.sectionTitle),
               if (question.audioUrl != null) ...[
                 const SizedBox(height: AppSpacing.space3),
-                _MockAudioPlayerBanner(audioUrl: question.audioUrl!),
-              ] else if (question.imageUrl != null) ...[
-                const SizedBox(height: AppSpacing.space2),
-                Text(
-                  context.l10n.mockMediaAvailable,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.learnerTextSecondary,
+                RikiNetworkAudioPlayer(
+                  key: ValueKey<String>('mock_audio_${question.id}'),
+                  audioUrl: question.audioUrl!,
+                  title: 'Bài nghe JLPT (Audio)',
+                ),
+              ],
+              if (question.imageUrl != null) ...[
+                const SizedBox(height: AppSpacing.space3),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    question.imageUrl!,
+                    key: ValueKey<String>('mock_image_${question.id}'),
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => Text(
+                      context.l10n.mockMediaAvailable,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.learnerTextSecondary,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -744,71 +758,6 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-
-class _MockAudioPlayerBanner extends StatefulWidget {
-  const _MockAudioPlayerBanner({required this.audioUrl});
-
-  final String audioUrl;
-
-  @override
-  State<_MockAudioPlayerBanner> createState() => _MockAudioPlayerBannerState();
-}
-
-class _MockAudioPlayerBannerState extends State<_MockAudioPlayerBanner> {
-  bool _isPlaying = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space3,
-        vertical: AppSpacing.space2,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.brandTint,
-        borderRadius: BorderRadius.circular(AppRadius.input),
-        border: Border.all(color: AppColors.borderSubtlePink),
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(
-              _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
-              color: AppColors.brandPrimary,
-              size: 32,
-            ),
-            onPressed: () {
-              setState(() {
-                _isPlaying = !_isPlaying;
-              });
-            },
-          ),
-          const SizedBox(width: AppSpacing.space2),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Bài nghe JLPT (Audio)',
-                  style: AppTypography.badgeText.copyWith(
-                    color: AppColors.brandPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  _isPlaying ? 'Đang phát âm thanh...' : 'Bấm để nghe đoạn hội thoại',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.learnerTextSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _MockCheckboxOptionTile extends StatelessWidget {
   const _MockCheckboxOptionTile({

@@ -301,7 +301,7 @@ class SakuraEventDetailSheet extends ConsumerWidget {
                       const SizedBox(width: AppSpacing.space3),
                       Expanded(
                         child: Text(
-                          'Buổi tư vấn đã bị hủy',
+                          'Buổi học đã bị hủy',
                           style: AppTypography.bodySmall.copyWith(
                             color: const Color(0xFFDC2626),
                             fontWeight: FontWeight.w600,

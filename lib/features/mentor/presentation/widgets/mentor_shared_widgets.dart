@@ -448,7 +448,7 @@ class MentorGreetingHeader extends StatelessWidget {
     final levelTag = profile?.jlptLevel?.trim();
     final subtitle = (levelTag != null && levelTag.isNotEmpty)
         ? 'Không gian cố vấn · Chuyên môn JLPT $levelTag'
-        : 'Không gian cố vấn · Hướng dẫn học viên 1-1';
+        : 'Không gian cố vấn · Lớp học nhóm JLPT';
 
     return Row(
       key: const Key('mentor_greeting_header'),
@@ -516,7 +516,7 @@ class SakuraMentorHeroBanner extends StatelessWidget {
       container: true,
       button: onTap != null,
       label:
-          'Đồng hành cùng học viên. Quản lý buổi tư vấn và chia sẻ kinh nghiệm JLPT.',
+          'Đồng hành cùng học viên. Quản lý lớp học nhóm và chia sẻ kinh nghiệm JLPT.',
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -645,7 +645,7 @@ class SakuraMentorHeroBanner extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Quản lý buổi tư vấn và chia sẻ kinh nghiệm JLPT.',
+                                'Quản lý lớp học nhóm và chia sẻ kinh nghiệm JLPT.',
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.bodySmall.copyWith(

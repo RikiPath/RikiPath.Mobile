@@ -190,6 +190,44 @@ void main() {
         ),
         contains('thử lại sau'),
       );
+      expect(
+        appErrorMessage(
+          const ServerError(
+            statusCode: 503,
+            errorCode: 'HOMEWORK_AI_DRAFT_UNAVAILABLE',
+          ),
+          l10n,
+        ),
+        contains('Chưa tạo được gợi ý chấm bằng AI'),
+      );
+      expect(
+        appErrorMessage(
+          const ConflictError(errorCode: 'HOMEWORK_SUBMISSION_CHANGED'),
+          l10n,
+        ),
+        contains('Học viên vừa nộp phiên bản mới'),
+      );
+      expect(
+        appErrorMessage(
+          const ServerError(statusCode: 403, errorCode: 'AI_CREDIT_REQUIRED'),
+          l10n,
+        ),
+        contains('chưa có lượt AI'),
+      );
+      expect(
+        appErrorMessage(
+          const ConflictError(errorCode: 'TRANSFER_TARGET_FULL'),
+          l10n,
+        ),
+        'Lớp đích đã đủ sĩ số.',
+      );
+      expect(
+        appErrorMessage(
+          const ValidationError(errorCode: 'COMPLAINT_EVIDENCE_INVALID'),
+          l10n,
+        ),
+        contains('Tệp minh chứng không hợp lệ'),
+      );
     });
   });
 }

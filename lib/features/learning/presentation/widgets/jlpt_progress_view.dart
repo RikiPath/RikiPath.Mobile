@@ -9,11 +9,13 @@ class JlptProgressView extends StatelessWidget {
   const JlptProgressView({
     required this.snapshot,
     required this.onOpenRoadmap,
+    this.onContinueStudy,
     super.key,
   });
 
   final LearningSnapshot snapshot;
   final VoidCallback onOpenRoadmap;
+  final VoidCallback? onContinueStudy;
 
   @override
   Widget build(BuildContext context) {
@@ -30,15 +32,11 @@ class JlptProgressView extends StatelessWidget {
         const SizedBox(height: AppSpacing.space5),
         _SkillProgressCard(skills: snapshot.skillProgress),
         const SizedBox(height: AppSpacing.space5),
-        Semantics(
-          enabled: false,
-          hint: context.l10n.lessonDetailsComingSoon,
-          child: RikiPrimaryButton(
-            key: const ValueKey<String>('progress_continue_lesson_button'),
-            label: context.l10n.continueStudy,
-            trailingIcon: Icons.arrow_forward,
-            onPressed: null,
-          ),
+        RikiPrimaryButton(
+          key: const ValueKey<String>('progress_continue_lesson_button'),
+          label: context.l10n.continueStudy,
+          trailingIcon: Icons.arrow_forward,
+          onPressed: onContinueStudy,
         ),
         const SizedBox(height: AppSpacing.space3),
         RikiSecondaryButton(

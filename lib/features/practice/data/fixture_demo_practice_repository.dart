@@ -108,8 +108,8 @@ class FixtureDemoPracticeRepository implements DemoPracticeRepository {
   static const List<DemoMentorPlan> _plans = [
     DemoMentorPlan(
       id: 'fixture-plan-focused',
-      name: 'Gói sửa lộ trình 1:1',
-      description: 'Một buổi 30 phút cùng Mentor để rà soát mục tiêu JLPT.',
+      name: 'Gói ôn tập JLPT chuyên sâu',
+      description: 'Một buổi học nhóm cùng Mentor để rà soát mục tiêu JLPT.',
       priceLabel: 'Demo checkout',
     ),
   ];

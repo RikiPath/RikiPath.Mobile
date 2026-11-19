@@ -2,4 +2,5 @@ import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.da
 
 abstract interface class LearnerMentorRepository {
   Future<List<BookableMentor>> loadMentors();
+  Future<BookableMentor?> loadPublicProfile(int mentorId);
 }

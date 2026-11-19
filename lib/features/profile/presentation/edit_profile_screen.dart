@@ -25,27 +25,21 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  String? _firstNameError;
-  String? _lastNameError;
+  final _fullNameController = TextEditingController();
+  String? _fullNameError;
   bool _initialized = false;
   bool _isDirty = false;
-  String _baselineFirstName = '';
-  String _baselineLastName = '';
+  String _baselineFullName = '';
 
   @override
   void initState() {
     super.initState();
-    _firstNameController.addListener(_syncDirty);
-    _lastNameController.addListener(_syncDirty);
+    _fullNameController.addListener(_syncDirty);
   }
 
   void _syncDirty() {
     if (!_initialized) return;
-    final dirty =
-        _firstNameController.text.trim() != _baselineFirstName ||
-        _lastNameController.text.trim() != _baselineLastName;
+    final dirty = _fullNameController.text.trim() != _baselineFullName;
     if (dirty != _isDirty && mounted) {
       setState(() => _isDirty = dirty);
     }
@@ -53,39 +47,36 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   void dispose() {
-    _firstNameController.removeListener(_syncDirty);
-    _lastNameController.removeListener(_syncDirty);
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _fullNameController.removeListener(_syncDirty);
+    _fullNameController.dispose();
     super.dispose();
   }
 
   void _initialize(UserProfile profile) {
-    _baselineFirstName = profile.firstName.trim();
-    _baselineLastName = profile.lastName.trim();
+    _baselineFullName = profile.fullName.trim();
     if (_initialized) return;
-    _firstNameController.text = profile.firstName;
-    _lastNameController.text = profile.lastName;
+    _fullNameController.text = profile.fullName;
     _initialized = true;
   }
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
-    final firstName = _firstNameController.text.trim();
-    final lastName = _lastNameController.text.trim();
+    final fullName = _fullNameController.text.trim().replaceAll(
+      RegExp(r'\s+'),
+      ' ',
+    );
     setState(() {
-      _firstNameError = firstName.isEmpty
-          ? context.l10n.validationFirstNameRequired
-          : null;
-      _lastNameError = lastName.isEmpty
-          ? context.l10n.validationLastNameRequired
+      _fullNameError = fullName.isEmpty
+          ? (Localizations.localeOf(context).languageCode == 'ja'
+                ? '氏名を入力してください。'
+                : 'Vui lòng nhập họ và tên.')
           : null;
     });
-    if (_firstNameError != null || _lastNameError != null) return;
+    if (_fullNameError != null) return;
 
     await ref
         .read(userProfileControllerProvider.notifier)
-        .updateName(firstName: firstName, lastName: lastName);
+        .updateName(fullName: fullName);
   }
 
   Future<void> _pickAvatar() async {
@@ -147,8 +138,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         _initialized &&
         loadedProfile != null &&
         mutation == null &&
-        (_firstNameController.text.trim() != loadedProfile.firstName.trim() ||
-            _lastNameController.text.trim() != loadedProfile.lastName.trim());
+        _fullNameController.text.trim() != loadedProfile.fullName.trim();
     final canPopRoute =
         !hasUnsavedChanges &&
         (GoRouter.maybeOf(context)?.canPop() ??
@@ -186,9 +176,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.space5),
-            child: RikiErrorBanner(
-              title: context.l10n.profileLoadFailedTitle,
-              message: userProfileErrorMessage(error, context.l10n),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RikiErrorBanner(
+                  title: context.l10n.profileLoadFailedTitle,
+                  message: userProfileErrorMessage(error, context.l10n),
+                ),
+                const SizedBox(height: AppSpacing.space3),
+                RikiSecondaryButton(
+                  label: context.l10n.retry,
+                  onPressed: () =>
+                      ref.read(userProfileControllerProvider.notifier).retry(),
+                ),
+              ],
             ),
           ),
         ),
@@ -286,43 +287,23 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 const SizedBox(height: AppSpacing.space6),
                 ProfileFormSection(
                   title: context.l10n.profileNameSection,
-                  child: Column(
-                    children: [
-                      RikiTextField(
-                        key: const ValueKey<String>('profile_last_name_field'),
-                        label: context.l10n.lastName,
-                        hintText: context.l10n.lastNameHint,
-                        controller: _lastNameController,
-                        errorText: _lastNameError,
-                        enabled: !isBusy,
-                        textInputAction: TextInputAction.next,
-                        autofillHints: const [AutofillHints.familyName],
-                        onChanged: (_) {
-                          if (_lastNameError != null) {
-                            setState(() => _lastNameError = null);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.fieldGap),
-                      RikiTextField(
-                        key: const ValueKey<String>('profile_first_name_field'),
-                        label: context.l10n.firstName,
-                        hintText: context.l10n.firstNameHint,
-                        controller: _firstNameController,
-                        errorText: _firstNameError,
-                        enabled: !isBusy,
-                        textInputAction: TextInputAction.done,
-                        autofillHints: const [AutofillHints.givenName],
-                        onChanged: (_) {
-                          if (_firstNameError != null) {
-                            setState(() => _firstNameError = null);
-                          }
-                        },
-                        onSubmitted: (_) {
-                          if (!isBusy) _submit();
-                        },
-                      ),
-                    ],
+                  child: RikiTextField(
+                    key: const ValueKey<String>('profile_full_name_field'),
+                    label: context.l10n.fullName,
+                    hintText: context.l10n.fullNameHint,
+                    controller: _fullNameController,
+                    errorText: _fullNameError,
+                    enabled: !isBusy,
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.name],
+                    onChanged: (_) {
+                      if (_fullNameError != null) {
+                        setState(() => _fullNameError = null);
+                      }
+                    },
+                    onSubmitted: (_) {
+                      if (!isBusy) _submit();
+                    },
                   ),
                 ),
                 const SizedBox(height: AppSpacing.space5),

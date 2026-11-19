@@ -14,6 +14,13 @@ final learnerMentorListControllerProvider =
       retry: (_, _) => null,
     );
 
+final learnerMentorPublicProfileProvider = FutureProvider.autoDispose
+    .family<BookableMentor?, int>((ref, mentorId) async {
+      return ref
+          .watch(learnerMentorRepositoryProvider)
+          .loadPublicProfile(mentorId);
+    });
+
 class LearnerMentorListController extends AsyncNotifier<List<BookableMentor>> {
   @override
   Future<List<BookableMentor>> build() {

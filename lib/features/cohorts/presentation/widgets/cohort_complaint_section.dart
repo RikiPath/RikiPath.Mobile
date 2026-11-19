@@ -266,12 +266,18 @@ class _CohortComplaintSectionState
             children: [
               OutlinedButton.icon(
                 key: const Key('complaint_evidence_button'),
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
                 onPressed: _pickEvidence,
                 icon: const Icon(Icons.attach_file),
-                label: Text(_evidence?.name ?? 'Minh chứng (PDF/PNG/JPG ≤10MB)'),
+                label: Text(
+                  _evidence?.name ?? 'Minh chứng (PDF/PNG/JPG ≤10MB)',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               ElevatedButton(
                 key: const Key('complaint_submit_button'),
+                style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
                 onPressed: _submit,
                 child: const Text('Gửi khiếu nại'),
               ),

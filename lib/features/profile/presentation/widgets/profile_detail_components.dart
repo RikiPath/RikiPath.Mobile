@@ -8,6 +8,7 @@ import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/notifications/application/push_notification_service.dart';
 
 class ProfileDetailHeader extends StatelessWidget
     implements PreferredSizeWidget {
@@ -751,7 +752,12 @@ Future<bool> confirmAndPerformLogout({
       context,
       title: l10n.loadingOverlayLoggingOutTitle,
       subtitle: l10n.loadingOverlayWaitSubtitle,
-      action: session.signOut,
+      action: () => session.signOut(
+        onBeforeClear: () => ref
+            .read(pushNotificationServiceProvider)
+            .unregisterDeviceToken()
+            .timeout(const Duration(seconds: 3)),
+      ),
     );
     toast.success(
       title: l10n.logoutSuccessTitle,

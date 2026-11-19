@@ -1013,6 +1013,78 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  group('Payment Deep Link Resolution', () {
+    test(
+      'resolves custom scheme and HTTP payment return URIs by role and query',
+      () {
+        expect(
+          resolvePaymentDeepLinkRoute(
+            Uri.parse('rikipath://payment-success'),
+            authState: AuthSessionState.authenticated,
+            role: BackendUserRole.learner,
+          ),
+          AppRoutes.learnerMyCourses,
+        );
+        expect(
+          resolvePaymentDeepLinkRoute(
+            Uri.parse('rikipath://payment-cancel'),
+            authState: AuthSessionState.authenticated,
+            role: BackendUserRole.learner,
+          ),
+          AppRoutes.learnerMyCourses,
+        );
+        expect(
+          resolvePaymentDeepLinkRoute(
+            Uri.parse('/payment-success?purchaseId=5'),
+            authState: AuthSessionState.authenticated,
+            role: BackendUserRole.learner,
+          ),
+          AppRoutes.profileSubscriptions,
+        );
+        expect(
+          resolvePaymentDeepLinkRoute(
+            Uri.parse('https://app.rikipath.test/payment-success?courseId=12'),
+            authState: AuthSessionState.authenticated,
+            role: BackendUserRole.learner,
+          ),
+          AppRoutes.learnerCohortDetail(12),
+        );
+        expect(
+          resolvePaymentDeepLinkRoute(
+            Uri.parse('rikipath://payment-success?courseId=12'),
+            authState: AuthSessionState.authenticated,
+            role: BackendUserRole.mentor,
+          ),
+          AppRoutes.mentor,
+        );
+        expect(
+          resolvePaymentDeepLinkRoute(
+            Uri.parse('rikipath://payment-success'),
+            authState: AuthSessionState.unauthenticated,
+            role: null,
+          ),
+          AppRoutes.login,
+        );
+        expect(
+          resolvePaymentDeepLinkRoute(
+            Uri.parse('rikipath://payment-success'),
+            authState: AuthSessionState.unknown,
+            role: null,
+          ),
+          AppRoutes.splash,
+        );
+        expect(
+          resolvePaymentDeepLinkRoute(
+            Uri.parse('/cohorts'),
+            authState: AuthSessionState.authenticated,
+            role: BackendUserRole.learner,
+          ),
+          isNull,
+        );
+      },
+    );
+  });
 }
 
 Future<GoRouter> _pumpRouter(
@@ -1151,10 +1223,8 @@ class _RouterProfileRepository implements UserProfileRepository {
   Future<UserProfile> loadProfile() async => _profile;
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) async => _profile;
+  Future<UserProfile> updateProfile({required String fullName}) async =>
+      _profile;
 
   @override
   Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) async =>

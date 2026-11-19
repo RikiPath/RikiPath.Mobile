@@ -255,13 +255,51 @@ class SignalRMeetingRealtimeClient implements MeetingRealtimeClient {
       for (final track in _localStream?.getAudioTracks() ?? const []) {
         track.enabled = false;
       }
-      _emit(_snapshot.copyWith(isMicOn: false));
+      _emit(
+        _snapshot.copyWith(
+          isMicOn: false,
+          stageNotice: 'Cố vấn đã tắt micro của bạn.',
+        ),
+      );
       await _broadcastMediaState();
     });
     hub.on('PresentationForceStopped', (_) {
-      _emit(_snapshot.copyWith(mediaWarning: 'presentationForceStopped'));
+      _emit(
+        _snapshot.copyWith(
+          mediaWarning: 'presentationForceStopped',
+          clearPresenter: true,
+        ),
+      );
       unawaited(_broadcastMediaState());
     });
+    hub.on('RoomReady', (arguments) {
+      final map = _mapArgument(arguments, 0);
+      if (map == null) return;
+      _emit(
+        _snapshot.copyWith(
+          isRoomReady: _boolean(map, 'isReady', 'IsReady', fallback: false),
+        ),
+      );
+    });
+    hub.on('ParticipantJoined', (arguments) {
+      final map = _mapArgument(arguments, 0);
+      final name = map?['name'] ?? map?['Name'];
+      if (name is String && name.trim().isNotEmpty) {
+        _emit(_snapshot.copyWith(stageNotice: '${name.trim()} đã vào phòng.'));
+      }
+    });
+    hub.on('ParticipantReconnected', (_) {
+      _emit(_snapshot.copyWith(stageNotice: 'Có thành viên vừa kết nối lại.'));
+    });
+    hub.on('ParticipantLeft', (arguments) {
+      final map = _mapArgument(arguments, 0);
+      final connId = _stringArgument([map?['connectionId'] ?? map?['ConnectionId']], 0);
+      if (connId != null && _snapshot.presenterConnectionId == connId) {
+        _emit(_snapshot.copyWith(clearPresenter: true));
+      }
+    });
+    hub.on('PresenceChanged', (_) {});
+    hub.on('AttendanceUpdated', (_) {});
     hub.onreconnecting(({error}) {
       if (_leaving || _disposed) return;
       _emit(_snapshot.copyWith(status: MeetingConnectionStatus.reconnecting));
@@ -312,6 +350,35 @@ class SignalRMeetingRealtimeClient implements MeetingRealtimeClient {
         clearError: true,
       ),
     );
+    unawaited(_loadChatHistory(hub, room.roomId));
+  }
+
+  Future<void> _loadChatHistory(HubConnection hub, String roomId) async {
+    try {
+      final raw = await hub.invoke(
+        'GetChatHistory',
+        args: [roomId],
+        timeout: const Duration(seconds: 10),
+      );
+      if (raw is! Iterable) return;
+      final existingIds = _snapshot.messages.map((m) => m.id).toSet();
+      final merged = [..._snapshot.messages];
+      for (final item in raw) {
+        final map = _asMap(item);
+        if (map == null) continue;
+        final msg = MeetingMessage.fromJson(map);
+        if (msg.id.isNotEmpty &&
+            msg.text.trim().isNotEmpty &&
+            existingIds.add(msg.id)) {
+          merged.add(msg);
+        }
+      }
+      if (!_disposed && merged.length != _snapshot.messages.length) {
+        _emit(_snapshot.copyWith(messages: merged));
+      }
+    } catch (_) {
+      // Older hubs or transient reconnects must not fail room connection.
+    }
   }
 
   Future<void> _rejoinAfterReconnect() async {
@@ -389,6 +456,25 @@ class SignalRMeetingRealtimeClient implements MeetingRealtimeClient {
     await _invokeRoomMethod('SendChatMessage', [
       {'id': id, 'text': safeText, 'timestamp': timestamp},
     ]);
+  }
+
+  @override
+  Future<void> muteParticipant(String targetConnectionId) {
+    return _invokeRoomMethod('MuteParticipant', [targetConnectionId]);
+  }
+
+  @override
+  Future<void> startPresenting() async {
+    await _invokeRoomMethod('StartPresenting', const []);
+    _emit(
+      _snapshot.copyWith(presenterConnectionId: _snapshot.self?.connectionId),
+    );
+  }
+
+  @override
+  Future<void> stopPresenting() async {
+    await _invokeRoomMethod('StopPresenting', const []);
+    _emit(_snapshot.copyWith(clearPresenter: true));
   }
 
   @override

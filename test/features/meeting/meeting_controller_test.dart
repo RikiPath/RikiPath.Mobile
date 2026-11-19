@@ -99,6 +99,45 @@ void main() {
     expect(controller.state.participants.single.isMicOn, isFalse);
   });
 
+  test(
+    'MeetingMessage.fromJson parses sentAt/SentAt into local HH:mm fallback',
+    () {
+      final sentAtUtc = DateTime.utc(2026, 11, 18, 12, 5);
+      final local = sentAtUtc.toLocal();
+      final expectedHhMm =
+          '${local.hour.toString().padLeft(2, '0')}:'
+          '${local.minute.toString().padLeft(2, '0')}';
+
+      final camel = MeetingMessage.fromJson({
+        'id': '1',
+        'sender': 'Mentor Tanaka',
+        'role': 'Mentor',
+        'text': 'Xin chào',
+        'sentAt': sentAtUtc.toIso8601String(),
+      });
+      expect(camel.timestamp, expectedHhMm);
+
+      final pascal = MeetingMessage.fromJson({
+        'Id': '2',
+        'Sender': 'Học viên',
+        'Role': 'Learner',
+        'Text': 'Konbanwa',
+        'SentAt': sentAtUtc.toIso8601String(),
+      });
+      expect(pascal.timestamp, expectedHhMm);
+
+      final explicit = MeetingMessage.fromJson({
+        'id': '3',
+        'sender': 'System',
+        'role': 'System',
+        'text': 'Joined',
+        'timestamp': '09:30',
+        'sentAt': sentAtUtc.toIso8601String(),
+      });
+      expect(explicit.timestamp, '09:30');
+    },
+  );
+
   test('invalid room authorization is exposed as a failed state', () async {
     client.failConnect = true;
 
@@ -268,6 +307,19 @@ class _FakeMeetingRealtimeClient implements MeetingRealtimeClient {
 
   @override
   Future<void> pause() async {}
+
+  @override
+  Future<void> muteParticipant(String targetConnectionId) async {}
+
+  @override
+  Future<void> startPresenting() async {
+    emit(_snapshot.copyWith(presenterConnectionId: _snapshot.self?.connectionId));
+  }
+
+  @override
+  Future<void> stopPresenting() async {
+    emit(_snapshot.copyWith(clearPresenter: true));
+  }
 
   @override
   Future<void> resume() async {}

@@ -79,7 +79,7 @@ class AccountSettingsScreen extends ConsumerWidget {
           isJa: isJa,
           currentEmail: currentEmail,
           changePasswordRoute: AppRoutes.profileChangePassword,
-          changeEmailRoute: null,
+          changeEmailRoute: AppRoutes.profileChangeEmail,
           notificationsRoute: AppRoutes.profileNotifications,
         ),
       );

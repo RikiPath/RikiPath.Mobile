@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/widgets/jlpt_badge.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/catalog/application/jlpt_catalog_controller.dart';
 import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart';
 import 'package:rikipath_mobile/features/mock_test/application/mock_test_controller.dart';
+import 'package:rikipath_mobile/features/mock_test/data/api_mock_test_repository.dart';
 import 'package:rikipath_mobile/features/mock_test/domain/mock_test.dart';
 
 class MockTestLevelGroup {
@@ -50,4 +52,27 @@ final mockTestLibraryProvider =
           .where((group) => group.tests.isNotEmpty)
           .toList(growable: false)
         ..sort((a, b) => a.level.sortOrder.compareTo(b.level.sortOrder));
+    });
+
+final mockTestLibraryHistoryProvider =
+    FutureProvider.autoDispose<List<MockTestHistoryRecord>>((ref) async {
+      ref.watch(authenticatedUserIdProvider);
+      final repository = ref.watch(mockTestRepositoryProvider);
+      if (repository is ApiMockTestRepository) {
+        return repository.loadHistory();
+      }
+      return const <MockTestHistoryRecord>[];
+    });
+
+final mockTestWrongQuestionsProvider = FutureProvider.autoDispose
+    .family<List<MockTestWrongQuestionCard>, int?>((
+      ref,
+      practiceTestId,
+    ) async {
+      ref.watch(authenticatedUserIdProvider);
+      final repository = ref.watch(mockTestRepositoryProvider);
+      if (repository is ApiMockTestRepository) {
+        return repository.loadWrongQuestions(practiceTestId: practiceTestId);
+      }
+      return const <MockTestWrongQuestionCard>[];
     });

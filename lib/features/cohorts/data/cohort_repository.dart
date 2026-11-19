@@ -59,12 +59,23 @@ abstract interface class CohortRepository {
     String? entitlementReference,
   });
   Future<void> reconcileCoursePayment(int courseId);
+  Future<void> cancelPendingEnrollment(int courseId);
   Future<List<LearnerStudyCourseDetail>> fetchMyCourses();
   Future<void> cancelCohortEnrollment({
     required int courseId,
     String? reason,
   });
   Future<List<CohortHomeworkAssignment>> fetchCohortHomework(int cohortId);
+  Future<({Uint8List bytes, String contentType})> downloadHomeworkScan(
+    int assignmentId,
+  );
+  Future<({Uint8List bytes, String contentType})> downloadTransferEvidence(
+    int requestId,
+  );
+  Future<({Uint8List bytes, String contentType})> downloadRetakeEvidence({
+    required int courseId,
+    required int requestId,
+  });
   Future<void> submitHomeworkText({
     required int assignmentId,
     required String textContent,
@@ -357,6 +368,43 @@ class ApiCohortRepository implements CohortRepository {
       '/api/study-courses/$courseId/payment/reconcile',
     );
   }
+
+  @override
+  Future<void> cancelPendingEnrollment(int courseId) async {
+    await _apiClient.post<Object?>(
+      '/api/study-courses/$courseId/cancel-pending-enrollment',
+    );
+  }
+
+  Future<({Uint8List bytes, String contentType})> _downloadBinary(
+    String path,
+  ) async {
+    final res = await _apiClient.get<List<int>>(
+      path,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    final raw = res.data ?? const <int>[];
+    final header =
+        res.headers.value(Headers.contentTypeHeader) ?? 'application/octet-stream';
+    final contentType = header.split(';').first.trim();
+    return (bytes: Uint8List.fromList(raw), contentType: contentType);
+  }
+
+  @override
+  Future<({Uint8List bytes, String contentType})> downloadHomeworkScan(
+    int assignmentId,
+  ) => _downloadBinary('/api/homework/$assignmentId/scan');
+
+  @override
+  Future<({Uint8List bytes, String contentType})> downloadTransferEvidence(
+    int requestId,
+  ) => _downloadBinary('/api/study-courses/transfer-requests/$requestId/evidence');
+
+  @override
+  Future<({Uint8List bytes, String contentType})> downloadRetakeEvidence({
+    required int courseId,
+    required int requestId,
+  }) => _downloadBinary('/api/study-courses/$courseId/retake/$requestId/evidence');
 
   @override
   Future<List<LearnerStudyCourseDetail>> fetchMyCourses() async {

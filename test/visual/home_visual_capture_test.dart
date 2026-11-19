@@ -488,10 +488,8 @@ class _ProfileRepository implements UserProfileRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) => throw UnimplementedError();
+  Future<UserProfile> updateProfile({required String fullName}) =>
+      throw UnimplementedError();
 
   @override
   Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) =>

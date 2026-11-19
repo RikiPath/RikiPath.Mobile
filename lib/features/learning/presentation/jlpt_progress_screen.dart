@@ -34,6 +34,9 @@ class JlptProgressScreen extends ConsumerWidget {
           ),
           data: (data) => JlptProgressView(
             snapshot: data,
+            onContinueStudy: data.hasCurrentLesson
+                ? () => context.push(AppRoutes.lesson(data.currentLesson.routeId))
+                : () => context.go(AppRoutes.learnRoadmap),
             onOpenRoadmap: () => context.go(AppRoutes.learnRoadmap),
           ),
         ),

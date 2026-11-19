@@ -70,6 +70,35 @@ const Set<String> _serverMessageCodes = {
   'COHORT_SESSION_DUPLICATE',
   'COHORT_SCHEDULE_CONFLICT',
   'COHORT_FULL',
+  'HOMEWORK_AI_DRAFT_UNAVAILABLE',
+  'HOMEWORK_SUBMISSION_CHANGED',
+  'HOMEWORK_ALREADY_GRADED',
+  'HOMEWORK_CLOSED',
+  'HOMEWORK_EXERCISES_INCOMPLETE',
+  'AI_CREDIT_REQUIRED',
+  'SELF_STUDY_PACKAGE_REQUIRED',
+  'WRITING_PACKAGE_REQUIRED',
+  'ENROLLMENT_CUTOFF_PASSED',
+  'RESERVATION_EXPIRED',
+  'LATE_PAYMENT_AFTER_CANCEL_OR_FAILURE',
+  'COHORT_ENTITLEMENT_INVALID',
+  'COHORT_PLAN_CHANGED',
+  'COHORT_SCHEDULE_PENDING',
+  'TRANSFER_TARGET_FULL',
+  'TRANSFER_SCHEDULE_CONFLICT',
+  'TRANSFER_REQUEST_ALREADY_PENDING',
+  'TRANSFER_TARGET_STARTED',
+  'TRANSFER_TARGET_CUTOFF',
+  'TRANSFER_LEVEL_MISMATCH',
+  'TRANSFER_CURRICULUM_MISMATCH',
+  'TRANSFER_RETAKE_UNSUPPORTED',
+  'TRANSFER_DISABLED_BY_POLICY',
+  'TRANSFER_EVIDENCE_INVALID',
+  'COMPLAINT_REFUND_REVIEW_NOT_ALLOWED',
+  'COMPLAINT_ALREADY_DECIDED',
+  'COMPLAINT_EVIDENCE_INVALID',
+  'COMPLAINT_MENTOR_RESPONSE_NOT_ALLOWED',
+  'COMPLAINT_STALE',
 };
 
 const Map<String, String> _codeMessages = {
@@ -101,12 +130,46 @@ const Map<String, String> _codeMessages = {
   'COHORT_ALREADY_ENROLLED': 'Bạn đã ghi danh lớp này.',
   'COHORT_SCHEDULE_CONFLICT':
       'Lịch lớp trùng với lịch học khác của bạn. Vui lòng chọn lớp khác.',
+  'COHORT_ENTITLEMENT_INVALID':
+      'Mã quyền học lớp nhóm không hợp lệ hoặc đã hết hạn.',
+  'COHORT_PLAN_CHANGED':
+      'Thông tin gói học của lớp vừa được cập nhật. Vui lòng tải lại.',
+  'COHORT_SCHEDULE_PENDING':
+      'Lớp đang điều chỉnh lịch học nên tạm chưa nhận ghi danh.',
+  'ENROLLMENT_CUTOFF_PASSED':
+      'Đã quá thời hạn đăng ký vào lớp này.',
+  'RESERVATION_EXPIRED':
+      'Thời gian giữ chỗ thanh toán đã hết hạn. Vui lòng đăng ký lại.',
+  'LATE_PAYMENT_AFTER_CANCEL_OR_FAILURE':
+      'Giao dịch hoàn tất sau khi giữ chỗ đã hết hạn; vui lòng liên hệ hỗ trợ hoặc gửi khiếu nại.',
   'PAYMENT_GATEWAY_INVALID_LINK':
       'Cổng thanh toán chưa tạo được liên kết hợp lệ. Vui lòng thử lại sau.',
   'COHORT_CANCELLATION_NOT_ALLOWED':
       'Khóa học đã bắt đầu nên không thể tự hủy ghi danh.',
   'TRANSFER_SOURCE_STARTED':
       'Khóa học đã bắt đầu nên không thể chuyển lớp.',
+  'TRANSFER_TARGET_FULL': 'Lớp đích đã đủ sĩ số.',
+  'TRANSFER_SCHEDULE_CONFLICT':
+      'Lịch học của lớp đích trùng với lịch học khác của bạn.',
+  'TRANSFER_REQUEST_ALREADY_PENDING':
+      'Bạn đang có một yêu cầu chuyển lớp chờ duyệt.',
+  // Homework (PR #70 + Cohort).
+  'HOMEWORK_AI_DRAFT_UNAVAILABLE':
+      'Chưa tạo được gợi ý chấm bằng AI. Mentor có thể xem bài nộp và chấm trực tiếp.',
+  'HOMEWORK_SUBMISSION_CHANGED':
+      'Học viên vừa nộp phiên bản mới. Vui lòng tải lại trước khi công bố điểm.',
+  'HOMEWORK_ALREADY_GRADED':
+      'Bài tập này đã được chấm điểm nên không thể nộp lại.',
+  'HOMEWORK_CLOSED': 'Bài tập đã đóng hoặc không còn mở nộp.',
+  'HOMEWORK_EXERCISES_INCOMPLETE':
+      'Vui lòng hoàn thành các bài luyện tập đính kèm trước khi nộp.',
+  // AI / Subscriptions gates.
+  'AI_CREDIT_REQUIRED':
+      'Bạn chưa có lượt AI cho tính năng này. Vào Mua gói để mua thêm lượt.',
+  'SELF_STUDY_PACKAGE_REQUIRED':
+      'Bạn cần kích hoạt gói tự học để sử dụng nội dung này.',
+  'WRITING_PACKAGE_REQUIRED':
+      'Bạn cần gói luyện viết AI để chấm bài viết.',
   // Cohort schedule requests.
   'COHORT_SCHEDULE_REQUEST_PENDING':
       'Lớp đang có một yêu cầu dời lịch/hủy lớp chờ xử lý.',
@@ -119,11 +182,22 @@ const Map<String, String> _codeMessages = {
   'COHORT_ALREADY_STARTED': 'Lớp đã bắt đầu nên không thể thay đổi lịch.',
   'COHORT_SCHEDULE_REQUEST_REASON_REQUIRED':
       'Vui lòng nhập lý do cho yêu cầu.',
-  // Cohort reviews.
+  // Cohort reviews & complaints.
   'COHORT_REVIEW_NOT_ELIGIBLE':
       'Bạn chỉ có thể đánh giá Mentor đã dạy bạn ít nhất một buổi.',
   'COHORT_REVIEW_DUPLICATE':
       'Bạn đã đánh giá Mentor này. Bạn có thể chỉnh sửa đánh giá hiện có.',
+  'COHORT_REVIEW_COMMENT_TOO_LONG':
+      'Nội dung nhận xét vượt quá giới hạn ký tự cho phép.',
+  'COMPLAINT_REFUND_REVIEW_NOT_ALLOWED':
+      'Không thể gửi yêu cầu xem xét hoàn tiền cho trạng thái đơn hiện tại.',
+  'COMPLAINT_ALREADY_DECIDED': 'Khiếu nại này đã có quyết định từ Admin.',
+  'COMPLAINT_EVIDENCE_INVALID':
+      'Tệp minh chứng không hợp lệ (hỗ trợ PDF/PNG/JPG ≤10MB).',
+  'COMPLAINT_MENTOR_RESPONSE_NOT_ALLOWED':
+      'Bạn không thể phản hồi khiếu nại này.',
+  'COMPLAINT_STALE':
+      'Khiếu nại vừa được cập nhật. Vui lòng tải lại trang.',
   // Platform-wide.
   'CONCURRENCY_CONFLICT':
       'Dữ liệu vừa được cập nhật. Vui lòng tải lại và thử lại.',

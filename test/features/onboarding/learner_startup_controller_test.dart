@@ -287,10 +287,8 @@ class _StartupProfileRepository implements UserProfileRepository {
   }) async => profile;
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) async => profile;
+  Future<UserProfile> updateProfile({required String fullName}) async =>
+      profile;
 
   @override
   Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) async => profile;

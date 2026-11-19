@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/cohorts/data/cohort_repository.dart';
@@ -10,8 +11,27 @@ import 'package:rikipath_mobile/features/cohorts/domain/cohort_operations.dart';
 import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
 import 'package:rikipath_mobile/features/cohorts/presentation/learner_cohort_detail_screen.dart';
 import 'package:rikipath_mobile/features/cohorts/presentation/learner_cohorts_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/learner_my_courses_screen.dart';
 import 'package:rikipath_mobile/features/cohorts/presentation/widgets/cohort_complaint_section.dart';
 import 'package:rikipath_mobile/features/cohorts/presentation/widgets/cohort_completion_summary_card.dart';
+
+class _UngradedHomeworkFakeCohortRepo extends _FakeCohortRepository {
+  _UngradedHomeworkFakeCohortRepo();
+
+  @override
+  Future<List<CohortHomeworkAssignment>> fetchCohortHomework(
+    int cohortId,
+  ) async => [
+    CohortHomeworkAssignment(
+      id: 92,
+      title: 'Bài tập Ngữ pháp Tuần 2',
+      instructions: 'Hoàn thành 5 mẫu câu.',
+      status: 'Assigned',
+      assignmentScope: 'CohortCommon',
+      cohortId: cohortId,
+    ),
+  ];
+}
 
 class _FakeCohortRepository implements CohortRepository {
   _FakeCohortRepository({
@@ -285,6 +305,25 @@ class _FakeCohortRepository implements CohortRepository {
   }
 
   @override
+  Future<void> cancelPendingEnrollment(int courseId) async {}
+
+  @override
+  Future<({Uint8List bytes, String contentType})> downloadHomeworkScan(
+    int assignmentId,
+  ) async => (bytes: Uint8List(0), contentType: 'application/pdf');
+
+  @override
+  Future<({Uint8List bytes, String contentType})> downloadTransferEvidence(
+    int requestId,
+  ) async => (bytes: Uint8List(0), contentType: 'application/pdf');
+
+  @override
+  Future<({Uint8List bytes, String contentType})> downloadRetakeEvidence({
+    required int courseId,
+    required int requestId,
+  }) async => (bytes: Uint8List(0), contentType: 'application/pdf');
+
+  @override
   Future<List<LearnerStudyCourseDetail>> fetchMyCourses() async => [
     LearnerStudyCourseDetail(
       paymentState: paymentState,
@@ -292,7 +331,7 @@ class _FakeCohortRepository implements CohortRepository {
           ? 'https://pay.example.com/checkout/1'
           : null,
       paymentExpiresAt: paymentState == 'AwaitingPayment'
-          ? DateTime(2026, 11, 18, 10, 0)
+          ? DateTime.now().add(const Duration(minutes: 10))
           : null,
       id: 55,
       name: 'N3 Evening Cohort',
@@ -589,6 +628,61 @@ void main() {
         find.textContaining('Ôn 4 đề đọc hiểu cùng Mentor trong 2 tuần.'),
         findsOneWidget,
       );
+    },
+  );
+
+  testWidgets(
+    'LearnerCohortDetailScreen ungraded homework attach button & session CTA render without unbounded width crash under AppTheme.light',
+    (tester) async {
+      final repo = _UngradedHomeworkFakeCohortRepo();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [cohortRepositoryProvider.overrideWithValue(repo)],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('vi'),
+            home: const LearnerCohortDetailScreen(courseId: 55),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Vào phòng'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('Bài tập Ngữ pháp Tuần 2'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(OutlinedButton), findsWidgets);
+    },
+  );
+
+  testWidgets(
+    'LearnerMyCoursesScreen renders localized Vietnamese status badge',
+    (tester) async {
+      final repo = _FakeCohortRepository(courseStatus: 'Active');
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [cohortRepositoryProvider.overrideWithValue(repo)],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('vi'),
+            home: const LearnerMyCoursesScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('N3 Evening Cohort'), findsOneWidget);
+      expect(find.text('Đang học'), findsOneWidget);
     },
   );
 

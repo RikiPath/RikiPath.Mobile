@@ -40,16 +40,14 @@ void main() {
       email: 'learner@example.com',
       password: 'secret',
       confirmPassword: 'secret',
-      firstName: 'Minh Anh',
-      lastName: 'Nguyễn',
+      fullName: 'Nguyễn Minh Anh',
     );
 
     expect(request.toJson(), const <String, Object?>{
       'email': 'learner@example.com',
       'password': 'secret',
       'confirmPassword': 'secret',
-      'firstName': 'Minh Anh',
-      'lastName': 'Nguyễn',
+      'fullName': 'Nguyễn Minh Anh',
     });
   });
 

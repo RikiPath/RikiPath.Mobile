@@ -574,10 +574,14 @@ void main() {
       await _tapVisible(tester, find.byKey(const Key('login_submit_button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Không thể đăng nhập'), findsOneWidget);
+      expect(
+        find.byKey(const Key('login_server_error_banner')),
+        findsOneWidget,
+      );
+      expect(find.text('Không thể đăng nhập'), findsNWidgets(2));
       expect(
         find.textContaining('Email hoặc mật khẩu không đúng'),
-        findsOneWidget,
+        findsNWidgets(2),
       );
     });
   });
@@ -753,8 +757,7 @@ void main() {
         isTrue,
       );
       expect(repository.registerCalls, 1);
-      expect(repository.lastRegisterRequest?.lastName, 'Nguyễn');
-      expect(repository.lastRegisterRequest?.firstName, 'Minh Anh');
+      expect(repository.lastRegisterRequest?.fullName, 'Nguyễn Minh Anh');
 
       completer.complete(_registerResponse);
       await tester.pumpAndSettle();
@@ -1384,10 +1387,7 @@ class _ReturningLearnerProfileRepository implements UserProfileRepository {
   }) async => profile;
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) async => profile;
+  Future<UserProfile> updateProfile({required String fullName}) async => profile;
 
   @override
   Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) async => profile;

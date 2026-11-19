@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/features/catalog/domain/jlpt_level_catalog.dart'
 import 'package:rikipath_mobile/features/grammar/data/api_grammar_repository.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar.dart';
 import 'package:rikipath_mobile/features/grammar/domain/grammar_repository.dart';
+import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 
 final grammarRepositoryProvider = Provider<GrammarRepository>((ref) {
   return ApiGrammarRepository(ref.watch(apiClientProvider));
@@ -184,11 +185,13 @@ class GrammarDetailController extends AsyncNotifier<GrammarDetailState> {
       state = AsyncData(
         state.requireValue.copyWith(isSaving: false, bookmark: bookmark),
       );
+      ref.invalidate(notebookControllerProvider);
       return true;
     } on ConflictError {
       state = AsyncData(
         state.requireValue.copyWith(isSaving: false, alreadySaved: true),
       );
+      ref.invalidate(notebookControllerProvider);
       return true;
     } catch (_) {
       state = AsyncData(

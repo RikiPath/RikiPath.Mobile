@@ -6,8 +6,7 @@ abstract final class UserProfileMapper {
     return UserProfile(
       userId: dto.userId,
       email: dto.email,
-      firstName: dto.firstName,
-      lastName: dto.lastName,
+      fullName: dto.fullName,
       avatarUrl: _nonEmpty(dto.avatarUrl),
       role: dto.role,
       isEmailVerified: dto.isEmailVerified,

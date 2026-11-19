@@ -968,9 +968,9 @@ void main() {
         );
         expect(find.byType(EditProfileScreen), findsOneWidget);
 
-        // Edit first name field
+        // Edit full name field
         await tester.enterText(
-          _textField('profile_first_name_field'),
+          _textField('profile_full_name_field'),
           'Tên Đã Sửa',
         );
         await tester.pumpAndSettle();
@@ -1525,12 +1525,9 @@ class _RegProfileRepository
   }) async => _build();
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) async {
-    _firstName = firstName;
-    _lastName = lastName;
+  Future<UserProfile> updateProfile({required String fullName}) async {
+    _firstName = fullName;
+    _lastName = '';
     return _build();
   }
 
@@ -1777,6 +1774,15 @@ class _RegMentorOperationsRepository implements MentorOperationsRepository {
 }
 
 class _RegMentorScheduleV3Repository implements MentorScheduleV3Repository {
+  @override
+  Future<MentorTeachingConflictReport> previewTeachingConflicts({
+    required List<({DateTime startUtc, DateTime endUtc})> intervals,
+    int? excludeCohortId,
+  }) async => const MentorTeachingConflictReport(
+    isValid: true,
+    conflicts: [],
+  );
+
   @override
   Future<void> deleteAvailability(int availabilityId) async {}
 

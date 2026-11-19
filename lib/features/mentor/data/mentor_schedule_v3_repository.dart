@@ -26,6 +26,11 @@ abstract interface class MentorScheduleV3Repository {
   Future<void> requestCancelAvailabilities(List<int> ids, {String? reason});
 
   Future<void> requestSlotChange(int slotId, String reason);
+
+  Future<MentorTeachingConflictReport> previewTeachingConflicts({
+    required List<({DateTime startUtc, DateTime endUtc})> intervals,
+    int? excludeCohortId,
+  });
 }
 
 class ApiMentorScheduleV3Repository implements MentorScheduleV3Repository {
@@ -110,6 +115,29 @@ class ApiMentorScheduleV3Repository implements MentorScheduleV3Repository {
     await _apiClient.post<Object?>(
       MentorApiPaths.requestSlotChange(slotId),
       data: {'reason': reason.trim()},
+    );
+  }
+
+  @override
+  Future<MentorTeachingConflictReport> previewTeachingConflicts({
+    required List<({DateTime startUtc, DateTime endUtc})> intervals,
+    int? excludeCohortId,
+  }) async {
+    final response = await _apiClient.post<Object?>(
+      MentorApiPaths.scheduleV3ConflictPreview,
+      data: {
+        'intervals': [
+          for (final i in intervals)
+            {
+              'startUtc': i.startUtc.toUtc().toIso8601String(),
+              'endUtc': i.endUtc.toUtc().toIso8601String(),
+            },
+        ],
+        'excludeCohortId': ?excludeCohortId,
+      },
+    );
+    return MentorScheduleV3Dto.conflictReportFromJson(
+      readMentorEnvelopeObject(response.data),
     );
   }
 }

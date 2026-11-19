@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/features/cohorts/data/cohort_json.dart';
@@ -11,7 +14,41 @@ abstract interface class MentorCohortRepository {
   Future<List<StudyCohortSummary>> fetchAssignedCohorts();
   Future<List<MentorCohortRosterEntry>> fetchRoster(int cohortId);
   Future<List<MentorCohortHomeworkItem>> fetchCohortHomework(int cohortId);
-  Future<Map<String, Object?>> fetchLearnerSkillProfile({
+  Future<List<HomeworkCatalogItem>> fetchHomeworkCatalog({
+    String? level,
+    String? search,
+  });
+  Future<void> createCohortHomework({
+    required int cohortId,
+    required String title,
+    String? instructions,
+    DateTime? dueAt,
+    List<int> lessonIds = const [],
+    List<int> practiceExerciseIds = const [],
+    List<int>? targetLearnerIds,
+  });
+  Future<({Uint8List bytes, String contentType})> downloadHomeworkScan(
+    int assignmentId,
+  );
+  Future<MentorHomeworkAiDraft> generateHomeworkAiDraft(int assignmentId);
+  Future<void> publishHomeworkGrade({
+    required int assignmentId,
+    required int submissionId,
+    required double score,
+    required String feedback,
+  });
+  Future<void> confirmSessionAttendance({
+    required int courseId,
+    required int sessionId,
+    required String status,
+    required String note,
+  });
+  Future<void> saveRetakeSupportPlan({
+    required int courseId,
+    required int requestId,
+    required String supportPlan,
+  });
+  Future<MentorLearnerSkillProfile> fetchLearnerSkillProfile({
     required int learnerId,
     required int cohortId,
   });
@@ -53,16 +90,11 @@ class ApiMentorCohortRepository implements MentorCohortRepository {
 
   @override
   Future<List<MentorCohortRosterEntry>> fetchRoster(int cohortId) async {
-    final res = await _apiClient.get<Object?>(
-      '/api/study-courses',
-      queryParameters: {'cohortId': cohortId},
-    );
+    final res = await _apiClient.get<Object?>('/api/study-courses');
     return CohortJson.list(res.data)
-        // Defensive: keep only rows of this cohort even if the server ignores
-        // the filter.
         .where((j) {
           final id = CohortJson.optInt(j['cohortId']);
-          return id == null || id == cohortId;
+          return id == cohortId;
         })
         .map(CohortJson.rosterEntry)
         .toList();
@@ -76,11 +108,142 @@ class ApiMentorCohortRepository implements MentorCohortRepository {
       '/api/homework',
       queryParameters: {'cohortId': cohortId},
     );
-    return CohortJson.list(res.data).map(CohortJson.homework).toList();
+    return CohortJson.homeworkList(res.data);
   }
 
   @override
-  Future<Map<String, Object?>> fetchLearnerSkillProfile({
+  Future<List<HomeworkCatalogItem>> fetchHomeworkCatalog({
+    String? level,
+    String? search,
+  }) async {
+    final res = await _apiClient.get<Object?>(
+      '/api/homework/catalog',
+      queryParameters: {
+        if (level != null && level.isNotEmpty) 'level': level,
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      },
+    );
+    return CohortJson.list(res.data)
+        .map(
+          (j) => HomeworkCatalogItem(
+            type: CohortJson.str(j['type']),
+            id: CohortJson.integer(j['id']),
+            title: CohortJson.str(j['title']),
+            level: CohortJson.str(j['level']),
+            skill: CohortJson.str(j['skill']),
+            questionCount: CohortJson.optInt(j['questionCount']),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<void> createCohortHomework({
+    required int cohortId,
+    required String title,
+    String? instructions,
+    DateTime? dueAt,
+    List<int> lessonIds = const [],
+    List<int> practiceExerciseIds = const [],
+    List<int>? targetLearnerIds,
+  }) async {
+    await _apiClient.post<Object?>(
+      '/api/homework/cohorts/$cohortId',
+      data: {
+        'cohortId': cohortId,
+        'title': title.trim(),
+        if (instructions != null && instructions.trim().isNotEmpty)
+          'instructions': instructions.trim(),
+        if (dueAt != null) 'dueAt': dueAt.toUtc().toIso8601String(),
+        if (lessonIds.isNotEmpty) 'lessonIds': lessonIds,
+        if (practiceExerciseIds.isNotEmpty)
+          'practiceExerciseIds': practiceExerciseIds,
+        if (targetLearnerIds != null && targetLearnerIds.isNotEmpty)
+          'targetLearnerIds': targetLearnerIds,
+      },
+    );
+  }
+
+  @override
+  Future<({Uint8List bytes, String contentType})> downloadHomeworkScan(
+    int assignmentId,
+  ) async {
+    final res = await _apiClient.get<List<int>>(
+      '/api/homework/$assignmentId/scan',
+      options: Options(responseType: ResponseType.bytes),
+    );
+    final raw = res.data ?? const <int>[];
+    final header =
+        res.headers.value(Headers.contentTypeHeader) ?? 'application/octet-stream';
+    return (
+      bytes: Uint8List.fromList(raw),
+      contentType: header.split(';').first.trim(),
+    );
+  }
+
+  @override
+  Future<MentorHomeworkAiDraft> generateHomeworkAiDraft(
+    int assignmentId,
+  ) async {
+    final res = await _apiClient.post<Object?>(
+      '/api/homework/$assignmentId/ai-draft',
+    );
+    final j = CohortJson.map(res.data);
+    return MentorHomeworkAiDraft(
+      suggestedScore: CohortJson.optDouble(j['score'] ?? j['suggestedScore']),
+      feedback: CohortJson.optStr(j['feedback']),
+      transcription: CohortJson.optStr(j['transcription']),
+      generatedAtUtc: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<void> publishHomeworkGrade({
+    required int assignmentId,
+    required int submissionId,
+    required double score,
+    required String feedback,
+  }) async {
+    await _apiClient.put<Object?>(
+      '/api/homework/$assignmentId/grade',
+      data: {
+        'submissionId': submissionId,
+        'score': score,
+        'feedback': feedback.trim(),
+      },
+    );
+  }
+
+  @override
+  Future<void> confirmSessionAttendance({
+    required int courseId,
+    required int sessionId,
+    required String status,
+    required String note,
+  }) async {
+    await _apiClient.post<Object?>(
+      '/api/study-courses/$courseId/sessions/$sessionId/attendance',
+      data: {
+        'status': status,
+        'note': note.trim(),
+      },
+    );
+  }
+
+  @override
+  Future<void> saveRetakeSupportPlan({
+    required int courseId,
+    required int requestId,
+    required String supportPlan,
+  }) async {
+    await _apiClient.post<Object?>(
+      '/api/study-courses/$courseId/retake/$requestId/support-plan',
+      data: {'supportPlan': supportPlan.trim()},
+    );
+  }
+
+  @override
+  Future<MentorLearnerSkillProfile> fetchLearnerSkillProfile({
     required int learnerId,
     required int cohortId,
   }) async {
@@ -88,7 +251,7 @@ class ApiMentorCohortRepository implements MentorCohortRepository {
       '/api/mentor/learners/$learnerId/skill-profile',
       queryParameters: {'cohortId': cohortId},
     );
-    return CohortJson.map(res.data);
+    return CohortJson.skillProfile(CohortJson.map(res.data));
   }
 
   @override

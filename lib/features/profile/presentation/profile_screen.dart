@@ -270,6 +270,13 @@ class _ProfileSuccessViewState extends ConsumerState<_ProfileSuccessView>
                 onTap: () => context.push(AppRoutes.learnerMyCourses),
               ),
               ProfileActionTile(
+                key: const ValueKey<String>('profile_subscriptions_action'),
+                icon: Icons.workspace_premium_outlined,
+                title: 'Gói tự học & Lượt AI',
+                subtitle: 'Xem lượt AI còn lại, gia hạn hoặc mua gói PayOS',
+                onTap: () => context.push(AppRoutes.profileSubscriptions),
+              ),
+              ProfileActionTile(
                 key: const ValueKey<String>('profile_cohorts_action'),
                 icon: Icons.groups_outlined,
                 title: 'Lớp ôn JLPT theo nhóm',

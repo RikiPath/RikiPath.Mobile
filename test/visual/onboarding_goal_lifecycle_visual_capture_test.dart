@@ -389,10 +389,8 @@ class _CaptureProfileRepository
   }) async => _buildProfile();
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) async => _buildProfile();
+  Future<UserProfile> updateProfile({required String fullName}) async =>
+      _buildProfile();
 
   @override
   Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) async =>

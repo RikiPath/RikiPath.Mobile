@@ -85,7 +85,6 @@ class _RikiPathAppState extends ConsumerState<RikiPathApp> {
         ref
             .read(pushNotificationServiceProvider)
             .disconnectForegroundNotifications();
-        ref.read(pushNotificationServiceProvider).unregisterDeviceToken();
       }
     });
 

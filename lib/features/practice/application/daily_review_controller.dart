@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/practice/data/api_daily_review_repository.dart';
 import 'package:rikipath_mobile/features/practice/domain/daily_review.dart';
 import 'package:rikipath_mobile/features/practice/domain/daily_review_repository.dart';
@@ -24,6 +26,7 @@ class DailyReviewController extends AsyncNotifier<DailyReviewState> {
 
   @override
   Future<DailyReviewState> build() async {
+    ref.watch(authenticatedUserIdProvider);
     final queue = await _repository.loadDailyQueue();
     return DailyReviewState(cards: queue.items);
   }
@@ -89,6 +92,7 @@ class DailyReviewController extends AsyncNotifier<DailyReviewState> {
           clearSubmitError: true,
         ),
       );
+      ref.invalidate(learnerAnalyticsControllerProvider);
       return true;
     } catch (error) {
       state = AsyncData(

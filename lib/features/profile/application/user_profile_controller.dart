@@ -60,16 +60,10 @@ class UserProfileController extends AsyncNotifier<UserProfileState> {
     });
   }
 
-  Future<bool> updateName({
-    required String firstName,
-    required String lastName,
-  }) {
+  Future<bool> updateName({required String fullName}) {
     return _mutate(
       flag: ProfileMutation.profile,
-      request: () => _repository.updateProfile(
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-      ),
+      request: () => _repository.updateProfile(fullName: fullName.trim()),
     );
   }
 

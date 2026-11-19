@@ -110,7 +110,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   color: AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(height: AppSpacing.space10),
+              const SizedBox(height: AppSpacing.space4),
+              RikiWarningBanner(
+                icon: Icons.support_agent_outlined,
+                message:
+                    'Nếu máy chủ chưa bật đặt lại mật khẩu tự động qua email, vui lòng liên hệ quản trị viên RikiPath để được hỗ trợ cấp lại quyền truy cập.',
+              ),
+              const SizedBox(height: AppSpacing.space6),
               RikiTextField(
                 key: const Key('forgot_email_field'),
                 label: l10n.registeredEmail,

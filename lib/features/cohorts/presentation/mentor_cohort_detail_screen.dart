@@ -14,6 +14,7 @@ import 'package:rikipath_mobile/features/cohorts/application/mentor_cohort_contr
 import 'package:rikipath_mobile/features/cohorts/domain/cohort_operations.dart';
 import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
 import 'package:rikipath_mobile/features/cohorts/presentation/mentor_cohorts_screen.dart';
+import 'package:rikipath_mobile/features/cohorts/presentation/widgets/mentor_cohort_sheets.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_parity_components.dart';
 import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shared_widgets.dart';
 
@@ -65,7 +66,7 @@ class MentorCohortDetailScreen extends ConsumerWidget {
                 _RosterCard(cohortId: cohort.id),
                 const SizedBox(height: AppSpacing.space4),
                 _SectionTitle('Bài tập & chấm điểm'),
-                _HomeworkCard(cohortId: cohort.id),
+                _HomeworkCard(cohort: cohort),
                 const SizedBox(height: AppSpacing.space4),
                 _SectionTitle('Lịch sử phân công Mentor chính'),
                 _AssignmentHistoryCard(cohortId: cohort.id),
@@ -229,7 +230,7 @@ class _CohortHeaderCard extends StatelessWidget {
   }
 }
 
-class _SessionScheduleCard extends StatelessWidget {
+class _SessionScheduleCard extends ConsumerWidget {
   const _SessionScheduleCard({required this.cohort});
 
   final StudyCohortSummary cohort;
@@ -247,7 +248,7 @@ class _SessionScheduleCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sessions = [...cohort.sessions]
       ..sort((a, b) => a.number.compareTo(b.number));
     final now = DateTime.now();
@@ -259,24 +260,66 @@ class _SessionScheduleCard extends StatelessWidget {
               children: [
                 for (final s in sessions)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            'Buổi ${s.number} · ${formatCohortSessionTime(s.startTime)}–${_time.format(s.endTime)}',
-                            style: AppTypography.bodySmall,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Buổi ${s.number} · ${formatCohortSessionTime(s.startTime)}–${_time.format(s.endTime)}',
+                                style: AppTypography.bodySmall,
+                              ),
+                            ),
+                            Builder(
+                              builder: (_) {
+                                final (label, color) = _status(s, now);
+                                return MentorStatusBadge(
+                                  label: label,
+                                  color: color,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        if (s.status != 'Cancelled')
+                          Wrap(
+                            spacing: 6,
+                            children: [
+                              if (s.roomId.isNotEmpty)
+                                TextButton.icon(
+                                  key: ValueKey('mentor_session_join_${s.number}'),
+                                  onPressed: () => context.push(
+                                    AppRoutes.meetingRoom(s.roomId),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.videocam_outlined,
+                                    size: 16,
+                                  ),
+                                  label: const Text('Vào phòng'),
+                                ),
+                              TextButton.icon(
+                                key: ValueKey(
+                                  'mentor_session_attendance_${s.number}',
+                                ),
+                                onPressed: () => showModalBottomSheet<void>(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  showDragHandle: true,
+                                  builder: (_) => MentorSessionAttendanceSheet(
+                                    cohort: cohort,
+                                    slot: s,
+                                  ),
+                                ),
+                                icon: const Icon(
+                                  Icons.fact_check_outlined,
+                                  size: 16,
+                                ),
+                                label: const Text('Điểm danh'),
+                              ),
+                            ],
                           ),
-                        ),
-                        Builder(
-                          builder: (_) {
-                            final (label, color) = _status(s, now);
-                            return MentorStatusBadge(
-                              label: label,
-                              color: color,
-                            );
-                          },
-                        ),
                       ],
                     ),
                   ),
@@ -295,6 +338,74 @@ class _RosterCard extends ConsumerWidget {
 
   final int cohortId;
 
+  Future<void> _editSupportPlan(
+    BuildContext context,
+    WidgetRef ref, {
+    required MentorCohortRosterEntry learner,
+    required CourseRetakeRequestItem request,
+  }) async {
+    final controller = TextEditingController(
+      text: request.mentorSupportPlan ?? '',
+    );
+    final saved = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'Lộ trình hỗ trợ ôn lại · ${learner.learnerName.isEmpty ? 'Học viên #${learner.courseId}' : learner.learnerName}',
+        ),
+        content: TextField(
+          key: ValueKey('mentor_retake_plan_field_${request.id}'),
+          controller: controller,
+          maxLines: 4,
+          maxLength: 2000,
+          decoration: const InputDecoration(
+            hintText:
+                'Nhập kế hoạch luyện đề, kỹ năng trọng tâm và lịch kèm ôn lại (tối đa 2000 ký tự).',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Đóng'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: const Text('Lưu lộ trình'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (saved == null || !context.mounted) return;
+    final toasts = ref.read(rikiToastServiceProvider.notifier);
+    if (saved.isEmpty) {
+      toasts.error(title: 'Vui lòng nhập nội dung lộ trình hỗ trợ');
+      return;
+    }
+    try {
+      await runWithAppLoadingOverlay<void>(
+        context,
+        title: 'Đang lưu lộ trình hỗ trợ...',
+        action: () => ref
+            .read(mentorCohortActionsProvider)
+            .saveRetakeSupportPlan(
+              cohortId: cohortId,
+              courseId: learner.courseId,
+              requestId: request.id,
+              supportPlan: saved,
+            ),
+      );
+      toasts.success(title: 'Đã lưu lộ trình hỗ trợ ôn lại');
+    } catch (error) {
+      if (!context.mounted) return;
+      toasts.error(
+        title: 'Chưa lưu được lộ trình',
+        description: appErrorMessage(error, context.l10n),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(mentorCohortRosterProvider(cohortId));
@@ -310,7 +421,7 @@ class _RosterCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('${roster.length} học viên', style: _muted),
-                  for (final learner in roster)
+                  for (final learner in roster) ...[
                     Row(
                       children: [
                         const Icon(
@@ -346,6 +457,61 @@ class _RosterCard extends ConsumerWidget {
                           ),
                       ],
                     ),
+                    for (final req in learner.retakeRequests)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 24, bottom: 6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Wrap(
+                              spacing: 6,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                MentorStatusBadge(
+                                  label: switch (req.status) {
+                                    'Approved' => 'Ôn lại JLPT: Đã duyệt',
+                                    'Rejected' => 'Ôn lại JLPT: Từ chối',
+                                    _ => 'Ôn lại JLPT: Chờ duyệt',
+                                  },
+                                  color: switch (req.status) {
+                                    'Approved' => AppColors.success,
+                                    'Rejected' => AppColors.error,
+                                    _ => AppColors.warningText,
+                                  },
+                                ),
+                                if (req.status == 'Approved')
+                                  TextButton.icon(
+                                    key: ValueKey(
+                                      'mentor_retake_support_${req.id}',
+                                    ),
+                                    onPressed: () => _editSupportPlan(
+                                      context,
+                                      ref,
+                                      learner: learner,
+                                      request: req,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.edit_note_outlined,
+                                      size: 16,
+                                    ),
+                                    label: Text(
+                                      req.mentorSupportPlan?.isNotEmpty == true
+                                          ? 'Sửa lộ trình'
+                                          : 'Lập lộ trình hỗ trợ',
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            if (req.mentorSupportPlan != null &&
+                                req.mentorSupportPlan!.isNotEmpty)
+                              Text(
+                                'Lộ trình hỗ trợ: ${req.mentorSupportPlan}',
+                                style: _muted,
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ],
               ),
       ),
@@ -364,49 +530,16 @@ class _SkillProfileSheet extends ConsumerWidget {
   final String learnerName;
   final int cohortId;
 
-  static String _scalar(Object? v) => switch (v) {
-    double d => d.toStringAsFixed(d % 1 == 0 ? 0 : 1),
-    bool b => b ? 'Có' : 'Không',
-    _ => v.toString(),
+  static String _skillLabel(String skill) => switch (skill.toLowerCase()) {
+    'vocabulary' => 'Từ vựng',
+    'grammar' => 'Ngữ pháp',
+    'kanji' => 'Kanji',
+    'reading' => 'Đọc hiểu',
+    'listening' => 'Nghe hiểu',
+    'writing' => 'Viết',
+    'speaking' => 'Nói',
+    _ => skill,
   };
-
-  List<Widget> _render(Map<String, Object?> profile) {
-    final rows = <Widget>[];
-    final skills = profile['skills'] ?? profile['items'];
-    if (skills is List) {
-      for (final s in skills.whereType<Map>()) {
-        final name = (s['skill'] ?? s['name'] ?? s['label'] ?? '').toString();
-        final score = s['score'] ?? s['level'] ?? s['value'];
-        rows.add(
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Expanded(child: Text(name, style: AppTypography.bodyMedium)),
-                if (score != null)
-                  MentorStatusBadge(
-                    label: _scalar(score),
-                    color: AppColors.brandPrimary,
-                  ),
-              ],
-            ),
-          ),
-        );
-      }
-    }
-    for (final e in profile.entries) {
-      final v = e.value;
-      if (v == null || v is Map || v is List) continue;
-      if (e.key.toLowerCase().endsWith('id')) continue;
-      rows.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
-          child: Text('${e.key}: ${_scalar(v)}', style: _muted),
-        ),
-      );
-    }
-    return rows;
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -424,14 +557,17 @@ class _SkillProfileSheet extends ConsumerWidget {
               style: AppTypography.cardTitle,
             ),
             const SizedBox(height: 8),
-            _asyncPanel<Map<String, Object?>>(
+            _asyncPanel<MentorLearnerSkillProfile>(
               context,
               state,
               onRetry: () =>
                   ref.invalidate(mentorLearnerSkillProfileProvider(args)),
               data: (profile) {
-                final rows = _render(profile);
-                if (rows.isEmpty) {
+                final hasAny =
+                    profile.assessedJlptLevel != null ||
+                    profile.skills.isNotEmpty ||
+                    profile.assignedCount > 0;
+                if (!hasAny) {
                   return Text(
                     'Chưa có dữ liệu kỹ năng cho học viên này.',
                     style: _muted,
@@ -444,7 +580,60 @@ class _SkillProfileSheet extends ConsumerWidget {
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: rows,
+                      children: [
+                        if (profile.assessedJlptLevel != null &&
+                            profile.assessedJlptLevel!.isNotEmpty) ...[
+                          MentorStatusBadge(
+                            label:
+                                'Trình độ đánh giá: ${profile.assessedJlptLevel}',
+                            color: AppColors.brandPrimary,
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                        if (profile.assignedCount > 0) ...[
+                          Text(
+                            'BTVN: đã nộp ${profile.submittedCount}/${profile.assignedCount}'
+                            ' · đúng hạn ${profile.onTimeCount}'
+                            '${profile.onTimePercent != null ? ' (${profile.onTimePercent!.toStringAsFixed(0)}%)' : ''}'
+                            ' · đạt ${profile.passedCount}',
+                            style: AppTypography.bodySmall,
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                        for (final m in profile.skills)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _skillLabel(m.skill),
+                                        style: AppTypography.bodyMedium,
+                                      ),
+                                      Text(
+                                        '${m.sampleCount} lượt đánh giá'
+                                        '${m.latestAssessedAtUtc != null ? ' · ${_dateTime.format(m.latestAssessedAtUtc!)}' : ''}',
+                                        style: _muted,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (m.averageScorePercent != null)
+                                  MentorStatusBadge(
+                                    label:
+                                        '${m.averageScorePercent!.toStringAsFixed(0)}%',
+                                    color: m.averageScorePercent! >= 70
+                                        ? AppColors.success
+                                        : AppColors.warningText,
+                                  ),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 );
@@ -462,62 +651,111 @@ class _SkillProfileSheet extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 
 class _HomeworkCard extends ConsumerWidget {
-  const _HomeworkCard({required this.cohortId});
+  const _HomeworkCard({required this.cohort});
 
-  final int cohortId;
+  final StudyCohortSummary cohort;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(mentorCohortHomeworkProvider(cohortId));
+    final state = ref.watch(mentorCohortHomeworkProvider(cohort.id));
     return _PanelCard(
       key: const Key('mentor_cohort_homework'),
-      child: _asyncPanel<List<MentorCohortHomeworkItem>>(
-        context,
-        state,
-        onRetry: () => ref.invalidate(mentorCohortHomeworkProvider(cohortId)),
-        data: (items) => items.isEmpty
-            ? Text('Chưa giao bài tập cho lớp này.', style: _muted)
-            : Column(
-                children: [
-                  for (final hw in items)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  hw.title,
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w600,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: RikiSecondaryButton(
+              key: const Key('mentor_create_homework_button'),
+              label: 'Giao bài tập cho lớp',
+              onPressed: () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                showDragHandle: true,
+                builder: (_) => MentorCreateHomeworkSheet(cohort: cohort),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _asyncPanel<List<MentorCohortHomeworkItem>>(
+            context,
+            state,
+            onRetry: () =>
+                ref.invalidate(mentorCohortHomeworkProvider(cohort.id)),
+            data: (items) => items.isEmpty
+                ? Text('Chưa giao bài tập cho lớp này.', style: _muted)
+                : Column(
+                    children: [
+                      for (final hw in items)
+                        Padding(
+                          key: ValueKey('mentor_hw_item_${hw.id}'),
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          hw.title,
+                                          style: AppTypography.bodyMedium
+                                              .copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                        Text(
+                                          [
+                                            hw.assignmentScope == 'CohortCommon'
+                                                ? 'Giao chung'
+                                                : 'Bài riêng',
+                                            if (hw.dueAt != null)
+                                              'Hạn ${_dateTime.format(hw.dueAt!)}',
+                                          ].join(' · '),
+                                          style: _muted,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  MentorStatusBadge(
+                                    label: hw.progressLabel,
+                                    color: hw.status == 'Graded'
+                                        ? AppColors.success
+                                        : AppColors.info,
+                                  ),
+                                ],
+                              ),
+                              if (hw.rows.isNotEmpty)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton.icon(
+                                    key: ValueKey('mentor_hw_grade_${hw.id}'),
+                                    onPressed: () => showModalBottomSheet<void>(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      showDragHandle: true,
+                                      builder: (_) => MentorHomeworkGradingSheet(
+                                        cohortId: cohort.id,
+                                        initialItem: hw,
+                                      ),
+                                    ),
+                                    icon: const Icon(
+                                      Icons.grading_outlined,
+                                      size: 16,
+                                    ),
+                                    label: const Text('Xem bài nộp & chấm'),
                                   ),
                                 ),
-                                Text(
-                                  [
-                                    hw.assignmentScope == 'CohortCommon'
-                                        ? 'Giao chung'
-                                        : 'Bài riêng',
-                                    if (hw.dueAt != null)
-                                      'Hạn ${_dateTime.format(hw.dueAt!)}',
-                                  ].join(' · '),
-                                  style: _muted,
-                                ),
-                              ],
-                            ),
+                            ],
                           ),
-                          MentorStatusBadge(
-                            label: hw.progressLabel,
-                            color: hw.status == 'Graded'
-                                ? AppColors.success
-                                : AppColors.info,
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+                        ),
+                    ],
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -722,33 +960,47 @@ class _ComplaintsCard extends ConsumerWidget {
 // Schedule requests (shift weeks / cancel empty cohort)
 // ---------------------------------------------------------------------------
 
-class _ScheduleRequestsCard extends ConsumerWidget {
+class _ScheduleRequestsCard extends ConsumerStatefulWidget {
   const _ScheduleRequestsCard({required this.cohort});
 
   final StudyCohortSummary cohort;
 
-  Future<void> _withdraw(
-    BuildContext context,
-    WidgetRef ref,
-    CohortScheduleRequest request,
-  ) async {
+  @override
+  ConsumerState<_ScheduleRequestsCard> createState() =>
+      _ScheduleRequestsCardState();
+}
+
+class _ScheduleRequestsCardState extends ConsumerState<_ScheduleRequestsCard> {
+  final Set<int> _withdrawingIds = {};
+
+  Future<void> _withdraw(CohortScheduleRequest request) async {
+    if (_withdrawingIds.contains(request.id)) return;
+    setState(() => _withdrawingIds.add(request.id));
     final toasts = ref.read(rikiToastServiceProvider.notifier);
     try {
       await ref
           .read(mentorCohortActionsProvider)
-          .withdrawScheduleRequest(cohortId: cohort.id, requestId: request.id);
+          .withdrawScheduleRequest(
+            cohortId: widget.cohort.id,
+            requestId: request.id,
+          );
       toasts.success(title: 'Đã rút yêu cầu');
     } catch (error) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       toasts.error(
         title: 'Chưa rút được yêu cầu',
         description: appErrorMessage(error, context.l10n),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _withdrawingIds.remove(request.id));
+      }
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final cohort = widget.cohort;
     final state = ref.watch(mentorCohortScheduleRequestsProvider(cohort.id));
     final requests = state.value ?? const <CohortScheduleRequest>[];
     final hasPending = requests.any((r) => r.isPending);
@@ -842,8 +1094,14 @@ class _ScheduleRequestsCard extends ConsumerWidget {
                                     key: ValueKey(
                                       'mentor_schedule_request_withdraw_${r.id}',
                                     ),
-                                    onPressed: () => _withdraw(context, ref, r),
-                                    child: const Text('Rút yêu cầu'),
+                                    onPressed: _withdrawingIds.contains(r.id)
+                                        ? null
+                                        : () => _withdraw(r),
+                                    child: Text(
+                                      _withdrawingIds.contains(r.id)
+                                          ? 'Đang rút...'
+                                          : 'Rút yêu cầu',
+                                    ),
                                   ),
                                 ),
                             ],
@@ -878,6 +1136,7 @@ class _MentorScheduleRequestSheetState
   int _weeks = 1;
   String? _idempotencyKey;
   bool _submitting = false;
+  bool _showAllSessions = false;
 
   bool get _isShift => _kind == CohortScheduleRequestKind.shiftWeeks;
 
@@ -971,10 +1230,21 @@ class _MentorScheduleRequestSheetState
               style: AppTypography.bodySmall.copyWith(color: AppColors.error),
             ),
           for (final c in p.conflicts)
-            Text(
-              '• ${c.message}',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.warningText,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                [
+                  '• ${c.message}',
+                  if (c.cohortName != null && c.cohortName!.isNotEmpty)
+                    'Lớp trùng: ${c.cohortName}'
+                  else if (c.cohortId != null)
+                    'Lớp #${c.cohortId}',
+                  if (c.commitmentStartUtc != null && c.commitmentEndUtc != null)
+                    'Cam kết: ${formatCohortSessionTime(c.commitmentStartUtc!)}–${_time.format(c.commitmentEndUtc!)}',
+                ].join(' · '),
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.warningText,
+                ),
               ),
             ),
           if (p.proposedSessions.isNotEmpty) ...[
@@ -982,16 +1252,25 @@ class _MentorScheduleRequestSheetState
             Text('Lịch mới dự kiến', style: AppTypography.bodySmall.copyWith(
               fontWeight: FontWeight.w700,
             )),
-            for (final s in p.proposedSessions.take(6))
+            for (final s in (_showAllSessions
+                ? p.proposedSessions
+                : p.proposedSessions.take(6)))
               Text(
-                'Buổi ${s.number}: ${s.startTime == null ? '—' : formatCohortSessionTime(s.startTime!)}'
+                'Buổi ${s.number}: '
+                '${s.currentStart == null ? '' : '${formatCohortSessionTime(s.currentStart!)} → '}'
+                '${s.startTime == null ? '—' : formatCohortSessionTime(s.startTime!)}'
                 '${s.endTime == null ? '' : '–${_time.format(s.endTime!)}'}',
                 style: _muted,
               ),
             if (p.proposedSessions.length > 6)
-              Text(
-                '… và ${p.proposedSessions.length - 6} buổi khác',
-                style: _muted,
+              TextButton(
+                onPressed: () =>
+                    setState(() => _showAllSessions = !_showAllSessions),
+                child: Text(
+                  _showAllSessions
+                      ? 'Thu gọn danh sách buổi'
+                      : 'Xem tất cả ${p.proposedSessions.length} buổi',
+                ),
               ),
           ],
           if (p.newEnrollmentClosesAtUtc != null)

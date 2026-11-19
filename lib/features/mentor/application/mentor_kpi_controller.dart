@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/mentor/data/api_mentor_kpi_repository.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_kpi.dart';
 import 'package:rikipath_mobile/features/mentor/domain/mentor_kpi_repository.dart';
@@ -69,6 +70,7 @@ final mentorKpiPresetProvider =
 final mentorKpiSummaryProvider = FutureProvider.autoDispose<MentorKpiSummary>((
   ref,
 ) {
+  ref.watch(authenticatedUserIdProvider);
   final preset = ref.watch(mentorKpiPresetProvider);
   final window = MentorKpiDateWindow.fromPreset(preset);
   return ref

@@ -244,6 +244,50 @@ void main() {
     );
 
     test(
+      'maps /my-courses/{id}, /study-courses/{id}, /mentor/complaints/{id}, and /homework?cohortId',
+      () {
+        final service = PushNotificationService(apiClient: _FakePushApiClient());
+
+        expect(
+          service.resolveDeepLink(
+            PushNotificationPayload.fromMap({
+              'data': {'linkUrl': '/my-courses/42'},
+            }),
+            role: 'Learner',
+          ),
+          equals(AppRoutes.learnerCohortDetail(42)),
+        );
+        expect(
+          service.resolveDeepLink(
+            PushNotificationPayload.fromMap({
+              'data': {'linkUrl': '/study-courses/88'},
+            }),
+            role: 'Learner',
+          ),
+          equals(AppRoutes.learnerCohortDetail(88)),
+        );
+        expect(
+          service.resolveDeepLink(
+            PushNotificationPayload.fromMap({
+              'data': {'linkUrl': '/mentor/complaints/7'},
+            }),
+            role: 'Mentor',
+          ),
+          equals(AppRoutes.mentorCohorts),
+        );
+        expect(
+          service.resolveDeepLink(
+            PushNotificationPayload.fromMap({
+              'data': {'linkUrl': '/homework/?cohortId=19'},
+            }),
+            role: 'Mentor',
+          ),
+          equals(AppRoutes.mentorCohortDetail(19)),
+        );
+      },
+    );
+
+    test(
       'background message handler entry-point executes without throwing',
       () async {
         await expectLater(

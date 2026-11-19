@@ -5,6 +5,7 @@ class MentorProfileData {
   const MentorProfileData({
     required this.mentorId,
     required this.email,
+    String? fullName,
     this.firstName,
     this.lastName,
     this.phoneNumber,
@@ -24,10 +25,13 @@ class MentorProfileData {
     this.reviewedAt,
     this.rejectionReason,
     this.reviewNotes,
-  });
+    // Keep public `fullName` named parameter while preserving derived getter fallback.
+    // ignore: prefer_initializing_formals
+  }) : _fullName = fullName;
 
   final int mentorId;
   final String email;
+  final String? _fullName;
   final String? firstName;
   final String? lastName;
   final String? phoneNumber;
@@ -49,6 +53,8 @@ class MentorProfileData {
   final String? reviewNotes;
 
   String get fullName {
+    final direct = _fullName?.trim();
+    if (direct != null && direct.isNotEmpty) return direct;
     final fn = firstName ?? '';
     final ln = lastName ?? '';
     final combined = '$fn $ln'.trim();

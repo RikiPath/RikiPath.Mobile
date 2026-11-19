@@ -456,6 +456,19 @@ class _FakeMeetingRealtimeClient implements MeetingRealtimeClient {
   }
 
   @override
+  Future<void> muteParticipant(String targetConnectionId) async {}
+
+  @override
+  Future<void> startPresenting() async {
+    _emit(_snapshot.copyWith(presenterConnectionId: _snapshot.self?.connectionId));
+  }
+
+  @override
+  Future<void> stopPresenting() async {
+    _emit(_snapshot.copyWith(clearPresenter: true));
+  }
+
+  @override
   Future<void> dispose() async {
     if (!_snapshots.isClosed) await _snapshots.close();
   }

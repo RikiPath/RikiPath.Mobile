@@ -93,6 +93,39 @@ abstract final class MockTestMapper {
     );
   }
 
+  static MockTestHistoryRecord historyRecord(MockTestHistoryRecordDto dto) {
+    return MockTestHistoryRecord(
+      attemptId: dto.attemptId,
+      mockTestId: dto.mockTestId,
+      title: dto.title,
+      jlptLevelName: dto.jlptLevelName,
+      submittedAt: dto.submittedAt,
+      totalScore: dto.totalScore,
+    );
+  }
+
+  static MockTestWrongQuestionCard wrongQuestion(MockTestWrongQuestionDto dto) {
+    return MockTestWrongQuestionCard(
+      questionId: dto.questionId,
+      questionText: dto.questionText,
+      questionType: dto.questionType,
+      response: dto.response,
+      answerKey: dto.answerKey,
+      options: dto.options
+          .map(
+            (option) => LiveMockTestReviewOption(
+              id: option.optionId,
+              text: option.optionText,
+              isCorrect: option.isCorrect,
+            ),
+          )
+          .toList(growable: false),
+      selectedOptionId: dto.selectedOptionId,
+      explanation: dto.explanation,
+      timesAnsweredWrong: dto.timesAnsweredWrong,
+    );
+  }
+
   static LiveMockTestQuestion _question(StartAttemptQuestionDto dto) {
     return LiveMockTestQuestion(
       id: dto.questionId,

@@ -6,8 +6,9 @@ class UserProfile {
   const UserProfile({
     required this.userId,
     required this.email,
-    required this.firstName,
-    required this.lastName,
+    String? fullName,
+    this.firstName = '',
+    this.lastName = '',
     required this.avatarUrl,
     required this.role,
     required this.isEmailVerified,
@@ -28,10 +29,13 @@ class UserProfile {
     this.certifiedJlptLevelName,
     required this.emailNotificationsEnabled,
     required this.systemNotificationsEnabled,
-  });
+    // Keep public `fullName` named parameter while deriving getter fallback from firstName/lastName.
+    // ignore: prefer_initializing_formals
+  }) : _fullName = fullName;
 
   final int userId;
   final String email;
+  final String? _fullName;
   final String firstName;
   final String lastName;
   final String? avatarUrl;
@@ -56,10 +60,14 @@ class UserProfile {
   final bool emailNotificationsEnabled;
   final bool systemNotificationsEnabled;
 
-  String get fullName => <String>[
-    firstName.trim(),
-    lastName.trim(),
-  ].where((part) => part.isNotEmpty).join(' ');
+  String get fullName {
+    final direct = _fullName?.trim();
+    if (direct != null && direct.isNotEmpty) return direct;
+    return <String>[
+      firstName.trim(),
+      lastName.trim(),
+    ].where((part) => part.isNotEmpty).join(' ');
+  }
 
   JlptLevel? get supportedJlptLevel {
     final name = targetJlptLevelName;

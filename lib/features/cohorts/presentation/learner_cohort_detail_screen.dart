@@ -77,6 +77,48 @@ class _LearnerCohortDetailScreenState
     );
   }
 
+  static const int _maxUploadBytes = 10 * 1024 * 1024;
+  bool _cancellingEnrollment = false;
+
+  static String _courseStatusLabel(String status) => switch (status) {
+    'Active' || 'Ready' => 'Đang học',
+    'PendingPayment' => 'Chờ thanh toán',
+    'Completed' => 'Đã hoàn thành',
+    'Cancelled' => 'Đã hủy',
+    'PaymentFailed' => 'Thanh toán thất bại',
+    'PaymentExpired' => 'Hết hạn giữ chỗ',
+    'PaymentReview' => 'Đang xem xét thanh toán',
+    'Transferred' => 'Đã chuyển lớp',
+    _ => status,
+  };
+
+  static String _sessionStatusLabel(String status) => switch (status) {
+    'Scheduled' || 'Upcoming' => 'Sắp diễn ra',
+    'InProgress' => 'Đang diễn ra',
+    'Completed' => 'Đã học',
+    'Present' => 'Có mặt',
+    'Absent' => 'Vắng',
+    'Late' => 'Đi muộn',
+    'Excused' || 'ExcusedAbsent' => 'Vắng có phép',
+    'Cancelled' || 'CancelledByMentor' => 'Đã hủy',
+    _ => status,
+  };
+
+  static String _homeworkStatusLabel(String status) => switch (status) {
+    'Assigned' => 'Đã giao',
+    'Submitted' => 'Đã nộp',
+    'Graded' => 'Đã chấm điểm',
+    'Overdue' => 'Quá hạn',
+    _ => status,
+  };
+
+  static String _retakeStatusLabel(String status) => switch (status) {
+    'Pending' => 'Chờ Admin duyệt',
+    'Approved' => 'Đã duyệt',
+    'Rejected' => 'Bị từ chối',
+    _ => status,
+  };
+
   Future<({Uint8List bytes, String name, String mime})?> _pickDocument() async {
     final file = await FilePicker.pickFile(
       type: FileType.custom,
@@ -84,6 +126,15 @@ class _LearnerCohortDetailScreenState
     );
     if (file == null) return null;
     final bytes = await file.readAsBytes();
+    if (bytes.lengthInBytes > _maxUploadBytes) {
+      if (mounted) {
+        ref.read(rikiToastServiceProvider.notifier).error(
+          title: 'Tệp quá lớn',
+          description: 'Tệp đính kèm tối đa 10MB (PDF/PNG/JPG).',
+        );
+      }
+      return null;
+    }
     final name = file.name;
     final ext = name.contains('.') ? name.split('.').last.toLowerCase() : '';
     final mime = switch (ext) {
@@ -92,6 +143,52 @@ class _LearnerCohortDetailScreenState
       _ => 'image/jpeg',
     };
     return (bytes: bytes, name: name, mime: mime);
+  }
+
+  Future<void> _previewBinaryAttachment({
+    required String title,
+    required Future<({Uint8List bytes, String contentType})> Function() loader,
+  }) async {
+    try {
+      final file = await runWithAppLoadingOverlay(
+        context,
+        title: 'Đang tải tệp đính kèm...',
+        action: loader,
+      );
+      if (!mounted) return;
+      final isImage = file.contentType.startsWith('image/');
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(title),
+          content: isImage
+              ? InteractiveViewer(
+                  child: Image.memory(
+                    file.bytes,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const Text(
+                      'Không thể hiển thị ảnh xem trước.',
+                    ),
+                  ),
+                )
+              : Text(
+                  'Tệp ${file.contentType} (${(file.bytes.lengthInBytes / 1024).toStringAsFixed(1)} KB) đã được tải an toàn từ máy chủ.',
+                ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Đóng'),
+            ),
+          ],
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ref.read(rikiToastServiceProvider.notifier).error(
+        title: 'Không thể tải tệp',
+        description: appErrorMessage(error, context.l10n),
+      );
+    }
   }
 
   Future<void> _submitHomework(
@@ -196,6 +293,7 @@ class _LearnerCohortDetailScreenState
   }
 
   Future<void> _cancelEnrollment(LearnerStudyCourseDetail course) async {
+    if (_cancellingEnrollment) return;
     final controller = TextEditingController();
     final reason = await showDialog<String>(
       context: context,
@@ -219,8 +317,9 @@ class _LearnerCohortDetailScreenState
       ),
     );
     controller.dispose();
-    if (reason == null || !mounted) return;
+    if (reason == null || !mounted || _cancellingEnrollment) return;
 
+    _cancellingEnrollment = true;
     try {
       await runWithAppLoadingOverlay<void>(
         context,
@@ -241,6 +340,8 @@ class _LearnerCohortDetailScreenState
             title: 'Chưa thể hủy ghi danh',
             description: appErrorMessage(error, context.l10n),
           );
+    } finally {
+      _cancellingEnrollment = false;
     }
   }
 
@@ -285,15 +386,24 @@ class _LearnerCohortDetailScreenState
       const SizedBox(height: AppSpacing.space2),
       switch (summaryState) {
         AsyncData(:final value) => CohortCompletionSummaryCard(summary: value),
-        AsyncError(:final error) => Text(
-          appErrorMessage(
-            error,
-            context.l10n,
-            fallback: 'Chưa thể tải tổng kết khóa học.',
-          ),
-          style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textSecondary,
-          ),
+        AsyncError(:final error) => Row(
+          children: [
+            Expanded(
+              child: Text(
+                appErrorMessage(
+                  error,
+                  context.l10n,
+                  fallback: 'Chưa thể tải tổng kết khóa học.',
+                ),
+                style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+              ),
+            ),
+            TextButton(
+              onPressed: () =>
+                  ref.invalidate(learnerCompletionSummaryProvider(course.id)),
+              child: const Text('Thử lại'),
+            ),
+          ],
         ),
         _ => const LinearProgressIndicator(),
       },
@@ -366,10 +476,14 @@ class _LearnerCohortDetailScreenState
                               color: AppColors.brandPrimary,
                             ),
                             MentorStatusBadge(
-                              label: course.status,
+                              label: _courseStatusLabel(course.status),
                               color: course.status == 'Active'
                                   ? AppColors.success
-                                  : AppColors.textSecondary,
+                                  : (course.status == 'Cancelled' ||
+                                            course.status == 'PaymentFailed' ||
+                                            course.status == 'PaymentExpired'
+                                        ? AppColors.error
+                                        : AppColors.textSecondary),
                             ),
                           ],
                         ),
@@ -430,7 +544,7 @@ class _LearnerCohortDetailScreenState
                                   ),
                                 ),
                                 Text(
-                                  s.status,
+                                  _sessionStatusLabel(s.status),
                                   style: AppTypography.bodySmall.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
@@ -440,6 +554,9 @@ class _LearnerCohortDetailScreenState
                           ),
                           if (s.roomId != null)
                             ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(0, 44),
+                              ),
                               onPressed: () => context.push(
                                 AppRoutes.meetingRoom(s.roomId!),
                               ),
@@ -456,8 +573,23 @@ class _LearnerCohortDetailScreenState
                     const SizedBox(height: AppSpacing.space2),
                     switch (cohortHwState) {
                       AsyncLoading() => const LinearProgressIndicator(),
-                      AsyncError(:final error) => Text(
-                        appErrorMessage(error, context.l10n),
+                      AsyncError(:final error) => Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              appErrorMessage(error, context.l10n),
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => ref.invalidate(
+                              learnerCohortHomeworkProvider(course.cohortId!),
+                            ),
+                            child: const Text('Thử lại'),
+                          ),
+                        ],
                       ),
                       AsyncData(value: final hwList) => hwList.isEmpty
                           ? const Text('Chưa có bài tập nhóm nào được giao.')
@@ -483,7 +615,7 @@ class _LearnerCohortDetailScreenState
                                               color: AppColors.brandPrimary,
                                             ),
                                             MentorStatusBadge(
-                                              label: hw.status,
+                                              label: _homeworkStatusLabel(hw.status),
                                               color: hw.status == 'Graded'
                                                   ? AppColors.success
                                                   : AppColors.info,
@@ -501,12 +633,41 @@ class _LearnerCohortDetailScreenState
                                             style: AppTypography.bodySmall,
                                           ),
                                         if (hw.submission != null)
-                                          Text(
-                                            'Đã nộp lần ${hw.submission!.revisionCount}${hw.submission!.hasScan ? " · Có tệp scan" : ""}',
-                                            style: AppTypography.metadata
-                                                .copyWith(
-                                                  color: AppColors.brandPrimary,
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  'Đã nộp lần ${hw.submission!.revisionCount}${hw.submission!.hasScan ? " · Có tệp scan" : ""}',
+                                                  style: AppTypography.metadata
+                                                      .copyWith(
+                                                        color: AppColors
+                                                            .brandPrimary,
+                                                      ),
                                                 ),
+                                              ),
+                                              if (hw.submission!.hasScan)
+                                                TextButton.icon(
+                                                  onPressed: () =>
+                                                      _previewBinaryAttachment(
+                                                        title: hw.title,
+                                                        loader: () => ref
+                                                            .read(
+                                                              learnerMyCoursesProvider
+                                                                  .notifier,
+                                                            )
+                                                            .downloadHomeworkScan(
+                                                              hw.id,
+                                                            ),
+                                                      ),
+                                                  icon: const Icon(
+                                                    Icons.visibility_outlined,
+                                                    size: 16,
+                                                  ),
+                                                  label: const Text(
+                                                    'Xem tệp đã nộp',
+                                                  ),
+                                                ),
+                                            ],
                                           ),
                                         if (hw.publishedGrade != null)
                                           Container(
@@ -537,29 +698,46 @@ class _LearnerCohortDetailScreenState
                                           const SizedBox(height: 8),
                                           Row(
                                             children: [
-                                              OutlinedButton.icon(
-                                                onPressed: () async {
-                                                  final picked =
-                                                      await _pickDocument();
-                                                  if (picked != null &&
-                                                      mounted) {
-                                                    setState(
-                                                      () => _hwScans[hw.id] =
-                                                          picked,
-                                                    );
-                                                  }
-                                                },
-                                                icon: const Icon(
-                                                  Icons.attach_file,
-                                                ),
-                                                label: Text(
-                                                  _hwScans[hw.id]?.name ??
-                                                      'Đính kèm ảnh/PDF',
+                                              Flexible(
+                                                child: OutlinedButton.icon(
+                                                  style: OutlinedButton.styleFrom(
+                                                    minimumSize: const Size(
+                                                      0,
+                                                      48,
+                                                    ),
+                                                  ),
+                                                  onPressed: () async {
+                                                    final picked =
+                                                        await _pickDocument();
+                                                    if (picked != null &&
+                                                        mounted) {
+                                                      setState(
+                                                        () => _hwScans[hw.id] =
+                                                            picked,
+                                                      );
+                                                    }
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.attach_file,
+                                                  ),
+                                                  label: Text(
+                                                    _hwScans[hw.id]?.name ??
+                                                        'Đính kèm ảnh/PDF',
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
                                                 ),
                                               ),
                                               const SizedBox(width: 8),
                                               Expanded(
                                                 child: ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                    minimumSize: const Size(
+                                                      0,
+                                                      48,
+                                                    ),
+                                                  ),
                                                   onPressed: () =>
                                                       _submitHomework(
                                                         course,
@@ -609,6 +787,9 @@ class _LearnerCohortDetailScreenState
                             runSpacing: 8,
                             children: [
                               OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(0, 44),
+                                ),
                                 onPressed: () async {
                                   final picked = await showDatePicker(
                                     context: context,
@@ -626,6 +807,9 @@ class _LearnerCohortDetailScreenState
                                 ),
                               ),
                               OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(0, 44),
+                                ),
                                 onPressed: () async {
                                   final picked = await showDatePicker(
                                     context: context,
@@ -665,6 +849,9 @@ class _LearnerCohortDetailScreenState
                             runSpacing: 8,
                             children: [
                               OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(0, 44),
+                                ),
                                 onPressed: () async {
                                   final picked = await _pickDocument();
                                   if (picked != null && mounted) {
@@ -687,7 +874,7 @@ class _LearnerCohortDetailScreenState
                         for (final r in course.requests) ...[
                           const Divider(height: 20),
                           Text(
-                            'Yêu cầu #${r.id} · ${r.status}',
+                            'Yêu cầu #${r.id} · ${_retakeStatusLabel(r.status)}',
                             style: AppTypography.cardTitle,
                           ),
                           if (r.reason.isNotEmpty)

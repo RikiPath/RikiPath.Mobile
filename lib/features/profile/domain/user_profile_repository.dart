@@ -3,10 +3,7 @@ import 'package:rikipath_mobile/features/profile/domain/user_profile.dart';
 abstract interface class UserProfileRepository {
   Future<UserProfile> loadProfile();
 
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  });
+  Future<UserProfile> updateProfile({required String fullName});
 
   Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload);
 

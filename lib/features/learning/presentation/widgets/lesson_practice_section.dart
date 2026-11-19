@@ -4,6 +4,7 @@ import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/lesson_practice_controller.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_practice.dart';
 
@@ -38,7 +39,9 @@ class _LessonPracticeSectionState extends ConsumerState<LessonPracticeSection> {
         builder: (context) =>
             _PracticeAttemptSheet(attempt: attempt, repository: repository),
       );
+      if (!mounted) return;
       ref.invalidate(lessonPracticeExercisesProvider(widget.lessonId));
+      ref.invalidate(learnerAnalyticsControllerProvider);
     } catch (error) {
       if (!mounted) return;
       setState(() {

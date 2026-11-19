@@ -15,6 +15,18 @@ import 'package:rikipath_mobile/features/mentor/presentation/widgets/mentor_shar
 class LearnerMyCoursesScreen extends ConsumerWidget {
   const LearnerMyCoursesScreen({super.key});
 
+  static String _courseStatusLabel(String status) => switch (status) {
+    'Active' || 'Ready' => 'Đang học',
+    'Pending' || 'PendingPayment' => 'Chờ thanh toán',
+    'Completed' => 'Đã hoàn thành',
+    'Cancelled' => 'Đã hủy',
+    'PaymentFailed' => 'Thanh toán thất bại',
+    'PaymentExpired' => 'Hết hạn giữ chỗ',
+    'PaymentReview' => 'Đang xem xét thanh toán',
+    'Transferred' => 'Đã chuyển lớp',
+    _ => status,
+  };
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(learnerMyCoursesProvider);
@@ -96,7 +108,7 @@ class LearnerMyCoursesScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: 8),
                                 MentorStatusBadge(
-                                  label: course.status,
+                                  label: _courseStatusLabel(course.status),
                                   color: course.status == 'Active'
                                       ? AppColors.success
                                       : AppColors.textSecondary,

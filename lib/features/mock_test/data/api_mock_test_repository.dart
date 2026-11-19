@@ -87,4 +87,22 @@ class ApiMockTestRepository implements MockTestRepository {
     );
     return MockTestMapper.detailed(readDetailedAttemptResult(response.data));
   }
+
+  Future<List<MockTestHistoryRecord>> loadHistory() async {
+    final response = await _client.get<Object?>(MockTestApiPaths.history);
+    return readMockTestHistory(
+      response.data,
+    ).map(MockTestMapper.historyRecord).toList(growable: false);
+  }
+
+  Future<List<MockTestWrongQuestionCard>> loadWrongQuestions({
+    int? practiceTestId,
+  }) async {
+    final response = await _client.get<Object?>(
+      MockTestApiPaths.wrongQuestions(practiceTestId: practiceTestId),
+    );
+    return readMockTestWrongQuestions(
+      response.data,
+    ).map(MockTestMapper.wrongQuestion).toList(growable: false);
+  }
 }

@@ -14,6 +14,7 @@ class SakuraCalendarDrawer extends StatelessWidget {
     required this.onToggleEventType,
     this.roleName = 'Học viên RikiPath',
     this.isMentor = false,
+    this.extraSection,
   });
 
   final SakuraCalendarViewMode currentMode;
@@ -22,6 +23,7 @@ class SakuraCalendarDrawer extends StatelessWidget {
   final ValueChanged<SakuraCalendarEventType> onToggleEventType;
   final String roleName;
   final bool isMentor;
+  final Widget? extraSection;
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +128,7 @@ class SakuraCalendarDrawer extends StatelessWidget {
                   ),
                   _CalendarFilterTile(
                     key: const Key('drawer_layer_consultation'),
-                    label: 'Tư vấn JLPT 1-1',
+                    label: 'Lớp học nhóm JLPT',
                     color: const Color(0xFFE11D48),
                     isChecked: visibleEventTypes.contains(
                       SakuraCalendarEventType.consultation,
@@ -137,7 +139,7 @@ class SakuraCalendarDrawer extends StatelessWidget {
                   _CalendarFilterTile(
                     label: isMentor
                         ? 'Lịch trống đã đăng ký'
-                        : 'Lịch tư vấn còn trống',
+                        : 'Lịch lớp nhóm sắp mở',
                     color: const Color(0xFF64748B),
                     isChecked: visibleEventTypes.contains(
                       SakuraCalendarEventType.availableSlot,
@@ -166,6 +168,11 @@ class SakuraCalendarDrawer extends StatelessWidget {
                         SakuraCalendarEventType.learningPlan,
                       ),
                     ),
+                  ],
+                  if (extraSection != null) ...[
+                    const SizedBox(height: AppSpacing.space3),
+                    const Divider(color: AppColors.border),
+                    extraSection!,
                   ],
                 ],
               ),

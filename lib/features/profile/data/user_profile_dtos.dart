@@ -2,8 +2,7 @@ class UserProfileDto {
   const UserProfileDto({
     required this.userId,
     required this.email,
-    required this.firstName,
-    required this.lastName,
+    required this.fullName,
     required this.avatarUrl,
     required this.role,
     required this.isEmailVerified,
@@ -35,11 +34,16 @@ class UserProfileDto {
   }
 
   factory UserProfileDto.fromJson(Map<String, Object?> json) {
+    final fullName =
+        _optionalString(json, 'fullName') ??
+        <String>[
+          _optionalString(json, 'firstName') ?? '',
+          _optionalString(json, 'lastName') ?? '',
+        ].where((part) => part.isNotEmpty).join(' ');
     return UserProfileDto(
       userId: _requiredInt(json, 'userId'),
       email: _requiredString(json, 'email'),
-      firstName: _requiredString(json, 'firstName'),
-      lastName: _requiredString(json, 'lastName'),
+      fullName: fullName,
       avatarUrl: _optionalString(json, 'avatarUrl'),
       role: _requiredString(json, 'role'),
       isEmailVerified: _requiredBool(json, 'isEmailVerified'),
@@ -72,8 +76,7 @@ class UserProfileDto {
 
   final int userId;
   final String email;
-  final String firstName;
-  final String lastName;
+  final String fullName;
   final String? avatarUrl;
   final String role;
   final bool isEmailVerified;
@@ -97,18 +100,11 @@ class UserProfileDto {
 }
 
 class UpdateProfileRequestDto {
-  const UpdateProfileRequestDto({
-    required this.firstName,
-    required this.lastName,
-  });
+  const UpdateProfileRequestDto({required this.fullName});
 
-  final String firstName;
-  final String lastName;
+  final String fullName;
 
-  Map<String, Object?> toJson() => <String, Object?>{
-    'firstName': firstName,
-    'lastName': lastName,
-  };
+  Map<String, Object?> toJson() => <String, Object?>{'fullName': fullName};
 }
 
 class SetJlptGoalRequestDto {

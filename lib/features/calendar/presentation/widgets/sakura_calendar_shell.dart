@@ -26,6 +26,7 @@ class SakuraCalendarShell extends ConsumerStatefulWidget {
     this.initialDate,
     this.showBackButton = true,
     this.onBackPressed,
+    this.drawerExtraSection,
   });
 
   final List<SakuraCalendarEvent> events;
@@ -40,6 +41,7 @@ class SakuraCalendarShell extends ConsumerStatefulWidget {
   final DateTime? initialDate;
   final bool showBackButton;
   final VoidCallback? onBackPressed;
+  final Widget? drawerExtraSection;
 
   @override
   ConsumerState<SakuraCalendarShell> createState() =>
@@ -124,6 +126,7 @@ class _SakuraCalendarShellState extends ConsumerState<SakuraCalendarShell> {
         isMentor: widget.isMentor,
         onSelectMode: (mode) => controller.setViewMode(mode),
         onToggleEventType: (type) => controller.toggleEventType(type),
+        extraSection: widget.drawerExtraSection,
       ),
       body: SafeArea(
         child: Column(

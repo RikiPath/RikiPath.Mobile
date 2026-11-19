@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
 import 'package:rikipath_mobile/features/writing_practice/data/writing_api_paths.dart';
@@ -13,7 +16,9 @@ class ApiWritingPracticeRepository implements WritingPracticeRepository {
   @override
   Future<List<WritingCharacter>> loadQueue(WritingQueueRequest request) async {
     final path = switch ((request.script, request.kanjiCollection)) {
-      (WritingScript.hiragana || WritingScript.katakana, _) =>
+      (WritingScript.hiragana || WritingScript.katakana, KanjiWritingCollection.all) =>
+        WritingApiPaths.kanaAll,
+      (WritingScript.hiragana || WritingScript.katakana, KanjiWritingCollection.due) =>
         WritingApiPaths.kanaDue,
       (WritingScript.kanji, KanjiWritingCollection.due) =>
         WritingApiPaths.kanjiDue,
@@ -126,6 +131,28 @@ class ApiWritingPracticeRepository implements WritingPracticeRepository {
         message: 'The Kanji Writing submit response is malformed.',
       );
     }
+  }
+
+  Future<List<String>> recognizeKanjiPng(Uint8List pngBytes) async {
+    final formData = FormData.fromMap(<String, Object?>{
+      'image': MultipartFile.fromBytes(
+        pngBytes,
+        filename: 'kanji.png',
+        contentType: DioMediaType('image', 'png'),
+      ),
+    });
+    final response = await _apiClient.post<Object?>(
+      WritingApiPaths.kanjiRecognize,
+      data: formData,
+    );
+    final body = response.data;
+    final raw = body is Map ? (body['result'] ?? body['data']) : body;
+    if (raw is! List) return const <String>[];
+    return raw
+        .whereType<String>()
+        .map((c) => c.trim())
+        .where((c) => c.isNotEmpty)
+        .toList(growable: false);
   }
 }
 

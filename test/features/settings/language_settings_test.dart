@@ -352,10 +352,7 @@ class _FakeProfileRepository implements UserProfileRepository {
   Future<UserProfile> loadProfile() async => _profile();
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) async {
+  Future<UserProfile> updateProfile({required String fullName}) async {
     throw UnimplementedError();
   }
 

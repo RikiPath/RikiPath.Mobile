@@ -51,6 +51,7 @@ import 'package:rikipath_mobile/features/practice/presentation/daily_review_scre
 import 'package:rikipath_mobile/features/practice/presentation/mock_test_result_screen.dart';
 import 'package:rikipath_mobile/features/practice/presentation/mock_test_screen.dart';
 import 'package:rikipath_mobile/features/speech/presentation/speech_to_text_screen.dart';
+import 'package:rikipath_mobile/features/subscriptions/presentation/subscriptions_screen.dart';
 import 'package:rikipath_mobile/features/text_scan/presentation/text_scan_screen.dart';
 import 'package:rikipath_mobile/features/writing_practice/domain/writing_practice.dart';
 import 'package:rikipath_mobile/features/writing_practice/presentation/writing_practice_detail_screen.dart';
@@ -91,6 +92,11 @@ GoRouter createAppRouter({
     refreshListenable: authSession,
     redirect: (context, state) {
       final authState = authSession.value;
+      final paymentTarget = resolvePaymentDeepLinkRoute(
+        state.uri,
+        authState: authState,
+        role: authSession.currentRole,
+      );
       if (authState == AuthSessionState.unknown) {
         if (state.matchedLocation != AppRoutes.splash) {
           pendingLocation ??= state.uri.toString();
@@ -102,11 +108,29 @@ GoRouter createAppRouter({
         );
       }
 
+      if (paymentTarget != null) {
+        if (pendingLocation == state.uri.toString()) {
+          pendingLocation = null;
+        }
+        return paymentTarget;
+      }
+
       if (authState == AuthSessionState.authenticated &&
           pendingLocation != null) {
         final intendedLocation = pendingLocation!;
         pendingLocation = null;
-        final intendedPath = Uri.parse(intendedLocation).path;
+        final intendedUri = Uri.tryParse(intendedLocation);
+        final intendedPaymentTarget = intendedUri == null
+            ? null
+            : resolvePaymentDeepLinkRoute(
+                intendedUri,
+                authState: authState,
+                role: authSession.currentRole,
+              );
+        if (intendedPaymentTarget != null) {
+          return intendedPaymentTarget;
+        }
+        final intendedPath = intendedUri?.path ?? intendedLocation;
         return authRouteRedirect(
               authState: authState,
               role: authSession.currentRole,
@@ -122,6 +146,14 @@ GoRouter createAppRouter({
       );
     },
     routes: [
+      GoRoute(
+        path: '/payment-success',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/payment-cancel',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),
@@ -624,6 +656,13 @@ GoRouter createAppRouter({
                       child: _buildVerifyEmailScreen(state),
                     ),
                   ),
+                  GoRoute(
+                    path: AppRoutes.profileSubscriptionsSegment,
+                    pageBuilder: (context, state) => _profileDetailPage(
+                      state: state,
+                      child: const SubscriptionsScreen(),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -767,4 +806,42 @@ String? _authenticatedRoleRedirect({
   return matchedLocation == AppRoutes.unsupportedRole
       ? null
       : AppRoutes.unsupportedRole;
+}
+
+/// Resolves PayOS return deep links (`rikipath://payment-success`,
+/// `rikipath://payment-cancel`, `/payment-success`, `/payment-cancel`) so
+/// external browser redirects never land on an unknown-route error page.
+String? resolvePaymentDeepLinkRoute(
+  Uri uri, {
+  required AuthSessionState authState,
+  required BackendUserRole? role,
+}) {
+  final scheme = uri.scheme.toLowerCase();
+  final host = uri.host.toLowerCase();
+  final path = uri.path.toLowerCase();
+  final isCustomPaymentReturn =
+      scheme == 'rikipath' &&
+      (host == 'payment-success' || host == 'payment-cancel');
+  final isPathPaymentReturn =
+      path == '/payment-success' || path == '/payment-cancel';
+  if (!isCustomPaymentReturn && !isPathPaymentReturn) return null;
+
+  if (authState != AuthSessionState.authenticated) {
+    return authState == AuthSessionState.unauthenticated
+        ? AppRoutes.login
+        : AppRoutes.splash;
+  }
+
+  if (role == BackendUserRole.mentor) return AppRoutes.mentor;
+  if (role != BackendUserRole.learner) return AppRoutes.unsupportedRole;
+
+  final purchaseId = int.tryParse(uri.queryParameters['purchaseId'] ?? '');
+  if (purchaseId != null && purchaseId > 0) {
+    return AppRoutes.profileSubscriptions;
+  }
+  final courseId = int.tryParse(uri.queryParameters['courseId'] ?? '');
+  if (courseId != null && courseId > 0) {
+    return AppRoutes.learnerCohortDetail(courseId);
+  }
+  return AppRoutes.learnerMyCourses;
 }

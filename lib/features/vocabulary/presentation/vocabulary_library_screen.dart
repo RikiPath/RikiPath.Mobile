@@ -11,6 +11,7 @@ import 'package:rikipath_mobile/features/learning/presentation/widgets/learning_
 import 'package:rikipath_mobile/features/notebook/application/notebook_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/application/vocabulary_controller.dart';
 import 'package:rikipath_mobile/features/vocabulary/domain/vocabulary.dart';
+import 'package:rikipath_mobile/features/vocabulary/presentation/widgets/japanese_dictionary_sheet.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/widgets/vocabulary_library_view.dart';
 import 'package:rikipath_mobile/features/vocabulary/presentation/widgets/vocabulary_state_views.dart';
 
@@ -30,6 +31,14 @@ class VocabularyLibraryScreen extends ConsumerWidget {
         title: context.l10n.vocabulary,
         subtitle: context.l10n.library,
         onBack: () => popOrGo(context, AppRoutes.learn),
+        actions: [
+          IconButton(
+            key: const ValueKey<String>('vocab_kana_dict_button'),
+            tooltip: 'Từ điển Kana → Kanji',
+            icon: const Icon(Icons.translate_rounded),
+            onPressed: () => showJapaneseDictionarySheet(context, ref),
+          ),
+        ],
       ),
       body: SafeArea(
         top: false,

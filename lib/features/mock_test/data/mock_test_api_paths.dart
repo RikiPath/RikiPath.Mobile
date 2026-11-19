@@ -19,4 +19,11 @@ abstract final class MockTestApiPaths {
 
   static String testsByLevel(int jlptLevelId) =>
       '/api/MockTest/level/$jlptLevelId/tests';
+
+  static const String history = '/api/MockTest/history';
+
+  static String wrongQuestions({int? practiceTestId}) =>
+      practiceTestId == null
+          ? '/api/MockTest/wrong-questions'
+          : '/api/MockTest/wrong-questions?practiceTestId=$practiceTestId';
 }

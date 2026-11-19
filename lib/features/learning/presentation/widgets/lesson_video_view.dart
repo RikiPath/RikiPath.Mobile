@@ -81,6 +81,8 @@ class LessonVideoView extends StatelessWidget {
                   lesson: lesson,
                   onToggleBookmark: onToggleBookmark,
                 )
+              else if (session.selectedTab == LessonContentTab.notes)
+                LessonNotesContent(lesson: lesson)
               else
                 LessonArticleContent(lesson: lesson),
               const SizedBox(height: AppSpacing.space5),

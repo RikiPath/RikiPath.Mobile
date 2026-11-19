@@ -75,7 +75,7 @@ class RegisterController extends Notifier<RegisterState> {
 
     state = const RegisterState(isLoading: true);
     try {
-      final name = _splitVietnameseFullName(fullName);
+      final normalizedFullName = fullName.trim().replaceAll(RegExp(r'\s+'), ' ');
       final account = await ref
           .read(authRepositoryProvider)
           .register(
@@ -83,8 +83,7 @@ class RegisterController extends Notifier<RegisterState> {
               email: email.trim(),
               password: password,
               confirmPassword: confirmPassword,
-              firstName: name.firstName,
-              lastName: name.lastName,
+              fullName: normalizedFullName.isEmpty ? null : normalizedFullName,
             ),
           );
       state = RegisterState(registeredAccount: account);
@@ -102,15 +101,4 @@ class RegisterController extends Notifier<RegisterState> {
       return false;
     }
   }
-}
-
-({String? firstName, String? lastName}) _splitVietnameseFullName(String value) {
-  final parts = value.trim().split(RegExp(r'\s+'));
-  if (parts.length == 1 && parts.single.isEmpty) {
-    return (firstName: null, lastName: null);
-  }
-  if (parts.length == 1) {
-    return (firstName: parts.single, lastName: null);
-  }
-  return (firstName: parts.skip(1).join(' '), lastName: parts.first);
 }

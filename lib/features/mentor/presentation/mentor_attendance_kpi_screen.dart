@@ -116,7 +116,7 @@ class _MentorAttendanceKpiScreenState
                         label: 'Buổi được giao',
                         value: '${summary.totalAssignedSessions}',
                         caption:
-                            '1-1: ${summary.assignedBookingsCount} • Khóa: ${summary.assignedCourseSessionsCount}',
+                            'Lớp nhóm: ${summary.assignedCourseSessionsCount} buổi',
                       ),
                     ),
                     const SizedBox(width: AppSpacing.space3),
@@ -320,7 +320,7 @@ class _MentorAttendanceKpiScreenState
                         : '—';
                     final typeLabel = s.sourceType == 'StudyCourse'
                         ? 'Khóa học'
-                        : 'Tư vấn 1-1';
+                        : 'Lớp nhóm';
                     return Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.space2),
                       child: RikiCard(

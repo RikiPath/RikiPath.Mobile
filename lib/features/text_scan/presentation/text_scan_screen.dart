@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/text_scan/application/text_scan_controller.dart';
 import 'package:rikipath_mobile/features/text_scan/domain/text_scan.dart';
+import 'package:rikipath_mobile/features/writing_practice/application/essay_writing_controller.dart';
+import 'package:rikipath_mobile/features/writing_practice/data/learner_essay_draft_repository.dart';
 
 class TextScanScreen extends ConsumerStatefulWidget {
   const TextScanScreen({super.key});
@@ -17,6 +21,37 @@ class TextScanScreen extends ConsumerStatefulWidget {
 
 class _TextScanScreenState extends ConsumerState<TextScanScreen> {
   final TextEditingController _textController = TextEditingController();
+  String _rawOcrText = '';
+  bool _savingDraft = false;
+
+  Future<void> _saveToEssayDraft(TextScanState state) async {
+    final text = _textController.text.trim();
+    if (_savingDraft || text.isEmpty) return;
+    setState(() => _savingDraft = true);
+    try {
+      await ref
+          .read(learnerEssayDraftRepositoryProvider)
+          .createDraft(
+            contentText: text,
+            originalOcrText: _rawOcrText.isNotEmpty ? _rawOcrText : text,
+            imageBytes: state.image?.bytes,
+            fileName: state.image?.fileName,
+            contentType: state.image?.contentType,
+          );
+      if (!mounted) return;
+      ref.invalidate(learnerEssayDraftsProvider);
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .success(title: 'Đã lưu vào bản nháp bài viết');
+    } catch (_) {
+      if (!mounted) return;
+      ref
+          .read(rikiToastServiceProvider.notifier)
+          .error(title: 'Không thể lưu bản nháp lúc này.');
+    } finally {
+      if (mounted) setState(() => _savingDraft = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -29,6 +64,10 @@ class _TextScanScreenState extends ConsumerState<TextScanScreen> {
     final state = ref.watch(textScanControllerProvider);
     final controller = ref.read(textScanControllerProvider.notifier);
     ref.listen(textScanControllerProvider, (previous, next) {
+      if (next.status == TextScanStatus.completed &&
+          previous?.status != TextScanStatus.completed) {
+        _rawOcrText = next.recognizedText;
+      }
       if (next.status == TextScanStatus.completed &&
           next.recognizedText != _textController.text) {
         _textController.value = TextEditingValue(
@@ -114,6 +153,46 @@ class _TextScanScreenState extends ConsumerState<TextScanScreen> {
                         color: AppColors.textMuted,
                       ),
                     ),
+                    if (_textController.text.trim().isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.space3),
+                      Wrap(
+                        spacing: AppSpacing.space2,
+                        runSpacing: AppSpacing.space2,
+                        children: [
+                          OutlinedButton.icon(
+                            key: const ValueKey<String>(
+                              'text_scan_save_draft_button',
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(0, 42),
+                            ),
+                            onPressed: _savingDraft
+                                ? null
+                                : () => _saveToEssayDraft(state),
+                            icon: const Icon(Icons.save_outlined, size: 18),
+                            label: Text(
+                              _savingDraft ? 'Đang lưu...' : 'Lưu bản nháp',
+                            ),
+                          ),
+                          FilledButton.tonalIcon(
+                            key: const ValueKey<String>(
+                              'text_scan_open_essay_button',
+                            ),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(0, 42),
+                            ),
+                            onPressed: () {
+                              ref
+                                  .read(essayWritingDraftProvider.notifier)
+                                  .state = _textController.text.trim();
+                              context.push(AppRoutes.essayWriting);
+                            },
+                            icon: const Icon(Icons.edit_note_rounded, size: 18),
+                            label: const Text('Đưa sang viết bài AI'),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -263,9 +342,29 @@ class _TextScanFeedback extends StatelessWidget {
         title: context.l10n.textScanFailedTitle,
         message: context.l10n.textScanNetworkError,
       ),
-      TextScanStatus.providerError => RikiErrorBanner(
-        title: context.l10n.textScanFailedTitle,
-        message: context.l10n.textScanProviderError,
+      TextScanStatus.providerError => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          RikiErrorBanner(
+            title: context.l10n.textScanFailedTitle,
+            message: state.subscriptionRequired
+                ? 'Bạn cần gói Luyện viết để sử dụng tính năng Quét chữ OCR.'
+                : context.l10n.textScanProviderError,
+          ),
+          if (state.subscriptionRequired) ...[
+            const SizedBox(height: AppSpacing.space2),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                key: const ValueKey<String>('text_scan_upgrade_button'),
+                onPressed: () =>
+                    context.push(AppRoutes.profileSubscriptions),
+                icon: const Icon(Icons.workspace_premium_outlined),
+                label: const Text('Xem gói Luyện viết'),
+              ),
+            ),
+          ],
+        ],
       ),
       TextScanStatus.completed => RikiSuccessBanner(
         message: context.l10n.textScanCompleted,

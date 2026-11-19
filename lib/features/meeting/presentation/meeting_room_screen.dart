@@ -863,11 +863,15 @@ class _ParticipantsSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(meetingControllerProvider(room)).state;
+    final controller = ref.watch(meetingControllerProvider(room));
+    final state = controller.state;
+    final telemetry = ref.watch(meetingRoomTelemetryProvider(room.roomId)).value;
+    final isLocalMentor = state.self?.role == MeetingParticipantRole.mentor;
     final entries = <MeetingParticipant>[
       if (state.self != null) state.self!,
       ...state.participants,
     ];
+    final roomReady = state.isRoomReady || (telemetry?.isReady ?? false);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -875,14 +879,47 @@ class _ParticipantsSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              context.l10n.meetingNativeParticipants,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.l10n.meetingNativeParticipants,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: roomReady
+                        ? const Color(0xFF14532D)
+                        : const Color(0xFF3F3B4A),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    roomReady ? 'Phòng đã sẵn sàng' : 'Chờ đủ thành viên',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
+            if (telemetry != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Trực tuyến: ${telemetry.onlineParticipantsCount} · Lượt ghi nhận điểm danh: ${telemetry.attendanceRecordsCount}',
+                style: const TextStyle(color: Color(0xFFAAA5AE), fontSize: 12),
+              ),
+            ],
             const SizedBox(height: 12),
             Flexible(
               child: ListView.separated(
@@ -943,6 +980,20 @@ class _ParticipantsSheet extends ConsumerWidget {
                               : const Color(0xFFFF8A9F),
                           size: 20,
                         ),
+                        if (isLocalMentor && !isSelf && participant.isMicOn) ...[
+                          const SizedBox(width: 4),
+                          IconButton(
+                            key: ValueKey('mute_peer_${participant.connectionId}'),
+                            tooltip: 'Tắt micro thành viên',
+                            onPressed: () =>
+                                controller.muteParticipant(participant.connectionId),
+                            icon: const Icon(
+                              Icons.volume_off_rounded,
+                              color: Color(0xFFFF8A9F),
+                              size: 20,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   );

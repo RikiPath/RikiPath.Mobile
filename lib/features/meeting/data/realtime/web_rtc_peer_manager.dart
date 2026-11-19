@@ -269,7 +269,16 @@ class WebRtcPeerManager {
   }
 
   static Map<String, Object?>? _jsonMap(Object? payload) {
-    final decoded = payload is String ? jsonDecode(payload) : payload;
+    Object? decoded;
+    if (payload is String) {
+      try {
+        decoded = jsonDecode(payload);
+      } on FormatException {
+        return null;
+      }
+    } else {
+      decoded = payload;
+    }
     if (decoded is! Map) return null;
     return decoded.map((key, value) => MapEntry('$key', value));
   }

@@ -175,14 +175,6 @@ class PushNotificationService {
     if (bookingMatch != null) {
       return {'screen': 'meeting_room', 'bookingId': bookingMatch.group(1)!};
     }
-    final chatMatch = RegExp(r'^/mentor/chat/(\d+)').firstMatch(path);
-    if (chatMatch != null) {
-      return {'screen': 'mentor_chat', 'bookingId': chatMatch.group(1)!};
-    }
-    final disputeMatch = RegExp(r'^/mentor/disputes/(\d+)').firstMatch(path);
-    if (disputeMatch != null) {
-      return {'screen': 'mentor_disputes', 'disputeId': disputeMatch.group(1)!};
-    }
     return const {};
   }
 
@@ -193,6 +185,7 @@ class PushNotificationService {
     _notificationHub = null;
     if (hub != null) await hub.stop();
     _handledNotifications.clear();
+    _firebaseInitialized = false;
   }
 
   bool get isFirebaseAvailable {
@@ -419,6 +412,7 @@ class PushNotificationService {
       );
       _currentToken = null;
       _isRegistered = false;
+      _firebaseInitialized = false;
       return (response.statusCode ?? 0) >= 200 &&
           (response.statusCode ?? 0) < 300;
     } catch (e) {
@@ -427,6 +421,7 @@ class PushNotificationService {
       );
       _currentToken = null;
       _isRegistered = false;
+      _firebaseInitialized = false;
       return false;
     }
   }
@@ -472,7 +467,8 @@ class PushNotificationService {
     }
     if (payload.linkUrl != null && payload.linkUrl!.trim().isNotEmpty) {
       final raw = payload.linkUrl!.trim();
-      final path = (Uri.tryParse(raw)?.path ?? raw).trim();
+      final parsed = Uri.tryParse(raw);
+      final path = (parsed?.path ?? raw).trim();
       final lower = path.toLowerCase();
 
       if (lower == AppRoutes.mentorAvailability ||
@@ -485,25 +481,49 @@ class PushNotificationService {
       if (lower == '/mentor/schedule' || lower == AppRoutes.mentorCalendar) {
         return AppRoutes.mentorCalendar;
       }
-      if (lower == AppRoutes.mentorAttendanceKpi ||
-          lower.startsWith('/mentor/compensation')) {
+      if (lower == AppRoutes.mentorAttendanceKpi) {
         return AppRoutes.mentorAttendanceKpi;
       }
-      if (lower.startsWith('/mentor/bank-account')) {
-        return AppRoutes.mentorProfile;
+      if (lower.startsWith('/subscriptions')) {
+        return AppRoutes.profileSubscriptions;
       }
-      if (lower.startsWith('/cohorts') || lower.startsWith('/my-courses')) {
+      final learnerCourseMatch = RegExp(
+        r'^/(?:my-courses|study-courses|cohorts)/(\d+)(?:/|$)',
+      ).firstMatch(lower);
+      if (learnerCourseMatch != null) {
+        final id = int.tryParse(learnerCourseMatch.group(1)!);
+        if (id != null && id > 0) {
+          return isLearner
+              ? AppRoutes.learnerCohortDetail(id)
+              : AppRoutes.mentorCohorts;
+        }
+      }
+      if (lower.startsWith('/cohorts') ||
+          lower.startsWith('/my-courses') ||
+          lower.startsWith('/study-courses')) {
         return isLearner ? AppRoutes.learnerMyCourses : AppRoutes.mentorCohorts;
       }
       if (lower.startsWith('/homework')) {
-        return isLearner ? AppRoutes.learnerMyCourses : AppRoutes.mentorCohorts;
+        if (!isLearner) {
+          final cohortId = int.tryParse(
+            parsed?.queryParameters['cohortId'] ?? '',
+          );
+          if (cohortId != null && cohortId > 0) {
+            return AppRoutes.mentorCohortDetail(cohortId);
+          }
+          return AppRoutes.mentorCohorts;
+        }
+        return AppRoutes.learnerMyCourses;
       }
       final mentorCohortMatch = RegExp(r'^/mentor/cohorts/(\d+)').firstMatch(lower);
       if (mentorCohortMatch != null) {
         final id = int.tryParse(mentorCohortMatch.group(1)!);
         if (id != null && id > 0) return AppRoutes.mentorCohortDetail(id);
       }
-      if (lower.startsWith('/mentor/cohorts')) {
+      if (lower.startsWith('/mentor/cohorts') ||
+          lower.startsWith('/mentor/complaints') ||
+          lower.startsWith('/mentor/reviews') ||
+          lower.startsWith('/mentor/disputes')) {
         return AppRoutes.mentorCohorts;
       }
     }

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
+import 'package:rikipath_mobile/features/cohorts/application/cohort_controller.dart';
+import 'package:rikipath_mobile/features/cohorts/domain/cohort_operations.dart';
 import 'package:rikipath_mobile/features/cohorts/presentation/widgets/cohort_summary_facts.dart';
 import 'package:rikipath_mobile/features/mentor/application/learner_mentor_controller.dart';
 import 'package:rikipath_mobile/features/mentor/domain/learner_mentor_meeting.dart';
@@ -22,9 +24,22 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
   final int mentorId;
   final DateTime? initialDate;
 
+  void _openMentorCohorts(BuildContext context, WidgetRef ref) {
+    ref
+        .read(learnerCohortFilterProvider.notifier)
+        .setFilter(CohortDiscoveryFilter(mentorId: mentorId));
+    context.push(AppRoutes.learnerCohorts);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mentorsState = ref.watch(learnerMentorListControllerProvider);
+    final listedMentor = mentorsState.value
+        ?.where((m) => m.id == mentorId)
+        .firstOrNull;
+    final directState = listedMentor != null
+        ? AsyncData<BookableMentor?>(listedMentor)
+        : ref.watch(learnerMentorPublicProfileProvider(mentorId));
 
     return Scaffold(
       key: const Key('learner_mentor_profile_screen'),
@@ -40,37 +55,39 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         top: false,
-        child: switch (mentorsState) {
-          AsyncLoading() => const MentorListSkeleton(
+        child: switch ((mentorsState, directState)) {
+          (AsyncLoading(), AsyncLoading()) => const MentorListSkeleton(
             key: Key('learner_mentor_profile_loading'),
           ),
-          AsyncError() => Center(
+          (_, AsyncData(value: final mentor?)) =>
+            _buildProfile(context, ref, mentor),
+          (AsyncError(), AsyncError()) || (_, AsyncError()) => Center(
             child: MentorErrorState(
               key: const Key('learner_mentor_profile_error'),
               message: 'Không thể tải hồ sơ cố vấn.',
-              onRetry: ref
-                  .read(learnerMentorListControllerProvider.notifier)
-                  .retry,
+              onRetry: () {
+                ref.read(learnerMentorListControllerProvider.notifier).retry();
+                ref.invalidate(learnerMentorPublicProfileProvider(mentorId));
+              },
             ),
           ),
-          AsyncData(:final value) => _buildLoadedProfile(context, value),
+          (AsyncError(), AsyncLoading()) => const MentorListSkeleton(
+            key: Key('learner_mentor_profile_loading'),
+          ),
+          (AsyncData(), AsyncLoading()) => const MentorListSkeleton(
+            key: Key('learner_mentor_profile_loading'),
+          ),
+          _ => const Center(child: Text('Không tìm thấy hồ sơ cố vấn.')),
         },
       ),
     );
   }
 
-  Widget _buildLoadedProfile(
+  Widget _buildProfile(
     BuildContext context,
-    List<BookableMentor> mentors,
+    WidgetRef ref,
+    BookableMentor mentor,
   ) {
-    final mentor = mentors.where((m) => m.id == mentorId).firstOrNull;
-    if (mentor == null) {
-      return const Center(child: Text('Không tìm thấy hồ sơ cố vấn.'));
-    }
-    return _buildProfile(context, mentor);
-  }
-
-  Widget _buildProfile(BuildContext context, BookableMentor mentor) {
     return Column(
       children: [
         Expanded(
@@ -337,7 +354,7 @@ class LearnerMentorProfileScreen extends ConsumerWidget {
             key: const Key('learner_mentor_view_cohorts_button'),
             label: 'Xem & đăng ký lớp nhóm',
             trailingIcon: Icons.groups_outlined,
-            onPressed: () => context.push(AppRoutes.learnerCohorts),
+            onPressed: () => _openMentorCohorts(context, ref),
           ),
         ),
       ],
@@ -432,14 +449,32 @@ class _MentorPublishedCohortsSection extends ConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: RikiSecondaryButton(
                     label: 'Xem & đăng ký lớp',
-                    onPressed: () => context.push(AppRoutes.learnerCohorts),
+                    onPressed: () {
+                      ref
+                          .read(learnerCohortFilterProvider.notifier)
+                          .setFilter(CohortDiscoveryFilter(mentorId: mentorId));
+                      context.push(AppRoutes.learnerCohorts);
+                    },
                   ),
                 ),
               ],
             ),
-            AsyncError() => Text(
-              'Chưa tải được danh sách lớp. Vui lòng thử lại.',
-              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+            AsyncError() => Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Chưa tải được danh sách lớp. Vui lòng thử lại.',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.error,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      ref.invalidate(mentorPublishedCohortsProvider(mentorId)),
+                  child: const Text('Thử lại'),
+                ),
+              ],
             ),
             _ => const LinearProgressIndicator(),
           },

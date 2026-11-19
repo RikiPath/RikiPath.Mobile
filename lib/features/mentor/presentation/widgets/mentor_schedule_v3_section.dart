@@ -31,6 +31,17 @@ class _MentorScheduleV3CardState extends ConsumerState<MentorScheduleV3Card> {
   DateTime _effectiveFrom = DateTime.now().toUtc();
   List<MentorScheduleRuleDraft> _draftRules = const <MentorScheduleRuleDraft>[];
   bool _dirty = false;
+  int _previewHorizonDays = 7;
+
+  static TimeOfDay _parseHhMm(String hhMm) {
+    final parts = hhMm.split(':');
+    final h = int.tryParse(parts.isNotEmpty ? parts[0] : '') ?? 18;
+    final m = int.tryParse(parts.length > 1 ? parts[1] : '') ?? 0;
+    return TimeOfDay(hour: h.clamp(0, 23), minute: m.clamp(0, 59));
+  }
+
+  static String _formatHhMm(TimeOfDay t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   void _updateDirtyFlag(bool next, {bool notifyAsync = false}) {
     if (_dirty == next) return;
@@ -72,8 +83,13 @@ class _MentorScheduleV3CardState extends ConsumerState<MentorScheduleV3Card> {
   Future<void> _addRuleDialog() async {
     var selectedWeekday = DateTime.monday % 7; // 1 = Monday
     var selectedDaypart = MentorDaypart.evening;
+    var startTime = _parseHhMm(selectedDaypart.defaultStart);
+    var endTime = _parseHhMm(selectedDaypart.defaultEnd);
+    String? timeError;
 
-    final result = await showDialog<({int weekday, MentorDaypart daypart})>(
+    final result = await showDialog<
+      ({int weekday, MentorDaypart daypart, String localStart, String localEnd})
+    >(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
@@ -116,9 +132,67 @@ class _MentorScheduleV3CardState extends ConsumerState<MentorScheduleV3Card> {
                     )
                     .toList(),
                 onChanged: (v) {
-                  if (v != null) setDialogState(() => selectedDaypart = v);
+                  if (v != null) {
+                    setDialogState(() {
+                      selectedDaypart = v;
+                      startTime = _parseHhMm(v.defaultStart);
+                      endTime = _parseHhMm(v.defaultEnd);
+                      timeError = null;
+                    });
+                  }
                 },
               ),
+              const SizedBox(height: AppSpacing.space3),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      key: const Key('mentor_rule_start_time'),
+                      onPressed: () async {
+                        final picked = await showTimePicker(
+                          context: ctx,
+                          initialTime: startTime,
+                        );
+                        if (picked != null) {
+                          setDialogState(() {
+                            startTime = picked;
+                            timeError = null;
+                          });
+                        }
+                      },
+                      child: Text('Từ ${_formatHhMm(startTime)}'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.space2),
+                  Expanded(
+                    child: OutlinedButton(
+                      key: const Key('mentor_rule_end_time'),
+                      onPressed: () async {
+                        final picked = await showTimePicker(
+                          context: ctx,
+                          initialTime: endTime,
+                        );
+                        if (picked != null) {
+                          setDialogState(() {
+                            endTime = picked;
+                            timeError = null;
+                          });
+                        }
+                      },
+                      child: Text('Đến ${_formatHhMm(endTime)}'),
+                    ),
+                  ),
+                ],
+              ),
+              if (timeError != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  timeError!,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.error,
+                  ),
+                ),
+              ],
             ],
           ),
           actions: [
@@ -127,9 +201,23 @@ class _MentorScheduleV3CardState extends ConsumerState<MentorScheduleV3Card> {
               child: Text(context.l10n.mentorCommonCancel),
             ),
             FilledButton(
-              onPressed: () => Navigator.of(
-                ctx,
-              ).pop((weekday: selectedWeekday, daypart: selectedDaypart)),
+              onPressed: () {
+                final startMin = startTime.hour * 60 + startTime.minute;
+                final endMin = endTime.hour * 60 + endTime.minute;
+                if (endMin - startMin < 90) {
+                  setDialogState(
+                    () => timeError =
+                        'Khung giờ phải kéo dài tối thiểu 90 phút để tạo ca dạy.',
+                  );
+                  return;
+                }
+                Navigator.of(ctx).pop((
+                  weekday: selectedWeekday,
+                  daypart: selectedDaypart,
+                  localStart: _formatHhMm(startTime),
+                  localEnd: _formatHhMm(endTime),
+                ));
+              },
               child: Text(context.l10n.mentorCommonSave),
             ),
           ],
@@ -154,8 +242,8 @@ class _MentorScheduleV3CardState extends ConsumerState<MentorScheduleV3Card> {
         MentorScheduleRuleDraft(
           weekday: result.weekday,
           daypart: result.daypart,
-          localStart: result.daypart.defaultStart,
-          localEnd: result.daypart.defaultEnd,
+          localStart: result.localStart,
+          localEnd: result.localEnd,
           effectiveFrom: DateTime.now().toUtc(),
         ),
       ]..sort(_compareRuleDraft);
@@ -206,7 +294,7 @@ class _MentorScheduleV3CardState extends ConsumerState<MentorScheduleV3Card> {
     final l10n = context.l10n;
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, now.day);
-    final end = start.add(const Duration(days: 6));
+    final end = start.add(Duration(days: _previewHorizonDays - 1));
 
     try {
       final result = await runWithAppLoadingOverlay<MentorSlotPreviewResult>(
@@ -216,12 +304,31 @@ class _MentorScheduleV3CardState extends ConsumerState<MentorScheduleV3Card> {
             .read(mentorScheduleV3ControllerProvider.notifier)
             .previewSlots(startDate: start, endDate: end),
       );
+      var conflicts = const <MentorTeachingConflictItem>[];
+      final candidateIntervals = result.slots
+          .where((s) => !s.isExisting)
+          .take(500)
+          .map((s) => (startUtc: s.startUtc.value, endUtc: s.endUtc.value))
+          .toList();
+      if (candidateIntervals.isNotEmpty) {
+        try {
+          final report = await ref
+              .read(mentorScheduleV3ControllerProvider.notifier)
+              .previewTeachingConflicts(intervals: candidateIntervals);
+          conflicts = report.conflicts;
+        } catch (_) {
+          // Preview still opens cleanly even if conflict advisory fails.
+        }
+      }
       if (!mounted) return;
       await showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (ctx) => _SlotPreviewSheet(preview: result),
+        builder: (ctx) => _SlotPreviewSheet(
+          preview: result,
+          teachingConflicts: conflicts,
+        ),
       );
     } catch (error) {
       if (!mounted) return;
@@ -242,7 +349,7 @@ class _MentorScheduleV3CardState extends ConsumerState<MentorScheduleV3Card> {
     final l10n = context.l10n;
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, now.day);
-    final end = start.add(const Duration(days: 6));
+    final end = start.add(Duration(days: _previewHorizonDays - 1));
 
     try {
       final result = await runWithAppLoadingOverlay<MentorPublishSlotsResult>(
@@ -464,6 +571,28 @@ class _MentorScheduleV3CardState extends ConsumerState<MentorScheduleV3Card> {
                             onPressed: _saveRules,
                           ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.space2),
+                    Wrap(
+                      spacing: AppSpacing.space2,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          'Phạm vi sinh lịch:',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        for (final days in const [7, 14, 30])
+                          ChoiceChip(
+                            key: ValueKey('mentor_schedule_horizon_$days'),
+                            label: Text('$days ngày'),
+                            selected: _previewHorizonDays == days,
+                            visualDensity: VisualDensity.compact,
+                            onSelected: (_) =>
+                                setState(() => _previewHorizonDays = days),
+                          ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.space2),
@@ -806,9 +935,13 @@ class MentorAvailabilitySlotItemCard extends ConsumerWidget {
 }
 
 class _SlotPreviewSheet extends StatelessWidget {
-  const _SlotPreviewSheet({required this.preview});
+  const _SlotPreviewSheet({
+    required this.preview,
+    this.teachingConflicts = const [],
+  });
 
   final MentorSlotPreviewResult preview;
+  final List<MentorTeachingConflictItem> teachingConflicts;
 
   @override
   Widget build(BuildContext context) {
@@ -837,6 +970,22 @@ class _SlotPreviewSheet extends StatelessWidget {
                 color: AppColors.textSecondary,
               ),
             ),
+            if (teachingConflicts.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.space2),
+              RikiWarningBanner(
+                title: 'Cảnh báo trùng lịch dạy (${teachingConflicts.length})',
+                message: teachingConflicts
+                    .take(4)
+                    .map(
+                      (c) => [
+                        c.message,
+                        if (c.cohortName != null && c.cohortName!.isNotEmpty)
+                          'Lớp: ${c.cohortName}',
+                      ].join(' · '),
+                    )
+                    .join('\n'),
+              ),
+            ],
             const SizedBox(height: AppSpacing.space3),
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 340),

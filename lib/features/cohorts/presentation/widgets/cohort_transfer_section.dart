@@ -37,6 +37,8 @@ class _CohortTransferSectionState extends ConsumerState<CohortTransferSection> {
   int? _targetCohortId;
   String? _idempotencyKey;
   ({Uint8List bytes, String name, String mime})? _evidence;
+  bool _submitting = false;
+  int? _withdrawingId;
 
   @override
   void dispose() {
@@ -45,6 +47,7 @@ class _CohortTransferSectionState extends ConsumerState<CohortTransferSection> {
   }
 
   Future<void> _submit() async {
+    if (_submitting) return;
     final reason = _reason.text.trim();
     if (reason.length < 10) {
       ref.read(rikiToastServiceProvider.notifier).error(
@@ -53,6 +56,7 @@ class _CohortTransferSectionState extends ConsumerState<CohortTransferSection> {
       );
       return;
     }
+    _submitting = true;
     _idempotencyKey ??= generateClientIdempotencyKey();
     try {
       await runWithAppLoadingOverlay<void>(
@@ -87,10 +91,14 @@ class _CohortTransferSectionState extends ConsumerState<CohortTransferSection> {
         title: 'Chưa gửi được yêu cầu',
         description: appErrorMessage(error, context.l10n),
       );
+    } finally {
+      _submitting = false;
     }
   }
 
   Future<void> _withdraw(CohortTransferRequestItem request) async {
+    if (_withdrawingId != null) return;
+    setState(() => _withdrawingId = request.id);
     try {
       await ref
           .read(learnerMyCoursesProvider.notifier)
@@ -105,6 +113,12 @@ class _CohortTransferSectionState extends ConsumerState<CohortTransferSection> {
         title: 'Chưa rút được yêu cầu',
         description: appErrorMessage(error, context.l10n),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _withdrawingId = null);
+      } else {
+        _withdrawingId = null;
+      }
     }
   }
 
@@ -207,9 +221,22 @@ class _CohortTransferSectionState extends ConsumerState<CohortTransferSection> {
           if (requestsState.isLoading)
             const LinearProgressIndicator()
           else if (requestsState.hasError)
-            Text(
-              appErrorMessage(requestsState.error!, context.l10n),
-              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    appErrorMessage(requestsState.error!, context.l10n),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.error,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      ref.invalidate(learnerTransferRequestsProvider),
+                  child: const Text('Thử lại'),
+                ),
+              ],
             )
           else if (requests.isEmpty)
             Text('Chưa có yêu cầu chuyển lớp nào.', style: AppTypography.bodySmall)
@@ -250,11 +277,67 @@ class _CohortTransferSectionState extends ConsumerState<CohortTransferSection> {
                   '${fmt.format(h.atUtc)} · ${h.action}: ${h.detail}',
                   style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                 ),
-              if (r.isPending)
-                TextButton(
-                  onPressed: () => _withdraw(r),
-                  child: const Text('Rút yêu cầu'),
-                ),
+              Wrap(
+                spacing: 8,
+                children: [
+                  if (r.hasEvidence)
+                    TextButton.icon(
+                      onPressed: () async {
+                        try {
+                          final file = await runWithAppLoadingOverlay(
+                            context,
+                            title: 'Đang tải minh chứng...',
+                            action: () => ref
+                                .read(learnerMyCoursesProvider.notifier)
+                                .downloadTransferEvidence(r.id),
+                          );
+                          if (!context.mounted) return;
+                          await showDialog<void>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: Text('Minh chứng yêu cầu #${r.id}'),
+                              content: file.contentType.startsWith('image/')
+                                  ? InteractiveViewer(
+                                      child: Image.memory(
+                                        file.bytes,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Tệp ${file.contentType} (${(file.bytes.lengthInBytes / 1024).toStringAsFixed(1)} KB) đã được tải.',
+                                    ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(),
+                                  child: const Text('Đóng'),
+                                ),
+                              ],
+                            ),
+                          );
+                        } catch (error) {
+                          if (!context.mounted) return;
+                          ref.read(rikiToastServiceProvider.notifier).error(
+                            title: 'Không thể tải minh chứng',
+                            description: appErrorMessage(error, context.l10n),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.visibility_outlined, size: 16),
+                      label: const Text('Xem minh chứng'),
+                    ),
+                  if (r.isPending)
+                    TextButton(
+                      onPressed: _withdrawingId == r.id
+                          ? null
+                          : () => _withdraw(r),
+                      child: Text(
+                        _withdrawingId == r.id
+                            ? 'Đang rút...'
+                            : 'Rút yêu cầu',
+                      ),
+                    ),
+                ],
+              ),
             ],
         ],
       ),

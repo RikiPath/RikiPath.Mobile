@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
@@ -6,6 +8,7 @@ import 'package:rikipath_mobile/features/learning/domain/lesson.dart';
 import 'package:rikipath_mobile/features/learning/domain/lesson_session.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_shared_widgets.dart';
 import 'package:rikipath_mobile/features/learning/presentation/widgets/lesson_practice_section.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LessonContentTabs extends StatelessWidget {
   const LessonContentTabs({
@@ -625,13 +628,6 @@ class _ExampleCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.space2),
-              const CircleAvatar(
-                radius: 17,
-                backgroundColor: AppColors.brandTint,
-                foregroundColor: AppColors.brandPrimary,
-                child: Icon(Icons.volume_up_outlined, size: 18),
-              ),
             ],
           ),
           const SizedBox(height: AppSpacing.space1),
@@ -659,6 +655,144 @@ class _ExampleCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Lesson Notes tab: displays lesson important notes alongside personal notes
+/// persisted locally per lesson via [SharedPreferences].
+class LessonNotesContent extends StatefulWidget {
+  const LessonNotesContent({required this.lesson, super.key});
+
+  final Lesson lesson;
+
+  @override
+  State<LessonNotesContent> createState() => _LessonNotesContentState();
+}
+
+class _LessonNotesContentState extends State<LessonNotesContent> {
+  final TextEditingController _noteController = TextEditingController();
+  bool _loaded = false;
+  bool _savedNotice = false;
+
+  String get _prefsKey => 'lesson_personal_note_${widget.lesson.routeId}';
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  @override
+  void didUpdateWidget(covariant LessonNotesContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.lesson.routeId != widget.lesson.routeId) {
+      _savedNotice = false;
+      unawaited(_load());
+    }
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString(_prefsKey) ?? '';
+      if (!mounted) return;
+      _noteController.text = saved;
+      setState(() => _loaded = true);
+    } catch (_) {
+      if (mounted) setState(() => _loaded = true);
+    }
+  }
+
+  Future<void> _save() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefsKey, _noteController.text.trim());
+      if (!mounted) return;
+      setState(() => _savedNotice = true);
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final notes = widget.lesson.article.importantNotes;
+    return Column(
+      key: const ValueKey<String>('lesson_notes_content'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (notes.isNotEmpty) ...[
+          _ArticleCard(
+            title: Localizations.localeOf(context).languageCode == 'ja'
+                ? '重要なメモ'
+                : 'Lưu ý quan trọng',
+            icon: Icons.lightbulb_outline_rounded,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final note in notes)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text('• $note', style: AppTypography.bodySmall),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space4),
+        ],
+        _ArticleCard(
+          title: 'Ghi chú cá nhân của bạn',
+          icon: Icons.edit_note_outlined,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                key: const Key('lesson_personal_note_field'),
+                controller: _noteController,
+                enabled: _loaded,
+                maxLines: 5,
+                maxLength: 2000,
+                onChanged: (_) {
+                  if (_savedNotice) setState(() => _savedNotice = false);
+                },
+                decoration: const InputDecoration(
+                  hintText: 'Ghi lại mẫu câu, từ khó hoặc lưu ý khi xem bài...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  if (_savedNotice)
+                    Expanded(
+                      child: Text(
+                        'Đã lưu ghi chú cho bài học này.',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.success,
+                        ),
+                      ),
+                    )
+                  else
+                    const Spacer(),
+                  FilledButton(
+                    key: const Key('lesson_personal_note_save'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 42),
+                    ),
+                    onPressed: _loaded ? _save : null,
+                    child: const Text('Lưu ghi chú'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -94,10 +96,60 @@ class _FakeMentorCohortRepository implements MentorCohortRepository {
   ];
 
   @override
-  Future<Map<String, Object?>> fetchLearnerSkillProfile({
+  Future<List<HomeworkCatalogItem>> fetchHomeworkCatalog({
+    String? level,
+    String? search,
+  }) async => const [];
+
+  @override
+  Future<void> createCohortHomework({
+    required int cohortId,
+    required String title,
+    String? instructions,
+    DateTime? dueAt,
+    List<int> lessonIds = const [],
+    List<int> practiceExerciseIds = const [],
+    List<int>? targetLearnerIds,
+  }) async {}
+
+  @override
+  Future<({Uint8List bytes, String contentType})> downloadHomeworkScan(
+    int assignmentId,
+  ) async => (bytes: Uint8List(0), contentType: 'image/png');
+
+  @override
+  Future<MentorHomeworkAiDraft> generateHomeworkAiDraft(
+    int assignmentId,
+  ) async => const MentorHomeworkAiDraft(suggestedScore: 85, feedback: 'OK');
+
+  @override
+  Future<void> publishHomeworkGrade({
+    required int assignmentId,
+    required int submissionId,
+    required double score,
+    required String feedback,
+  }) async {}
+
+  @override
+  Future<void> confirmSessionAttendance({
+    required int courseId,
+    required int sessionId,
+    required String status,
+    required String note,
+  }) async {}
+
+  @override
+  Future<void> saveRetakeSupportPlan({
+    required int courseId,
+    required int requestId,
+    required String supportPlan,
+  }) async {}
+
+  @override
+  Future<MentorLearnerSkillProfile> fetchLearnerSkillProfile({
     required int learnerId,
     required int cohortId,
-  }) async => const {};
+  }) async => MentorLearnerSkillProfile(learnerId: learnerId, learnerName: 'Học viên');
 
   @override
   Future<List<CohortMentorAssignment>> fetchMentorAssignments(

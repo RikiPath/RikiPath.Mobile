@@ -17,6 +17,12 @@ abstract final class MentorApiPaths {
       '/api/mentors/me/schedule/preview-slots';
   static const String scheduleV3PublishSlots =
       '/api/mentors/me/schedule/publish-slots';
+  static const String scheduleV3ConflictPreview =
+      '/api/mentors/me/schedule/conflict-preview';
+  static const String mentorCalendar = '/api/mentor/calendar';
+  static const String mentorCalendarConnect = '$mentorCalendar/connect';
+  static const String mentorCalendarCallback = '$mentorCalendar/callback';
+  static const String mentorCalendarSync = '$mentorCalendar/sync';
   static const String requestCancelAvailability =
       '/api/mentor/availability/request-cancel';
 
@@ -28,6 +34,10 @@ abstract final class MentorApiPaths {
 
   static String roomAccess(String roomId) =>
       '/api/mentor-meetings/rooms/$roomId/access';
+  static String roomPresence(String roomId) =>
+      '/api/mentor-meetings/rooms/$roomId/presence';
+  static String roomAttendance(String roomId) =>
+      '/api/mentor-meetings/rooms/$roomId/attendance';
   static String scheduleV3DeleteSlot(int slotId) =>
       '$scheduleV3/slots/$slotId';
   static String deleteAvailability(int id) => '$availability/$id';

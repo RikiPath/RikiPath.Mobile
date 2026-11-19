@@ -6,6 +6,7 @@ import 'package:rikipath_mobile/core/widgets/riki_brand_lockup.dart';
 import 'package:rikipath_mobile/core/widgets/riki_buttons.dart';
 import 'package:rikipath_mobile/core/widgets/riki_language_switcher.dart';
 import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
+import 'package:rikipath_mobile/features/notifications/application/push_notification_service.dart';
 
 class UnsupportedRoleScreen extends ConsumerWidget {
   const UnsupportedRoleScreen({required this.role, super.key});
@@ -20,7 +21,12 @@ class UnsupportedRoleScreen extends ConsumerWidget {
       title: context.l10n.unsupportedRoleTitle,
       description: context.l10n.unsupportedRoleDescription,
       actionLabel: context.l10n.logout,
-      onAction: () => ref.read(authSessionControllerProvider).signOut(),
+      onAction: () => ref.read(authSessionControllerProvider).signOut(
+        onBeforeClear: () => ref
+            .read(pushNotificationServiceProvider)
+            .unregisterDeviceToken()
+            .timeout(const Duration(seconds: 3)),
+      ),
     );
   }
 }

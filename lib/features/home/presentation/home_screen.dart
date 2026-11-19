@@ -19,7 +19,6 @@ import 'package:rikipath_mobile/features/meeting/domain/meeting_native_rollout.d
 import 'package:rikipath_mobile/features/meeting/domain/meeting_room.dart';
 import 'package:rikipath_mobile/features/notifications/application/notification_controller.dart';
 import 'package:rikipath_mobile/features/practice/application/daily_review_controller.dart';
-import 'package:rikipath_mobile/features/practice/application/demo_practice_controller.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 
@@ -35,7 +34,6 @@ class HomeScreen extends ConsumerWidget {
     final roadmapState = journeyState.value?.hasSelectedLevel == true
         ? ref.watch(standardRoadmapProvider)
         : null;
-    final practiceState = ref.watch(demoPracticeControllerProvider);
     final dailyReviewState = ref.watch(dailyReviewControllerProvider);
     final notificationState = ref.watch(notificationControllerProvider);
     final upcomingMeetingState = ref.watch(upcomingMeetingProvider);
@@ -62,7 +60,6 @@ class HomeScreen extends ConsumerWidget {
           learningState: learningState,
           analyticsState: analyticsState,
           roadmapState: roadmapState,
-          practiceState: practiceState,
           dailyReviewState: dailyReviewState,
           upcomingMeetingState: upcomingMeetingState,
           onRefreshLive: () => _refreshLiveData(ref),
@@ -72,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
               .read(learnerAnalyticsControllerProvider.notifier)
               .retry,
           onRetryPractice: ref
-              .read(demoPracticeControllerProvider.notifier)
+              .read(dailyReviewControllerProvider.notifier)
               .retry,
           onOpenLearning: () {
             final journey = journeyState.value;

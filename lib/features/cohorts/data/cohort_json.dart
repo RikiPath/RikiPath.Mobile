@@ -223,6 +223,34 @@ abstract final class CohortJson {
   static CohortCompletionSummary completion(Map<String, Object?> j) {
     final sessions = map(j['sessions']);
     final homework = map(j['homework']);
+    final hwItems = rows(homework['items'])
+        .where(
+          (f) =>
+              optStr(f['publishedFeedback']) != null ||
+              optDouble(f['score']) != null ||
+              boolean(f['graded']),
+        )
+        .map(
+          (f) => CompletionFeedbackItem(
+            title: str(f['title']),
+            feedback: str(f['publishedFeedback'] ?? f['feedback']),
+            score: optDouble(f['score']),
+            publishedAtUtc: optDate(
+              f['publishedFeedbackAtUtc'] ?? f['publishedAtUtc'],
+            ),
+          ),
+        )
+        .toList();
+    final legacyFeedback = rows(j['mentorFeedback'])
+        .map(
+          (f) => CompletionFeedbackItem(
+            title: str(f['title']),
+            feedback: str(f['feedback'] ?? f['publishedFeedback']),
+            score: optDouble(f['score']),
+            publishedAtUtc: optDate(f['publishedAtUtc']),
+          ),
+        )
+        .toList();
     return CohortCompletionSummary(
       courseId: integer(j['courseId']),
       cohortId: optInt(j['cohortId']),
@@ -242,7 +270,7 @@ abstract final class CohortJson {
                   .map(optInt)
                   .whereType<int>()
                   .toList(),
-              isPrimary: boolean(m['isPrimary']),
+              isPrimary: boolean(m['isCurrentPrimary'] ?? m['isPrimary']),
             ),
           )
           .toList(),
@@ -257,7 +285,7 @@ abstract final class CohortJson {
           .map(
             (a) => CompletionAttendanceItem(
               number: integer(a['number']),
-              scheduledAt: optDate(a['scheduledAt']),
+              scheduledAt: optDate(a['date'] ?? a['scheduledAt']),
               status: str(a['status']),
             ),
           )
@@ -268,16 +296,7 @@ abstract final class CohortJson {
         graded: integer(homework['graded']),
         outstanding: integer(homework['outstanding']),
       ),
-      mentorFeedback: rows(j['mentorFeedback'])
-          .map(
-            (f) => CompletionFeedbackItem(
-              title: str(f['title']),
-              feedback: str(f['feedback']),
-              score: optDouble(f['score']),
-              publishedAtUtc: optDate(f['publishedAtUtc']),
-            ),
-          )
-          .toList(),
+      mentorFeedback: hwItems.isNotEmpty ? hwItems : legacyFeedback,
       skillProgressAvailable: boolean(j['skillProgressAvailable']),
       skillProgress: j['skillProgress'],
       note: str(j['note']),
@@ -309,7 +328,7 @@ abstract final class CohortJson {
       if (rawBlockers is List)
         for (final b in rawBlockers)
           if (b is Map)
-            str(b['message'] ?? b['code'])
+            _formatShiftBlocker(b.map((k, v) => MapEntry(k.toString(), v)))
           else if (b != null)
             b.toString(),
     ].where((b) => b.trim().isNotEmpty).toList();
@@ -329,14 +348,30 @@ abstract final class CohortJson {
           .map(
             (s) => ShiftPreviewSession(
               number: integer(s['number']),
-              startTime: optDate(s['startTime']),
-              endTime: optDate(s['endTime']),
+              startTime: optDate(s['proposedStart'] ?? s['startTime']),
+              endTime: optDate(s['proposedEnd'] ?? s['endTime']),
+              currentStart: optDate(s['currentStart']),
+              currentEnd: optDate(s['currentEnd']),
             ),
           )
           .toList(),
       conflicts: rows(j['conflicts']).map(conflict).toList(),
-      newEnrollmentClosesAtUtc: optDate(j['newEnrollmentClosesAtUtc']),
+      newEnrollmentClosesAtUtc: optDate(
+        j['newEnrollmentCutoffUtc'] ?? j['newEnrollmentClosesAtUtc'],
+      ),
     );
+  }
+
+  static String _formatShiftBlocker(Map<String, Object?> b) {
+    final explicit = optStr(b['message']) ?? optStr(b['code']);
+    if (explicit != null) return explicit;
+    final courseId = optInt(b['courseId']);
+    final kind = optStr(b['kind']) ?? optStr(b['status']) ?? '';
+    final paymentStatus = optStr(b['paymentStatus']);
+    final prefix = courseId != null ? 'Hồ sơ #$courseId' : 'Ghi danh';
+    return paymentStatus != null && paymentStatus.isNotEmpty
+        ? '$prefix ($kind · $paymentStatus)'
+        : '$prefix ($kind)';
   }
 
   static CohortScheduleRequest scheduleRequest(Map<String, Object?> j) {
@@ -361,6 +396,42 @@ abstract final class CohortJson {
   // Mentor operations
   // -------------------------------------------------------------------------
 
+  static List<CourseSessionItem> courseSessions(Object? raw) {
+    return rows(raw)
+        .map(
+          (s) => CourseSessionItem(
+            id: integer(s['id']),
+            number: integer(s['number']),
+            attempt: integer(s['attempt'], 1),
+            scheduledAt: date(s['scheduledAt']),
+            status: str(s['status'], 'Scheduled'),
+            note: optStr(s['note']),
+            meetingUrl: optStr(s['meetingUrl']),
+            confirmedAt: optDate(s['confirmedAt']),
+          ),
+        )
+        .toList();
+  }
+
+  static List<CourseRetakeRequestItem> courseRetakeRequests(Object? raw) {
+    return rows(raw)
+        .map(
+          (r) => CourseRetakeRequestItem(
+            id: integer(r['id']),
+            status: str(r['status'], 'Pending'),
+            examDate: date(r['examDate']),
+            resultPublishedAt: date(r['resultPublishedAt']),
+            reason: str(r['reason']),
+            submittedAt: date(r['submittedAt']),
+            reviewedAt: optDate(r['reviewedAt']),
+            response: optStr(r['response']),
+            mentorSupportPlan: optStr(r['mentorSupportPlan']),
+            mentorSupportPlanAtUtc: optDate(r['mentorSupportPlanAtUtc']),
+          ),
+        )
+        .toList();
+  }
+
   static MentorCohortRosterEntry rosterEntry(Map<String, Object?> j) {
     final learner = optMap(j['learner']) ?? const <String, Object?>{};
     return MentorCohortRosterEntry(
@@ -378,6 +449,55 @@ abstract final class CohortJson {
         'learnerNestedName',
       ]),
       status: str(j['status']),
+      sessions: courseSessions(j['sessions']),
+      retakeRequests: courseRetakeRequests(j['requests'] ?? j['retakeRequests']),
+    );
+  }
+
+  static MentorCohortHomeworkRow homeworkRow(Map<String, Object?> j) {
+    final subMap = optMap(j['submission']);
+    final gradeMap = optMap(j['publishedGrade']) ?? optMap(subMap?['grade']);
+    final aiMap = optMap(j['aiDraft']);
+    return MentorCohortHomeworkRow(
+      id: integer(j['id']),
+      title: str(j['title']),
+      instructions: optStr(j['instructions']),
+      learnerId: optInt(j['learnerId']),
+      learnerName: optStr(j['learnerName']) ?? 'Học viên #${integer(j['learnerId'])}',
+      status: str(j['status'], 'Assigned'),
+      assignmentScope: str(j['assignmentScope'], 'CohortCommon'),
+      cohortAssignmentGroupKey: optStr(j['cohortAssignmentGroupKey']),
+      assignedAt: optDate(j['assignedAt']),
+      dueAt: optDate(j['dueAt']),
+      submission: subMap == null
+          ? null
+          : CohortHomeworkSubmission(
+              id: integer(subMap['id']),
+              textContent: optStr(subMap['textContent']),
+              submittedAt: date(subMap['submittedAt']),
+              revisionCount: integer(subMap['revisionCount'], 1),
+              lastRevisedAtUtc: optDate(subMap['lastRevisedAtUtc']),
+              hasScan: boolean(subMap['hasScan']),
+            ),
+      aiDraft: aiMap == null
+          ? null
+          : MentorHomeworkAiDraft(
+              suggestedScore: optDouble(aiMap['suggestedScore'] ?? aiMap['score']),
+              feedback: optStr(aiMap['feedback']),
+              generatedAtUtc: optDate(aiMap['generatedAtUtc']),
+              unavailableReason: optStr(aiMap['unavailableReason']),
+              transcription: optStr(aiMap['transcription']),
+            ),
+      publishedGrade: gradeMap == null
+          ? null
+          : CohortHomeworkPublishedGrade(
+              passed: gradeMap['passed'] is bool ? gradeMap['passed'] as bool : null,
+              score: optDouble(gradeMap['score']),
+              feedback: str(gradeMap['feedback']),
+              publishedAtUtc: date(gradeMap['publishedAtUtc'] ?? gradeMap['publishedAt']),
+            ),
+      lessonTitles: rows(j['lessons']).map((e) => str(e['title'])).where((e) => e.isNotEmpty).toList(),
+      exerciseTitles: rows(j['exercises']).map((e) => str(e['title'])).where((e) => e.isNotEmpty).toList(),
     );
   }
 
@@ -390,30 +510,116 @@ abstract final class CohortJson {
         (alt != null ? optInt(j[alt]) : null) ??
         optInt(stats[key]) ??
         (alt != null ? optInt(stats[alt]) : null);
+    final submitted = pick('submittedCount', 'submissionCount');
+    final graded = pick('gradedCount');
+    final total = pick('totalLearners', 'assignedCount');
+    final row = homeworkRow(j);
     return MentorCohortHomeworkItem(
       id: integer(j['id']),
       title: str(j['title']),
       status: str(j['status'], 'Assigned'),
       assignmentScope: str(j['assignmentScope'], 'CohortCommon'),
+      cohortAssignmentGroupKey: row.cohortAssignmentGroupKey,
+      instructions: row.instructions,
       dueAt: optDate(j['dueAt']),
-      submittedCount: pick('submittedCount', 'submissionCount'),
-      gradedCount: pick('gradedCount'),
-      totalCount: pick('totalLearners', 'assignedCount'),
+      submittedCount: submitted ?? (row.submission != null ? 1 : 0),
+      gradedCount: graded ?? (row.publishedGrade != null || row.status == 'Graded' ? 1 : 0),
+      totalCount: total ?? 1,
+      rows: [row],
     );
+  }
+
+  /// Groups flat per-learner backend `HomeworkItem` rows by
+  /// `cohortAssignmentGroupKey` (or single assignment when null) while
+  /// preserving pre-aggregated payloads.
+  static List<MentorCohortHomeworkItem> homeworkList(Object? raw) {
+    final items = list(raw);
+    if (items.isEmpty) return const [];
+    final isPreAggregated = items.any(
+      (j) =>
+          j.containsKey('stats') ||
+          j.containsKey('summary') ||
+          j.containsKey('submittedCount') ||
+          j.containsKey('submissionCount') ||
+          j.containsKey('totalLearners'),
+    );
+    if (isPreAggregated) {
+      return items.map(homework).toList();
+    }
+    final grouped = <String, List<MentorCohortHomeworkRow>>{};
+    for (final j in items) {
+      final row = homeworkRow(j);
+      final key = row.cohortAssignmentGroupKey ?? 'single:${row.id}';
+      grouped.putIfAbsent(key, () => []).add(row);
+    }
+    return grouped.values.map((groupRows) {
+      final first = groupRows.first;
+      final submitted = groupRows.where((r) => r.submission != null).length;
+      final graded = groupRows
+          .where((r) => r.publishedGrade != null || r.status == 'Graded')
+          .length;
+      final allGraded = graded == groupRows.length && groupRows.isNotEmpty;
+      return MentorCohortHomeworkItem(
+        id: first.id,
+        title: first.title,
+        status: allGraded ? 'Graded' : (submitted > 0 ? 'Submitted' : first.status),
+        assignmentScope: first.assignmentScope,
+        cohortAssignmentGroupKey: first.cohortAssignmentGroupKey,
+        instructions: first.instructions,
+        dueAt: first.dueAt,
+        submittedCount: submitted,
+        gradedCount: graded,
+        totalCount: groupRows.length,
+        rows: groupRows,
+      );
+    }).toList();
   }
 
   static CohortMentorAssignment mentorAssignment(Map<String, Object?> j) {
     final role = str(j['role'] ?? j['kind']);
+    final prevId = optInt(j['previousMentorId']);
+    final mentorId = integer(j['mentorId']);
     return CohortMentorAssignment(
-      mentorId: integer(j['mentorId']),
-      mentorName: str(j['mentorName']),
+      mentorId: mentorId,
+      mentorName: optStr(j['mentorName']) ?? 'Mentor #$mentorId',
       isPrimary: j['isPrimary'] is bool
           ? j['isPrimary'] as bool
-          : role.toLowerCase() == 'primary',
-      fromSessionNumber:
-          optInt(j['fromSessionNumber']) ?? optInt(j['effectiveFromSession']),
+          : (prevId == null || prevId == 0) && role.toLowerCase() != 'substitute',
+      fromSessionNumber: optInt(j['effectiveFromSessionNumber']) ??
+          optInt(j['fromSessionNumber']) ??
+          optInt(j['effectiveFromSession']),
       assignedAtUtc: optDate(j['assignedAtUtc'] ?? j['createdAtUtc']),
       reason: optStr(j['reason'] ?? j['note']),
+      previousMentorId: prevId,
+      affectedSessionCount: optInt(j['affectedSessionCount']),
+      effectiveFromUtc: optDate(j['effectiveFromUtc']),
+    );
+  }
+
+  static MentorLearnerSkillProfile skillProfile(Map<String, Object?> j) {
+    final hw = optMap(j['homeworkStats']) ?? const <String, Object?>{};
+    return MentorLearnerSkillProfile(
+      learnerId: integer(j['learnerId']),
+      learnerName: optStr(j['learnerName']) ?? 'Học viên',
+      cohortId: optInt(j['cohortId']),
+      assessedJlptLevel: optStr(j['assessedJlptLevel']),
+      skills: rows(j['skills'])
+          .map(
+            (s) => MentorLearnerSkillMetric(
+              skill: str(s['skill']),
+              averageScorePercent: optDouble(s['averageScorePercent']),
+              sampleCount: integer(s['sampleCount']),
+              latestAssessedAtUtc: optDate(s['latestAssessedAtUtc']),
+              dataSource: optStr(s['dataSource']),
+            ),
+          )
+          .toList(),
+      assignedCount: integer(hw['assignedCount']),
+      submittedCount: integer(hw['submittedCount']),
+      onTimeCount: integer(hw['onTimeCount']),
+      passedCount: integer(hw['passedCount']),
+      onTimePercent: optDouble(hw['onTimePercent']),
+      latestActivityAtUtc: optDate(hw['latestActivityAtUtc']),
     );
   }
 }

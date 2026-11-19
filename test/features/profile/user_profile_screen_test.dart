@@ -438,34 +438,31 @@ void main() {
   });
 
   group('EditProfileScreen', () {
-    testWidgets('validates both exact backend name fields locally', (
+    testWidgets('validates fullName field locally', (
       tester,
     ) async {
       final repository = _ProfileRepository();
       await _pump(tester, const EditProfileScreen(), repository: repository);
       await tester.pumpAndSettle();
-      await tester.enterText(_field('profile_last_name_field'), '');
-      await tester.enterText(_field('profile_first_name_field'), '');
+      await tester.enterText(_field('profile_full_name_field'), '');
 
       await tester.tap(
         find.byKey(const ValueKey<String>('profile_save_button')),
       );
       await tester.pump();
 
-      expect(find.text('Vui lòng nhập họ.'), findsOneWidget);
-      expect(find.text('Vui lòng nhập tên.'), findsOneWidget);
+      expect(find.text('Vui lòng nhập họ và tên.'), findsOneWidget);
       expect(repository.updateCalls, 0);
     });
 
-    testWidgets('submits names and publishes the returned profile', (
+    testWidgets('submits fullName and publishes the returned profile', (
       tester,
     ) async {
       final completer = Completer<UserProfile>();
       final repository = _ProfileRepository(updateCompleter: completer);
       await _pump(tester, const EditProfileScreen(), repository: repository);
       await tester.pumpAndSettle();
-      await tester.enterText(_field('profile_last_name_field'), 'Sato');
-      await tester.enterText(_field('profile_first_name_field'), 'Aiko');
+      await tester.enterText(_field('profile_full_name_field'), 'Sato Aiko');
 
       await tester.tap(
         find.byKey(const ValueKey<String>('profile_save_button')),
@@ -473,10 +470,9 @@ void main() {
       await tester.pump();
 
       expect(find.text('Đang lưu...'), findsOneWidget);
-      expect(repository.lastFirstName, 'Aiko');
-      expect(repository.lastLastName, 'Sato');
+      expect(repository.lastFullName, 'Sato Aiko');
 
-      completer.complete(_profile(firstName: 'Aiko', lastName: 'Sato'));
+      completer.complete(_profile(fullName: 'Sato Aiko'));
       await tester.pumpAndSettle();
       expect(find.text('Cập nhật hồ sơ thành công'), findsOneWidget);
     });
@@ -573,7 +569,7 @@ void main() {
 
       expect(
         find.byKey(const ValueKey<String>('account_change_email_action')),
-        findsNothing,
+        findsOneWidget,
       );
       expect(
         find.byKey(const ValueKey<String>('account_change_password_action')),
@@ -956,6 +952,7 @@ Finder _field(String key) {
 }
 
 UserProfile _profile({
+  String? fullName,
   String firstName = 'Minh Anh',
   String lastName = 'Nguyễn',
   bool isEmailVerified = true,
@@ -971,6 +968,7 @@ UserProfile _profile({
   return UserProfile(
     userId: 42,
     email: 'learner@example.com',
+    fullName: fullName,
     firstName: firstName,
     lastName: lastName,
     avatarUrl: avatarUrl,
@@ -1034,8 +1032,7 @@ class _ProfileRepository
   int clearExamDateCalls = 0;
   int? lastJlptLevelId;
   int? lastDailyStudyMinutes;
-  String? lastFirstName;
-  String? lastLastName;
+  String? lastFullName;
   ProfileAvatarUpload? lastUpload;
   bool? lastEmailNotifications;
   bool? lastSystemNotifications;
@@ -1048,17 +1045,11 @@ class _ProfileRepository
   }
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) {
+  Future<UserProfile> updateProfile({required String fullName}) {
     updateCalls += 1;
-    lastFirstName = firstName;
-    lastLastName = lastName;
+    lastFullName = fullName;
     return updateCompleter?.future ??
-        Future<UserProfile>.value(
-          _profile(firstName: firstName, lastName: lastName),
-        );
+        Future<UserProfile>.value(_profile(fullName: fullName));
   }
 
   @override

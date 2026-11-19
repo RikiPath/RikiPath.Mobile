@@ -41,12 +41,14 @@ class TextScanState {
     this.image,
     this.recognizedText = '',
     this.inputError,
+    this.subscriptionRequired = false,
   });
 
   final TextScanStatus status;
   final TextScanImage? image;
   final String recognizedText;
   final TextScanInputError? inputError;
+  final bool subscriptionRequired;
 
   bool get isBusy =>
       status == TextScanStatus.selecting || status == TextScanStatus.scanning;
@@ -58,12 +60,14 @@ class TextScanState {
     String? recognizedText,
     TextScanInputError? inputError,
     bool clearInputError = false,
+    bool? subscriptionRequired,
   }) {
     return TextScanState(
       status: status ?? this.status,
       image: clearImage ? null : image ?? this.image,
       recognizedText: recognizedText ?? this.recognizedText,
       inputError: clearInputError ? null : inputError ?? this.inputError,
+      subscriptionRequired: subscriptionRequired ?? this.subscriptionRequired,
     );
   }
 }

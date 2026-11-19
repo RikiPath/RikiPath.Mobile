@@ -13,16 +13,19 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
     super.key,
   }) : title = null,
        subtitle = null,
-       onBack = null;
+       onBack = null,
+       detailActions = const <Widget>[];
 
   const LearningHeader.detail({
     required this.title,
     required this.subtitle,
     required this.onBack,
     this.isScrolled = false,
+    List<Widget> actions = const <Widget>[],
     super.key,
   }) : streakDays = null,
-       hasUnreadNotifications = false;
+       hasUnreadNotifications = false,
+       detailActions = actions;
 
   final String? title;
   final String? subtitle;
@@ -30,6 +33,7 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool hasUnreadNotifications;
   final VoidCallback? onBack;
   final bool isScrolled;
+  final List<Widget> detailActions;
 
   bool get _isRoot => onBack == null;
 
@@ -183,7 +187,7 @@ class LearningHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 
   List<Widget> _buildDetailActions() {
-    return const [];
+    return detailActions;
   }
 }
 

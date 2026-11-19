@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/cohorts/data/cohort_repository.dart';
 import 'package:rikipath_mobile/features/cohorts/domain/cohort_operations.dart';
 import 'package:rikipath_mobile/features/cohorts/domain/study_cohort.dart';
@@ -28,11 +29,13 @@ final learnerMyCoursesProvider =
 
 final learnerCohortHomeworkProvider = FutureProvider.autoDispose
     .family<List<CohortHomeworkAssignment>, int>((ref, cohortId) async {
+      ref.watch(authenticatedUserIdProvider);
       return ref.watch(cohortRepositoryProvider).fetchCohortHomework(cohortId);
     });
 
 final learnerTransferRequestsProvider =
     FutureProvider.autoDispose<List<CohortTransferRequestItem>>((ref) async {
+      ref.watch(authenticatedUserIdProvider);
       return ref.watch(cohortRepositoryProvider).fetchMyTransferRequests();
     });
 
@@ -75,6 +78,7 @@ final learnerCourseMentorReviewsProvider = FutureProvider.autoDispose
 /// The learner's own complaints (all courses); screens filter by course.
 final learnerComplaintsProvider =
     FutureProvider.autoDispose<List<CohortComplaint>>((ref) async {
+      ref.watch(authenticatedUserIdProvider);
       return ref.watch(cohortRepositoryProvider).fetchMyComplaints();
     });
 
@@ -91,10 +95,13 @@ String generateClientIdempotencyKey() {
 class LearnerCohortDiscoveryController
     extends AsyncNotifier<CohortDiscoveryData> {
   @override
-  Future<CohortDiscoveryData> build() => _load(
-    ref.watch(cohortRepositoryProvider),
-    ref.watch(learnerCohortFilterProvider),
-  );
+  Future<CohortDiscoveryData> build() {
+    ref.watch(authenticatedUserIdProvider);
+    return _load(
+      ref.watch(cohortRepositoryProvider),
+      ref.watch(learnerCohortFilterProvider),
+    );
+  }
 
   Future<CohortDiscoveryData> _load(
     CohortRepository repo,
@@ -164,6 +171,7 @@ class LearnerMyCoursesController
     extends AsyncNotifier<List<LearnerStudyCourseDetail>> {
   @override
   Future<List<LearnerStudyCourseDetail>> build() {
+    ref.watch(authenticatedUserIdProvider);
     return ref.watch(cohortRepositoryProvider).fetchMyCourses();
   }
 
@@ -179,6 +187,27 @@ class LearnerMyCoursesController
     ref.invalidate(learnerCohortDiscoveryProvider);
     await refresh();
   }
+
+  Future<void> cancelPendingEnrollment(int courseId) async {
+    await ref.read(cohortRepositoryProvider).cancelPendingEnrollment(courseId);
+    ref.invalidate(learnerCohortDiscoveryProvider);
+    await refresh();
+  }
+
+  Future<({Uint8List bytes, String contentType})> downloadHomeworkScan(
+    int assignmentId,
+  ) => ref.read(cohortRepositoryProvider).downloadHomeworkScan(assignmentId);
+
+  Future<({Uint8List bytes, String contentType})> downloadTransferEvidence(
+    int requestId,
+  ) => ref.read(cohortRepositoryProvider).downloadTransferEvidence(requestId);
+
+  Future<({Uint8List bytes, String contentType})> downloadRetakeEvidence({
+    required int courseId,
+    required int requestId,
+  }) => ref
+      .read(cohortRepositoryProvider)
+      .downloadRetakeEvidence(courseId: courseId, requestId: requestId);
 
   Future<void> cancelCohortEnrollment({
     required int courseId,

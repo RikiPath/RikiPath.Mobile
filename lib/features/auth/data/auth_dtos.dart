@@ -17,22 +17,19 @@ class RegisterRequestDto {
     required this.email,
     required this.password,
     required this.confirmPassword,
-    this.firstName,
-    this.lastName,
+    this.fullName,
   });
 
   final String email;
   final String password;
   final String confirmPassword;
-  final String? firstName;
-  final String? lastName;
+  final String? fullName;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'email': email,
     'password': password,
     'confirmPassword': confirmPassword,
-    'firstName': firstName,
-    'lastName': lastName,
+    'fullName': fullName,
   };
 }
 

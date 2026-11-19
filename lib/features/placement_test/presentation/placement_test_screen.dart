@@ -7,6 +7,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/router/navigation_helpers.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/widgets/riki_audio_player.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/core/widgets/sakura_colorful_icon.dart';
 import 'package:rikipath_mobile/features/placement_test/application/placement_test_controller.dart';
@@ -474,7 +475,13 @@ class _PlacementActiveAttemptView extends StatelessWidget {
                     ],
                     if (question.audioUrl != null) ...[
                       const SizedBox(height: AppSpacing.space3),
-                      const _PlacementAudioUnavailable(),
+                      RikiNetworkAudioPlayer(
+                        key: ValueKey<String>(
+                          'placement_audio_player_${question.id}',
+                        ),
+                        audioUrl: question.audioUrl!,
+                        title: 'Nghe đoạn hội thoại JLPT',
+                      ),
                     ],
                     const SizedBox(height: AppSpacing.space4),
                     for (final option in question.options) ...[
@@ -649,36 +656,6 @@ class _PlacementQuestionImage extends StatelessWidget {
   }
 }
 
-class _PlacementAudioUnavailable extends StatelessWidget {
-  const _PlacementAudioUnavailable();
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: context.l10n.placementAudioUnavailableSemantics,
-      liveRegion: true,
-      child: Container(
-        key: const ValueKey<String>('placement_audio_unavailable'),
-        padding: const EdgeInsets.all(AppSpacing.space3),
-        decoration: BoxDecoration(
-          color: AppColors.learnerBackground,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.volume_off_outlined, color: AppColors.textMuted),
-            const SizedBox(width: AppSpacing.space2),
-            Expanded(
-              child: Text(context.l10n.placementAudioUnavailableDescription),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _PlacementResultView extends StatelessWidget {
   const _PlacementResultView({
     required this.state,
@@ -837,10 +814,7 @@ class _PlacementResultView extends StatelessWidget {
               if (result.wrongQuestionIds.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.space2),
                 Text(
-                  context.l10n.placementWrongQuestionsSummary(
-                    result.wrongQuestionIds.length,
-                    result.wrongQuestionIds.join(', '),
-                  ),
+                  'Có ${result.wrongQuestionIds.length} câu trả lời cần ôn lại (xem phân tích kỹ năng ở trên).',
                   key: const ValueKey<String>(
                     'placement_result_wrong_questions_summary',
                   ),

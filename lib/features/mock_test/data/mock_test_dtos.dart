@@ -322,6 +322,90 @@ DetailedAttemptResultDto readDetailedAttemptResult(Object? body) {
   );
 }
 
+class MockTestHistoryRecordDto {
+  const MockTestHistoryRecordDto({
+    required this.attemptId,
+    required this.mockTestId,
+    required this.title,
+    required this.jlptLevelName,
+    required this.submittedAt,
+    required this.totalScore,
+  });
+
+  factory MockTestHistoryRecordDto.fromJson(Map<String, Object?> json) {
+    return MockTestHistoryRecordDto(
+      attemptId: _requiredInt(json, 'attemptId'),
+      mockTestId: _requiredInt(json, 'mockTestId'),
+      title: _optionalString(json, 'title') ?? '',
+      jlptLevelName: _optionalString(json, 'jlptLevelName') ?? '',
+      submittedAt: _requiredDateTime(json, 'submittedAt'),
+      totalScore: _requiredDouble(json, 'totalScore'),
+    );
+  }
+
+  final int attemptId;
+  final int mockTestId;
+  final String title;
+  final String jlptLevelName;
+  final DateTime submittedAt;
+  final double totalScore;
+}
+
+class MockTestWrongQuestionDto {
+  const MockTestWrongQuestionDto({
+    required this.questionId,
+    required this.questionText,
+    this.questionType = 'SingleChoice',
+    this.response,
+    this.answerKey,
+    required this.options,
+    required this.selectedOptionId,
+    required this.explanation,
+    required this.timesAnsweredWrong,
+  });
+
+  factory MockTestWrongQuestionDto.fromJson(Map<String, Object?> json) {
+    return MockTestWrongQuestionDto(
+      questionId: _requiredInt(json, 'questionId'),
+      questionText: _requiredString(json, 'questionText'),
+      questionType: _optionalString(json, 'questionType') ?? 'SingleChoice',
+      response: json['response'],
+      answerKey: json['answerKey'],
+      options: _objectList(
+        json['options'] ?? const <Object?>[],
+        'options',
+      ).map(MockTestReviewOptionDto.fromJson).toList(growable: false),
+      selectedOptionId: _optionalInt(json, 'selectedOptionId'),
+      explanation: _optionalString(json, 'explanation'),
+      timesAnsweredWrong: _optionalInt(json, 'timesAnsweredWrong') ?? 1,
+    );
+  }
+
+  final int questionId;
+  final String questionText;
+  final String questionType;
+  final Object? response;
+  final Object? answerKey;
+  final List<MockTestReviewOptionDto> options;
+  final int? selectedOptionId;
+  final String? explanation;
+  final int timesAnsweredWrong;
+}
+
+List<MockTestHistoryRecordDto> readMockTestHistory(Object? body) {
+  return _objectList(
+    _readEnvelopeResult(body) ?? const <Object?>[],
+    'result',
+  ).map(MockTestHistoryRecordDto.fromJson).toList(growable: false);
+}
+
+List<MockTestWrongQuestionDto> readMockTestWrongQuestions(Object? body) {
+  return _objectList(
+    _readEnvelopeResult(body) ?? const <Object?>[],
+    'result',
+  ).map(MockTestWrongQuestionDto.fromJson).toList(growable: false);
+}
+
 Object? _readEnvelopeResult(Object? body) {
   final envelope = _objectMap(body, 'response');
   if (envelope['isSuccess'] != true) {

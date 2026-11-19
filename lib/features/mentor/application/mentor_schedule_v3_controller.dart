@@ -81,4 +81,16 @@ class MentorScheduleV3Controller extends AsyncNotifier<MentorScheduleV3> {
         .requestSlotChange(slotId, reason);
     ref.invalidate(mentorAvailabilityControllerProvider);
   }
+
+  Future<MentorTeachingConflictReport> previewTeachingConflicts({
+    required List<({DateTime startUtc, DateTime endUtc})> intervals,
+    int? excludeCohortId,
+  }) {
+    return ref
+        .read(mentorScheduleV3RepositoryProvider)
+        .previewTeachingConflicts(
+          intervals: intervals,
+          excludeCohortId: excludeCohortId,
+        );
+  }
 }

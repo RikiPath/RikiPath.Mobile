@@ -77,6 +77,15 @@ List<Map<String, Object?>> readLearnerMentorResultList(Object? body) {
       .toList(growable: false);
 }
 
+Map<String, Object?> readLearnerMentorResultMap(Object? body) {
+  final envelope = _readEnvelope(body);
+  final result = envelope['result'] ?? envelope['data'];
+  if (result is! Map<Object?, Object?>) {
+    throw const FormatException('Expected a Mentor result object.');
+  }
+  return result.map((key, value) => MapEntry(key.toString(), value));
+}
+
 Map<Object?, Object?> _readEnvelope(Object? body) {
   if (body is! Map<Object?, Object?> || body['isSuccess'] != true) {
     throw const FormatException('Expected a successful Mentor API envelope.');

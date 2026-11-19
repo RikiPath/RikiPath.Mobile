@@ -82,25 +82,18 @@ void main() {
       await container.read(userProfileControllerProvider.future);
       final controller = container.read(userProfileControllerProvider.notifier);
 
-      final first = controller.updateName(
-        firstName: ' Aiko ',
-        lastName: ' Sato ',
-      );
-      final duplicate = await controller.updateName(
-        firstName: 'Other',
-        lastName: 'Name',
-      );
+      final first = controller.updateName(fullName: ' Aiko   Sato ');
+      final duplicate = await controller.updateName(fullName: 'Other Name');
 
       expect(duplicate, isFalse);
       expect(repository.updateCalls, 1);
-      expect(repository.lastFirstName, 'Aiko');
-      expect(repository.lastLastName, 'Sato');
+      expect(repository.lastFullName, 'Aiko   Sato');
       expect(
         container.read(userProfileControllerProvider).value?.activeMutation,
         ProfileMutation.profile,
       );
 
-      updateCompleter.complete(_profile(firstName: 'Aiko', lastName: 'Sato'));
+      updateCompleter.complete(_profile(fullName: 'Aiko Sato'));
       expect(await first, isTrue);
       expect(
         container.read(userProfileControllerProvider).value?.profile.fullName,
@@ -182,12 +175,14 @@ void main() {
 }
 
 UserProfile _profile({
+  String? fullName,
   String firstName = 'Minh Anh',
   String lastName = 'Nguyễn',
 }) {
   return UserProfile(
     userId: 42,
     email: 'learner@example.com',
+    fullName: fullName,
     firstName: firstName,
     lastName: lastName,
     avatarUrl: null,
@@ -216,8 +211,7 @@ class _FakeUserProfileRepository implements UserProfileRepository {
 
   int loadCalls = 0;
   int updateCalls = 0;
-  String? lastFirstName;
-  String? lastLastName;
+  String? lastFullName;
 
   @override
   Future<UserProfile> loadProfile() async {
@@ -227,17 +221,11 @@ class _FakeUserProfileRepository implements UserProfileRepository {
   }
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) {
+  Future<UserProfile> updateProfile({required String fullName}) {
     updateCalls += 1;
-    lastFirstName = firstName;
-    lastLastName = lastName;
+    lastFullName = fullName;
     return updateCompleter?.future ??
-        Future<UserProfile>.value(
-          _profile(firstName: firstName, lastName: lastName),
-        );
+        Future<UserProfile>.value(_profile(fullName: fullName));
   }
 
   @override

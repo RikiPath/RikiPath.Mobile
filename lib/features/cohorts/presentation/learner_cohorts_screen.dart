@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,7 @@ import 'package:rikipath_mobile/app/router/app_routes.dart';
 import 'package:rikipath_mobile/app/theme/app_theme.dart';
 import 'package:rikipath_mobile/core/errors/app_error_message.dart';
 import 'package:rikipath_mobile/core/localization/localization.dart';
+import 'package:rikipath_mobile/core/network/safe_external_http_uri.dart';
 import 'package:rikipath_mobile/core/notifications/riki_toast_service.dart';
 import 'package:rikipath_mobile/core/widgets/riki_design_system.dart';
 import 'package:rikipath_mobile/features/cohorts/presentation/widgets/cohort_summary_facts.dart';
@@ -58,45 +60,67 @@ class _LearnerCohortsScreenState extends ConsumerState<LearnerCohortsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Xác nhận ghi danh lớp ${cohort.name}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Cấp độ: ${cohort.level}'),
-            const SizedBox(height: 4),
-            Text(
-              cohortIntensityText(cohort),
-              key: const ValueKey('confirm_cohort_intensity'),
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${cohort.sessionMinutes ?? '—'} phút/buổi · ${cohort.totalSessions ?? cohort.sessions.length} buổi',
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Học phí trọn khóa: ${_formatPrice(cohort.price)}',
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 4),
-            Text('Số chỗ còn lại: ${cohort.seatsAvailable}/${cohort.capacity}'),
-            const SizedBox(height: 4),
-            Text('Mentor: ${cohort.mentorName}'),
-            const SizedBox(height: 4),
-            Text('Khai giảng: ${_formatDate(cohort.startsAt)}'),
-            const SizedBox(height: 4),
-            Text('Hạn đăng ký: ${_formatDate(cohort.enrollmentClosesAtUtc)}'),
-            if (cohort.entitlementReference != null) ...[
-              const SizedBox(height: 6),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Cấp độ: ${cohort.level}'),
+              const SizedBox(height: 4),
               Text(
-                'Mã quyền lớp nhóm: ${cohort.entitlementReference}',
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.brandPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
+                cohortIntensityText(cohort),
+                key: const ValueKey('confirm_cohort_intensity'),
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
+              const SizedBox(height: 4),
+              Text(
+                '${cohort.sessionMinutes ?? 90} phút/buổi · ${cohort.totalSessions ?? cohort.sessions.length} buổi',
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Học phí trọn khóa: ${_formatPrice(cohort.price)}',
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Text('Số chỗ còn lại: ${cohort.seatsAvailable}/${cohort.capacity}'),
+              const SizedBox(height: 4),
+              Text('Mentor: ${cohort.mentorName}'),
+              const SizedBox(height: 4),
+              Text('Khai giảng: ${_formatDate(cohort.startsAt)}'),
+              const SizedBox(height: 4),
+              Text('Hạn đăng ký: ${_formatDate(cohort.enrollmentClosesAtUtc)}'),
+              if (cohort.sessions.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Lịch học dự kiến (${cohort.sessions.length} buổi):',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 4),
+                for (final s in cohort.sessions.take(5))
+                  Text(
+                    '• Buổi ${s.number}: ${DateFormat('dd/MM HH:mm').format(s.startTime)}–${DateFormat('HH:mm').format(s.endTime)}',
+                    style: AppTypography.bodySmall,
+                  ),
+                if (cohort.sessions.length > 5)
+                  Text(
+                    '… và ${cohort.sessions.length - 5} buổi tiếp theo (xem đủ sau khi vào lớp).',
+                    style: AppTypography.metadata.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+              ],
+              if (cohort.entitlementReference != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  'Mã quyền lớp nhóm: ${cohort.entitlementReference}',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.brandPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
         actions: [
           TextButton(
@@ -140,10 +164,21 @@ class _LearnerCohortsScreenState extends ConsumerState<LearnerCohortsScreen> {
         toasts.success(title: 'Đã ghi danh');
       } else if (result.requiresPayment) {
         toasts.info(title: 'Đang chờ xác nhận thanh toán');
-        await launchUrl(
-          Uri.parse(result.checkoutUrl!),
-          mode: LaunchMode.externalApplication,
-        );
+        final checkoutUri = parseSafeExternalHttpUri(result.checkoutUrl);
+        final launched =
+            checkoutUri != null &&
+            await launchUrl(
+              checkoutUri,
+              mode: LaunchMode.externalApplication,
+            );
+        if (!launched && mounted) {
+          await Clipboard.setData(ClipboardData(text: result.checkoutUrl!));
+          toasts.info(
+            title: 'Đã sao chép liên kết PayOS',
+            description:
+                'Chưa tự mở được trình duyệt. Bạn có thể tiếp tục thanh toán ngay trong chi tiết lớp.',
+          );
+        }
       } else {
         toasts.info(title: 'Đang chờ xác nhận thanh toán');
       }
@@ -352,6 +387,12 @@ class _LearnerCohortsScreenState extends ConsumerState<LearnerCohortsScreen> {
       appBar: AppBar(
         title: const Text('Lớp ôn JLPT theo nhóm'),
         actions: [
+          IconButton(
+            key: const Key('learner_cohorts_to_mentors_btn'),
+            tooltip: 'Danh sách Mentor',
+            onPressed: () => context.push(AppRoutes.learnerMentors),
+            icon: const Icon(Icons.person_search_outlined),
+          ),
           TextButton.icon(
             key: const Key('learner_cohorts_to_my_courses_btn'),
             onPressed: () => context.push(AppRoutes.learnerMyCourses),
@@ -397,7 +438,7 @@ class _LearnerCohortsScreenState extends ConsumerState<LearnerCohortsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Quyền ghi danh lớp nhóm tách biệt hoàn toàn với vé tư vấn 1-1 (${value.entitlements.where((e) => e.isUsable).length} quyền khả dụng).',
+                        'Quyền ghi danh lớp nhóm được Admin cấp theo từng khóa (${value.entitlements.where((e) => e.isUsable).length} quyền khả dụng).',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.w600,
@@ -407,7 +448,7 @@ class _LearnerCohortsScreenState extends ConsumerState<LearnerCohortsScreen> {
                         const SizedBox(height: 6),
                         for (final ent in value.entitlements)
                           Text(
-                            '• Lớp #${ent.studyCohortId}: ${ent.entitlementReference} (${ent.status})',
+                            '• Lớp #${ent.studyCohortId}: ${ent.entitlementReference} (${_entitlementStatusLabel(ent.status)})',
                             style: AppTypography.metadata.copyWith(
                               color: AppColors.textSecondary,
                             ),
@@ -548,6 +589,14 @@ class _LearnerCohortsScreenState extends ConsumerState<LearnerCohortsScreen> {
       ),
     );
   }
+
+  static String _entitlementStatusLabel(String status) => switch (status) {
+    'Approved' || 'Available' || 'Usable' => 'Khả dụng',
+    'Consumed' || 'Used' => 'Đã sử dụng',
+    'Revoked' => 'Đã thu hồi',
+    'Expired' => 'Hết hạn',
+    _ => status,
+  };
 }
 
 /// "★ 4.6 · 12 đánh giá" from the public cohort review summary, or

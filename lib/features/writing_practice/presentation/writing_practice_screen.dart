@@ -53,16 +53,14 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _WritingScriptTabs(selected: widget.script),
-                if (widget.script == WritingScript.kanji) ...[
-                  const SizedBox(height: AppSpacing.space3),
-                  _KanjiCollectionControl(
-                    value: _kanjiCollection,
-                    onChanged: (value) {
-                      if (value == _kanjiCollection) return;
-                      setState(() => _kanjiCollection = value);
-                    },
-                  ),
-                ],
+                const SizedBox(height: AppSpacing.space3),
+                _KanjiCollectionControl(
+                  value: _kanjiCollection,
+                  onChanged: (value) {
+                    if (value == _kanjiCollection) return;
+                    setState(() => _kanjiCollection = value);
+                  },
+                ),
                 const SizedBox(height: AppSpacing.space4),
               ],
             ),

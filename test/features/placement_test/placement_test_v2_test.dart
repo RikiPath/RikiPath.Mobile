@@ -1176,16 +1176,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const ValueKey<String>('placement_audio_unavailable')),
+      find.byKey(const ValueKey<String>('placement_audio_player_501')),
       findsOneWidget,
     );
+    await tester.tap(find.byIcon(Icons.play_circle_filled_rounded));
+    await tester.pumpAndSettle();
     expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is Semantics &&
-            widget.properties.label ==
-                'Âm thanh câu hỏi hiện không được hỗ trợ hoặc không khả dụng',
-      ),
+      find.textContaining('Không phát được âm thanh'),
       findsOneWidget,
     );
     expect(
@@ -1535,10 +1532,8 @@ class _ProfileRepository implements UserProfileRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) => throw UnimplementedError();
+  Future<UserProfile> updateProfile({required String fullName}) =>
+      throw UnimplementedError();
 
   @override
   Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) =>

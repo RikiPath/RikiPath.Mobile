@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/localization/locale_controller.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learner_journey_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_controller.dart';
 import 'package:rikipath_mobile/features/learning/application/learning_path_controller.dart';
@@ -203,6 +206,11 @@ class LessonController extends AsyncNotifier<LessonSession> {
         state = AsyncData(
           current.copyWith(videoStatus: LessonVideoStatus.paused),
         );
+        final posSeconds =
+            _mediaDriver.videoController?.value.position.inSeconds;
+        if (posSeconds != null && posSeconds > 0) {
+          unawaited(savePlaybackPosition(posSeconds).catchError((_) {}));
+        }
       } else {
         await _mediaDriver.play();
         state = AsyncData(
@@ -250,7 +258,7 @@ class LessonController extends AsyncNotifier<LessonSession> {
 
   void selectTab(LessonContentTab tab) {
     final current = state.value;
-    if (current == null || tab == LessonContentTab.notes) {
+    if (current == null) {
       return;
     }
     state = AsyncData(current.copyWith(selectedTab: tab));
@@ -452,6 +460,7 @@ class LessonController extends AsyncNotifier<LessonSession> {
         clearCompletionError: true,
       );
       state = AsyncData(completed);
+      ref.invalidate(learnerAnalyticsControllerProvider);
       if (current.lesson.remoteLessonId == null) {
         await ref
             .read(learnerJourneyControllerProvider.notifier)

@@ -571,7 +571,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Buổi tư vấn đã bị hủy'), findsOneWidget);
+      expect(find.text('Buổi học đã bị hủy'), findsOneWidget);
       expect(find.text('Tham gia phòng học'), findsNothing);
       expect(find.text('Hủy buổi tư vấn này'), findsNothing);
     });

@@ -11,6 +11,7 @@ import 'package:rikipath_mobile/features/mock_test/application/mock_test_control
 import 'package:rikipath_mobile/features/mock_test/application/mock_test_library_controller.dart';
 import 'package:rikipath_mobile/features/mock_test/domain/mock_test.dart';
 import 'package:rikipath_mobile/features/mock_test/domain/mock_test_display_title.dart';
+import 'package:rikipath_mobile/features/mock_test/presentation/widgets/mock_test_review_sheets.dart';
 
 class MockTestLibraryScreen extends ConsumerWidget {
   const MockTestLibraryScreen({super.key});
@@ -75,6 +76,20 @@ class MockTestLibraryScreen extends ConsumerWidget {
           ),
         ),
         centerTitle: false,
+        actions: [
+          IconButton(
+            key: const ValueKey<String>('mock_library_wrong_questions_button'),
+            tooltip: isJa ? '誤答復習' : 'Ôn câu làm sai',
+            icon: const Icon(Icons.quiz_outlined),
+            onPressed: () => showMockTestWrongQuestionsSheet(context, ref),
+          ),
+          IconButton(
+            key: const ValueKey<String>('mock_library_history_button'),
+            tooltip: isJa ? '受験履歴' : 'Lịch sử thi thử',
+            icon: const Icon(Icons.history_rounded),
+            onPressed: () => showMockTestHistorySheet(context, ref),
+          ),
+        ],
       ),
       body: catalog.when(
         loading: () => SakuraSectionLoading(

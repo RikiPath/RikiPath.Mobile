@@ -13,10 +13,21 @@ class ApiLearnerMentorRepository implements LearnerMentorRepository {
   Future<List<BookableMentor>> loadMentors() async {
     final response = await _apiClient.get<Object?>(
       LearnerMentorApiPaths.mentors,
+      queryParameters: const {'pageSize': 50},
     );
     return readLearnerMentorResultList(response.data)
         .map(BookableMentorDto.fromJson)
         .map((dto) => dto.toDomain())
         .toList(growable: false);
+  }
+
+  @override
+  Future<BookableMentor?> loadPublicProfile(int mentorId) async {
+    final response = await _apiClient.get<Object?>(
+      LearnerMentorApiPaths.mentorProfile(mentorId),
+    );
+    return BookableMentorDto.fromJson(
+      readLearnerMentorResultMap(response.data),
+    ).toDomain();
   }
 }

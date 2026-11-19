@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rikipath_mobile/core/errors/api_error.dart';
 import 'package:rikipath_mobile/core/network/api_client.dart';
+import 'package:rikipath_mobile/features/analytics/application/analytics_controller.dart';
+import 'package:rikipath_mobile/features/auth/application/auth_session_controller.dart';
 import 'package:rikipath_mobile/features/mock_test/data/api_mock_test_repository.dart';
 import 'package:rikipath_mobile/features/mock_test/domain/mock_test.dart';
 import 'package:rikipath_mobile/features/mock_test/domain/mock_test_attempt_status.dart';
@@ -41,7 +43,10 @@ class MockTestController extends AsyncNotifier<MockTestFlowState> {
   Future<void> _pendingSave = Future<void>.value();
 
   @override
-  Future<MockTestFlowState> build() => _loadCatalog();
+  Future<MockTestFlowState> build() {
+    ref.watch(authenticatedUserIdProvider);
+    return _loadCatalog();
+  }
 
   Future<MockTestFlowState> _loadCatalog() async {
     final profile = await ref.read(userProfileRepositoryProvider).loadProfile();
@@ -551,6 +556,7 @@ class MockTestController extends AsyncNotifier<MockTestFlowState> {
         clearActionIssue: true,
       ),
     );
+    ref.invalidate(learnerAnalyticsControllerProvider);
   }
 
   MockTestActionIssue _classify(Object error) {

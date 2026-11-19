@@ -402,11 +402,15 @@ class ShiftPreviewSession {
     required this.number,
     required this.startTime,
     required this.endTime,
+    this.currentStart,
+    this.currentEnd,
   });
 
   final int number;
   final DateTime? startTime;
   final DateTime? endTime;
+  final DateTime? currentStart;
+  final DateTime? currentEnd;
 }
 
 @immutable
@@ -500,12 +504,147 @@ class MentorCohortRosterEntry {
     required this.learnerId,
     required this.learnerName,
     required this.status,
+    this.sessions = const [],
+    this.retakeRequests = const [],
   });
 
   final int courseId;
   final int? learnerId;
   final String learnerName;
   final String status;
+  final List<CourseSessionItem> sessions;
+  final List<CourseRetakeRequestItem> retakeRequests;
+}
+
+@immutable
+class MentorHomeworkAiDraft {
+  const MentorHomeworkAiDraft({
+    this.suggestedScore,
+    this.feedback,
+    this.generatedAtUtc,
+    this.unavailableReason,
+    this.transcription,
+  });
+
+  final double? suggestedScore;
+  final String? feedback;
+  final DateTime? generatedAtUtc;
+  final String? unavailableReason;
+  final String? transcription;
+}
+
+@immutable
+class MentorCohortHomeworkRow {
+  const MentorCohortHomeworkRow({
+    required this.id,
+    required this.title,
+    this.instructions,
+    required this.learnerId,
+    required this.learnerName,
+    required this.status,
+    required this.assignmentScope,
+    this.cohortAssignmentGroupKey,
+    this.assignedAt,
+    this.dueAt,
+    this.submission,
+    this.aiDraft,
+    this.publishedGrade,
+    this.lessonTitles = const [],
+    this.exerciseTitles = const [],
+  });
+
+  final int id;
+  final String title;
+  final String? instructions;
+  final int? learnerId;
+  final String learnerName;
+  final String status;
+  final String assignmentScope;
+  final String? cohortAssignmentGroupKey;
+  final DateTime? assignedAt;
+  final DateTime? dueAt;
+  final CohortHomeworkSubmission? submission;
+  final MentorHomeworkAiDraft? aiDraft;
+  final CohortHomeworkPublishedGrade? publishedGrade;
+  final List<String> lessonTitles;
+  final List<String> exerciseTitles;
+}
+
+@immutable
+class HomeworkCatalogItem {
+  const HomeworkCatalogItem({
+    required this.type,
+    required this.id,
+    required this.title,
+    this.level = '',
+    this.skill = '',
+    this.questionCount,
+  });
+
+  /// 'Lesson' | 'PracticeExercise'
+  final String type;
+  final int id;
+  final String title;
+  final String level;
+  final String skill;
+  final int? questionCount;
+}
+
+@immutable
+class CohortBinaryAttachment {
+  const CohortBinaryAttachment({
+    required this.bytes,
+    required this.contentType,
+  });
+
+  final List<int> bytes;
+  final String contentType;
+}
+
+@immutable
+class MentorLearnerSkillMetric {
+  const MentorLearnerSkillMetric({
+    required this.skill,
+    this.averageScorePercent,
+    this.sampleCount = 0,
+    this.latestAssessedAtUtc,
+    this.dataSource,
+  });
+
+  final String skill;
+  final double? averageScorePercent;
+  final int sampleCount;
+  final DateTime? latestAssessedAtUtc;
+  final String? dataSource;
+}
+
+@immutable
+class MentorLearnerSkillProfile {
+  const MentorLearnerSkillProfile({
+    required this.learnerId,
+    required this.learnerName,
+    this.cohortId,
+    this.assessedJlptLevel,
+    this.skills = const [],
+    this.assignedCount = 0,
+    this.submittedCount = 0,
+    this.onTimeCount = 0,
+    this.passedCount = 0,
+    this.onTimePercent,
+    this.latestActivityAtUtc,
+  });
+
+  final int learnerId;
+  final String learnerName;
+  final int? cohortId;
+  final String? assessedJlptLevel;
+  final List<MentorLearnerSkillMetric> skills;
+  final int assignedCount;
+  final int submittedCount;
+  final int onTimeCount;
+  final int passedCount;
+  final double? onTimePercent;
+  final DateTime? latestActivityAtUtc;
 }
 
 @immutable
@@ -515,20 +654,26 @@ class MentorCohortHomeworkItem {
     required this.title,
     required this.status,
     required this.assignmentScope,
+    this.cohortAssignmentGroupKey,
+    this.instructions,
     this.dueAt,
     this.submittedCount,
     this.gradedCount,
     this.totalCount,
+    this.rows = const [],
   });
 
   final int id;
   final String title;
   final String status;
   final String assignmentScope;
+  final String? cohortAssignmentGroupKey;
+  final String? instructions;
   final DateTime? dueAt;
   final int? submittedCount;
   final int? gradedCount;
   final int? totalCount;
+  final List<MentorCohortHomeworkRow> rows;
 
   String get progressLabel {
     final parts = <String>[
@@ -549,6 +694,9 @@ class CohortMentorAssignment {
     this.fromSessionNumber,
     this.assignedAtUtc,
     this.reason,
+    this.previousMentorId,
+    this.affectedSessionCount,
+    this.effectiveFromUtc,
   });
 
   final int mentorId;
@@ -557,6 +705,9 @@ class CohortMentorAssignment {
   final int? fromSessionNumber;
   final DateTime? assignedAtUtc;
   final String? reason;
+  final int? previousMentorId;
+  final int? affectedSessionCount;
+  final DateTime? effectiveFromUtc;
 }
 
 /// A Mentor's assigned cohort with derived schedule helpers.

@@ -137,4 +137,38 @@ class MentorScheduleV3Dto {
       publishedSlots: slots,
     );
   }
+
+  static MentorTeachingConflictReport conflictReportFromJson(
+    Map<String, Object?> json,
+  ) {
+    final rawConflicts = json['conflicts'];
+    final conflicts = <MentorTeachingConflictItem>[];
+    if (rawConflicts is List<Object?>) {
+      for (final raw in rawConflicts) {
+        final item = readMapOrEmpty(raw);
+        if (item.isEmpty) continue;
+        conflicts.add(
+          MentorTeachingConflictItem(
+            code: readStringOrEmpty(item, 'code'),
+            sessionNumber: readOptionalInt(item, 'sessionNumber'),
+            proposedStartUtc:
+                readRequiredTimestamp(item, 'proposedStartUtc').value,
+            proposedEndUtc: readRequiredTimestamp(item, 'proposedEndUtc').value,
+            commitmentKind: readStringOrEmpty(item, 'commitmentKind'),
+            cohortId: readOptionalInt(item, 'cohortId'),
+            cohortName: readOptionalString(item, 'cohortName'),
+            commitmentStartUtc:
+                readOptionalTimestamp(item, 'commitmentStartUtc')?.value,
+            commitmentEndUtc:
+                readOptionalTimestamp(item, 'commitmentEndUtc')?.value,
+            message: readStringOrEmpty(item, 'message'),
+          ),
+        );
+      }
+    }
+    return MentorTeachingConflictReport(
+      isValid: readBoolOrFalse(json, 'isValid'),
+      conflicts: conflicts,
+    );
+  }
 }

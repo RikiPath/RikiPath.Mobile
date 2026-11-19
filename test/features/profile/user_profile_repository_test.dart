@@ -18,8 +18,7 @@ void main() {
 
       expect(dto.userId, 42);
       expect(dto.email, 'learner@example.com');
-      expect(dto.firstName, 'Minh Anh');
-      expect(dto.lastName, 'Nguyễn');
+      expect(dto.fullName, 'Nguyễn Minh Anh');
       expect(dto.avatarUrl, 'https://cdn.example.test/avatar.webp');
       expect(dto.role, 'Learner');
       expect(dto.isEmailVerified, isTrue);
@@ -61,22 +60,21 @@ void main() {
       final profile = await repository.loadProfile();
 
       expect(client.calls, <String>['GET ${UserProfileApiPaths.me}']);
-      expect(profile.fullName, 'Minh Anh Nguyễn');
+      expect(profile.fullName, 'Nguyễn Minh Anh');
       expect(profile.supportedJlptLevel?.label, 'N3');
     });
 
     test(
-      'PUT profile sends only exact firstName and lastName fields',
+      'PUT profile sends exact fullName field',
       () async {
         final client = _RecordingApiClient();
         final repository = ApiUserProfileRepository(client);
 
-        await repository.updateProfile(firstName: 'Aiko', lastName: 'Tanaka');
+        await repository.updateProfile(fullName: 'Tanaka Aiko');
 
         expect(client.calls, <String>['PUT ${UserProfileApiPaths.me}']);
         expect(client.lastData, <String, Object?>{
-          'firstName': 'Aiko',
-          'lastName': 'Tanaka',
+          'fullName': 'Tanaka Aiko',
         });
       },
     );
@@ -308,8 +306,7 @@ Map<String, Object?> _profileEnvelope({
     'result': <String, Object?>{
       'userId': 42,
       'email': 'learner@example.com',
-      'firstName': 'Minh Anh',
-      'lastName': 'Nguyễn',
+      'fullName': 'Nguyễn Minh Anh',
       'avatarUrl': avatarUrl,
       'role': 'Learner',
       'isEmailVerified': true,

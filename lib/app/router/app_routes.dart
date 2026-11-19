@@ -249,6 +249,7 @@ abstract final class AppRoutes {
   static const String profileChangeEmailSegment = 'change-email';
   static const String profileChangePasswordSegment = 'change-password';
   static const String profileVerifyEmailSegment = 'verify-email';
+  static const String profileSubscriptionsSegment = 'subscriptions';
   static const String profileAccount = '$profile/$profileAccountSegment';
   static const String profileEdit = '$profile/$profileEditSegment';
   static const String profileJlptGoal = '$profile/$profileJlptGoalSegment';
@@ -260,6 +261,8 @@ abstract final class AppRoutes {
       '$profile/$profileChangePasswordSegment';
   static const String profileVerifyEmail =
       '$profile/$profileVerifyEmailSegment';
+  static const String profileSubscriptions =
+      '$profile/$profileSubscriptionsSegment';
 
   static int _positiveId(int value, String name) {
     if (value <= 0) {

@@ -13,14 +13,29 @@ class MeetingMessage {
   });
 
   factory MeetingMessage.fromJson(Map<String, Object?> json) {
+    final rawTimestamp =
+        (json['timestamp'] ?? json['Timestamp'] ?? '').toString().trim();
+    final timestamp = rawTimestamp.isNotEmpty
+        ? rawTimestamp
+        : _formatSentAt(json['sentAt'] ?? json['SentAt']);
     return MeetingMessage(
       id: (json['id'] ?? json['Id'] ?? '').toString(),
       sender: (json['sender'] ?? json['Sender'] ?? 'RikiPath').toString(),
       role: MeetingParticipantRole.fromApi(json['role'] ?? json['Role']),
       text: (json['text'] ?? json['Text'] ?? '').toString(),
-      timestamp: (json['timestamp'] ?? json['Timestamp'] ?? '').toString(),
+      timestamp: timestamp,
       isSelf: false,
     );
+  }
+
+  static String _formatSentAt(Object? raw) {
+    final str = raw?.toString().trim();
+    if (str == null || str.isEmpty) return '';
+    final parsed = DateTime.tryParse(str)?.toLocal();
+    if (parsed == null) return '';
+    final hh = parsed.hour.toString().padLeft(2, '0');
+    final mm = parsed.minute.toString().padLeft(2, '0');
+    return '$hh:$mm';
   }
 
   final String id;

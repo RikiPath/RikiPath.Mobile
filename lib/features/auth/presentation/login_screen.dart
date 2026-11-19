@@ -143,6 +143,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     label: l10n.password,
                     hintText: l10n.passwordHint,
                     controller: _passwordController,
+                    focusNode: _passwordFocusNode,
                     errorText: state.passwordError,
                     enabled: !state.isLoading,
                     textInputAction: TextInputAction.done,
@@ -174,6 +175,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           },
                     child: Text(l10n.rememberSession),
                   ),
+                  if (state.serverError != null) ...[
+                    const SizedBox(height: AppSpacing.space3),
+                    RikiErrorBanner(
+                      key: const Key('login_server_error_banner'),
+                      title: l10n.loginFailedTitle,
+                      message: state.serverError!,
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.space3),
                   SizedBox(
                     height: 54,

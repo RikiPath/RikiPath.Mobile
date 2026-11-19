@@ -16,6 +16,9 @@ class MeetingRealtimeSnapshot {
     this.isMicOn = false,
     this.isCameraOn = false,
     this.isHandRaised = false,
+    this.isRoomReady = false,
+    this.presenterConnectionId,
+    this.stageNotice,
     this.mediaWarning,
     this.error,
   });
@@ -27,6 +30,9 @@ class MeetingRealtimeSnapshot {
   final bool isMicOn;
   final bool isCameraOn;
   final bool isHandRaised;
+  final bool isRoomReady;
+  final String? presenterConnectionId;
+  final String? stageNotice;
   final String? mediaWarning;
   final String? error;
 
@@ -39,6 +45,11 @@ class MeetingRealtimeSnapshot {
     bool? isMicOn,
     bool? isCameraOn,
     bool? isHandRaised,
+    bool? isRoomReady,
+    String? presenterConnectionId,
+    bool clearPresenter = false,
+    String? stageNotice,
+    bool clearStageNotice = false,
     String? mediaWarning,
     bool clearMediaWarning = false,
     String? error,
@@ -52,6 +63,11 @@ class MeetingRealtimeSnapshot {
       isMicOn: isMicOn ?? this.isMicOn,
       isCameraOn: isCameraOn ?? this.isCameraOn,
       isHandRaised: isHandRaised ?? this.isHandRaised,
+      isRoomReady: isRoomReady ?? this.isRoomReady,
+      presenterConnectionId: clearPresenter
+          ? null
+          : presenterConnectionId ?? this.presenterConnectionId,
+      stageNotice: clearStageNotice ? null : stageNotice ?? this.stageNotice,
       mediaWarning: clearMediaWarning
           ? null
           : mediaWarning ?? this.mediaWarning,
@@ -84,6 +100,12 @@ abstract interface class MeetingRealtimeClient {
   Future<void> toggleRaiseHand();
 
   Future<void> sendChatMessage(String text);
+
+  Future<void> muteParticipant(String targetConnectionId);
+
+  Future<void> startPresenting();
+
+  Future<void> stopPresenting();
 
   Future<void> pause();
 

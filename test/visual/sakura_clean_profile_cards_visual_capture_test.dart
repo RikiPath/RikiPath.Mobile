@@ -53,10 +53,7 @@ class _VisualProfileRepository implements UserProfileRepository {
   }) => loadProfile();
 
   @override
-  Future<UserProfile> updateProfile({
-    required String firstName,
-    required String lastName,
-  }) => loadProfile();
+  Future<UserProfile> updateProfile({required String fullName}) => loadProfile();
 
   @override
   Future<UserProfile> uploadAvatar(ProfileAvatarUpload upload) => loadProfile();

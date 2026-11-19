@@ -252,7 +252,7 @@ class MentorCalendarEventSheet extends ConsumerWidget {
                 RikiPrimaryButton(
                   key: const Key('mentor_calendar_join_room_button'),
                   label: MeetingNativeRollout.isEnabled
-                      ? 'Vào phòng tư vấn RikiPath'
+                      ? 'Vào phòng học trực tuyến'
                       : l10n.mentorJoinMeeting,
                   leadingIcon: Icons.videocam_rounded,
                   onPressed: () => _joinMeetingRoom(context, ref),
